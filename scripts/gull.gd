@@ -42,6 +42,9 @@ var walk_phase: float = 0.0
 var coasting: bool = false
 var coast_speed: float = 0.0
 var wind_force: float = 0.0
+var stroke_cooldown: float = 0.0
+var stroke_left: float = 0.0
+var stroke_started: bool = false
 var sprite: AnimatedSprite2D
 var detailed_art: bool = false
 var art_scale: float = 1.0
@@ -76,13 +79,11 @@ func landing_perch() -> Dictionary:
 			nearest = surface
 	return nearest
 
-func resolve_perches(before: Vector2, was_striking: bool) -> void:
-	if not support.is_empty() or state == State.STUNNED or position.y <= before.y:
+func resolve_perches(before: Vector2, started: State) -> void:
+	# Swoops pass over rooftops and poles; only ordinary flight lands on them.
+	if started in [State.WINDUP, State.STRIKE] or not support.is_empty() or state == State.STUNNED or position.y <= before.y:
 		return
 	var offset: Vector2 = Vector2(0,float(Config.tuning.flight.feet_offset))
-	var nose_first: bool = was_striking and direction.y*float(Config.tuning.dive.beak_offset)>offset.y
-	if nose_first:
-		offset = direction*float(Config.tuning.dive.beak_offset)
 	var first: Dictionary = {}
 	var first_t: float = 2.0
 	for surface: Dictionary in perch_surfaces:
@@ -100,19 +101,14 @@ func resolve_perches(before: Vector2, was_striking: bool) -> void:
 	# Resolve the first crossed top even when a fast frame passes several surfaces.
 	position.x = clampf(lerpf(before.x,position.x,first_t),float(first.x)-float(first.half_width),float(first.x)+float(first.half_width))
 	position.y = float(first.y)-float(Config.tuning.flight.feet_offset)
-	if nose_first and velocity.y>=float(Config.tuning.dive.crash_vertical_speed):
-		velocity = Vector2.ZERO
-		state = State.STUNNED
-		timer = Config.tuning.dive.stun
-		ground_crashed.emit()
-	elif not nose_first and velocity.length()<=float(Config.tuning.flight.landing_speed):
+	if velocity.length()<=float(Config.tuning.flight.landing_speed):
 		support = first
 		if bool(first.pole):
 			position.x = first.x
 			velocity.x = 0
 		land()
 	else:
-		# A quick shallow strike bounces back into flight instead of snapping to rest.
+		# A quick shallow pass bounces back into flight instead of snapping to rest.
 		velocity.y = -minf(absf(velocity.y),35.0)
 		pullup()
 
@@ -231,10 +227,15 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 	previous_beak = beak()
 	timer -= delta
 	cooldown = maxf(0.0, cooldown - delta)
+	stroke_cooldown = maxf(-delta, stroke_cooldown - delta)
+	stroke_started = false
+	if state != State.GLIDE:
+		stroke_left = 0.0
 	invulnerable = maxf(0.0, invulnerable - delta)
 	sprite.modulate.a = 0.5 if invulnerable > 0.0 and int(invulnerable * 12) % 2 == 0 else 1.0
 	sprite.rotation = 0.0
 	sprite.scale = Vector2.ONE
+	sprite.speed_scale = 1.0
 	match state:
 		State.GLIDE, State.GROUNDED:
 			var on_ground: bool = state == State.GROUNDED
@@ -245,6 +246,8 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 				state = State.GLIDE
 				on_ground = false
 				velocity.y = -float(f.takeoff_speed)
+				# The launch is the first wingbeat, so no second boost follows at once.
+				stroke_cooldown = float(f.stroke_interval)
 			if climb:
 				coasting = false
 			var side: float = signf(aim.x - position.x) if absf(aim.x - position.x) > float(f.aim_deadzone) else 0.0
@@ -270,14 +273,18 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 				var sink_speed: float = minf(float(f.landing_speed),float(f.landing_touchdown_speed) + maxf(0,landing_y-position.y)*float(f.landing_slowdown))
 				velocity.y = move_toward(velocity.y,sink_speed,float(f.landing_acceleration)*delta)
 			else:
-				# Preserve upward momentum across the end of a swoop.
-				var vertical_change: float = float(f.gravity) - (float(f.climb_acceleration) if climb else 0.0)
+				# Wind soaring eases gravity and the sink cap; it never reverses them.
+				var lift: float = wind_lift()
+				var gravity: float = float(f.gravity) * (1.0 - float(w.lift_gravity_cut) * lift)
+				var sink_cap: float = float(f.max_descent) * (1.0 - float(w.lift_descent_cut) * lift)
+				var stroke: float = wingbeat(delta)
+				# Preserve upward momentum across the end of a swoop; passive drag bleeds fast descent.
 				if velocity.y < -float(f.max_climb):
-					velocity.y = move_toward(velocity.y,-float(f.max_climb),float(f.gravity)*delta)
-				elif velocity.y > float(f.max_descent):
-					velocity.y = move_toward(velocity.y,float(f.max_descent),float(f.climb_acceleration)*delta)
+					velocity.y = move_toward(velocity.y,-float(f.max_climb),gravity*delta)
+				elif velocity.y > sink_cap:
+					velocity.y = move_toward(velocity.y,sink_cap,float(f.descent_drag)*delta) - stroke*delta
 				else:
-					velocity.y = clampf(velocity.y + vertical_change * delta,-float(f.max_climb),float(f.max_descent))
+					velocity.y = clampf(velocity.y + (gravity-stroke)*delta,-float(f.max_climb),sink_cap)
 			position += velocity * delta
 			if on_ground and not support.is_empty() and absf(position.x-float(support.x))>float(support.half_width):
 				support = {}
@@ -287,6 +294,9 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			if absf(velocity.x) > 1:
 				facing = signf(velocity.x)
 			sprite.play(&"climb" if climb else &"glide")
+			sprite.speed_scale = climb_loop_time() / float(f.stroke_interval) if climb else 1.0
+			if stroke_started:
+				sprite.frame = 0
 		State.WINDUP:
 			velocity.y = minf(velocity.y + float(f.gravity)*delta,float(f.max_descent))
 			position += velocity * delta
@@ -304,8 +314,10 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			if offset.length() > float(d.aim_deadzone):
 				direction = Vector2.from_angle(rotate_toward(direction.angle(), offset.angle(), float(d.turn_rate) * delta))
 			# Climbing spends momentum faster than descending builds it.
-			var slope_force: float = float(d.acceleration) * maxf(direction.y, 0) + float(d.uphill_deceleration) * minf(direction.y, 0)
-			var drag: float = float(d.drag) + float(d.uphill_drag) * maxf(-direction.y,0)
+			# A tailwind pushes the swoop along; a headwind drags it in proportion to speed, mostly on shallow angles.
+			var tail: float = tailwind(direction.x)
+			var slope_force: float = float(d.acceleration) * maxf(direction.y, 0) + float(d.uphill_deceleration) * minf(direction.y, 0) + float(w.dive_tailwind) * maxf(tail,0)
+			var drag: float = float(d.drag) + float(d.uphill_drag) * maxf(-direction.y,0) + (float(w.dive_drag) * wind_lift() + float(w.dive_headwind_drag) * maxf(-tail,0) * absf(direction.x)) * dive_speed
 			dive_speed = clampf(dive_speed + (slope_force - drag) * delta, 0, float(d.max_speed))
 			velocity = direction * dive_speed
 			position += velocity * delta
@@ -345,7 +357,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 		if state == State.STRIKE:
 			pullup()
 	position.x = clampf(position.x, 12, float(Config.tuning.world.width) - 12)
-	resolve_perches(before,started_state == State.STRIKE)
+	resolve_perches(before,started_state)
 	# Resolve against the geometry used during movement, even if landing or pull-up
 	# changed state before Game runs its collision pass.
 	sweep_state = started_state
@@ -365,6 +377,33 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			else:
 				sprite.play(&"idle")
 	queue_redraw()
+
+func wind_lift() -> float:
+	return clampf(absf(wind_force) / float(Config.tuning.wind.lift_ref), 0.0, 1.5)
+
+# Wind along a heading, positive with the wind and negative against it.
+func tailwind(heading: float) -> float:
+	return clampf(heading * wind_force / float(Config.tuning.wind.lift_ref), -1.5, 1.5)
+
+func wingbeat(delta: float) -> float:
+	## Held flap repeats a short downstroke at a fixed cadence; returns its average upward acceleration this tick.
+	var f: Dictionary = Config.tuning.flight
+	if climb and stroke_cooldown <= 0.0 and stroke_left <= 0.0:
+		stroke_left = float(f.stroke_duration)
+		stroke_cooldown += float(f.stroke_interval)
+		stroke_started = true
+	if stroke_left <= 0.0:
+		return 0.0
+	var share: float = minf(delta, stroke_left)
+	stroke_left -= delta
+	var w: Dictionary = Config.tuning.wind
+	var heading: float = signf(velocity.x) if absf(velocity.x) > 1.0 else facing
+	var flap_scale: float = clampf(1.0 + float(w.flap_tail) * tailwind(heading), float(w.flap_min), float(w.flap_max))
+	return float(f.stroke_lift) * flap_scale / float(f.stroke_duration) * share / delta
+
+func climb_loop_time() -> float:
+	var frames: SpriteFrames = sprite.sprite_frames
+	return frames.get_frame_count(&"climb") / frames.get_animation_speed(&"climb")
 
 func land() -> void:
 	var was_airborne: bool = state in [State.GLIDE, State.WINDUP, State.STRIKE]

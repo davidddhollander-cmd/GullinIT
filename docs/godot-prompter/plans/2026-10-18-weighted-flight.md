@@ -1,6 +1,6 @@
 # Weighted gull flight: assessment and edit plan
 
-Date: 18 October 2026. Status: proposed; flight behavior has not been edited.
+Date: 18 October 2026. Status: implemented with deliberately subtle values (gravity 75, stroke 36 px/s every 0.3 s, sink cap 45, wind gravity cut 30%, dive drag 0.55). Needs a rendered playtest; `tests/flight_dynamics_checks.gd` covers 30/60/120 Hz.
 
 ## Intended feel
 

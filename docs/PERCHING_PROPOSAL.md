@@ -10,7 +10,7 @@ Use these high points to rest, look around and digest food.
 - Catch the surface only when descending slowly and feet-first within its actual width. Flying underneath or past a roof must not pull the gull onto it. Explicit diving takes priority over assisted landing.
 - Roofs allow slow walking. Pole tops hold a standing pose. Walking off a roof returns to flight; flap takes off immediately. Starting a dive leaves the perch and resumes ordinary aiming.
 - Perching gives the same faster digestion as resting on the ground. It does not award extra score or replenish food. Adults can stop chasing when the gull is out of reach, using the existing escape rules.
-- A fast beak-first strike into a perch surface should use the existing crash penalty, with a clear impact reaction. No instant snapping from a fast dive into a safe rest.
+- Swoops (windup and strike) pass through roofs and pole tops: a dive can never hit, land on or crash into them. Superseded the earlier beak-first roof crash on 18 October 2026.
 
 ## Implementation
 

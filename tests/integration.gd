@@ -49,6 +49,7 @@ func menu_font_grid(node: Node) -> void:
 		menu_font_grid(child)
 
 func run() -> void:
+	GameState.unlock_all = false
 	capture = OS.get_cmdline_user_args().has("--capture")
 	DirAccess.make_dir_recursive_absolute("res://test-output")
 	GameState.save_path = "res://test-output/integration-save.json"
@@ -124,6 +125,7 @@ func run() -> void:
 	await beachgoer_art_checks()
 	await pier_diner_art_checks()
 	preload("res://tests/digestion_checks.gd").run(Callable(self,"check"))
+	preload("res://tests/flight_dynamics_checks.gd").run(self,Callable(self,"check"))
 	await digestion_reaction_checks()
 	preload("res://tests/level_generator_checks.gd").run(Callable(self,"check"))
 	await generated_layout_checks()
@@ -1432,15 +1434,16 @@ func perch_checks() -> void:
 			gull.queue_free()
 		var diver: BeachGull = physics_gull(Vector2(300,65),Vector2(0,230))
 		diver.setup_perches([{"type":"kiosk","x":300}])
+		var surface_y: float = diver.perch_surfaces[0].y
 		diver.state = BeachGull.State.STRIKE
 		diver.direction = Vector2.DOWN
 		diver.dive_speed = 230
 		diver.aim = Vector2(300,160)
 		for frame: int in hz:
 			diver.tick(1.0/hz,0,0)
-			if diver.state==BeachGull.State.STUNNED:
+			if diver.position.y > float(surface_y)+10.0:
 				break
-		check(diver.state==BeachGull.State.STUNNED,"fast beak-first roof impact crashes at %d Hz" % hz)
+		check(diver.state==BeachGull.State.STRIKE and diver.support.is_empty() and diver.position.y > float(surface_y),"fast swoop passes through the roof without crashing or landing at %d Hz" % hz)
 		diver.queue_free()
 	main.start_level(1)
 	var game: BeachGame = main.game
@@ -1482,9 +1485,9 @@ func perch_checks() -> void:
 	game.score.points = 100
 	for frame: int in 60:
 		game.player.tick(1.0/60,0,0)
-		if game.player.state==BeachGull.State.STUNNED:
+		if game.player.position.y > float(roof.y)+10.0:
 			break
-	check(game.score.points==0,"roof crash uses existing score-loss signal")
+	check(game.score.points==100 and game.player.state==BeachGull.State.STRIKE and game.player.support.is_empty(),"swooping through a stand roof costs nothing")
 	main.clear_game()
 	await settle()
 
@@ -1510,10 +1513,10 @@ func landing_aim_checks() -> void:
 	gull.aim = Vector2(300,160)
 	for frame: int in 30:
 		gull.tick(1.0/60,0,0)
-	check(gull.velocity.y > 32,"downward aim sinks faster than passive glide")
+	check(gull.velocity.y > float(Config.tuning.flight.max_descent),"downward aim sinks faster than passive glide")
 	gull.climb = true
 	check(not gull.landing_aim(),"flapping overrides landing aim")
-	for frame: int in 45:
+	for frame: int in 120:
 		gull.tick(1.0/60,0,0)
 	check(gull.state == BeachGull.State.GLIDE and gull.velocity.y < 0,"flapping cancels descent and climbs")
 	gull.climb = false

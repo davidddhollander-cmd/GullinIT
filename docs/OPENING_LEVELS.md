@@ -30,7 +30,7 @@ Training replenishes the customer snack every five seconds (abandoned knocked fo
 - Per-actor `speed_mult`, `awareness_mult`, and `reaction_delay` tune patrol speed, detection, and warning/wake timing. They default to 1 for existing actors.
 - Backdrop signs use level zones; the HUD map scales to the level width and marks its sand, promenade, and pier boundaries. Existing sprites provide the different scenery arrangements; no new art sheets or audio were generated.
 - Zone signs size to their 8 px labels, stay within zone/world bounds, and slide around props and standing adults.
-- Arcade starting targets: Training Day 105 seconds / 100, 200, 300 points; Family Picnic 120 seconds / 250, 400, 550; Boardwalk Bustle 135 seconds / 350, 550, 750. These are initial tuning values, not a claim of human playtest balance.
+- Arcade starting targets: Training Day 105 seconds / 100, 200, 300 points; Family Picnic 120 seconds / 250, 400, 550; Boardwalk Bustle 135 seconds / 250, 550, 750. These are initial tuning values, not a claim of human playtest balance.
 
 ## Validation focus
 

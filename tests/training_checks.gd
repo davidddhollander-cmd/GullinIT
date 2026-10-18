@@ -26,7 +26,7 @@ static func run(host: Node, check: Callable) -> void:
 	game.input.touch_active = true
 	game.input.touch_aim = Vector2(70,40)
 	game.input.touch_climb = true
-	for frame: int in range(50):
+	for frame: int in range(90):
 		game._physics_process(1.0/60)
 	check.call(game.player.position.y < 110 and game.lesson == 0,"vertical takeoff waits for steering")
 	check.call(game.training_text().contains("STEER RIGHT"),"takeoff updates the tip with the remaining steering action")

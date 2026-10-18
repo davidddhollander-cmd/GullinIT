@@ -5,7 +5,7 @@
   "time_limit": 135,
   "wind": {"dir": -1, "strength": 0.35, "gusts": false, "flip": false},
   "awareness_mult": 1.08,
-  "stars": [350, 550, 750],
+  "stars": [250, 550, 750],
   "rivals": [{"name": "Gary", "speed": 0.8, "accuracy_px": 16}],
   "rivals_after_snatch": true,
   "world": {"width": 1280, "promenade_start": 430, "pier_start": 920, "start_x": 65, "start_y": 105},

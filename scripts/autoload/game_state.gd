@@ -3,6 +3,8 @@ var progress: Dictionary = {}
 var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false}
 var save_path: String = "user://save.json"
 var save_error: String = ""
+# Playtest build: every level is selectable. Set to false to restore normal progression.
+var unlock_all: bool = true
 
 func _ready() -> void:
 	load_progress()
@@ -61,7 +63,7 @@ func entry(id: int) -> Dictionary:
 	return value.duplicate() if value is Dictionary else {}
 
 func unlocked(id: int) -> bool:
-	if id == 1:
+	if id == 1 or unlock_all:
 		return true
 	var previous: Dictionary = entry(id - 1)
 	return int(previous.get("stars", 0)) > 0 or previous.has("casual_time") or (id == 2 and bool(previous.get("training_complete", false)))

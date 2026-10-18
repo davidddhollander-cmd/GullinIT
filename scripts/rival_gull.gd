@@ -30,7 +30,7 @@ func tick(delta: float, targets: Array[BeachTarget], claims: Dictionary, wind: B
 		elif gull.position.x > float(Config.tuning.world.width) - 30:
 			retreat_direction = -1.0
 		gull.aim = Vector2(clampf(gull.position.x + retreat_direction * 100, 25, float(Config.tuning.world.width) - 25), float(Config.tuning.rival.cruise_y))
-		gull.climb = true
+		gull.climb = needs_height()
 		gull.tick(delta, wind.direction, wind.strength)
 		if leave <= 0:
 			carried = 0
@@ -53,7 +53,7 @@ func tick(delta: float, targets: Array[BeachTarget], claims: Dictionary, wind: B
 	if is_instance_valid(target):
 		claims[target] = self
 		gull.aim = target.food_position() + Vector2(aim_error, 0)
-		gull.climb = gull.state in [BeachGull.State.GLIDE, BeachGull.State.GROUNDED] and gull.position.y > float(Config.tuning.rival.cruise_y)
+		gull.climb = gull.state in [BeachGull.State.GLIDE, BeachGull.State.GROUNDED] and needs_height()
 		var distance_x: float = absf(gull.position.x - target.position.x)
 		if distance_x < float(Config.tuning.rival.dive_range) and distance_x > 15:
 			gull.dive(wind.direction)
@@ -65,10 +65,14 @@ func tick(delta: float, targets: Array[BeachTarget], claims: Dictionary, wind: B
 				gull.attempt_peck()
 	else:
 		gull.aim = Vector2(gull.position.x + gull.facing * 100, Config.tuning.rival.cruise_y)
-		gull.climb = gull.position.y > float(Config.tuning.rival.cruise_y)
+		gull.climb = needs_height()
 		if gull.position.x < 25 or gull.position.x > float(Config.tuning.world.width) - 25:
 			gull.facing *= -1
 	gull.tick(delta, wind.direction, wind.strength)
+
+func needs_height() -> bool:
+	# Look a quarter second ahead so flapping stops before the climb overshoots cruise height.
+	return gull.position.y + gull.velocity.y * 0.25 > float(Config.tuning.rival.cruise_y)
 
 func took_food(value: int) -> void:
 	carried = value
