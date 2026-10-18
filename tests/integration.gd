@@ -127,6 +127,7 @@ func run() -> void:
 	preload("res://tests/digestion_checks.gd").run(Callable(self,"check"))
 	preload("res://tests/flight_dynamics_checks.gd").run(self,Callable(self,"check"))
 	await digestion_reaction_checks()
+	await bag_variety_checks()
 	preload("res://tests/level_generator_checks.gd").run(Callable(self,"check"))
 	await generated_layout_checks()
 	var model: BeachScore = BeachScore.new()
@@ -1412,6 +1413,31 @@ func stash_raid_checks() -> void:
 	check(int(main.game.stash_raids.bins[0].remaining) == int(Config.tuning.world.bin_stash_size),"retry restores fresh finite bin supply")
 	main.clear_game()
 	await settle()
+
+func bag_variety_checks() -> void:
+	for level: Dictionary in Config.levels:
+		main.start_level(int(level.id))
+		var game: BeachGame = main.game
+		game.set_physics_process(false)
+		var seen: Dictionary = {}
+		var count: int = 0
+		for target: BeachTarget in game.spawner.targets:
+			if target.kind == "sunbather":
+				count += 1
+				seen[target.bag_variant] = true
+		check(count == 0 or seen.size() == mini(count,BeachTarget.BAG_TEXTURES.size()),"level %d sunbather bags are all different styles" % int(level.id))
+		# Replacement sunbathers also pick a style no live bag is using.
+		for target: BeachTarget in game.spawner.targets.duplicate():
+			if target.kind == "sunbather":
+				game.spawner.targets.erase(target)
+				target.queue_free()
+		var styles: Dictionary = {}
+		for slot: int in BeachTarget.BAG_TEXTURES.size():
+			var extra: BeachTarget = game.spawner.create("sunbather",100.0+slot*60.0)
+			styles[extra.bag_variant] = true
+		check(styles.size() == BeachTarget.BAG_TEXTURES.size(),"level %d fills every bag style before repeating" % int(level.id))
+		main.clear_game()
+		await settle()
 
 func perch_checks() -> void:
 	for hz: int in [30,60,120]:

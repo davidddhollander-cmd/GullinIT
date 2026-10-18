@@ -9,12 +9,14 @@ var kiosk_timer: float = 0.0
 var replacements: Array[Dictionary] = []
 var visual_offsets: Dictionary = {}
 var previous_x: Dictionary = {}
+var bag_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 const CROWD_OFFSETS: Array[Vector2] = [Vector2.ZERO, Vector2(26,-14), Vector2(-26,-14), Vector2(26,12), Vector2(-26,12), Vector2(52,0), Vector2(-52,0)]
 
 func setup(owner_node: Node2D, definition: Dictionary) -> void:
 	parent = owner_node
 	level = definition
 	rng.seed = int(level.seed)
+	bag_rng.seed = int(level.seed) + 97
 	for spawn: Dictionary in level.spawns:
 		create(spawn.type,spawn.x,spawn)
 	_link_families()
@@ -24,10 +26,27 @@ func create(kind: String, x: float, spawn: Dictionary = {}) -> BeachTarget:
 	var target: BeachTarget = BeachTarget.new()
 	parent.add_child(target)
 	target.setup(kind,x,rng,level.awareness_mult,spawn)
+	if kind == "sunbather":
+		target.bag_variant = _free_bag_variant()
 	target.departed.connect(_departed)
 	targets.append(target)
 	target_created.emit(target)
 	return target
+
+# Random bag style that no other sunbather in the level is using; reuses the least-used style if all are taken.
+func _free_bag_variant() -> int:
+	var counts: Array[int] = []
+	counts.resize(BeachTarget.BAG_TEXTURES.size())
+	counts.fill(0)
+	for other: BeachTarget in targets:
+		if other.kind == "sunbather":
+			counts[other.bag_variant] += 1
+	var fewest: int = counts.min()
+	var choices: Array[int] = []
+	for variant: int in counts.size():
+		if counts[variant] == fewest:
+			choices.append(variant)
+	return choices[bag_rng.randi_range(0,choices.size()-1)]
 
 func _link_families() -> void:
 	var parents: Dictionary = {}

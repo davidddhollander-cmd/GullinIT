@@ -44,6 +44,12 @@ var stash_active: bool = false
 var stash_standing: bool = false
 const BAG_SQUISH_TIME: float = 0.18
 const BAG_PIVOT: Vector2 = Vector2(0, 8)
+const BAG_TEXTURES: Array[Texture2D] = [
+	preload("res://assets/sprites/retro-picnic-bag-coral-32bit.png"),
+	preload("res://assets/sprites/retro-picnic-bag-teal-32bit.png"),
+	preload("res://assets/sprites/retro-picnic-bag-woven-32bit.png"),
+]
+var bag_variant: int = 0
 var bag_squish_time: float = 0.0
 var bag_squish_duration: float = BAG_SQUISH_TIME
 var bag_squish_strength: float = 0.12
@@ -706,14 +712,10 @@ func _draw() -> void:
 		var stretch: float = bag_squish_strength*squish-rebound
 		draw_set_transform(bag_anchor+BAG_PIVOT, 0.0, Vector2(1.0+stretch*0.55,1.0-stretch))
 		var bag: Vector2 = -BAG_PIVOT
-		draw_rect(Rect2(bag+Vector2(-14,-7),Vector2(28,16)),Color("183b4e"))
-		draw_rect(Rect2(bag+Vector2(-12,-6),Vector2(24,13)),Color("c66b3d"))
-		draw_rect(Rect2(bag+Vector2(-12,2),Vector2(24,5)),Color("9b5c32"))
-		for strap: float in [-7,6]:
-			draw_rect(Rect2(bag+Vector2(strap,-6),Vector2(3,13)),Color("ffe0a3"))
-		draw_polyline(PackedVector2Array([bag+Vector2(-5,-6),bag+Vector2(-4,-11),bag+Vector2(5,-11),bag+Vector2(6,-6)]),Color("ffe0a3"),2)
-		draw_line(bag+Vector2(-10,-4),bag+Vector2(10,-4),Color("183b4e"),1)
-		draw_rect(Rect2(bag+Vector2(8,-4),Vector2(2,3)),Color("ffc65c"))
+		# The 32x24 sprite's bottom-centre sits on the old bag's base, so pecks squish it the same way.
+		draw_texture(BAG_TEXTURES[bag_variant],bag+Vector2(-16,-15))
+		if stash_remaining > 0:
+			draw_rect(Rect2(bag+Vector2(-5,1),Vector2(stash_remaining*3+1,4)),Color("183b4e"))
 		for i: int in stash_remaining:
 			draw_rect(Rect2(bag+Vector2(-4+i*3,2),Vector2(2,2)),Color("ffc65c"))
 		draw_set_transform(Vector2.ZERO)
