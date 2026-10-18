@@ -5,8 +5,14 @@ static func run(host: Node, check: Callable) -> void:
 	host.main.start_level(1)
 	var game: BeachGame = host.main.game
 	game.set_physics_process(false)
-	game.intro = 0
-	game.running = true
+	game._physics_process(float(Config.tuning.world.intro_time)+1.0)
+	check.call(not game.running and game.intro > 0 and not game.input.enabled,"tutorial waits for explicit start without running in background")
+	game.set_paused(true)
+	game.set_paused(false)
+	game.set_physics_process(false)
+	check.call(not game.input.enabled,"resuming before confirmation keeps gameplay controls disabled")
+	game.overlay.start_button.pressed.emit()
+	check.call(game.running and game.input.enabled,"tutorial start button enables controls")
 	check.call(game.training and not game.casual and game.lesson == 0 and game.player.state == BeachGull.State.GROUNDED,"first visit starts grounded training without a timer")
 	check.call(game.training_text().contains("SPACE") or game.training_text().contains("FLAP"),"first lesson explains takeoff: "+game.training_text())
 	check.call(game.training_target().x > game.player.position.x,"first lesson points into open sky: "+str(game.training_target())+" / "+str(game.player.position))
@@ -16,10 +22,21 @@ static func run(host: Node, check: Callable) -> void:
 	game.score.items = 15
 	game._physics_process(0.01)
 	check.call(game.running and game.lesson == 0,"training ignores arcade time and Practice snatch quota")
-	game.player.climb = true
-	game.player.position = Vector2(115,90)
-	game._training_tick(0.1)
+	# Take off first, then release flap and steer: the actions need not overlap.
+	game.input.touch_active = true
+	game.input.touch_aim = Vector2(70,40)
+	game.input.touch_climb = true
+	for frame: int in range(50):
+		game._physics_process(1.0/60)
+	check.call(game.player.position.y < 110 and game.lesson == 0,"vertical takeoff waits for steering")
+	check.call(game.training_text().contains("STEER RIGHT"),"takeoff updates the tip with the remaining steering action")
+	game.input.touch_climb = false
+	game.input.touch_aim = Vector2(245,75)
+	for frame: int in range(40):
+		game._physics_process(1.0/60)
 	check.call(game.lesson == 1 and int(GameState.entry(1).get("training_step",0)) == 1,"takeoff and steer saves lesson checkpoint")
+	game.overlay._process(0)
+	check.call(game.overlay.lesson_label.text.contains("LESSON 2/5") and game.overlay.lesson_prompt.text.contains("CRUMB"),"landing tip replaces first tip after takeoff then steering")
 	game.player.state = BeachGull.State.GLIDE
 	game._scrap_collected(Vector2(60,156),"crumbs")
 	check.call(game.lesson == 1,"airborne crumb pickup does not satisfy landing lesson")
@@ -91,6 +108,38 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(not host.main.game.training,"completed Training Day can be replayed as a regular run")
 	host.main.start_level(1,true)
 	check.call(host.main.game.training and host.main.game.lesson == 0,"train again explicitly restarts the first lesson")
+	# Reproduce the player's normal route with an already-completed save.
+	var completed_entry: Dictionary = GameState.entry(1)
+	host.main._navigate("select")
+	var training_button: Button
+	for button: Button in host.main.menus.find_children("*","Button",true,false):
+		if button.text.contains("TRAINING"):
+			training_button = button
+			break
+	check.call(is_instance_valid(training_button) and training_button.text.contains("REPLAY LESSONS"),"completed Training Day card clearly offers the lessons")
+	if is_instance_valid(training_button):
+		training_button.pressed.emit()
+	game = host.main.game
+	game.set_physics_process(false)
+	check.call(game.training and game.lesson == 0 and not game.casual,"normal Training Day selection replays lessons on a completed save")
+	game.overlay.start_button.pressed.emit()
+	game.overlay._process(0)
+	check.call(game.overlay.training_panel.visible and game.overlay.lesson_prompt.text.contains("TAKE OFF"),"first tip is visible when replaying through the level card")
+	Input.action_press("climb")
+	Input.action_press("aim_up")
+	for frame: int in range(50):
+		game._physics_process(1.0/60)
+	Input.action_release("climb")
+	Input.action_release("aim_up")
+	Input.action_press("aim_right")
+	for frame: int in range(40):
+		game._physics_process(1.0/60)
+	Input.action_release("aim_right")
+	game.overlay._process(0)
+	check.call(game.lesson == 1 and game.overlay.training_panel.visible and game.overlay.lesson_prompt.text.contains("CRUMB"),"second tip appears after takeoff and steering on a completed save")
+	check.call(GameState.entry(1) == completed_entry,"replaying tips preserves completed progress and existing records")
+	host.main._navigate("restart")
+	check.call(host.main.game.training and host.main.game.lesson == 0,"restarting a replay keeps tutorial tips enabled")
 	host.main.start_level(3)
 	game = host.main.game
 	game.set_physics_process(false)

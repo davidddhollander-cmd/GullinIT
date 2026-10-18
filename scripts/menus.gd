@@ -65,7 +65,7 @@ func level_select(casual: bool) -> void:
 		var record: Dictionary = GameState.entry(id)
 		var unlocked: bool = GameState.unlocked(id)
 		var stars: String = "*".repeat(int(record.get("stars",0)))
-		var status: String = "LOCKED" if not unlocked else ("BEGIN LESSON" if id == 1 and not trained else "BEST %d" % int(record.get("best",0)))
+		var status: String = "LOCKED" if not unlocked else (("REPLAY LESSONS" if trained else "BEGIN LESSON") if id == 1 else "BEST %d" % int(record.get("best",0)))
 		var caption: String = "%02d %s\n%s\n%s" % [id,stars,level.name.to_upper().replace(" ","\n"),status]
 		var button: Button = BeachUI.button(grid,caption,func() -> void: choose("start",id),82)
 		button.size_flags_horizontal = SIZE_EXPAND_FILL

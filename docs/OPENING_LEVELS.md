@@ -10,13 +10,15 @@ The first three levels use authored JSON layouts with deterministic +/-3 positio
 
 ## Training rules
 
-1. Hold flap, climb above y=110, and steer at least 30 units from the start.
+The first-level opening panel waits for the **LET'S GULL IT** button. Mouse, touch, and keyboard/controller confirmation can activate it. Gameplay inputs and elapsed time cannot dismiss it; gameplay controls stay disabled until confirmation, including after pausing and resuming.
+
+1. Hold flap and climb above y=110, then steer at least 30 units right of the start. Takeoff is remembered if flap is released before steering; the tip switches to the remaining steering action.
 2. Land and collect a ground scrap.
 3. Make a direct held-snack snatch during a dive, then climb above y=100 without a stun or crash.
 4. Peck a sunbather bag and collect a snack from it. Bin crumbs and unrelated food do not advance this lesson.
 5. Choose another held snack and repeat the clean swoop and escape without a target highlight.
 
-The lesson index is saved after each success. Restart resumes an unfinished course; Train Again starts at lesson zero. Course completion has its own saved flag, unlocks level two, and does not fabricate stars or a Practice time. Replaying a completed course leaves existing records intact. Arcade/Practice replay becomes available after course completion.
+The lesson index is saved after each success. Restart resumes an unfinished course; Train Again starts at lesson zero. Course completion has its own saved flag, unlocks level two, and does not fabricate stars or a Practice time. The normal Training Day level card always opens the lessons: unfinished courses resume their checkpoint, while completed courses show REPLAY LESSONS and start at lesson zero. Replaying a completed course leaves existing records intact. The other levels use the selected Arcade/Practice mode.
 
 Training replenishes the customer snack every five seconds (abandoned knocked food is removed before restoration) and refills an empty bag only once no loose food remains owned by it. These assistance rules run only during the course. All ordinary level food remains governed by the existing finite stock and replacement rules.
 

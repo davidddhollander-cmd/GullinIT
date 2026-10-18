@@ -20,7 +20,7 @@ func _ready() -> void:
 	menus.title()
 	get_tree().auto_accept_quit = true
 	if OS.get_cmdline_user_args().has("--smoke"):
-		start_level(1)
+		_navigate("start",1)
 
 func _process(delta: float) -> void:
 	if background.visible:
@@ -43,7 +43,9 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			menus.level_select(casual)
 		"start":
 			if GameState.unlocked(int(payload)):
-				start_level(int(payload))
+				# The Training Day card always opens lessons, even on a completed save.
+				var replay_training: bool = int(payload) == 1 and bool(GameState.entry(1).get("training_complete",false))
+				start_level(int(payload),replay_training)
 		"train_again":
 			start_level(1, true)
 		"restart":

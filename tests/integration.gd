@@ -69,6 +69,8 @@ func run() -> void:
 	check(not GameState.unlocked(2),"level 2 starts locked")
 	main.start_level(1)
 	main.game.set_physics_process(false)
+	await snapshot("training-intro")
+	layout(main.game.overlay)
 	main.game.intro = 0
 	main.game.running = true
 	main.game.input.enabled = true
@@ -353,6 +355,14 @@ func action(name: String) -> void:
 	event.action = name
 	event.pressed = false
 	get_viewport().push_input(event)
+
+func click_at(point: Vector2) -> void:
+	for pressed: bool in [true,false]:
+		var event: InputEventMouseButton = InputEventMouseButton.new()
+		event.button_index = MOUSE_BUTTON_LEFT
+		event.position = point
+		event.pressed = pressed
+		get_viewport().push_input(event,true)
 
 func mechanics_checks() -> void:
 	main.start_level(1)
@@ -943,8 +953,17 @@ func input_checks() -> void:
 	await snapshot("flight-instructions")
 	layout(main.game.overlay)
 	check(not main.game.overlay.training_panel.get_rect().intersects(Rect2(232,44,84,29)),"training panel clears NEXT LEVEL footprint")
+	main.game._physics_process(float(Config.tuning.world.intro_time)+1.0)
+	check(not main.game.running and main.game.intro > 0 and main.game.elapsed == 0,"first level waits indefinitely for start button")
 	action("dive")
-	check(main.game.running and main.game.player.state == BeachGull.State.GLIDE,"intro consumes first dive input")
+	action("peck")
+	click_at(Vector2(5,165))
+	check(not main.game.running and not main.game.input.enabled,"gameplay buttons and clicks outside start button cannot dismiss first intro")
+	var start_button: Button = main.game.overlay.start_button
+	check(start_button.text == "LET'S GULL IT" and start_button.has_focus(),"start button is labelled and focused for keyboard and controller")
+	click_at(start_button.get_global_rect().get_center())
+	check(main.game.running and main.game.input.enabled and main.game.player.state == BeachGull.State.GLIDE,"start button click begins level without a dive")
+	check(not main.game.overlay.intro_panel.visible,"start button hides opening menu immediately")
 	action("dive")
 	check(main.game.player.state == BeachGull.State.WINDUP,"dive input reaches player")
 	action("pause")
@@ -958,7 +977,8 @@ func input_checks() -> void:
 	check(main.game.intro > 0 and main.game.score.points == 0,"restart input creates fresh run")
 	main.game.set_physics_process(false)
 	await settle()
-	action("dive")
+	action("ui_accept")
+	check(main.game.running and main.game.player.state == BeachGull.State.GLIDE,"keyboard and controller confirmation activate focused start button")
 	var touch: InputEventScreenTouch = InputEventScreenTouch.new()
 	touch.index = 0
 	touch.position = Vector2(230,160)
@@ -971,6 +991,17 @@ func input_checks() -> void:
 	touch.pressed = false
 	get_viewport().push_input(touch, true)
 	check(not main.game.input.touch_climb,"touch climb release")
+	main._navigate("restart")
+	main.game.set_physics_process(false)
+	await settle()
+	var start_point: Vector2 = main.game.overlay.start_button.get_global_rect().get_center()
+	for pressed: bool in [true,false]:
+		var start_touch: InputEventScreenTouch = InputEventScreenTouch.new()
+		start_touch.index = 0
+		start_touch.position = start_point
+		start_touch.pressed = pressed
+		get_viewport().push_input(start_touch,true)
+	check(main.game.running and not main.game.input.touch_climb and not main.game.input.touch_dive and not main.game.input.touch_peck,"touch start activates button without carrying gameplay input")
 	main.clear_game()
 	await settle()
 

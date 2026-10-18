@@ -28,6 +28,7 @@ var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var last_near: float = -10.0
 var training: bool = false
 var lesson: int = 0
+var training_took_off: bool = false
 var training_clean_snatch: bool = false
 var training_raid_started: bool = false
 var training_reset_clock: float = 0.0
@@ -151,12 +152,10 @@ func _reload() -> void:
 	effects.message(player.position,"DATA RELOADED")
 
 func _physics_process(delta: float) -> void:
-	if intro > 0:
+	if intro > 0 and int(level.id) != 1:
 		intro -= delta
 		if intro <= 0:
-			intro_dismissed_elapsed = 0.0
-			running = true
-			input.enabled = true
+			dismiss_intro()
 	if intro_dismissed_elapsed >= 0.0 and running:
 		intro_dismissed_elapsed += delta
 	if not running:
@@ -210,13 +209,19 @@ func _physics_process(delta: float) -> void:
 	elif (casual and score.items >= int(Config.tuning.score.casual_items)) or (not casual and elapsed >= float(level.time_limit)):
 		finish()
 
+func dismiss_intro() -> void:
+	intro = 0.0
+	intro_dismissed_elapsed = 0.0
+	input.clear_touch()
+	running = true
+	input.enabled = true
+	overlay.intro_panel.hide()
+
 func _unhandled_input(event: InputEvent) -> void:
-	if intro > 0 and event.is_pressed() and not event is InputEventMouseMotion:
-		intro = 0
-		intro_dismissed_elapsed = 0.0
-		running = true
-		input.enabled = true
-		get_viewport().set_input_as_handled()
+	if intro > 0:
+		if int(level.id) != 1 and event.is_pressed() and not event is InputEventMouseMotion:
+			dismiss_intro()
+			get_viewport().set_input_as_handled()
 		return
 	if running and event.is_action_pressed("dive"):
 		input.update_player(player,camera_x)
@@ -240,7 +245,7 @@ func _peck() -> void:
 func set_paused(value: bool) -> void:
 	set_physics_process(not value)
 	set_process_unhandled_input(not value)
-	input.enabled = not value
+	input.enabled = not value and running and intro <= 0
 	input.clear_touch()
 	for gull: BeachGull in gulls:
 		gull.sprite.speed_scale = 0 if value else 1
@@ -371,8 +376,12 @@ func _training_advance() -> void:
 		finish()
 
 func _training_tick(delta: float) -> void:
-	if lesson == 0 and player.climb and player.position.y < 110 and player.position.x > 100:
-		_training_advance()
+	if lesson == 0:
+		# Remember takeoff even when the player releases flap before steering.
+		if player.state == BeachGull.State.GLIDE and player.position.y < 110:
+			training_took_off = true
+		if training_took_off and player.state == BeachGull.State.GLIDE and player.position.x > float(level.world.start_x) + 30:
+			_training_advance()
 	elif lesson in [2,4] and training_clean_snatch and player.position.y < 100 and player.velocity.y <= 0 and player.state in [BeachGull.State.GLIDE,BeachGull.State.STRIKE]:
 		_training_advance()
 	# Lessons cannot run out of food. Restore only after all loose food clears,
@@ -412,7 +421,10 @@ func training_text() -> String:
 	if player.crash_warning():
 		return "PULL UP! AIM UP TO AVOID A CRASH\nHOLD %s TO RECOVER" % flap
 	match lesson:
-		0: return "HOLD %s TO FLY\nSTEER RIGHT: %s" % [flap,"DRAG" if input.touch_visible else ("LEFT STICK" if input.gamepad else "MOUSE / WASD")]
+		0:
+			if training_took_off:
+				return "STEER RIGHT: %s\nFLY TOWARD THE GOLDEN RING" % ("DRAG" if input.touch_visible else ("LEFT STICK" if input.gamepad else "MOUSE / WASD"))
+			return "HOLD %s TO TAKE OFF\nTHEN STEER RIGHT TOWARD THE RING" % flap
 		1: return "RELEASE FLAP. AIM DOWN TO LAND\nWALK OVER A GOLDEN CRUMB"
 		2:
 			return "SNACK TAKEN! AIM UP AND CLIMB" if training_clean_snatch else "DIVE: %s\nTAP %s AT THE SNACK. THEN AIM UP" % [dive_key,peck_key]

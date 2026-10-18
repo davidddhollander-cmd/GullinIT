@@ -4,7 +4,7 @@ A six-level, data-driven seaside arcade prototype for Godot. Aim a gull, hold cl
 
 The opening now progresses from **Training Day** (a compact, calm teaching beach), to **Family Picnic** (two picnic groups and their kiosk trips), to **Boardwalk Bustle** (customers, a dog owner, and a pier diner). These three maps have authored rosters, boundaries, landmarks, and small repeatable placement variations. Levels 4–6 retain the larger generated route.
 
-On the first visit, Training Day teaches takeoff and steering, landing and crumbs, a timed swoop followed by a safe climb, bag raiding, and an independent swoop. There is no timer or snatch quota. Completed lessons save automatically; crashes and restarts preserve the checkpoint. Practice snacks are restored during training. Finishing unlocks Family Picnic without awarding stars or setting a Practice best time. Subsequent visits use the selected Arcade/Practice mode; **TRAIN AGAIN** replays the lessons. Gary enters Boardwalk Bustle after the first non-scrap snack is swallowed.
+Training Day teaches takeoff and steering, landing and crumbs, a timed swoop followed by a safe climb, bag raiding, and an independent swoop. Selecting its level card always opens the lessons, including after completing the tutorial; completed saves show **REPLAY LESSONS** and start from lesson one. There is no timer or snatch quota. Completed lessons save automatically; unfinished courses resume their checkpoint. Practice snacks are restored during training. Finishing unlocks Family Picnic without awarding stars or setting a Practice best time. **TRAIN AGAIN** explicitly starts over. Existing scores and unlocks are preserved. Gary enters Boardwalk Bustle after the first non-scrap snack is swallowed.
 
 See `docs/OPENING_LEVELS.md` for the map contracts and tuning notes.
 
@@ -25,7 +25,7 @@ Import `project.godot` into Godot and press F6 on `scenes/main.tscn`, or F5 to r
 | Fullscreen | F11 | Options menu |
 | Debug overlay / reload JSON | F1 / F2 | — |
 
-Touch: drag the beach to aim, hold FLAP, and tap DIVE. Enable the touch overlay in Options when previewing on desktop. The first button press dismisses the level introduction. Controller A, Space, or left mouse flaps; keyboard A remains leftward aiming.
+Touch: drag the beach to aim, hold FLAP, and tap DIVE. Enable the touch overlay in Options when previewing on desktop. The first level waits for **LET'S GULL IT** at the bottom of its opening panel; click, tap, or confirm the focused button to begin. Other level introductions dismiss on the first button press or after two seconds. Controller A, Space, or left mouse flaps; keyboard A remains leftward aiming.
 
 Without flapping, the gull slowly descends and lands on the sand. Aim left or right to walk on visibly stepping feet with folded wings, at one fifth of normal flying speed. Landing immediately limits movement to this walking pace. Ground crumbs award 2 points and single chips award 5; both reappear after 18 seconds. Hold flap to take off. Scraps do not count toward the 15 practice snatches or build a combo.
 

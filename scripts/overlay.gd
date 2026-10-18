@@ -6,6 +6,7 @@ var score_label: Label
 var time_label: Label
 var wind_label: Label
 var intro_panel: PanelContainer
+var start_button: Button
 var training_panel: PanelContainer
 var lesson_label: Label
 var lesson_prompt: Label
@@ -48,9 +49,18 @@ func setup(owner_game: BeachGame) -> void:
 		card.mouse_filter = MOUSE_FILTER_IGNORE
 		card.custom_minimum_size = Vector2(51,27)
 		BeachUI.label(card,caption).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	training_panel = BeachUI.panel(self,Color(0.094,0.23,0.30,0.95))
-	training_panel.position = Vector2(5,30)
-	training_panel.custom_minimum_size = Vector2(222,49)
+	var training_center: CenterContainer = CenterContainer.new()
+	add_child(training_center)
+	BeachUI.full(training_center)
+	training_center.mouse_filter = MOUSE_FILTER_IGNORE
+	training_panel = BeachUI.panel(training_center,Color(0.094,0.23,0.30,0.95))
+	training_panel.custom_minimum_size = Vector2(192,32)
+	var training_style: StyleBoxFlat = training_panel.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
+	training_style.content_margin_left = 8
+	training_style.content_margin_right = 8
+	training_style.content_margin_top = 4
+	training_style.content_margin_bottom = 4
+	training_panel.add_theme_stylebox_override("panel",training_style)
 	training_panel.mouse_filter = MOUSE_FILTER_IGNORE
 	var lesson_column: VBoxContainer = VBoxContainer.new()
 	lesson_column.mouse_filter = MOUSE_FILTER_IGNORE
@@ -58,10 +68,13 @@ func setup(owner_game: BeachGame) -> void:
 	training_panel.add_child(lesson_column)
 	lesson_label = BeachUI.label(lesson_column,"TRAINING DAY  /  LESSON 1/5",8,BeachUI.GOLD)
 	lesson_prompt = BeachUI.label(lesson_column,"",8,BeachUI.CREAM)
+	for tip_label: Label in [lesson_label,lesson_prompt]:
+		tip_label.add_theme_font_size_override("font_size",6)
+		tip_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lesson_label.mouse_filter = MOUSE_FILTER_IGNORE
 	lesson_prompt.mouse_filter = MOUSE_FILTER_IGNORE
 	lesson_prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lesson_prompt.custom_minimum_size = Vector2(202,22)
+	lesson_prompt.custom_minimum_size = Vector2(176,12)
 	var center: CenterContainer = CenterContainer.new()
 	add_child(center)
 	BeachUI.full(center)
@@ -85,7 +98,12 @@ func setup(owner_game: BeachGame) -> void:
 		BeachUI.label(intro,"DIVE: B / SHIFT / RIGHT CLICK",8,Color("80bcb8"))
 		BeachUI.label(intro,"TAP E / X / PECK DURING THE DIVE",8,BeachUI.GOLD)
 		BeachUI.label(intro,"AIM UP TO SWOOP. FAST CRASH = 0!",8,Color("80bcb8"))
-	BeachUI.label(intro,"ANY BUTTON TO GO",8,BeachUI.GOLD)
+	if int(game.level.id) == 1:
+		intro_panel.mouse_filter = MOUSE_FILTER_STOP
+		start_button = BeachUI.button(intro,"LET'S GULL IT",game.dismiss_intro)
+		start_button.grab_focus()
+	else:
+		BeachUI.label(intro,"ANY BUTTON TO GO",8,BeachUI.GOLD)
 
 func _process(_delta: float) -> void:
 	score_label.text = "%04d  X%s" % [game.score.points,str(Config.tuning.score.tiers[game.score.tier])]

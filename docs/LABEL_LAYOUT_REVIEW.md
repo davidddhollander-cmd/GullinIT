@@ -10,7 +10,7 @@ Board width is measured text width plus 4 px. Placement starts at zone.from+28, 
 
 YOU is shown throughout active training. Outside training it holds for four seconds after the intro is dismissed, then fades for 0.5 seconds. Its dark tag is pixel-aligned, stays below y=30 and inside the screen, and seeks a clear row above the gull around signs and HUD panels. A top-corner fallback keeps it readable when there is no clear row directly above the gull.
 
-The training title/prompt gap is 2 px. The panel fits two prompt lines, remains left of the NEXT LEVEL footprint, and the contextual hint/FOOD rows are placed below the panel and sign boards.
+The training title/prompt gap is 2 px. Following the playtest request, the tutorial panel is centered on screen, with centered 6 px title and prompt text (25% smaller than the 8 px HUD). A full-screen CenterContainer keeps the compact 192×32 panel centered as its content changes. Its decorative controls let gameplay input pass through. The contextual hint/FOOD rows are placed below the panel. Other menu and HUD typography keeps its native 8 px size.
 
 Gameplay rules, tuning, rosters, level JSON and art assets were not changed. Overview camera adjustments exist only in screenshot fixtures. Legacy layout filenames are refreshed using the current authored maps (the level-1 pier/promenade aliases therefore show its east beach, not a nonexistent pier).
 
