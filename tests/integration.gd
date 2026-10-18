@@ -75,14 +75,19 @@ func run() -> void:
 	main.game.overlay.queue_redraw()
 	await snapshot("training-lesson-0")
 	layout(main.game.overlay)
+	check(not main.game.overlay.training_panel.get_rect().intersects(Rect2(232,44,84,29)),"training panel clears NEXT LEVEL footprint")
+	check(main.game.overlay.lesson_label.get_global_rect().intersection(main.game.overlay.lesson_prompt.get_global_rect()).size == Vector2.ZERO,"training title and prompt have separate rows")
 	for lesson_index: int in range(1,5):
 		main.game.lesson = lesson_index
 		main.game.overlay.queue_redraw()
 		await snapshot("training-lesson-%d" % lesson_index)
 		layout(main.game.overlay)
+		check(not main.game.overlay.training_panel.get_rect().intersects(Rect2(232,44,84,29)),"training panel clears NEXT LEVEL footprint")
+		check(main.game.overlay.lesson_label.get_global_rect().intersection(main.game.overlay.lesson_prompt.get_global_rect()).size == Vector2.ZERO,"training title and prompt do not overlap in lesson %d" % lesson_index)
 	main.game.input.touch_visible = true
 	await snapshot("training-touch")
 	layout(main.game.overlay)
+	check(not main.game.overlay.training_panel.get_rect().intersects(Rect2(232,44,84,29)),"training panel clears NEXT LEVEL footprint")
 	main.game.lesson = 5
 	main.game.finish()
 	await snapshot("training-complete")
@@ -183,6 +188,9 @@ func run() -> void:
 			game.beach.camera_x = 640
 			game.player.position.x = 570
 			game.beach.queue_redraw()
+			game.running = true
+			game.intro_dismissed_elapsed = 1.0
+			game.overlay.queue_redraw()
 			await snapshot("game-family")
 			game.input.touch_visible = true
 			await snapshot("game-touch")
@@ -934,6 +942,7 @@ func input_checks() -> void:
 	await settle()
 	await snapshot("flight-instructions")
 	layout(main.game.overlay)
+	check(not main.game.overlay.training_panel.get_rect().intersects(Rect2(232,44,84,29)),"training panel clears NEXT LEVEL footprint")
 	action("dive")
 	check(main.game.running and main.game.player.state == BeachGull.State.GLIDE,"intro consumes first dive input")
 	action("dive")
@@ -1632,6 +1641,7 @@ func refinement_checks() -> void:
 	main.game.overlay.queue_redraw()
 	await snapshot("crash-warning")
 	layout(main.game.overlay)
+	check(not main.game.overlay.training_panel.get_rect().intersects(Rect2(232,44,84,29)),"training panel clears NEXT LEVEL footprint")
 	main.clear_game()
 	await settle()
 
@@ -1811,6 +1821,7 @@ func female_sunbather_art_checks() -> void:
 
 func generated_layout_checks() -> void:
 	var layouts: Array = []
+	var moved_far: int = 0
 	for number: int in range(1,7):
 		main.start_level(number)
 		var game: BeachGame = main.game
@@ -1818,6 +1829,34 @@ func generated_layout_checks() -> void:
 		game.running = true
 		game.intro = 0
 		layouts.append(game.level)
+		var world_width: float = float(game.beach.world.get("width",Config.tuning.world.width))
+		for sign: Dictionary in game.beach.sign_layouts():
+			var board: Rect2 = sign.rect
+			var zone: Dictionary = sign.zone
+			check(board.position.x >= float(zone.from) and board.end.x <= float(zone.to) and board.end.x <= world_width,"level %d sign %s inside zone/world" % [number,sign.name])
+			for sprite: AnimatedSprite2D in game.beach.prop_sprites:
+				var texture: Texture2D = sprite.sprite_frames.get_frame_texture(sprite.animation,sprite.frame)
+				var dimensions: Vector2 = texture.get_size()*sprite.scale.abs()
+				var rect := Rect2(sprite.position-dimensions*0.5,dimensions)
+				check(not board.intersects(rect),"level %d sign %s clears actual prop sprite %s" % [number,sign.name,sprite.position])
+			for actor: BeachTarget in game.spawner.targets:
+				if actor.kind == "toddler":
+					continue
+				var texture: Texture2D = actor.sprite.sprite_frames.get_frame_texture(actor.sprite.animation,actor.sprite.frame)
+				var height: float = texture.get_height()*absf(actor.sprite.scale.y)
+				var head: float = minf(160-height,actor.position.y+actor.sprite.position.y-height*0.5)
+				check(board.end.y <= head,"level %d sign %s above %s standing sprite band" % [number,sign.name,actor.kind])
+			if absi(int(sign.shift)) > 40:
+				moved_far += 1
+				print("SIGN SHIFT: level %d %s %+d px (x=%d)" % [number,sign.name,int(sign.shift),int(board.position.x)])
+		game.training = true
+		check(game.overlay._you_marker_visible(),"YOU marker remains visible during Training Day")
+		game.training = false
+		game.intro_dismissed_elapsed = 4.5
+		check(not game.overlay._you_marker_visible(),"YOU marker is absent 4.5 seconds after intro outside training")
+		for point: Vector2 in [Vector2(-20,0),Vector2(160,70),Vector2(350,180)]:
+			var marker: Rect2 = game.overlay.you_marker_rect(point)
+			check(marker.position.y >= 30 and marker.position.x >= 0 and marker.end.x <= 320 and marker.end.y <= 180,"YOU tag remains below HUD and on screen")
 		var count: int = game.spawner.targets.size()
 		for i: int in 30:
 			game.spawner.tick(10,40)
@@ -1829,7 +1868,35 @@ func generated_layout_checks() -> void:
 			views = [[160,"sunbathers"],[480,"first-family"],[720,"second-family"],[880,"snack-kiosk"]]
 		elif number == 3:
 			views = [[160,"quiet-beach"],[600,"promenade-snacks"],[800,"dog-walk"],[1080,"pier-dining"]]
+		if number <= 3:
+			for legacy: Array in [[160,"sunbathers"],[480,"families"],[800,"promenade"],[1120,"pier"]]:
+				var already_present: bool = false
+				for current: Array in views:
+					already_present = already_present or current[1] == legacy[1]
+				if not already_present:
+					views.append([clampf(float(legacy[0]),160,world_width-160),legacy[1]])
 		for view: Array in views:
+			# Reframe only screenshot fixtures so readable boards aren't sliced at an edge.
+			var framed_x: float = float(view[0])
+			var found_frame: bool = false
+			for shift: int in range(0,161):
+				for direction: int in [1,-1]:
+					var candidate: float = clampf(float(view[0])+shift*direction,160,world_width-160)
+					var clear: bool = true
+					for sign: Dictionary in game.beach.sign_layouts():
+						var board: Rect2 = sign.rect
+						var left: float = candidate-160
+						var right: float = candidate+160
+						if board.end.x > left and board.position.x < right and (board.position.x < left+2 or board.end.x > right-2):
+							clear = false
+					if clear:
+						framed_x = candidate
+						found_frame = true
+						break
+				if found_frame:
+					break
+			view[0] = framed_x
+			check(found_frame,"overview has no sliced sign: level %d %s" % [number,view[1]])
 			game.camera_x = float(view[0])
 			game.camera.position.x = float(view[0])
 			game.beach.camera_x = float(view[0])
@@ -2327,4 +2394,3 @@ func art_checks() -> void:
 	await snapshot("gull-dive")
 	main.clear_game()
 	await settle()
-

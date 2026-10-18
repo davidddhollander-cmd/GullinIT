@@ -50,18 +50,18 @@ func setup(owner_game: BeachGame) -> void:
 		BeachUI.label(card,caption).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	training_panel = BeachUI.panel(self,Color(0.094,0.23,0.30,0.95))
 	training_panel.position = Vector2(5,30)
-	training_panel.custom_minimum_size = Vector2(214,43)
+	training_panel.custom_minimum_size = Vector2(222,49)
 	training_panel.mouse_filter = MOUSE_FILTER_IGNORE
 	var lesson_column: VBoxContainer = VBoxContainer.new()
 	lesson_column.mouse_filter = MOUSE_FILTER_IGNORE
-	lesson_column.add_theme_constant_override("separation",0)
+	lesson_column.add_theme_constant_override("separation",2)
 	training_panel.add_child(lesson_column)
 	lesson_label = BeachUI.label(lesson_column,"TRAINING DAY  /  LESSON 1/5",8,BeachUI.GOLD)
 	lesson_prompt = BeachUI.label(lesson_column,"",8,BeachUI.CREAM)
 	lesson_label.mouse_filter = MOUSE_FILTER_IGNORE
 	lesson_prompt.mouse_filter = MOUSE_FILTER_IGNORE
 	lesson_prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lesson_prompt.custom_minimum_size = Vector2(200,20)
+	lesson_prompt.custom_minimum_size = Vector2(202,22)
 	var center: CenterContainer = CenterContainer.new()
 	add_child(center)
 	BeachUI.full(center)
@@ -144,26 +144,29 @@ func _draw() -> void:
 			if training_target.x >= 4 and training_target.x <= 316 and training_target.y >= 28 and training_target.y <= 165:
 				draw_arc(training_target,12,0,TAU,24,BeachUI.GOLD,2)
 				draw_arc(training_target,16,0,TAU,24,Color(1.0,0.95,0.7,0.55),1)
-		if game.training:
-			pass
-		elif game.player.state == BeachGull.State.GROUNDED:
+		var hint_y: float = maxf(105.0,training_panel.get_rect().end.y+11) if game.training else 39.0
+		if game.player.state == BeachGull.State.GROUNDED:
 			var hint: String = "TAP E / X / PECK TO SEARCH" if game.stash_raids.has_nearby_source() else "WALK FOR SCRAPS / HOLD FLAP TO FLY"
-			draw_string(font,Vector2(6,39),hint,HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.INK)
+			draw_string(font,Vector2(6,hint_y),hint,HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.INK)
 		elif game.player.landing_aim():
-			draw_string(font,Vector2(6,39),"LANDING / HOLD FLAP TO CLIMB",HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.INK)
+			draw_string(font,Vector2(6,hint_y),"LANDING / HOLD FLAP TO CLIMB",HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.INK)
 			var landing_x: float = clampf(aim.x,8,312)
 			draw_line(Vector2(landing_x-6,159),Vector2(landing_x+6,159),BeachUI.CREAM,2)
 		elif game.player.state == BeachGull.State.STRIKE:
 			var danger: bool = game.player.crash_warning()
 			var strike_hint: String = "PULL UP! CRASH AHEAD" if danger else ("PECK! AIM AT THE SNACK" if not game.player.peck_used else ("PECK ACTIVE" if game.player.peck_time > 0 else "PECK SPENT - DIVE AGAIN"))
-			draw_string(font,Vector2(6,39),strike_hint,HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("ef725c") if danger else BeachUI.INK)
+			draw_string(font,Vector2(6,hint_y),strike_hint,HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("ef725c") if danger else BeachUI.INK)
 			if danger:
-				draw_line(Vector2(4,43),Vector2(185,43),Color("ef725c"),2)
+				draw_line(Vector2(4,hint_y+4),Vector2(185,hint_y+4),Color("ef725c"),2)
 		draw_arc(aim,4,0,TAU,12,Color("fff4da"))
 		draw_line(aim-Vector2(7,0),aim+Vector2(7,0),Color("fff4da"))
 		draw_line(aim-Vector2(0,7),aim+Vector2(0,7),Color("fff4da"))
 		var pos: Vector2 = game.player.position-offset
-		draw_string(font,pos-Vector2(8,14),"YOU",HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.INK)
+		if _you_marker_visible():
+			var tag_pos: Vector2 = you_marker_rect(pos).position+Vector2(2,9)
+			var marker_alpha: float = 1.0 if game.training else clampf((4.5-game.intro_dismissed_elapsed)/0.5,0.0,1.0)
+			draw_rect(Rect2(tag_pos-Vector2(2,9),Vector2(24,11)),Color(0.09,0.20,0.26,0.88*marker_alpha))
+			draw_string(font,tag_pos,"YOU",HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color(1.0,0.96,0.85,marker_alpha))
 		if game.player.cooldown > 0:
 			var ratio: float = clampf(game.player.cooldown/float(Config.tuning.dive.cooldown),0.0,1.0)
 			draw_rect(Rect2(pos+Vector2(-16,-25),Vector2(32,4)),BeachUI.INK)
@@ -189,7 +192,8 @@ func _draw() -> void:
 		if x > 320 and x < 640:
 			right_food = right_food or target.food
 			right_threat = right_threat or target.defense > 0
-	for item: Array in [[left_food,Vector2(3,85),"< FOOD",BeachUI.GOLD],[right_food,Vector2(280,85),"FOOD >",BeachUI.GOLD],[left_threat,Vector2(3,96),"< !",Color("ef725c")],[right_threat,Vector2(302,96),"! >",Color("ef725c")]]:
+	var arrow_y: float = maxf(116.0,training_panel.get_rect().end.y+22.0) if game.training else 108.0
+	for item: Array in [[left_food,Vector2(3,arrow_y),"< FOOD",BeachUI.GOLD],[right_food,Vector2(280,arrow_y),"FOOD >",BeachUI.GOLD],[left_threat,Vector2(3,arrow_y+11),"< !",Color("ef725c")],[right_threat,Vector2(302,arrow_y+11),"! >",Color("ef725c")]]:
 		if item[0]:
 			draw_string(font,item[1],item[2],HORIZONTAL_ALIGNMENT_LEFT,-1,8,item[3])
 	# Zone boundaries follow the longer map rather than equal screen thirds.
@@ -208,3 +212,30 @@ func _draw() -> void:
 				var radius: Vector2 = target.food_radius()
 				draw_rect(Rect2(target.food_position()-offset-radius,radius*2),BeachUI.GOLD,false)
 		draw_rect(Rect2(game.player.beak()-offset-Vector2(4,3),Vector2(8,6)),Color("ef725c"),false)
+
+func _you_marker_visible() -> bool:
+	return game != null and (game.training or (game.intro_dismissed_elapsed >= 0.0 and game.intro_dismissed_elapsed < 4.5))
+
+func you_marker_rect(pos: Vector2) -> Rect2:
+	var initial := Vector2(roundf(clampf(pos.x-10,2,294)),roundf(clampf(pos.y-23,30,165)))
+	var obstacles: Array[Rect2] = []
+	obstacles.append(Rect2(232,44,84,29) if not game.training else training_panel.get_rect())
+	for sign: Dictionary in game.beach.sign_layouts():
+		var board: Rect2 = sign.rect
+		board.position.x -= game.camera_x-160
+		obstacles.append(board.grow(2))
+	# Try the preferred height first, then other clear rows above the bird.
+	var rows: Array[float] = [initial.y]
+	for y: int in range(int(initial.y)-1,29,-1):
+		rows.append(float(y))
+	for y: float in rows:
+		var candidate := Rect2(initial.x,y,24,11)
+		var clear: bool = true
+		for obstacle: Rect2 in obstacles:
+			if candidate.intersects(obstacle):
+				clear = false
+				break
+		if clear:
+			return candidate
+	# Near the top, keep the marker readable beside the training panel.
+	return Rect2(292,30,24,11)

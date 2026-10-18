@@ -7,6 +7,7 @@ var casual: bool = false
 var elapsed: float = 0.0
 var running: bool = false
 var intro: float = 0.0
+var intro_dismissed_elapsed: float = -1.0
 var camera_x: float = 160.0
 var debug: bool = false
 var player: BeachGull
@@ -99,6 +100,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	canvas.add_child(overlay)
 	overlay.setup(self)
 	intro = Config.tuning.world.intro_time
+	intro_dismissed_elapsed = -1.0
 	if training:
 		player.position = Vector2(70,player.ground_y())
 		player.state = BeachGull.State.GROUNDED
@@ -152,8 +154,11 @@ func _physics_process(delta: float) -> void:
 	if intro > 0:
 		intro -= delta
 		if intro <= 0:
+			intro_dismissed_elapsed = 0.0
 			running = true
 			input.enabled = true
+	if intro_dismissed_elapsed >= 0.0 and running:
+		intro_dismissed_elapsed += delta
 	if not running:
 		overlay.queue_redraw()
 		return
@@ -208,6 +213,7 @@ func _physics_process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if intro > 0 and event.is_pressed() and not event is InputEventMouseMotion:
 		intro = 0
+		intro_dismissed_elapsed = 0.0
 		running = true
 		input.enabled = true
 		get_viewport().set_input_as_handled()

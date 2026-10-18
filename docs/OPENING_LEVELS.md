@@ -27,6 +27,7 @@ Training replenishes the customer snack every five seconds (abandoned knocked fo
 - `BeachGame` owns lesson transitions, completion, and deferred rivals. `BeachStashRaids.bag_collected` distinguishes a real bag pickup from other food.
 - Per-actor `speed_mult`, `awareness_mult`, and `reaction_delay` tune patrol speed, detection, and warning/wake timing. They default to 1 for existing actors.
 - Backdrop signs use level zones; the HUD map scales to the level width and marks its sand, promenade, and pier boundaries. Existing sprites provide the different scenery arrangements; no new art sheets or audio were generated.
+- Zone signs size to their 8 px labels, stay within zone/world bounds, and slide around props and standing adults.
 - Arcade starting targets: Training Day 105 seconds / 100, 200, 300 points; Family Picnic 120 seconds / 250, 400, 550; Boardwalk Bustle 135 seconds / 350, 550, 750. These are initial tuning values, not a claim of human playtest balance.
 
 ## Validation focus
@@ -34,3 +35,5 @@ Training replenishes the customer snack every five seconds (abandoned knocked fo
 Exercise fresh and existing saves, checkpoint restart, forced lesson replay, no timed tutorial expiry, clean swoop versus dropped food, depletion recovery, family links, delayed rival arrival, per-level geometry restoration, menu bounds, and the existing six-level mechanics suite. Human playtesting should assess lesson wording, peck timing difficulty, travel time, and score targets.
 
 Final rendered validation: **10,084 checks, zero failures**, using `tools/validate.ps1 -Capture`. Tutorial prompts, touch controls, completion board, and representative family/promenade/pier captures were also visually inspected. Logs and captures are under `test-output/`.
+
+Zone sign boards use native 8 px text at y=84-95 (above the full 64 px standing actor band), with posts to y=134; text-width boards start at zone.from+28, search right then left within a 4 px zone inset, and avoid scaled prop sprites and flags. No level data or art changes are required.
