@@ -1,0 +1,204 @@
+{
+  "food_crumbs": {
+    "file": "res://assets/sprites/food_bites.png",
+    "frame_w": 275,
+    "frame_h": 216,
+    "regions": [
+      {
+        "region": [
+          98,
+          153,
+          275,
+          216
+        ],
+        "offset": [
+          0,
+          0
+        ]
+      }
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 1,
+        "loop": true
+      }
+    }
+  },
+  "food_single_chip": {
+    "file": "res://assets/sprites/food_bites.png",
+    "frame_w": 266,
+    "frame_h": 245,
+    "regions": [
+      {
+        "region": [
+          541,
+          114,
+          266,
+          245
+        ],
+        "offset": [
+          0,
+          0
+        ]
+      }
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 1,
+        "loop": true
+      }
+    }
+  },
+  "food_crisps_box": {
+    "file": "res://assets/sprites/food_bites.png",
+    "frame_w": 349,
+    "frame_h": 329,
+    "regions": [
+      {
+        "region": [
+          936,
+          78,
+          349,
+          329
+        ],
+        "offset": [
+          0,
+          0
+        ]
+      }
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 1,
+        "loop": true
+      }
+    }
+  },
+  "food_ice_cream": {
+    "file": "res://assets/sprites/food_bites.png",
+    "frame_w": 199,
+    "frame_h": 366,
+    "regions": [
+      {
+        "region": [
+          1462,
+          51,
+          199,
+          366
+        ],
+        "offset": [
+          0,
+          0
+        ]
+      }
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 1,
+        "loop": true
+      }
+    }
+  },
+  "food_crisps_bag": {
+    "file": "res://assets/sprites/food_bites.png",
+    "frame_w": 328,
+    "frame_h": 369,
+    "regions": [
+      {
+        "region": [
+          58,
+          482,
+          328,
+          369
+        ],
+        "offset": [
+          0,
+          0
+        ]
+      }
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 1,
+        "loop": true
+      }
+    }
+  },
+  "food_hotdog": {
+    "file": "res://assets/sprites/food_bites.png",
+    "frame_w": 363,
+    "frame_h": 283,
+    "regions": [
+      {
+        "region": [
+          490,
+          522,
+          363,
+          283
+        ],
+        "offset": [
+          0,
+          0
+        ]
+      }
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 1,
+        "loop": true
+      }
+    }
+  },
+  "food_fried_fish": {
+    "file": "res://assets/sprites/food_bites.png",
+    "frame_w": 396,
+    "frame_h": 278,
+    "regions": [
+      {
+        "region": [
+          925,
+          520,
+          396,
+          278
+        ],
+        "offset": [
+          0,
+          0
+        ]
+      }
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 1,
+        "loop": true
+      }
+    }
+  },
+  "food_cookie": {
+    "file": "res://assets/sprites/cookie.svg",
+    "frame_w": 16,
+    "frame_h": 16,
+    "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}
+  }
+}

@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://dglcndvfu7ntj"
+path="res://.godot/imported/gull_pixel.fnt-a59c6818d709b13f1082c6422b490845.fontdata"
+
+[deps]
+
+source_file="res://assets/fonts/gull_pixel.fnt"
+dest_files=["res://.godot/imported/gull_pixel.fnt-a59c6818d709b13f1082c6422b490845.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2

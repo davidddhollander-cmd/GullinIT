@@ -1,0 +1,125 @@
+{
+  "crumbs": {
+    "name": "Crumbs",
+    "category": "small",
+    "points": 2,
+    "sprite": "food_crumbs",
+    "size": [
+      3,
+      2
+    ],
+    "pickup_radius": [
+      1.5,
+      1.0
+    ],
+    "ground": true
+  },
+  "single_chip": {
+    "name": "Single chip",
+    "category": "small",
+    "points": 5,
+    "sprite": "food_single_chip",
+    "size": [
+      4,
+      2
+    ],
+    "pickup_radius": [
+      2.0,
+      1.0
+    ],
+    "ground": true
+  },
+  "crisps_box": {
+    "name": "Box of crisps",
+    "category": "medium",
+    "points": 20,
+    "sprite": "food_crisps_box",
+    "size": [
+      6,
+      6
+    ],
+    "pickup_radius": [
+      3.0,
+      3.0
+    ],
+    "ground": false
+  },
+  "ice_cream": {
+    "reclaim_chance": 0.0,
+    "name": "Ice cream",
+    "category": "medium",
+    "points": 15,
+    "sprite": "food_ice_cream",
+    "size": [
+      4,
+      7
+    ],
+    "pickup_radius": [
+      2.0,
+      3.5
+    ],
+    "ground": false
+  },
+  "crisps_bag": {
+    "reclaim_chance": 1.0,
+    "name": "Bag of crisps",
+    "category": "medium",
+    "points": 15,
+    "sprite": "food_crisps_bag",
+    "size": [
+      6,
+      7
+    ],
+    "pickup_radius": [
+      3.0,
+      3.5
+    ],
+    "ground": false
+  },
+  "hotdog": {
+    "reclaim_chance": 0.5,
+    "name": "Full hotdog",
+    "category": "large",
+    "points": 30,
+    "sprite": "food_hotdog",
+    "size": [
+      8,
+      4
+    ],
+    "pickup_radius": [
+      4.0,
+      2.0
+    ],
+    "ground": false
+  },
+  "fried_fish": {
+    "name": "Fried fish",
+    "category": "large",
+    "points": 40,
+    "sprite": "food_fried_fish",
+    "size": [
+      9,
+      5
+    ],
+    "pickup_radius": [
+      4.5,
+      2.5
+    ],
+    "ground": false
+  },
+  "cookie": {
+    "name": "Cookie",
+    "category": "small",
+    "points": 8,
+    "sprite": "food_cookie",
+    "size": [
+      3,
+      3
+    ],
+    "pickup_radius": [
+      1.5,
+      1.5
+    ],
+    "ground": false
+  }
+}

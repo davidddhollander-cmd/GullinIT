@@ -1,0 +1,175 @@
+{
+  "id": 5,
+  "name": "Pier patrol",
+  "seed": 7105,
+  "time_limit": 150,
+  "wind": {
+    "dir": -1,
+    "strength": 0.5,
+    "gusts": true,
+    "flip": false
+  },
+  "awareness_mult": 1.32,
+  "stars": [
+    550,
+    850,
+    1150
+  ],
+  "rivals": [
+    {
+      "name": "Gary",
+      "speed": 0.8,
+      "accuracy_px": 16
+    },
+    {
+      "name": "Chip",
+      "speed": 0.8,
+      "accuracy_px": 10
+    }
+  ],
+  "spawns": [
+    {
+      "type": "sunbather",
+      "x": 80,
+      "appearance": "male_red"
+    },
+    {
+      "type": "toddler",
+      "x": 155,
+      "family_id": "family_1"
+    },
+    {
+      "type": "picnic_family",
+      "x": 245,
+      "family_id": "family_1"
+    },
+    {
+      "type": "dog_owner",
+      "x": 665
+    },
+    {
+      "type": "picnic_family",
+      "x": 445,
+      "family_id": "family_2"
+    },
+    {
+      "type": "kiosk_customer",
+      "x": 550
+    },
+    {
+      "type": "pier_diner",
+      "x": 1020
+    },
+    {
+      "type": "lifeguard",
+      "x": 1110
+    },
+    {
+      "type": "sunbather",
+      "x": 390,
+      "appearance": "female_blue"
+    },
+    {
+      "type": "kiosk_customer",
+      "x": 750,
+      "food_id": "hotdog"
+    }
+  ],
+  "props": [
+    {
+      "type": "bin",
+      "x": 305
+    },
+    {
+      "type": "bin",
+      "x": 610
+    },
+    {
+      "type": "kiosk",
+      "x": 520
+    },
+    {
+      "type": "hotdog_stand",
+      "x": 740
+    },
+    {
+      "type": "tower",
+      "x": 1135
+    },
+    {
+      "type": "umbrella",
+      "x": 1030
+    },
+    {
+      "type": "beach_palm",
+      "x": 22,
+      "y": 150
+    },
+    {
+      "type": "beach_parasol",
+      "x": 112,
+      "y": 145
+    },
+    {
+      "type": "beach_chair",
+      "x": 124,
+      "y": 150
+    },
+    {
+      "type": "beach_castle",
+      "x": 205,
+      "y": 169
+    },
+    {
+      "type": "beach_parasol_blue",
+      "x": 350,
+      "y": 145
+    },
+    {
+      "type": "beach_chair_blue",
+      "x": 364,
+      "y": 150
+    },
+    {
+      "type": "beach_rocks",
+      "x": 420,
+      "y": 173
+    },
+    {
+      "type": "beach_boards",
+      "x": 465,
+      "y": 149
+    },
+    {
+      "type": "beach_hut",
+      "x": 590,
+      "y": 151
+    },
+    {
+      "type": "beach_sign",
+      "x": 660,
+      "y": 152
+    },
+    {
+      "type": "beach_bench",
+      "x": 830,
+      "y": 153
+    },
+    {
+      "type": "beach_lamp",
+      "x": 880,
+      "y": 155
+    },
+    {
+      "type": "beach_palm",
+      "x": 935,
+      "y": 153
+    },
+    {
+      "type": "beach_rocks",
+      "x": 1235,
+      "y": 172
+    }
+  ],
+  "map_version": 2
+}

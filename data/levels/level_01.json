@@ -1,0 +1,33 @@
+{
+  "id": 1,
+  "name": "Training Day",
+  "seed": 7101,
+  "tutorial": true,
+  "time_limit": 105,
+  "wind": {"dir": 0, "strength": 0, "gusts": false, "flip": false},
+  "awareness_mult": 0.7,
+  "stars": [100, 200, 300],
+  "rivals": [],
+  "world": {"width": 800, "promenade_start": 800, "pier_start": 800, "start_x": 70, "start_y": 150},
+  "zones": [
+    {"name": "OPEN SAND", "from": 0, "to": 220},
+    {"name": "SNACKS", "from": 220, "to": 385},
+    {"name": "SUNBATHERS", "from": 385, "to": 550},
+    {"name": "FAMILY BAY", "from": 550, "to": 800}
+  ],
+  "spawns": [
+    {"type": "kiosk_customer", "x": 250, "food_id": "ice_cream", "station": "first_snack", "patrol_radius": 5, "speed_mult": 0.45, "awareness_mult": 0.65, "reaction_delay": 3},
+    {"type": "sunbather", "x": 430, "appearance": "female_blue", "station": "first_bag", "patrol_radius": 0, "awareness_mult": 0.65, "reaction_delay": 3},
+    {"type": "toddler", "x": 575, "family_id": "family_1", "station": "family_1", "patrol_radius": 5, "speed_mult": 0.6},
+    {"type": "picnic_family", "x": 620, "family_id": "family_1", "station": "family_1", "patrol_radius": 0, "awareness_mult": 0.75, "reaction_delay": 1.5}
+  ],
+  "props": [
+    {"type": "bin", "x": 326},
+    {"type": "beach_parasol_blue", "x": 455, "y": 143},
+    {"type": "beach_chair_blue", "x": 470, "y": 151},
+    {"type": "beach_castle", "x": 518, "y": 171, "jitter": true},
+    {"type": "kiosk", "x": 730, "customer_x": 682},
+    {"type": "beach_palm", "x": 770, "y": 150}
+  ],
+  "map_version": 3
+}

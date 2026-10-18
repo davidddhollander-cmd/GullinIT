@@ -1,0 +1,36 @@
+# Opening level redesign — 18 October 2026
+
+The first three levels use authored JSON layouts with deterministic +/-3 position variation. Their rosters are not filled by the legacy generator. Levels 4–6 keep the existing generation rules.
+
+| Level | Geometry | Cast and rhythm |
+| --- | --- | --- |
+| Training Day | 800 units of sand; open flight area, customer, bag, family | Four actors, calm air, slower customer and longer warnings. Five action-driven lessons on the first visit. |
+| Family Picnic | 1040 units of sand; quiet sunbathers, separated families, kiosk | Seven actors; gentle steady breeze; family restocking creates moving opportunities. No rival, dog, or pier. |
+| Boardwalk Bustle | 1280 units; promenade begins at 430, pier at 920 | Sunbather, two customers, dog owner, pier diner. Gary arrives after the first swallowed non-scrap snack. No vendor or lifeguard. |
+
+## Training rules
+
+1. Hold flap, climb above y=110, and steer at least 30 units from the start.
+2. Land and collect a ground scrap.
+3. Make a direct held-snack snatch during a dive, then climb above y=100 without a stun or crash.
+4. Peck a sunbather bag and collect a snack from it. Bin crumbs and unrelated food do not advance this lesson.
+5. Choose another held snack and repeat the clean swoop and escape without a target highlight.
+
+The lesson index is saved after each success. Restart resumes an unfinished course; Train Again starts at lesson zero. Course completion has its own saved flag, unlocks level two, and does not fabricate stars or a Practice time. Replaying a completed course leaves existing records intact. Arcade/Practice replay becomes available after course completion.
+
+Training replenishes the customer snack every five seconds (abandoned knocked food is removed before restoration) and refills an empty bag only once no loose food remains owned by it. These assistance rules run only during the course. All ordinary level food remains governed by the existing finite stock and replacement rules.
+
+## Implementation and tuning
+
+- `data/levels/level_01.json` through `level_03.json` own `world`, `zones`, `spawns`, and `props`. Keep each family's kiosk and children together in the recipe.
+- `Config.apply_level_world()` resets geometry from the base tuning before applying a level, including beach retrieval/scatter bounds. Returning to menus restores base geometry.
+- `BeachGame` owns lesson transitions, completion, and deferred rivals. `BeachStashRaids.bag_collected` distinguishes a real bag pickup from other food.
+- Per-actor `speed_mult`, `awareness_mult`, and `reaction_delay` tune patrol speed, detection, and warning/wake timing. They default to 1 for existing actors.
+- Backdrop signs use level zones; the HUD map scales to the level width and marks its sand, promenade, and pier boundaries. Existing sprites provide the different scenery arrangements; no new art sheets or audio were generated.
+- Arcade starting targets: Training Day 105 seconds / 100, 200, 300 points; Family Picnic 120 seconds / 250, 400, 550; Boardwalk Bustle 135 seconds / 350, 550, 750. These are initial tuning values, not a claim of human playtest balance.
+
+## Validation focus
+
+Exercise fresh and existing saves, checkpoint restart, forced lesson replay, no timed tutorial expiry, clean swoop versus dropped food, depletion recovery, family links, delayed rival arrival, per-level geometry restoration, menu bounds, and the existing six-level mechanics suite. Human playtesting should assess lesson wording, peck timing difficulty, travel time, and score targets.
+
+Final rendered validation: **10,084 checks, zero failures**, using `tools/validate.ps1 -Capture`. Tutorial prompts, touch controls, completion board, and representative family/promenade/pier captures were also visually inspected. Logs and captures are under `test-output/`.

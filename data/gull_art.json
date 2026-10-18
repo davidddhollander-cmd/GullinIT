@@ -1,0 +1,610 @@
+{
+  "player_gull": {
+    "file": "res://assets/sprites/gull_reference_clean.png",
+    "frame_w": 240,
+    "frame_h": 200,
+    "visual_scale": 0.18,
+    "regions": [
+      {
+        "region": [
+          17,
+          60,
+          111,
+          104
+        ],
+        "offset": [
+          64,
+          31
+        ]
+      },
+      {
+        "region": [
+          44,
+          248,
+          127,
+          106
+        ],
+        "offset": [
+          65,
+          29
+        ]
+      },
+      {
+        "region": [
+          186,
+          248,
+          121,
+          106
+        ],
+        "offset": [
+          68,
+          29
+        ]
+      },
+      {
+        "region": [
+          311,
+          248,
+          117,
+          106
+        ],
+        "offset": [
+          68,
+          29
+        ]
+      },
+      {
+        "region": [
+          433,
+          248,
+          116,
+          106
+        ],
+        "offset": [
+          66,
+          29
+        ]
+      },
+      {
+        "region": [
+          554,
+          248,
+          121,
+          106
+        ],
+        "offset": [
+          59,
+          29
+        ]
+      },
+      {
+        "region": [
+          682,
+          248,
+          120,
+          107
+        ],
+        "offset": [
+          60,
+          29
+        ]
+      },
+      {
+        "region": [
+          803,
+          248,
+          117,
+          107
+        ],
+        "offset": [
+          60,
+          29
+        ]
+      },
+      {
+        "region": [
+          920,
+          248,
+          123,
+          107
+        ],
+        "offset": [
+          54,
+          29
+        ]
+      },
+      {
+        "region": [
+          50,
+          428,
+          155,
+          108
+        ],
+        "offset": [
+          40,
+          21
+        ]
+      },
+      {
+        "region": [
+          230,
+          412,
+          162,
+          126
+        ],
+        "offset": [
+          32,
+          6
+        ]
+      },
+      {
+        "region": [
+          430,
+          413,
+          160,
+          129
+        ],
+        "offset": [
+          38,
+          3
+        ]
+      },
+      {
+        "region": [
+          631,
+          424,
+          167,
+          118
+        ],
+        "offset": [
+          33,
+          14
+        ]
+      },
+      {
+        "region": [
+          841,
+          417,
+          165,
+          126
+        ],
+        "offset": [
+          36,
+          6
+        ]
+      },
+      {
+        "region": [
+          1054,
+          412,
+          163,
+          134
+        ],
+        "offset": [
+          37,
+          -4
+        ]
+      },
+      {
+        "region": [
+          38,
+          830,
+          163,
+          86
+        ],
+        "offset": [
+          32,
+          47
+        ]
+      }
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "walk": {
+        "frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "fps": 8,
+        "loop": true,
+        "source_left": true
+      },
+      "fly": {
+        "frames": [
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "fps": 9,
+        "loop": true,
+        "source_left": false
+      },
+      "climb": {
+        "frames": [
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "fps": 11,
+        "loop": true,
+        "source_left": false
+      },
+      "glide": {
+        "frames": [
+          15
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "dive_windup": {
+        "frames": [
+          15
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "dive": {
+        "frames": [
+          15
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "snatch": {
+        "frames": [
+          15
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "pullup": {
+        "frames": [
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "fps": 8,
+        "loop": true,
+        "source_left": false
+      },
+      "stunned": {
+        "frames": [
+          15
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      }
+    }
+  },
+  "rival_gull": {
+    "file": "res://assets/sprites/gull_reference_clean.png",
+    "frame_w": 240,
+    "frame_h": 200,
+    "visual_scale": 0.18,
+    "regions": [
+      {
+        "region": [
+          17,
+          60,
+          111,
+          104
+        ],
+        "offset": [
+          64,
+          31
+        ]
+      },
+      {
+        "region": [
+          44,
+          248,
+          127,
+          106
+        ],
+        "offset": [
+          65,
+          29
+        ]
+      },
+      {
+        "region": [
+          186,
+          248,
+          121,
+          106
+        ],
+        "offset": [
+          68,
+          29
+        ]
+      },
+      {
+        "region": [
+          311,
+          248,
+          117,
+          106
+        ],
+        "offset": [
+          68,
+          29
+        ]
+      },
+      {
+        "region": [
+          433,
+          248,
+          116,
+          106
+        ],
+        "offset": [
+          66,
+          29
+        ]
+      },
+      {
+        "region": [
+          554,
+          248,
+          121,
+          106
+        ],
+        "offset": [
+          59,
+          29
+        ]
+      },
+      {
+        "region": [
+          682,
+          248,
+          120,
+          107
+        ],
+        "offset": [
+          60,
+          29
+        ]
+      },
+      {
+        "region": [
+          803,
+          248,
+          117,
+          107
+        ],
+        "offset": [
+          60,
+          29
+        ]
+      },
+      {
+        "region": [
+          920,
+          248,
+          123,
+          107
+        ],
+        "offset": [
+          54,
+          29
+        ]
+      },
+      {
+        "region": [
+          50,
+          428,
+          155,
+          108
+        ],
+        "offset": [
+          40,
+          21
+        ]
+      },
+      {
+        "region": [
+          230,
+          412,
+          162,
+          126
+        ],
+        "offset": [
+          32,
+          6
+        ]
+      },
+      {
+        "region": [
+          430,
+          413,
+          160,
+          129
+        ],
+        "offset": [
+          38,
+          3
+        ]
+      },
+      {
+        "region": [
+          631,
+          424,
+          167,
+          118
+        ],
+        "offset": [
+          33,
+          14
+        ]
+      },
+      {
+        "region": [
+          841,
+          417,
+          165,
+          126
+        ],
+        "offset": [
+          36,
+          6
+        ]
+      },
+      {
+        "region": [
+          1054,
+          412,
+          163,
+          134
+        ],
+        "offset": [
+          37,
+          -4
+        ]
+      },
+      {
+        "region": [
+          38,
+          830,
+          163,
+          86
+        ],
+        "offset": [
+          32,
+          47
+        ]
+      }
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "walk": {
+        "frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "fps": 8,
+        "loop": true,
+        "source_left": true
+      },
+      "fly": {
+        "frames": [
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "fps": 9,
+        "loop": true,
+        "source_left": false
+      },
+      "climb": {
+        "frames": [
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "fps": 11,
+        "loop": true,
+        "source_left": false
+      },
+      "glide": {
+        "frames": [
+          15
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "dive_windup": {
+        "frames": [
+          15
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "dive": {
+        "frames": [
+          15
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "snatch": {
+        "frames": [
+          15
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "pullup": {
+        "frames": [
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "fps": 8,
+        "loop": true,
+        "source_left": false
+      },
+      "stunned": {
+        "frames": [
+          15
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      }
+    }
+  }
+}

@@ -1,0 +1,85 @@
+class_name BeachEffects
+extends Node2D
+var texts: Array[Dictionary] = []
+var particles: Array[Dictionary] = []
+var shake: float = 0.0
+var freeze: float = 0.0
+var slow: float = 0.0
+var clock: float = 0.0
+var font: Font = preload("res://assets/fonts/gull_pixel.fnt")
+
+func message(at: Vector2, text: String, color: Color = Color("fff4da")) -> void:
+	if Config.tuning.juice.floating_text:
+		texts.append({"at":at,"text":text,"color":color,"life":float(Config.tuning.juice.float_time)})
+
+func empty_message(at: Vector2) -> void:
+	if not bool(Config.tuning.juice.floating_text):
+		return
+	for item: Dictionary in texts:
+		if item.get("source",null) == at and item.text == "EMPTY":
+			item.at = at
+			item.life = 0.72
+			queue_redraw()
+			return
+	texts.append({"at":at,"source":at,"text":"EMPTY","color":Color("d7d9cf"),"life":0.72,"fade_time":0.40})
+	queue_redraw()
+
+func impact(at: Vector2, stunned: bool) -> void:
+	var t: Dictionary = Config.tuning.juice
+	if t.hitstop:
+		freeze = float(t.stun_stop if stunned else t.snatch_stop)
+	if t.shake and GameState.options.shake:
+		shake = float(t.stun_shake if stunned else t.snatch_shake)
+	if t.particles:
+		for i: int in int(t.feathers):
+			var angle: float = TAU * i / float(t.feathers)
+			particles.append({"at":at,"v":Vector2(cos(angle),sin(angle))*35,"life":0.5})
+
+func sand_puff(at: Vector2, taking_off: bool = false) -> void:
+	if not bool(Config.tuning.juice.particles) or at.x >= float(Config.tuning.world.promenade_start):
+		return
+	for i: int in 5:
+		var side: float = float(i - 2)
+		particles.append({"at":at + Vector2(side * 2.0, -1),"v":Vector2(side * 10.0, -12.0 - float(i % 2) * 5.0 - (5.0 if taking_off else 0.0)),"life":0.22,"duration":0.22,"color":Color("d4ad78"),"size":Vector2(2,1),"sand":true})
+
+func release_burst(at: Vector2, from_bin: bool = false) -> void:
+	if not bool(Config.tuning.juice.particles):
+		return
+	for i: int in 6:
+		var side: float = float(i) - 2.5
+		particles.append({"at":at + Vector2(side * 2.0, -2),"v":Vector2(side * 13.0,-20.0 - float(i % 3) * 5.0),"life":0.32,"duration":0.32,"color":Color("d4ad78") if from_bin else Color("f3c443"),"size":Vector2(2,2),"sand":true})
+
+func tick(delta: float) -> void:
+	clock += delta
+	freeze = maxf(0.0,freeze-delta)
+	slow = maxf(0.0,slow-delta)
+	shake = move_toward(shake,0,delta*12)
+	for i: int in range(texts.size()-1,-1,-1):
+		texts[i].life -= delta
+		texts[i].at.y -= delta*10
+		if texts[i].life <= 0:
+			texts.remove_at(i)
+	for i: int in range(particles.size()-1,-1,-1):
+		particles[i].life -= delta
+		particles[i].at += particles[i].v*delta
+		particles[i].v.y += delta*(65 if particles[i].get("sand",false) else 80)
+		if particles[i].life <= 0:
+			particles.remove_at(i)
+	queue_redraw()
+
+func _draw() -> void:
+	for item: Dictionary in texts:
+		var width: float = font.get_string_size(item.text,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x
+		var at: Vector2 = item.at-Vector2(width*0.5,0)
+		var alpha: float = clampf(float(item.life)/float(item.fade_time),0.0,1.0) if item.has("fade_time") else 1.0
+		var backing := Color("183b4e")
+		backing.a = alpha
+		var lettering: Color = item.color
+		lettering.a *= alpha
+		draw_rect(Rect2(at-Vector2(2,8),Vector2(width+4,11)),backing)
+		draw_string(font,at,item.text,HORIZONTAL_ALIGNMENT_LEFT,-1,8,lettering)
+	for item: Dictionary in particles:
+		var color: Color = item.get("color",Color("fff4da"))
+		if item.has("duration"):
+			color.a *= clampf(float(item.life)/float(item.duration),0.0,1.0)
+		draw_rect(Rect2(Vector2(roundf(item.at.x),roundf(item.at.y)),item.get("size",Vector2(2,1))),color)

@@ -1,0 +1,105 @@
+{
+  "sunbather": {
+    "sprite": "sunbather",
+    "awareness": 42,
+    "rise": 0.25,
+    "altitude": 115,
+    "twist": "sleep",
+    "danger": 0,
+    "windup": 0.6,
+    "zone": 0,
+    "foods": []
+  },
+  "toddler": {
+    "sprite": "toddler",
+    "awareness": 45,
+    "rise": 0.4,
+    "altitude": 115,
+    "twist": "cry",
+    "danger": 0,
+    "windup": 0.6,
+    "zone": 0,
+    "foods": [
+      "ice_cream"
+    ]
+  },
+  "picnic_family": {
+    "sprite": "parent",
+    "awareness": 65,
+    "rise": 0.8,
+    "altitude": 115,
+    "twist": "shield",
+    "danger": 20,
+    "windup": 0.6,
+    "zone": 0,
+    "foods": [
+      "crisps_bag",
+      "crisps_box"
+    ]
+  },
+  "dog_owner": {
+    "sprite": "dog",
+    "awareness": 65,
+    "rise": 0.7,
+    "altitude": 115,
+    "twist": "dog",
+    "danger": 23,
+    "windup": 0.6,
+    "zone": 1,
+    "foods": [
+      "hotdog"
+    ]
+  },
+  "kiosk_customer": {
+    "sprite": "kiosk_customer",
+    "awareness": 45,
+    "rise": 0.5,
+    "altitude": 115,
+    "twist": "walk",
+    "danger": 0,
+    "windup": 0.6,
+    "zone": 1,
+    "foods": [
+      "ice_cream",
+      "crisps_box",
+      "crisps_bag"
+    ]
+  },
+  "pier_diner": {
+    "sprite": "pier_diner",
+    "awareness": 70,
+    "rise": 0.8,
+    "altitude": 115,
+    "twist": "umbrella",
+    "danger": 20,
+    "windup": 0.6,
+    "zone": 2,
+    "foods": [
+      "fried_fish"
+    ]
+  },
+  "lifeguard": {
+    "sprite": "lifeguard",
+    "awareness": 80,
+    "rise": 0.8,
+    "altitude": 115,
+    "twist": "whistle",
+    "danger": 0,
+    "windup": 0.6,
+    "zone": 2,
+    "foods": []
+  },
+  "seafood_vendor": {
+    "sprite": "seafood_vendor",
+    "awareness": 85,
+    "rise": 1,
+    "altitude": 115,
+    "twist": "broom",
+    "danger": 30,
+    "windup": 0.6,
+    "zone": 2,
+    "foods": [
+      "fried_fish"
+    ]
+  }
+}

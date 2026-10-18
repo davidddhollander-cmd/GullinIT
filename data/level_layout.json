@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "sunbather_centres": [105, 255],
+  "children_per_family": 1,
+  "family_centres": [435, 585],
+  "stand_centres": [730, 872],
+  "customer_offset": 48,
+  "jitter": 6,
+  "family_spacing": 44,
+  "patrol_radius": 12,
+  "arrival_clearance": 44,
+  "max_food_gap": 180
+}
