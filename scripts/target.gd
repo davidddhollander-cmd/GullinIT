@@ -76,6 +76,7 @@ var toddler_run_speed: float = 0.0
 var toddler_cry_run_active: bool = false
 var mum_swat_time: float = 0.0
 var action_pose_time: float = 0.0
+var lifeguard_whistle_time: float = 0.0
 var reaction: AdultReaction = AdultReaction.new()
 
 func art_height() -> float:
@@ -84,7 +85,7 @@ func art_height() -> float:
 	if kind == "picnic_family":
 		return 40.0
 	var entry: Dictionary = Config.sprites[info.sprite]
-	return float(entry.frame_h) * float(entry.get("visual_scale",1.0))
+	return float(entry.get("art_height",float(entry.frame_h) * float(entry.get("visual_scale",1.0))))
 
 func stash_position() -> Vector2:
 	return Vector2(clampf(stash_home_x-30,16,float(Config.tuning.world.width)-16),float(Config.tuning.world.ground)-9)
@@ -97,6 +98,9 @@ func peck_bag(progress: float = 0.0, released: bool = false) -> void:
 	queue_redraw()
 
 func update_art_pose(moving: bool = false) -> void:
+	if kind == "lifeguard":
+		LifeguardArt.update(self,moving)
+		return
 	if kind == "pier_diner":
 		PierDinerArt.update(self, moving)
 		return
@@ -109,12 +113,11 @@ func update_art_pose(moving: bool = false) -> void:
 	if kind != "toddler":
 		return
 	sprite.flip_h = facing < 0
-	var anchor: Array = Config.sprites[info.sprite].get("food_anchor",[Config.tuning.world.food_offset_x,Config.tuning.world.food_offset_y])
-	food_sprite.position = Vector2(float(anchor[0])*facing,anchor[1])
 	var pose: StringName = &"walk" if moving else (&"eat" if food else &"idle")
 	if not food and (seeking_parent or toddler_cry_run_active or recover > 0) and not leaving:
-		pose = &"walk" if moving else &"cry"
+		pose = &"cry_run" if moving else &"cry"
 	sprite.play(pose)
+	ToddlerArt.align_food(self)
 
 func setup(type: String, x: float, random: RandomNumberGenerator, mult: float, spawn: Dictionary = {}) -> void:
 	kind = type
@@ -164,6 +167,8 @@ func setup(type: String, x: float, random: RandomNumberGenerator, mult: float, s
 		sprite.frame_changed.connect(func() -> void: MumArt.align_food(self))
 	elif kind == "pier_diner":
 		sprite.frame_changed.connect(func() -> void: PierDinerArt.align_food(self))
+	elif kind == "toddler":
+		sprite.frame_changed.connect(func() -> void: ToddlerArt.align_food(self))
 	elif kind in ["kiosk_customer","dog_owner"]:
 		sprite.frame_changed.connect(func() -> void: BeachgoerArt.align_food(self))
 	Config.reloaded.connect(refresh_art)
@@ -176,17 +181,16 @@ func refresh_art() -> void:
 		sprite.sprite_frames = PierDinerArt.frames()
 	else:
 		sprite.sprite_frames = Config.frames(info.sprite)
-	sprite.scale = Vector2.ONE if kind in ["picnic_family", "sunbather"] else Vector2.ONE * float(Config.sprites[info.sprite].get("visual_scale",1.0))
-	# The toddler is painted at high resolution, then shown small in the 320x180
-	# world. Render it with smooth mipmapped sampling at the display resolution;
-	# the rest of the pixel-art cast keeps the project-wide nearest filter.
-	if kind in ["toddler","kiosk_customer","dog_owner"]:
+	sprite.scale = Vector2.ONE * AdultPixelArt.DISPLAY_SCALE if kind in ["picnic_family", "sunbather"] else Vector2.ONE * float(Config.sprites[info.sprite].get("visual_scale",1.0))
+	if kind == "dog_owner":
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	elif kind in ["pier_diner", "picnic_family", "sunbather"]:
+	elif kind in ["toddler", "pier_diner", "picnic_family", "sunbather", "lifeguard", "kiosk_customer"]:
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	sprite.position.y = -26.0 if kind in ["picnic_family", "sunbather"] else -art_height() * 0.5
+	if Config.sprites[info.sprite].has("sprite_offset_y"):
+		sprite.position.y = float(Config.sprites[info.sprite].sprite_offset_y)
 	sprite.material = null
-	if Config.sprites[info.sprite].has("visual_scale") and kind not in ["picnic_family", "sunbather"]:
+	if Config.sprites[info.sprite].has("visual_scale") and kind not in ["toddler", "picnic_family", "sunbather", "lifeguard", "kiosk_customer"]:
 		var cutout: ShaderMaterial = ShaderMaterial.new()
 		cutout.shader = preload("res://assets/shaders/gull_cutout.gdshader")
 		sprite.material = cutout
@@ -222,9 +226,12 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	bag_squish_time = maxf(0.0, bag_squish_time-delta)
 	mum_swat_time = maxf(0,mum_swat_time-delta)
 	action_pose_time = maxf(0, action_pose_time-delta)
+	lifeguard_whistle_time = maxf(0,lifeguard_whistle_time-delta)
 	var moved: bool = false
 	recover = maxf(0.0, recover - delta)
 	defense = maxf(0.0, defense - delta)
+	if kind == "lifeguard":
+		_tick_lifeguard_whistle(gulls)
 	if reaction.tick(self,delta,gulls):
 		return
 	if kind == "toddler" and _tick_toddler_cry_run(delta):
@@ -280,7 +287,8 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	var toddler_pause: bool = kind == "toddler" and not seeking_parent and ((not food and recover > 0) or (food and fmod(art_time,6.0) < 1.2))
 	# A short planted reaction makes the customer's empty-hand surprise readable.
 	var customer_pause: bool = kind == "kiosk_customer" and not food and recover > float(t.recover_time)-0.5
-	if info.twist in ["walk", "cry", "whistle"] and not toddler_pause and not customer_pause:
+	var whistle_pause: bool = kind == "lifeguard" and lifeguard_whistle_time > 0
+	if info.twist in ["walk", "cry", "whistle"] and not toddler_pause and not customer_pause and not whistle_pause:
 		position.x += facing * float(t.walk_speed) * speed_mult * delta
 		moved = true
 		if absf(position.x - patrol_home) > patrol_radius or position.x < 20 or position.x > float(t.width) - 20:
@@ -297,11 +305,26 @@ func _update_defense_art() -> void:
 		animation = "windup" if windup > 0 else ("shield" if info.twist == "shield" else "swat")
 	elif recover > 0:
 		animation = "cry" if info.twist == "cry" else "angry"
-	if kind not in ["toddler", "sunbather", "picnic_family", "kiosk_customer", "dog_owner", "pier_diner"]:
+	if kind not in ["toddler", "sunbather", "picnic_family", "kiosk_customer", "dog_owner", "pier_diner", "lifeguard"]:
 		if sprite.sprite_frames.has_animation(animation):
 			sprite.play(animation)
 		else:
 			sprite.play(sprite.sprite_frames.get_animation_names()[0])
+
+func _tick_lifeguard_whistle(gulls: Array[BeachGull]) -> void:
+	if recover > 0 or action_pose_time > 0:
+		return
+	for gull: BeachGull in gulls:
+		if gull.state == BeachGull.State.STRIKE and gull.position.distance_to(position) < float(Config.tuning.world.whistle_trigger):
+			recover = float(Config.tuning.world.recover_time)
+			lifeguard_whistle_time = 0.8
+			if absf(gull.position.x-position.x) > 1:
+				facing = signf(gull.position.x-position.x)
+			sprite.play(&"whistle")
+			sprite.set_frame_and_progress(0,0)
+			LifeguardArt.update(self,false)
+			whistled.emit(self)
+			return
 
 func _tick_defense(delta: float, gulls: Array[BeachGull]) -> void:
 	var t: Dictionary = Config.tuning.world
@@ -311,9 +334,6 @@ func _tick_defense(delta: float, gulls: Array[BeachGull]) -> void:
 		if offset.length() < float(info.awareness) * awareness_mult and gull.position.y > float(info.altitude):
 			seen = true
 			alert = minf(1.0,alert+float(info.rise)*awareness_mult*(float(t.front_multiplier) if signf(offset.x)==facing else 1.0)*delta)
-		if info.twist == "whistle" and gull.state == BeachGull.State.STRIKE and offset.length() < float(t.whistle_trigger) and recover <= 0:
-			whistled.emit(self)
-			recover = t.recover_time
 		if info.twist == "dog" and absf(offset.x) < float(t.dog_overhead):
 			overhead += delta
 			if overhead >= float(t.dog_delay):
@@ -675,7 +695,7 @@ func _draw() -> void:
 	if kind == "toddler" and not food and (seeking_parent or toddler_cry_run_active):
 		for i: int in 2:
 			var fall: float = fposmod(art_time*14+i*4,8)
-			draw_circle(Vector2(facing*4,-15+fall),0.8,Color("72c9ef"))
+			draw_circle(Vector2(facing*4,-17+fall),0.8,Color("72c9ef"))
 	if Config.sprites[info.sprite].has("visual_scale"):
 		draw_set_transform(Vector2(0,-1),0,Vector2(1,0.25))
 		draw_circle(Vector2.ZERO,7,Color(0.09,0.18,0.22,0.20))

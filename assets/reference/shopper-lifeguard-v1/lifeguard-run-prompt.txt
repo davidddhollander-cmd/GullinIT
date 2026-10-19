@@ -1,0 +1,10 @@
+Use case: stylized-concept. Asset type: transparent six-frame RUN CYCLE for the lifeguard in reference1, EXACT same red cap, blond hair, red vest, yellow whistle, navy shorts, red/white/teal shoes, head scale and crisp diner-style art. Reference2 existing walk sheet demonstrates narrow passing-leg poses.
+ONE horizontal row SIX equal spaced full-body right-facing frames, generous actual transparent gutters, no ground/text/labels/effects/shadows.
+Critical: do NOT draw the same long stride six times. Render a full alternating six-phase RUN CYCLE:
+1 LEFT leg reaches FRONT to ground, RIGHT leg trails BACK lifted.
+2 LEFT leg planted beneath hip, RIGHT knee swings forward bent, body down.
+3 RIGHT knee lifted FORWARD HIGH, LEFT foot trailing behind; feet near beneath torso, narrow passing silhouette.
+4 RIGHT leg reaches FRONT to ground, LEFT leg trails BACK lifted (opposite contact to frame1).
+5 RIGHT leg planted beneath hip, LEFT knee swings forward bent, body down.
+6 LEFT knee lifted FORWARD HIGH, RIGHT foot trails behind (opposite passing to frame3).
+Arms counter-swing with each step. Make feet relative to hip and knee bend unmistakably different between contact and passing, including clearly short/narrow poses in frames2/3/5/6. Slightly forward lean, focused adult face, empty hands, same cap and whistle every frame. Every figure entirely within its cell at identical scale, complete shoes and hat. Hard crisp outlines, compact cel/pixel shading matching references, no smooth painted gradients. Genuinely transparent background.

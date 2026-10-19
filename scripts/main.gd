@@ -10,7 +10,20 @@ func _ready() -> void:
 	GullInput.register_actions()
 	background = BeachBackdrop.new()
 	add_child(background)
-	background.setup([])
+	background.sunset = true
+	background.setup([
+		{"type":"beach_lamp","x":190},{"type":"beach_hut","x":212},{"type":"beach_parasol","x":244},
+		{"type":"beach_parasol_blue","x":282},{"type":"beach_castle","x":305},{"type":"beach_palm","x":317}
+	])
+	for spec: Array in [[false,true,244.0],[true,false,282.0]]:
+		var sunbather: AnimatedSprite2D = AnimatedSprite2D.new()
+		sunbather.sprite_frames = SunbatherArt.frames(spec[0],spec[1])
+		sunbather.play(&"rest")
+		sunbather.scale = Vector2.ONE * AdultPixelArt.DISPLAY_SCALE
+		sunbather.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		sunbather.position = Vector2(spec[2],134)
+		background.add_child(sunbather)
+	background.add_child(TitleFlyby.new())
 	var layer: CanvasLayer = CanvasLayer.new()
 	layer.layer = 5
 	add_child(layer)

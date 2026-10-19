@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://c1adbw6elampk"
+path="res://.godot/imported/arcade_score_blue.fnt-e9286d099c836a64a3ddd5bff4487be4.fontdata"
+
+[deps]
+
+source_file="res://assets/arcade_score_blue.fnt"
+dest_files=["res://.godot/imported/arcade_score_blue.fnt-e9286d099c836a64a3ddd5bff4487be4.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2

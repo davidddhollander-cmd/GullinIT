@@ -1,0 +1,81 @@
+{
+  "species": [
+    {
+      "id": "herring",
+      "name": "Herring gull",
+      "latin": "Larus argentatus",
+      "role": "standard balanced gull",
+      "size": 1
+    },
+    {
+      "id": "kittiwake",
+      "name": "Black-legged kittiwake",
+      "latin": "Rissa tridactyla",
+      "role": "smaller agile faster game character",
+      "size": 0.78
+    },
+    {
+      "id": "great-black-backed",
+      "name": "Great black-backed gull",
+      "latin": "Larus marinus",
+      "role": "larger heavyweight game character",
+      "size": 1.25
+    }
+  ],
+  "concepts": [
+    {
+      "id": "herring-a",
+      "species": "herring",
+      "option": "A",
+      "name": "Coastal"
+    },
+    {
+      "id": "kittiwake-a",
+      "species": "kittiwake",
+      "option": "A",
+      "name": "Coastal"
+    },
+    {
+      "id": "great-black-backed-a",
+      "species": "great-black-backed",
+      "option": "A",
+      "name": "Coastal"
+    },
+    {
+      "id": "herring-b",
+      "species": "herring",
+      "option": "B",
+      "name": "CHIP THIEF"
+    },
+    {
+      "id": "kittiwake-b",
+      "species": "kittiwake",
+      "option": "B",
+      "name": "QUICK FLICK"
+    },
+    {
+      "id": "great-black-backed-b",
+      "species": "great-black-backed",
+      "option": "B",
+      "name": "BIG BOSS"
+    },
+    {
+      "id": "herring-c",
+      "species": "herring",
+      "option": "C",
+      "name": "Harbour Rogue"
+    },
+    {
+      "id": "kittiwake-c",
+      "species": "kittiwake",
+      "option": "C",
+      "name": "Sea Dart"
+    },
+    {
+      "id": "great-black-backed-c",
+      "species": "great-black-backed",
+      "option": "C",
+      "name": "Breakwater Bruiser"
+    }
+  ]
+}

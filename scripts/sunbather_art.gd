@@ -7,7 +7,7 @@ const SWAT_FOLLOW: float = 0.14
 const SETTLE_TIME: float = 0.42
 
 static func scale_for(_female: bool) -> float:
-	return 1.0
+	return AdultPixelArt.DISPLAY_SCALE
 
 static func frames(blue: bool, female: bool = false) -> SpriteFrames:
 	return AdultPixelArt.frames(false, female, blue)

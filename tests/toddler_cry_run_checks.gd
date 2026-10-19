@@ -31,7 +31,7 @@ static func run(check: Callable, toddler: BeachTarget) -> void:
 		for frame: int in range(maxi(0,cry_steps-1)):
 			toddler.tick(1.0/rate,[])
 		check.call(toddler.position.x < before,"toddler moves while crying at %d Hz" % rate)
-		check.call(toddler.sprite.animation == &"walk" and toddler.toddler_cry_run_active,"crying run uses moving legs at %d Hz" % rate)
+		check.call(toddler.sprite.animation == &"cry_run" and toddler.toddler_cry_run_active,"crying run uses upset running legs at %d Hz" % rate)
 		toddler.tick(1.0/rate,[])
 		check.call(toddler.position.x < before,"crying toddler continues moving at %d Hz" % rate)
 		check.call(toddler.sprite.animation != &"cry","cry pose finishes before movement at %d Hz" % rate)

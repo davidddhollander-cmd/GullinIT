@@ -25,7 +25,8 @@ static func run_checks(check: Callable) -> void:
 					binary_alpha = false
 				if pixel.a > 0.0:
 					colours[pixel.to_html(false)] = true
-		check.call(binary_alpha and colours.size() <= 16, "%s uses hard edges and at most 16 colours" % label)
+		check.call(binary_alpha, "%s keeps hard alpha at the approved higher detail" % label)
+		check.call(image.get_width() == 8 * AdultPixelArt.CELL and AdultPixelArt.CELL == 128, "%s uses the approved 128-pixel source grid" % label)
 		var frames: SpriteFrames = AdultPixelArt.frames(appearance.mum, appearance.female, appearance.blue)
 		for clip: String in AdultPixelArt.clips(appearance.mum):
 			check.call(frames.get_frame_count(StringName(clip)) == int(AdultPixelArt.clips(appearance.mum)[clip]), "%s %s has its authored frame count" % [label, clip])
@@ -38,3 +39,25 @@ static func run_checks(check: Callable) -> void:
 				if i > 0:
 					check.call(pixels != previous, "%s %s frame %d changes silhouette" % [label, clip, i])
 				previous = pixels
+		var walk: AtlasTexture = frames.get_frame_texture(&"walk",0)
+		var chase: AtlasTexture = frames.get_frame_texture(&"chase",0)
+		check.call(image.get_region(Rect2i(walk.region)).get_data() != image.get_region(Rect2i(chase.region)).get_data(), "%s chase has distinct running artwork" % label)
+	for female: bool in [false,true]:
+		var red: PackedByteArray = (load(AdultPixelArt.atlas_path(false,female,false)) as Texture2D).get_image().get_data()
+		var blue: PackedByteArray = (load(AdultPixelArt.atlas_path(false,female,true)) as Texture2D).get_image().get_data()
+		var same_mask := red.size() == blue.size()
+		var anatomy_unchanged := same_mask
+		var changed := 0
+		for p: int in range(0,mini(red.size(),blue.size()),4):
+			if red[p+3] != blue[p+3]:
+				same_mask = false
+			if red[p+3] == 0:
+				continue
+			var differs := red[p] != blue[p] or red[p+1] != blue[p+1] or red[p+2] != blue[p+2]
+			if differs:
+				changed += 1
+			# Warm orange skin and brown hair pixels must survive the garment swap.
+			if red[p] > 80 and red[p+1] > 30 and red[p+1] > red[p+2]*1.5 and differs:
+				anatomy_unchanged = false
+		check.call(same_mask,"red and blue sunbathers share the exact same silhouette")
+		check.call(anatomy_unchanged and changed > 100,"blue swimwear preserves skin and hair while changing garment colours")

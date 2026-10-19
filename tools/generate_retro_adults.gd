@@ -1,16 +1,18 @@
 extends SceneTree
 ## Run with Godot --headless --path . --script tools/generate_retro_adults.gd.
-## Prepare selected review art and supplemental animation sources on the native grid.
+## Prepare approved diner-style sources at 2x detail with unchanged gameplay size.
 const AdultArt = preload("res://scripts/adult_pixel_art.gd")
-const AtlasSource = preload("res://tools/adult_atlas_source.gd")
+const AtlasSource = preload("res://tools/diner_adult_atlas_source.gd")
+const CELL := AdultArt.CELL
 
 func _initialize() -> void:
 	call_deferred("_generate")
 
 func _generate() -> void:
-	var review := Image.create(8 * 64, 5 * 64, false, Image.FORMAT_RGBA8)
+	var review := Image.create(8 * CELL, 5 * CELL, false, Image.FORMAT_RGBA8)
 	review.fill(Color("e4d2ae"))
 	var row := 0
+	var red_atlases: Dictionary = {}
 	for appearance: Dictionary in [
 		{"mum": true, "female": false, "blue": false},
 		{"mum": false, "female": false, "blue": false},
@@ -19,7 +21,19 @@ func _generate() -> void:
 		{"mum": false, "female": true, "blue": true}
 	]:
 		var path: String = AdultArt.atlas_path(appearance.mum, appearance.female, appearance.blue).trim_prefix("res://")
-		var image: Image = AtlasSource.new().build(appearance.mum, appearance.female, appearance.blue, AdultArt.clips(appearance.mum))
+		var source := AtlasSource.new()
+		var key := "mum" if appearance.mum else ("female" if appearance.female else "male")
+		var image: Image
+		if appearance.blue:
+			image = AtlasSource.blue_variant(red_atlases[key])
+		else:
+			image = source.build(appearance.mum, appearance.female, AdultArt.clips(appearance.mum))
+			red_atlases[key] = image
+			if appearance.mum:
+				var metadata := FileAccess.open("res://data/adult_art.json",FileAccess.WRITE)
+				assert(metadata != null)
+				metadata.store_string(JSON.stringify({"cell":CELL,"display_scale":AdultArt.DISPLAY_SCALE,"sole":116,"mum_food_anchors":source.food_anchors},"  ")+"\n")
+				metadata.close()
 		var error: Error = image.save_png(path)
 		if error != OK:
 			push_error("Failed to save %s: %s" % [path, error_string(error)])
@@ -33,8 +47,8 @@ func _generate() -> void:
 					break
 				frame_index += int(AdultArt.clips(appearance.mum)[clip])
 			frame_index += int(samples[column][1])
-			review.blit_rect(image, Rect2i(frame_index % 8 * 64, frame_index / 8 * 64, 64, 64), Vector2i(column * 64, row * 64))
+			review.blit_rect(image, Rect2i(frame_index % 8 * CELL, frame_index / 8 * CELL, CELL, CELL), Vector2i(column * CELL, row * CELL))
 		row += 1
-	review.resize(review.get_width() * 4, review.get_height() * 4, Image.INTERPOLATE_NEAREST)
-	assert(review.save_png("res://assets/previews/adult-replacement-review-v3.png") == OK)
+	review.resize(review.get_width() * 2, review.get_height() * 2, Image.INTERPOLATE_NEAREST)
+	assert(review.save_png("res://assets/previews/adult-diner-production-review-v1.png") == OK)
 	quit()

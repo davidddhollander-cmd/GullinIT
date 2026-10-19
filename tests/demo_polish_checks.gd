@@ -140,6 +140,22 @@ static func _hint_checks(suite: Node, check: Callable) -> void:
 		training_signs = training_signs and box.end.y <= (sign.rect as Rect2).position.y
 	check.call(training_signs, "training hint stays above the zone signs")
 	overlay.show_score_announcement("ice_cream", 15)
+	var first_score_font: Font = overlay.score_announcement.get_theme_font("font")
+	check.call(first_score_font.resource_path.ends_with("arcade_score_blue.fnt"), "first food score uses colorful font 1")
+	overlay.show_score_announcement("ice_cream", 15)
+	var second_score_font: Font = overlay.score_announcement.get_theme_font("font")
+	check.call(second_score_font.resource_path.ends_with("arcade_score_hot.fnt"), "next food score alternates to colorful font 2")
+	check.call(is_equal_approx(BeachOverlay.SCORE_ANNOUNCEMENT_HOLD, 3.0), "food score holds for 3 seconds before fading")
+	check.call(is_equal_approx(BeachOverlay.SCORE_ANNOUNCEMENT_FADE, 1.5), "food score fades over 1.5 seconds")
+	var score_tween: Tween = overlay.score_announcement_tween
+	score_tween.pause()
+	score_tween.custom_step(3.0)
+	check.call(overlay.score_announcement.visible and is_equal_approx(overlay.score_announcement.modulate.a, 1.0), "food score is still fully visible 3s in")
+	score_tween.custom_step(0.75)
+	check.call(overlay.score_announcement.visible and overlay.score_announcement.modulate.a < 1.0 and overlay.score_announcement.modulate.a > 0.0, "food score is mid-fade at 3.75s")
+	score_tween.custom_step(1.0)
+	check.call(not overlay.score_announcement.visible, "food score is hidden after ~4.6s")
+	overlay.show_score_announcement("ice_cream", 15)
 	row = overlay.score_announcement.get_parent() as Control
 	check.call(row.offset_top >= box.end.y, "training score callout sits below the hint")
 	var callout_rect := Rect2(0, row.offset_top, 320, row.offset_bottom - row.offset_top)

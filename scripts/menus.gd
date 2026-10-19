@@ -8,12 +8,15 @@ func _ready() -> void:
 	theme = BeachUI.theme()
 	BeachUI.full(self)
 
-func clear(title: String, subtitle: String = "") -> VBoxContainer:
+func clear(title: String, subtitle: String = "", card: bool = false) -> VBoxContainer:
 	for child: Node in get_children():
 		remove_child(child)
 		child.queue_free()
 	var margin: MarginContainer = BeachUI.margin(self,12)
-	var panel: PanelContainer = BeachUI.panel(margin,Color(0.094,0.23,0.30,0.96))
+	var panel: PanelContainer = BeachUI.panel(margin,Color(0.094,0.23,0.30,0.72 if card else 0.96))
+	if card:
+		panel.size_flags_horizontal = SIZE_SHRINK_BEGIN
+		panel.size_flags_vertical = SIZE_SHRINK_CENTER
 	content = VBoxContainer.new()
 	panel.add_child(content)
 	BeachUI.label(content,title,BeachUI.FONT_DISPLAY,BeachUI.GOLD)
@@ -24,8 +27,13 @@ func clear(title: String, subtitle: String = "") -> VBoxContainer:
 func choose(action: String, payload: Variant = null) -> void:
 	requested.emit(action,payload)
 
+func hint(parent: Control, text: String) -> void:
+	var node: Label = BeachUI.label(parent,text,8,Color("80bcb8"))
+	node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	node.custom_minimum_size.x = 150
+
 func title() -> void:
-	clear("GULLIN' IT", "SMALL BIRD. BIG APPETITE.")
+	clear("GULLIN' IT", "SMALL BIRD. BIG APPETITE.", true)
 	var gap: Control = Control.new()
 	gap.custom_minimum_size.y = 6
 	content.add_child(gap)
@@ -40,14 +48,8 @@ func title() -> void:
 	BeachUI.button(small,"OPTIONS",func() -> void: choose("options"))
 	if not OS.has_feature("web"):
 		BeachUI.button(small,"QUIT",func() -> void: choose("quit"))
-	var art: TextureRect = TextureRect.new()
-	art.texture = Config.frames("player_gull").get_frame_texture(&"glide",0)
-	art.custom_minimum_size = Vector2(112,65)
-	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	row.add_child(art)
-	BeachUI.label(content,"AIM. CLIMB. DIVE. BORROW SOME LUNCH.",8,Color("80bcb8"))
-	BeachUI.label(content,"MOUSE / KEYS / CONTROLLER / TOUCH",8,Color("80bcb8"))
+	hint(content,"AIM. CLIMB. DIVE. SNATCH.")
+	hint(content,"MOUSE / KEYS / PAD / TOUCH")
 
 func level_select(casual: bool) -> void:
 	var trained: bool = bool(GameState.entry(1).get("training_complete", false))

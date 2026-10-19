@@ -1,9 +1,10 @@
 class_name AdultPixelArt
 extends RefCounted
-## Native 64x64, palette-limited sprites. The figure itself is about 40 pixels tall.
-## Atlas layout only; tools/adult_atlas_source.gd prepares the selected review artwork.
+## Approved diner-style atlases: 80-source-pixel adults shown at 40 logical pixels.
+## tools/diner_adult_atlas_source.gd prepares the higher-detail artwork.
 
-const CELL := 64
+const CELL := 128
+const DISPLAY_SCALE := 0.5
 const COLUMNS := 8
 const MUM_CLIPS := {
 	"idle": 4, "eat": 4, "walk": 6, "walk_left": 6,

@@ -126,6 +126,8 @@ func _release_rivals() -> void:
 		pilot.setup(rival,profile,rng)
 		pilots.append(pilot)
 	pending_rivals.clear()
+	if is_instance_valid(overlay):
+		overlay.sync_rival_scores()
 
 func _wire_sand(gull: BeachGull) -> void:
 	gull.sand_landed.connect(func(at: Vector2) -> void: effects.sand_puff(at))
@@ -271,7 +273,7 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 func _award(value: int, risky: bool, upwind: bool, mugged: bool) -> int:
 	var earned: int = score.snatch(value,risky,upwind,mugged)
 	var quip: String = "MUGGED!" if mugged else str(Config.quips.snatch[rng.randi_range(0,Config.quips.snatch.size()-1)])
-	effects.message(player.position-Vector2(0,15),"+%d %s" % [earned,quip],Color("ffc65c"))
+	effects.score_message(player.position-Vector2(0,15),"+%d %s" % [earned,quip],Color("ffc65c"))
 	effects.impact(player.position,false)
 	Audio.play("snatch",1+score.tier*0.08)
 	return earned
@@ -304,7 +306,7 @@ func _swallowed(snack: Dictionary) -> void:
 	var value: int = int(snack.get("value",Config.foods[snack.id].points))
 	if snack.get("scrap",false):
 		score.points += value
-		effects.message(player.position,"+%d" % value,Color("ffc65c"))
+		effects.score_message(player.position,"+%d" % value,Color("ffc65c"))
 		Audio.play("snatch")
 		overlay.show_score_announcement(str(snack.id),value)
 	else:

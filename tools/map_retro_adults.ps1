@@ -1,4 +1,4 @@
-# Keep Config.frames metadata aligned with the generated native-pixel atlases.
+# Keep Config.frames metadata aligned with the approved 128-pixel source atlases.
 $spritePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'data/sprites.json'
 $sprites = Get-Content -LiteralPath $spritePath -Raw | ConvertFrom-Json -AsHashtable
 $mumClips = [ordered]@{
@@ -19,8 +19,8 @@ foreach ($spec in @(
 )) {
     $definition = $sprites[$spec.id]
     $definition['file'] = $spec.file
-    $definition['frame_w'] = 64
-    $definition['frame_h'] = 64
+    $definition['frame_w'] = 128
+    $definition['frame_h'] = 128
     $definition.Remove('visual_scale')
     $definition.Remove('regions')
     $animations = [ordered]@{}

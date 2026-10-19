@@ -15,7 +15,7 @@
     "ground": true
   },
   "single_chip": {
-    "name": "Single chip",
+    "name": "Chip",
     "category": "small",
     "points": 10,
     "sprite": "food_single_chip",
@@ -123,7 +123,7 @@
     "ground": false
   },
   "half_eaten_doughnut": {
-    "name": "Half-eaten doughnut",
+    "name": "Doughnut",
     "category": "small",
     "points": 10,
     "sprite": "food_half_eaten_doughnut",
@@ -132,7 +132,7 @@
     "ground": true
   },
   "half_eaten_sandwich": {
-    "name": "Half-eaten sandwich",
+    "name": "Sandwich",
     "category": "small",
     "points": 15,
     "sprite": "food_half_eaten_sandwich",
@@ -141,7 +141,7 @@
     "ground": true
   },
   "half_eaten_pizza": {
-    "name": "Half-eaten pizza",
+    "name": "Pizza",
     "category": "small",
     "points": 20,
     "sprite": "food_half_eaten_pizza",

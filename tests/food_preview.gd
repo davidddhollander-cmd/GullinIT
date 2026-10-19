@@ -14,6 +14,6 @@ func _draw() -> void:
 		var enlarged: Vector2 = size*minf(28/size.x,24/size.y)
 		draw_texture_rect(texture,Rect2(origin+Vector2(18,12)-enlarged/2,enlarged),false)
 		draw_texture_rect(texture,Rect2(origin+Vector2(57,14)-size/2,size),false)
-		draw_string(font,origin+Vector2(0,30),str(definition.name).replace("Half-eaten", "1/2"),HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color.WHITE)
+		draw_string(font,origin+Vector2(0,30),str(definition.name),HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color.WHITE)
 		draw_string(font,origin+Vector2(0,42),"%s / %d" % [definition.category,definition.points],HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("ffc65c"))
 		index += 1

@@ -3,11 +3,11 @@
 | Category | Food | Base points | Where it appears |
 | --- | --- | ---: | --- |
 | Small | Crumbs | 5 | Sand, bins |
-| Small | Single chip | 10 | Sand |
+| Small | Chip | 10 | Sand |
 | Small | Cookie | 15 | Picnic families |
-| Small | Half-eaten doughnut | 10 | Bins |
-| Small | Half-eaten sandwich | 15 | Bins |
-| Small | Half-eaten pizza | 20 | Bins |
+| Small | Doughnut | 10 | Bins |
+| Small | Sandwich | 15 | Bins |
+| Small | Pizza | 20 | Bins |
 | Medium | Box of crisps | 35 | Sunbathers, picnic families, kiosk customers |
 | Medium | Ice cream | 25 | Toddlers, kiosk customers |
 | Medium | Bag of crisps | 30 | Sunbathers, picnic families, kiosk customers |

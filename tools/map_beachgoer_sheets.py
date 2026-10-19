@@ -13,6 +13,10 @@ for key, filename, canvas, scale, centers, baselines in [
     ('dog','dog-owner-polished.png',(600,460),.09,
      [180,630,1072,1518,180,623,1055,1500],[430]*4+[865]*4),
 ]:
+    current_shopper = ROOT/'data/shopper_art.json'
+    if key == 'kiosk_customer' and current_shopper.exists():
+        data.update(json.loads(current_shopper.read_text(encoding='utf-8-sig')))
+        continue
     image = Image.open(ROOT/'assets/sprites'/filename)
     regions = []
     for index in range(8):

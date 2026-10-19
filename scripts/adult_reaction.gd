@@ -48,6 +48,7 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 		owner.facing = signf(focus.position.x-owner.position.x) if absf(focus.position.x-owner.position.x)>1 else owner.facing
 	timer -= delta
 	var moving: bool = false
+	var whistle_pause: bool = owner.kind == "lifeguard" and owner.lifeguard_whistle_time > 0
 	if mode == "warning":
 		if timer <= 0:
 			# A warning only connects if the gull ignores it and stays within reach.
@@ -81,12 +82,13 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 					swat = 1.2
 			elif focus.position.distance_to(owner.position-Vector2(0,12)) < 24 and swat <= 0:
 				swat_timer = 0.4 * owner.reaction_delay
-			elif moving:
+			elif moving and not whistle_pause:
 				owner.position.x = move_toward(owner.position.x,destination,(30.0 if owner.kind == "sunbather" else 45.0)*delta)
 	elif mode == "return":
 		owner.facing = signf(home-owner.position.x) if absf(home-owner.position.x)>1 else owner.facing
 		moving = absf(home-owner.position.x)>0.25
-		owner.position.x = move_toward(owner.position.x,home,30*delta)
+		if not whistle_pause:
+			owner.position.x = move_toward(owner.position.x,home,30*delta)
 		if not moving:
 			owner.position.x = home
 			mode = ""
@@ -104,7 +106,7 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 			SunbatherArt.reaction_pose(owner,&"windup" if swat_timer >= 0 or mode == "follow" else (&"run" if moving else &"stand"),1.0 if mode == "follow" else 0.5,int(owner.sunbather_run_time*10)%7)
 	else:
 		owner.update_art_pose(moving)
-		if owner.kind not in ["picnic_family","kiosk_customer","dog_owner","pier_diner"]:
+		if owner.kind not in ["picnic_family","kiosk_customer","dog_owner","pier_diner","lifeguard"]:
 			var pose: StringName = &"swat" if swat_timer >= 0 or mode == "warning" else (&"walk" if moving else &"eat")
 			if owner.sprite.sprite_frames.has_animation(pose):
 				owner.sprite.play(pose)
@@ -114,7 +116,7 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 
 func _hit(owner: BeachTarget) -> void:
 	if is_instance_valid(focus) and focus.position.distance_to(owner.position-Vector2(0,12)) < 24:
-		if owner.kind == "pier_diner":
+		if owner.kind in ["pier_diner","lifeguard","kiosk_customer"]:
 			owner.action_pose_time = 0.28
 		focus.stun()
 		owner.mum_swat_time = 0.25

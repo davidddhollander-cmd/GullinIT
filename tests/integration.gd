@@ -125,6 +125,7 @@ func run() -> void:
 	await mum_art_checks()
 	await extended_beach_checks()
 	await beachgoer_art_checks()
+	await preload("res://tests/staff_art_checks.gd").run(self,Callable(self,"check"))
 	await pier_diner_art_checks()
 	preload("res://tests/digestion_checks.gd").run(Callable(self,"check"))
 	preload("res://tests/flight_dynamics_checks.gd").run(self,Callable(self,"check"))
@@ -662,9 +663,11 @@ func grounded_toddler_peck_checks() -> void:
 	second.dropped_pending = false
 	second.dropped_item = {}
 	second.refresh_art()
-	gull.position = Vector2(201,gull.ground_y())
+	# Stage the beak relative to the newly drawn hand rather than the old artwork's palm.
+	gull.position = Vector2(second.food_position().x-float(Config.tuning.dive.beak_offset)-8,gull.ground_y())
 	gull.facing = 1
 	game.stash_raids.peck_cooldown = 0.0
+	check(game.stash_raids.nearby_toddler() == second,"cookie fixture places the visible snack within grounded peck reach")
 	game._peck()
 	check(not second.food and second.dropped_pending and game.stash_raids.items.size() == 1 and str(game.stash_raids.items[0].food_id) == "cookie","grounded toddler peck preserves non-ice-cream food IDs")
 	game.stash_raids.items.clear()
@@ -861,7 +864,7 @@ func family_food_foundation_checks() -> void:
 	check(siblings[0].seeking_parent and siblings[0].position.x != start_x,"robbed toddler immediately runs crying toward mum")
 	for frame: int in 40:
 		siblings[0].tick(1.0/60,[])
-	check(siblings[0].sprite.animation == &"walk","seeking toddler uses walking feet after crying")
+	check(siblings[0].sprite.animation == &"cry_run","seeking toddler uses upset running feet")
 	for frame: int in range(1800):
 		siblings[0].tick(1.0/60,[])
 		if siblings[0].handover_timer > 0 and absf(siblings[0].position.x-mum.position.x) < 20:
@@ -1394,6 +1397,15 @@ func stash_raid_checks() -> void:
 		if cue.text == "EMPTY":
 			empty_cue_count += 1
 	check(empty_cue_count == 0,"EMPTY cue disappears after fading")
+	game.effects.score_message(Vector2(40,80),"+25",BeachUI.GOLD)
+	var score_cue: Dictionary = game.effects.texts[-1]
+	check(is_equal_approx(float(score_cue.life),4.5) and is_equal_approx(float(score_cue.fade_time),1.5),"score cue starts with a 3 second hold plus 1.5 second fade")
+	game.effects.tick(2.99)
+	check(float(score_cue.life) > float(score_cue.fade_time),"score cue remains fully opaque throughout the 3 second hold")
+	game.effects.tick(0.02)
+	check(float(score_cue.life) > 0.0 and float(score_cue.life) < float(score_cue.fade_time),"score cue begins fading only after its 3 second hold")
+	game.effects.tick(1.49)
+	check(not game.effects.texts.has(score_cue),"score cue disappears after its 1.5 second fade")
 	var text_count_before_disabled: int = game.effects.texts.size()
 	Config.tuning.juice.floating_text = false
 	game.effects.empty_message(owner.stash_position()-Vector2(0,10))
@@ -2255,7 +2267,7 @@ func beachgoer_art_checks() -> void:
 				var texture: AtlasTexture = frames.get_frame_texture(animation,index) as AtlasTexture
 				check(texture.get_size() == Vector2(definition.frame_w,definition.frame_h),"beachgoer aligned frame canvas")
 				check(Rect2(Vector2.ZERO,texture.atlas.get_size()).encloses(texture.region),"beachgoer atlas stays inside sheet")
-		check(frames.get_frame_texture(&"idle",0).atlas.get_image().get_mipmap_count() > 0,"beachgoer source has mipmaps")
+		check((frames.get_frame_texture(&"idle",0).atlas.get_image().get_mipmap_count() > 0)==(key=="dog"),"beachgoer source sampling matches current art treatment")
 	main.start_level(4)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
@@ -2309,6 +2321,8 @@ func beachgoer_art_checks() -> void:
 	await settle()
 
 func pier_diner_art_checks() -> void:
+	preload("res://tests/isolated_sprite_checks.gd").run(Callable(self,"check"),Config.frames("pier_diner"),"diner poses")
+	preload("res://tests/isolated_sprite_checks.gd").run(Callable(self,"check"),Config.frames("pier_diner_motion"),"diner motion")
 	var frames: SpriteFrames = PierDinerArt.frames()
 	for motion: StringName in [&"walk", &"run", &"eat"]:
 		check(frames.get_frame_count(motion) == 4,"retro diner has a four-frame "+String(motion)+" cycle")
@@ -2434,7 +2448,7 @@ func mum_art_checks() -> void:
 	for animation: StringName in frames.get_animation_names():
 		for index: int in frames.get_frame_count(animation):
 			var texture: AtlasTexture = frames.get_frame_texture(animation,index) as AtlasTexture
-			check(texture.get_size() == Vector2(64,64),"mum frames share the native 64-pixel canvas")
+			check(texture.get_size() == Vector2(128,128),"mum frames share the approved 128-pixel source canvas")
 			check(Rect2(Vector2.ZERO,texture.atlas.get_size()).encloses(texture.region),"mum frame stays inside source sheet")
 	check(frames.get_frame_texture(&"idle",0).atlas.get_image().get_mipmap_count() == 0,"mum source remains crisp without mipmaps")
 	main.start_level(1)
@@ -2477,7 +2491,8 @@ func mum_art_checks() -> void:
 	mum.update_art_pose(false)
 	mum.sprite.pause()
 	mum.sprite.frame = 2
-	check(mum.food_sprite.position == Vector2(-11,-17),"handover lowers separate snack onto the v3 left-facing palm")
+	check(mum.food_sprite.position.x < 0 and mum.food_sprite.position.y > MumArt.food_anchor("idle",0).y+4,"handover lowers separate snack onto the approved left-facing palm")
+	check(mum.sprite.scale == Vector2(0.5,0.5),"higher-detail mum retains the original gameplay height")
 	await snapshot("mum-handover")
 	mum.defense = 1
 	mum.update_art_pose(false)
@@ -2496,12 +2511,14 @@ func mum_art_checks() -> void:
 
 func toddler_art_checks() -> void:
 	var frames: SpriteFrames = Config.frames("toddler")
+	preload("res://tests/isolated_sprite_checks.gd").run(Callable(self,"check"),frames,"toddler")
 	for animation: StringName in frames.get_animation_names():
 		for index: int in frames.get_frame_count(animation):
 			var texture: AtlasTexture = frames.get_frame_texture(animation,index) as AtlasTexture
-			check(texture.get_size() == Vector2(362,362),"toddler frame shares aligned canvas")
+			check(texture.get_size() == Vector2(64,64),"toddler frame shares aligned canvas")
 			check(Rect2(Vector2.ZERO,texture.atlas.get_size()).encloses(texture.region),"toddler atlas region within sheet")
-			check(texture.margin.position.y + texture.region.size.y == 362,"toddler feet aligned at frame baseline")
+			var pose_image := texture.atlas.get_image().get_region(Rect2i(texture.region))
+			check(pose_image.get_used_rect().end.y == 60,"toddler feet aligned at frame baseline")
 	main.start_level(1)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
@@ -2512,12 +2529,23 @@ func toddler_art_checks() -> void:
 		if target.kind == "toddler":
 			toddler = target
 			break
-	check(is_equal_approx(toddler.art_height(),27.15*0.7),"toddler is thirty percent smaller with aligned feet")
-	check(toddler.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS,"toddler alone uses smooth mipmapped minification")
+	check(is_equal_approx(toddler.art_height(),22.0),"toddler is slightly taller at 22 world pixels")
+	check(is_zero_approx(toddler.sprite.position.y+(60.0-32.0)*toddler.sprite.scale.y),"toddler padded canvas plants feet on the ground")
+	check(toddler.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST,"toddler uses the adults' crisp sampling")
 	var toddler_source: Texture2D = frames.get_frame_texture(&"idle",0).atlas
-	check(toddler_source.get_image().get_mipmap_count() > 0,"toddler source imports mip levels for stable high-resolution downsampling")
+	var toddler_pixels := toddler_source.get_image().get_data()
+	var hard_alpha := true
+	for offset: int in range(3,toddler_pixels.size(),4):
+		if toddler_pixels[offset] not in [0,255]:
+			hard_alpha = false
+	check(hard_alpha and toddler.sprite.material == null,"toddler has clean native alpha without painted cutout shader")
+	check(toddler_source.get_image().get_mipmap_count() == 0,"toddler keeps native source pixels")
 	toddler.tick(0.2,[])
 	check(toddler.sprite.animation == &"eat" and toddler.food_sprite.visible,"toddler eating pause holds separate ice cream")
+	toddler.sprite.set_frame_and_progress(0,0)
+	var held_food := toddler.food_sprite.position
+	toddler.sprite.set_frame_and_progress(1,0)
+	check(toddler.food_sprite.position.y < held_food.y and toddler.food_sprite.position.x < held_food.x-1,"toddler brings separate food toward its mouth with the eating hand")
 	var paused_x: float = toddler.position.x
 	toddler.tick(0.2,[])
 	check(toddler.position.x == paused_x,"eating pose plants feet")
@@ -2545,7 +2573,7 @@ func toddler_art_checks() -> void:
 	# parent nearby instead of depending on the authored level's family position.
 	family.position.x = 245
 	family.family_home = 245
-	check(toddler.take(game.player),"polished toddler food remains stealable")
+	check(toddler.take(game.player),"restyled toddler food remains stealable")
 	eat_pending(game)
 	check(toddler.sprite.animation == &"cry" and not toddler.food_sprite.visible and family.alert == 1,"theft shows crying without baked-in ice cream and alerts parent")
 	paused_x = toddler.position.x

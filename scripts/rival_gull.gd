@@ -9,6 +9,7 @@ var target: BeachTarget
 var personality: Dictionary
 var leave: float = 0.0
 var carried: int = 0
+var score: int = 0
 var carry_window: float = 0.0
 var carried_food_id: String = "crisps_bag"
 var rng: RandomNumberGenerator
@@ -222,6 +223,7 @@ func needs_height() -> bool:
 
 func took_food(value: int) -> void:
 	carried = value
+	score += value
 	carry_window = Config.tuning.rival.mug_window
 	leave = Config.tuning.rival.leave_time
 	# Away from the player, unless that is a dead end against the wall.
@@ -239,6 +241,7 @@ func mug() -> int:
 		return 0
 	var value: int = carried
 	carried = 0
+	score = maxi(0, score - value)
 	carry_window = 0
 	leave = 0
 	cooldown = relax_time()

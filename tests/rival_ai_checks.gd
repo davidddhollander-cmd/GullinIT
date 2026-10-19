@@ -14,7 +14,7 @@ static func simulate(host: Node, main: Node, level: int, seconds: float) -> Dict
 	game.player.position = Vector2(40,game.player.ground_y())
 	game.player.state = BeachGull.State.GROUNDED
 	var width: float = float(Config.tuning.world.width)
-	var report: Dictionary = {"pilots":game.pilots.size(),"edge_max":0.0,"out_of_bounds":0,"sand_frames":0,"shared_target":0,"cooldown_dives":0,"escape_short":0,"dives":[],"thefts":[],"crashes":[]}
+	var report: Dictionary = {"pilots":game.pilots.size(),"edge_max":0.0,"out_of_bounds":0,"sand_frames":0,"shared_target":0,"cooldown_dives":0,"escape_short":0,"dives":[],"thefts":[],"crashes":[],"scores":[]}
 	var edge_time: Array[float] = []
 	var last_theft: Array[float] = []
 	var dives_seen: Array[int] = []
@@ -66,6 +66,14 @@ static func simulate(host: Node, main: Node, level: int, seconds: float) -> Dict
 		report.dives.append(pilot.dives)
 		report.thefts.append(pilot.thefts)
 		report.crashes.append(pilot.crashes)
+		report.scores.append(pilot.score)
+	game.overlay._process(0.0)
+	report.hud_visible = game.overlay.rival_score_panel.visible
+	report.hud_rows = game.overlay.rival_score_labels.size()
+	report.hud_rect = game.overlay.rival_score_panel.get_global_rect()
+	if level == 6:
+		game.overlay.queue_redraw()
+		await host.snapshot("rival-score-meter")
 	return report
 
 static func run(host: Node, main: Node, check: Callable) -> void:
@@ -74,9 +82,12 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 		print("RIVAL SIM level %d: %s" % [level,str(r)])
 		var need_thefts: int = 2 if level == 6 else 1
 		check.call(r.pilots == (3 if level == 6 else 1),"level %d rival count" % level)
+		check.call(r.hud_visible and r.hud_rows == r.pilots,"level %d shows one right-side score row per rival" % level)
+		check.call((r.hud_rect as Rect2).end.x <= 320.0 and (r.hud_rect as Rect2).position.y >= 74.0 and (r.hud_rect as Rect2).end.y < 124.0,"level %d rival score meter stays in its right-side safe area" % level)
 		for i: int in r.pilots:
 			check.call(r.dives[i] >= 3,"level %d rival %d dives at least 3 times (%d)" % [level,i,r.dives[i]])
 			check.call(r.thefts[i] >= need_thefts,"level %d rival %d steals at least %d times (%d)" % [level,i,need_thefts,r.thefts[i]])
+			check.call(r.scores[i] > 0,"level %d rival %d accumulates a visible food score (%d)" % [level,i,r.scores[i]])
 			check.call(r.crashes[i] == 0,"level %d rival %d never crashes its own dives" % [level,i])
 		check.call(r.edge_max <= 1.5,"level %d rival never lingers at the edge (%.2f s)" % [level,r.edge_max])
 		check.call(r.out_of_bounds == 0,"level %d rivals stay inside the beach" % level)

@@ -1,0 +1,88 @@
+{
+  "cell": 128,
+  "display_scale": 0.5,
+  "figure_height": 80,
+  "frames": [
+    {
+      "colours": 1707,
+      "id": "mum-idle",
+      "source": "mum-three-poses-source.png",
+      "source_region": [
+        149,
+        69,
+        511,
+        648
+      ],
+      "source_size": [
+        2043,
+        770
+      ],
+      "used_width": 63
+    },
+    {
+      "colours": 1714,
+      "id": "mum-walk",
+      "source": "mum-three-poses-source.png",
+      "source_region": [
+        752,
+        71,
+        481,
+        646
+      ],
+      "source_size": [
+        2043,
+        770
+      ],
+      "used_width": 60
+    },
+    {
+      "colours": 1798,
+      "id": "mum-swat",
+      "source": "mum-three-poses-source.png",
+      "source_region": [
+        1381,
+        69,
+        584,
+        648
+      ],
+      "source_size": [
+        2043,
+        770
+      ],
+      "used_width": 72
+    },
+    {
+      "colours": 1021,
+      "id": "male-idle",
+      "source": "male-idle-source.png",
+      "source_region": [
+        350,
+        142,
+        661,
+        1027
+      ],
+      "source_size": [
+        1292,
+        1217
+      ],
+      "used_width": 51
+    },
+    {
+      "colours": 898,
+      "id": "female-idle",
+      "source": "female-idle-source.png",
+      "source_region": [
+        328,
+        80,
+        647,
+        1165
+      ],
+      "source_size": [
+        1213,
+        1297
+      ],
+      "used_width": 44
+    }
+  ],
+  "sole": 116
+}

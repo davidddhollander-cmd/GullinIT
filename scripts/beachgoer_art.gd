@@ -2,6 +2,9 @@ class_name BeachgoerArt
 extends RefCounted
 ## Customer/owner poses share the existing target movement and awareness state.
 static func update(target: BeachTarget, moving: bool) -> void:
+	if target.kind == "kiosk_customer":
+		ShopperArt.update(target,moving)
+		return
 	var pose: StringName = &"walk" if moving else &"idle"
 	if not target.leaving:
 		if target.reaction.swat_timer >= 0 or target.reaction.mode in ["warning","follow"]:

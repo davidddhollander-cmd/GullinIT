@@ -1,4 +1,4 @@
-class_name BeachOverlay
+﻿class_name BeachOverlay
 extends Control
 var game: BeachGame
 var font: Font = preload("res://assets/fonts/gull_pixel.fnt")
@@ -14,6 +14,16 @@ var pause_button: Button
 var top: HBoxContainer
 var score_announcement: Label
 var score_announcement_tween: Tween
+var rival_score_panel: PanelContainer
+var rival_score_list: VBoxContainer
+var rival_score_labels: Array[Label] = []
+var score_announcement_fonts: Array[Font] = [
+	preload("res://assets/arcade_score_blue.fnt"),
+	preload("res://assets/arcade_score_hot.fnt"),
+]
+var score_announcement_font_index: int = 0
+const SCORE_ANNOUNCEMENT_HOLD: float = BeachEffects.SCORE_MESSAGE_HOLD
+const SCORE_ANNOUNCEMENT_FADE: float = BeachEffects.SCORE_MESSAGE_FADE
 
 func setup(owner_game: BeachGame) -> void:
 	game = owner_game
@@ -44,15 +54,33 @@ func setup(owner_game: BeachGame) -> void:
 	announcement_row.offset_top = 30.0
 	announcement_row.offset_bottom = 54.0
 	announcement_row.mouse_filter = MOUSE_FILTER_IGNORE
-	score_announcement = BeachUI.label(announcement_row,"",BeachUI.FONT_DISPLAY,BeachUI.GOLD)
+	score_announcement = BeachUI.label(announcement_row,"",BeachUI.FONT_DISPLAY,Color.WHITE)
 	score_announcement.custom_minimum_size = Vector2(304,16)
 	score_announcement.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	score_announcement.add_theme_constant_override("outline_size",2)
-	score_announcement.add_theme_color_override("font_outline_color",BeachUI.INK)
+	score_announcement.add_theme_font_override("font",score_announcement_fonts[0])
 	score_announcement.add_theme_color_override("font_shadow_color",Color(0.0,0.0,0.0,0.65))
 	score_announcement.add_theme_constant_override("shadow_offset_x",1)
 	score_announcement.add_theme_constant_override("shadow_offset_y",1)
 	score_announcement.hide()
+	rival_score_panel = BeachUI.panel(self,Color(0.055,0.14,0.19,0.92))
+	rival_score_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	rival_score_panel.offset_left = -86.0
+	rival_score_panel.offset_top = 76.0
+	rival_score_panel.offset_right = -4.0
+	rival_score_panel.mouse_filter = MOUSE_FILTER_IGNORE
+	var rival_panel_style: StyleBoxFlat = rival_score_panel.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
+	rival_panel_style.content_margin_left = 4.0
+	rival_panel_style.content_margin_right = 4.0
+	rival_panel_style.content_margin_top = 3.0
+	rival_panel_style.content_margin_bottom = 3.0
+	rival_panel_style.border_color = Color("397a85")
+	rival_panel_style.set_border_width_all(1)
+	rival_score_panel.add_theme_stylebox_override("panel",rival_panel_style)
+	rival_score_list = VBoxContainer.new()
+	rival_score_list.add_theme_constant_override("separation",1)
+	rival_score_list.mouse_filter = MOUSE_FILTER_IGNORE
+	rival_score_panel.add_child(rival_score_list)
+	sync_rival_scores()
 	var space: Control = Control.new()
 	space.mouse_filter = MOUSE_FILTER_IGNORE
 	space.size_flags_vertical = SIZE_EXPAND_FILL
@@ -126,6 +154,33 @@ func _process(_delta: float) -> void:
 		lesson_label.text = "TRAINING DAY  /  LESSON %d/6" % mini(game.lesson + 1, 6)
 		lesson_prompt.text = game.training_text()
 	pause_button.visible = game.running
+	if rival_score_labels.size() != game.pilots.size():
+		sync_rival_scores()
+	rival_score_panel.visible = not game.pilots.is_empty() and game.running and game.intro <= 0.0
+	for i: int in rival_score_labels.size():
+		var pilot: RivalPilot = game.pilots[i]
+		rival_score_labels[i].text = "%s  %03d" % [pilot.gull.rival_name.to_upper(),pilot.score]
+
+func sync_rival_scores() -> void:
+	if not is_instance_valid(rival_score_list) or game == null:
+		return
+	for child: Node in rival_score_list.get_children():
+		rival_score_list.remove_child(child)
+		child.queue_free()
+	rival_score_labels.clear()
+	if game.pilots.is_empty():
+		rival_score_panel.hide()
+		return
+	var title: Label = BeachUI.label(rival_score_list,"RIVALS",BeachUI.FONT_NATIVE,BeachUI.GOLD)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	for pilot: RivalPilot in game.pilots:
+		var label: Label = BeachUI.label(rival_score_list,"",BeachUI.FONT_NATIVE,pilot.gull.rival_tint)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		label.custom_minimum_size.x = 72.0
+		rival_score_labels.append(label)
+	var height: float = 8.0 + float(game.pilots.size()) * 9.0 + 7.0
+	rival_score_panel.offset_bottom = rival_score_panel.offset_top + height
+	rival_score_panel.show()
 
 func show_score_announcement(food_id: String, earned: int) -> void:
 	if not Config.foods.has(food_id):
@@ -133,6 +188,8 @@ func show_score_announcement(food_id: String, earned: int) -> void:
 	if is_instance_valid(score_announcement_tween):
 		score_announcement_tween.kill()
 	var food: Dictionary = Config.foods[food_id]
+	score_announcement.add_theme_font_override("font",score_announcement_fonts[score_announcement_font_index])
+	score_announcement_font_index = (score_announcement_font_index + 1) % score_announcement_fonts.size()
 	score_announcement.text = "%s +%d" % [str(food.name).to_upper(),earned]
 	# Training text occupies the normal top-center slot, so shift the transient
 	# callout below it rather than covering the current instruction.
@@ -147,9 +204,10 @@ func show_score_announcement(food_id: String, earned: int) -> void:
 	score_announcement_tween.set_parallel(true)
 	score_announcement_tween.tween_property(score_announcement,"scale",Vector2.ONE,0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	score_announcement_tween.tween_property(score_announcement,"modulate:a",1.0,0.12)
-	score_announcement_tween.chain().tween_interval(0.3)
-	score_announcement_tween.tween_property(score_announcement,"modulate:a",0.0,0.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
-	score_announcement_tween.tween_callback(score_announcement.hide)
+	# Parallel mode would start the fade and hide alongside the hold, so chain each step.
+	score_announcement_tween.chain().tween_interval(SCORE_ANNOUNCEMENT_HOLD)
+	score_announcement_tween.chain().tween_property(score_announcement,"modulate:a",0.0,SCORE_ANNOUNCEMENT_FADE).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	score_announcement_tween.chain().tween_callback(score_announcement.hide)
 
 func _draw_digestion(offset: Vector2) -> void:
 	var belly: GullDigestion = game.player.digestion
@@ -244,7 +302,9 @@ func _draw() -> void:
 			right_food = right_food or target.food
 			right_threat = right_threat or target.defense > 0
 	var arrow_y: float = maxf(116.0,training_panel.get_rect().end.y+22.0) if game.training else 108.0
-	for item: Array in [[left_food,Vector2(3,arrow_y),"< FOOD",BeachUI.GOLD],[right_food,Vector2(280,arrow_y),"FOOD >",BeachUI.GOLD],[left_threat,Vector2(3,arrow_y+11),"< !",Color("ef725c")],[right_threat,Vector2(302,arrow_y+11),"! >",Color("ef725c")]]:
+	var right_food_x: float = 186.0 if rival_score_panel.visible else 280.0
+	var right_threat_x: float = 214.0 if rival_score_panel.visible else 302.0
+	for item: Array in [[left_food,Vector2(3,arrow_y),"< FOOD",BeachUI.GOLD],[right_food,Vector2(right_food_x,arrow_y),"FOOD >",BeachUI.GOLD],[left_threat,Vector2(3,arrow_y+11),"< !",Color("ef725c")],[right_threat,Vector2(right_threat_x,arrow_y+11),"! >",Color("ef725c")]]:
 		if item[0]:
 			draw_string(font,item[1],item[2],HORIZONTAL_ALIGNMENT_LEFT,-1,8,item[3])
 	# Zone boundaries follow the longer map rather than equal screen thirds.

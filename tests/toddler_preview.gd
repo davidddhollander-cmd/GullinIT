@@ -3,8 +3,8 @@ extends Control
 func _draw() -> void:
 	draw_rect(Rect2(0,0,320,180),Color("20364d"))
 	var font: Font = preload("res://assets/fonts/gull_pixel.fnt")
-	draw_string(font,Vector2(8,12),"TODDLER / FIRST POLISHED SHEET",HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("fff4da"))
-	var groups: Array[StringName] = [&"idle",&"eat",&"walk",&"cry"]
+	draw_string(font,Vector2(8,12),"TODDLER / DINER STYLE / 22 PX",HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("fff4da"))
+	var groups: Array[StringName] = [&"eat",&"walk",&"cry",&"cry_run"]
 	var frames: SpriteFrames = Config.frames("toddler")
 	for column: int in 4:
 		var animation: StringName = groups[column]

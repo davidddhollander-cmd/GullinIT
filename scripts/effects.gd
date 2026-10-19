@@ -7,10 +7,24 @@ var freeze: float = 0.0
 var slow: float = 0.0
 var clock: float = 0.0
 var font: Font = preload("res://assets/fonts/gull_pixel.fnt")
+const SCORE_MESSAGE_HOLD: float = 3.0
+const SCORE_MESSAGE_FADE: float = 1.5
+const SCORE_MESSAGE_RISE_SPEED: float = 4.0
 
 func message(at: Vector2, text: String, color: Color = Color("fff4da")) -> void:
 	if Config.tuning.juice.floating_text:
 		texts.append({"at":at,"text":text,"color":color,"life":float(Config.tuning.juice.float_time)})
+
+func score_message(at: Vector2, text: String, color: Color = Color("fff4da")) -> void:
+	if Config.tuning.juice.floating_text:
+		texts.append({
+			"at":at,
+			"text":text,
+			"color":color,
+			"life":SCORE_MESSAGE_HOLD + SCORE_MESSAGE_FADE,
+			"fade_time":SCORE_MESSAGE_FADE,
+			"rise_speed":SCORE_MESSAGE_RISE_SPEED,
+		})
 
 func empty_message(at: Vector2) -> void:
 	if not bool(Config.tuning.juice.floating_text):
@@ -56,7 +70,7 @@ func tick(delta: float) -> void:
 	shake = move_toward(shake,0,delta*12)
 	for i: int in range(texts.size()-1,-1,-1):
 		texts[i].life -= delta
-		texts[i].at.y -= delta*10
+		texts[i].at.y -= delta*float(texts[i].get("rise_speed",10.0))
 		if texts[i].life <= 0:
 			texts.remove_at(i)
 	for i: int in range(particles.size()-1,-1,-1):
