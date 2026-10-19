@@ -13,6 +13,8 @@ var lesson_prompt: Label
 var touch_row: HBoxContainer
 var pause_button: Button
 var top: HBoxContainer
+var score_announcement: Label
+var score_announcement_tween: Tween
 
 func setup(owner_game: BeachGame) -> void:
 	game = owner_game
@@ -36,6 +38,22 @@ func setup(owner_game: BeachGame) -> void:
 	wind_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	pause_button = BeachUI.button(top,"II",func() -> void: game.pause_requested.emit())
 	pause_button.custom_minimum_size = Vector2(20,20)
+	# This sits just below the status strip, leaving the score and timer readable.
+	var announcement_row: CenterContainer = CenterContainer.new()
+	add_child(announcement_row)
+	announcement_row.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	announcement_row.offset_top = 30.0
+	announcement_row.offset_bottom = 54.0
+	announcement_row.mouse_filter = MOUSE_FILTER_IGNORE
+	score_announcement = BeachUI.label(announcement_row,"",BeachUI.FONT_DISPLAY,BeachUI.GOLD)
+	score_announcement.custom_minimum_size = Vector2(304,16)
+	score_announcement.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	score_announcement.add_theme_constant_override("outline_size",2)
+	score_announcement.add_theme_color_override("font_outline_color",BeachUI.INK)
+	score_announcement.add_theme_color_override("font_shadow_color",Color(0.0,0.0,0.0,0.65))
+	score_announcement.add_theme_constant_override("shadow_offset_x",1)
+	score_announcement.add_theme_constant_override("shadow_offset_y",1)
+	score_announcement.hide()
 	var space: Control = Control.new()
 	space.mouse_filter = MOUSE_FILTER_IGNORE
 	space.size_flags_vertical = SIZE_EXPAND_FILL
@@ -52,6 +70,9 @@ func setup(owner_game: BeachGame) -> void:
 	var training_center: CenterContainer = CenterContainer.new()
 	add_child(training_center)
 	BeachUI.full(training_center)
+	training_center.anchor_bottom = 0.0
+	training_center.offset_top = 28.0
+	training_center.offset_bottom = 28.0
 	training_center.mouse_filter = MOUSE_FILTER_IGNORE
 	training_panel = BeachUI.panel(training_center,Color(0.094,0.23,0.30,0.95))
 	training_panel.custom_minimum_size = Vector2(192,32)
@@ -66,7 +87,7 @@ func setup(owner_game: BeachGame) -> void:
 	lesson_column.mouse_filter = MOUSE_FILTER_IGNORE
 	lesson_column.add_theme_constant_override("separation",2)
 	training_panel.add_child(lesson_column)
-	lesson_label = BeachUI.label(lesson_column,"TRAINING DAY  /  LESSON 1/5",8,BeachUI.GOLD)
+	lesson_label = BeachUI.label(lesson_column,"TRAINING DAY  /  LESSON 1/6",8,BeachUI.GOLD)
 	lesson_prompt = BeachUI.label(lesson_column,"",8,BeachUI.CREAM)
 	for tip_label: Label in [lesson_label,lesson_prompt]:
 		tip_label.add_theme_font_size_override("font_size",6)
@@ -85,7 +106,7 @@ func setup(owner_game: BeachGame) -> void:
 	intro_panel.add_child(intro)
 	BeachUI.label(intro,"TRAINING DAY" if game.training else "%02d / %s" % [game.level.id,game.level.name.to_upper()],8,BeachUI.GOLD)
 	if game.training:
-		BeachUI.label(intro,"FIVE SHORT LESSONS. TAKE YOUR TIME.")
+		BeachUI.label(intro,"SIX SHORT LESSONS. TAKE YOUR TIME.")
 		BeachUI.label(intro,"AIM, FLAP, DIVE AND PECK TO LEARN.",8,Color("80bcb8"))
 		BeachUI.label(intro,"YOUR NEXT STEP APPEARS ON THE BEACH.",8,BeachUI.GOLD)
 	else:
@@ -112,10 +133,34 @@ func _process(_delta: float) -> void:
 	intro_panel.visible = game.intro > 0
 	training_panel.visible = game.training and game.running and game.intro <= 0
 	if game.training:
-		lesson_label.text = "TRAINING DAY  /  LESSON %d/5" % mini(game.lesson + 1, 5)
+		lesson_label.text = "TRAINING DAY  /  LESSON %d/6" % mini(game.lesson + 1, 6)
 		lesson_prompt.text = game.training_text()
 	touch_row.visible = game.input.touch_visible and game.running
 	pause_button.visible = game.running
+
+func show_score_announcement(food_id: String, earned: int) -> void:
+	if not Config.foods.has(food_id):
+		return
+	if is_instance_valid(score_announcement_tween):
+		score_announcement_tween.kill()
+	var food: Dictionary = Config.foods[food_id]
+	score_announcement.text = "%s +%d" % [str(food.name).to_upper(),earned]
+	# Training text occupies the normal top-center slot, so shift the transient
+	# callout below it rather than covering the current instruction.
+	var row: Control = score_announcement.get_parent() as Control
+	row.offset_top = 58.0 if game.training else 30.0
+	row.offset_bottom = row.offset_top + 24.0
+	score_announcement.modulate.a = 1.0
+	score_announcement.scale = Vector2(0.72,0.72)
+	score_announcement.pivot_offset = score_announcement.size * 0.5
+	score_announcement.show()
+	score_announcement_tween = create_tween()
+	score_announcement_tween.set_parallel(true)
+	score_announcement_tween.tween_property(score_announcement,"scale",Vector2.ONE,0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	score_announcement_tween.tween_property(score_announcement,"modulate:a",1.0,0.12)
+	score_announcement_tween.chain().tween_interval(0.3)
+	score_announcement_tween.tween_property(score_announcement,"modulate:a",0.0,0.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	score_announcement_tween.tween_callback(score_announcement.hide)
 
 func _draw_digestion(offset: Vector2) -> void:
 	var belly: GullDigestion = game.player.digestion
@@ -164,7 +209,11 @@ func _draw() -> void:
 				draw_arc(training_target,16,0,TAU,24,Color(1.0,0.95,0.7,0.55),1)
 		var hint_y: float = maxf(105.0,training_panel.get_rect().end.y+11) if game.training else 39.0
 		if game.player.state == BeachGull.State.GROUNDED:
-			var hint: String = "TAP E / X / PECK TO SEARCH" if game.stash_raids.has_nearby_source() else "WALK FOR SCRAPS / HOLD FLAP TO FLY"
+			var hint: String = "WALK FOR SCRAPS / HOLD FLAP TO FLY"
+			if game.stash_raids.nearby_toddler() != null:
+				hint = "TAP E / X / PECK AT TODDLER"
+			elif game.stash_raids.has_nearby_source():
+				hint = "TAP E / X / PECK TO SEARCH"
 			draw_string(font,Vector2(6,hint_y),hint,HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.INK)
 		elif game.player.landing_aim():
 			draw_string(font,Vector2(6,hint_y),"LANDING / HOLD FLAP TO CLIMB",HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.INK)

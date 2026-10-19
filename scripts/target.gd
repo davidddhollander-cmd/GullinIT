@@ -50,6 +50,7 @@ const BAG_TEXTURES: Array[Texture2D] = [
 	preload("res://assets/sprites/retro-picnic-bag-woven-32bit.png"),
 ]
 var bag_variant: int = 0
+var shine_time: float = 0.0
 var bag_squish_time: float = 0.0
 var bag_squish_duration: float = BAG_SQUISH_TIME
 var bag_squish_strength: float = 0.12
@@ -213,6 +214,9 @@ func food_radius() -> Vector2:
 	return Vector2(radius[0],radius[1])
 
 func tick(delta: float, gulls: Array[BeachGull]) -> void:
+	shine_time += delta
+	if kind == "sunbather":
+		queue_redraw()
 	var t: Dictionary = Config.tuning.world
 	art_time += delta
 	bag_squish_time = maxf(0.0, bag_squish_time-delta)
@@ -714,6 +718,10 @@ func _draw() -> void:
 		var bag: Vector2 = -BAG_PIVOT
 		# The 32x24 sprite's bottom-centre sits on the old bag's base, so pecks squish it the same way.
 		draw_texture(BAG_TEXTURES[bag_variant],bag+Vector2(-16,-15))
+		if stash_remaining > 0:
+			var glint: Texture2D = PickupShine.overlay(BAG_TEXTURES[bag_variant],shine_time,stash_home_x*0.37)
+			if glint != null:
+				draw_texture(glint,bag+Vector2(-16,-15))
 		if stash_remaining > 0:
 			draw_rect(Rect2(bag+Vector2(-5,1),Vector2(stash_remaining*3+1,4)),Color("183b4e"))
 		for i: int in stash_remaining:

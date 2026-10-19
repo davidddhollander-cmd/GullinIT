@@ -129,6 +129,7 @@
     "family_retry_wait": 8,
     "sunbather_stash_size": 3,
     "peck_reach": 16,
+    "toddler_peck_vertical_tolerance": 14,
     "peck_cooldown": 0.18,
     "peck_alert": 0.2,
     "stash_pecks": 3,
@@ -159,9 +160,13 @@
     "bin_scatter": [
       "crumbs",
       "wrapper",
-      "crumbs",
+      "half_eaten_doughnut",
       "paper",
-      "crumbs"
+      "half_eaten_sandwich",
+      "crumbs",
+      "wrapper",
+      "half_eaten_pizza",
+      "paper"
     ],
     "promenade_start": 640,
     "pier_start": 960
@@ -176,6 +181,9 @@
   },
   "juice": {
     "audio": true,
+    "shine": true,
+    "shine_cycle": 2.6,
+    "shine_step": 0.08,
     "hitstop": true,
     "shake": true,
     "particles": true,

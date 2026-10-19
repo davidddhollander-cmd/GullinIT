@@ -3,6 +3,7 @@ extends Node2D
 ## Scattered items remain owned by their source until the gull or owner claims them.
 signal collected(position: Vector2, food_id: String, scrap: bool)
 signal bag_collected
+signal bin_opened
 var game: BeachGame
 var items: Array[Dictionary] = []
 var raids: Dictionary = {}
@@ -10,6 +11,7 @@ var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var peck_cooldown: float = 0.0
 var peck_flash: float = 0.0
 var bins: Array[Dictionary] = []
+var shine_clock: float = 0.0
 
 func setup(owner_game: BeachGame) -> void:
 	game = owner_game
@@ -35,6 +37,26 @@ func nearby_bin(include_empty: bool = false) -> Dictionary:
 func has_nearby_source() -> bool:
 	return nearby_stash(true) != null or not nearby_bin(true).is_empty()
 
+func nearby_toddler() -> BeachTarget:
+	if game.player.state != BeachGull.State.GROUNDED:
+		return null
+	var beak: Vector2 = game.player.beak()
+	var reach: float = float(Config.tuning.world.peck_reach)
+	var vertical_tolerance: float = float(Config.tuning.world.toddler_peck_vertical_tolerance)
+	var nearest: BeachTarget
+	var distance: float = INF
+	for target: BeachTarget in game.spawner.targets:
+		if not is_instance_valid(target) or target.kind != "toddler" or not target.food or target.leaving or target.dropped_pending or not Config.foods.has(target.food_id):
+			continue
+		var food: Vector2 = target.food_position()
+		var forward_gap: float = (food.x-beak.x)*game.player.facing
+		if forward_gap < 0.0 or forward_gap > reach or absf(food.y-beak.y) > vertical_tolerance:
+			continue
+		if forward_gap < distance:
+			distance = forward_gap
+			nearest = target
+	return nearest
+
 func nearby_stash(include_empty: bool = false) -> BeachTarget:
 	if game.player.state != BeachGull.State.GROUNDED:
 		return null
@@ -52,6 +74,9 @@ func nearby_stash(include_empty: bool = false) -> BeachTarget:
 func peck() -> bool:
 	if peck_cooldown > 0 or not game.running:
 		return false
+	var toddler: BeachTarget = nearby_toddler()
+	if toddler != null:
+		return _peck_toddler(toddler)
 	var owner: BeachTarget = nearby_stash()
 	if owner == null:
 		var bin: Dictionary = nearby_bin()
@@ -100,6 +125,16 @@ func peck() -> bool:
 	queue_redraw()
 	return true
 
+func _peck_toddler(toddler: BeachTarget) -> bool:
+	if not toddler.knock_food(game.player):
+		return false
+	peck_cooldown = float(Config.tuning.world.peck_cooldown)
+	peck_flash = 0.15
+	game.effects.message(toddler.food_position()-Vector2(0,10),"PECK!",BeachUI.GOLD)
+	Audio.play("click")
+	queue_redraw()
+	return true
+
 func _peck_bin(bin: Dictionary) -> bool:
 	var t: Dictionary = Config.tuning.world
 	peck_cooldown = float(t.peck_cooldown)
@@ -121,9 +156,12 @@ func _peck_bin(bin: Dictionary) -> bool:
 			bin.remaining = int(bin.remaining)-1
 			var choices: Array = t.bin_scatter
 			var kind: String = str(choices[int(bin.scatter_index)%choices.size()])
+			var is_food: bool = Config.foods.has(kind)
 			bin.scatter_index = int(bin.scatter_index)+1
 			var direction: float = -1.0 if i%2 == 0 else 1.0
-			items.append({"owner":null,"source":"bin","food_id":"crumbs" if kind == "crumbs" else "","garbage":kind != "crumbs","garbage_kind":kind,"position":Vector2(float(bin.x),float(t.ground)-12),"velocity":Vector2(direction*rng.randf_range(35,65),-rng.randf_range(65,95)),"grounded":false,"age":0.0})
+			items.append({"owner":null,"source":"bin","food_id":kind if is_food else "","garbage":not is_food,"garbage_kind":kind,"position":Vector2(float(bin.x),float(t.ground)-12),"velocity":Vector2(direction*rng.randf_range(35,65),-rng.randf_range(65,95)),"grounded":false,"age":0.0})
+		if count > 0:
+			bin_opened.emit()
 	queue_redraw()
 	return true
 
@@ -142,6 +180,9 @@ func add_knocked_food(owner: BeachTarget, food_id: String, at: Vector2, impulse:
 	queue_redraw()
 
 func tick(delta: float) -> void:
+	shine_clock += delta
+	for bin: Dictionary in bins:
+		game.beach.set_bin_full(float(bin.x),int(bin.remaining) > 0)
 	peck_cooldown = maxf(0,peck_cooldown-delta)
 	peck_flash = maxf(0,peck_flash-delta)
 	var t: Dictionary = Config.tuning.world
@@ -331,7 +372,15 @@ func _draw() -> void:
 			var definition: Dictionary = Config.foods[item.food_id]
 			var size: Vector2 = Vector2(definition.size[0],definition.size[1])
 			var texture: Texture2D = Config.frames(definition.sprite).get_frame_texture(&"idle",0)
-			draw_texture_rect(texture,Rect2(item.position-size*0.5,size),false)
+			var rect: Rect2 = Rect2(item.position-size*0.5,size)
+			draw_texture_rect(texture,rect,false)
+			# Glint only once the item can be picked up and the gull has room for it.
+			if float(item.get("age",1.0)) >= float(Config.tuning.world.stash_pickup_delay) and is_instance_valid(game) and game.player.can_collect_food(item.food_id):
+				if not item.has("shine_seed"):
+					item.shine_seed = fposmod(float(item.position.x)*0.37,3.0)
+				var glint: Texture2D = PickupShine.overlay(texture,shine_clock,float(item.shine_seed))
+				if glint != null:
+					draw_texture_rect(glint,rect,false)
 	if peck_flash > 0 and is_instance_valid(game):
 		draw_line(game.player.beak(),game.player.beak()+Vector2(game.player.facing*7,4),BeachUI.GOLD,2)
 	for owner: BeachTarget in raids.keys():

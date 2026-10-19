@@ -4,7 +4,7 @@ The first three levels use authored JSON layouts with deterministic +/-3 positio
 
 | Level | Geometry | Cast and rhythm |
 | --- | --- | --- |
-| Training Day | 800 units of sand; open flight area, customer, bag, family | Four actors, calm air, slower customer and longer warnings. Five action-driven lessons on the first visit. |
+| Training Day | 800 units of sand; open flight area, customer, bag, family | Four actors, calm air, slower customer and longer warnings. Six action-driven lessons on the first visit. |
 | Family Picnic | 1040 units of sand; quiet sunbathers, separated families, kiosk | Seven actors; gentle steady breeze; family restocking creates moving opportunities. No rival, dog, or pier. |
 | Boardwalk Bustle | 1280 units; promenade begins at 430, pier at 920 | Sunbather, two customers, dog owner, pier diner. Gary arrives after the first swallowed non-scrap snack. No vendor or lifeguard. |
 
@@ -16,7 +16,8 @@ The first-level opening panel waits for the **LET'S GULL IT** button. Mouse, tou
 2. Land and collect a ground scrap.
 3. Make a direct held-snack snatch during a dive, then climb above y=100 without a stun or crash.
 4. Peck a sunbather bag and collect a snack from it. Bin crumbs and unrelated food do not advance this lesson.
-5. Choose another held snack and repeat the clean swoop and escape without a target highlight.
+5. Land by the highlighted bin and tap peck four times to release scraps and litter. Ordinary crumb collection does not complete this lesson. The practice bin is restocked when this lesson begins.
+6. Choose another held snack and repeat the clean swoop and escape without a target highlight.
 
 The lesson index is saved after each success. Restart resumes an unfinished course; Train Again starts at lesson zero. Course completion has its own saved flag, unlocks level two, and does not fabricate stars or a Practice time. The normal Training Day level card always opens the lessons: unfinished courses resume their checkpoint, while completed courses show REPLAY LESSONS and start at lesson zero. Replaying a completed course leaves existing records intact. The other levels use the selected Arcade/Practice mode.
 

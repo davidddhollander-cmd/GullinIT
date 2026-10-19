@@ -17,6 +17,8 @@ var bin_wobble: Array[float] = []
 var bin_wobble_duration: Array[float] = []
 var bin_wobble_strength: Array[float] = []
 var bin_release_bounce: Array[bool] = []
+var bin_full: Array[bool] = []
+var bin_glints: Array[Sprite2D] = []
 var font: Font = preload("res://assets/fonts/gull_pixel.fnt")
 
 func setup(entries: Array, zone_entries: Array = [], world_settings: Dictionary = {}) -> void:
@@ -28,6 +30,8 @@ func setup(entries: Array, zone_entries: Array = [], world_settings: Dictionary 
 		bin_wobble_duration.append(BIN_WOBBLE_TIME)
 		bin_wobble_strength.append(BIN_WOBBLE_ANGLE)
 		bin_release_bounce.append(false)
+		bin_full.append(true)
+		bin_glints.append(null)
 		var sprite: AnimatedSprite2D = AnimatedSprite2D.new()
 		sprite.sprite_frames = Config.frames(entry.type)
 		sprite.play(&"idle")
@@ -37,6 +41,13 @@ func setup(entries: Array, zone_entries: Array = [], world_settings: Dictionary 
 		add_child(sprite)
 		prop_sprites.append(sprite)
 		_apply_prop_art(sprite,entry)
+		if entry.type == "bin":
+			# The glint is a child so it rotates and bounces with the wobbling bin.
+			var glint: Sprite2D = Sprite2D.new()
+			glint.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			glint.visible = false
+			sprite.add_child(glint)
+			bin_glints[bin_glints.size()-1] = glint
 		if entry.type in ["kiosk","hotdog_stand"]:
 			var sign_node: Node2D = preload("res://scripts/stand_sign.gd").new()
 			sign_node.hotdog = entry.type == "hotdog_stand"
@@ -69,8 +80,18 @@ func wobble_bin(x: float, progress: float = 0.0, released: bool = false) -> void
 			bin_release_bounce[i] = released
 			return
 
+func set_bin_full(x: float, full: bool) -> void:
+	for i: int in props.size():
+		if props[i].type == "bin" and absf(float(props[i].x)-x) < 0.1:
+			bin_full[i] = full
+
 func tick(delta: float) -> void:
 	time += delta
+	for i: int in props.size():
+		if is_instance_valid(bin_glints[i]):
+			var glint: Texture2D = PickupShine.overlay(Config.frames("bin").get_frame_texture(&"idle",0),time,float(props[i].x)*0.37) if bin_full[i] else null
+			bin_glints[i].texture = glint
+			bin_glints[i].visible = glint != null
 	for i: int in props.size():
 		if props[i].type != "bin" or bin_wobble[i] <= 0.0:
 			continue

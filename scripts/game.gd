@@ -38,7 +38,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	level = definition
 	Config.apply_level_world(level)
 	training = bool(level.get("tutorial",false)) and (force_training or not bool(GameState.entry(1).get("training_complete",false)))
-	lesson = 0 if force_training else clampi(int(GameState.entry(1).get("training_step",0)),0,4)
+	lesson = 0 if force_training else clampi(int(GameState.entry(1).get("training_step",0)),0,5)
 	casual = is_casual and not training
 	rng.seed = int(level.seed) + 91
 	wind.setup(level)
@@ -82,6 +82,10 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	)
 	stash_raids.bag_collected.connect(func() -> void:
 		if training and lesson == 3 and training_raid_started:
+			_training_advance()
+	)
+	stash_raids.bin_opened.connect(func() -> void:
+		if training and lesson == 4:
 			_training_advance()
 	)
 	pending_rivals = level.rivals.duplicate(true)
@@ -264,12 +268,13 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 				pilot.took_food(target.food_value())
 				effects.message(gull.position,"MINE!",Color("ffc65c"))
 
-func _award(value: int, risky: bool, upwind: bool, mugged: bool) -> void:
+func _award(value: int, risky: bool, upwind: bool, mugged: bool) -> int:
 	var earned: int = score.snatch(value,risky,upwind,mugged)
 	var quip: String = "MUGGED!" if mugged else str(Config.quips.snatch[rng.randi_range(0,Config.quips.snatch.size()-1)])
 	effects.message(player.position-Vector2(0,15),"+%d %s" % [earned,quip],Color("ffc65c"))
 	effects.impact(player.position,false)
 	Audio.play("snatch",1+score.tier*0.08)
+	return earned
 
 func _stunned() -> void:
 	training_clean_snatch = false
@@ -284,7 +289,7 @@ func _stunned() -> void:
 
 func _crashed() -> void:
 	training_clean_snatch = false
-	score.points = 0
+	score.points = ceili(score.points * 0.5)
 	score.stunned()
 	effects.message(player.position-Vector2(0,20),"TRY AGAIN - LESSON SAVED" if training else "CRASH! POINTS LOST",Color("ef725c"))
 	effects.impact(player.position,true)
@@ -301,8 +306,10 @@ func _swallowed(snack: Dictionary) -> void:
 		score.points += value
 		effects.message(player.position,"+%d" % value,Color("ffc65c"))
 		Audio.play("snatch")
+		overlay.show_score_announcement(str(snack.id),value)
 	else:
-		_award(value,snack.get("risky",false),snack.get("upwind",false),snack.get("mugged",false))
+		var earned: int = _award(value,snack.get("risky",false),snack.get("upwind",false),snack.get("mugged",false))
+		overlay.show_score_announcement(str(snack.id),earned)
 		if not pending_rivals.is_empty():
 			_release_rivals()
 			effects.message(player.position-Vector2(0,22),"GARY JOINS THE LUNCH RUSH!",BeachUI.GOLD)
@@ -350,7 +357,7 @@ func finish() -> void:
 	input.clear_touch()
 	var result: Dictionary = score.result(level,casual,elapsed)
 	if training:
-		if lesson < 5:
+		if lesson < 6:
 			running = true
 			input.enabled = true
 			return
@@ -364,15 +371,20 @@ func finish() -> void:
 	level_finished.emit(result)
 
 func _training_snatch(_target: BeachTarget) -> void:
-	if lesson in [2,4]:
+	if lesson in [2,5]:
 		training_clean_snatch = true
 
 func _training_advance() -> void:
 	lesson += 1
 	training_clean_snatch = false
+	if lesson == 4:
+		# A bin explored earlier must still support a complete practice attempt.
+		for bin: Dictionary in stash_raids.bins:
+			bin.remaining = int(Config.tuning.world.bin_stash_size)
+			bin.pecks = 0
 	GameState.save_training_step(lesson)
 	effects.message(player.position-Vector2(0,24),"LESSON COMPLETE",BeachUI.GOLD)
-	if lesson >= 5:
+	if lesson >= 6:
 		finish()
 
 func _training_tick(delta: float) -> void:
@@ -382,7 +394,7 @@ func _training_tick(delta: float) -> void:
 			training_took_off = true
 		if training_took_off and player.state == BeachGull.State.GLIDE and player.position.x > float(level.world.start_x) + 30:
 			_training_advance()
-	elif lesson in [2,4] and training_clean_snatch and player.position.y < 100 and player.velocity.y <= 0 and player.state in [BeachGull.State.GLIDE,BeachGull.State.STRIKE]:
+	elif lesson in [2,5] and training_clean_snatch and player.position.y < 100 and player.velocity.y <= 0 and player.state in [BeachGull.State.GLIDE,BeachGull.State.STRIKE]:
 		_training_advance()
 	# Lessons cannot run out of food. Restore only after all loose food clears,
 	# so a missed peck never duplicates an item still lying on the beach.
@@ -429,10 +441,13 @@ func training_text() -> String:
 		2:
 			return "SNACK TAKEN! AIM UP AND CLIMB" if training_clean_snatch else "DIVE: %s\nTAP %s AT THE SNACK. THEN AIM UP" % [dive_key,peck_key]
 		3: return "LAND BESIDE THE PICNIC BAG\nTAP %s THREE TIMES. COLLECT FOOD" % peck_key
-		4: return "ONE MORE CLEAN SWOOP THEN ESCAPE\nCHOOSE A HELD SNACK YOURSELF"
+		4: return "LAND BY THE BIN. TAP %s %d TIMES\nSCRAPS ARE FOOD. WRAPPERS ARE NOT" % [peck_key,int(Config.tuning.world.bin_pecks)]
+		5: return "ONE MORE CLEAN SWOOP THEN ESCAPE\nCHOOSE A HELD SNACK YOURSELF"
 	return "TRAINING COMPLETE!"
 
 func training_target() -> Vector2:
+	if lesson == 4 and not stash_raids.bins.is_empty():
+		return Vector2(float(stash_raids.bins[0].x),float(Config.tuning.world.ground)-18)
 	if lesson == 0:
 		return Vector2(245,75)
 	if lesson == 1:

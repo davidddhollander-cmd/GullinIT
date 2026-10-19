@@ -2,15 +2,21 @@
 
 | Category | Food | Base points | Where it appears |
 | --- | --- | ---: | --- |
-| Small | Crumbs | 2 | Sand |
-| Small | Single chip | 5 | Sand |
-| Medium | Box of crisps | 20 | Sunbathers, picnic families, kiosk customers |
-| Medium | Ice cream | 15 | Toddlers, kiosk customers |
-| Medium | Bag of crisps | 15 | Sunbathers, picnic families, kiosk customers |
-| Large | Full hotdog | 30 | Dog owners |
-| Large | Fried fish | 40 | Pier diners, seafood vendors |
+| Small | Crumbs | 5 | Sand, bins |
+| Small | Single chip | 10 | Sand |
+| Small | Cookie | 15 | Picnic families |
+| Small | Half-eaten doughnut | 10 | Bins |
+| Small | Half-eaten sandwich | 15 | Bins |
+| Small | Half-eaten pizza | 20 | Bins |
+| Medium | Box of crisps | 35 | Sunbathers, picnic families, kiosk customers |
+| Medium | Ice cream | 25 | Toddlers, kiosk customers |
+| Medium | Bag of crisps | 30 | Sunbathers, picnic families, kiosk customers |
+| Large | Full hotdog | 45 | Dog owners |
+| Large | Fried fish | 55 | Pier diners, seafood vendors |
 
-Ground pickups repeat two crumbs followed by one chip and replenish after 18 seconds. They award their listed points without combos or practice-snatch credit. Held food receives the existing risk, upwind and combo bonuses. Rivals use the same food values. Food category does not add weight or an eating delay in this first pass. Lifeguards carry no food.
+Ground pickups repeat two crumbs followed by one chip and replenish after 18 seconds. They award their listed points without combos or practice-snatch credit. Held food receives the existing risk, upwind and combo bonuses. Rivals use the same food values. Food category controls digestion capacity and eating time; the normal queue awards points on swallowing. Lifeguards carry no food. A crash retains half the current points, rounded up for odd totals, and resets the combo.
+
+Bins include the three half-eaten leftovers as finite edible scraps alongside crumbs, wrappers and paper. Each bin contains one of each new leftover, two crumb pickups and four inert litter objects. Four pecks release three objects, for three bursts before depletion. Leftovers render at 8 × 8 pixels and use the normal small-snack digestion time (0.5 seconds airborne, twice as fast grounded); points are awarded only on swallowing, without combo or practice credit. See `BIN_LEFTOVER_ART.md` for the fixed sequence, artwork and validation.
 
 `data/foods.json` owns food definitions independently from the person carrying them. `data/targets.json` provides each person's pool of allowed foods, selected using the level's random generator when they spawn. Replenishment retains that person's selected food. Restart a level to apply changed pools.
 
@@ -18,7 +24,7 @@ Seven transparent sprites were created with the built-in ChatGPT image generator
 
 The game draws small foods at 7×5 pixels, medium foods at 7–11×11–13 pixels, and large foods at 17–18×12–13 pixels. Pickup areas follow those sizes. `tests/food_preview.gd` renders both enlarged previews and actual sizes, captured to `test-output/food-preview.png` by `tools/validate.ps1 -Capture`.
 
-Validation: 358 integration checks passed in a rendered Godot 4.7.2 run. Tests cover atlas bounds, seven-category membership, chip collection and duplicate prevention, food-specific scoring, separate risk bonuses and valid food choices for every person type. Level star thresholds are unchanged; human playtesting should assess the new score balance.
+The new values keep bin leftovers below the medium and large meals while making each progressively richer. Level star thresholds are unchanged; human playtesting should assess the new score balance.
 
 ## Generation prompt
 

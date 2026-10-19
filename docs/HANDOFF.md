@@ -126,9 +126,9 @@ Sleeping sunbathers now allow their crisp box or crisp bag to be stolen either b
 
 Rendered Godot validation passes 373 checks with zero failures, including both snack choices and approach directions, downward and rising sweeps, landing-frame collection, miss geometry, one award before respawn, crash/stun priority, ground scraps, and exclusion of awake defensive targets. The captured `sunbather-walkup.png` confirms the detailed gull reaches the snack location without an oversized global pickup range.
 
-## Latest food pass
+## Original food pass
 
-Implemented seven independent food definitions across small, medium and large categories, with generated transparent sprites integrated into ground pickups and held food. Crumbs award 2, chips 5, ice cream/crisp bags 15, crisp boxes 20, hotdogs 30 and fried fish 40. People choose from configured food pools; scoring, rival priorities and pickup sizes use the food definition. Small bites remain separate from combo/practice snatches. Curated food atlas entries survive placeholder regeneration. See `docs/FOOD.md` for exact mappings, asset provenance and the generation prompt.
+The first food pass introduced seven independent definitions across small, medium and large categories, with generated transparent sprites integrated into ground pickups and held food. People choose from configured food pools; scoring, rival priorities and pickup sizes use the food definition. Small bites remain separate from combo/practice snatches. Curated food atlas entries survive placeholder regeneration. The current catalog has eleven foods and updated point values; see `docs/FOOD.md` for exact mappings and artwork details.
 
 Rendered Godot validation passes 358 checks, zero failures. Inspected the in-engine food gallery at enlarged and actual gameplay sizes. Balance and tiny-sprite readability still warrant human playtesting; platform export status below is unchanged.
 

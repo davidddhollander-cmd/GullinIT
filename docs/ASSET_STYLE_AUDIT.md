@@ -1,5 +1,7 @@
 # Gullin' It asset style audit
 
+19 October 2026 update: the five native adult atlases described below have been replaced using the selected review artwork plus three supplemental motion sources. Their earlier geometric-silhouette findings are resolved by that replacement; held reaction poses and adapted chase cycles remain documented limitations. See `ADULT_ASSET_REPLACEMENT_V3.md` and `assets/previews/adult-replacement-review-v3.png`. The remaining audit is the historical 17 October snapshot.
+
 17 October 2026. Visual target: the native 320 × 180, hard-edged, restrained-palette, 32-bit-era pixel style in `RETRO_ADULT_CAST_STYLE.md` and `RETRO_ENVIRONMENT_STYLE.md`. Judgements below use `data/sprites.json`, runtime rendering settings, generated level placement, and recent in-game captures. `*.import` files are generated metadata, not separate art.
 
 **Inventory:** 58 sprite source images, 22 review/render PNGs, 1 reference PNG, 3 font files, 1 app icon, 3 shaders, and 6 WAV files. The sprite registry names 37 distinct source images. Three additional sunbather colour/sex sheets are loaded directly by `SunbatherArt`, giving 40 production-referenced sprite images. The other 18 sprite images are old or unmapped sources. Some registered props and icons are still dormant in generated levels.

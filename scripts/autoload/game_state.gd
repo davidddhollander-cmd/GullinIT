@@ -44,7 +44,7 @@ func save_training_step(step: int) -> void:
 	var previous: Dictionary = entry(1)
 	if bool(previous.get("training_complete", false)):
 		return
-	var next_step: int = clampi(step, 0, 5)
+	var next_step: int = clampi(step, 0, 6)
 	if next_step <= int(previous.get("training_step", 0)):
 		return
 	previous.training_step = next_step
@@ -53,7 +53,7 @@ func save_training_step(step: int) -> void:
 
 func complete_training() -> void:
 	var previous: Dictionary = entry(1)
-	previous.training_step = 5
+	previous.training_step = 6
 	previous.training_complete = true
 	progress["1"] = previous
 	save_progress()

@@ -1,5 +1,7 @@
 # Retro adult cast style and animation specification
 
+**19 October 2026 replacement:** the user selected the existing review artwork for replacing the geometric production cast. See `ADULT_ASSET_REPLACEMENT_V3.md` for the active source mapping, three supplemental generated sheets, preparation workflow and motion limitations. The historical direct-drawing source description and strict independent-cycle requirements below describe the earlier pass; they are not claims about the current reused keyframe set.
+
 Status: implemented native-pixel pass, 15 October 2026. Applies to the beach mums and male/female sunbathers. The target is a chunky 32-bit-era handheld/arcade sprite, with the visible pixels and restrained palette of a native low-resolution game asset. “32-bit” describes the period and visual character, not the PNG colour depth. The first review sheets were too finely shaded and are rejected as production art.
 
 ## Visual rules

@@ -2,7 +2,7 @@
   "crumbs": {
     "name": "Crumbs",
     "category": "small",
-    "points": 2,
+    "points": 5,
     "sprite": "food_crumbs",
     "size": [
       3,
@@ -17,7 +17,7 @@
   "single_chip": {
     "name": "Single chip",
     "category": "small",
-    "points": 5,
+    "points": 10,
     "sprite": "food_single_chip",
     "size": [
       4,
@@ -32,7 +32,7 @@
   "crisps_box": {
     "name": "Box of crisps",
     "category": "medium",
-    "points": 20,
+    "points": 35,
     "sprite": "food_crisps_box",
     "size": [
       6,
@@ -48,7 +48,7 @@
     "reclaim_chance": 0.0,
     "name": "Ice cream",
     "category": "medium",
-    "points": 15,
+    "points": 25,
     "sprite": "food_ice_cream",
     "size": [
       4,
@@ -64,7 +64,7 @@
     "reclaim_chance": 1.0,
     "name": "Bag of crisps",
     "category": "medium",
-    "points": 15,
+    "points": 30,
     "sprite": "food_crisps_bag",
     "size": [
       6,
@@ -80,7 +80,7 @@
     "reclaim_chance": 0.5,
     "name": "Full hotdog",
     "category": "large",
-    "points": 30,
+    "points": 45,
     "sprite": "food_hotdog",
     "size": [
       8,
@@ -95,7 +95,7 @@
   "fried_fish": {
     "name": "Fried fish",
     "category": "large",
-    "points": 40,
+    "points": 55,
     "sprite": "food_fried_fish",
     "size": [
       9,
@@ -110,7 +110,7 @@
   "cookie": {
     "name": "Cookie",
     "category": "small",
-    "points": 8,
+    "points": 15,
     "sprite": "food_cookie",
     "size": [
       3,
@@ -121,5 +121,32 @@
       1.5
     ],
     "ground": false
+  },
+  "half_eaten_doughnut": {
+    "name": "Half-eaten doughnut",
+    "category": "small",
+    "points": 10,
+    "sprite": "food_half_eaten_doughnut",
+    "size": [8, 8],
+    "pickup_radius": [4, 4],
+    "ground": true
+  },
+  "half_eaten_sandwich": {
+    "name": "Half-eaten sandwich",
+    "category": "small",
+    "points": 15,
+    "sprite": "food_half_eaten_sandwich",
+    "size": [8, 8],
+    "pickup_radius": [4, 4],
+    "ground": true
+  },
+  "half_eaten_pizza": {
+    "name": "Half-eaten pizza",
+    "category": "small",
+    "points": 20,
+    "sprite": "food_half_eaten_pizza",
+    "size": [8, 8],
+    "pickup_radius": [4, 4],
+    "ground": true
   }
 }
