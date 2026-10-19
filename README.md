@@ -103,5 +103,7 @@ godot --headless --path . --export-release 'Windows Desktop'
 godot --headless --path . --export-release 'Web'
 ```
 
+Web build for itch.io: run `tools/export_web.sh` (exports from a temp copy, writes `build/web/` and `build/GullinIt-web.zip`). Upload the zip to itch.io with Kind of project = HTML, tick "This file will be played in the browser", viewport 1280x720, enable the fullscreen button. SharedArrayBuffer support is NOT needed because the build is single-threaded.
+
 These presets are configuration, not evidence of a tested release. No mobile platform presets, signing credentials, or native-device certification are included.
 
