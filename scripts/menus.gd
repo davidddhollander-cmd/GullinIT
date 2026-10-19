@@ -32,10 +32,33 @@ func hint(parent: Control, text: String) -> void:
 	node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	node.custom_minimum_size.x = 150
 
+const GLINT: Shader = preload("res://assets/shaders/title_glint.gdshader")
+
 func title() -> void:
-	clear("GULLIN' IT", "SMALL BIRD. BIG APPETITE.", true)
+	clear("GULLIN' IT", "Just another Seagull Simulator", true)
+	var heading: Label = content.get_child(0) as Label
+	content.get_child(1).add_theme_color_override("font_color",Color("ef725c"))
+	var logo: TextureRect = TextureRect.new()
+	logo.texture = load("res://assets/sprites/title-logo.png")
+	logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	logo.stretch_mode = TextureRect.STRETCH_SCALE
+	logo.size = Vector2(175,26)
+	logo.position.y = 1.5
+	logo.material = ShaderMaterial.new()
+	logo.material.shader = GLINT
+	var slot: Control = Control.new()
+	slot.custom_minimum_size = Vector2(175,29)
+	slot.add_child(logo)
+	content.add_child(slot)
+	content.move_child(slot,0)
+	content.remove_child(heading)
+	heading.queue_free()
+	var tween: Tween = logo.create_tween().set_loops()
+	tween.tween_property(logo,"position:y",3.0,1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(logo,"position:y",0.0,1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	var gap: Control = Control.new()
-	gap.custom_minimum_size.y = 6
+	gap.custom_minimum_size.y = 2
 	content.add_child(gap)
 	var row: HBoxContainer = HBoxContainer.new()
 	content.add_child(row)
