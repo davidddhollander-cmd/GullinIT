@@ -12,7 +12,7 @@ rm -rf "$WORK"; mkdir -p "$WORK"
 (cd "$SRC" && tar --exclude=./.tools --exclude=./.git --exclude=./test-output \
   --exclude=./build --exclude=./export_templates --exclude=./.godot -cf - .) | (cd "$WORK" && tar xf -)
 cd "$WORK"; mkdir -p build/web
-# Web preset: skip mobile VRAM compression (export fails with it unless project enables ETC2/ASTC import).
+# Safety net; the committed preset already disables mobile VRAM compression.
 sed -i 's#vram_texture_compression/for_mobile=true#vram_texture_compression/for_mobile=false#' export_presets.cfg
 "$GODOT" --headless --path . --editor --import --quit >/dev/null 2>&1
 "$GODOT" --headless --path . --export-release "Web" build/web/index.html
