@@ -189,7 +189,7 @@ func _physics_process(delta: float) -> void:
 		if is_instance_valid(pilot.target) and pilot.target.food:
 			claims[pilot.target] = pilot
 	for pilot: RivalPilot in pilots:
-		pilot.tick(step,spawner.targets,claims,wind)
+		pilot.tick(step,spawner.targets,claims,wind,player.position)
 	for target: BeachTarget in spawner.targets.duplicate():
 		target.tick(step,gulls)
 	stash_raids.tick(step)

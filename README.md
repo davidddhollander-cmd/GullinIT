@@ -79,6 +79,8 @@ The player gull now uses the supplied sprite-sheet artwork with standing, walkin
 - `tools/generate_assets.py`: original placeholder pixel art, font, sounds, and initial JSON generator (Python standard library only). **Running it overwrites assets and tuning data**, including hand edits; back up changes first.
 - Menu typography uses the bundled 8 px GullPixel bitmap face at its native size or an exact 2x size. Keep menu font overrides on that 8 px grid so one-pixel letter strokes stay crisp.
 
+Rival gulls (`scripts/rival_gull.gd`) run a small state machine: patrol across the whole beach, stalk the best held snack (scored by value and distance, skipping defended or already-claimed food), line up at a horizontal offset that gives a ~40 degree swoop, dive after a reaction delay, peck, then pull out. After a theft they flee away from the player and rest before hunting again; the mugging window is unchanged. Level profiles still set `speed` (also scales reaction and rest time) and `accuracy_px` (dive aim error is `accuracy_px * aim_spread`). Tuning keys in `data/tuning.json` -> `rival`: `search_radius` 900, `lineup_ratio` 1.2, `lineup_tolerance` 10, `reaction_delay` 0.45, `retarget_interval` 1.5, `cooldown` 3, `aim_spread` 2.0, `miss_cooldown` 0.8, `edge_margin` 40, plus the existing `leave_time`, `mug_window`, `mug_stun` and `cruise_y`. `tests/rival_ai_checks.gd` simulates 90 s on levels 3, 4 and 6.
+
 F2 reloads JSON and refreshes art during play. Reload validates parsing, top-level tuning sections, food categories/values and food references; preserve the supplied schema and numeric ranges. Restart to apply changed level spawns, food choices or rival profiles. Keep active food IDs when reloading an existing level.
 
 ## Validation
