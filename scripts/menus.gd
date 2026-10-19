@@ -65,7 +65,7 @@ func level_select(casual: bool) -> void:
 		var record: Dictionary = GameState.entry(id)
 		var unlocked: bool = GameState.unlocked(id)
 		var stars: String = "*".repeat(int(record.get("stars",0)))
-		var status: String = "LOCKED" if not unlocked else (("REPLAY LESSONS" if trained else "BEGIN LESSON") if id == 1 else "BEST %d" % int(record.get("best",0)))
+		var status: String = "FULL GAME" if GameState.demo_locked(id) else ("LOCKED" if not unlocked else (("REPLAY LESSONS" if trained else "BEGIN LESSON") if id == 1 else "BEST %d" % int(record.get("best",0))))
 		var caption: String = "%02d %s\n%s\n%s" % [id,stars,level.name.to_upper().replace(" ","\n"),status]
 		var button: Button = BeachUI.button(grid,caption,func() -> void: choose("start",id),82)
 		button.size_flags_horizontal = SIZE_EXPAND_FILL
@@ -75,9 +75,13 @@ func level_select(casual: bool) -> void:
 			button.grab_focus()
 	var actions: HBoxContainer = HBoxContainer.new()
 	content.add_child(actions)
+	var with_feedback: bool = not GameState.feedback_url().is_empty()
+	var action_width: int = 86 if with_feedback else 100
 	if trained:
-		BeachUI.button(actions,"TRAIN AGAIN",func() -> void: choose("train_again"),100)
-	BeachUI.button(actions,"< BACK",func() -> void: choose("title"),100)
+		BeachUI.button(actions,"TRAIN AGAIN",func() -> void: choose("train_again"),action_width)
+	if with_feedback:
+		BeachUI.button(actions,"FEEDBACK",func() -> void: choose("feedback"),action_width)
+	BeachUI.button(actions,"< BACK",func() -> void: choose("title"),action_width)
 
 func pause() -> void:
 	clear("TAKING A BREATHER", "YOUR LUNCH CAN WAIT.")

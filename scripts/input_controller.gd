@@ -10,6 +10,21 @@ var climb_fingers: Dictionary = {}
 var gamepad: bool = false
 var touch_visible: bool = false
 var enabled: bool = false
+# Compact right-thumb cluster (logical 320x180 coordinates). FLAP sits in the
+# corner, DIVE above it and PECK beside it, so the right thumb can peck mid-dive
+# while the left thumb keeps steering. The overlay draws these same rects.
+const TOUCH_BUTTONS: Dictionary = {
+	"peck": Rect2(226,149,42,22),
+	"flap": Rect2(272,149,44,22),
+	"dive": Rect2(272,124,44,21),
+}
+const TOUCH_SLOP: float = 2.0
+
+static func touch_button_at(point: Vector2) -> String:
+	for kind: String in TOUCH_BUTTONS:
+		if (TOUCH_BUTTONS[kind] as Rect2).grow(TOUCH_SLOP).has_point(point):
+			return kind
+	return ""
 
 static func register_actions() -> void:
 	var keys: Dictionary = {"climb":[KEY_SPACE],"dive":[KEY_SHIFT],"pause":[KEY_ESCAPE],"restart":[KEY_R],"fullscreen":[KEY_F11],"debug":[KEY_F1],"reload":[KEY_F2],"aim_left":[KEY_A,KEY_LEFT],"aim_right":[KEY_D,KEY_RIGHT],"aim_up":[KEY_W,KEY_UP],"aim_down":[KEY_S,KEY_DOWN]}
@@ -54,13 +69,13 @@ func _input(event: InputEvent) -> void:
 		gamepad = false
 		touch_visible = true
 		if event.pressed:
-			if event.position.y > 144 and event.position.x > 150 and event.position.x <= 208:
+			var button: String = touch_button_at(event.position)
+			if button == "peck":
 				touch_peck = true
-			elif event.position.y > 144 and event.position.x > 208:
-				if event.position.x < 266:
-					climb_fingers[event.index] = true
-				else:
-					touch_dive = true
+			elif button == "flap":
+				climb_fingers[event.index] = true
+			elif button == "dive":
+				touch_dive = true
 			elif event.position.y > 28:
 				aim_finger = event.index
 				touch_aim = event.position

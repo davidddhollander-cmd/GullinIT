@@ -10,7 +10,6 @@ var start_button: Button
 var training_panel: PanelContainer
 var lesson_label: Label
 var lesson_prompt: Label
-var touch_row: HBoxContainer
 var pause_button: Button
 var top: HBoxContainer
 var score_announcement: Label
@@ -58,15 +57,6 @@ func setup(owner_game: BeachGame) -> void:
 	space.mouse_filter = MOUSE_FILTER_IGNORE
 	space.size_flags_vertical = SIZE_EXPAND_FILL
 	column.add_child(space)
-	touch_row = HBoxContainer.new()
-	touch_row.alignment = BoxContainer.ALIGNMENT_END
-	touch_row.mouse_filter = MOUSE_FILTER_IGNORE
-	column.add_child(touch_row)
-	for caption: String in ["PECK", "FLAP", "DIVE"]:
-		var card: PanelContainer = BeachUI.panel(touch_row,Color("245369"))
-		card.mouse_filter = MOUSE_FILTER_IGNORE
-		card.custom_minimum_size = Vector2(51,27)
-		BeachUI.label(card,caption).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var training_center: CenterContainer = CenterContainer.new()
 	add_child(training_center)
 	BeachUI.full(training_center)
@@ -135,7 +125,6 @@ func _process(_delta: float) -> void:
 	if game.training:
 		lesson_label.text = "TRAINING DAY  /  LESSON %d/6" % mini(game.lesson + 1, 6)
 		lesson_prompt.text = game.training_text()
-	touch_row.visible = game.input.touch_visible and game.running
 	pause_button.visible = game.running
 
 func show_score_announcement(food_id: String, earned: int) -> void:
@@ -148,7 +137,7 @@ func show_score_announcement(food_id: String, earned: int) -> void:
 	# Training text occupies the normal top-center slot, so shift the transient
 	# callout below it rather than covering the current instruction.
 	var row: Control = score_announcement.get_parent() as Control
-	row.offset_top = 58.0 if game.training else 30.0
+	row.offset_top = training_callout_top() if game.training else 30.0
 	row.offset_bottom = row.offset_top + 24.0
 	score_announcement.modulate.a = 1.0
 	score_announcement.scale = Vector2(0.72,0.72)
@@ -196,7 +185,7 @@ func _draw() -> void:
 		if not game.training:
 			var goal: int = int(Config.tuning.score.casual_items) if game.casual else int(game.level.stars[0])
 			var progress: int = game.score.items if game.casual else game.score.points
-			var title: String = "PRACTICE" if game.casual else ("NEXT LEVEL" if int(game.level.id) < 6 else "FINAL GOAL")
+			var title: String = "PRACTICE" if game.casual else ("NEXT LEVEL" if int(game.level.id) < GameState.last_playable_level() else ("DEMO GOAL" if GameState.demo_locked(int(game.level.id) + 1) else "FINAL GOAL"))
 			draw_rect(Rect2(232,44,84,29),Color(0.094,0.23,0.30,0.9))
 			draw_string(font,Vector2(237,53),title,HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.CREAM)
 			draw_rect(Rect2(237,57,74,4),Color("397a85"))
@@ -207,24 +196,17 @@ func _draw() -> void:
 			if training_target.x >= 4 and training_target.x <= 316 and training_target.y >= 28 and training_target.y <= 165:
 				draw_arc(training_target,12,0,TAU,24,BeachUI.GOLD,2)
 				draw_arc(training_target,16,0,TAU,24,Color(1.0,0.95,0.7,0.55),1)
-		var hint_y: float = maxf(105.0,training_panel.get_rect().end.y+11) if game.training else 39.0
-		if game.player.state == BeachGull.State.GROUNDED:
-			var hint: String = "WALK FOR SCRAPS / HOLD FLAP TO FLY"
-			if game.stash_raids.nearby_toddler() != null:
-				hint = "TAP E / X / PECK AT TODDLER"
-			elif game.stash_raids.has_nearby_source():
-				hint = "TAP E / X / PECK TO SEARCH"
-			draw_string(font,Vector2(6,hint_y),hint,HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.INK)
-		elif game.player.landing_aim():
-			draw_string(font,Vector2(6,hint_y),"LANDING / HOLD FLAP TO CLIMB",HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.INK)
+		var hint: Dictionary = context_hint()
+		if not hint.is_empty():
+			var hint_box: Rect2 = hint_rect(str(hint.text))
+			var danger: bool = bool(hint.get("danger",false))
+			draw_rect(hint_box,Color(0.09,0.20,0.26,0.85))
+			if danger:
+				draw_rect(hint_box,Color("ef725c"),false,1.0)
+			draw_string(font,hint_box.position+Vector2(3,8),str(hint.text),HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("ef725c") if danger else BeachUI.CREAM)
+		if game.player.landing_aim() and game.player.state != BeachGull.State.GROUNDED:
 			var landing_x: float = clampf(aim.x,8,312)
 			draw_line(Vector2(landing_x-6,159),Vector2(landing_x+6,159),BeachUI.CREAM,2)
-		elif game.player.state == BeachGull.State.STRIKE:
-			var danger: bool = game.player.crash_warning()
-			var strike_hint: String = "PULL UP! CRASH AHEAD" if danger else ("PECK! AIM AT THE SNACK" if not game.player.peck_used else ("PECK ACTIVE" if game.player.peck_time > 0 else "PECK SPENT - DIVE AGAIN"))
-			draw_string(font,Vector2(6,hint_y),strike_hint,HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("ef725c") if danger else BeachUI.INK)
-			if danger:
-				draw_line(Vector2(4,hint_y+4),Vector2(185,hint_y+4),Color("ef725c"),2)
 		draw_arc(aim,4,0,TAU,12,Color("fff4da"))
 		draw_line(aim-Vector2(7,0),aim+Vector2(7,0),Color("fff4da"))
 		draw_line(aim-Vector2(0,7),aim+Vector2(0,7),Color("fff4da"))
@@ -247,6 +229,8 @@ func _draw() -> void:
 			draw_arc(beak,6,0,TAU,12,peck_color,2)
 			if game.player.peck_time > 0:
 				draw_line(beak-Vector2(7,10),beak-Vector2(7-14*game.player.peck_time/float(Config.tuning.dive.peck_window),10),peck_color,2)
+	if touch_buttons_visible():
+		_draw_touch_buttons()
 	var left_food: bool = false
 	var right_food: bool = false
 	var left_threat: bool = false
@@ -286,7 +270,10 @@ func _you_marker_visible() -> bool:
 func you_marker_rect(pos: Vector2) -> Rect2:
 	var initial := Vector2(roundf(clampf(pos.x-10,2,294)),roundf(clampf(pos.y-23,30,165)))
 	var obstacles: Array[Rect2] = []
-	obstacles.append(Rect2(232,44,84,29) if not game.training else training_panel.get_rect())
+	obstacles.append(Rect2(232,44,84,29) if not game.training else training_panel.get_global_rect())
+	var hint: Dictionary = context_hint()
+	if not hint.is_empty():
+		obstacles.append(hint_rect(str(hint.text)).grow(1))
 	for sign: Dictionary in game.beach.sign_layouts():
 		var board: Rect2 = sign.rect
 		board.position.x -= game.camera_x-160
@@ -306,3 +293,67 @@ func you_marker_rect(pos: Vector2) -> Rect2:
 			return candidate
 	# Near the top, keep the marker readable beside the training panel.
 	return Rect2(292,30,24,11)
+
+func input_word(kind: String) -> String:
+	if game.input.touch_visible:
+		return kind.to_upper()
+	match kind:
+		"flap":
+			return "A" if game.input.gamepad else "SPACE"
+		"peck":
+			return "X" if game.input.gamepad else "E"
+	return kind.to_upper()
+
+# One contextual hint at a time, chosen from the gull's current situation.
+func context_hint() -> Dictionary:
+	if game == null or not game.running:
+		return {}
+	var peck: String = input_word("peck")
+	var flap: String = input_word("flap")
+	if game.player.state == BeachGull.State.GROUNDED:
+		if game.stash_raids.nearby_toddler() != null:
+			return {"text":"TAP %s AT TODDLER" % peck}
+		if game.stash_raids.has_nearby_source():
+			return {"text":"TAP %s TO SEARCH" % peck}
+		return {"text":"WALK FOR SCRAPS / HOLD %s TO FLY" % flap}
+	if game.player.state == BeachGull.State.STRIKE:
+		if game.player.crash_warning():
+			return {"text":"PULL UP! CRASH AHEAD","danger":true}
+		if not game.player.peck_used:
+			return {"text":"TAP %s AT THE SNACK" % peck}
+		return {"text":"PECK ACTIVE" if game.player.peck_time > 0 else "PECK SPENT - DIVE AGAIN"}
+	if game.player.landing_aim():
+		return {"text":"LANDING / HOLD %s TO CLIMB" % flap}
+	return {}
+
+# Fixed slot: below the score callout (or the lesson panel), left of the goal panel,
+# and above the zone signs, so the hint never crosses world labels.
+func hint_rect(text: String) -> Rect2:
+	var width: float = ceilf(font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x) + 6.0
+	var y: float = training_panel.get_global_rect().end.y + 2.0 if game.training else 56.0
+	return Rect2(4.0,roundf(y),width,11.0)
+
+func touch_buttons_visible() -> bool:
+	return game != null and game.running and game.input.touch_visible
+
+func peck_available() -> bool:
+	return game.player.state in [BeachGull.State.GROUNDED,BeachGull.State.WINDUP,BeachGull.State.STRIKE]
+
+func _draw_touch_buttons() -> void:
+	for kind: String in GullInput.TOUCH_BUTTONS:
+		var box: Rect2 = GullInput.TOUCH_BUTTONS[kind]
+		var held: bool = (kind == "flap" and game.input.touch_climb)
+		var alpha: float = 0.35 if kind == "peck" and not peck_available() else 1.0
+		draw_rect(box,Color(0.14,0.33,0.41,(0.7 if held else 0.42)*alpha))
+		draw_rect(box,Color(1.0,0.96,0.85,0.55*alpha),false,1.0)
+		var caption: String = kind.to_upper()
+		var text_width: float = font.get_string_size(caption,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x
+		draw_string(font,Vector2(roundf(box.position.x+(box.size.x-text_width)*0.5),roundf(box.position.y+box.size.y*0.5+3)),caption,HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color(1.0,0.96,0.85,0.9*alpha))
+
+# During lessons the panel and hint fill the top slot, so the callout drops just
+# below the zone sign boards (over the sea) instead of covering them.
+func training_callout_top() -> float:
+	var top: float = training_panel.get_global_rect().end.y + 15.0
+	for sign: Dictionary in game.beach.sign_layouts():
+		top = maxf(top,(sign.rect as Rect2).end.y + 3.0)
+	return roundf(top)

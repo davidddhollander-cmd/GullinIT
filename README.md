@@ -51,6 +51,12 @@ Crash severity uses downward impact speed (170 by default) when the beak leads t
 
 Arcade awards stars and unlocks the next level after earning at least one star. Casual / Practice ends after 15 snatches with no time limit and keeps a separate best time; it uses the same level unlocks and does not award stars. Scores and options save to Godot's `user://save.json`.
 
+## Demo build
+
+`data/demo.json` controls the itch.io demo. With `"enabled": true`, levels after `last_level` (3) show **FULL GAME** on level select and cannot be started, even when `GameState.unlock_all` is on. Clearing level 3 shows **DEMO COMPLETE - THANKS!** on the results board. Put a form link in `feedback_url` to add **FEEDBACK** buttons to level select and the demo-complete board; they stay hidden while it is empty. Set `"enabled": false` for the full game.
+
+Contextual hints (walk/peck/landing/dive prompts) sit in one backed tag in a fixed slot: below the score callout during play, below the lesson panel during Training Day, always above the zone signs. During training the score callout drops below the sign boards. Touch controls are a translucent right-thumb cluster defined once in `GullInput.TOUCH_BUTTONS` (FLAP in the corner, DIVE above, PECK beside); PECK dims when it cannot be used. `tests/demo_polish_checks.gd` covers these rules.
+
 ## Tuning and art
 
 Ground landings and takeoffs make five small sand pixels. Bag and bin pecks squish or wobble more strongly and rise slightly in pitch as the release approaches; the final hit rebounds and adds a short accent with six dust or crumb pixels. A depleted source gives a quiet hollow tap and a brief EMPTY message that fades, with the normal peck cooldown. An available nearby source takes priority over an empty one. Particles use `juice.particles` in `data/tuning.json`, floating labels use `juice.floating_text`, and raid sounds use `juice.audio` plus the Master/SFX sliders. For replacement art, adjust `BAG_PIVOT` and `BAG_SQUISH_TIME` in `scripts/target.gd`, or `BIN_WOBBLE_TIME`, `BIN_WOBBLE_ANGLE`, and the optional per-bin `wobble_pivot_y` prop value in `scripts/beach.gd`. The particles are drawn by `scripts/effects.gd` and do not depend on sprite frames.

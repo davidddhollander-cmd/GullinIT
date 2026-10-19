@@ -70,7 +70,7 @@ func _build() -> void:
 	title_label = BeachUI.label(self, "LUNCH IS SERVED!" if passed else "STILL HUNGRY?", BeachUI.FONT_DISPLAY, CREAM)
 	_place(title_label, 43, 292, 17)
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var subtitle := BeachUI.label(self, str(level.name).to_upper(), BeachUI.FONT_NATIVE, SEA)
+	var subtitle := BeachUI.label(self, str(level.name).to_upper() + ("  /  DEMO COMPLETE - THANKS!" if demo_finished() else ""), BeachUI.FONT_NATIVE, GOLD if demo_finished() else SEA)
 	_place(subtitle, 61, 292, 9)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
@@ -101,6 +101,8 @@ func _build() -> void:
 	add_child(actions)
 	if passed and int(level.id) < 6 and GameState.unlocked(int(level.id) + 1):
 		_add_button(actions, "NEXT >", "start", int(level.id) + 1)
+	elif demo_finished() and not GameState.feedback_url().is_empty():
+		_add_button(actions, "FEEDBACK", "feedback")
 	_add_button(actions, "RETRY / R", "restart")
 	_add_button(actions, "LEVELS", "select")
 	for button: Button in buttons:
@@ -121,6 +123,10 @@ func _build() -> void:
 	fish.visible = false
 	fish.z_index = 3
 	add_child(fish)
+
+# The last demo level was cleared: the next level exists but belongs to the full game.
+func demo_finished() -> bool:
+	return passed and not bool(result.get("training", false)) and GameState.demo_locked(int(level.id) + 1) and int(level.id) < 6
 
 func _add_count_row(caption: String, value: int, y: float, format: String = "%d") -> void:
 	var label := BeachUI.label(self, "%s  0" % caption, 8, CREAM)

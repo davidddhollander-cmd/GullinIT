@@ -71,6 +71,10 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if full else DisplayServer.WINDOW_MODE_FULLSCREEN)
 		"quit":
 			get_tree().quit()
+		"feedback":
+			var url: String = GameState.feedback_url()
+			if not url.is_empty():
+				OS.shell_open(url)
 
 func start_level(id: int, force_training: bool = false) -> void:
 	clear_game()

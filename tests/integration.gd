@@ -134,6 +134,7 @@ func run() -> void:
 	await bin_shine_checks()
 	preload("res://tests/level_generator_checks.gd").run(Callable(self,"check"))
 	await generated_layout_checks()
+	await preload("res://tests/demo_polish_checks.gd").run(self,Callable(self,"check"))
 	var model: BeachScore = BeachScore.new()
 	check(model.snatch(10,false,false,false)==10,"first snatch")
 	check(model.snatch(20,true,true,true)==66,"additive bonuses before combo")
@@ -1095,13 +1096,13 @@ func input_checks() -> void:
 	check(main.game.running and main.game.player.state == BeachGull.State.GLIDE,"keyboard and controller confirmation activate focused start button")
 	var touch: InputEventScreenTouch = InputEventScreenTouch.new()
 	touch.index = 0
-	touch.position = Vector2(230,160)
+	touch.position = (GullInput.TOUCH_BUTTONS.flap as Rect2).get_center()
 	touch.pressed = true
 	get_viewport().push_input(touch, true)
 	check(main.game.input.touch_climb,"touch climb press")
 	touch = InputEventScreenTouch.new()
 	touch.index = 0
-	touch.position = Vector2(230,160)
+	touch.position = (GullInput.TOUCH_BUTTONS.flap as Rect2).get_center()
 	touch.pressed = false
 	get_viewport().push_input(touch, true)
 	check(not main.game.input.touch_climb,"touch climb release")
@@ -1513,7 +1514,7 @@ func stash_raid_checks() -> void:
 	game.input.enabled = true
 	var tap: InputEventScreenTouch = InputEventScreenTouch.new()
 	tap.index = 4
-	tap.position = Vector2(180,160)
+	tap.position = (GullInput.TOUCH_BUTTONS.peck as Rect2).get_center()
 	tap.pressed = true
 	game.input._input(tap)
 	check(game.input.touch_peck and not game.input.touch_climb,"separate touch peck does not flap")

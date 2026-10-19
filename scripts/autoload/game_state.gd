@@ -5,9 +5,29 @@ var save_path: String = "user://save.json"
 var save_error: String = ""
 # Playtest build: every level is selectable. Set to false to restore normal progression.
 var unlock_all: bool = true
+# Demo build settings from data/demo.json: levels after last_level are always
+# locked (even with unlock_all), and feedback_url powers the feedback buttons.
+var demo: Dictionary = {"enabled": false, "last_level": 6, "feedback_url": ""}
 
 func _ready() -> void:
+	load_demo()
 	load_progress()
+
+func load_demo(path: String = "res://data/demo.json") -> void:
+	if not FileAccess.file_exists(path):
+		return
+	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if data is Dictionary:
+		demo.merge(data, true)
+
+func demo_locked(id: int) -> bool:
+	return bool(demo.get("enabled", false)) and id > int(demo.get("last_level", 6))
+
+func last_playable_level() -> int:
+	return int(demo.get("last_level", 6)) if bool(demo.get("enabled", false)) else 6
+
+func feedback_url() -> String:
+	return str(demo.get("feedback_url", "")).strip_edges()
 
 func load_progress() -> void:
 	if not FileAccess.file_exists(save_path):
@@ -63,6 +83,8 @@ func entry(id: int) -> Dictionary:
 	return value.duplicate() if value is Dictionary else {}
 
 func unlocked(id: int) -> bool:
+	if demo_locked(id):
+		return false
 	if id == 1 or unlock_all:
 		return true
 	var previous: Dictionary = entry(id - 1)

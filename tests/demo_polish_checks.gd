@@ -1,0 +1,211 @@
+extends RefCounted
+## Demo polish: contextual hint slot, compact touch cluster and the levels 1-3 demo lock.
+const GOAL_PANEL := Rect2(232,44,84,29)
+const MINIMAP := Rect2(108,170,106,7)
+const OLD_TOUCH_AREA := 3 * 51 * 27
+
+static func _buttons(node: Node, found: Array[Button]) -> Array[Button]:
+	for child: Node in node.get_children():
+		if child is Button:
+			found.append(child)
+		_buttons(child, found)
+	return found
+
+static func _labels(node: Node, found: Array[String]) -> Array[String]:
+	for child: Node in node.get_children():
+		if child is Label:
+			found.append((child as Label).text)
+		_labels(child, found)
+	return found
+
+static func _captions(node: Node) -> Array[String]:
+	var result: Array[String] = []
+	for button: Button in _buttons(node, []):
+		result.append(button.text)
+	return result
+
+static func run(suite: Node, check: Callable) -> void:
+	await _demo_lock_checks(suite, check)
+	await _hint_checks(suite, check)
+	await _touch_checks(suite, check)
+
+static func _demo_lock_checks(suite: Node, check: Callable) -> void:
+	var saved_demo: Dictionary = GameState.demo.duplicate()
+	var saved_unlock: bool = GameState.unlock_all
+	var saved_progress: Dictionary = GameState.progress.duplicate(true)
+	GameState.load_demo()
+	check.call(bool(GameState.demo.enabled) and int(GameState.demo.last_level) == 3, "data/demo.json enables the three-level demo")
+	GameState.demo = {"enabled": true, "last_level": 3, "feedback_url": ""}
+	GameState.unlock_all = true
+	check.call(GameState.unlocked(3) and not GameState.unlocked(4) and not GameState.unlocked(5) and not GameState.unlocked(6), "demo locks levels 4-6 even with unlock_all")
+	check.call(GameState.last_playable_level() == 3 and GameState.demo_locked(4) and not GameState.demo_locked(3), "demo reports level 3 as the final playable level")
+	suite.main._navigate("start", 4)
+	check.call(not is_instance_valid(suite.main.game) or int(suite.main.game.level.id) != 4, "navigation cannot start a demo-locked level")
+	suite.main.clear_game()
+	suite.main._navigate("select")
+	await suite.settle()
+	var full_game: int = 0
+	for button: Button in _buttons(suite.main.menus, []):
+		if "FULL GAME" in button.text:
+			full_game += 1
+			check.call(button.disabled, "full-game level card is disabled: " + button.text.replace("\n", " "))
+	check.call(full_game == 3, "level select marks three full-game levels (found %d)" % full_game)
+	check.call(not "FEEDBACK" in _captions(suite.main.menus), "no feedback button without a feedback URL")
+	suite.layout(suite.main.menus)
+	suite.menu_font_grid(suite.main.menus)
+	GameState.demo.feedback_url = "https://example.com/gullin-feedback"
+	suite.main._navigate("select")
+	await suite.settle()
+	check.call("FEEDBACK" in _captions(suite.main.menus), "level select offers feedback when a URL is set")
+	suite.layout(suite.main.menus)
+	var passed := {"score": 400, "base": 380, "clean": 20, "stars": 1, "items": 9, "stuns": 0, "bonuses": {"Risky": 0, "Upwind": 0, "Mugged": 0}, "elapsed": 100.0, "casual": false}
+	suite.main.menus.results(Config.levels[2], passed)
+	var board: ResultBoard = suite.main.menus.get_child(0) as ResultBoard
+	board.finish_tally()
+	await suite.settle()
+	var captions: Array[String] = _captions(board)
+	var labels: Array[String] = _labels(board, [])
+	var demo_line: bool = false
+	for text: String in labels:
+		demo_line = demo_line or "DEMO COMPLETE" in text
+	check.call(board.demo_finished() and demo_line, "clearing level 3 shows the demo-complete line")
+	check.call(not "NEXT >" in captions and "FEEDBACK" in captions, "demo end card swaps NEXT for FEEDBACK: " + str(captions))
+	suite.layout(suite.main.menus)
+	suite.menu_font_grid(suite.main.menus)
+	await suite.snapshot("demo-complete")
+	GameState.progress["2"] = {"stars": 1, "best": 300}
+	suite.main.menus.results(Config.levels[1], passed)
+	board = suite.main.menus.get_child(0) as ResultBoard
+	board.finish_tally()
+	check.call(not board.demo_finished() and "NEXT >" in _captions(board), "level 2 still offers NEXT to level 3")
+	var failed: Dictionary = passed.duplicate()
+	failed.stars = 0
+	suite.main.menus.results(Config.levels[2], failed)
+	board = suite.main.menus.get_child(0) as ResultBoard
+	check.call(not board.demo_finished(), "a failed level 3 run is not a demo completion")
+	GameState.demo = {"enabled": false, "last_level": 3, "feedback_url": ""}
+	check.call(GameState.unlocked(4), "disabling the demo restores normal unlock rules")
+	GameState.demo = saved_demo
+	GameState.unlock_all = saved_unlock
+	GameState.progress = saved_progress
+	suite.main.menus.hide()
+
+static func _hint_checks(suite: Node, check: Callable) -> void:
+	suite.main.start_level(2)
+	var game: BeachGame = suite.main.game
+	game.set_physics_process(false)
+	game.intro = 0
+	game.running = true
+	game.input.touch_visible = false
+	game.input.gamepad = false
+	var overlay: BeachOverlay = game.overlay
+	game.player.position = Vector2(60, game.player.ground_y())
+	game.player.land()
+	await suite.settle()
+	var hint: Dictionary = overlay.context_hint()
+	check.call(not hint.is_empty() and "SPACE" in str(hint.text), "grounded hint uses keyboard wording: " + str(hint))
+	game.input.touch_visible = true
+	check.call("FLAP" in str(overlay.context_hint().text), "grounded hint uses touch wording")
+	game.input.touch_visible = false
+	var row: Control = overlay.score_announcement.get_parent() as Control
+	var callout := Rect2(0, row.offset_top, 320, row.offset_bottom - row.offset_top)
+	var signs: Array[Rect2] = []
+	for sign: Dictionary in game.beach.sign_layouts():
+		signs.append(sign.rect)
+	for text: String in ["WALK FOR SCRAPS / HOLD SPACE TO FLY", "LANDING / HOLD SPACE TO CLIMB", "PECK SPENT - DIVE AGAIN", "TAP E AT THE SNACK", "TAP PECK AT TODDLER", "PULL UP! CRASH AHEAD"]:
+		var box: Rect2 = overlay.hint_rect(text)
+		check.call(box.position.x >= 0 and box.end.x <= 320 and box.position.y >= 28, "hint stays on screen below the HUD: " + text)
+		check.call(not box.intersects(GOAL_PANEL), "hint clears the goal panel: " + text + " " + str(box))
+		check.call(not box.intersects(callout), "hint clears the score callout row: " + text)
+		var clear_of_signs: bool = true
+		for board: Rect2 in signs:
+			clear_of_signs = clear_of_signs and box.end.y <= board.position.y
+		check.call(clear_of_signs, "hint sits above every zone sign board: " + text)
+	await suite.snapshot("hint-grounded")
+	suite.main.clear_game()
+	suite.main.start_level(1, true)
+	game = suite.main.game
+	game.set_physics_process(false)
+	game.intro = 0
+	game.running = true
+	overlay = game.overlay
+	game.player.position = Vector2(60, game.player.ground_y())
+	game.player.land()
+	await suite.settle()
+	var panel: Rect2 = overlay.training_panel.get_global_rect()
+	var box: Rect2 = overlay.hint_rect("WALK FOR SCRAPS / HOLD SPACE TO FLY")
+	check.call(panel.size.y > 0 and box.position.y >= panel.end.y and not box.intersects(panel), "training hint sits below the lesson panel: " + str(box) + " panel " + str(panel))
+	var training_signs: bool = true
+	for sign: Dictionary in game.beach.sign_layouts():
+		training_signs = training_signs and box.end.y <= (sign.rect as Rect2).position.y
+	check.call(training_signs, "training hint stays above the zone signs")
+	overlay.show_score_announcement("ice_cream", 15)
+	row = overlay.score_announcement.get_parent() as Control
+	check.call(row.offset_top >= box.end.y, "training score callout sits below the hint")
+	var callout_rect := Rect2(0, row.offset_top, 320, row.offset_bottom - row.offset_top)
+	var callout_clear: bool = callout_rect.end.y <= 160.0
+	for sign: Dictionary in game.beach.sign_layouts():
+		callout_clear = callout_clear and not callout_rect.intersects(sign.rect)
+	check.call(callout_clear, "training score callout clears the zone signs: " + str(callout_rect))
+	check.call(not overlay.you_marker_rect(game.player.position - Vector2(game.camera_x - 160, 0)).intersects(box), "YOU marker avoids the hint")
+	await suite.snapshot("hint-training")
+	suite.main.clear_game()
+	await suite.settle()
+
+static func _touch_checks(suite: Node, check: Callable) -> void:
+	var area: float = 0.0
+	var kinds: Array = GullInput.TOUCH_BUTTONS.keys()
+	for kind: String in kinds:
+		var box: Rect2 = GullInput.TOUCH_BUTTONS[kind]
+		area += box.get_area()
+		check.call(box.position.x >= 0 and box.end.x <= 320 and box.position.y >= 28 and box.end.y <= 180, "touch button on screen: " + kind)
+		check.call(not box.intersects(MINIMAP) and not box.intersects(GOAL_PANEL), "touch button clears minimap and goal panel: " + kind)
+		check.call(GullInput.touch_button_at(box.get_center()) == kind, "touch hit test matches drawn button: " + kind)
+		for other: String in kinds:
+			if other != kind:
+				check.call(not box.intersects(GullInput.TOUCH_BUTTONS[other]), "touch buttons do not overlap: %s/%s" % [kind, other])
+	check.call(area <= OLD_TOUCH_AREA * 0.75, "touch cluster covers at least 25%% less screen (%d vs %d)" % [area, OLD_TOUCH_AREA])
+	check.call(GullInput.touch_button_at(Vector2(160, 160)) == "" and GullInput.touch_button_at(Vector2(120, 100)) == "", "beach outside the cluster stays available for aiming")
+	suite.main.start_level(2)
+	var game: BeachGame = suite.main.game
+	game.set_physics_process(false)
+	game.intro = 0
+	game.running = true
+	game.input.enabled = true
+	for pair: Array in [["peck", "touch_peck"], ["dive", "touch_dive"], ["flap", "touch_climb"]]:
+		game.input.clear_touch()
+		game.input.touch_dive = false
+		var tap := InputEventScreenTouch.new()
+		tap.index = 2
+		tap.position = (GullInput.TOUCH_BUTTONS[pair[0]] as Rect2).get_center()
+		tap.pressed = true
+		game.input._input(tap)
+		var others: bool = false
+		for flag: String in ["touch_peck", "touch_dive", "touch_climb"]:
+			if flag != pair[1]:
+				others = others or bool(game.input.get(flag))
+		check.call(bool(game.input.get(pair[1])) and not others, "touch %s triggers only its own action" % pair[0])
+		tap = InputEventScreenTouch.new()
+		tap.index = 2
+		tap.position = (GullInput.TOUCH_BUTTONS[pair[0]] as Rect2).get_center()
+		tap.pressed = false
+		game.input._input(tap)
+	check.call(not game.input.touch_climb, "releasing FLAP stops climbing")
+	var aim_tap := InputEventScreenTouch.new()
+	aim_tap.index = 3
+	aim_tap.position = Vector2(160, 160)
+	aim_tap.pressed = true
+	game.input._input(aim_tap)
+	check.call(game.input.touch_active and game.input.aim_finger == 3, "former PECK position now steers")
+	game.input.clear_touch()
+	game.input.touch_dive = false
+	game.input.touch_visible = true
+	game.player.state = BeachGull.State.GLIDE
+	check.call(not game.overlay.peck_available() and game.overlay.touch_buttons_visible(), "PECK dims while gliding")
+	game.player.position = Vector2(60, game.player.ground_y())
+	game.player.land()
+	check.call(game.overlay.peck_available(), "PECK is fully available on foot")
+	game.overlay.queue_redraw()
+	await suite.snapshot("touch-cluster")
+	suite.main.clear_game()
+	await suite.settle()
