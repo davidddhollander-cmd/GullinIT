@@ -10,6 +10,12 @@ boot_splash/stretch_mode=4
 boot_splash/use_filter=true
 boot_splash/image="res://assets/sprites/loading-backdrop-v2.png"
 
+[audio]
+
+# Web builds default to browser "Sample" playback, which cannot play the
+# procedurally generated SFX; use Godot's own mixer like desktop does.
+general/default_playback_type.web=0
+
 [autoload]
 Config="*res://scripts/autoload/config.gd"
 GameState="*res://scripts/autoload/game_state.gd"
