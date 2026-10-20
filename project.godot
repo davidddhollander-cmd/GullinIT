@@ -2,13 +2,13 @@ config_version=5
 
 [application]
 config/name="Gullin' It"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/loading.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://assets/icon.svg"
 boot_splash/bg_color=Color(0.663, 0.843, 0.824, 1)
 boot_splash/stretch_mode=4
 boot_splash/use_filter=true
-boot_splash/image="res://assets/sprites/boot-splash.png"
+boot_splash/image="res://assets/sprites/loading-backdrop-v2.png"
 
 [autoload]
 Config="*res://scripts/autoload/config.gd"
