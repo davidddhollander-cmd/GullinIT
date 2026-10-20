@@ -19,6 +19,7 @@ func _ready() -> void:
 	streams["gull_call"] = GULL_CALL
 	music = AudioStreamPlayer.new()
 	music.bus = "Music"
+	music.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
 	add_child(music)
 	if streams.has("music"):
 		music.stream = streams.music
@@ -41,6 +42,9 @@ func play(cue: String, pitch: float = 1.0, volume_db: float = 0.0) -> AudioStrea
 		return null
 	var player: AudioStreamPlayer = AudioStreamPlayer.new()
 	player.bus = "SFX"
+	# Web builds otherwise use browser "Sample" playback, which cannot play the
+	# procedurally generated cues; Godot's own mixer handles every stream.
+	player.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
 	player.stream = streams[cue]
 	player.pitch_scale = pitch
 	player.volume_db = volume_db
@@ -54,6 +58,7 @@ func play_result_reaction(success: bool, intensity: int) -> AudioStreamPlayer:
 		return null
 	var player := AudioStreamPlayer.new()
 	player.bus = "SFX"
+	player.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
 	player.volume_db = -8.0
 	player.stream = _result_stream(success, intensity)
 	add_child(player)
