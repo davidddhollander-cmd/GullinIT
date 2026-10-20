@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://dwol0f2unpy6i"
+path="res://.godot/imported/gull_hud.fnt-cbe064d3f7488522ce2e72820a2e3399.fontdata"
+
+[deps]
+
+source_file="res://assets/fonts/gull_hud.fnt"
+dest_files=["res://.godot/imported/gull_hud.fnt-cbe064d3f7488522ce2e72820a2e3399.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2

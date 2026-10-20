@@ -8,6 +8,7 @@ signal food_knocked(target: BeachTarget, food_id: String, at: Vector2, impulse: 
 var kind: String
 var info: Dictionary
 var alert: float = 0.0
+var seen_time: float = 0.0
 var food: bool = true
 var food_id: String = ""
 var dropped_pending: bool = false
@@ -16,6 +17,9 @@ var drop_retrieve: bool = false
 var drop_pickup_time: float = 0.0
 var thefts: int = 0
 var last_theft_direct: bool = false
+var last_theft_handover: bool = false
+var stall_service: StallService
+var service_locked: bool = false
 var respawn: float = 0.0
 var recover: float = 0.0
 var defense: float = 0.0
@@ -50,6 +54,7 @@ const BAG_TEXTURES: Array[Texture2D] = [
 	preload("res://assets/sprites/retro-picnic-bag-woven-32bit.png"),
 ]
 var bag_variant: int = 0
+var shopper_appearance: String = "kiosk_customer"
 var shine_time: float = 0.0
 var bag_squish_time: float = 0.0
 var bag_squish_duration: float = BAG_SQUISH_TIME
@@ -78,6 +83,44 @@ var mum_swat_time: float = 0.0
 var action_pose_time: float = 0.0
 var lifeguard_whistle_time: float = 0.0
 var reaction: AdultReaction = AdultReaction.new()
+var routine: BeachRoutine = BeachRoutine.new()
+enum SleepState { SLEEPING, WAKING, AWAKE }
+var sleep_state: SleepState = SleepState.SLEEPING
+var sleep_pecks: int = 0
+var rise_remaining: float = 0.0
+
+func register_bag_peck() -> void:
+	if sleep_state != SleepState.SLEEPING:
+		return
+	sleep_pecks += 1
+	if sleep_pecks >= int(Config.tuning.world.sunbather_sleep_pecks):
+		sleep_state = SleepState.WAKING
+		rise_remaining = float(Config.tuning.world.sunbather_rise_time)*reaction_delay
+	queue_redraw()
+
+func _tick_sleep(delta: float) -> bool:
+	if kind != "sunbather" or sleep_state == SleepState.AWAKE:
+		return false
+	# Neither proximity nor first-burst theft can bypass the four protected hits.
+	alert = 0.0
+	defense = 0.0
+	if sleep_state == SleepState.SLEEPING:
+		SunbatherArt.pose(self,&"rest",0)
+	else:
+		rise_remaining = maxf(0.0,rise_remaining-delta)
+		var duration: float = float(Config.tuning.world.sunbather_rise_time)*reaction_delay
+		SunbatherArt.pose(self,&"rise",clampi(int((1.0-rise_remaining/duration)*7.0),0,6))
+		if rise_remaining <= 0.0:
+			sleep_state = SleepState.AWAKE
+			stash_standing = true
+	queue_redraw()
+	return true
+
+func sleep_letters() -> Dictionary:
+	if kind != "sunbather" or sleep_state != SleepState.SLEEPING:
+		return {}
+	var phase: float = fposmod(art_time+stash_home_x*0.013,2.4)/2.4
+	return {"position":Vector2(-22+phase*5,-27-phase*10).round(),"alpha":sin(PI*phase)}
 
 func art_height() -> float:
 	if kind == "sunbather":
@@ -131,6 +174,9 @@ func setup(type: String, x: float, random: RandomNumberGenerator, mult: float, s
 	stash_home_x = x
 	family_home = x
 	rng = random
+	if kind == "kiosk_customer":
+		var appearance: String = str(spawn.get("appearance","kiosk_customer"))
+		shopper_appearance = appearance if appearance in ShopperArt.APPEARANCES else "kiosk_customer"
 	encounter_awareness = float(spawn.get("awareness_mult",1.0))
 	awareness_mult = mult * encounter_awareness
 	speed_mult = float(spawn.get("speed_mult",1.0))
@@ -175,6 +221,10 @@ func setup(type: String, x: float, random: RandomNumberGenerator, mult: float, s
 
 func refresh_art() -> void:
 	info = Config.targets[kind]
+	if kind == "kiosk_customer":
+		# Per-person art must not change the shared gameplay target definition.
+		info = info.duplicate()
+		info.sprite = shopper_appearance
 	if kind == "sunbather":
 		sprite.sprite_frames = SunbatherArt.frames(sunbather_blue,sunbather_female)
 	elif kind == "pier_diner":
@@ -219,6 +269,7 @@ func food_radius() -> Vector2:
 
 func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	shine_time += delta
+	seen_time = seen_time+delta if alert > 0.05 else 0.0
 	if kind == "sunbather":
 		queue_redraw()
 	var t: Dictionary = Config.tuning.world
@@ -227,9 +278,14 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	mum_swat_time = maxf(0,mum_swat_time-delta)
 	action_pose_time = maxf(0, action_pose_time-delta)
 	lifeguard_whistle_time = maxf(0,lifeguard_whistle_time-delta)
+	if _tick_sleep(delta):
+		return
 	var moved: bool = false
 	recover = maxf(0.0, recover - delta)
 	defense = maxf(0.0, defense - delta)
+	if service_locked:
+		update_art_pose(false)
+		return
 	if kind == "lifeguard":
 		_tick_lifeguard_whistle(gulls)
 	if reaction.tick(self,delta,gulls):
@@ -281,22 +337,49 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	if not food and not dropped_pending and not food_id.is_empty() and kind not in ["toddler", "picnic_family", "sunbather"]:
 		respawn -= delta
 		if respawn <= 0:
-			food = true
-			food_sprite.show()
+			if kind == "kiosk_customer" and stall_service != null:
+				_tick_shopping(delta)
+				return
+			else:
+				food = true
+				food_sprite.show()
 	# Brief eating stops and a planted crying pose make the new toddler frames readable.
 	var toddler_pause: bool = kind == "toddler" and not seeking_parent and ((not food and recover > 0) or (food and fmod(art_time,6.0) < 1.2))
 	# A short planted reaction makes the customer's empty-hand surprise readable.
 	var customer_pause: bool = kind == "kiosk_customer" and not food and recover > float(t.recover_time)-0.5
 	var whistle_pause: bool = kind == "lifeguard" and lifeguard_whistle_time > 0
-	if info.twist in ["walk", "cry", "whistle"] and not toddler_pause and not customer_pause and not whistle_pause:
+	if routine.enabled and not customer_pause and not whistle_pause:
+		moved = routine.tick(self,delta)
+	elif not routine.enabled and info.twist in ["walk", "cry", "whistle"] and not toddler_pause and not customer_pause and not whistle_pause:
 		position.x += facing * float(t.walk_speed) * speed_mult * delta
 		moved = true
-		if absf(position.x - patrol_home) > patrol_radius or position.x < 20 or position.x > float(t.width) - 20:
-			facing *= -1
+		# A purchase, retrieval or chase can leave us beyond a patrol endpoint.
+		# Keep heading inward until back inside; toggling here flips every tick.
+		var center := clampf(patrol_home,20.0,float(t.width)-20.0)
+		var left := maxf(20.0,center-patrol_radius)
+		var right := minf(float(t.width)-20.0,center+patrol_radius)
+		if position.x >= right:
+			facing = -1.0
+		elif position.x <= left:
+			facing = 1.0
 	_tick_defense(delta,gulls)
 	_update_defense_art()
 	update_art_pose(moved)
 	queue_redraw()
+
+func _tick_shopping(delta: float) -> void:
+	var stand: FoodStall = stall_service.find_stall(self,"hotdog_stand" if food_id=="hotdog" else "kiosk")
+	if stand == null:
+		respawn = float(Config.tuning.world.stall_retry_wait)
+		update_art_pose(false)
+		return
+	var destination: float = stand.contact_x()
+	var moving: bool = absf(destination-position.x)>0.25
+	facing = signf(destination-position.x) if moving else -stand.side
+	position.x = move_toward(position.x,destination,float(Config.tuning.world.family_trip_speed)*delta)
+	update_art_pose(moving)
+	if not moving:
+		stall_service.request_shopper(self)
 
 func _update_defense_art() -> void:
 	food_sprite.modulate = Color("ef725c") if defense > 0 and info.twist == "shield" else Color.WHITE
@@ -351,7 +434,7 @@ func _tick_defense(delta: float, gulls: Array[BeachGull]) -> void:
 		if can_attack and kind == "toddler" and gull.position.distance_to(food_position()) < float(info.danger):
 			if kind == "picnic_family" and gull.state != BeachGull.State.STUNNED and gull.invulnerable <= 0:
 				mum_swat_time = 0.25
-			gull.stun()
+			gull.stun(-1.0,position)
 	if windup >= 0:
 		windup -= delta
 	if not seen:
@@ -503,6 +586,9 @@ func _tick_family_trip(delta: float) -> void:
 				family_trip = FamilyTrip.BUY
 				family_trip_timer = float(Config.tuning.world.family_purchase_pause)
 		FamilyTrip.BUY:
+			if stall_service != null:
+				stall_service.request_family(self)
+				return
 			family_trip_timer -= delta
 			if family_trip_timer <= 0:
 				_complete_family_purchase()
@@ -595,7 +681,7 @@ func _offer_family_fallbacks() -> void:
 		child.refresh_art()
 
 func family_purchase_stolen(serial: int) -> void:
-	if family_trip != FamilyTrip.RETURN or serial != family_trip_serial:
+	if family_trip not in [FamilyTrip.BUY,FamilyTrip.RETURN] or serial != family_trip_serial:
 		return
 	family_trip = FamilyTrip.RETREAT
 	for child: BeachTarget in family_children:
@@ -621,6 +707,7 @@ func take(gull: BeachGull) -> bool:
 	food = false
 	food_sprite.hide()
 	last_theft_direct = true
+	last_theft_handover = false
 	_finish_theft(gull,risky)
 	return true
 
@@ -662,6 +749,7 @@ func claim_dropped(gull: BeachGull) -> bool:
 	dropped_item = {}
 	drop_retrieve = false
 	last_theft_direct = false
+	last_theft_handover = false
 	_finish_theft(gull,alert >= 1.0 or defense > 0)
 	return true
 
@@ -678,7 +766,7 @@ func _finish_theft(gull: BeachGull, risky: bool) -> void:
 		family_purchase_stolen(stolen_purchase_serial)
 	# Repeated theft now leads to a bounded chase and return, not departure.
 	snatched.emit(self, gull, risky)
-	reaction.theft(self,gull)
+	reaction.theft(self,gull,last_theft_direct)
 	if info.twist == "cry":
 		toddler_cry_timer = float(Config.tuning.world.toddler_cry_duration)
 		toddler_run_speed = 0.0
@@ -692,6 +780,17 @@ func _finish_theft(gull: BeachGull, risky: bool) -> void:
 	update_art_pose(leaving)
 
 func _draw() -> void:
+	if kind == "sunbather":
+		# Current character atlases have no baked towel, including their rest poses.
+		SunbatherTowel.paint(self,Vector2(stash_home_x-position.x,0),sunbather_blue,sunbather_female)
+		var letters: Dictionary = sleep_letters()
+		if not letters.is_empty():
+			var ink: Color = BeachUI.INK
+			var cream: Color = BeachUI.CREAM
+			ink.a = float(letters.alpha)
+			cream.a = float(letters.alpha)
+			draw_string_outline(preload("res://assets/fonts/gull_pixel.fnt"),letters.position,"Zzz",HORIZONTAL_ALIGNMENT_LEFT,-1,8,1,ink)
+			draw_string(preload("res://assets/fonts/gull_pixel.fnt"),letters.position,"Zzz",HORIZONTAL_ALIGNMENT_LEFT,-1,8,cream)
 	if kind == "toddler" and not food and (seeking_parent or toddler_cry_run_active):
 		for i: int in 2:
 			var fall: float = fposmod(art_time*14+i*4,8)
@@ -703,13 +802,20 @@ func _draw() -> void:
 	var awareness_cue: String = ""
 	var fill: float = alert
 	var color: Color = Color("ffc65c")
-	if reaction.mode in ["warning","wake"]:
+	if kind == "sunbather" and sleep_state == SleepState.WAKING:
+		awareness_cue = "!"
+		fill = 1.0-rise_remaining/(float(Config.tuning.world.sunbather_rise_time)*reaction_delay)
+	elif reaction.mode in ["warning","notice"]:
 		awareness_cue = "WATCH"
-		fill = clampf(1.0-reaction.timer/((0.8 if kind == "sunbather" else 0.35)*reaction_delay),0.05,1.0)
+		var notice_time: float = float(Config.tuning.world.sunbather_notice_delay) if reaction.mode == "notice" else float(Config.tuning.world.sunbather_warning_time)
+		fill = clampf(1.0-reaction.timer/((notice_time if kind == "sunbather" else 0.35)*reaction_delay),0.05,1.0)
 	elif reaction.mode == "chase":
 		awareness_cue = "CHASE"
-		fill = clampf(reaction.timer/3.0,0.0,1.0)
+		fill = clampf(reaction.timer/(float(Config.tuning.world.snatch_chase_time) if reaction.committed else 3.0),0.0,1.0)
 		color = Color("ef725c")
+	elif reaction.mode == "give_up":
+		awareness_cue = "GONE!"
+		fill = 0.0
 	elif defense > 0:
 		awareness_cue = "BLOCK"
 		fill = clampf(defense/float(Config.tuning.world.shield_time),0.0,1.0)
@@ -721,10 +827,19 @@ func _draw() -> void:
 		awareness_cue = "CALM"
 		fill = clampf(reaction.cooldown,0.0,1.0)
 		color = Color("80bcb8")
+	if kind == "sunbather" and sleep_state == SleepState.SLEEPING:
+		awareness_cue = ""
 	if not awareness_cue.is_empty():
 		var marker_y: float = -art_height()-20
-		draw_rect(Rect2(-16,marker_y-9,32,9),Color("183b4e"))
-		draw_string(preload("res://assets/fonts/gull_pixel.fnt"),Vector2(-14,marker_y-2),awareness_cue,HORIZONTAL_ALIGNMENT_LEFT,-1,8,color)
+		# Only the parent speaks for a family; low urgency text fades, not the bar.
+		var tag_alpha: float = 1.0
+		if awareness_cue == "SEEN":
+			tag_alpha = clampf((1.0-seen_time)/0.3,0.0,1.0) if family_id.is_empty() or kind == "picnic_family" else 0.0
+		if tag_alpha > 0.0:
+			var tag_color: Color = color
+			tag_color.a = tag_alpha
+			draw_rect(Rect2(-16,marker_y-9,32,9),Color(0.094,0.231,0.306,tag_alpha))
+			draw_string(preload("res://assets/fonts/gull_pixel.fnt"),Vector2(-14,marker_y-2),awareness_cue,HORIZONTAL_ALIGNMENT_LEFT,-1,8,tag_color)
 		draw_rect(Rect2(-16,marker_y,32,3),Color("397a85"))
 		draw_rect(Rect2(-16,marker_y,32*clampf(fill,0.0,1.0),3),color)
 	if kind == "sunbather":
@@ -747,12 +862,6 @@ func _draw() -> void:
 		for i: int in stash_remaining:
 			draw_rect(Rect2(bag+Vector2(-4+i*3,2),Vector2(2,2)),Color("ffc65c"))
 		draw_set_transform(Vector2.ZERO)
-		if stash_standing and (sprite.animation == &"run" or absf(position.x-stash_home_x)>1):
-			var towel_x: float = stash_home_x-position.x-23
-			var towel_color: Color = Color("f3c443") if sunbather_blue else (Color("ef725c") if sunbather_female else Color("408fa8"))
-			draw_rect(Rect2(towel_x,-3,46,3),towel_color)
-			for stripe: int in 7:
-				draw_rect(Rect2(towel_x+stripe*6.6,-3,2.2,3),Color("fff4da"))
 	if kind == "picnic_family":
 		for i: int in supply_crisps:
 			draw_rect(Rect2(-12+i*4,-7,3,4),Color("ef725c"),true)

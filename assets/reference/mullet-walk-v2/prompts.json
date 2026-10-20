@@ -1,0 +1,71 @@
+{
+  "tool": "Built-in image_gen.imagegen",
+  "date": "2026-10-20",
+  "purpose": "Full-body mullet man walk poses. Original shopper supplies pose reference only.",
+  "poses": [
+    {
+      "frame": 0,
+      "source": "walk-0-source.png",
+      "original_output": "C:\\Users\\david\\.codex\\generated_images\\01a1581e-3896-7800-a2fd-741123839787\\exec-58a5ca30-96db-4440-9bae-3736b63d6491.png",
+      "references": [
+        "shopper_mullet-0.png",
+        "kiosk_customer-0.png"
+      ],
+      "prompt": "Create ONE complete full-body game sprite, right-facing three-quarter side view, on a genuine transparent background.\nImage 1 is the exact CHARACTER IDENTITY to retain: fat stocky middle-aged man, large round belly, coral-red T-shirt, navy shorts, teal baseball cap, brown mullet and moustache, brown strap sandals, warm tan skin, friendly expression. Preserve his broad body, round face, cap, short sturdy limbs and overall proportions. Match the existing crisp outlined arcade sprite rendering; it must remain readable at 40 game pixels tall.\nImage 2 is the approved WALK POSE reference ONLY. Recreate that pose with the man from image 1. Do not turn him into the slim yellow-shirt character. Match the relative leg angles, foot contact versus lifted foot, and timing of that exact walk pose, adapting it naturally to the stocky body.\nHis front food-carrying palm stays EMPTY, extended at waist height. The food is a separate game sprite. The free arm follows the pose reference. Full hair/cap-to-sandals character inside the canvas, generous clear margins, unchanged outfit and identity, no text, labels, floor, shadow, food, props, motion lines, scenery or duplicate figures. Use coherent painted sprite clusters and clean dark navy outlines, no separated puppet pieces or skeletal drawing.\nSpecific pose: Contact pose: one heel forward/right, other leg extended behind/left. A comfortably broad readable step, neither feet together nor both toes in the same position."
+    },
+    {
+      "frame": 1,
+      "source": "walk-1-source.png",
+      "original_output": "C:\\Users\\david\\.codex\\generated_images\\01a1581e-3896-7800-a2fd-741123839787\\exec-e6d48d12-9dc2-4949-8fb1-cf7722c856a7.png",
+      "references": [
+        "shopper_mullet-0.png",
+        "kiosk_customer-1.png",
+        "walk-0-source.png"
+      ],
+      "prompt": "Create ONE complete full-body game sprite, right-facing three-quarter side view, on a genuine transparent background.\nImage 1 is the exact CHARACTER IDENTITY to retain: fat stocky middle-aged man, large round belly, coral-red T-shirt, navy shorts, teal baseball cap, brown mullet and moustache, brown strap sandals, warm tan skin, friendly expression. Preserve his broad body, round face, cap, short sturdy limbs and overall proportions. Match the existing crisp outlined arcade sprite rendering; it must remain readable at 40 game pixels tall.\nImage 2 is the approved WALK POSE reference ONLY. Recreate that pose with the man from image 1. Do not turn him into the slim yellow-shirt character. Match the relative leg angles, foot contact versus lifted foot, and timing of that exact walk pose, adapting it naturally to the stocky body.\nHis front food-carrying palm stays EMPTY, extended at waist height. The food is a separate game sprite. The free arm follows the pose reference. Full hair/cap-to-sandals character inside the canvas, generous clear margins, unchanged outfit and identity, no text, labels, floor, shadow, food, props, motion lines, scenery or duplicate figures. Use coherent painted sprite clusters and clean dark navy outlines, no separated puppet pieces or skeletal drawing.\nImage 3 is the newly generated first contact of this same man: match its face, cap, colour finish and body volume for cycle consistency.\nSpecific pose: Down/recoil after first contact: follow image 2 precisely. Supporting front foot planted and front knee bent under weight. Trailing leg bends back with its heel lifted. Keep the clear space below the belly; this is a moving walk pose, not standing."
+    },
+    {
+      "frame": 2,
+      "source": "walk-2-source.png",
+      "original_output": "C:\\Users\\david\\.codex\\generated_images\\01a1581e-3896-7800-a2fd-741123839787\\exec-8a7071d2-bfe6-4b97-8d5d-3d2af866ff1b.png",
+      "references": [
+        "shopper_mullet-0.png",
+        "kiosk_customer-2.png"
+      ],
+      "prompt": "Create ONE complete full-body game sprite, right-facing three-quarter side view, on a genuine transparent background.\nImage 1 is the exact CHARACTER IDENTITY to retain: fat stocky middle-aged man, large round belly, coral-red T-shirt, navy shorts, teal baseball cap, brown mullet and moustache, brown strap sandals, warm tan skin, friendly expression. Preserve his broad body, round face, cap, short sturdy limbs and overall proportions. Match the existing crisp outlined arcade sprite rendering; it must remain readable at 40 game pixels tall.\nImage 2 is the approved WALK POSE reference ONLY. Recreate that pose with the man from image 1. Do not turn him into the slim yellow-shirt character. Match the relative leg angles, foot contact versus lifted foot, and timing of that exact walk pose, adapting it naturally to the stocky body.\nHis front food-carrying palm stays EMPTY, extended at waist height. The food is a separate game sprite. The free arm follows the pose reference. Full hair/cap-to-sandals character inside the canvas, generous clear margins, unchanged outfit and identity, no text, labels, floor, shadow, food, props, motion lines, scenery or duplicate figures. Use coherent painted sprite clusters and clean dark navy outlines, no separated puppet pieces or skeletal drawing.\nSpecific pose: Passing pose: weight on one planted near-vertical leg. The OTHER leg is clearly BENT AT THE KNEE with its SANDAL LIFTED above the ground, crossing behind the supporting shin as in image 2. Show actual knee and ankle movement; do not draw two flat planted feet or repeat a standing pose."
+    },
+    {
+      "frame": 3,
+      "source": "walk-3-source.png",
+      "original_output": "C:\\Users\\david\\.codex\\generated_images\\01a1581e-3896-7800-a2fd-741123839787\\exec-0ade12fe-da58-4d28-a6f4-9717d0d54e1e.png",
+      "references": [
+        "shopper_mullet-0.png",
+        "kiosk_customer-3.png",
+        "walk-0-source.png"
+      ],
+      "prompt": "Create ONE complete full-body game sprite, right-facing three-quarter side view, on a genuine transparent background.\nImage 1 is the exact CHARACTER IDENTITY to retain: fat stocky middle-aged man, large round belly, coral-red T-shirt, navy shorts, teal baseball cap, brown mullet and moustache, brown strap sandals, warm tan skin, friendly expression. Preserve his broad body, round face, cap, short sturdy limbs and overall proportions. Match the existing crisp outlined arcade sprite rendering; it must remain readable at 40 game pixels tall.\nImage 2 is the approved WALK POSE reference ONLY. Recreate that pose with the man from image 1. Do not turn him into the slim yellow-shirt character. Match the relative leg angles, foot contact versus lifted foot, and timing of that exact walk pose, adapting it naturally to the stocky body.\nHis front food-carrying palm stays EMPTY, extended at waist height. The food is a separate game sprite. The free arm follows the pose reference. Full hair/cap-to-sandals character inside the canvas, generous clear margins, unchanged outfit and identity, no text, labels, floor, shadow, food, props, motion lines, scenery or duplicate figures. Use coherent painted sprite clusters and clean dark navy outlines, no separated puppet pieces or skeletal drawing.\nImage 3 is the newly generated first contact of this same man: match its face, cap, colour finish and body volume for cycle consistency.\nSpecific pose: Second contact / opposite half-step: reproduce image 2's leg positions and raised forward sandal/toe as the next heel approaches the ground, with the other leg trailing. Match the arm counter-swing. Make it visibly different from first contact by following this pose reference."
+    },
+    {
+      "frame": 4,
+      "source": "walk-4-source.png",
+      "original_output": "C:\\Users\\david\\.codex\\generated_images\\01a1581e-3896-7800-a2fd-741123839787\\exec-7a00a698-9e23-4e29-bfda-48ee55887aca.png",
+      "references": [
+        "shopper_mullet-0.png",
+        "kiosk_customer-4.png",
+        "walk-0-source.png"
+      ],
+      "prompt": "Create ONE complete full-body game sprite, right-facing three-quarter side view, on a genuine transparent background.\nImage 1 is the exact CHARACTER IDENTITY to retain: fat stocky middle-aged man, large round belly, coral-red T-shirt, navy shorts, teal baseball cap, brown mullet and moustache, brown strap sandals, warm tan skin, friendly expression. Preserve his broad body, round face, cap, short sturdy limbs and overall proportions. Match the existing crisp outlined arcade sprite rendering; it must remain readable at 40 game pixels tall.\nImage 2 is the approved WALK POSE reference ONLY. Recreate that pose with the man from image 1. Do not turn him into the slim yellow-shirt character. Match the relative leg angles, foot contact versus lifted foot, and timing of that exact walk pose, adapting it naturally to the stocky body.\nHis front food-carrying palm stays EMPTY, extended at waist height. The food is a separate game sprite. The free arm follows the pose reference. Full hair/cap-to-sandals character inside the canvas, generous clear margins, unchanged outfit and identity, no text, labels, floor, shadow, food, props, motion lines, scenery or duplicate figures. Use coherent painted sprite clusters and clean dark navy outlines, no separated puppet pieces or skeletal drawing.\nImage 3 is the newly generated first contact of this same man: match its face, cap, colour finish and body volume for cycle consistency.\nSpecific pose: Opposite recoil: match image 2, torso passes above planted leg while the trailing leg is clearly folded at knee and its sandal is lifted. Legs close together, with one supporting and the other moving, not two flat feet."
+    },
+    {
+      "frame": 5,
+      "source": "walk-5-source.png",
+      "original_output": "C:\\Users\\david\\.codex\\generated_images\\01a1581e-3896-7800-a2fd-741123839787\\exec-429c8e2c-c94a-4c2f-b5fc-697df3556b34.png",
+      "references": [
+        "shopper_mullet-0.png",
+        "kiosk_customer-5.png",
+        "walk-0-source.png"
+      ],
+      "prompt": "Create ONE complete full-body game sprite, right-facing three-quarter side view, on a genuine transparent background.\nImage 1 is the exact CHARACTER IDENTITY to retain: fat stocky middle-aged man, large round belly, coral-red T-shirt, navy shorts, teal baseball cap, brown mullet and moustache, brown strap sandals, warm tan skin, friendly expression. Preserve his broad body, round face, cap, short sturdy limbs and overall proportions. Match the existing crisp outlined arcade sprite rendering; it must remain readable at 40 game pixels tall.\nImage 2 is the approved WALK POSE reference ONLY. Recreate that pose with the man from image 1. Do not turn him into the slim yellow-shirt character. Match the relative leg angles, foot contact versus lifted foot, and timing of that exact walk pose, adapting it naturally to the stocky body.\nHis front food-carrying palm stays EMPTY, extended at waist height. The food is a separate game sprite. The free arm follows the pose reference. Full hair/cap-to-sandals character inside the canvas, generous clear margins, unchanged outfit and identity, no text, labels, floor, shadow, food, props, motion lines, scenery or duplicate figures. Use coherent painted sprite clusters and clean dark navy outlines, no separated puppet pieces or skeletal drawing.\nImage 3 is the newly generated first contact of this same man: match its face, cap, colour finish and body volume for cycle consistency.\nSpecific pose: Opposite passing: match image 2's folded trailing leg, raised sandal and planted supporting foot. Keep leg motion readable below his navy shorts, retain stout proportions, palm up and free arm down/forward as in the pose reference."
+    }
+  ]
+}

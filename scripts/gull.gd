@@ -7,6 +7,7 @@ signal ground_crashed
 signal peck_started
 signal sand_landed(at: Vector2)
 signal sand_departed(at: Vector2)
+signal tumble_feathers(at: Vector2, impulse: Vector2, amount: int)
 enum State { GLIDE, WINDUP, STRIKE, GROUNDED, STUNNED }
 var state: State = State.GLIDE
 var digestion: GullDigestion = GullDigestion.new()
@@ -32,6 +33,12 @@ var invulnerable: float = 0.0
 var climb: bool = false
 var speed_factor: float = 1.0
 var rival: bool = false
+## Empty uses the role default; any species can be used by either role.
+var species: String = ""
+var art_id: String = "player_gull"
+var art_entry: Dictionary = {}
+var art_event: StringName = &""
+var art_event_left: float = 0.0
 var rival_name: String = "RIVAL"
 var rival_tint: Color = Color("a5c7e6")
 var rival_label: Label
@@ -51,6 +58,13 @@ var art_scale: float = 1.0
 var perch_surfaces: Array[Dictionary] = []
 var support: Dictionary = {}
 var departing_perch: Dictionary = {}
+var tumble_angle: float = 0.0
+var tumble_spin: float = 0.0
+var tumble_elapsed: float = 0.0
+var tumble_shed: float = 0.0
+var tumble_bounced: bool = false
+var tumble_recovery_angle: float = 0.0
+var tumble_recovering: bool = false
 
 func setup_perches(props: Array) -> void:
 	perch_surfaces.clear()
@@ -60,11 +74,21 @@ func setup_perches(props: Array) -> void:
 		var base: float = float(prop.get("y",160))
 		match str(prop.type):
 			"kiosk", "hotdog_stand":
-				perch_surfaces.append({"x":float(prop.x),"y":base-43.0,"half_width":23.0,"pole":false})
+				perch_surfaces.append({"x":float(prop.x),"y":base-43.0,"half_width":23.0,"pole":false,"prop_type":str(prop.type)})
 			"tower":
-				perch_surfaces.append({"x":float(prop.x),"y":base-58.0,"half_width":16.0,"pole":false})
+				perch_surfaces.append({"x":float(prop.x),"y":base-58.0,"half_width":16.0,"pole":false,"prop_type":str(prop.type)})
 			"beach_lamp":
-				perch_surfaces.append({"x":float(prop.x),"y":base-56.0,"half_width":3.0,"pole":true})
+				var lamp: Dictionary = Config.sprites.beach_lamp
+				var lamp_scale: float = float(lamp.get("visual_scale",1.0))
+				perch_surfaces.append({"x":float(prop.x)+float(lamp.get("perch_offset_x",0.0))*lamp_scale,"y":base-float(lamp.frame_h)*lamp_scale+float(lamp.get("perch_inset_y",2.0))*lamp_scale,"half_width":3.0,"pole":true,"prop_type":str(prop.type)})
+			BeachBackdrop.WHEELIE_BIN_TYPE:
+				var definition: Dictionary = Config.sprites.wheelie_bin
+				var height: float = float(definition.frame_h) * float(definition.get("visual_scale",1.0))
+				var bin_scale: float = float(definition.get("visual_scale",1.0))
+				perch_surfaces.append({"x":float(prop.x),"y":base-height+BeachBackdrop.WHEELIE_BIN_LID_INSET*bin_scale,"half_width":BeachBackdrop.WHEELIE_BIN_HALF_WIDTH*bin_scale,"pole":false,"prop_type":str(prop.type)})
+
+func is_supported_by(prop_type: String, at_x: float) -> bool:
+	return state == State.GROUNDED and not support.is_empty() and str(support.get("prop_type","")) == prop_type and absf(float(support.get("x",INF))-at_x) < 0.1
 
 func landing_perch() -> Dictionary:
 	if not landing_aim():
@@ -135,24 +159,37 @@ func _ready() -> void:
 	sweep_beak = previous_beak
 
 func refresh_art() -> void:
-	var art_id: String = "rival_gull" if rival else "player_gull"
-	var entry: Dictionary = Config.sprites[art_id]
-	detailed_art = entry.has("regions")
-	art_scale = float(entry.get("visual_scale",1.0))
+	art_id = "rival_gull" if rival else "player_gull"
+	var species_id: String = "gull_" + species.replace("-","_")
+	if not species.is_empty() and Config.sprites.has(species_id):
+		art_id = species_id
+	art_entry = Config.sprites[art_id]
+	detailed_art = art_entry.has("regions") or bool(art_entry.get("native_alpha",false))
+	art_scale = float(art_entry.get("visual_scale",1.0))
 	sprite.sprite_frames = Config.frames(art_id)
 	sprite.scale = Vector2.ONE * art_scale
+	sprite.material = null
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	if rival:
-		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		if is_instance_valid(rival_label):
 			rival_label.text = rival_name.to_upper()
 			rival_label.add_theme_color_override("font_color",Color("fff4da"))
-	if detailed_art:
+	if detailed_art and not bool(art_entry.get("native_alpha",false)):
 		var cutout: ShaderMaterial = ShaderMaterial.new()
 		cutout.shader = preload("res://assets/shaders/rival_tint.gdshader") if rival else preload("res://assets/shaders/gull_cutout.gdshader")
 		if rival:
 			cutout.set_shader_parameter("feather_tint",rival_tint)
 		sprite.material = cutout
 	sprite.play(&"glide")
+	art_event = &""
+	art_event_left = 0.0
+
+func species_speed() -> float:
+	return float(art_entry.get("flight_speed_mult",1.0))
+
+func show_ground_peck() -> void:
+	art_event = &"peck"
+	art_event_left = 0.14
 
 func ground_y() -> float:
 	if not support.is_empty():
@@ -174,7 +211,7 @@ func beak_for_state(for_state: State) -> Vector2:
 		return position + direction * float(Config.tuning.dive.beak_offset)
 	if for_state == State.GROUNDED:
 		# The detailed standing/walking art carries its head above the body origin.
-		return position + Vector2(facing * float(Config.tuning.dive.beak_offset), -5)
+		return position + Vector2(facing * float(Config.tuning.dive.beak_offset), float(art_entry.get("ground_beak_y",-5)))
 	return position + Vector2(facing * float(Config.tuning.dive.beak_offset), 2)
 
 func dive(wind_dir: int) -> void:
@@ -213,6 +250,7 @@ func consume_peck() -> void:
 	peck_near_target = null
 
 func tick(delta: float, wind_dir: int, strength: float) -> void:
+	art_event_left = maxf(0.0,art_event_left-delta)
 	var f: Dictionary = Config.tuning.flight
 	var d: Dictionary = Config.tuning.dive
 	var w: Dictionary = Config.tuning.wind
@@ -251,7 +289,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			if climb:
 				coasting = false
 			var side: float = signf(aim.x - position.x) if absf(aim.x - position.x) > float(f.aim_deadzone) else 0.0
-			var max_speed: float = float(f.ground_speed) if on_ground else float(f.max_speed) * speed_factor
+			var max_speed: float = float(f.ground_speed) if on_ground else float(f.max_speed) * speed_factor * species_speed()
 			if coasting and not on_ground:
 				coast_speed = move_toward(coast_speed,0,float(f.coast_drag)*delta)
 				max_speed = coast_speed
@@ -301,7 +339,8 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			velocity.y = minf(velocity.y + float(f.gravity)*delta,float(f.max_descent))
 			position += velocity * delta
 			sprite.play(&"dive_windup")
-			sprite.scale = Vector2(1.15, 0.75)
+			if not bool(art_entry.get("native_alpha",false)):
+				sprite.scale = Vector2(1.15, 0.75)
 			if position.y >= ground_y():
 				land()
 			elif timer <= 0:
@@ -324,15 +363,13 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			upwind = direction.x * wind_force < 0
 			if absf(direction.x) > 0.05:
 				facing = signf(direction.x)
-			sprite.play(&"dive")
+			sprite.play(&"snatch" if peck_time > 0.0 else &"dive")
 			sprite.rotation = direction.angle() if facing > 0 else direction.angle() - PI
 			var nose_down: bool = direction.y * float(d.beak_offset) > float(f.feet_offset)
 			if nose_down and beak().y >= float(Config.tuning.world.ground) and velocity.y > 0:
 				if crash_risk() >= 1.0:
 					position.y = ground_y()
-					velocity = Vector2.ZERO
-					state = State.STUNNED
-					timer = d.stun
+					begin_tumble()
 					ground_crashed.emit()
 				else:
 					land()
@@ -341,14 +378,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			elif climb or (direction.y < 0 and dive_speed <= float(d.exit_speed)):
 				pullup()
 		State.STUNNED:
-			sprite.play(&"stunned")
-			sprite.rotation = timer * 12
-			position.y = minf(ground_y(), position.y + float(f.max_descent) * delta)
-			if timer <= 0:
-				invulnerable = d.invulnerability
-				state = State.GLIDE
-				if position.y >= ground_y():
-					land()
+			tick_tumble(delta)
 	if state in [State.GLIDE,State.WINDUP,State.STRIKE]:
 		position.x += wind_force * float(w.drift) * delta
 	if position.y < float(f.min_y):
@@ -372,10 +402,39 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 				# Tie footfalls to distance, so feet stop immediately at rest.
 				sprite.animation = &"walk"
 				sprite.pause()
-				sprite.frame = int(walk_phase / TAU * 8) % 8
-				sprite.flip_h = (facing < 0) != bool(Config.sprites.player_gull.animations.walk.get("source_left",false))
+				var count: int = sprite.sprite_frames.get_frame_count(&"walk")
+				sprite.frame = int(walk_phase / TAU * count) % count
+				sprite.flip_h = (facing < 0) != bool(art_entry.animations.walk.get("source_left",false))
 			else:
 				sprite.play(&"idle")
+		if art_event_left > 0.0 and sprite.sprite_frames.has_animation(art_event):
+			if (state == State.GROUNDED and art_event in [&"landing",&"peck"]) or (state == State.GLIDE and not climb and art_event == &"pullup"):
+				sprite.play(art_event)
+		if art_entry.has("frame_beaks"):
+			# Production sheets use source-space bill x=20 and sole y=12.
+			# Resize around these contact anchors, keeping feet on sand/lids and
+			# the airborne bill at the existing collision point through dive rotation.
+			var offset := Vector2((float(d.beak_offset)-20.0*art_scale)*facing,0)
+			if state == State.GROUNDED:
+				offset.y = float(f.feet_offset)-12.0*art_scale
+			elif state != State.STRIKE:
+				offset.y = 2.0-4.0*art_scale
+			sprite.position = offset.rotated(sprite.rotation)
+			if state == State.STUNNED:
+				# Spin around the body, without the flight bill alignment orbit.
+				sprite.position = Vector2.ZERO
+		if rival and is_instance_valid(rival_badge) and art_entry.has("frame_bounds"):
+			# Keep the badge above raised wings and rotated dive silhouettes.
+			var source_index: int = art_entry.animations[String(sprite.animation)].frames[sprite.frame]
+			var bounds: Array = art_entry.frame_bounds[source_index]
+			var top: float = -18.0
+			for corner: Vector2 in [Vector2(bounds[0],bounds[1]),Vector2(bounds[0]+bounds[2],bounds[1]),Vector2(bounds[0],bounds[1]+bounds[3]),Vector2(bounds[0]+bounds[2],bounds[1]+bounds[3])]:
+				var point: Vector2 = (corner-Vector2(art_entry.frame_w,art_entry.frame_h)*.5)*sprite.scale
+				if sprite.flip_h:
+					point.x = -point.x
+				top = minf(top,(point.rotated(sprite.rotation)+sprite.position).y)
+			rival_badge.position.y = top-12
+			rival_label.position.y = top-12
 	queue_redraw()
 
 func wind_lift() -> float:
@@ -407,6 +466,9 @@ func climb_loop_time() -> float:
 
 func land() -> void:
 	var was_airborne: bool = state in [State.GLIDE, State.WINDUP, State.STRIKE]
+	if was_airborne and velocity.y > 0.1:
+		art_event = &"landing"
+		art_event_left = 0.16
 	position.y = ground_y()
 	velocity.y = 0
 	velocity.x = clampf(velocity.x, -float(Config.tuning.flight.ground_speed), float(Config.tuning.flight.ground_speed))
@@ -423,6 +485,8 @@ func pullup() -> void:
 	coasting = true
 	coast_speed = absf(velocity.x)
 	cooldown = Config.tuning.dive.cooldown
+	art_event = &"pullup"
+	art_event_left = 0.18
 
 func crash_risk() -> float:
 	# Downward impact speed, not harmless horizontal speed, determines severity.
@@ -436,14 +500,91 @@ func crash_warning() -> bool:
 	var seconds_to_sand: float = maxf(0,float(Config.tuning.world.ground)-beak().y) / maxf(velocity.y,1)
 	return seconds_to_sand <= float(Config.tuning.dive.warning_time)
 
-func stun(duration: float = -1.0) -> void:
+func stun(duration: float = -1.0, attacker: Vector2 = Vector2.INF) -> void:
 	if state == State.STUNNED or invulnerable > 0:
 		return
+	begin_tumble(duration,attacker)
+	gull_stunned.emit()
+
+func begin_tumble(duration: float = -1.0, attacker: Vector2 = Vector2.INF) -> void:
+	var t: Dictionary = Config.tuning.tumble
+	var away: float = signf(position.x-attacker.x) if attacker.is_finite() else signf(velocity.x)
+	if away == 0.0:
+		away = -signf(velocity.x) if absf(velocity.x)>1.0 else -facing
 	state = State.STUNNED
 	support = {}
-	velocity = Vector2.ZERO
-	timer = float(Config.tuning.dive.stun) if duration < 0 else duration
-	gull_stunned.emit()
+	departing_perch = {}
+	coasting = false
+	dive_speed = 0.0
+	consume_peck()
+	peck_used = true
+	art_event_left = 0.0
+	stroke_left = 0.0
+	timer = float(t.duration) if duration < 0.0 else maxf(duration,float(t.recovery_time))
+	velocity = Vector2(away*float(t.launch_speed),-float(t.launch_up))
+	facing = away
+	tumble_angle = sprite.rotation
+	tumble_spin = away*float(t.spin)
+	tumble_elapsed = 0.0
+	tumble_shed = float(t.shed_interval)
+	tumble_bounced = false
+	tumble_recovering = false
+	sprite.play(&"idle" if sprite.sprite_frames.has_animation(&"idle") else &"glide")
+	position.y = minf(position.y,tumble_floor())
+	tumble_feathers.emit(position,velocity,int(Config.tuning.juice.feathers))
+
+func tumble_floor() -> float:
+	# Leave room for a folded body while it turns over on the ground.
+	return float(Config.tuning.world.ground)-maxf(10.0,float(art_entry.get("art_height",16.0))*0.65)
+
+func tick_tumble(delta: float) -> void:
+	var t: Dictionary = Config.tuning.tumble
+	sprite.play(&"idle" if sprite.sprite_frames.has_animation(&"idle") else &"glide")
+	# A delayed frame must not simulate beyond the end of this reaction.
+	var remaining: float = minf(delta,maxf(0.0,timer+delta))
+	while remaining > 0.000001:
+		var step: float = minf(remaining,1.0/120.0)
+		remaining -= step
+		tumble_elapsed += step
+		velocity.x = move_toward(velocity.x,0.0,float(t.drag)*step)
+		velocity.y += float(t.gravity)*step
+		position += velocity*step
+		if position.x < 12.0 or position.x > float(Config.tuning.world.width)-12.0:
+			position.x = clampf(position.x,12.0,float(Config.tuning.world.width)-12.0)
+			velocity.x = 0.0
+		if position.y >= tumble_floor() and velocity.y > 0.0:
+			position.y = tumble_floor()
+			if not tumble_bounced:
+				velocity.y = -minf(velocity.y*float(t.bounce),float(t.bounce_speed))
+				velocity.x *= 0.85
+				tumble_spin *= 0.8
+				tumble_bounced = true
+				tumble_feathers.emit(position,velocity,3)
+				sand_landed.emit(Vector2(position.x,float(Config.tuning.world.ground)))
+			else:
+				velocity.y = 0.0
+		if not tumble_recovering:
+			tumble_angle += tumble_spin*step
+			tumble_spin = move_toward(tumble_spin,0.0,float(t.spin_drag)*step)
+		if tumble_elapsed <= float(t.shed_time):
+			tumble_shed -= step
+			if tumble_shed <= 0.0:
+				tumble_shed += float(t.shed_interval)
+				tumble_feathers.emit(position,velocity,2)
+	if timer <= float(t.recovery_time):
+		if not tumble_recovering:
+			tumble_recovering = true
+			tumble_recovery_angle = wrapf(tumble_angle,-PI,PI)
+		var progress: float = clampf(1.0-maxf(timer,0.0)/float(t.recovery_time),0.0,1.0)
+		tumble_angle = tumble_recovery_angle*(1.0-smoothstep(0.0,1.0,progress))
+	sprite.rotation = tumble_angle
+	if timer <= 0.0:
+		invulnerable = float(Config.tuning.dive.invulnerability)
+		sprite.rotation = 0.0
+		state = State.GLIDE
+		cooldown = float(Config.tuning.dive.cooldown)
+		if position.y >= tumble_floor()-0.1 and velocity.y >= 0.0:
+			land()
 
 func _draw() -> void:
 	var target_perch: Dictionary = landing_perch()

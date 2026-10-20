@@ -24,6 +24,10 @@ var score_announcement_fonts: Array[Font] = [
 var score_announcement_font_index: int = 0
 const SCORE_ANNOUNCEMENT_HOLD: float = BeachEffects.SCORE_MESSAGE_HOLD
 const SCORE_ANNOUNCEMENT_FADE: float = BeachEffects.SCORE_MESSAGE_FADE
+const TOP_BAR_HEIGHT: int = 17
+const TOP_BAR_FONT_SIZE: int = 6
+const SCORE_CALLOUT_TOP: float = TOP_BAR_HEIGHT + 2.0
+const HUD_FONT: Font = preload("res://assets/fonts/gull_hud.fnt")
 
 func setup(owner_game: BeachGame) -> void:
 	game = owner_game
@@ -31,28 +35,44 @@ func setup(owner_game: BeachGame) -> void:
 	BeachUI.full(self)
 	mouse_filter = MOUSE_FILTER_IGNORE
 	var margin: MarginContainer = BeachUI.margin(self,5)
+	margin.add_theme_constant_override("margin_top",2)
 	margin.mouse_filter = MOUSE_FILTER_IGNORE
 	var column: VBoxContainer = VBoxContainer.new()
 	column.mouse_filter = MOUSE_FILTER_IGNORE
 	margin.add_child(column)
 	top = HBoxContainer.new()
+	top.custom_minimum_size.y = 11
+	top.add_theme_constant_override("separation",5)
 	column.add_child(top)
 	score_label = BeachUI.label(top,"0000",8,BeachUI.GOLD)
 	score_label.custom_minimum_size.x = 95
-	time_label = BeachUI.label(top,"75s")
+	time_label = BeachUI.label(top,"75")
 	time_label.size_flags_horizontal = SIZE_EXPAND_FILL
 	time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	wind_label = BeachUI.label(top,"CALM")
 	wind_label.custom_minimum_size.x = 83
 	wind_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	pause_button = BeachUI.button(top,"II",func() -> void: game.pause_requested.emit())
-	pause_button.custom_minimum_size = Vector2(20,20)
+	pause_button.custom_minimum_size = Vector2(14,11)
+	for item: Control in [score_label,time_label,wind_label,pause_button]:
+		item.add_theme_font_override("font",HUD_FONT)
+		item.add_theme_font_size_override("font_size",TOP_BAR_FONT_SIZE)
+	for item: Label in [score_label,time_label,wind_label]:
+		item.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	# Override only the compact HUD button, keeping menu/touch typography intact.
+	for state: String in ["normal","hover","pressed","focus","disabled"]:
+		var style: StyleBoxFlat = pause_button.get_theme_stylebox(state).duplicate() as StyleBoxFlat
+		style.content_margin_left = 3
+		style.content_margin_right = 3
+		style.content_margin_top = 1
+		style.content_margin_bottom = 1
+		pause_button.add_theme_stylebox_override(state,style)
 	# This sits just below the status strip, leaving the score and timer readable.
 	var announcement_row: CenterContainer = CenterContainer.new()
 	add_child(announcement_row)
 	announcement_row.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	announcement_row.offset_top = 30.0
-	announcement_row.offset_bottom = 54.0
+	announcement_row.offset_top = SCORE_CALLOUT_TOP
+	announcement_row.offset_bottom = SCORE_CALLOUT_TOP + 24.0
 	announcement_row.mouse_filter = MOUSE_FILTER_IGNORE
 	score_announcement = BeachUI.label(announcement_row,"",BeachUI.FONT_DISPLAY,Color.WHITE)
 	score_announcement.custom_minimum_size = Vector2(304,16)
@@ -89,8 +109,8 @@ func setup(owner_game: BeachGame) -> void:
 	add_child(training_center)
 	BeachUI.full(training_center)
 	training_center.anchor_bottom = 0.0
-	training_center.offset_top = 28.0
-	training_center.offset_bottom = 28.0
+	training_center.offset_top = TOP_BAR_HEIGHT
+	training_center.offset_bottom = TOP_BAR_HEIGHT
 	training_center.mouse_filter = MOUSE_FILTER_IGNORE
 	training_panel = BeachUI.panel(training_center,Color(0.094,0.23,0.30,0.95))
 	training_panel.custom_minimum_size = Vector2(192,32)
@@ -146,7 +166,7 @@ func setup(owner_game: BeachGame) -> void:
 
 func _process(_delta: float) -> void:
 	score_label.text = "%04d  X%s" % [game.score.points,str(Config.tuning.score.tiers[game.score.tier])]
-	time_label.text = "TRAINING" if game.training else ("%d/%d" % [game.score.items,Config.tuning.score.casual_items] if game.casual else "%02ds" % ceili(maxf(0,float(game.level.time_limit)-game.elapsed)))
+	time_label.text = "TRAINING" if game.training else ("%d/%d" % [game.score.items,Config.tuning.score.casual_items] if game.casual else "%02d" % ceili(maxf(0,float(game.level.time_limit)-game.elapsed)))
 	wind_label.text = "CALM" if absf(game.player.wind_force) < 0.01 else "%s %d%%" % ["WIND >" if game.player.wind_force > 0 else "< WIND",roundi(absf(game.player.wind_force)*100)]
 	intro_panel.visible = game.intro > 0
 	training_panel.visible = game.training and game.running and game.intro <= 0
@@ -194,7 +214,7 @@ func show_score_announcement(food_id: String, earned: int) -> void:
 	# Training text occupies the normal top-center slot, so shift the transient
 	# callout below it rather than covering the current instruction.
 	var row: Control = score_announcement.get_parent() as Control
-	row.offset_top = training_callout_top() if game.training else 30.0
+	row.offset_top = training_callout_top() if game.training else SCORE_CALLOUT_TOP
 	row.offset_bottom = row.offset_top + 24.0
 	score_announcement.modulate.a = 1.0
 	score_announcement.scale = Vector2(0.72,0.72)
@@ -230,20 +250,29 @@ func _draw_digestion(offset: Vector2) -> void:
 	var size: Vector2 = Vector2(definition.size[0],definition.size[1])
 	draw_texture_rect(Config.frames(definition.sprite).get_frame_texture(&"idle",0),Rect2(game.player.beak()-offset-size*0.5,size),false)
 
+func goal_status() -> Dictionary:
+	if game.casual:
+		return {"title":"PRACTICE","progress":game.score.items,"goal":int(Config.tuning.score.casual_items)}
+	var index: int = 0
+	while index < game.level.stars.size()-1 and game.score.points >= int(game.level.stars[index]):
+		index += 1
+	return {"title":"1 STAR" if index == 0 else "%d STARS" % (index+1),"progress":game.score.points,"goal":int(game.level.stars[index])}
+
 func _draw() -> void:
 	if game == null:
 		return
-	draw_rect(Rect2(0,0,320,28),Color("183b4e"))
-	draw_rect(Rect2(5,19,85,2),Color("397a85"))
-	draw_rect(Rect2(5,19,85*game.score.window/float(Config.tuning.score.combo_window),2),BeachUI.GOLD)
+	draw_rect(Rect2(0,0,320,TOP_BAR_HEIGHT),Color("183b4e"))
+	draw_rect(Rect2(5,TOP_BAR_HEIGHT-3,85,2),Color("397a85"))
+	draw_rect(Rect2(5,TOP_BAR_HEIGHT-3,85*game.score.window/float(Config.tuning.score.combo_window),2),BeachUI.GOLD)
 	var offset: Vector2 = Vector2(game.camera_x-160,0)
 	_draw_digestion(offset)
 	var aim: Vector2 = game.player.aim-offset
 	if game.running:
 		if not game.training:
-			var goal: int = int(Config.tuning.score.casual_items) if game.casual else int(game.level.stars[0])
-			var progress: int = game.score.items if game.casual else game.score.points
-			var title: String = "PRACTICE" if game.casual else ("NEXT LEVEL" if int(game.level.id) < GameState.last_playable_level() else ("DEMO GOAL" if GameState.demo_locked(int(game.level.id) + 1) else "FINAL GOAL"))
+			var status: Dictionary = goal_status()
+			var goal: int = int(status.goal)
+			var progress: int = int(status.progress)
+			var title: String = str(status.title)
 			draw_rect(Rect2(232,44,84,29),Color(0.094,0.23,0.30,0.9))
 			draw_string(font,Vector2(237,53),title,HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.CREAM)
 			draw_rect(Rect2(237,57,74,4),Color("397a85"))
@@ -390,7 +419,7 @@ func context_hint() -> Dictionary:
 # and above the zone signs, so the hint never crosses world labels.
 func hint_rect(text: String) -> Rect2:
 	var width: float = ceilf(font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x) + 6.0
-	var y: float = training_panel.get_global_rect().end.y + 2.0 if game.training else 56.0
+	var y: float = training_panel.get_global_rect().end.y + 2.0 if game.training else SCORE_CALLOUT_TOP + 26.0
 	return Rect2(4.0,roundf(y),width,11.0)
 
 func touch_buttons_visible() -> bool:

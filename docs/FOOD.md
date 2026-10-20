@@ -14,7 +14,7 @@
 | Large | Full hotdog | 45 | Dog owners |
 | Large | Fried fish | 55 | Pier diners, seafood vendors |
 
-Ground pickups repeat two crumbs followed by one chip and replenish after 18 seconds. They award their listed points without combos or practice-snatch credit. Held food receives the existing risk, upwind and combo bonuses. Rivals use the same food values. Food category controls digestion capacity and eating time; the normal queue awards points on swallowing. Lifeguards carry no food. A crash retains half the current points, rounded up for odd totals, and resets the combo.
+Ground pickups repeat two crumbs followed by one chip and replenish after 18 seconds. Crumbs use a 5 × 3 pixel `display_size` for readability while retaining their original pickup radius and 5-point value. They award their listed points without combos or practice-snatch credit. Held food receives the existing risk, upwind and combo bonuses. Rivals use the same food values. Food category controls digestion capacity and eating time; the normal queue awards points on swallowing. Lifeguards carry no food. A crash retains half the current points, rounded up for odd totals, and resets the combo.
 
 Bins include the three half-eaten leftovers as finite edible scraps alongside crumbs, wrappers and paper. Each bin contains one of each new leftover, two crumb pickups and four inert litter objects. Four pecks release three objects, for three bursts before depletion. Leftovers render at 8 × 8 pixels and use the normal small-snack digestion time (0.5 seconds airborne, twice as fast grounded); points are awarded only on swallowing, without combo or practice credit. See `BIN_LEFTOVER_ART.md` for the fixed sequence, artwork and validation.
 

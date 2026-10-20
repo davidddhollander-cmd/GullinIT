@@ -1,0 +1,80 @@
+{
+  "stride_pixels": 28.0,
+  "upper_length": 7.0,
+  "lower_length": 7.0,
+  "parts": {
+    "near-upper": {
+      "file": "res://assets/pilots/shopper-walk-v1/near-upper.png",
+      "pivot": [
+        16,
+        8
+      ],
+      "size": [
+        36,
+        72
+      ]
+    },
+    "near-lower": {
+      "file": "res://assets/pilots/shopper-walk-v1/near-lower.png",
+      "pivot": [
+        12,
+        8
+      ],
+      "size": [
+        24,
+        72
+      ]
+    },
+    "near-foot": {
+      "file": "res://assets/pilots/shopper-walk-v1/near-foot.png",
+      "pivot": [
+        8,
+        4
+      ],
+      "size": [
+        40,
+        28
+      ]
+    },
+    "far-upper": {
+      "file": "res://assets/pilots/shopper-walk-v1/far-upper.png",
+      "pivot": [
+        16,
+        8
+      ],
+      "size": [
+        36,
+        72
+      ]
+    },
+    "far-lower": {
+      "file": "res://assets/pilots/shopper-walk-v1/far-lower.png",
+      "pivot": [
+        12,
+        8
+      ],
+      "size": [
+        24,
+        72
+      ]
+    },
+    "far-foot": {
+      "file": "res://assets/pilots/shopper-walk-v1/far-foot.png",
+      "pivot": [
+        8,
+        4
+      ],
+      "size": [
+        40,
+        28
+      ]
+    }
+  },
+  "body": "res://assets/pilots/shopper-walk-v1/body.png",
+  "palm": [
+    14.0,
+    -22.0
+  ],
+  "status": "cutout review pilot",
+  "ankle_height": 3.0
+}

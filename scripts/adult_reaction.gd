@@ -9,19 +9,34 @@ var focus: BeachGull
 var home: float = 0
 var swat: float = 0
 var swat_timer: float = -1
+var committed: bool = false
+var escape_direction: float = 1.0
 
-func theft(owner: BeachTarget, gull: BeachGull) -> void:
+func theft(owner: BeachTarget, gull: BeachGull, perfect: bool = false) -> void:
 	if owner.kind == "toddler" or owner.leaving:
+		return
+	if owner.kind == "sunbather" and owner.sleep_state != BeachTarget.SleepState.AWAKE:
+		return
+	if owner.kind == "sunbather" and mode in ["notice","chase"]:
 		return
 	if mode.is_empty():
 		home = owner.position.x
 	focus = gull
-	mode = "wake" if owner.kind == "sunbather" and not owner.stash_standing else "chase"
-	timer = 0.8 * owner.reaction_delay if mode == "wake" else 3.0
+	committed = perfect and owner.kind in ["kiosk_customer","pier_diner"]
+	if committed:
+		home = owner.position.x
+		escape_direction = signf(gull.velocity.x) if absf(gull.velocity.x)>1.0 else signf(gull.direction.x)
+		if is_zero_approx(escape_direction):
+			escape_direction = owner.facing
+	mode = "notice" if owner.kind == "sunbather" else "chase"
+	timer = float(Config.tuning.world.sunbather_notice_delay)*owner.reaction_delay if mode == "notice" else (float(Config.tuning.world.snatch_chase_time) if committed else 3.0)
+	swat_timer = -1.0
 	window = 5
 
 func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 	if owner.kind == "toddler" or owner.leaving:
+		return false
+	if owner.kind == "sunbather" and owner.sleep_state != BeachTarget.SleepState.AWAKE:
 		return false
 	window = maxf(0,window-delta)
 	cooldown = maxf(0,cooldown-delta)
@@ -35,7 +50,7 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 				home = owner.position.x
 				focus = gull
 				mode = "warning"
-				timer = (0.8 if owner.kind == "sunbather" else 0.35) * owner.reaction_delay
+				timer = (float(Config.tuning.world.sunbather_warning_time) if owner.kind == "sunbather" else 0.35) * owner.reaction_delay
 				window = 5
 				owner.alert = maxf(owner.alert,0.5)
 		if close:
@@ -44,7 +59,7 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 			near[gull] = false
 	if mode.is_empty():
 		return false
-	if is_instance_valid(focus) and mode in ["warning","wake"]:
+	if is_instance_valid(focus) and mode in ["warning","notice"]:
 		owner.facing = signf(focus.position.x-owner.position.x) if absf(focus.position.x-owner.position.x)>1 else owner.facing
 	timer -= delta
 	var moving: bool = false
@@ -59,17 +74,22 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 	elif mode == "follow":
 		if timer <= 0:
 			mode = ""
-	elif mode == "wake":
+	elif mode == "notice":
 		if timer <= 0:
 			owner.stash_standing = true
 			mode = "chase"
 			timer = 3
 	elif mode == "chase":
-		if not is_instance_valid(focus) or timer <= 0 or focus.position.y < 100 or absf(focus.position.x-home)>85:
-			mode = "return"
+		if not is_instance_valid(focus) or timer <= 0 or (not committed and (focus.position.y < 100 or absf(focus.position.x-home)>85)):
+			mode = "give_up" if committed else "return"
+			timer = float(Config.tuning.world.snatch_give_up_time) if committed else 0.0
 			swat_timer = -1
 		else:
-			var destination: float = clampf(focus.position.x,home-80,home+80)
+			var reach: float = float(Config.tuning.world.snatch_chase_distance) if committed else 80.0
+			var destination: float = clampf(focus.position.x,home-reach,home+reach)
+			if committed and focus.position.y < 100 and absf(destination-owner.position.x)<12.0:
+				destination = home+escape_direction*reach
+			destination = clampf(destination,20.0,float(Config.tuning.world.width)-20.0)
 			if owner.kind == "sunbather":
 				destination = clampf(destination,float(Config.tuning.world.beach_min_x),float(Config.tuning.world.beach_max_x))
 			owner.facing = signf(destination-owner.position.x) if absf(destination-owner.position.x)>1 else owner.facing
@@ -81,9 +101,19 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 					swat_timer = -1
 					swat = 1.2
 			elif focus.position.distance_to(owner.position-Vector2(0,12)) < 24 and swat <= 0:
-				swat_timer = 0.4 * owner.reaction_delay
+				swat_timer = maxf(0.4,0.4 * owner.reaction_delay)
 			elif moving and not whistle_pause:
 				owner.position.x = move_toward(owner.position.x,destination,(30.0 if owner.kind == "sunbather" else 45.0)*delta)
+	elif mode == "give_up":
+		# Dedicated yell/curse artwork is tracked in docs/CHARACTER_ANIMATION_TODO.md.
+		if timer <= 0.0:
+			committed = false
+			cooldown = 1.0
+			if owner.routine.enabled:
+				owner.routine.resume(owner)
+				mode = ""
+			else:
+				mode = "return"
 	elif mode == "return":
 		owner.facing = signf(home-owner.position.x) if absf(home-owner.position.x)>1 else owner.facing
 		moving = absf(home-owner.position.x)>0.25
@@ -95,10 +125,10 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 			cooldown = 1
 	if owner.kind == "sunbather":
 		owner.sunbather_run_time += delta
-		if mode == "warning" and timer < 0.38:
+		if mode == "warning":
 			SunbatherArt.pose(owner,&"alert",clampi(int((0.38-timer)*10.0),0,3))
-		elif mode == "warning" or mode == "wake":
-			SunbatherArt.pose(owner,&"rise",clampi(int((0.8-timer)*8),0,6))
+		elif mode == "notice":
+			SunbatherArt.reaction_pose(owner,&"stand",0.0)
 		elif mode.is_empty() and not owner.stash_active:
 			owner.stash_standing = false
 			SunbatherArt.pose(owner,&"rest",0)
@@ -118,5 +148,5 @@ func _hit(owner: BeachTarget) -> void:
 	if is_instance_valid(focus) and focus.position.distance_to(owner.position-Vector2(0,12)) < 24:
 		if owner.kind in ["pier_diner","lifeguard","kiosk_customer"]:
 			owner.action_pose_time = 0.28
-		focus.stun()
+		focus.stun(-1.0,owner.position)
 		owner.mum_swat_time = 0.25

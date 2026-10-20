@@ -1,5 +1,6 @@
 class_name ShopperArt
 extends RefCounted
+const APPEARANCES: Array[String] = ["kiosk_customer","shopper_mullet","shopper_sundress"]
 
 static func update(target: BeachTarget,moving: bool) -> void:
 	var pose: StringName = &"walk" if moving else &"idle"
@@ -10,7 +11,7 @@ static func update(target: BeachTarget,moving: bool) -> void:
 			pose = &"windup"
 		elif target.reaction.mode == "warning":
 			pose = &"warning"
-		elif target.reaction.mode == "follow" or (not target.food and target.recover > 0 and not moving):
+		elif target.reaction.mode in ["follow","give_up"] or (not target.food and target.recover > 0 and not moving):
 			pose = &"angry"
 		elif target.reaction.mode == "chase" and moving:
 			pose = &"run"

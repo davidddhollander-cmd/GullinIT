@@ -1,202 +1,217 @@
 {
-  "player_gull": {
-    "file": "res://assets/sprites/gull_reference_clean.png",
-    "frame_w": 240,
-    "frame_h": 200,
-    "visual_scale": 0.18,
-    "regions": [
-      {
-        "region": [
-          17,
-          60,
-          111,
-          104
-        ],
-        "offset": [
-          64,
-          31
-        ]
-      },
-      {
-        "region": [
-          44,
-          248,
-          127,
-          106
-        ],
-        "offset": [
-          65,
-          29
-        ]
-      },
-      {
-        "region": [
-          186,
-          248,
-          121,
-          106
-        ],
-        "offset": [
-          68,
-          29
-        ]
-      },
-      {
-        "region": [
-          311,
-          248,
-          117,
-          106
-        ],
-        "offset": [
-          68,
-          29
-        ]
-      },
-      {
-        "region": [
-          433,
-          248,
-          116,
-          106
-        ],
-        "offset": [
-          66,
-          29
-        ]
-      },
-      {
-        "region": [
-          554,
-          248,
-          121,
-          106
-        ],
-        "offset": [
-          59,
-          29
-        ]
-      },
-      {
-        "region": [
-          682,
-          248,
-          120,
-          107
-        ],
-        "offset": [
-          60,
-          29
-        ]
-      },
-      {
-        "region": [
-          803,
-          248,
-          117,
-          107
-        ],
-        "offset": [
-          60,
-          29
-        ]
-      },
-      {
-        "region": [
-          920,
-          248,
-          123,
-          107
-        ],
-        "offset": [
-          54,
-          29
-        ]
-      },
-      {
-        "region": [
-          50,
-          428,
-          155,
-          108
-        ],
-        "offset": [
-          40,
-          21
-        ]
-      },
-      {
-        "region": [
-          230,
-          412,
-          162,
-          126
-        ],
-        "offset": [
-          32,
-          6
-        ]
-      },
-      {
-        "region": [
-          430,
-          413,
-          160,
-          129
-        ],
-        "offset": [
-          38,
-          3
-        ]
-      },
-      {
-        "region": [
-          631,
-          424,
-          167,
-          118
-        ],
-        "offset": [
-          33,
-          14
-        ]
-      },
-      {
-        "region": [
-          841,
-          417,
-          165,
-          126
-        ],
-        "offset": [
-          36,
-          6
-        ]
-      },
-      {
-        "region": [
-          1054,
-          412,
-          163,
-          134
-        ],
-        "offset": [
-          37,
-          -4
-        ]
-      },
-      {
-        "region": [
-          38,
-          830,
-          163,
-          86
-        ],
-        "offset": [
-          32,
-          47
-        ]
-      }
+  "gull_herring": {
+    "file": "res://assets/sprites/gull-herring-diner-style.png",
+    "frame_w": 256,
+    "frame_h": 256,
+    "visual_scale": 0.375,
+    "species": "herring",
+    "art_height": 16.5,
+    "native_alpha": true,
+    "flight_speed_mult": 1.0,
+    "ground_beak_y": -7.5,
+    "frame_beaks": [
+      [
+        10.0,
+        -7.5
+      ],
+      [
+        10.0,
+        -7.125
+      ],
+      [
+        10.0,
+        -7.125
+      ],
+      [
+        10.0,
+        -6.5625
+      ],
+      [
+        10.0,
+        -6.375
+      ],
+      [
+        10.0,
+        -6.75
+      ],
+      [
+        10.0,
+        -7.125
+      ],
+      [
+        10.0,
+        -6.75
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        0
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        0
+      ],
+      [
+        10.0,
+        1.5
+      ],
+      [
+        10.0,
+        -4.5
+      ],
+      [
+        10.0,
+        0
+      ]
+    ],
+    "frame_bounds": [
+      [
+        87,
+        96,
+        61,
+        44
+      ],
+      [
+        88,
+        97,
+        60,
+        43
+      ],
+      [
+        88,
+        97,
+        60,
+        43
+      ],
+      [
+        87,
+        96,
+        61,
+        44
+      ],
+      [
+        87,
+        99,
+        61,
+        41
+      ],
+      [
+        84,
+        98,
+        64,
+        42
+      ],
+      [
+        87,
+        97,
+        61,
+        43
+      ],
+      [
+        87,
+        98,
+        61,
+        42
+      ],
+      [
+        79,
+        91,
+        69,
+        55
+      ],
+      [
+        67,
+        106,
+        81,
+        41
+      ],
+      [
+        65,
+        122,
+        83,
+        42
+      ],
+      [
+        79,
+        91,
+        69,
+        55
+      ],
+      [
+        67,
+        115,
+        92,
+        29
+      ],
+      [
+        73,
+        102,
+        75,
+        40
+      ],
+      [
+        62,
+        116,
+        86,
+        21
+      ],
+      [
+        67,
+        99,
+        84,
+        49
+      ],
+      [
+        66,
+        96,
+        83,
+        45
+      ],
+      [
+        71,
+        103,
+        77,
+        37
+      ],
+      [
+        86,
+        81,
+        63,
+        59
+      ],
+      [
+        78,
+        106,
+        70,
+        34
+      ]
     ],
     "animations": {
       "idle": {
@@ -216,41 +231,37 @@
           5,
           6,
           7,
-          8
+          0
         ],
         "fps": 8,
         "loop": true,
-        "source_left": true
+        "source_left": false
       },
       "fly": {
         "frames": [
+          8,
           9,
           10,
-          11,
-          12,
-          13,
-          14
+          11
         ],
-        "fps": 9,
+        "fps": 10,
         "loop": true,
         "source_left": false
       },
       "climb": {
         "frames": [
+          8,
           9,
           10,
-          11,
-          12,
-          13,
-          14
+          11
         ],
-        "fps": 11,
+        "fps": 10,
         "loop": true,
         "source_left": false
       },
       "glide": {
         "frames": [
-          15
+          12
         ],
         "fps": 1,
         "loop": true,
@@ -258,23 +269,15 @@
       },
       "dive_windup": {
         "frames": [
-          15
+          13
         ],
         "fps": 1,
-        "loop": true,
+        "loop": false,
         "source_left": false
       },
       "dive": {
         "frames": [
-          15
-        ],
-        "fps": 1,
-        "loop": true,
-        "source_left": false
-      },
-      "snatch": {
-        "frames": [
-          15
+          14
         ],
         "fps": 1,
         "loop": true,
@@ -282,20 +285,1017 @@
       },
       "pullup": {
         "frames": [
-          9,
-          10,
-          11,
-          12,
-          13,
-          14
+          15
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "snatch": {
+        "frames": [
+          16
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "peck": {
+        "frames": [
+          17
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "landing": {
+        "frames": [
+          18
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "stunned": {
+        "frames": [
+          19
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      }
+    }
+  },
+  "gull_kittiwake": {
+    "file": "res://assets/sprites/gull-kittiwake-diner-style.png",
+    "frame_w": 256,
+    "frame_h": 256,
+    "visual_scale": 0.375,
+    "species": "kittiwake",
+    "art_height": 12.75,
+    "native_alpha": true,
+    "flight_speed_mult": 1.2,
+    "ground_beak_y": -4.3125,
+    "frame_beaks": [
+      [
+        10.0,
+        -4.3125
+      ],
+      [
+        10.0,
+        -4.125
+      ],
+      [
+        10.0,
+        -4.125
+      ],
+      [
+        10.0,
+        -4.125
+      ],
+      [
+        10.0,
+        -3.75
+      ],
+      [
+        10.0,
+        -4.125
+      ],
+      [
+        10.0,
+        -4.3125
+      ],
+      [
+        10.0,
+        -4.125
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        1.8125
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        0
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        0
+      ],
+      [
+        10.0,
+        3.9375
+      ],
+      [
+        10.0,
+        -1.875
+      ],
+      [
+        10.0,
+        2.25
+      ]
+    ],
+    "frame_bounds": [
+      [
+        101,
+        106,
+        47,
+        34
+      ],
+      [
+        101,
+        106,
+        47,
+        34
+      ],
+      [
+        100,
+        106,
+        48,
+        34
+      ],
+      [
+        98,
+        106,
+        50,
+        34
+      ],
+      [
+        100,
+        107,
+        48,
+        33
+      ],
+      [
+        100,
+        106,
+        48,
+        34
+      ],
+      [
+        100,
+        106,
+        48,
+        34
+      ],
+      [
+        99,
+        106,
+        49,
+        34
+      ],
+      [
+        99,
+        96,
+        49,
+        47
+      ],
+      [
+        92,
+        106,
+        56,
+        35
+      ],
+      [
+        92,
+        126,
+        56,
+        32
+      ],
+      [
+        94,
+        103,
+        55,
+        39
+      ],
+      [
+        87,
+        120,
+        74,
+        21
+      ],
+      [
+        95,
+        113,
+        53,
+        26
+      ],
+      [
+        90,
+        121,
+        58,
+        14
+      ],
+      [
+        92,
+        107,
+        56,
+        34
+      ],
+      [
+        84,
+        112,
+        64,
+        28
+      ],
+      [
+        91,
+        117,
+        57,
+        23
+      ],
+      [
+        97,
+        101,
+        59,
+        39
+      ],
+      [
+        97,
+        117,
+        51,
+        23
+      ]
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "walk": {
+        "frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          0
         ],
         "fps": 8,
         "loop": true,
         "source_left": false
       },
-      "stunned": {
+      "fly": {
+        "frames": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "fps": 10,
+        "loop": true,
+        "source_left": false
+      },
+      "climb": {
+        "frames": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "fps": 10,
+        "loop": true,
+        "source_left": false
+      },
+      "glide": {
+        "frames": [
+          12
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "dive_windup": {
+        "frames": [
+          13
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "dive": {
+        "frames": [
+          14
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "pullup": {
         "frames": [
           15
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "snatch": {
+        "frames": [
+          16
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "peck": {
+        "frames": [
+          17
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "landing": {
+        "frames": [
+          18
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "stunned": {
+        "frames": [
+          19
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      }
+    }
+  },
+  "gull_great_black_backed": {
+    "file": "res://assets/sprites/gull-great-black-backed-diner-style.png",
+    "frame_w": 256,
+    "frame_h": 256,
+    "visual_scale": 0.375,
+    "species": "great-black-backed",
+    "art_height": 21,
+    "native_alpha": true,
+    "flight_speed_mult": 1.0,
+    "ground_beak_y": -11.625,
+    "frame_beaks": [
+      [
+        10.0,
+        -11.625
+      ],
+      [
+        10.0,
+        -11.0625
+      ],
+      [
+        10.0,
+        -10.875
+      ],
+      [
+        10.0,
+        -10.875
+      ],
+      [
+        10.0,
+        -11.25
+      ],
+      [
+        10.0,
+        -11.625
+      ],
+      [
+        10.0,
+        -11.625
+      ],
+      [
+        10.0,
+        -11.625
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        0
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        0
+      ],
+      [
+        10.0,
+        2.25
+      ],
+      [
+        10.0,
+        -6
+      ],
+      [
+        10.0,
+        -1.125
+      ]
+    ],
+    "frame_bounds": [
+      [
+        71,
+        84,
+        77,
+        56
+      ],
+      [
+        70,
+        86,
+        78,
+        54
+      ],
+      [
+        70,
+        86,
+        78,
+        54
+      ],
+      [
+        68,
+        86,
+        80,
+        54
+      ],
+      [
+        67,
+        85,
+        81,
+        55
+      ],
+      [
+        69,
+        84,
+        79,
+        56
+      ],
+      [
+        68,
+        84,
+        80,
+        56
+      ],
+      [
+        67,
+        84,
+        81,
+        56
+      ],
+      [
+        66,
+        82,
+        83,
+        67
+      ],
+      [
+        66,
+        94,
+        85,
+        53
+      ],
+      [
+        63,
+        123,
+        85,
+        53
+      ],
+      [
+        68,
+        98,
+        80,
+        48
+      ],
+      [
+        55,
+        109,
+        110,
+        39
+      ],
+      [
+        68,
+        94,
+        80,
+        51
+      ],
+      [
+        59,
+        118,
+        89,
+        26
+      ],
+      [
+        62,
+        92,
+        86,
+        55
+      ],
+      [
+        50,
+        104,
+        98,
+        43
+      ],
+      [
+        67,
+        100,
+        81,
+        40
+      ],
+      [
+        68,
+        83,
+        80,
+        57
+      ],
+      [
+        73,
+        99,
+        75,
+        41
+      ]
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "walk": {
+        "frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          0
+        ],
+        "fps": 8,
+        "loop": true,
+        "source_left": false
+      },
+      "fly": {
+        "frames": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "fps": 10,
+        "loop": true,
+        "source_left": false
+      },
+      "climb": {
+        "frames": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "fps": 10,
+        "loop": true,
+        "source_left": false
+      },
+      "glide": {
+        "frames": [
+          12
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "dive_windup": {
+        "frames": [
+          13
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "dive": {
+        "frames": [
+          14
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "pullup": {
+        "frames": [
+          15
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "snatch": {
+        "frames": [
+          16
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "peck": {
+        "frames": [
+          17
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "landing": {
+        "frames": [
+          18
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "stunned": {
+        "frames": [
+          19
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      }
+    }
+  },
+  "player_gull": {
+    "file": "res://assets/sprites/gull-herring-diner-style.png",
+    "frame_w": 256,
+    "frame_h": 256,
+    "visual_scale": 0.375,
+    "species": "herring",
+    "art_height": 16.5,
+    "native_alpha": true,
+    "flight_speed_mult": 1.0,
+    "ground_beak_y": -7.5,
+    "frame_beaks": [
+      [
+        10.0,
+        -7.5
+      ],
+      [
+        10.0,
+        -7.125
+      ],
+      [
+        10.0,
+        -7.125
+      ],
+      [
+        10.0,
+        -6.5625
+      ],
+      [
+        10.0,
+        -6.375
+      ],
+      [
+        10.0,
+        -6.75
+      ],
+      [
+        10.0,
+        -7.125
+      ],
+      [
+        10.0,
+        -6.75
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        0
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        0
+      ],
+      [
+        10.0,
+        1.5
+      ],
+      [
+        10.0,
+        -4.5
+      ],
+      [
+        10.0,
+        0
+      ]
+    ],
+    "frame_bounds": [
+      [
+        87,
+        96,
+        61,
+        44
+      ],
+      [
+        88,
+        97,
+        60,
+        43
+      ],
+      [
+        88,
+        97,
+        60,
+        43
+      ],
+      [
+        87,
+        96,
+        61,
+        44
+      ],
+      [
+        87,
+        99,
+        61,
+        41
+      ],
+      [
+        84,
+        98,
+        64,
+        42
+      ],
+      [
+        87,
+        97,
+        61,
+        43
+      ],
+      [
+        87,
+        98,
+        61,
+        42
+      ],
+      [
+        79,
+        91,
+        69,
+        55
+      ],
+      [
+        67,
+        106,
+        81,
+        41
+      ],
+      [
+        65,
+        122,
+        83,
+        42
+      ],
+      [
+        79,
+        91,
+        69,
+        55
+      ],
+      [
+        67,
+        115,
+        92,
+        29
+      ],
+      [
+        73,
+        102,
+        75,
+        40
+      ],
+      [
+        62,
+        116,
+        86,
+        21
+      ],
+      [
+        67,
+        99,
+        84,
+        49
+      ],
+      [
+        66,
+        96,
+        83,
+        45
+      ],
+      [
+        71,
+        103,
+        77,
+        37
+      ],
+      [
+        86,
+        81,
+        63,
+        59
+      ],
+      [
+        78,
+        106,
+        70,
+        34
+      ]
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "walk": {
+        "frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          0
+        ],
+        "fps": 8,
+        "loop": true,
+        "source_left": false
+      },
+      "fly": {
+        "frames": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "fps": 10,
+        "loop": true,
+        "source_left": false
+      },
+      "climb": {
+        "frames": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "fps": 10,
+        "loop": true,
+        "source_left": false
+      },
+      "glide": {
+        "frames": [
+          12
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "dive_windup": {
+        "frames": [
+          13
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "dive": {
+        "frames": [
+          14
+        ],
+        "fps": 1,
+        "loop": true,
+        "source_left": false
+      },
+      "pullup": {
+        "frames": [
+          15
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "snatch": {
+        "frames": [
+          16
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "peck": {
+        "frames": [
+          17
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "landing": {
+        "frames": [
+          18
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "stunned": {
+        "frames": [
+          19
         ],
         "fps": 1,
         "loop": true,
@@ -304,203 +1304,218 @@
     }
   },
   "rival_gull": {
-    "file": "res://assets/sprites/gull_reference_clean.png",
-    "frame_w": 240,
-    "frame_h": 200,
-    "visual_scale": 0.18,
-    "regions": [
-      {
-        "region": [
-          17,
-          60,
-          111,
-          104
-        ],
-        "offset": [
-          64,
-          31
-        ]
-      },
-      {
-        "region": [
-          44,
-          248,
-          127,
-          106
-        ],
-        "offset": [
-          65,
-          29
-        ]
-      },
-      {
-        "region": [
-          186,
-          248,
-          121,
-          106
-        ],
-        "offset": [
-          68,
-          29
-        ]
-      },
-      {
-        "region": [
-          311,
-          248,
-          117,
-          106
-        ],
-        "offset": [
-          68,
-          29
-        ]
-      },
-      {
-        "region": [
-          433,
-          248,
-          116,
-          106
-        ],
-        "offset": [
-          66,
-          29
-        ]
-      },
-      {
-        "region": [
-          554,
-          248,
-          121,
-          106
-        ],
-        "offset": [
-          59,
-          29
-        ]
-      },
-      {
-        "region": [
-          682,
-          248,
-          120,
-          107
-        ],
-        "offset": [
-          60,
-          29
-        ]
-      },
-      {
-        "region": [
-          803,
-          248,
-          117,
-          107
-        ],
-        "offset": [
-          60,
-          29
-        ]
-      },
-      {
-        "region": [
-          920,
-          248,
-          123,
-          107
-        ],
-        "offset": [
-          54,
-          29
-        ]
-      },
-      {
-        "region": [
-          50,
-          428,
-          155,
-          108
-        ],
-        "offset": [
-          40,
-          21
-        ]
-      },
-      {
-        "region": [
-          230,
-          412,
-          162,
-          126
-        ],
-        "offset": [
-          32,
-          6
-        ]
-      },
-      {
-        "region": [
-          430,
-          413,
-          160,
-          129
-        ],
-        "offset": [
-          38,
-          3
-        ]
-      },
-      {
-        "region": [
-          631,
-          424,
-          167,
-          118
-        ],
-        "offset": [
-          33,
-          14
-        ]
-      },
-      {
-        "region": [
-          841,
-          417,
-          165,
-          126
-        ],
-        "offset": [
-          36,
-          6
-        ]
-      },
-      {
-        "region": [
-          1054,
-          412,
-          163,
-          134
-        ],
-        "offset": [
-          37,
-          -4
-        ]
-      },
-      {
-        "region": [
-          38,
-          830,
-          163,
-          86
-        ],
-        "offset": [
-          32,
-          47
-        ]
-      }
+    "file": "res://assets/sprites/gull-great-black-backed-diner-style.png",
+    "frame_w": 256,
+    "frame_h": 256,
+    "visual_scale": 0.375,
+    "species": "great-black-backed",
+    "art_height": 21,
+    "native_alpha": true,
+    "flight_speed_mult": 1.0,
+    "ground_beak_y": -11.625,
+    "frame_beaks": [
+      [
+        10.0,
+        -11.625
+      ],
+      [
+        10.0,
+        -11.0625
+      ],
+      [
+        10.0,
+        -10.875
+      ],
+      [
+        10.0,
+        -10.875
+      ],
+      [
+        10.0,
+        -11.25
+      ],
+      [
+        10.0,
+        -11.625
+      ],
+      [
+        10.0,
+        -11.625
+      ],
+      [
+        10.0,
+        -11.625
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        0
+      ],
+      [
+        10.0,
+        2
+      ],
+      [
+        10.0,
+        0
+      ],
+      [
+        10.0,
+        2.25
+      ],
+      [
+        10.0,
+        -6
+      ],
+      [
+        10.0,
+        -1.125
+      ]
+    ],
+    "frame_bounds": [
+      [
+        71,
+        84,
+        77,
+        56
+      ],
+      [
+        70,
+        86,
+        78,
+        54
+      ],
+      [
+        70,
+        86,
+        78,
+        54
+      ],
+      [
+        68,
+        86,
+        80,
+        54
+      ],
+      [
+        67,
+        85,
+        81,
+        55
+      ],
+      [
+        69,
+        84,
+        79,
+        56
+      ],
+      [
+        68,
+        84,
+        80,
+        56
+      ],
+      [
+        67,
+        84,
+        81,
+        56
+      ],
+      [
+        66,
+        82,
+        83,
+        67
+      ],
+      [
+        66,
+        94,
+        85,
+        53
+      ],
+      [
+        63,
+        123,
+        85,
+        53
+      ],
+      [
+        68,
+        98,
+        80,
+        48
+      ],
+      [
+        55,
+        109,
+        110,
+        39
+      ],
+      [
+        68,
+        94,
+        80,
+        51
+      ],
+      [
+        59,
+        118,
+        89,
+        26
+      ],
+      [
+        62,
+        92,
+        86,
+        55
+      ],
+      [
+        50,
+        104,
+        98,
+        43
+      ],
+      [
+        67,
+        100,
+        81,
+        40
+      ],
+      [
+        68,
+        83,
+        80,
+        57
+      ],
+      [
+        73,
+        99,
+        75,
+        41
+      ]
     ],
     "animations": {
       "idle": {
@@ -520,41 +1535,37 @@
           5,
           6,
           7,
-          8
+          0
         ],
         "fps": 8,
         "loop": true,
-        "source_left": true
+        "source_left": false
       },
       "fly": {
         "frames": [
+          8,
           9,
           10,
-          11,
-          12,
-          13,
-          14
+          11
         ],
-        "fps": 9,
+        "fps": 10,
         "loop": true,
         "source_left": false
       },
       "climb": {
         "frames": [
+          8,
           9,
           10,
-          11,
-          12,
-          13,
-          14
+          11
         ],
-        "fps": 11,
+        "fps": 10,
         "loop": true,
         "source_left": false
       },
       "glide": {
         "frames": [
-          15
+          12
         ],
         "fps": 1,
         "loop": true,
@@ -562,23 +1573,15 @@
       },
       "dive_windup": {
         "frames": [
-          15
+          13
         ],
         "fps": 1,
-        "loop": true,
+        "loop": false,
         "source_left": false
       },
       "dive": {
         "frames": [
-          15
-        ],
-        "fps": 1,
-        "loop": true,
-        "source_left": false
-      },
-      "snatch": {
-        "frames": [
-          15
+          14
         ],
         "fps": 1,
         "loop": true,
@@ -586,20 +1589,39 @@
       },
       "pullup": {
         "frames": [
-          9,
-          10,
-          11,
-          12,
-          13,
-          14
+          15
         ],
-        "fps": 8,
-        "loop": true,
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "snatch": {
+        "frames": [
+          16
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "peck": {
+        "frames": [
+          17
+        ],
+        "fps": 1,
+        "loop": false,
+        "source_left": false
+      },
+      "landing": {
+        "frames": [
+          18
+        ],
+        "fps": 1,
+        "loop": false,
         "source_left": false
       },
       "stunned": {
         "frames": [
-          15
+          19
         ],
         "fps": 1,
         "loop": true,

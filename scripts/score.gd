@@ -6,14 +6,14 @@ var items: int = 0
 var tier: int = 0
 var window: float = 0.0
 var stuns: int = 0
-var bonuses: Dictionary = {"Risky": 0, "Upwind": 0, "Mugged": 0}
+var bonuses: Dictionary = {"Risky": 0, "Upwind": 0, "Mugged": 0, "Handover": 0}
 
 func tick(delta: float) -> void:
 	window = maxf(0.0, window - delta)
 	if window <= 0:
 		tier = 0
 
-func snatch(value: int, risky: bool, upwind: bool, mugged: bool) -> int:
+func snatch(value: int, risky: bool, upwind: bool, mugged: bool, handover: bool = false) -> int:
 	var t: Dictionary = Config.tuning.score
 	if window > 0:
 		tier = mini(tier + 1, t.tiers.size() - 1)
@@ -21,7 +21,7 @@ func snatch(value: int, risky: bool, upwind: bool, mugged: bool) -> int:
 	else:
 		tier = 0
 	var bonus: float = 1.0
-	for pair: Array in [[risky,"Risky","risky"],[upwind,"Upwind","upwind"],[mugged,"Mugged","mugged"]]:
+	for pair: Array in [[risky,"Risky","risky"],[upwind,"Upwind","upwind"],[mugged,"Mugged","mugged"],[handover,"Handover","handover"]]:
 		if pair[0]:
 			bonus += float(t[pair[2]])
 			bonuses[pair[1]] += 1

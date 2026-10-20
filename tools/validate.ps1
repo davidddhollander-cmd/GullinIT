@@ -14,6 +14,8 @@ Push-Location $projectRoot
 try {
     $validationData = Join-Path $projectRoot '.tools/userdata'
     New-Item -ItemType Directory -Force $validationData, 'test-output' | Out-Null
+    # Review captures may include saved scripts; keep them out of Godot's class registry.
+    New-Item -ItemType File -Force (Join-Path $projectRoot 'test-output/.gdignore') | Out-Null
     $env:APPDATA = $validationData
     $env:LOCALAPPDATA = $validationData
     & $Godot --headless --path $projectRoot --editor --import --quit

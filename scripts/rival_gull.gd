@@ -35,6 +35,7 @@ func setup(actor: BeachGull, profile: Dictionary, random: RandomNumberGenerator)
 	rng = random
 	gull.speed_factor = profile.speed
 	gull.rival_name = str(profile.name)
+	gull.species = str(profile.get("species","great-black-backed"))
 	var colors: Array[Color] = [Color("a5c7e6"), Color("d3b9e8"), Color("a4d8c4")]
 	gull.rival_tint = colors[absi(str(profile.name).hash()) % colors.size()]
 	gull.dive_started.connect(func() -> void: dives += 1)
@@ -236,7 +237,7 @@ func took_food(value: int) -> void:
 	target = null
 	mode = Mode.ESCAPE
 
-func mug() -> int:
+func mug(attacker: Vector2 = Vector2.INF) -> int:
 	if carry_window <= 0 or carried <= 0:
 		return 0
 	var value: int = carried
@@ -246,5 +247,5 @@ func mug() -> int:
 	leave = 0
 	cooldown = relax_time()
 	mode = Mode.RECOVER
-	gull.stun(Config.tuning.rival.mug_stun)
+	gull.stun(Config.tuning.rival.mug_stun,attacker)
 	return value

@@ -17,8 +17,12 @@ func setup(owner_game: BeachGame) -> void:
 	game = owner_game
 	rng.seed = int(game.level.seed) + 307
 	for prop: Dictionary in game.beach.props:
-		if prop.type == "bin":
-			bins.append({"x":float(prop.x),"remaining":int(Config.tuning.world.bin_stash_size),"pecks":0,"scatter_index":0})
+		var type: String = str(prop.type)
+		if BeachBackdrop.is_bin_type(type):
+			var capacity: int = int(Config.tuning.world.bin_stash_size)
+			if type == BeachBackdrop.WHEELIE_BIN_TYPE:
+				capacity *= int(Config.tuning.world.wheelie_bin_stash_multiplier)
+			bins.append({"type":type,"x":float(prop.x),"content_y":BeachBackdrop.bin_content_y(prop),"requires_top_landing":type==BeachBackdrop.WHEELIE_BIN_TYPE,"capacity":capacity,"remaining":capacity,"pecks":0,"scatter_index":0})
 
 func nearby_bin(include_empty: bool = false) -> Dictionary:
 	if game.player.state != BeachGull.State.GROUNDED:
@@ -27,6 +31,8 @@ func nearby_bin(include_empty: bool = false) -> Dictionary:
 	var distance: float = float(Config.tuning.world.peck_reach)
 	for bin: Dictionary in bins:
 		if int(bin.remaining) <= 0 and not include_empty:
+			continue
+		if bool(bin.get("requires_top_landing",false)) and not game.player.is_supported_by(str(bin.type),float(bin.x)):
 			continue
 		var gap: float = absf(float(bin.x)-game.player.beak().x)
 		if gap <= distance:
@@ -87,22 +93,23 @@ func peck() -> bool:
 			return _peck_empty(owner.stash_position()-Vector2(0,10))
 		bin = nearby_bin(true)
 		if not bin.is_empty():
-			return _peck_empty(Vector2(float(bin.x),float(Config.tuning.world.ground)-18))
+			return _peck_empty(_bin_content_position(bin))
 		return false
 	var t: Dictionary = Config.tuning.world
 	peck_cooldown = float(t.peck_cooldown)
 	peck_flash = 0.15
 	if not raids.has(owner):
-		raids[owner] = {"pecks":0,"wake":maxf(float(t.stash_wake_min),float(t.stash_wake_delay)*(1-owner.alert))*owner.reaction_delay,"awake":false,"swat":0.0,"action":"","action_time":0.0,"pickup_item":{}}
+		raids[owner] = {"pecks":0,"notice":float(t.sunbather_notice_delay)*owner.reaction_delay if owner.sleep_state == BeachTarget.SleepState.AWAKE else 0.0,"swat":0.0,"action":"","action_time":0.0,"pickup_item":{}}
 	var raid: Dictionary = raids[owner]
 	if str(raid.get("action","")) == "settle":
 		raid.action = ""
 		raid.action_time = 0.0
+		raid.notice = float(t.sunbather_notice_delay)*owner.reaction_delay
 	raid.pecks += 1
-	owner.alert = minf(1,owner.alert+float(t.peck_alert))
+	owner.register_bag_peck()
+	if owner.sleep_state == BeachTarget.SleepState.AWAKE:
+		owner.alert = minf(1,owner.alert+float(t.peck_alert))
 	owner.stash_active = true
-	# Repeated disturbance shortens the remaining reaction delay, never extends it.
-	raid.wake = minf(raid.wake,maxf(float(t.stash_wake_min),float(t.stash_wake_delay)*(1-owner.alert))*owner.reaction_delay)
 	var final_hit: bool = int(raid.pecks) >= int(t.stash_pecks)
 	var progress: float = clampf(float(raid.pecks)/float(maxi(1,int(t.stash_pecks))),0.0,1.0)
 	game.effects.message(owner.stash_position()-Vector2(0,10),"PECK!",BeachUI.GOLD)
@@ -137,19 +144,20 @@ func _peck_toddler(toddler: BeachTarget) -> bool:
 
 func _peck_bin(bin: Dictionary) -> bool:
 	var t: Dictionary = Config.tuning.world
+	var content_position: Vector2 = _bin_content_position(bin)
 	peck_cooldown = float(t.peck_cooldown)
 	peck_flash = 0.15
 	bin.pecks = int(bin.pecks)+1
 	var final_hit: bool = int(bin.pecks) >= int(t.bin_pecks)
 	var progress: float = clampf(float(bin.pecks)/float(maxi(1,int(t.bin_pecks))),0.0,1.0)
-	game.effects.message(Vector2(float(bin.x),float(t.ground)-18),"RATTLE!",BeachUI.GOLD)
+	game.effects.message(content_position,"RATTLE!",BeachUI.GOLD)
 	game.beach.wobble_bin(float(bin.x),progress,final_hit)
 	Audio.play("bin_rattle",0.90+0.20*progress)
 	if final_hit:
 		bin.pecks = 0
 		var count: int = mini(int(bin.remaining),int(t.bin_burst))
 		if count > 0:
-			game.effects.release_burst(Vector2(float(bin.x),float(t.ground)-18),true)
+			game.effects.release_burst(content_position,true)
 			Audio.play("stash_release")
 			Audio.play("release_accent",1.0,-4.0)
 		for i: int in count:
@@ -159,11 +167,14 @@ func _peck_bin(bin: Dictionary) -> bool:
 			var is_food: bool = Config.foods.has(kind)
 			bin.scatter_index = int(bin.scatter_index)+1
 			var direction: float = -1.0 if i%2 == 0 else 1.0
-			items.append({"owner":null,"source":"bin","food_id":kind if is_food else "","garbage":not is_food,"garbage_kind":kind,"position":Vector2(float(bin.x),float(t.ground)-12),"velocity":Vector2(direction*rng.randf_range(35,65),-rng.randf_range(65,95)),"grounded":false,"age":0.0})
+			items.append({"owner":null,"source":"bin","food_id":kind if is_food else "","garbage":not is_food,"garbage_kind":kind,"position":content_position+Vector2(0,6),"velocity":Vector2(direction*rng.randf_range(35,65),-rng.randf_range(65,95)),"grounded":false,"age":0.0})
 		if count > 0:
 			bin_opened.emit()
 	queue_redraw()
 	return true
+
+func _bin_content_position(bin: Dictionary) -> Vector2:
+	return Vector2(float(bin.x),float(bin.get("content_y",float(Config.tuning.world.ground)-18.0)))
 
 func _peck_empty(at: Vector2) -> bool:
 	peck_cooldown = float(Config.tuning.world.peck_cooldown)
@@ -200,6 +211,11 @@ func tick(delta: float) -> void:
 		var is_garbage: bool = bool(item.get("garbage",false))
 		var definition: Dictionary = {} if is_garbage else Config.foods[item.food_id]
 		if not item.grounded:
+			if item.get("source","") == "near_miss" and float(item.age)<0.7:
+				item.crumb_trail = float(item.get("crumb_trail",0.0))+delta
+				if float(item.crumb_trail)>=0.09:
+					game.effects.food_crumble(item.position,item.velocity,3)
+					item.crumb_trail = fmod(float(item.crumb_trail),0.09)
 			item.velocity.y += float(t.stash_gravity)*delta
 			item.position += item.velocity*delta
 			if item.position.x < 12 or item.position.x > float(t.width)-12:
@@ -247,20 +263,18 @@ func tick(delta: float) -> void:
 			raids.erase(owner)
 			continue
 		var raid: Dictionary = raids[owner]
+		if owner.sleep_state != BeachTarget.SleepState.AWAKE:
+			continue
 		if not owner.reaction.mode.is_empty():
-			if owner.stash_standing:
-				raid.wake = 0.0
-				raid.awake = true
 			continue
 		raid["action"] = str(raid.get("action",""))
 		raid["action_time"] = float(raid.get("action_time",0.0))
 		raid["pickup_item"] = raid.get("pickup_item",{})
-		raid.wake -= delta
+		var notice: float = float(raid.get("notice",0.0))
+		raid.notice = maxf(0.0,notice-delta)
 		raid.swat = maxf(0,raid.swat-delta)
-		if raid.wake > 0:
-			SunbatherArt.pose(owner,&"rise",clampi(int((0.6-float(raid.wake))*10),0,6))
+		if notice > 0.0:
 			continue
-		raid.awake = true
 		owner.stash_standing = true
 		var action: String = str(raid.action)
 		if action == "pickup":
@@ -277,7 +291,7 @@ func tick(delta: float) -> void:
 			raid.action_time -= delta
 			if raid.action_time <= 0:
 				if gull.state != BeachGull.State.STUNNED and gull.position.distance_to(owner.position-Vector2(0,12)) < float(t.stash_swat_reach):
-					gull.stun()
+					gull.stun(-1.0,owner.position)
 				raid.swat = float(t.stash_swat_cooldown)
 				raid.action = "swat_follow"
 				raid.action_time = SunbatherArt.SWAT_FOLLOW
@@ -370,9 +384,12 @@ func _draw() -> void:
 				draw_line(at+Vector2(-2,-2),at+Vector2(2,2),Color("7993a3"),1)
 		else:
 			var definition: Dictionary = Config.foods[item.food_id]
-			var size: Vector2 = Vector2(definition.size[0],definition.size[1])
+			var display_size: Array = definition.get("display_size",definition.size)
+			var size: Vector2 = Vector2(display_size[0],display_size[1])
 			var texture: Texture2D = Config.frames(definition.sprite).get_frame_texture(&"idle",0)
 			var rect: Rect2 = Rect2(item.position-size*0.5,size)
+			if item.food_id == "crumbs":
+				draw_texture_rect(texture,Rect2(rect.position+Vector2(0,1),size),false,Color("754a39"))
 			draw_texture_rect(texture,rect,false)
 			# Glint only once the item can be picked up and the gull has room for it.
 			if float(item.get("age",1.0)) >= float(Config.tuning.world.stash_pickup_delay) and is_instance_valid(game) and game.player.can_collect_food(item.food_id):

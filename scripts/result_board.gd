@@ -21,6 +21,7 @@ var stars_label: Label
 var title_label: Label
 var hint_label: Label
 var gull: AnimatedSprite2D
+var gull_base_scale: float = 1.0
 var fish: ResultFishSkeleton
 var buttons: Array[Button] = []
 var reaction_player: AudioStreamPlayer
@@ -79,7 +80,7 @@ func _build() -> void:
 	_add_count_row("SNATCHES", int(result.items), 92)
 	_add_count_row("STUNS", int(result.stuns), 103)
 
-	var events := BeachUI.label(self, "RISKY 0   UPWIND 0   MUGGED 0", BeachUI.FONT_NATIVE, SEA)
+	var events := BeachUI.label(self, "RISKY 0  UPWIND 0  MUGGED 0  COUNTER 0", BeachUI.FONT_NATIVE, SEA)
 	_place(events, 114, 292, 9)
 	events.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	rows.append(events)
@@ -112,7 +113,8 @@ func _build() -> void:
 	gull.sprite_frames = Config.frames("player_gull")
 	gull.animation = &"idle"
 	gull.position = Vector2(247, 29)
-	gull.scale = Vector2.ONE * 0.18
+	gull_base_scale = float(Config.sprites.player_gull.get("visual_scale",1.0))
+	gull.scale = Vector2.ONE * gull_base_scale
 	gull.z_index = 2
 	var cutout := ShaderMaterial.new()
 	cutout.shader = preload("res://assets/shaders/gull_cutout.gdshader")
@@ -166,7 +168,8 @@ func _update_row(index: int, progress: float) -> void:
 		var risky := roundi(int(result.bonuses.Risky) * progress)
 		var upwind := roundi(int(result.bonuses.Upwind) * progress)
 		var mugged := roundi(int(result.bonuses.Mugged) * progress)
-		rows[index].text = "RISKY %d   UPWIND %d   MUGGED %d" % [risky, upwind, mugged]
+		var handover := roundi(int(result.bonuses.get("Handover",0)) * progress)
+		rows[index].text = "RISKY %d  UPWIND %d  MUGGED %d  COUNTER %d" % [risky, upwind, mugged, handover]
 		return
 	var parts := row_formats[index].split("|")
 	rows[index].text = "%s  %s" % [parts[0], parts[1] % roundi(row_values[index] * progress)]
@@ -198,9 +201,9 @@ func _record_text() -> String:
 	if bool(result.casual):
 		return "TIME %.1f   BEST %.1f SEC" % [float(result.elapsed), float(record.get("casual_time", result.elapsed))]
 	if int(result.stars) >= 3:
-		return "%.1f SEC   BEST %d   ALL 3 STARS!" % [float(result.elapsed), int(record.get("best", 0))]
+		return "BEST %d   ALL 3 STARS!" % int(record.get("best", 0))
 	var threshold_index: int = mini(int(result.stars), 2)
-	return "%.1f SEC   BEST %d   NEXT %s" % [float(result.elapsed), int(record.get("best", 0)), str(level.stars[threshold_index])]
+	return "BEST %d   NEXT STAR %d" % [int(record.get("best", 0)), int(level.stars[threshold_index])]
 
 func _start_reaction() -> void:
 	if reaction_started:
@@ -222,16 +225,16 @@ func _idle_gull(delta: float) -> void:
 		var strength := 1.0 + float(int(result.stars)) * 0.25
 		gull.rotation = sin(reaction_time * 34.0) * 0.08 * strength
 		gull.position.y = 29.0 - absf(sin(reaction_time * 17.0)) * 3.0 * strength
-		gull.scale = Vector2(0.18 + sin(reaction_time * 27.0) * 0.014, 0.18)
+		gull.scale = Vector2(1.0 + sin(reaction_time * 27.0) * 0.078, 1.0) * gull_base_scale
 	elif not passed and reaction_time < 0.9:
 		gull.rotation = sin(reaction_time * 20.0) * 0.12
-		gull.scale = Vector2(0.18 - absf(sin(reaction_time * 16.0)) * 0.028, 0.18 + absf(sin(reaction_time * 16.0)) * 0.02)
+		gull.scale = Vector2(1.0 - absf(sin(reaction_time * 16.0)) * 0.156, 1.0 + absf(sin(reaction_time * 16.0)) * 0.111) * gull_base_scale
 		if reaction_time > 0.35 and not fish.visible:
 			fish.launch()
 	else:
 		gull.rotation = 0.0
 		gull.position.y = 29.0 + sin(Time.get_ticks_msec() * 0.004) * 0.7
-		gull.scale = Vector2.ONE * 0.18
+		gull.scale = Vector2.ONE * gull_base_scale
 		gull.play(&"idle")
 
 func _input(event: InputEvent) -> void:

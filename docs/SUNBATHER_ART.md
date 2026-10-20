@@ -1,5 +1,9 @@
 # Sunbather animation set — 6 October 2026
 
+## Stationary towel restoration — 20 October 2026
+
+The current diner-style character atlases contain no baked towel. The legacy pursuit-only towel condition therefore left resting and rising sunbathers directly on the sand. A separate striped towel now draws beneath every sunbather pose at the fixed home position, including settlement and pursuit. All four appearance variants use the same ground layer; the title beach uses it too. The 64-pixel towel spans the current 58-pixel reclining silhouette, with cream fringes and the existing blue, coral and yellow palette. Character sources and reaction timings are unchanged.
+
 ## Reaction pass — 7 October 2026
 
 Pickup now uses the upright-to-crouch part of the rise sequence during a short pause; returning home reverses the full rise sequence to settle down. Swats use raised arms from the run sheet, a visible warning cue and forward swing offset before the range-checked impact. These adapt existing supplied art rather than inventing new frames. Per-raid action timers live in `stash_raids.gd`; durations and pose mapping live in `SunbatherArt`.
@@ -25,3 +29,5 @@ Sprites render at 0.19 scale with nearest filtering inherited from the project, 
 Existing food, bag stock, retrieval speed, swat timing and scoring are unchanged. This set does not contain dedicated bending-to-collect or swatting poses; those remain future art work. Picnic-bag refill trips remain cancelled.
 
 Validation captures: `test-output/sunbather-new-rest.png`, `sunbather-new-wake.png`, and `sunbather-new-run.png`.
+
+20 October validation: 16/16 rendered stationary-towel checks passed for all four appearances and four pose states. Full integration: 11,844 checks, zero failures.

@@ -1,0 +1,191 @@
+{
+  "file": "res://assets/pilots/shopper-walk-v1/walk.png",
+  "frame_w": 128,
+  "frame_h": 128,
+  "columns": 4,
+  "count": 8,
+  "visual_scale": 0.5,
+  "sprite_offset_y": -26,
+  "stride_pixels": 36.0,
+  "frames": [
+    {
+      "palm": [
+        14.0,
+        -22.0
+      ]
+    },
+    {
+      "palm": [
+        13.0,
+        -22.5
+      ]
+    },
+    {
+      "palm": [
+        13.5,
+        -22.0
+      ]
+    },
+    {
+      "palm": [
+        13.0,
+        -23.0
+      ]
+    },
+    {
+      "palm": [
+        14.0,
+        -22.0
+      ]
+    },
+    {
+      "palm": [
+        13.0,
+        -22.0
+      ]
+    },
+    {
+      "palm": [
+        14.0,
+        -22.5
+      ]
+    },
+    {
+      "palm": [
+        13.5,
+        -22.5
+      ]
+    }
+  ],
+  "source_preparation": [
+    {
+      "frame": 0,
+      "source": "source.png",
+      "source_bounds": [
+        107,
+        49,
+        261,
+        359
+      ],
+      "scale": 0.220994475138122,
+      "hip_x": 229.0,
+      "destination": [
+        37,
+        37
+      ]
+    },
+    {
+      "frame": 1,
+      "source": "source.png",
+      "source_bounds": [
+        119,
+        48,
+        244,
+        360
+      ],
+      "scale": 0.220994475138122,
+      "hip_x": 230.0,
+      "destination": [
+        39,
+        36
+      ]
+    },
+    {
+      "frame": 2,
+      "source": "source.png",
+      "source_bounds": [
+        130,
+        44,
+        227,
+        358
+      ],
+      "scale": 0.220994475138122,
+      "hip_x": 221.0,
+      "destination": [
+        44,
+        37
+      ]
+    },
+    {
+      "frame": 3,
+      "source": "source.png",
+      "source_bounds": [
+        123,
+        42,
+        239,
+        365
+      ],
+      "scale": 0.220994475138122,
+      "hip_x": 233.0,
+      "destination": [
+        40,
+        35
+      ]
+    },
+    {
+      "frame": 4,
+      "source": "opposite-contact.png",
+      "source_bounds": [
+        321,
+        140,
+        715,
+        1010
+      ],
+      "scale": 0.0785515015589957,
+      "hip_x": 656.0,
+      "destination": [
+        38,
+        37
+      ]
+    },
+    {
+      "frame": 5,
+      "source": "source.png",
+      "source_bounds": [
+        113,
+        50,
+        249,
+        355
+      ],
+      "scale": 0.220994475138122,
+      "hip_x": 232.0,
+      "destination": [
+        38,
+        38
+      ]
+    },
+    {
+      "frame": 6,
+      "source": "source.png",
+      "source_bounds": [
+        124,
+        44,
+        238,
+        362
+      ],
+      "scale": 0.220994475138122,
+      "hip_x": 222.0,
+      "destination": [
+        42,
+        36
+      ]
+    },
+    {
+      "frame": 7,
+      "source": "source.png",
+      "source_bounds": [
+        115,
+        45,
+        249,
+        363
+      ],
+      "scale": 0.220994475138122,
+      "hip_x": 230.0,
+      "destination": [
+        39,
+        36
+      ]
+    }
+  ],
+  "status": "review pilot"
+}

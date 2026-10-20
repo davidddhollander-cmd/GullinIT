@@ -1,4 +1,5 @@
 extends Node
+const GULL_CALL: AudioStream = preload("res://assets/audio/263786__steaq__seagull-single-call.ogg")
 var streams: Dictionary = {}
 var music: AudioStreamPlayer
 
@@ -15,6 +16,7 @@ func _ready() -> void:
 			streams[cue] = load(path)
 	for cue: String in ["bag_thump", "bin_rattle", "stash_release", "release_accent", "empty_tap"]:
 		streams[cue] = _stash_stream(cue)
+	streams["gull_call"] = GULL_CALL
 	music = AudioStreamPlayer.new()
 	music.bus = "Music"
 	add_child(music)
@@ -22,6 +24,11 @@ func _ready() -> void:
 		music.stream = streams.music
 		music.finished.connect(music.play)
 		music.play()
+
+func stop_all() -> void:
+	for player: Node in get_children():
+		if player is AudioStreamPlayer:
+			player.stop()
 
 func apply_options() -> void:
 	for bus: String in ["Master", "SFX", "Music"]:

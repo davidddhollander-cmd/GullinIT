@@ -23,7 +23,7 @@ static func update(target: BeachTarget, moving: bool = false) -> void:
 		pose = &"windup"
 	elif target.reaction.mode == "warning" or target.defense > 0:
 		pose = &"brace"
-	elif target.reaction.mode == "follow" or (not target.food and target.recover > 0):
+	elif target.reaction.mode in ["follow","give_up"] or (not target.food and target.recover > 0 and not moving):
 		pose = &"angry"
 	elif target.reaction.mode == "chase" and moving:
 		pose = &"run"

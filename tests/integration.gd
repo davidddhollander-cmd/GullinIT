@@ -78,19 +78,19 @@ func run() -> void:
 	main.game.overlay.queue_redraw()
 	await snapshot("training-lesson-0")
 	layout(main.game.overlay)
-	check(is_equal_approx(main.game.overlay.training_panel.global_position.y,28.0),"training panel sits immediately below top bar")
+	check(is_equal_approx(main.game.overlay.training_panel.global_position.y,BeachOverlay.TOP_BAR_HEIGHT),"training panel sits immediately below top bar")
 	check(main.game.overlay.lesson_label.get_global_rect().intersection(main.game.overlay.lesson_prompt.get_global_rect()).size == Vector2.ZERO,"training title and prompt have separate rows")
 	for lesson_index: int in range(1,6):
 		main.game.lesson = lesson_index
 		main.game.overlay.queue_redraw()
 		await snapshot("training-lesson-%d" % lesson_index)
 		layout(main.game.overlay)
-		check(is_equal_approx(main.game.overlay.training_panel.global_position.y,28.0),"training panel sits immediately below top bar")
+		check(is_equal_approx(main.game.overlay.training_panel.global_position.y,BeachOverlay.TOP_BAR_HEIGHT),"training panel sits immediately below top bar")
 		check(main.game.overlay.lesson_label.get_global_rect().intersection(main.game.overlay.lesson_prompt.get_global_rect()).size == Vector2.ZERO,"training title and prompt do not overlap in lesson %d" % lesson_index)
 	main.game.input.touch_visible = true
 	await snapshot("training-touch")
 	layout(main.game.overlay)
-	check(is_equal_approx(main.game.overlay.training_panel.global_position.y,28.0),"training panel sits immediately below top bar")
+	check(is_equal_approx(main.game.overlay.training_panel.global_position.y,BeachOverlay.TOP_BAR_HEIGHT),"training panel sits immediately below top bar")
 	main.game.lesson = 6
 	main.game.finish()
 	await snapshot("training-complete")
@@ -108,11 +108,13 @@ func run() -> void:
 	await sunbather_pickup_checks()
 	await family_food_foundation_checks()
 	await family_trip_checks()
+	await preload("res://tests/stall_service_checks.gd").run(self,Callable(self,"check"))
 	await refinement_checks()
 	await landing_aim_checks()
 	await perch_checks()
 	await stash_raid_checks()
 	await preload("res://tests/bin_leftover_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/wheelie_bin_checks.gd").run(self,Callable(self,"check"))
 	preload("res://tests/sunbather_reactions_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/retro_environment_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/retro_adult_art_checks.gd").run_checks(Callable(self,"check"))
@@ -126,9 +128,14 @@ func run() -> void:
 	await extended_beach_checks()
 	await beachgoer_art_checks()
 	await preload("res://tests/staff_art_checks.gd").run(self,Callable(self,"check"))
+	preload("res://tests/mullet_walk_checks.gd").run(Callable(self,"check"))
+	preload("res://tests/sundress_walk_checks.gd").run(Callable(self,"check"))
+	preload("res://tests/shopper_patrol_checks.gd").run(self,Callable(self,"check"))
+	preload("res://tests/character_routine_checks.gd").run(self,Callable(self,"check"))
 	await pier_diner_art_checks()
 	preload("res://tests/digestion_checks.gd").run(Callable(self,"check"))
 	preload("res://tests/flight_dynamics_checks.gd").run(self,Callable(self,"check"))
+	preload("res://tests/gull_tumble_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/rival_ai_checks.gd").run(self,main,Callable(self,"check"))
 	await digestion_reaction_checks()
 	await bag_variety_checks()
@@ -268,9 +275,7 @@ func run() -> void:
 	main.clear_game()
 	main.queue_free()
 	# Let the audio server release playback before shutting down a fast test run.
-	for audio_player: Node in Audio.get_children():
-		if audio_player is AudioStreamPlayer:
-			audio_player.stop()
+	Audio.stop_all()
 	await settle()
 	await get_tree().create_timer(0.1).timeout
 	DirAccess.remove_absolute(GameState.save_path)
@@ -329,7 +334,10 @@ func result_board_checks() -> void:
 	board._process(0.25)
 	await get_tree().process_frame
 	check(absf(board.gull.rotation) > 0.001,"good result gull performs vigorous screech reaction")
+	check(is_equal_approx(board.gull.scale.y,float(Config.sprites.player_gull.visual_scale)),"result celebration retains the registered gull size")
 	await snapshot("results-three-star-reaction")
+	board._process(1.0)
+	check(board.gull.scale == Vector2.ONE*float(Config.sprites.player_gull.visual_scale),"result idle keeps the new gull size after celebrating")
 
 	var practice := good.duplicate(true)
 	practice.casual = true
@@ -651,8 +659,12 @@ func grounded_toddler_peck_checks() -> void:
 	dropped.age = float(Config.tuning.world.stash_pickup_delay)
 	dropped.velocity = Vector2.ZERO
 	dropped.position = gull.beak()
+	# Pin mum's random ice-cream trip roll so the handover path is tested regardless of roster RNG.
+	var ice_cream_chance: float = float(Config.tuning.world.family_ice_cream_chance)
+	Config.tuning.world.family_ice_cream_chance = 0.0
 	game.stash_raids.tick(0.01)
 	eat_pending(game)
+	Config.tuning.world.family_ice_cream_chance = ice_cream_chance
 	check(game.stash_raids.items.is_empty() and not first.dropped_pending,"later collection removes the claimed toddler drop")
 	check(first.thefts == 1,"later collection completes exactly one toddler theft")
 	check(first.toddler_cry_run_active and first.seeking_parent,"collecting the toddler drop preserves the crying and family-handover lifecycle")
@@ -685,7 +697,9 @@ func grounded_toddler_peck_checks() -> void:
 	gull.facing = 1
 	game.stash_raids.peck()
 	check(not game.stash_raids.nearby_toddler() and second.food and not second.dropped_pending,"toddler food behind the gull is not knocked")
-	second.position = Vector2(516,float(Config.tuning.world.ground)-20)
+	second.position = Vector2(516,float(Config.tuning.world.ground))
+	# Keep this snack outside the new standing bill's actual vertical reach.
+	second.position.y += gull.beak().y-float(Config.tuning.world.toddler_peck_vertical_tolerance)-2-second.food_position().y
 	game.stash_raids.peck()
 	check(not game.stash_raids.nearby_toddler() and second.food and not second.dropped_pending,"toddler food outside the vertical peck tolerance is not knocked")
 	gull.state = BeachGull.State.GLIDE
@@ -949,6 +963,7 @@ func family_trip_checks() -> void:
 		mum.tick(1.0/60,[])
 		for child: BeachTarget in siblings:
 			child.tick(1.0/60,[])
+		game.stalls.tick(1.0/60)
 		if mum.family_trip == BeachTarget.FamilyTrip.BUY:
 			saw_stand = is_equal_approx(mum.position.x,mum.family_kiosk_x)
 			if not saw_buy:
@@ -1048,6 +1063,7 @@ func family_trip_checks() -> void:
 	for frame: int in range(3600):
 		one_mum.tick(1.0/60,[])
 		one_child.tick(1.0/60,[])
+		game.stalls.tick(1.0/60)
 		if one_mum.family_trip == BeachTarget.FamilyTrip.IDLE:
 			break
 	check(one_mum.family_trip == BeachTarget.FamilyTrip.IDLE and one_child.food,"one-child family completes stand trip and returns normally")
@@ -1071,7 +1087,7 @@ func input_checks() -> void:
 	await settle()
 	await snapshot("flight-instructions")
 	layout(main.game.overlay)
-	check(is_equal_approx(main.game.overlay.training_panel.global_position.y,28.0),"training panel sits immediately below top bar")
+	check(is_equal_approx(main.game.overlay.training_panel.global_position.y,BeachOverlay.TOP_BAR_HEIGHT),"training panel sits immediately below top bar")
 	main.game._physics_process(float(Config.tuning.world.intro_time)+1.0)
 	check(not main.game.running and main.game.intro > 0 and main.game.elapsed == 0,"first level waits indefinitely for start button")
 	action("dive")
@@ -1131,9 +1147,10 @@ func target_checks(game: BeachGame) -> void:
 	target.thefts = 0
 	target.take(game.player)
 	eat_pending(game)
-	for frame: int in 1200:
+	for frame: int in 3600:
 		target.tick(1.0/60,[])
-	check(target.food,"unrelated NPC food still replenishes")
+		game.stalls.tick(1.0/60)
+	check(target.food,"robbed shopper visits a vendor and receives replacement food")
 	target.take(game.player)
 	eat_pending(game)
 	check(not target.leaving and target.reaction.mode == "chase","repeat theft starts a chase rather than permanent departure")
@@ -1197,7 +1214,11 @@ func stash_raid_checks() -> void:
 				check(float(spawn.x) < promenade_start,"sunbather level placement remains on sand before promenade")
 		for prop: Dictionary in definition.props:
 			if prop.type == "bin":
-				check(float(prop.x) < pier_start,"peckable bin remains before the pier")
+				var beside_bench: bool = definition.props.any(func(other: Dictionary) -> bool: return other.type == "beach_bench" and absf(float(other.x)-float(prop.x)) <= 40.0)
+				check(float(prop.x) < pier_start or beside_bench,"peckable bin remains before the pier unless it serves a bench")
+			elif prop.type == "beach_bench":
+				var has_bin: bool = definition.props.any(func(other: Dictionary) -> bool: return other.type == "bin" and absf(float(other.x)-float(prop.x)) <= 40.0)
+				check(has_bin,"every bench has a bin beside it")
 	main.start_level(2)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
@@ -1224,7 +1245,6 @@ func stash_raid_checks() -> void:
 	check(owner.bag_squish_time > 0.0 and Audio.streams.has("bag_thump"),"bag peck starts squish and fabric thump")
 	var first_bag_strength: float = owner.bag_squish_strength
 	var first_bag_pitch: float = (Audio.get_children().back() as AudioStreamPlayer).pitch_scale
-	var first_wake: float = raids.raids[owner].wake
 	check(not raids.peck(),"peck recovery prevents instant repeat")
 	raids.tick(float(Config.tuning.world.peck_cooldown))
 	eat_pending(game)
@@ -1254,19 +1274,22 @@ func stash_raid_checks() -> void:
 	check(raids.items[0].position != scattered_start and raids.items[0].velocity.y > -95,"protected raid snacks still fly and fall normally")
 	game.overlay.queue_redraw()
 	await snapshot("stash-scatter")
-	check(raids.raids[owner].wake < first_wake,"repeated pecks make sunbather respond sooner")
+	check(owner.sleep_pecks == 3 and owner.sleep_state == BeachTarget.SleepState.SLEEPING,"first three pecks leave sunbather sleeping regardless of elapsed time")
+	raids.peck_cooldown = 0.0
+	check(raids.peck() and owner.sleep_state == BeachTarget.SleepState.WAKING,"fourth protected hit starts visible waking")
 	gull.position = Vector2(400,60)
 	gull.state = BeachGull.State.GLIDE
 	gull.previous_beak = gull.beak()
 	gull.sweep_beak = gull.beak()
 	check(not raids.peck(),"airborne gull cannot peck a bag")
-	raids.raids[owner].wake = 0.3
+	owner.tick(0.4,[])
 	raids.tick(0)
 	eat_pending(game)
 	check(owner.sprite.animation == &"rise" and owner.sprite.frame > 0,"wake countdown drives getting-up frames")
 	game.effects.texts.clear()
 	game.effects.queue_redraw()
 	await snapshot("sunbather-new-wake")
+	owner.tick(0.35,[])
 	raids.tick(0.35)
 	eat_pending(game)
 	check(owner.sprite.visible and owner.stash_standing and owner.sprite.animation in [&"run",&"run_left",&"rise",&"pickup"],"awakened owner runs, waits upright or bends according to food position")
@@ -1655,7 +1678,11 @@ func perch_checks() -> void:
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
 	game.intro = 0
-	var roof: Dictionary = game.player.perch_surfaces[0]
+	var roof: Dictionary = {}
+	for surface: Dictionary in game.player.perch_surfaces:
+		if str(surface.prop_type) in ["kiosk","hotdog_stand"]:
+			roof = surface
+			break
 	game.player.position = Vector2(roof.x,65)
 	game.player.velocity = Vector2.ZERO
 	game.player.aim = Vector2(roof.x,roof.y)
@@ -1881,7 +1908,7 @@ func refinement_checks() -> void:
 	main.game.overlay.queue_redraw()
 	await snapshot("crash-warning")
 	layout(main.game.overlay)
-	check(is_equal_approx(main.game.overlay.training_panel.global_position.y,28.0),"training panel sits immediately below top bar")
+	check(is_equal_approx(main.game.overlay.training_panel.global_position.y,BeachOverlay.TOP_BAR_HEIGHT),"training panel sits immediately below top bar")
 	main.clear_game()
 	await settle()
 
@@ -1960,6 +1987,7 @@ func sunbather_reaction_flow_checks() -> void:
 	gull.sweep_beak = gull.beak()
 	owner.stash_remaining = 0
 	owner.stash_active = true
+	owner.sleep_state = BeachTarget.SleepState.AWAKE
 	raids.raids[owner] = {"pecks":0,"wake":0.0,"awake":true,"swat":0.0}
 	raids.items.append({"owner":owner,"food_id":"cookie","position":Vector2(owner.position.x+25,156.5),"velocity":Vector2.ZERO,"grounded":true,"age":1.0})
 	for frame: int in 120:
@@ -2070,6 +2098,7 @@ func generated_layout_checks() -> void:
 		game.set_physics_process(false)
 		game.running = true
 		game.intro = 0
+		preload("res://tests/palm_wind_checks.gd").run(game,Callable(self,"check"))
 		layouts.append(game.level)
 		var world_width: float = float(game.beach.world.get("width",Config.tuning.world.width))
 		for sign: Dictionary in game.beach.sign_layouts():
@@ -2109,7 +2138,7 @@ func generated_layout_checks() -> void:
 		elif number == 2:
 			views = [[160,"sunbathers"],[480,"first-family"],[720,"second-family"],[880,"snack-kiosk"]]
 		elif number == 3:
-			views = [[160,"quiet-beach"],[600,"promenade-snacks"],[800,"dog-walk"],[1080,"pier-dining"]]
+			views = [[160,"quiet-beach"],[600,"promenade-snacks"],[800,"promenade-stroll"],[1080,"pier-dining"]]
 		if number <= 3:
 			for legacy: Array in [[160,"sunbathers"],[480,"families"],[800,"promenade"],[1120,"pier"]]:
 				var already_present: bool = false
@@ -2245,7 +2274,7 @@ func digestion_reaction_checks() -> void:
 	check(gull.state==BeachGull.State.STUNNED and game.score.points==15 and gull.digestion.snacks.size()==1 and game.stash_raids.items.size()==1,"actual adult swat stuns, penalizes and drops only current snack")
 	var sleeper: BeachTarget = game.spawner.create("sunbather",280)
 	sleeper.reaction.theft(sleeper,gull)
-	check(sleeper.reaction.mode=="wake" and sleeper.reaction.timer>0.5,"sunbather takes longer to wake for chase")
+	check(sleeper.reaction.mode.is_empty() and sleeper.sleep_state == BeachTarget.SleepState.SLEEPING,"sleeping sunbather ignores theft until four accepted bag hits")
 	game.set_paused(true)
 	var paused_progress: float = gull.digestion.progress
 	await settle()
@@ -2310,10 +2339,12 @@ func beachgoer_art_checks() -> void:
 	check(not customer.food and not customer.food_sprite.visible,"visible customer snack is stolen through swept collision")
 	var before: float = customer.position.x
 	customer.tick(0.1,[])
-	check(customer.position.x == before and customer.sprite.animation == &"angry","customer plants feet for brief theft reaction")
+	check(customer.position.x != before and customer.sprite.animation == &"run","perfectly robbed customer immediately runs after the gull")
 	await snapshot("polished-customer-theft")
-	customer.tick(0.5,[])
-	check(customer.reaction.mode.is_empty() and is_equal_approx(customer.position.x,customer.reaction.home),"robbed customer gives up when gull flies high and returns")
+	customer.tick(2.2,[])
+	check(customer.reaction.mode == "give_up" and customer.sprite.animation == &"angry","robbed customer gives up visibly after the short chase")
+	customer.tick(0.7,[])
+	check(customer.reaction.mode.is_empty(),"robbed customer resumes strolling after giving up")
 	owner.leaving = true
 	owner.update_art_pose(true)
 	check(owner.sprite.animation == &"walk","departing owner and dog use walk cycle")
@@ -2332,7 +2363,7 @@ func pier_diner_art_checks() -> void:
 			var texture: AtlasTexture = frames.get_frame_texture(animation,index) as AtlasTexture
 			check(texture.get_size() == Vector2(definition.frame_w,definition.frame_h),"retro diner uses an aligned frame canvas")
 			check(Rect2(Vector2.ZERO,texture.atlas.get_size()).encloses(texture.region),"retro diner atlas frame stays inside source")
-	main.start_level(1)
+	main.start_level(3)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
 	game.intro = 0
@@ -2427,7 +2458,7 @@ func extended_beach_checks() -> void:
 	for target: BeachTarget in game.spawner.targets:
 		if target.kind == "picnic_family":
 			var kiosk: Dictionary = game.level.props.filter(func(prop: Dictionary) -> bool: return prop.type == "kiosk")[0]
-			check(target.family_kiosk_x == float(kiosk.x),"family trips reach generated ice cream stand")
+			check(is_equal_approx(target.family_kiosk_x,game.stalls.find_stall(target,"kiosk").contact_x()),"family trips reach generated ice cream service contact")
 	var saw_hotdog: bool = false
 	for target: BeachTarget in game.spawner.targets:
 		if target.kind == "kiosk_customer" and target.food_id == "hotdog":
@@ -2481,6 +2512,9 @@ func mum_art_checks() -> void:
 	check(mum.food_position().x < mum.position.x,"carried food follows mirrored hand")
 	await snapshot("mum-carrying")
 	mum.family_trip = BeachTarget.FamilyTrip.BUY
+	# This fixture isolates a held buying pose; real purchase transitions have
+	# their own service tests and do not wait when the order is already full.
+	mum.stall_service = null
 	mum.family_trip_timer = 5
 	mum.tick(0.01,[])
 	check(mum.sprite.animation == &"idle","mum stops walking while buying")
@@ -2602,11 +2636,12 @@ func toddler_art_checks() -> void:
 	await settle()
 
 func art_checks() -> void:
+	await preload("res://tests/gull_species_checks.gd").run(self,Callable(self,"check"))
 	var frames: SpriteFrames = Config.frames("player_gull")
 	for animation: StringName in frames.get_animation_names():
 		for index: int in range(frames.get_frame_count(animation)):
 			var frame: AtlasTexture = frames.get_frame_texture(animation,index) as AtlasTexture
-			check(frame != null and frame.get_size() == Vector2(240,200),"gull frames share an aligned canvas")
+			check(frame != null and frame.get_size() == Vector2(Config.sprites.player_gull.frame_w,Config.sprites.player_gull.frame_h),"gull frames share an aligned canvas")
 			check(Rect2(Vector2.ZERO,frame.atlas.get_size()).encloses(frame.region),"gull crop stays within source sheet")
 	main.start_level(1)
 	var game: BeachGame = main.game
@@ -2627,17 +2662,17 @@ func art_checks() -> void:
 	var first_frame: int = gull.sprite.frame
 	for frame: int in range(10):
 		gull.tick(1.0/60,0,0)
-	check(gull.sprite.frame != first_frame and gull.sprite.flip_h,"walking advances supplied feet and faces right")
+	check(gull.sprite.frame != first_frame and not gull.sprite.flip_h,"walking advances supplied feet and faces right")
 	game.overlay.queue_redraw()
 	await snapshot("gull-walking")
 	gull.aim.x = gull.position.x - 100
 	for frame: int in range(15):
 		gull.tick(1.0/60,0,0)
-	check(not gull.sprite.flip_h,"left walking uses the original left-facing sequence")
+	check(gull.sprite.flip_h,"left walking mirrors the right-facing sequence")
 	gull.climb = true
 	for frame: int in range(25):
 		gull.tick(1.0/60,0,0)
-	check(gull.sprite.animation == &"climb" and is_equal_approx(gull.sprite.scale.x,0.18),"takeoff uses new wing frames at consistent scale")
+	check(gull.sprite.animation == &"climb" and is_equal_approx(gull.sprite.scale.x,float(gull.art_entry.visual_scale)),"takeoff uses new wing frames at consistent scale")
 	game.overlay.queue_redraw()
 	await snapshot("gull-flight")
 	gull.climb = false

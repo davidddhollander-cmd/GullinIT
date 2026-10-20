@@ -5,6 +5,7 @@ var background: BeachBackdrop
 var casual: bool = false
 var current_level: int = 1
 var screen: String = "title"
+var quitting: bool = false
 
 func _ready() -> void:
 	GullInput.register_actions()
@@ -16,6 +17,11 @@ func _ready() -> void:
 		{"type":"beach_parasol_blue","x":282},{"type":"beach_castle","x":305},{"type":"beach_palm","x":317}
 	])
 	for spec: Array in [[false,true,244.0],[true,false,282.0]]:
+		var towel := SunbatherTowel.new()
+		towel.blue = spec[0]
+		towel.female = spec[1]
+		towel.position = Vector2(spec[2],160)
+		background.add_child(towel)
 		var sunbather: AnimatedSprite2D = AnimatedSprite2D.new()
 		sunbather.sprite_frames = SunbatherArt.frames(spec[0],spec[1])
 		sunbather.play(&"rest")
@@ -31,7 +37,8 @@ func _ready() -> void:
 	layer.add_child(menus)
 	menus.requested.connect(_navigate)
 	menus.title()
-	get_tree().auto_accept_quit = true
+	get_tree().auto_accept_quit = false
+	get_tree().root.close_requested.connect(_quit)
 	if OS.get_cmdline_user_args().has("--smoke"):
 		_navigate("start",1)
 
@@ -83,11 +90,20 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			var full: bool = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if full else DisplayServer.WINDOW_MODE_FULLSCREEN)
 		"quit":
-			get_tree().quit()
+			_quit()
 		"feedback":
 			var url: String = GameState.feedback_url()
 			if not url.is_empty():
 				OS.shell_open(url)
+
+func _quit() -> void:
+	if quitting:
+		return
+	quitting = true
+	Audio.stop_all()
+	# Playback releases on the audio thread; give it time before engine teardown.
+	await get_tree().create_timer(0.1).timeout
+	get_tree().quit()
 
 func start_level(id: int, force_training: bool = false) -> void:
 	clear_game()

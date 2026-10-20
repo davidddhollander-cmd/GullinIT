@@ -1,0 +1,24 @@
+{
+  "ice_cream": {
+    "file": "res://assets/sprites/vendor-ice-cream-full-body-v2.png",
+    "source": "res://assets/reference/stall-vendors-v2/ice-cream-full-body-source.png",
+    "frame_w": 128,
+    "frame_h": 128,
+    "frames": 8,
+    "visual_scale": 0.5,
+    "art_height": 40,
+    "sole": 116,
+    "sprite_offset_y": -26
+  },
+  "hotdog": {
+    "file": "res://assets/sprites/vendor-hotdog-full-body-v2.png",
+    "source": "res://assets/reference/stall-vendors-v2/hotdog-full-body-source.png",
+    "frame_w": 128,
+    "frame_h": 128,
+    "frames": 8,
+    "visual_scale": 0.5,
+    "art_height": 40,
+    "sole": 116,
+    "sprite_offset_y": -26
+  }
+}

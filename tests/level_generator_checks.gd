@@ -10,6 +10,8 @@ static func run(check: Callable) -> void:
 			recipe.seed = int(source.seed)+variation*100
 			var level: Dictionary = BeachLevelGenerator.generate(recipe,Config.layout_rules)
 			check.call(level == BeachLevelGenerator.generate(recipe,Config.layout_rules),"same seed reproduces complete layout")
+			check.call(not JSON.stringify(level.spawns).contains("dog_owner"),"dog owner never spawns")
+			_check_palms(check,level)
 			if number <= 3:
 				_check_opening_level(check,source,level,number)
 			else:
@@ -18,6 +20,27 @@ static func run(check: Callable) -> void:
 				signatures[JSON.stringify(level.props)] = true
 		check.call(JSON.stringify(source)==original,"generator leaves authored recipe intact")
 	check.call(signatures.size()==6,"all six levels have distinct scenery arrangements")
+
+static func _check_palms(check: Callable, level: Dictionary) -> void:
+	var palms: Array[float] = []
+	var width: float = float(level.get("world",{}).get("width",Config.default_world.width))
+	var palm_art: Dictionary = Config.sprites.beach_palm
+	var half_width: float = float(palm_art.frame_w)*float(palm_art.get("visual_scale",1.0))*0.5
+	for prop: Dictionary in level.props:
+		if prop.type != "beach_palm":
+			continue
+		var x: float = float(prop.x)
+		palms.append(x)
+		check.call(x-half_width>=0 and x+half_width<=width,"palm crown remains inside level")
+		for stand: Dictionary in level.props:
+			if stand.type in ["kiosk","hotdog_stand"]:
+				var art: Dictionary = Config.sprites[stand.type]
+				var stand_half: float = float(art.frame_w)*float(art.get("visual_scale",1.0))*0.5
+				check.call(absf(x-float(stand.x))>=half_width+stand_half+8.0,"palm clears stall and counter food")
+	check.call(palms.size()>=3,"each playable level has at least three palms")
+	palms.sort()
+	for i: int in range(1,palms.size()):
+		check.call(palms[i]-palms[i-1]>=140.0,"palms are spread along the route")
 
 static func _check_opening_level(check: Callable, source: Dictionary, level: Dictionary, number: int) -> void:
 	check.call(level.spawns.size()==source.spawns.size(),"opening roster stays authored")
@@ -61,9 +84,9 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 		check.call(stand_count==1 and kiosk_x>float(family_positions["family_2"])+200.0,"family kiosk sits at far end")
 		check.call(int(level.world.promenade_start)==int(level.world.width) and int(level.world.pier_start)==int(level.world.width),"family beach remains all sand")
 	else:
-		check.call(types==["sunbather","kiosk_customer","kiosk_customer","dog_owner","pier_diner"],"boardwalk leads from customers to dog owner to diner")
-		check.call(not types.has("seafood_vendor") and not types.has("lifeguard"),"boardwalk leaves later hazards for later levels")
-		check.call(float(level.spawns[1].x)>float(level.world.promenade_start) and float(level.spawns[4].x)>float(level.world.pier_start),"boardwalk actors occupy their zones")
+		check.call(types==["sunbather","sunbather","kiosk_customer","kiosk_customer","kiosk_customer","pier_diner"],"boardwalk leads from sunbathers through customers to diner")
+		check.call(not types.has("dog_owner") and not types.has("seafood_vendor") and not types.has("lifeguard"),"boardwalk leaves later hazards for later levels")
+		check.call(float(level.spawns[1].x)<float(level.world.promenade_start) and float(level.spawns[2].x)>float(level.world.promenade_start) and float(level.spawns[5].x)>float(level.world.pier_start),"boardwalk actors occupy their zones")
 		check.call(stand_count==2 and bool(level.rivals_after_snatch),"boardwalk includes both stands and delayed Gary")
 
 static func _check_later_level(check: Callable, level: Dictionary) -> void:
@@ -83,7 +106,7 @@ static func _check_later_level(check: Callable, level: Dictionary) -> void:
 			food_positions.append(x)
 			if spawn.type == "picnic_family":
 				family_ids[spawn.family_id] = x
-		elif spawn.type in ["dog_owner","kiosk_customer"]:
+		elif spawn.type == "kiosk_customer":
 			check.call(x>=640 and x<960,"promenade food stays on promenade")
 			food_positions.append(x)
 		elif spawn.type in ["pier_diner","seafood_vendor"]:
@@ -102,7 +125,7 @@ static func _check_later_level(check: Callable, level: Dictionary) -> void:
 		if prop.type in ["kiosk","hotdog_stand"]:
 			stand_count += 1
 			check.call(float(prop.x)>690 and float(prop.x)<930,"both stands are on promenade")
-		if prop.type == "bin":
+		if prop.type in ["bin","wheelie_bin"]:
 			food_positions.append(float(prop.x))
 	check.call(stand_count==2,"exactly two separate food stands")
 	food_positions.sort()

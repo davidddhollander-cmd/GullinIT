@@ -27,10 +27,16 @@ func _draw() -> void:
 		if crumb.wait <= 0:
 			var point: Vector2 = Vector2(crumb.x, Config.tuning.world.ground)
 			var definition: Dictionary = Config.foods[crumb.food_id]
-			var size: Vector2 = Vector2(definition.size[0],definition.size[1])
+			var display_size: Array = definition.get("display_size",definition.size)
+			var size: Vector2 = Vector2(display_size[0],display_size[1])
 			var texture: Texture2D = Config.frames(definition.sprite).get_frame_texture(&"idle",0)
 			var rect: Rect2 = Rect2(point-Vector2(size.x*0.5,size.y),size)
-			draw_texture_rect(texture,rect,false)
+			if crumb.food_id == "crumbs":
+				# A warm bright top and a one-pixel underside separate crumbs from sand.
+				draw_texture_rect(texture,Rect2(rect.position+Vector2(0,1),size),false,Color("754a39"))
+				draw_texture_rect(texture,rect,false,Color(1.18,1.12,1.0))
+			else:
+				draw_texture_rect(texture,rect,false)
 			if collector == null or collector.can_collect_food(crumb.food_id):
 				var glint: Texture2D = PickupShine.overlay(texture,clock,float(crumb.x))
 				if glint != null:

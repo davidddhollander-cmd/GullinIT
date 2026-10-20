@@ -18,12 +18,7 @@ func _gull(id: String) -> AnimatedSprite2D:
 	var sprite: AnimatedSprite2D = AnimatedSprite2D.new()
 	sprite.sprite_frames = Config.frames(id)
 	sprite.scale = Vector2.ONE * float(Config.sprites[id].get("visual_scale",1.0))
-	var material: ShaderMaterial = ShaderMaterial.new()
-	material.shader = preload("res://assets/shaders/rival_tint.gdshader") if id == "rival_gull" else preload("res://assets/shaders/gull_cutout.gdshader")
-	if id == "rival_gull":
-		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-		material.set_shader_parameter("feather_tint",Color("a5c7e6"))
-	sprite.material = material
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	sprite.play(&"glide")
 	add_child(sprite)
 	return sprite

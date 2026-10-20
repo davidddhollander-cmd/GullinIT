@@ -1,7 +1,7 @@
 extends RefCounted
 
 static func run(harness: Node,check: Callable) -> void:
-	for id: String in ["lifeguard","kiosk_customer"]:
+	for id: String in ["lifeguard","kiosk_customer","shopper_mullet","shopper_sundress"]:
 		var frames := Config.frames(id)
 		preload("res://tests/isolated_sprite_checks.gd").run(check,frames,id)
 		var atlas: Texture2D = frames.get_frame_texture(&"idle",0).atlas
@@ -34,7 +34,7 @@ static func run(harness: Node,check: Callable) -> void:
 	for actor: BeachTarget in game.spawner.targets:
 		actor.hide()
 	var guard := game.spawner.create("lifeguard",550)
-	var shopper := game.spawner.create("kiosk_customer",625,{"food_id":"ice_cream"})
+	var shopper := game.spawner.create("kiosk_customer",625,{"food_id":"ice_cream","appearance":"kiosk_customer"})
 	game.camera_x = 590
 	game.camera.position = Vector2(590,90)
 	game.beach.camera_x = 590

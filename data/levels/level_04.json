@@ -17,7 +17,7 @@
   ],
   "rivals": [
     {
-      "name": "Gary",
+      "name": "Gary", "species": "great-black-backed",
       "speed": 0.8,
       "accuracy_px": 16
     }
@@ -37,10 +37,6 @@
       "type": "picnic_family",
       "x": 245,
       "family_id": "family_1"
-    },
-    {
-      "type": "dog_owner",
-      "x": 665
     },
     {
       "type": "picnic_family",

@@ -18,8 +18,9 @@ $sizes = [ordered]@{
     beach_rocks = @(44, 18)
     beach_boards = @(32, 44)
     beach_hut = @(40, 52)
-    beach_lamp = @(22, 58)
 }
+# The taller, curated lamp has its own preparation script and perch alignment.
+# Preserve its metadata when rebuilding the original environment sheet.
 foreach ($name in $sizes.Keys) {
     $definition = $sprites[$name]
     $slug = $name.Replace('_', '-')

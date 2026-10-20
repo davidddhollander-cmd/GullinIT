@@ -16,6 +16,7 @@ var pilots: Array[RivalPilot] = []
 var wind: BeachWind = BeachWind.new()
 var score: BeachScore = BeachScore.new()
 var spawner: BeachSpawner = BeachSpawner.new()
+var stalls: StallService = StallService.new()
 var beach: BeachBackdrop
 var scraps: BeachScraps
 var stash_raids: BeachStashRaids
@@ -45,6 +46,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	wind.gust_warning.connect(_gust)
 	beach = BeachBackdrop.new()
 	beach.sunset = int(level.id) == 6
+	beach.wind_dir = wind.direction
+	beach.strength = wind.strength
 	add_child(beach)
 	beach.setup(level.props,level.get("zones",[]),level.get("world",{}))
 	scraps = BeachScraps.new()
@@ -55,10 +58,15 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	add_child(actors)
 	spawner.target_created.connect(_wire_target)
 	spawner.setup(actors,level)
+	stalls.setup(beach,spawner)
+	stalls.portion_created.connect(_wire_target)
 	player = BeachGull.new()
+	player.species = str(level.get("player_species","herring"))
 	player.digestion_enabled = true
 	player.digestion.swallowed.connect(_swallowed)
 	player.name = "Player"
+	# Flight and loose food stay in front of the stall's complete scenery layer.
+	player.z_index = 4
 	add_child(player)
 	player.position = Vector2(Config.tuning.world.start_x,Config.tuning.world.start_y)
 	player.setup_perches(level.props)
@@ -72,6 +80,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	)
 	gulls.append(player)
 	stash_raids = BeachStashRaids.new()
+	stash_raids.z_index = 4
 	add_child(stash_raids)
 	stash_raids.setup(self)
 	stash_raids.collected.connect(func(at: Vector2, food_id: String, scrap: bool) -> void:
@@ -92,6 +101,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	if not bool(level.get("rivals_after_snatch",false)):
 		_release_rivals()
 	effects = BeachEffects.new()
+	effects.z_index = 5
 	add_child(effects)
 	input = GullInput.new()
 	add_child(input)
@@ -117,6 +127,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 func _release_rivals() -> void:
 	for profile: Dictionary in pending_rivals:
 		var rival: BeachGull = BeachGull.new()
+		rival.z_index = 4
 		rival.rival = true
 		add_child(rival)
 		rival.position = Vector2(clampf(player.position.x+90,30,float(Config.tuning.world.width)-30),65)
@@ -132,8 +143,11 @@ func _release_rivals() -> void:
 func _wire_sand(gull: BeachGull) -> void:
 	gull.sand_landed.connect(func(at: Vector2) -> void: effects.sand_puff(at))
 	gull.sand_departed.connect(func(at: Vector2) -> void: effects.sand_puff(at, true))
+	gull.tumble_feathers.connect(func(at: Vector2, impulse: Vector2, amount: int) -> void: effects.feather_burst(at,impulse,amount))
 
 func _wire_target(target: BeachTarget) -> void:
+	if stalls.spawner != null:
+		stalls.bind(target)
 	target.snatched.connect(_snatched)
 	target.cried.connect(_cry)
 	target.whistled.connect(_whistle)
@@ -141,7 +155,8 @@ func _wire_target(target: BeachTarget) -> void:
 
 func _food_knocked(target: BeachTarget, food_id: String, at: Vector2, impulse: Vector2) -> void:
 	stash_raids.add_knocked_food(target,food_id,at,impulse)
-	effects.message(at,"DROPPED!",Color("ef725c"))
+	effects.food_crumble(at,impulse)
+	effects.message(at-Vector2(0,18),"DROPPED!",Color("ef725c"))
 	effects.impact(at,false)
 
 func _reload() -> void:
@@ -186,18 +201,23 @@ func _physics_process(delta: float) -> void:
 	if player.state != BeachGull.State.STUNNED:
 		player.digestion.tick(step,player.state == BeachGull.State.GROUNDED)
 	scraps.tick(step,player)
+	var food_targets: Array[BeachTarget] = stalls.portions.duplicate()
+	food_targets.append_array(spawner.targets)
 	var claims: Dictionary = {}
 	for pilot: RivalPilot in pilots:
 		if is_instance_valid(pilot.target) and pilot.target.food:
 			claims[pilot.target] = pilot
 	for pilot: RivalPilot in pilots:
-		pilot.tick(step,spawner.targets,claims,wind,player.position)
+		pilot.tick(step,food_targets,claims,wind,player.position)
 	for target: BeachTarget in spawner.targets.duplicate():
 		target.tick(step,gulls)
+	stalls.tick(step)
+	food_targets = stalls.portions.duplicate()
+	food_targets.append_array(spawner.targets)
 	stash_raids.tick(step)
 	for gull: BeachGull in gulls:
 		if gull.visible:
-			BeachCollisions.resolve(gull,spawner.targets,beach.props)
+			BeachCollisions.resolve(gull,food_targets,beach.props)
 	_mugging()
 	_near_misses()
 	spawner.tick(step,elapsed)
@@ -246,7 +266,8 @@ func _peck() -> void:
 	elif player.state == BeachGull.State.GROUNDED:
 		if training and lesson == 3 and stash_raids.nearby_stash() != null:
 			training_raid_started = true
-		stash_raids.peck()
+		if stash_raids.peck():
+			player.show_ground_peck()
 
 func set_paused(value: bool) -> void:
 	set_physics_process(not value)
@@ -262,7 +283,10 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 	if gull == player:
 		if training and target.last_theft_direct and player.state == BeachGull.State.STRIKE:
 			_training_snatch(target)
-		player.digestion.collect(target.food_id,{"risky":risky,"upwind":player.upwind})
+		var handover: bool = target.last_theft_handover and target.last_theft_direct and (player.state == BeachGull.State.STRIKE or player.sweep_state == BeachGull.State.STRIKE)
+		player.digestion.collect(target.food_id,{"risky":risky,"upwind":player.upwind,"handover":handover})
+		if handover:
+			effects.message(target.food_position()-Vector2(0,12),"COUNTER +%d%%!" % roundi(float(Config.tuning.score.handover)*100),BeachUI.GOLD)
 	else:
 		for pilot: RivalPilot in pilots:
 			if pilot.gull == gull:
@@ -270,9 +294,9 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 				pilot.took_food(target.food_value())
 				effects.message(gull.position,"MINE!",Color("ffc65c"))
 
-func _award(value: int, risky: bool, upwind: bool, mugged: bool) -> int:
-	var earned: int = score.snatch(value,risky,upwind,mugged)
-	var quip: String = "MUGGED!" if mugged else str(Config.quips.snatch[rng.randi_range(0,Config.quips.snatch.size()-1)])
+func _award(value: int, risky: bool, upwind: bool, mugged: bool, handover: bool = false) -> int:
+	var earned: int = score.snatch(value,risky,upwind,mugged,handover)
+	var quip: String = "COUNTER!" if handover else ("MUGGED!" if mugged else str(Config.quips.snatch[rng.randi_range(0,Config.quips.snatch.size()-1)]))
 	effects.score_message(player.position-Vector2(0,15),"+%d %s" % [earned,quip],Color("ffc65c"))
 	effects.impact(player.position,false)
 	Audio.play("snatch",1+score.tier*0.08)
@@ -310,7 +334,7 @@ func _swallowed(snack: Dictionary) -> void:
 		Audio.play("snatch")
 		overlay.show_score_announcement(str(snack.id),value)
 	else:
-		var earned: int = _award(value,snack.get("risky",false),snack.get("upwind",false),snack.get("mugged",false))
+		var earned: int = _award(value,snack.get("risky",false),snack.get("upwind",false),snack.get("mugged",false),snack.get("handover",false))
 		overlay.show_score_announcement(str(snack.id),earned)
 		if not pending_rivals.is_empty():
 			_release_rivals()
@@ -336,7 +360,7 @@ func _mugging() -> void:
 		return
 	for pilot: RivalPilot in pilots:
 		if pilot.carry_window > 0 and player.can_collect_food(pilot.carried_food_id) and BeachCollisions.segment_hits(player.previous_beak,player.sweep_beak,pilot.gull.position,Vector2(14,10)):
-			var value: int = pilot.mug()
+			var value: int = pilot.mug(player.position)
 			if value > 0:
 				player.digestion.collect(pilot.carried_food_id,{"value":value,"upwind":player.upwind,"mugged":true})
 				return
@@ -382,7 +406,7 @@ func _training_advance() -> void:
 	if lesson == 4:
 		# A bin explored earlier must still support a complete practice attempt.
 		for bin: Dictionary in stash_raids.bins:
-			bin.remaining = int(Config.tuning.world.bin_stash_size)
+			bin.remaining = int(bin.get("capacity",Config.tuning.world.bin_stash_size))
 			bin.pecks = 0
 	GameState.save_training_step(lesson)
 	effects.message(player.position-Vector2(0,24),"LESSON COMPLETE",BeachUI.GOLD)

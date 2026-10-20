@@ -22,12 +22,15 @@
     {"type": "picnic_family", "x": 620, "family_id": "family_1", "station": "family_1", "patrol_radius": 0, "awareness_mult": 0.75, "reaction_delay": 1.5}
   ],
   "props": [
+    {"type": "beach_palm", "x": 145, "y": 148},
+    {"type": "beach_palm", "x": 370, "y": 148},
+    {"type": "beach_palm", "x": 665, "y": 148},
     {"type": "bin", "x": 326},
     {"type": "beach_parasol_blue", "x": 455, "y": 143},
     {"type": "beach_chair_blue", "x": 470, "y": 151},
     {"type": "beach_castle", "x": 518, "y": 171, "jitter": true},
-    {"type": "kiosk", "x": 730, "customer_x": 682},
-    {"type": "beach_palm", "x": 770, "y": 150}
+    {"type": "wheelie_bin", "x": 690},
+    {"type": "kiosk", "x": 730, "customer_x": 682}
   ],
   "map_version": 3
 }

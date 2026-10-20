@@ -57,7 +57,11 @@ Arcade awards stars and unlocks the next level after earning at least one star. 
 
 Contextual hints (walk/peck/landing/dive prompts) sit in one backed tag in a fixed slot: below the score callout during play, below the lesson panel during Training Day, always above the zone signs. During training the score callout drops below the sign boards. Touch controls are a translucent right-thumb cluster defined once in `GullInput.TOUCH_BUTTONS` (FLAP in the corner, DIVE above, PECK beside); PECK dims when it cannot be used. `tests/demo_polish_checks.gd` covers these rules.
 
+The gameplay status bar is 17 pixels high, about 40% thinner than its original 28-pixel band. Score, timer, wind and pause use a dedicated native 6-pixel GullHud font, compact padding and an 11-pixel control row. The combo meter sits below that row, while training panels and score callouts follow the new bar height. `tools/generate_hud_font.py` rebuilds the compact font without changing menu typography.
+
 ## Tuning and art
+
+Ice-cream and hot-dog stalls use distinct ImageGen full-body vendor characters at normal adult scale, with their lower bodies hidden behind the serving window and front counter. Vendors set each snack on the counter for 0.85 seconds, marked with gold corners, before the buyer collects it. A timed dive PECK during that window earns a +50% base-food bonus, scored on swallowing; stolen food never reaches the buyer. Stall-side shoppers start by buying, robbed shoppers revisit a stand, and family purchases expose each missing snack and reserve bag. See `docs/STALL_VENDORS.md` for source art, generation prompts, tuning and preview captures. Main-character art must never be drawn in code; this is recorded in `AGENTS.md`.
 
 Ground landings and takeoffs make five small sand pixels. Bag and bin pecks squish or wobble more strongly and rise slightly in pitch as the release approaches; the final hit rebounds and adds a short accent with six dust or crumb pixels. A depleted source gives a quiet hollow tap and a brief EMPTY message that fades, with the normal peck cooldown. An available nearby source takes priority over an empty one. Particles use `juice.particles` in `data/tuning.json`, floating labels use `juice.floating_text`, and raid sounds use `juice.audio` plus the Master/SFX sliders. For replacement art, adjust `BAG_PIVOT` and `BAG_SQUISH_TIME` in `scripts/target.gd`, or `BIN_WOBBLE_TIME`, `BIN_WOBBLE_ANGLE`, and the optional per-bin `wobble_pivot_y` prop value in `scripts/beach.gd`. The particles are drawn by `scripts/effects.gd` and do not depend on sprite frames.
 
@@ -83,7 +87,11 @@ Rival gulls (`scripts/rival_gull.gd`) run a small state machine: patrol across t
 
 F2 reloads JSON and refreshes art during play. Reload validates parsing, top-level tuning sections, food categories/values and food references; preserve the supplied schema and numeric ranges. Restart to apply changed level spawns, food choices or rival profiles. Keep active food IDs when reloading an existing level.
 
+Two additional animated shopper appearances (mullet/baseball-cap man and older woman in a floral sundress) now join the original customer. See [shopper artwork and validation](docs/SHOPPER_VARIANTS_V1.md).
+
 ## Validation
+
+Menu button activations play the supplied `assets/audio/263786__steaq__seagull-single-call.ogg` recording through the SFX bus at -8 dB, replacing the old menu click. Every activation plays without a cooldown, including keyboard and controller activation. Gameplay actions do not use this recording. The existing SFX volume/mute and audio toggle apply; the original recording is preserved.
 
 From PowerShell in this directory:
 
@@ -93,6 +101,8 @@ From PowerShell in this directory:
 ```
 
 Use `-Godot 'C:/path/to/Godot_console.exe'` for another installation. The script keeps engine settings and test saves under ignored `.tools/userdata`; it does not change your ordinary player save. Capture requires a graphics device and writes PNGs to `test-output/`.
+
+Validation creates `test-output/.gdignore` so archived scripts and captures cannot override game classes or register duplicate asset IDs. Menu quit and window close stop audio and allow playback to release before exiting. Forced engine exits such as `--quit-after` bypass that cleanup and can still report active music resources.
 
 The integration scene exercises all six timed loops, scoring, persistence, unlocks, dive hits, stun recovery, explicit family links, shared-stock conservation, finite sunbather depletion, retry reset, parent shields and alerts, vendor telegraphing, wind gusts, rival mugging, casual completion, menu bounds, and input routing. It uses deterministic simulation, not a human playthrough. See `docs/HANDOFF.md` for the validated state and remaining limits.
 

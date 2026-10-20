@@ -9,8 +9,14 @@ var props: Array[Dictionary] = []
 var zones: Array = []
 var world: Dictionary = {}
 var prop_sprites: Array[AnimatedSprite2D] = []
+var stalls: Array[FoodStall] = []
+var palm_materials: Array[ShaderMaterial] = []
 const BIN_WOBBLE_TIME: float = 0.26
 const BIN_WOBBLE_ANGLE: float = 0.095
+const WHEELIE_BIN_TYPE: String = "wheelie_bin"
+const WHEELIE_BIN_LID_INSET: float = 8.0
+const WHEELIE_BIN_HALF_WIDTH: float = 12.0
+const BIN_TYPES: Array[String] = ["bin", WHEELIE_BIN_TYPE]
 const SIGN_TOP: int = 84
 const SIGN_HEIGHT: int = 11
 var bin_wobble: Array[float] = []
@@ -41,7 +47,7 @@ func setup(entries: Array, zone_entries: Array = [], world_settings: Dictionary 
 		add_child(sprite)
 		prop_sprites.append(sprite)
 		_apply_prop_art(sprite,entry)
-		if entry.type == "bin":
+		if is_bin_type(str(entry.type)):
 			# The glint is a child so it rotates and bounces with the wobbling bin.
 			var glint: Sprite2D = Sprite2D.new()
 			glint.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -49,31 +55,71 @@ func setup(entries: Array, zone_entries: Array = [], world_settings: Dictionary 
 			sprite.add_child(glint)
 			bin_glints[bin_glints.size()-1] = glint
 		if entry.type in ["kiosk","hotdog_stand"]:
+			var stall := FoodStall.new()
+			add_child(stall)
+			stall.setup(entry,props.size()-1)
+			stalls.append(stall)
 			var sign_node: Node2D = preload("res://scripts/stand_sign.gd").new()
 			sign_node.hotdog = entry.type == "hotdog_stand"
-			sign_node.position = Vector2(entry.x,160)
+			sign_node.z_index = FoodStall.DRAW_DEPTH
+			sign_node.position = Vector2(entry.x,float(entry.get("y",160))-11)
 			add_child(sign_node)
+	_update_palm_wind()
 	Config.reloaded.connect(_refresh)
 
 func _apply_prop_art(sprite: AnimatedSprite2D, entry: Dictionary) -> void:
+	if entry.type in ["kiosk","hotdog_stand"]:
+		sprite.z_index = FoodStall.DRAW_DEPTH
 	var definition: Dictionary = Config.sprites[entry.type]
 	var scale_factor: float = float(definition.get("visual_scale",1.0))
 	sprite.scale = Vector2.ONE * scale_factor
 	sprite.position = Vector2(entry.x,float(entry.get("y",160))-float(definition.frame_h)*scale_factor*0.5)
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	sprite.material = null
+	if entry.type == "beach_palm":
+		var leaves := ShaderMaterial.new()
+		leaves.shader = preload("res://assets/shaders/palm_leaf_sway.gdshader")
+		# The palm frame covers its entire 44 x 62 texture, so the shader can
+		# sample its transparent border directly, just like the approved pilot.
+		leaves.set_shader_parameter("phase",fposmod(float(entry.x)*0.037,TAU))
+		sprite.material = leaves
+		palm_materials.append(leaves)
+	if entry.type == WHEELIE_BIN_TYPE:
+		var sharpen := ShaderMaterial.new()
+		sharpen.shader = preload("res://assets/shaders/bin_pixel_sharpen.gdshader")
+		sprite.material = sharpen
 	if entry.type == "umbrella":
 		sprite.position.y = 125
 
 func _refresh() -> void:
+	palm_materials.clear()
 	for i: int in props.size():
 		prop_sprites[i].sprite_frames = Config.frames(props[i].type)
 		prop_sprites[i].play(&"idle")
 		_apply_prop_art(prop_sprites[i],props[i])
+	_update_palm_wind()
+
+func _update_palm_wind() -> void:
+	# Gameplay already smooths this wind through the gull's actual wind force.
+	# Feeding the beach clock also freezes the leaves during pause and results.
+	for leaves: ShaderMaterial in palm_materials:
+		leaves.set_shader_parameter("wind_strength",strength)
+		leaves.set_shader_parameter("wind_direction",float(wind_dir))
+		leaves.set_shader_parameter("preview_time",time)
+
+static func is_bin_type(type: String) -> bool:
+	return type in BIN_TYPES
+
+static func bin_content_y(prop: Dictionary) -> float:
+	var base_y: float = float(prop.get("y",Config.tuning.world.ground))
+	if str(prop.type) != WHEELIE_BIN_TYPE:
+		return base_y-18.0
+	var definition: Dictionary = Config.sprites[WHEELIE_BIN_TYPE]
+	return base_y-(float(definition.frame_h)-WHEELIE_BIN_LID_INSET)*float(definition.get("visual_scale",1.0))
 
 func wobble_bin(x: float, progress: float = 0.0, released: bool = false) -> void:
 	for i: int in props.size():
-		if props[i].type == "bin" and absf(float(props[i].x)-x) < 0.1:
+		if is_bin_type(str(props[i].type)) and absf(float(props[i].x)-x) < 0.1:
 			bin_wobble_duration[i] = 0.36 if released else BIN_WOBBLE_TIME
 			bin_wobble[i] = bin_wobble_duration[i]
 			bin_wobble_strength[i] = BIN_WOBBLE_ANGLE + 0.035 * clampf(progress,0.0,1.0)
@@ -82,24 +128,25 @@ func wobble_bin(x: float, progress: float = 0.0, released: bool = false) -> void
 
 func set_bin_full(x: float, full: bool) -> void:
 	for i: int in props.size():
-		if props[i].type == "bin" and absf(float(props[i].x)-x) < 0.1:
+		if is_bin_type(str(props[i].type)) and absf(float(props[i].x)-x) < 0.1:
 			bin_full[i] = full
 
 func tick(delta: float) -> void:
 	time += delta
+	_update_palm_wind()
 	for i: int in props.size():
 		if is_instance_valid(bin_glints[i]):
-			var glint: Texture2D = PickupShine.overlay(Config.frames("bin").get_frame_texture(&"idle",0),time,float(props[i].x)*0.37) if bin_full[i] else null
+			var glint: Texture2D = PickupShine.overlay(Config.frames(str(props[i].type)).get_frame_texture(&"idle",0),time,float(props[i].x)*0.37) if bin_full[i] else null
 			bin_glints[i].texture = glint
 			bin_glints[i].visible = glint != null
 	for i: int in props.size():
-		if props[i].type != "bin" or bin_wobble[i] <= 0.0:
+		if not is_bin_type(str(props[i].type)) or bin_wobble[i] <= 0.0:
 			continue
 		bin_wobble[i] = maxf(0.0,bin_wobble[i]-delta)
 		var progress: float = 1.0-bin_wobble[i]/bin_wobble_duration[i]
 		var angle: float = sin(progress*TAU*2.0)*bin_wobble_strength[i]*(1.0-progress)
 		var sprite: AnimatedSprite2D = prop_sprites[i]
-		var definition: Dictionary = Config.sprites["bin"]
+		var definition: Dictionary = Config.sprites[str(props[i].type)]
 		var scale_factor: float = float(definition.get("visual_scale",1.0))
 		# The foot pivot is measured from the sprite center, so replacement art only changes this offset.
 		var pivot: Vector2 = Vector2(0.0,float(props[i].get("wobble_pivot_y",float(definition.frame_h)*scale_factor*0.5-2.0)))

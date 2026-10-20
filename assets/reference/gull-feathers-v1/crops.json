@@ -1,0 +1,38 @@
+[
+  {
+    "file": "assets\\sprites\\feather-down-v1.png",
+    "source_bounds": [
+      216,
+      71,
+      671,
+      492
+    ]
+  },
+  {
+    "file": "assets\\sprites\\feather-gray-v1.png",
+    "source_bounds": [
+      960,
+      66,
+      1345,
+      498
+    ]
+  },
+  {
+    "file": "assets\\sprites\\feather-tip-v1.png",
+    "source_bounds": [
+      216,
+      558,
+      731,
+      967
+    ]
+  },
+  {
+    "file": "assets\\sprites\\feather-fluff-v1.png",
+    "source_bounds": [
+      953,
+      593,
+      1350,
+      956
+    ]
+  }
+]

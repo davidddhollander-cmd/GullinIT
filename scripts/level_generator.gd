@@ -46,7 +46,7 @@ static func generate(definition: Dictionary, rules: Dictionary) -> Dictionary:
 			families[str(spawn.family_id)] = []
 	for i: int in range(sun_count,rules.sunbather_centres.size()):
 		spawns.append({"type":"sunbather"})
-	for kind: String in ["dog_owner","pier_diner","seafood_vendor"]:
+	for kind: String in ["pier_diner","seafood_vendor"]:
 		if not kinds.has(kind):
 			spawns.append({"type":kind})
 	for spawn: Dictionary in spawns:
@@ -68,6 +68,7 @@ static func generate(definition: Dictionary, rules: Dictionary) -> Dictionary:
 	var hot_x: float = float(stand_positions[1])+random.randi_range(-int(rules.jitter),int(rules.jitter))
 	props.append({"type":"kiosk","x":ice_x,"customer_x":ice_x+float(rules.customer_offset)})
 	props.append({"type":"hotdog_stand","x":hot_x,"customer_x":hot_x+float(rules.customer_offset)})
+	props.append({"type":"wheelie_bin","x":minf(ice_x,hot_x)-42.0})
 	var appearances: Array = ["male_red","female_blue","female_red","male_blue"]
 	for spawn: Dictionary in spawns:
 		spawn.patrol_radius = 6.0 if spawn.type == "toddler" else float(rules.patrol_radius)
@@ -109,9 +110,14 @@ static func generate(definition: Dictionary, rules: Dictionary) -> Dictionary:
 	for i: int in range(customer_index,2):
 		spawns.append({"type":"kiosk_customer","x":(ice_x if i==0 else hot_x)+float(rules.customer_offset),"food_id":"ice_cream" if i==0 else "hotdog","station":"ice_cream" if i==0 else "hotdogs","patrol_radius":float(rules.patrol_radius)})
 	props.append_array([{"type":"bin","x":325},{"type":"bin","x":620},
-		{"type":"tower","x":1090},{"type":"beach_palm","x":22,"y":148},
+		{"type":"tower","x":1090},
+		# Space three palms along the route, with full crowns inside the map and
+		# clear of both serving windows even at the stands' maximum seed jitter.
+		{"type":"beach_palm","x":32,"y":148},
+		{"type":"beach_palm","x":350,"y":148},
+		{"type":"beach_palm","x":965,"y":148},
 		{"type":"beach_castle" if int(level.seed)%2 else "beach_rocks","x":495,"y":173},
-		{"type":"beach_lamp","x":822,"y":151},{"type":"beach_bench","x":1250,"y":153}])
+		{"type":"beach_lamp","x":822,"y":151},{"type":"beach_bench","x":1250,"y":153},{"type":"bin","x":1218}])
 	if int(level.id)>=5:
 		for spawn: Dictionary in spawns:
 			if spawn.type == "pier_diner":

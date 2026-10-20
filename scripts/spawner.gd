@@ -10,6 +10,7 @@ var replacements: Array[Dictionary] = []
 var visual_offsets: Dictionary = {}
 var previous_x: Dictionary = {}
 var bag_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var shopper_serial: int = 0
 const CROWD_OFFSETS: Array[Vector2] = [Vector2.ZERO, Vector2(26,-14), Vector2(-26,-14), Vector2(26,12), Vector2(-26,12), Vector2(52,0), Vector2(-52,0)]
 
 func setup(owner_node: Node2D, definition: Dictionary) -> void:
@@ -17,15 +18,28 @@ func setup(owner_node: Node2D, definition: Dictionary) -> void:
 	level = definition
 	rng.seed = int(level.seed)
 	bag_rng.seed = int(level.seed) + 97
+	shopper_serial = 0
 	for spawn: Dictionary in level.spawns:
-		create(spawn.type,spawn.x,spawn)
+		var target: BeachTarget = create(spawn.type,spawn.x,spawn)
+		# Authored buyers beside a stall begin with its visible purchase. The
+		# distant training/strolling snacks still represent earlier purchases.
+		if str(spawn.type)=="kiosk_customer" and str(spawn.get("station","")) in ["ice_cream","hotdogs"]:
+			target.food = false
+			target.food_sprite.hide()
+			target.respawn = 0.0
 	_link_families()
 	kiosk_timer = Config.tuning.world.kiosk_rate
 
 func create(kind: String, x: float, spawn: Dictionary = {}) -> BeachTarget:
 	var target: BeachTarget = BeachTarget.new()
 	parent.add_child(target)
+	if kind == "kiosk_customer":
+		spawn = spawn.duplicate()
+		if not spawn.has("appearance"):
+			spawn.appearance = ShopperArt.APPEARANCES[shopper_serial % ShopperArt.APPEARANCES.size()]
+		shopper_serial += 1
 	target.setup(kind,x,rng,level.awareness_mult,spawn)
+	target.routine.setup(target,level,spawn)
 	if kind == "sunbather":
 		target.bag_variant = _free_bag_variant()
 	target.departed.connect(_departed)
@@ -94,6 +108,9 @@ func apply_spacing(delta: float) -> void:
 			ordered.append(target)
 	for target: BeachTarget in ordered:
 		var desired: Vector2 = Vector2.ZERO
+		if target.service_locked:
+			placed[target] = desired
+			continue
 		for candidate: Vector2 in CROWD_OFFSETS:
 			var clear: bool = true
 			for other: BeachTarget in placed:
@@ -110,7 +127,7 @@ func apply_spacing(delta: float) -> void:
 		placed[target] = desired
 	for target: BeachTarget in ordered:
 		var old_offset: Vector2 = visual_offsets.get(target,Vector2.ZERO)
-		var next_offset: Vector2 = old_offset.move_toward(placed[target],300.0*delta)
+		var next_offset: Vector2 = Vector2.ZERO if target.service_locked else old_offset.move_toward(placed[target],300.0*delta)
 		previous_x[target] = target.position.x
 		visual_offsets[target] = next_offset
 		target.position += next_offset
@@ -135,10 +152,15 @@ func tick(delta: float, elapsed: float) -> void:
 				for prop: Dictionary in level.props:
 					if prop.type in ["kiosk","hotdog_stand"]:
 						stands.append(prop)
+				if stands.is_empty():
+					return
 				var stand: Dictionary = stands[rng.randi_range(0,stands.size()-1)]
 				var arrival_x: float = float(stand.get("customer_x",stand.x))
 				for existing: BeachTarget in targets:
-					if absf(existing.position.x-arrival_x) < float(Config.layout_rules.arrival_clearance) or absf(existing.patrol_home-arrival_x) < float(Config.layout_rules.arrival_clearance):
+					if absf(existing.position.x-arrival_x) < float(Config.layout_rules.arrival_clearance):
 						return
 				var customer: BeachTarget = create("kiosk_customer",arrival_x,{"food_id":"hotdog" if stand.type == "hotdog_stand" else "ice_cream","patrol_radius":float(Config.layout_rules.patrol_radius)})
+				customer.food = false
+				customer.food_sprite.hide()
+				customer.respawn = 0.0
 				customer.facing = -1 if rng.randf() < 0.5 else 1

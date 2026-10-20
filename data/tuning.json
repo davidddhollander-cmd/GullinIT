@@ -49,6 +49,20 @@
     "warning_risk": 0.7,
     "warning_time": 0.65
   },
+  "tumble": {
+    "duration": 0.9,
+    "launch_speed": 110,
+    "launch_up": 115,
+    "gravity": 520,
+    "drag": 70,
+    "bounce": 0.3,
+    "bounce_speed": 38,
+    "spin": 17,
+    "spin_drag": 5,
+    "recovery_time": 0.18,
+    "shed_time": 0.5,
+    "shed_interval": 0.12
+  },
   "wind": {
     "drift": 40,
     "gust_min": 6,
@@ -80,8 +94,15 @@
     "risky": 0.5,
     "upwind": 0.2,
     "mugged": 0.5,
+    "handover": 0.5,
     "clean": 0.1,
     "casual_items": 15
+  },
+  "routines": {
+    "kiosk_customer": {"min_distance": 120, "max_distance": 220, "pause_min": 2, "pause_max": 5},
+    "pier_diner": {"min_distance": 80, "max_distance": 140, "pause_min": 4, "pause_max": 8},
+    "dog_owner": {"min_distance": 120, "max_distance": 180, "pause_min": 2, "pause_max": 5},
+    "lifeguard": {"min_distance": 100, "max_distance": 160, "pause_min": 2, "pause_max": 4}
   },
   "world": {
     "width": 1280,
@@ -125,6 +146,11 @@
     "family_follow_spacing": 27,
     "family_trip_speed": 20,
     "family_purchase_pause": 0.45,
+    "stall_prepare_time": 0.25,
+    "stall_extend_time": 0.18,
+    "stall_handover_time": 0.85,
+    "stall_retract_time": 0.18,
+    "stall_retry_wait": 4.0,
     "family_retreat_distance": 90,
     "family_retry_wait": 8,
     "sunbather_stash_size": 3,
@@ -132,6 +158,13 @@
     "toddler_peck_vertical_tolerance": 14,
     "peck_cooldown": 0.18,
     "peck_alert": 0.2,
+    "sunbather_sleep_pecks": 4,
+    "sunbather_rise_time": 0.7,
+    "sunbather_notice_delay": 0.25,
+    "sunbather_warning_time": 0.3,
+    "snatch_chase_time": 2.2,
+    "snatch_chase_distance": 120,
+    "snatch_give_up_time": 0.65,
     "stash_pecks": 3,
     "stash_burst": 2,
     "stash_snacks": [
@@ -155,6 +188,7 @@
     "beach_max_x": 620,
     "beach_scatter_max_x": 628,
     "bin_stash_size": 9,
+    "wheelie_bin_stash_multiplier": 2,
     "bin_pecks": 4,
     "bin_burst": 3,
     "bin_scatter": [

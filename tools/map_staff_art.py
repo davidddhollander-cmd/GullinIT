@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 path = ROOT / 'data/sprites.json'
 text = path.read_text(encoding='utf-8-sig')
-for name in ['lifeguard_art', 'shopper_art']:
+for name in ['lifeguard_art', 'shopper_art', 'shopper_variants_art']:
     source = ROOT / f'data/{name}.json'
     if not source.exists():
         continue
@@ -14,6 +14,9 @@ for name in ['lifeguard_art', 'shopper_art']:
         pattern = r'(?ms)^  "' + re.escape(key) + r'": \{.*?^  \}(?=,?\n)'
         replacement = '  "' + key + '": ' + json.dumps(entry, indent=2).replace('\n', '\n  ')
         text, count = re.subn(pattern, lambda match: replacement, text)
-        assert count == 1, key
+        if count == 0:
+            # New appearances are additional registry entries, not target types.
+            end = text.rfind('}')
+            text = text[:end].rstrip() + ',\n' + replacement + '\n}\n'
 json.loads(text)
 path.write_text(text, encoding='utf-8')

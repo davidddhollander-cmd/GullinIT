@@ -3,6 +3,7 @@ extends RefCounted
 const INK: Color = Color("183b4e")
 const CREAM: Color = Color("fff4da")
 const GOLD: Color = Color("ffc65c")
+const CORAL: Color = Color("ef725c")
 const FONT_NATIVE: int = 8
 const FONT_DISPLAY: int = 16
 
@@ -24,9 +25,13 @@ static func theme() -> Theme:
 		box.content_margin_bottom = 6
 		result.set_stylebox(state,"Button",box)
 	result.set_color("font_color","Button",CREAM)
-	result.set_color("font_hover_color","Button",GOLD)
+	result.set_color("font_hover_color","Button",CORAL)
+	result.set_color("font_pressed_color","Button",CORAL)
+	result.set_color("font_hover_pressed_color","Button",CORAL)
 	result.set_color("font_focus_color","Button",GOLD)
 	result.set_color("font_disabled_color","Button",Color("6b858b"))
+	result.set_color("font_outline_color","Button",INK)
+	result.set_constant("outline_size","Button",1)
 	result.set_constant("separation","VBoxContainer",5)
 	result.set_constant("separation","HBoxContainer",6)
 	return result
@@ -49,7 +54,7 @@ static func button(parent: Node, value: String, action: Callable, width: float =
 	node.text = value
 	node.custom_minimum_size = Vector2(width,21)
 	node.pressed.connect(func() -> void:
-		Audio.play("click")
+		Audio.play("gull_call", 1.0, -8.0)
 		action.call())
 	parent.add_child(node)
 	return node

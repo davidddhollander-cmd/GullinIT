@@ -1,0 +1,71 @@
+{
+  "tool": "Built-in image_gen.imagegen",
+  "date": "2026-10-20",
+  "purpose": "Full-body older woman walk. Original shopper provides pose reference only.",
+  "poses": [
+    {
+      "frame": 0,
+      "source": "walk-0-source.png",
+      "original_output": "C:\\Users\\david\\.codex\\generated_images\\01a1581e-3896-7800-a2fd-741123839787\\exec-8bf02a2e-085b-4870-b5e1-fb57766a12a0.png",
+      "references": [
+        "shopper_sundress-idle.png",
+        "kiosk_customer-0.png"
+      ],
+      "prompt": "Create ONE complete full-body game sprite, right-facing three-quarter side view, on a genuinely transparent background.\nImage 1 is the exact CHARACTER IDENTITY to preserve: a short plump older seaside woman, silver/grey hair in a low bun, dark glasses, warm tan skin, sleeveless yellow sundress with coral-pink flowers and green leaves, brown strap sandals. Keep her same face, age, body type, dress cut and proportions. Retain the existing crisp outlined arcade sprite style, readable at 40 game pixels tall.\nImage 2 supplies ONLY the approved WALK POSE, not the identity. Recreate this exact pose with the older woman from Image 1, adapting to her dress and short legs. Keep her dress at the same knee-length; a small hem sway should reveal deliberate knee/ankle movement and distinct sandal positions. One planted supporting foot and one moving foot must read clearly. Do not merely shift the torso with two flat feet. Do not turn her into the slim yellow-shirt man.\nHer forward food-carrying palm stays EMPTY and up at waist height; food is a separate game sprite. Her free arm follows the pose reference. One coherent complete figure from hair bun to sandal soles, clear margins, no text, numbers, food, props, floor, shadow, scenery, motion lines or duplicate bodies. No cutout puppet pieces, rig drawings or disconnected anatomy.\nSpecific pose: Contact pose: one sandal reaches forward/right for heel contact while the other leg extends behind/left, broad readable stride below the hem."
+    },
+    {
+      "frame": 1,
+      "source": "walk-1-source.png",
+      "original_output": "C:\\Users\\david\\.codex\\generated_images\\01a1581e-3896-7800-a2fd-741123839787\\exec-aba91b5d-45ab-42ee-bc3b-5b12dc8ae2ca.png",
+      "references": [
+        "shopper_sundress-idle.png",
+        "kiosk_customer-1.png",
+        "walk-0-source.png"
+      ],
+      "prompt": "Create ONE complete full-body game sprite, right-facing three-quarter side view, on a genuinely transparent background.\nImage 1 is the exact CHARACTER IDENTITY to preserve: a short plump older seaside woman, silver/grey hair in a low bun, dark glasses, warm tan skin, sleeveless yellow sundress with coral-pink flowers and green leaves, brown strap sandals. Keep her same face, age, body type, dress cut and proportions. Retain the existing crisp outlined arcade sprite style, readable at 40 game pixels tall.\nImage 2 supplies ONLY the approved WALK POSE, not the identity. Recreate this exact pose with the older woman from Image 1, adapting to her dress and short legs. Keep her dress at the same knee-length; a small hem sway should reveal deliberate knee/ankle movement and distinct sandal positions. One planted supporting foot and one moving foot must read clearly. Do not merely shift the torso with two flat feet. Do not turn her into the slim yellow-shirt man.\nHer forward food-carrying palm stays EMPTY and up at waist height; food is a separate game sprite. Her free arm follows the pose reference. One coherent complete figure from hair bun to sandal soles, clear margins, no text, numbers, food, props, floor, shadow, scenery, motion lines or duplicate bodies. No cutout puppet pieces, rig drawings or disconnected anatomy.\nImage 3 is this same woman's newly generated first contact pose; match its face, hair bun, glasses, body volume, dress pattern and sprite finish for a consistent loop.\nSpecific pose: Down/recoil following first contact. Reproduce Image 2: supporting front foot planted with bent knee, trailing knee folded and sandal lifted. A clear actual walk stance below the knee-length dress, not standing."
+    },
+    {
+      "frame": 2,
+      "source": "walk-2-source.png",
+      "original_output": "C:\\Users\\david\\.codex\\generated_images\\01a1581e-3896-7800-a2fd-741123839787\\exec-d2ffa950-bf4c-4b48-a5a9-d77e9810ea7f.png",
+      "references": [
+        "shopper_sundress-idle.png",
+        "kiosk_customer-2.png"
+      ],
+      "prompt": "Create ONE complete full-body game sprite, right-facing three-quarter side view, on a genuinely transparent background.\nImage 1 is the exact CHARACTER IDENTITY to preserve: a short plump older seaside woman, silver/grey hair in a low bun, dark glasses, warm tan skin, sleeveless yellow sundress with coral-pink flowers and green leaves, brown strap sandals. Keep her same face, age, body type, dress cut and proportions. Retain the existing crisp outlined arcade sprite style, readable at 40 game pixels tall.\nImage 2 supplies ONLY the approved WALK POSE, not the identity. Recreate this exact pose with the older woman from Image 1, adapting to her dress and short legs. Keep her dress at the same knee-length; a small hem sway should reveal deliberate knee/ankle movement and distinct sandal positions. One planted supporting foot and one moving foot must read clearly. Do not merely shift the torso with two flat feet. Do not turn her into the slim yellow-shirt man.\nHer forward food-carrying palm stays EMPTY and up at waist height; food is a separate game sprite. Her free arm follows the pose reference. One coherent complete figure from hair bun to sandal soles, clear margins, no text, numbers, food, props, floor, shadow, scenery, motion lines or duplicate bodies. No cutout puppet pieces, rig drawings or disconnected anatomy.\nSpecific pose: Passing pose: one supporting leg nearly vertical, the OTHER knee bent with its sandal clearly LIFTED above ground crossing behind the supporting shin. Follow Image 2. Expose enough of both lower legs to see the planted versus raised sandal."
+    },
+    {
+      "frame": 3,
+      "source": "walk-3-source.png",
+      "original_output": "C:\\Users\\david\\.codex\\generated_images\\01a1581e-3896-7800-a2fd-741123839787\\exec-a7d8ac03-76ab-45e9-b673-7d8c44eea101.png",
+      "references": [
+        "shopper_sundress-idle.png",
+        "kiosk_customer-3.png",
+        "walk-0-source.png"
+      ],
+      "prompt": "Create ONE complete full-body game sprite, right-facing three-quarter side view, on a genuinely transparent background.\nImage 1 is the exact CHARACTER IDENTITY to preserve: a short plump older seaside woman, silver/grey hair in a low bun, dark glasses, warm tan skin, sleeveless yellow sundress with coral-pink flowers and green leaves, brown strap sandals. Keep her same face, age, body type, dress cut and proportions. Retain the existing crisp outlined arcade sprite style, readable at 40 game pixels tall.\nImage 2 supplies ONLY the approved WALK POSE, not the identity. Recreate this exact pose with the older woman from Image 1, adapting to her dress and short legs. Keep her dress at the same knee-length; a small hem sway should reveal deliberate knee/ankle movement and distinct sandal positions. One planted supporting foot and one moving foot must read clearly. Do not merely shift the torso with two flat feet. Do not turn her into the slim yellow-shirt man.\nHer forward food-carrying palm stays EMPTY and up at waist height; food is a separate game sprite. Her free arm follows the pose reference. One coherent complete figure from hair bun to sandal soles, clear margins, no text, numbers, food, props, floor, shadow, scenery, motion lines or duplicate bodies. No cutout puppet pieces, rig drawings or disconnected anatomy.\nImage 3 is this same woman's newly generated first contact pose; match its face, hair bun, glasses, body volume, dress pattern and sprite finish for a consistent loop.\nSpecific pose: Opposing contact. Follow Image 2's forward leg extension with the forward sandal heel approaching ground and toe lifted, the other leg trailing behind. Clearly different from first contact, with matching arm counter-swing."
+    },
+    {
+      "frame": 4,
+      "source": "walk-4-source.png",
+      "original_output": "C:\\Users\\david\\.codex\\generated_images\\01a1581e-3896-7800-a2fd-741123839787\\exec-a8b00571-3a52-4003-a897-aa4b4eb01b48.png",
+      "references": [
+        "shopper_sundress-idle.png",
+        "kiosk_customer-4.png",
+        "walk-0-source.png"
+      ],
+      "prompt": "Create ONE complete full-body game sprite, right-facing three-quarter side view, on a genuinely transparent background.\nImage 1 is the exact CHARACTER IDENTITY to preserve: a short plump older seaside woman, silver/grey hair in a low bun, dark glasses, warm tan skin, sleeveless yellow sundress with coral-pink flowers and green leaves, brown strap sandals. Keep her same face, age, body type, dress cut and proportions. Retain the existing crisp outlined arcade sprite style, readable at 40 game pixels tall.\nImage 2 supplies ONLY the approved WALK POSE, not the identity. Recreate this exact pose with the older woman from Image 1, adapting to her dress and short legs. Keep her dress at the same knee-length; a small hem sway should reveal deliberate knee/ankle movement and distinct sandal positions. One planted supporting foot and one moving foot must read clearly. Do not merely shift the torso with two flat feet. Do not turn her into the slim yellow-shirt man.\nHer forward food-carrying palm stays EMPTY and up at waist height; food is a separate game sprite. Her free arm follows the pose reference. One coherent complete figure from hair bun to sandal soles, clear margins, no text, numbers, food, props, floor, shadow, scenery, motion lines or duplicate bodies. No cutout puppet pieces, rig drawings or disconnected anatomy.\nImage 3 is this same woman's newly generated first contact pose; match its face, hair bun, glasses, body volume, dress pattern and sprite finish for a consistent loop.\nSpecific pose: Opposite recoil. Follow Image 2 exactly: weight above one supporting leg, the OTHER knee folded with sandal above ground. Keep lower legs visible beneath the hem and distinct moving versus planted foot."
+    },
+    {
+      "frame": 5,
+      "source": "walk-5-source.png",
+      "original_output": "C:\\Users\\david\\.codex\\generated_images\\01a1581e-3896-7800-a2fd-741123839787\\exec-e18a7f84-0bf1-4d1c-99f4-27ba25e02970.png",
+      "references": [
+        "shopper_sundress-idle.png",
+        "kiosk_customer-5.png",
+        "walk-0-source.png"
+      ],
+      "prompt": "Create ONE complete full-body game sprite, right-facing three-quarter side view, on a genuinely transparent background.\nImage 1 is the exact CHARACTER IDENTITY to preserve: a short plump older seaside woman, silver/grey hair in a low bun, dark glasses, warm tan skin, sleeveless yellow sundress with coral-pink flowers and green leaves, brown strap sandals. Keep her same face, age, body type, dress cut and proportions. Retain the existing crisp outlined arcade sprite style, readable at 40 game pixels tall.\nImage 2 supplies ONLY the approved WALK POSE, not the identity. Recreate this exact pose with the older woman from Image 1, adapting to her dress and short legs. Keep her dress at the same knee-length; a small hem sway should reveal deliberate knee/ankle movement and distinct sandal positions. One planted supporting foot and one moving foot must read clearly. Do not merely shift the torso with two flat feet. Do not turn her into the slim yellow-shirt man.\nHer forward food-carrying palm stays EMPTY and up at waist height; food is a separate game sprite. Her free arm follows the pose reference. One coherent complete figure from hair bun to sandal soles, clear margins, no text, numbers, food, props, floor, shadow, scenery, motion lines or duplicate bodies. No cutout puppet pieces, rig drawings or disconnected anatomy.\nImage 3 is this same woman's newly generated first contact pose; match its face, hair bun, glasses, body volume, dress pattern and sprite finish for a consistent loop.\nSpecific pose: Opposite passing. Follow Image 2's supporting foot and bent moving knee, the raised sandal crosses behind the shin, free arm relaxed forward. Distinct passing position, no two flat feet. Retain short sturdy older woman's legs."
+    }
+  ]
+}

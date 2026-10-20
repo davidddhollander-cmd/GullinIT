@@ -1,0 +1,11 @@
+# Palm leaf wind pilot
+
+Standalone review scene: `tools/palm_wind_pilot.tscn`. Open it and run the current scene (F6) for a live comparison. The approved v2 movement now also runs on all gameplay palms.
+
+The left palm is the original still sprite at 2×. The middle is the moving pilot at 2×; the right shows the same movement at normal game size. Both moving trees use a gentle rightward breeze at strength 0.55, with an eight-second cycle. The revised pilot increases movement amplitude by 40%, keeping the original speed. Outer leaf tips move about one game pixel horizontally and up to 0.23 vertically; the leaf bases and trunk stay anchored. Small phase differences between fronds keep them from moving as a single rigid crown. Zero wind produces the original still image, and negative direction bends the tips leftward.
+
+`assets/shaders/palm_leaf_sway.gdshader` samples the existing 44 × 62 transparent palm with nearest-neighbour filtering. It expands the drawing area by three transparent pixels so the left-edge leaves cannot clip. The complete source artwork remains unchanged. The material expects the complete texture; the gameplay palm's single atlas frame covers that complete texture. The pilot uses the live shader clock; `preview_time` permits deterministic capture and gameplay-controlled time.
+
+Preview: `assets/previews/palm-wind-pilot-v2.gif` (eight seconds, 20 fps) and matching PNG. The original v1 preview is retained for comparison. To rebuild v2, run the pilot scene with `-- --capture`, then run `tools/package_palm_wind_pilot.py` with Pillow available. Render frames go to ignored `test-output/palm-wind-pilot/`.
+
+Gameplay integration: `BeachBackdrop` assigns the shader to every palm, using its x position for a repeatable phase offset. Wind strength and direction follow the beach's existing smoothed actual wind force, including gusts and reversals. Zero wind holds the leaves still, including Training Day. The beach clock controls animation so pause, slow motion, hit freeze and results follow gameplay timing. Art reload recreates the palm materials while preserving the current wind and animation time. `tests/palm_wind_checks.gd` exercises the connection on all six levels.

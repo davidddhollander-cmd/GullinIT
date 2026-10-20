@@ -62,7 +62,7 @@ func _initialize() -> void:
 			push_error("Could not save " + path)
 	quit()
 
-func _alpha_bounds(image: Image, partition: Rect2i) -> Rect2i:
+static func _alpha_bounds(image: Image, partition: Rect2i) -> Rect2i:
 	var min_x: int = partition.end.x
 	var min_y: int = partition.end.y
 	var max_x: int = partition.position.x - 1
@@ -76,7 +76,7 @@ func _alpha_bounds(image: Image, partition: Rect2i) -> Rect2i:
 				max_y = maxi(max_y, y)
 	return Rect2i(min_x, min_y, maxi(0, max_x - min_x + 1), maxi(0, max_y - min_y + 1))
 
-func _quantize(image: Image) -> void:
+static func _quantize(image: Image) -> void:
 	for y: int in image.get_height():
 		for x: int in image.get_width():
 			var source: Color = image.get_pixel(x, y)

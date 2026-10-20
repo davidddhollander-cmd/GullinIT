@@ -17,17 +17,17 @@
   ],
   "rivals": [
     {
-      "name": "Gary",
+      "name": "Gary", "species": "great-black-backed",
       "speed": 0.8,
       "accuracy_px": 16
     },
     {
-      "name": "Chip",
+      "name": "Chip", "species": "kittiwake",
       "speed": 0.8,
       "accuracy_px": 10
     },
     {
-      "name": "Bev",
+      "name": "Bev", "species": "herring",
       "speed": 0.8,
       "accuracy_px": 4
     }
@@ -47,10 +47,6 @@
       "type": "picnic_family",
       "x": 245,
       "family_id": "family_1"
-    },
-    {
-      "type": "dog_owner",
-      "x": 665
     },
     {
       "type": "picnic_family",

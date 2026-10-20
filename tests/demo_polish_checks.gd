@@ -25,7 +25,14 @@ static func _captions(node: Node) -> Array[String]:
 	return result
 
 static func run(suite: Node, check: Callable) -> void:
+	var menu_theme: Theme = BeachUI.theme()
+	check.call(menu_theme.default_font.resource_path.ends_with("gull_pixel.fnt"), "menu keeps the original pixel font")
+	check.call(menu_theme.get_color("font_color","Button") == BeachUI.CREAM, "menu buttons are cream normally")
+	check.call(menu_theme.get_color("font_focus_color","Button") == BeachUI.GOLD, "selected menu button is gold")
+	check.call(menu_theme.get_color("font_hover_color","Button") == BeachUI.CORAL and menu_theme.get_color("font_pressed_color","Button") == BeachUI.CORAL, "hovered and pressed menu buttons are coral")
+	check.call(menu_theme.get_color("font_outline_color","Button") == BeachUI.INK and menu_theme.get_constant("outline_size","Button") == 1, "menu buttons have a one-pixel navy outline")
 	await _demo_lock_checks(suite, check)
+	await _readability_checks(suite, check)
 	await _hint_checks(suite, check)
 	await _touch_checks(suite, check)
 
@@ -90,6 +97,48 @@ static func _demo_lock_checks(suite: Node, check: Callable) -> void:
 	GameState.progress = saved_progress
 	suite.main.menus.hide()
 
+static func _readability_checks(suite: Node, check: Callable) -> void:
+	suite.main.start_level(2)
+	var game: BeachGame = suite.main.game
+	game.set_physics_process(false)
+	var overlay: BeachOverlay = game.overlay
+	for seconds: int in [58,9,0]:
+		game.elapsed = float(game.level.time_limit)-seconds
+		overlay._process(0.0)
+		check.call(overlay.time_label.text == "%02d" % seconds,"timer shows only padded digits: "+overlay.time_label.text)
+	for score: int in [249,250,399,400,550]:
+		game.score.points = score
+		var index: int = 0 if score < 250 else (1 if score < 400 else 2)
+		var status: Dictionary = overlay.goal_status()
+		check.call(int(status.goal) == int(game.level.stars[index]),"HUD advances to the next star at %d points" % score)
+		check.call(overlay.font.get_string_size(str(status.title),HORIZONTAL_ALIGNMENT_LEFT,-1,8).x <= 74,"star title fits goal box: "+str(status.title))
+	game.casual = true
+	game.score.items = int(Config.tuning.score.casual_items)
+	await suite.settle()
+	check.call(overlay.goal_status().title == "PRACTICE","casual goal keeps PRACTICE")
+	_top_bar_checks(overlay,check)
+	game.training = true
+	await suite.settle()
+	_top_bar_checks(overlay,check)
+	var board := ResultBoard.new()
+	board.level = game.level
+	board.result = {"stars":1,"casual":false,"elapsed":120.0}
+	var text: String = board._record_text()
+	check.call(text.ends_with("NEXT STAR 400") and not ".0" in text and not "SEC" in text,"arcade result uses integer next star and omits fixed elapsed time: "+text)
+	board.result.stars = 3
+	check.call("ALL 3 STARS!" in board._record_text() and not "SEC" in board._record_text(),"three-star arcade result omits fixed elapsed time")
+	board.free()
+	suite.main.clear_game()
+	await suite.settle()
+
+static func _top_bar_checks(overlay: BeachOverlay, check: Callable) -> void:
+	check.call(overlay.top.get_global_rect().end.y<=BeachOverlay.TOP_BAR_HEIGHT-3,"compact status row leaves room for combo meter")
+	for item: Control in [overlay.score_label,overlay.time_label,overlay.wind_label,overlay.pause_button]:
+		var rect: Rect2 = item.get_global_rect()
+		var minimum: Vector2 = item.get_combined_minimum_size()
+		check.call(rect.position.y>=0 and rect.end.y<=BeachOverlay.TOP_BAR_HEIGHT,"status text/button stays inside thinner bar: "+item.text)
+		check.call(minimum.x<=item.size.x and minimum.y<=item.size.y,"compact status text fits: "+item.text)
+
 static func _hint_checks(suite: Node, check: Callable) -> void:
 	suite.main.start_level(2)
 	var game: BeachGame = suite.main.game
@@ -102,6 +151,7 @@ static func _hint_checks(suite: Node, check: Callable) -> void:
 	game.player.position = Vector2(60, game.player.ground_y())
 	game.player.land()
 	await suite.settle()
+	_top_bar_checks(overlay,check)
 	var hint: Dictionary = overlay.context_hint()
 	check.call(not hint.is_empty() and "SPACE" in str(hint.text), "grounded hint uses keyboard wording: " + str(hint))
 	game.input.touch_visible = true
@@ -114,7 +164,7 @@ static func _hint_checks(suite: Node, check: Callable) -> void:
 		signs.append(sign.rect)
 	for text: String in ["WALK FOR SCRAPS / HOLD SPACE TO FLY", "LANDING / HOLD SPACE TO CLIMB", "PECK SPENT - DIVE AGAIN", "TAP E AT THE SNACK", "TAP PECK AT TODDLER", "PULL UP! CRASH AHEAD"]:
 		var box: Rect2 = overlay.hint_rect(text)
-		check.call(box.position.x >= 0 and box.end.x <= 320 and box.position.y >= 28, "hint stays on screen below the HUD: " + text)
+		check.call(box.position.x >= 0 and box.end.x <= 320 and box.position.y >= BeachOverlay.TOP_BAR_HEIGHT, "hint stays on screen below the HUD: " + text)
 		check.call(not box.intersects(GOAL_PANEL), "hint clears the goal panel: " + text + " " + str(box))
 		check.call(not box.intersects(callout), "hint clears the score callout row: " + text)
 		var clear_of_signs: bool = true
@@ -133,6 +183,7 @@ static func _hint_checks(suite: Node, check: Callable) -> void:
 	game.player.land()
 	await suite.settle()
 	var panel: Rect2 = overlay.training_panel.get_global_rect()
+	_top_bar_checks(overlay,check)
 	var box: Rect2 = overlay.hint_rect("WALK FOR SCRAPS / HOLD SPACE TO FLY")
 	check.call(panel.size.y > 0 and box.position.y >= panel.end.y and not box.intersects(panel), "training hint sits below the lesson panel: " + str(box) + " panel " + str(panel))
 	var training_signs: bool = true

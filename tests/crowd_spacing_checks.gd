@@ -19,6 +19,18 @@ static func run_checks(root: Node, check: Callable) -> void:
 	spawner.apply_spacing(1.0)
 	check.call(first.position.distance_to(second.position) >= 25.0, "overlapping adults receive separate visual positions")
 	check.call(first.z_index != second.z_index, "crossing adults draw in depth order")
+	var beach := BeachBackdrop.new()
+	root.add_child(beach)
+	beach.setup([{"type":"kiosk","x":228},{"type":"hotdog_stand","x":428}])
+	for i: int in beach.stalls.size():
+		var shell: AnimatedSprite2D = beach.prop_sprites[i]
+		var stall: FoodStall = beach.stalls[i]
+		check.call(second.z_index < shell.z_index and second.z_index < stall.z_index,"rear lane passes behind complete stall and vendor: "+str(i))
+		check.call(first.z_index >= shell.z_index and first.z_index >= stall.z_index,"ground lane remains in front of the stall: "+str(i))
+	for child: Node in beach.get_children():
+		if child.get_script() == preload("res://scripts/stand_sign.gd"):
+			check.call(second.z_index < child.z_index,"rear lane passes behind stall signs and awnings")
+	beach.queue_free()
 	spawner.reset_spacing()
 	check.call(first.position == Vector2(200,160) and second.position == Vector2(202,160), "spacing leaves gameplay positions unchanged")
 	second.position.x = 280.0
