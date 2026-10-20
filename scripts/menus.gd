@@ -35,7 +35,7 @@ func hint(parent: Control, text: String) -> void:
 const GLINT: Shader = preload("res://assets/shaders/title_glint.gdshader")
 
 func title() -> void:
-	clear("GULLIN' IT", "Just another Seagull Simulator", true)
+	clear("GULLIN' IT", "The No. 1 Seagull Simulator", true)
 	var heading: Label = content.get_child(0) as Label
 	content.get_child(1).add_theme_color_override("font_color",Color("ef725c"))
 	var logo: TextureRect = TextureRect.new()
