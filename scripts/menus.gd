@@ -145,7 +145,7 @@ func options(from_pause: bool) -> void:
 			Audio.apply_options())
 	var toggles: HBoxContainer = HBoxContainer.new()
 	content.add_child(toggles)
-	for key: String in ["shake","touch"]:
+	for key: String in ["shake","touch","stats"]:
 		var toggle: Button = BeachUI.button(toggles,key.to_upper()+": "+("ON" if GameState.options[key] else "OFF"),func() -> void:
 			GameState.options[key] = not bool(GameState.options[key])
 			options(from_pause))
