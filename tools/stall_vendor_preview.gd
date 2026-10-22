@@ -31,11 +31,19 @@ func save_frame(label: String) -> void:
 	for i: int in 3:
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png("res://assets/previews/stall-vendor-%s-v2.png" % label)
+	get_viewport().get_texture().get_image().save_png("res://assets/previews/stall-vendor-%s-v3.png" % label)
 
 func _capture() -> void:
+	if "--turn-cycle" in OS.get_cmdline_user_args():
+		await capture_turn_cycle()
+		return
 	await save_frame("prepare")
-	Checks.step(game,0.65)
+	Checks.step(game,0.25)
+	await save_frame("working")
+	Checks.step(game,float(Config.tuning.world.stall_prepare_time)*0.85-0.35)
+	await save_frame("turn-back")
+	Checks.wait_for_food(game)
+	Checks.step(game,0.2)
 	await save_frame("handover")
 	get_window().size = Vector2i(640,360)
 	await save_frame("counter-phone")
@@ -86,13 +94,13 @@ func _capture() -> void:
 	game.queue_free()
 	await get_tree().process_frame
 	full_body_review = true
-	for index: int in 4:
+	for index: int in 8:
 		var actor := AnimatedSprite2D.new()
-		actor.sprite_frames = VendorArt.frames(index>=2)
+		actor.sprite_frames = VendorArt.frames(index>=4)
 		actor.animation = &"poses"
-		actor.frame = 0 if index%2==0 else 5
+		actor.frame = 8+index%4
 		actor.scale = Vector2(0.5,0.5)
-		actor.position = Vector2(45+index*76,119)
+		actor.position = Vector2(45+(index%4)*76,66+(index/4)*66)
 		actor.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		add_child(actor)
 	queue_redraw()
@@ -103,13 +111,28 @@ func _capture() -> void:
 	await get_tree().create_timer(0.05).timeout
 	get_tree().quit()
 
+func capture_turn_cycle() -> void:
+	game.set_process_unhandled_input(false)
+	var output: String = "res://test-output/vendor-turn-v3-frames"
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(output))
+	var duration: float = float(Config.tuning.world.stall_prepare_time)+float(Config.tuning.world.stall_extend_time)+float(Config.tuning.world.stall_handover_time)+float(Config.tuning.world.stall_retract_time)+0.4
+	for frame: int in ceili(duration/0.05):
+		for refresh: int in 2:
+			await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		var image: Image = get_viewport().get_texture().get_image()
+		image.resize(640,360,Image.INTERPOLATE_NEAREST)
+		image.save_png(output+"/frame-%03d.png" % frame)
+		Checks.step(game,0.05)
+	get_tree().quit()
+
 func _draw() -> void:
 	if not full_body_review:
 		return
 	draw_rect(Rect2(0,0,320,180),Color("a9d7d2"))
 	draw_rect(Rect2(0,145,320,35),Color("e5c68c"))
 	var font: Font = preload("res://assets/fonts/gull_pixel.fnt")
-	draw_string(font,Vector2(10,24),"GENERATED FULL-BODY VENDORS",HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("183b4e"))
-	for index: int in 4:
-		var label: String = ("ICE" if index<2 else "DOG")+ (" IDLE" if index%2==0 else " SET")
-		draw_string(font,Vector2(10+index*76,166),label,HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("183b4e"))
+	draw_string(font,Vector2(10,24),"VENDOR TURNAROUND POSES",HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("183b4e"))
+	for index: int in 8:
+		var label: String = ["TURN","WORK A","WORK B","RETURN"][index%4]
+		draw_string(font,Vector2(20+(index%4)*76,106+(index/4)*66),label,HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("183b4e"))

@@ -27,6 +27,19 @@ var buttons: Array[Button] = []
 var reaction_player: AudioStreamPlayer
 var reaction_time: float = 0.0
 var reaction_started: bool = false
+var captions: Array[Label] = []
+var scores_panel: Control
+var score_rows: Array[Dictionary] = []
+var star_slots: Array[Label] = []
+const STAR_DIM := Color("7d4a28")
+const LEADERBOARD_PATH := "res://data/leaderboards.json"
+static var _seed_boards: Dictionary = {}
+
+# Two inset panels on the sign: the run tally on the left, high scores on the right.
+const LEFT_PANEL := Rect2(26, 64, 144, 72)
+const RIGHT_PANEL := Rect2(176, 64, 118, 72)
+const SCORE_SLOTS := 5
+const STAR_TAB := Rect2(110, 13, 100, 24)
 
 func setup(for_level: Dictionary, for_result: Dictionary) -> void:
 	level = for_level
@@ -66,37 +79,55 @@ func _build_training() -> void:
 	_add_button(actions,"LEVELS","select")
 	if not buttons.is_empty():
 		buttons[0].grab_focus()
+	# Graduates get the full scoring reference before their first real beach.
+	open_score_rules("GOT IT")
 
 func _build() -> void:
 	title_label = BeachUI.label(self, "LUNCH IS SERVED!" if passed else "STILL HUNGRY?", BeachUI.FONT_DISPLAY, CREAM)
-	_place(title_label, 43, 292, 17)
+	_place(title_label, 38, 292, 17)
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var subtitle := BeachUI.label(self, str(level.name).to_upper() + ("  /  DEMO COMPLETE - THANKS!" if demo_finished() else ""), BeachUI.FONT_NATIVE, GOLD if demo_finished() else SEA)
-	_place(subtitle, 61, 292, 9)
+	_place(subtitle, 55, 292, 9)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
-	_add_count_row("EARNED POINTS", int(result.base), 70)
-	_add_count_row("CLEAN BONUS", int(result.clean), 81, "+%d")
-	_add_count_row("SNATCHES", int(result.items), 92)
-	_add_count_row("STUNS", int(result.stuns), 103)
+	# Left panel: the run tally, captions left and values right-aligned.
+	_add_count_row("EARNED POINTS", int(result.base), 66)
+	_add_count_row("CLEAN BONUS", int(result.clean), 75, "+%d")
+	_add_count_row("SNATCHES", int(result.items), 84)
+	_add_count_row("STUNS", int(result.stuns), 93)
 
-	var events := BeachUI.label(self, "RISKY 0  UPWIND 0  MUGGED 0  COUNTER 0", BeachUI.FONT_NATIVE, SEA)
-	_place(events, 114, 292, 9)
+	var events := BeachUI.label(self, _events_text(0.0), BeachUI.FONT_NATIVE, SEA)
+	events.position = Vector2(LEFT_PANEL.position.x + 2, 102)
+	events.size = Vector2(LEFT_PANEL.size.x - 4, 19)
 	events.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	rows.append(events)
 	row_values.append(0)
 	row_formats.append("events")
-	_add_count_row("TOTAL", int(result.score), 125)
+	_add_rules_link(events)
+	_add_count_row("TOTAL", int(result.score), 126, "%d", GOLD)
 
+	_build_scores_panel()
+
+	# stars_label keeps the textual result ("**-") for tests and tooling; the three
+	# star slots on the header plank are what players see.
 	stars_label = BeachUI.label(self, "", BeachUI.FONT_DISPLAY, GOLD)
-	_place(stars_label, 25, 292, 17)
+	_place(stars_label, 18, 292, 17)
 	stars_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	stars_label.visible = false
+	for i: int in 3:
+		var star := BeachUI.label(self, "*", BeachUI.FONT_DISPLAY, STAR_DIM)
+		star.position = Vector2(136 + i * 16, 18)
+		star.size = Vector2(16, 17)
+		star.pivot_offset = star.size * 0.5
+		star.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		star.visible = not bool(result.casual)
+		star_slots.append(star)
 	hint_label = BeachUI.label(self, "CLICK / TAP / CONFIRM TO TALLY", BeachUI.FONT_NATIVE, Color("f9d98b"))
-	_place(hint_label, 135, 292, 9)
+	_place(hint_label, 137, 280, 9)
 	hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 	var actions := HBoxContainer.new()
-	actions.position = Vector2(42, 145)
+	actions.position = Vector2(42, 148)
 	actions.size = Vector2(236, 14)
 	actions.add_theme_constant_override("separation", 3)
 	add_child(actions)
@@ -126,14 +157,187 @@ func _build() -> void:
 	fish.z_index = 3
 	add_child(fish)
 
+# Right panel: a fixed set of rank / name / score slots. It stays hidden until the
+# tally finishes, then fades in. set_high_scores() fills it; until an online board
+# is connected it shows this device's best for the level.
+func _build_scores_panel() -> void:
+	scores_panel = Control.new()
+	scores_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	scores_panel.modulate.a = 0.0
+	add_child(scores_panel)
+	var x := RIGHT_PANEL.position.x
+	var width := RIGHT_PANEL.size.x
+	var header := BeachUI.label(scores_panel, "HIGH SCORES", BeachUI.FONT_NATIVE, GOLD)
+	header.name = "Header"
+	header.position = Vector2(x, 66)
+	header.size = Vector2(width, 10)
+	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var rule := ColorRect.new()
+	rule.color = Color(1.0, 0.82, 0.4, 0.35)
+	rule.position = Vector2(x + 8, 76)
+	rule.size = Vector2(width - 16, 1)
+	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	scores_panel.add_child(rule)
+	for slot: int in SCORE_SLOTS:
+		var y := 80.0 + slot * 11.0
+		var rank := BeachUI.label(scores_panel, "%d" % (slot + 1), BeachUI.FONT_NATIVE, SEA)
+		rank.position = Vector2(x + 6, y)
+		rank.size = Vector2(12, 10)
+		var player := BeachUI.label(scores_panel, "---", BeachUI.FONT_NATIVE, CREAM)
+		player.position = Vector2(x + 20, y)
+		player.size = Vector2(54, 10)
+		player.clip_text = true
+		var points := BeachUI.label(scores_panel, "", BeachUI.FONT_NATIVE, CREAM)
+		points.position = Vector2(x + 72, y)
+		points.size = Vector2(width - 78, 10)
+		points.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		score_rows.append({"rank": rank, "name": player, "score": points})
+	var board: Array = seed_scores(int(level.id))
+	if bool(result.casual):
+		set_high_scores(board, "NOT RANKED")
+	else:
+		var best: int = maxi(int(GameState.entry(int(level.id)).get("best", 0)), int(result.score))
+		set_high_scores(ranked_view(board, {"name": "YOU", "score": best, "me": true}))
+
+# Starter entries from data/leaderboards.json, highest first. Online scores will
+# replace these; until then they give each level a field to measure against.
+static func seed_scores(level_id: int) -> Array:
+	if _seed_boards.is_empty() and FileAccess.file_exists(LEADERBOARD_PATH):
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(LEADERBOARD_PATH))
+		if parsed is Dictionary:
+			_seed_boards = parsed.get("levels", {})
+	var entries: Array = []
+	for entry: Variant in _seed_boards.get(str(level_id), []):
+		if entry is Dictionary:
+			entries.append({"name": str(entry.get("name", "")), "score": int(entry.get("score", 0))})
+	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.score) > int(b.score))
+	return entries
+
+# Merges the player into a board and returns what fits the panel: the top five
+# when the player makes it, otherwise the top four plus the player's own rank.
+static func ranked_view(board: Array, player: Dictionary, slots: int = SCORE_SLOTS) -> Array:
+	var merged: Array = board.duplicate()
+	var at := merged.size()
+	for i: int in merged.size():
+		if int(player.score) >= int(merged[i].score):
+			at = i
+			break
+	merged.insert(at, player)
+	for i: int in merged.size():
+		merged[i] = (merged[i] as Dictionary).merged({"rank": i + 1})
+	if at < slots:
+		return merged.slice(0, slots)
+	var view: Array = merged.slice(0, slots - 1)
+	view.append(merged[at])
+	return view
+
+# entries: Array of {"name": String, "score": int, "me": bool}, highest first.
+# An optional "rank" overrides the slot number (a player outside the top shows as e.g. 9).
+# heading names the board, e.g. "HIGH SCORES" or "GLOBAL TOP 5".
+func set_high_scores(entries: Array, heading: String = "HIGH SCORES") -> void:
+	if scores_panel == null:
+		return
+	for slot: int in score_rows.size():
+		var row: Dictionary = score_rows[slot]
+		var has_entry := slot < entries.size()
+		var entry: Dictionary = entries[slot] if has_entry else {}
+		var mine := bool(entry.get("me", false))
+		var color := GOLD if mine else CREAM
+		(row.rank as Label).text = str(int(entry.get("rank", slot + 1)))
+		(row.name as Label).text = str(entry.get("name", "---")).to_upper().left(8) if has_entry else "---"
+		(row.score as Label).text = str(int(entry.get("score", 0))) if has_entry else ""
+		(row.name as Label).add_theme_color_override("font_color", color if has_entry else Color("c9a77a"))
+		(row.score as Label).add_theme_color_override("font_color", color)
+		(row.rank as Label).add_theme_color_override("font_color", GOLD if mine else SEA)
+	(scores_panel.get_node("Header") as Label).text = heading
+	queue_redraw()
+
+# Earned stars turn gold one after another with a small pop; unearned ones stay dim.
+func _light_stars(count: int) -> void:
+	for i: int in star_slots.size():
+		var star := star_slots[i]
+		if i >= count:
+			continue
+		if not is_inside_tree():
+			star.add_theme_color_override("font_color", GOLD)
+			continue
+		var tween := create_tween()
+		tween.tween_interval(i * 0.14)
+		tween.tween_callback(func() -> void:
+			star.add_theme_color_override("font_color", GOLD)
+			star.scale = Vector2.ONE * 1.6)
+		tween.tween_property(star, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+func _reveal_scores() -> void:
+	if scores_panel == null:
+		return
+	if is_inside_tree():
+		create_tween().tween_property(scores_panel, "modulate:a", 1.0, 0.25)
+	else:
+		scores_panel.modulate.a = 1.0
+
+# The bonus-count line doubles as a link to the score rules: the whole line is
+# clickable, and a small "?" badge says so.
+func _add_rules_link(events: Label) -> void:
+	events.size.x -= 14
+	var line := Button.new()
+	line.flat = true
+	line.focus_mode = Control.FOCUS_NONE
+	line.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	add_child(line)
+	line.position = events.position
+	line.size = events.size
+	line.pressed.connect(func() -> void: open_score_rules("BACK"))
+	line.mouse_entered.connect(func() -> void: events.add_theme_color_override("font_color", GOLD))
+	line.mouse_exited.connect(func() -> void: events.add_theme_color_override("font_color", SEA))
+	var badge := Button.new()
+	badge.name = "RulesLink"
+	badge.text = "?"
+	badge.focus_mode = Control.FOCUS_NONE
+	badge.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	for state: String in ["normal", "hover", "pressed", "focus", "disabled"]:
+		var box := StyleBoxFlat.new()
+		box.bg_color = Color("397a85") if state in ["hover", "pressed"] else Color("245369")
+		box.set_content_margin_all(1)
+		box.content_margin_left = 3
+		box.content_margin_right = 3
+		badge.add_theme_stylebox_override(state, box)
+	add_child(badge)
+	badge.custom_minimum_size = Vector2(11, 11)
+	badge.position = Vector2(LEFT_PANEL.end.x - 15, events.position.y + 4)
+	badge.size = Vector2(11, 11)
+	badge.pressed.connect(func() -> void: open_score_rules("BACK"))
+
+func open_score_rules(button_text: String) -> ScoreRulesCard:
+	var card := ScoreRulesCard.open(self, button_text)
+	card.closed.connect(func() -> void:
+		if not buttons.is_empty() and is_instance_valid(buttons[0]) and not buttons[0].disabled:
+			buttons[0].grab_focus())
+	return card
+
+func _events_text(progress: float) -> String:
+	var bonuses: Dictionary = result.get("bonuses", {})
+	return "RISKY %d  UPWIND %d\nMUGGED %d  COUNTER %d" % [
+		roundi(int(bonuses.get("Risky", 0)) * progress),
+		roundi(int(bonuses.get("Upwind", 0)) * progress),
+		roundi(int(bonuses.get("Mugged", 0)) * progress),
+		roundi(int(bonuses.get("Handover", 0)) * progress)]
+
 # The last demo level was cleared: the next level exists but belongs to the full game.
 func demo_finished() -> bool:
 	return passed and not bool(result.get("training", false)) and GameState.demo_locked(int(level.id) + 1) and int(level.id) < 6
 
-func _add_count_row(caption: String, value: int, y: float, format: String = "%d") -> void:
-	var label := BeachUI.label(self, "%s  0" % caption, 8, CREAM)
-	_place(label, y, 292, 11)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+func _add_count_row(caption: String, value: int, y: float, format: String = "%d", color: Color = CREAM) -> void:
+	var x := LEFT_PANEL.position.x + 6
+	var width := LEFT_PANEL.size.x - 12
+	var name_label := BeachUI.label(self, caption, BeachUI.FONT_NATIVE, color)
+	name_label.position = Vector2(x, y)
+	name_label.size = Vector2(width, 9)
+	captions.append(name_label)
+	var label := BeachUI.label(self, format % 0, BeachUI.FONT_NATIVE, color)
+	label.position = Vector2(x, y)
+	label.size = Vector2(width, 9)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	rows.append(label)
 	row_values.append(value)
 	row_formats.append(caption + "|" + format)
@@ -165,14 +369,10 @@ func _update_row(index: int, progress: float) -> void:
 	if index < 0 or index >= rows.size():
 		return
 	if row_formats[index] == "events":
-		var risky := roundi(int(result.bonuses.Risky) * progress)
-		var upwind := roundi(int(result.bonuses.Upwind) * progress)
-		var mugged := roundi(int(result.bonuses.Mugged) * progress)
-		var handover := roundi(int(result.bonuses.get("Handover",0)) * progress)
-		rows[index].text = "RISKY %d  UPWIND %d  MUGGED %d  COUNTER %d" % [risky, upwind, mugged, handover]
+		rows[index].text = _events_text(progress)
 		return
 	var parts := row_formats[index].split("|")
-	rows[index].text = "%s  %s" % [parts[0], parts[1] % roundi(row_values[index] * progress)]
+	rows[index].text = parts[1] % roundi(row_values[index] * progress)
 
 func finish_tally() -> void:
 	if complete:
@@ -185,6 +385,7 @@ func finish_tally() -> void:
 		stars_label.text = ""
 	else:
 		stars_label.text = "*".repeat(int(result.stars)) + "-".repeat(3 - int(result.stars))
+		_light_stars(int(result.stars))
 	hint_label.text = _record_text()
 	if not GameState.save_error.is_empty():
 		hint_label.add_theme_color_override("font_color", Color("ef725c"))
@@ -192,6 +393,7 @@ func finish_tally() -> void:
 		button.disabled = false
 	if not buttons.is_empty():
 		buttons[0].grab_focus()
+	_reveal_scores()
 	_start_reaction()
 
 func _record_text() -> String:
@@ -284,3 +486,21 @@ func _draw() -> void:
 		for x: float in [left + 8, right - 9]:
 			draw_circle(Vector2(x, y + 13), 2.0, Color("493427"))
 			draw_circle(Vector2(x - 0.5, y + 12.5), 0.7, Color("c0a176"))
+	if bool(result.get("training", false)) or scores_panel == null:
+		return
+	# Raised header plank: a short board nailed above the sign gives the stars their own backing.
+	var tab := STAR_TAB
+	draw_colored_polygon(PackedVector2Array([tab.position + Vector2(2, 0), Vector2(tab.end.x, tab.position.y + 1), tab.end - Vector2(1, 0), Vector2(tab.position.x, tab.end.y - 1)]), Color("a96135"))
+	draw_line(tab.position + Vector2(2, 0.5), Vector2(tab.end.x, tab.position.y + 1.5), Color(0.91, 0.59, 0.32, 0.5), 1.0)
+	draw_line(Vector2(tab.position.x, tab.end.y - 0.5), tab.end - Vector2(1, 0.5), Color(0.30, 0.16, 0.09, 0.6), 1.0)
+	draw_rect(Rect2(tab.position + Vector2(12, 5), tab.size - Vector2(24, 9)), Color(0.16, 0.08, 0.04, 0.65))
+	for x: float in [tab.position.x + 6, tab.end.x - 6]:
+		draw_circle(Vector2(x, tab.get_center().y), 2.0, Color("493427"))
+		draw_circle(Vector2(x - 0.5, tab.get_center().y - 0.5), 0.7, Color("c0a176"))
+	# Recessed panels keep the tally and the high scores visually separate on the planks.
+	for panel: Rect2 in [LEFT_PANEL, RIGHT_PANEL]:
+		draw_rect(panel, Color(0.16, 0.08, 0.04, 0.6))
+		draw_line(panel.position + Vector2(0, 0.5), panel.position + Vector2(panel.size.x, 0.5), Color(0.12, 0.06, 0.03, 0.8), 1.0)
+		draw_line(panel.position + Vector2(0, panel.size.y - 0.5), panel.end - Vector2(0, 0.5), Color(0.91, 0.62, 0.36, 0.35), 1.0)
+	# Rule above the total.
+	draw_line(Vector2(LEFT_PANEL.position.x + 6, 123.5), Vector2(LEFT_PANEL.end.x - 6, 123.5), Color(1.0, 0.82, 0.4, 0.45), 1.0)

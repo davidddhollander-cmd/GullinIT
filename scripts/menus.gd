@@ -76,7 +76,7 @@ func title() -> void:
 
 func level_select(casual: bool) -> void:
 	var trained: bool = bool(GameState.entry(1).get("training_complete", false))
-	clear("PICK YOUR BEACH", "PRACTICE / 15 SNATCHES, NO TIMER" if casual else ("ARCADE / TRAINING DAY FIRST" if not trained else "ARCADE / EARN A STAR TO MOVE ON"))
+	clear("PICK YOUR BEACH", "PRACTICE / 15 SNATCHES. NO TIMER" if casual else ("ARCADE / TRAINING DAY FIRST" if not trained else "ARCADE / EARN A STAR TO MOVE ON"))
 	content.add_theme_constant_override("separation",2)
 	var outer: MarginContainer = content.get_parent().get_parent() as MarginContainer
 	for edge: String in ["top","bottom"]:
@@ -110,9 +110,18 @@ func level_select(casual: bool) -> void:
 
 func pause() -> void:
 	clear("TAKING A BREATHER", "YOUR LUNCH CAN WAIT.")
-	BeachUI.button(content,"RESUME",func() -> void: choose("resume")).grab_focus()
+	var resume: Button = BeachUI.button(content,"RESUME",func() -> void: choose("resume"))
+	resume.grab_focus()
 	BeachUI.button(content,"RESTART",func() -> void: choose("restart"))
-	BeachUI.button(content,"OPTIONS",func() -> void: choose("options_pause"))
+	var pair: HBoxContainer = HBoxContainer.new()
+	content.add_child(pair)
+	var rules: Button = BeachUI.button(pair,"SCORE RULES",func() -> void: pass)
+	rules.size_flags_horizontal = SIZE_EXPAND_FILL
+	rules.pressed.connect(func() -> void:
+		ScoreRulesCard.open(self,"BACK").closed.connect(func() -> void:
+			if is_instance_valid(rules):
+				rules.grab_focus()))
+	BeachUI.button(pair,"OPTIONS",func() -> void: choose("options_pause")).size_flags_horizontal = SIZE_EXPAND_FILL
 	BeachUI.button(content,"LEVEL SELECT",func() -> void: choose("select"))
 
 func options(from_pause: bool) -> void:

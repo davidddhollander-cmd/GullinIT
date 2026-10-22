@@ -4,7 +4,7 @@ var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": tr
 var save_path: String = "user://save.json"
 var save_error: String = ""
 # Playtest build: every level is selectable. Set to false to restore normal progression.
-var unlock_all: bool = true
+var unlock_all: bool = false
 # Demo build settings from data/demo.json: levels after last_level are always
 # locked (even with unlock_all), and feedback_url powers the feedback buttons.
 var demo: Dictionary = {"enabled": false, "last_level": 6, "feedback_url": ""}
@@ -64,7 +64,7 @@ func save_training_step(step: int) -> void:
 	var previous: Dictionary = entry(1)
 	if bool(previous.get("training_complete", false)):
 		return
-	var next_step: int = clampi(step, 0, 6)
+	var next_step: int = clampi(step, 0, 7)
 	if next_step <= int(previous.get("training_step", 0)):
 		return
 	previous.training_step = next_step
@@ -73,7 +73,7 @@ func save_training_step(step: int) -> void:
 
 func complete_training() -> void:
 	var previous: Dictionary = entry(1)
-	previous.training_step = 6
+	previous.training_step = 7
 	previous.training_complete = true
 	progress["1"] = previous
 	save_progress()

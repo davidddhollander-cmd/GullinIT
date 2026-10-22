@@ -1,5 +1,6 @@
 {
   "id": 6,
+  "crabs": {"enabled": true},
   "name": "Sunset showdown",
   "seed": 7106,
   "time_limit": 150,

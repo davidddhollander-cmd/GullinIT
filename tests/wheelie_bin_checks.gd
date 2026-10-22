@@ -13,17 +13,23 @@ static func run(suite: Node, check: Callable) -> void:
 				wheelies.append(prop)
 			elif str(prop.type) in SHED_TYPES:
 				sheds.append(prop)
-		check.call(wheelies.size()==1,"level %d has one wheelie bin" % int(level.id))
-		if wheelies.size()!=1 or sheds.is_empty():
+		var expected_count: int = 4 if int(level.id)==3 else 1
+		check.call(wheelies.size()==expected_count,"level %d has %d wheelie bin%s" % [int(level.id),expected_count,"" if expected_count==1 else "s"])
+		if wheelies.size()!=expected_count or sheds.is_empty():
 			continue
 		var closest: float = INF
 		for shed: Dictionary in sheds:
-			closest = minf(closest,absf(float(wheelies[0].x)-float(shed.x)))
-		check.call(closest<=50.0,"level %d wheelie bin sits beside a shed" % int(level.id))
-		for prop: Dictionary in level.props:
-			if prop == wheelies[0] or str(prop.type) in SHED_TYPES:
-				continue
-			check.call(absf(float(wheelies[0].x)-float(prop.x))>=24.0,"level %d wheelie bin clears other scenery" % int(level.id))
+			for wheelie: Dictionary in wheelies:
+				closest = minf(closest,absf(float(wheelie.x)-float(shed.x)))
+		check.call(closest<=50.0,"level %d keeps a wheelie bin beside a shed" % int(level.id))
+		for wheelie: Dictionary in wheelies:
+			for prop: Dictionary in level.props:
+				if prop == wheelie or str(prop.type) in SHED_TYPES:
+					continue
+				check.call(absf(float(wheelie.x)-float(prop.x))>=24.0,"level %d wheelie bin clears other scenery" % int(level.id))
+		if int(level.id)==3:
+			var right_end_bins: Array[Dictionary] = wheelies.filter(func(wheelie: Dictionary) -> bool: return float(wheelie.x)>=float(level.world.width)-60.0)
+			check.call(right_end_bins.size()==3,"level 3 lines up three wheelie bins at the complete right end")
 
 	suite.main.start_level(1)
 	var game: BeachGame = suite.main.game

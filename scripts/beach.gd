@@ -18,7 +18,9 @@ const WHEELIE_BIN_LID_INSET: float = 8.0
 const WHEELIE_BIN_HALF_WIDTH: float = 12.0
 const BIN_TYPES: Array[String] = ["bin", WHEELIE_BIN_TYPE]
 const SIGN_TOP: int = 84
-const SIGN_HEIGHT: int = 11
+const SIGN_HEIGHT: int = 17
+const SignArt = preload("res://scripts/beach_sign_art.gd")
+const StandSignArt = preload("res://scripts/stand_sign.gd")
 var bin_wobble: Array[float] = []
 var bin_wobble_duration: Array[float] = []
 var bin_wobble_strength: Array[float] = []
@@ -188,11 +190,7 @@ func _draw() -> void:
 		var board: Rect2 = sign.rect
 		if board.position.x < 0:
 			continue
-		var post_x: int = int(board.position.x) + int(board.size.x / 2) - 1
-		draw_rect(Rect2(post_x,board.end.y,2,134-board.end.y),Color("9b6650"))
-		draw_rect(board,Color("fff4da"))
-		draw_rect(Rect2(board.position,Vector2(board.size.x,1)),Color("9b6650"))
-		draw_string(font,board.position+Vector2(2,9),sign.name,HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("183b4e"))
+		SignArt.draw_sign(self,sign)
 	for entry: Dictionary in props:
 		if entry.type in ["tower", "kiosk", "hotdog_stand"]:
 			var top: int = 103 if entry.type == "tower" else 110
@@ -214,7 +212,10 @@ func sign_layouts() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	var width: int = roundi(float(world.get("width",Config.tuning.world.width)))
 	for zone: Dictionary in sign_zones():
-		var board_width: int = ceili(font.get_string_size(str(zone.name),HORIZONTAL_ALIGNMENT_LEFT,-1,8).x)+4
+		var arrows: Array[Dictionary] = _sign_destinations(zone)
+		var board_width: int = 28
+		for arrow: Dictionary in arrows:
+			board_width = maxi(board_width,ceili(SignArt.FONT.get_string_size(arrow.label,HORIZONTAL_ALIGNMENT_LEFT,-1,SignArt.FONT_SIZE).x)+4)
 		var min_x: int = maxi(0,int(zone.from)+4)
 		var max_x: int = mini(int(zone.to),width)-board_width-4
 		var desired: int = clampi(int(zone.from)+28,min_x,maxi(min_x,max_x))
@@ -229,11 +230,68 @@ func sign_layouts() -> Array[Dictionary]:
 					if not _sign_hits_prop(x,board_width,props):
 						chosen = x
 						break
-		result.append({"name":zone.name,"zone":zone,"rect":Rect2(chosen,SIGN_TOP,board_width,SIGN_HEIGHT),"shift":chosen-int(zone.from)-28})
+		if chosen < 0:
+			# Crowded zones use one arrow above the roofs rather than losing signage.
+			arrows.resize(1)
+			for x: int in range(min_x,max_x+1):
+				if not _sign_hits_prop(x,board_width,props,SignArt.BOARD_HEIGHT):
+					chosen = x
+					break
+		if chosen < 0:
+			# Narrow single-arrow version for densely furnished generated promenades.
+			arrows[0].label = "SNACKS"
+			board_width = 28
+			max_x = mini(int(zone.to),width)-board_width-4
+			for x: int in range(min_x,max_x+1):
+				if not _sign_hits_prop(x,board_width,props,SignArt.BOARD_HEIGHT):
+					chosen = x
+					break
+		if chosen < 0:
+			continue
+		# Placement can move a sign past another stall; retarget from its final center.
+		if arrows[0].label in ["SNACKS","ICE CREAM","HOT DOGS"]:
+			var actual: Array[Dictionary] = _sign_destinations(zone,chosen+board_width*0.5)
+			arrows[0].target_x = actual[0].target_x
+			if arrows[0].label!="SNACKS":
+				arrows[0].label = actual[0].label
+		for arrow: Dictionary in arrows:
+			arrow.right = float(arrow.target_x)>=chosen+board_width*0.5
+		var height: int = arrows.size()*SignArt.ROW_STEP-1
+		result.append({"name":zone.name,"zone":zone,"arrows":arrows,"rect":Rect2(chosen,SIGN_TOP,board_width,height),"visual_rect":Rect2(chosen,SIGN_TOP,board_width,134-SIGN_TOP),"shift":chosen-int(zone.from)-28})
 	return result
-func _sign_hits_prop(x: int,board_width: int,entries: Array) -> bool:
+
+func _sign_destinations(zone: Dictionary, final_center: float = -1.0) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	var origin: float = float(zone.from)+66 if final_center<0 else final_center
+	var nearest: Dictionary = {}
+	var gap: float = INF
+	for prop: Dictionary in props:
+		if prop.type in ["kiosk","hotdog_stand"] and absf(float(prop.x)-origin)<gap:
+			nearest = prop
+			gap = absf(float(prop.x)-origin)
+	if not nearest.is_empty():
+		result.append({"label":"HOT DOGS" if nearest.type=="hotdog_stand" else "ICE CREAM","target_x":float(nearest.x)})
+	var label: String = str(zone.name)
+	if "SNACK" in label and not result.is_empty():
+		return result
+	var destination: float = (float(zone.from)+float(zone.to))*0.5
+	var width: float = float(world.get("width",Config.tuning.world.width))
+	var promenade: float = float(world.get("promenade_start",Config.tuning.world.promenade_start))
+	var pier: float = float(world.get("pier_start",Config.tuning.world.pier_start))
+	if "PIER" in label and pier<width:
+		label = "THE PIER"
+		destination = pier
+	elif promenade<width:
+		label = "PROMENADE"
+		destination = promenade
+	# Beach-only maps retain their useful local zone names as the second finger.
+	result.append({"label":label,"target_x":destination})
+	return result
+
+func _sign_hits_prop(x: int,board_width: int,entries: Array,board_height: int = SIGN_HEIGHT) -> bool:
 	# Compare the readable board against full scaled sprite bounds and decorative flags.
-	var sign_rect: Rect2 = Rect2(x,SIGN_TOP,board_width,SIGN_HEIGHT)
+	var sign_rect: Rect2 = Rect2(x,SIGN_TOP,board_width,board_height)
+	var post_rect := Rect2(x+roundf(board_width*0.5)-1,SIGN_TOP,3,134-SIGN_TOP)
 	for entry: Dictionary in entries:
 		if not Config.sprites.has(entry.type):
 			continue
@@ -247,7 +305,12 @@ func _sign_hits_prop(x: int,board_width: int,entries: Array) -> bool:
 			var flag_top: int = 85 if entry.type == "tower" else 92
 			if sign_rect.intersects(Rect2(float(entry.x)-5,flag_top,37,25)):
 				return true
-		if sign_rect.intersects(prop_rect):
+		if entry.type in ["kiosk","hotdog_stand"]:
+			var roof: Rect2 = StandSignArt.local_bounds(entry.type=="hotdog_stand")
+			roof.position += Vector2(float(entry.x),prop_y-11)
+			if sign_rect.intersects(roof) or post_rect.intersects(roof):
+				return true
+		if sign_rect.intersects(prop_rect) or post_rect.intersects(prop_rect):
 			return true
 	return false
 

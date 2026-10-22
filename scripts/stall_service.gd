@@ -2,6 +2,7 @@ class_name StallService
 extends RefCounted
 ## One bounded service per stand; gameplay and presentation share the same clock.
 signal portion_created(portion: BeachTarget)
+const OrderBubble = preload("res://scripts/order_bubble.gd")
 var stalls: Array[FoodStall] = []
 var portions: Array[BeachTarget] = []
 var requests: Dictionary = {}
@@ -69,6 +70,10 @@ func _begin(stand: FoodStall, buyer: BeachTarget, orders: Array[Dictionary], fam
 		for child: BeachTarget in buyer.family_children:
 			child.service_locked = true
 	_next(stand)
+	var bubble := OrderBubble.new()
+	buyer.add_child(bubble)
+	bubble.position = Vector2(-8+buyer.facing*4,-buyer.art_height()-14).round()
+	requests[stand].order_bubble = bubble
 
 func _next(stand: FoodStall) -> void:
 	var request: Dictionary = requests[stand]
@@ -88,6 +93,14 @@ func tick(delta: float) -> void:
 	for stand: FoodStall in stalls:
 		stand.advance(delta)
 		if requests.has(stand):
+			var request: Dictionary = requests[stand]
+			if request.has("order_bubble"):
+				var bubble: Control = request.order_bubble
+				if not is_instance_valid(bubble):
+					request.erase("order_bubble")
+				elif bubble.advance(delta):
+					bubble.queue_free()
+					request.erase("order_bubble")
 			_tick_request(stand,delta)
 		stand.sync_pose()
 	for portion: BeachTarget in portions.duplicate():
@@ -201,6 +214,9 @@ func _intercept(stand: FoodStall, portion: StallPortion, gull: BeachGull) -> voi
 		buyer.reaction.theft(buyer,gull,portion.last_theft_direct)
 		buyer.recover = float(Config.tuning.world.recover_time)
 		buyer.respawn = float(Config.tuning.world.stall_retry_wait)
+		# Counter interception bypasses BeachTarget._finish_theft, so present the
+		# recipient's successful-theft reaction immediately on this same frame.
+		buyer.update_art_pose(false)
 	_interrupt(stand,portion)
 
 func _interrupt(stand: FoodStall, portion: StallPortion) -> void:
@@ -213,6 +229,8 @@ func _interrupt(stand: FoodStall, portion: StallPortion) -> void:
 
 func _finish(stand: FoodStall, success: bool) -> void:
 	var request: Dictionary = requests[stand]
+	if request.has("order_bubble") and is_instance_valid(request.order_bubble):
+		request.order_bubble.queue_free()
 	for order: Dictionary in request.orders:
 		if is_instance_valid(order.buyer):
 			order.buyer.service_locked = false

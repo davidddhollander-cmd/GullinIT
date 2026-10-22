@@ -1,5 +1,6 @@
 {
   "id": 4,
+  "crabs": {"enabled": true},
   "name": "Ice cream rush",
   "seed": 7104,
   "time_limit": 135,

@@ -75,7 +75,10 @@ static func run(root: Node, check: Callable) -> void:
 	check.call(owner.sleep_pecks == history,"empty bag taps do not change wake history")
 	# Real clean swept snatches commit to a visible pursuit, even during high escape.
 	for kind: String in ["kiosk_customer","pier_diner"]:
-		var victim := game.spawner.create(kind,850.0,{"food_id":"ice_cream"})
+		var victim_spawn: Dictionary = {"food_id":"ice_cream"}
+		if kind == "kiosk_customer":
+			victim_spawn.appearance = "kiosk_customer"
+		var victim := game.spawner.create(kind,850.0,victim_spawn)
 		victim.defense = 0.0
 		gull.digestion.snacks.clear()
 		gull.digestion.rest = 0.0
@@ -88,15 +91,18 @@ static func run(root: Node, check: Callable) -> void:
 		gull.previous_beak = victim.food_position()-Vector2(15,0)
 		gull.sweep_beak = victim.food_position()+Vector2(15,0)
 		BeachCollisions.resolve(gull,[victim],[])
-		check.call(not victim.food and victim.reaction.committed and victim.reaction.mode == "chase",kind+" clean swept snatch starts committed chase")
+		check.call(not victim.food and victim.reaction.committed and victim.reaction.mode == "surprise",kind+" clean swept snatch starts its committed surprise")
+		var surprise_x: float = victim.position.x
+		victim.tick(AdultReaction.THEFT_SURPRISE_TIME+0.01,[])
+		check.call(victim.position.x == surprise_x and victim.reaction.mode == "chase" and is_equal_approx(victim.reaction.timer,float(Config.tuning.world.snatch_chase_time)),kind+" surprise stays planted then preserves the full chase clock")
 		gull.position = Vector2(1100,55)
 		var before: float = victim.position.x
 		victim.tick(0.2,[gull])
 		check.call(victim.position.x > before and victim.sprite.animation == &"run",kind+" runs after high and distant escape instead of immediately quitting")
 		for frame: int in 101:
 			victim.tick(0.02,[gull])
-		check.call(victim.reaction.mode == "give_up" and victim.sprite.animation == &"angry" and victim.position.x-before <= 120.0,kind+" gives up visibly after bounded short pursuit")
-		victim.tick(0.7,[])
+		check.call(victim.reaction.mode == "give_up" and victim.sprite.animation == &"fist_shake" and victim.position.x-before <= 120.0,kind+" gives up visibly after bounded short pursuit")
+		victim.tick(AdultReaction.FAILED_CHASE_ANGER_TIME+0.01,[])
 		check.call(victim.reaction.mode.is_empty() and victim.routine.enabled,kind+" resumes routine after give-up pause")
 		victim.reaction = AdultReaction.new()
 		victim.dropped_pending = true

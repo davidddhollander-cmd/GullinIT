@@ -37,6 +37,7 @@ func _ready() -> void:
 	layer.add_child(menus)
 	menus.requested.connect(_navigate)
 	menus.title()
+	Audio.play_music("title", 0.0)
 	get_tree().auto_accept_quit = false
 	get_tree().root.close_requested.connect(_quit)
 	if OS.get_cmdline_user_args().has("--smoke"):
@@ -53,6 +54,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			screen = "title"
 			menus.show()
 			menus.title()
+			Audio.play_music("title")
 		"arcade", "casual":
 			casual = action == "casual"
 			_navigate("select")
@@ -61,6 +63,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			screen = "select"
 			menus.show()
 			menus.level_select(casual)
+			Audio.play_music("title")
 		"start":
 			if GameState.unlocked(int(payload)):
 				# The Training Day card always opens lessons, even on a completed save.
@@ -77,12 +80,14 @@ func _navigate(action: String, payload: Variant = null) -> void:
 				screen = "pause"
 				menus.show()
 				menus.pause()
+				Audio.duck_music(true)
 		"resume":
 			if is_instance_valid(game):
 				game.input.touch_visible = DisplayServer.is_touchscreen_available() or bool(GameState.options.touch)
 				game.set_paused(false)
 				screen = "game"
 				menus.hide()
+				Audio.duck_music(false)
 		"options", "options_pause":
 			screen = action
 			menus.options(action == "options_pause")
@@ -117,6 +122,7 @@ func start_level(id: int, force_training: bool = false) -> void:
 	game.setup(Config.levels[id-1],casual,force_training)
 	game.level_finished.connect(_finished)
 	game.pause_requested.connect(func() -> void: _navigate("pause"))
+	Audio.play_music("beach")
 
 func clear_game() -> void:
 	if is_instance_valid(game):
@@ -129,6 +135,7 @@ func clear_game() -> void:
 func _finished(result: Dictionary) -> void:
 	screen = "results"
 	game.set_paused(true)
+	Audio.stop_music()
 	menus.show()
 	menus.results(game.level,result)
 

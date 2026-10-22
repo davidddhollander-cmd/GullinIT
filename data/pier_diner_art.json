@@ -134,7 +134,7 @@
     }
   },
   "pier_diner_motion": {
-    "file": "res://assets/sprites/pier-diner-motion-clean.png",
+    "file": "res://assets/sprites/pier-diner-motion-v2.png",
     "frame_w": 400,
     "frame_h": 400,
     "visual_scale": 0.11,
@@ -144,27 +144,29 @@
           0,
           1,
           2,
-          3
+          3,
+          4,
+          5
         ],
         "fps": 7,
         "loop": true
       },
       "run": {
         "frames": [
-          4,
-          5,
           6,
-          7
+          7,
+          8,
+          9
         ],
         "fps": 10,
         "loop": true
       },
       "eat": {
         "frames": [
-          8,
-          9,
           10,
-          11
+          11,
+          12,
+          13
         ],
         "fps": 5,
         "loop": true
@@ -172,6 +174,14 @@
     },
     "food_anchors": {
       "walk": [
+        [
+          10,
+          -22
+        ],
+        [
+          10,
+          -22
+        ],
         [
           10,
           -22
@@ -225,6 +235,28 @@
           -22
         ]
       ]
+    }
+  },
+  "pier_diner_reactions": {
+    "file": "res://assets/sprites/pier-diner-reactions-v1.png",
+    "frame_w": 400,
+    "frame_h": 400,
+    "visual_scale": 0.11,
+    "animations": {
+      "surprise": {
+        "frames": [0, 1, 2, 3, 4, 5],
+        "fps": 18,
+        "loop": false
+      },
+      "fist_shake": {
+        "frames": [6, 7, 8, 9, 10, 11],
+        "fps": 7,
+        "loop": false
+      }
+    },
+    "food_anchors": {
+      "surprise": [[14, -22], [14, -22], [14, -22], [14, -22], [14, -22], [14, -22]],
+      "fist_shake": [[14, -22], [14, -22], [14, -22], [14, -22], [14, -22], [14, -22]]
     }
   }
 }

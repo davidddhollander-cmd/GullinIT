@@ -2,6 +2,16 @@ extends Node
 const GULL_CALL: AudioStream = preload("res://assets/audio/263786__steaq__seagull-single-call.ogg")
 var streams: Dictionary = {}
 var music: AudioStreamPlayer
+# Looping soundtrack: the title theme on menus, the beach loop during levels.
+const MUSIC_TRACKS: Dictionary = {
+	"title": "res://assets/audio/music/title_theme.ogg",
+	"beach": "res://assets/audio/music/beach_loop.ogg",
+}
+const MUSIC_DB: float = -3.0
+const MUSIC_DUCK_DB: float = -14.0
+const MUSIC_SILENT_DB: float = -40.0
+var music_track: String = ""
+var music_tween: Tween
 
 func _ready() -> void:
 	for bus: String in ["SFX", "Music"]:
@@ -10,7 +20,7 @@ func _ready() -> void:
 			AudioServer.set_bus_name(AudioServer.bus_count - 1, bus)
 			AudioServer.set_bus_send(AudioServer.bus_count - 1, "Master")
 	apply_options()
-	for cue: String in ["snatch", "dive", "stun", "gust", "click", "music"]:
+	for cue: String in ["snatch", "dive", "stun", "gust", "click"]:
 		var path: String = "res://assets/audio/%s.wav" % cue
 		if ResourceLoader.exists(path):
 			streams[cue] = load(path)
@@ -20,11 +30,63 @@ func _ready() -> void:
 	music = AudioStreamPlayer.new()
 	music.bus = "Music"
 	music.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
+	music.volume_db = MUSIC_DB
 	add_child(music)
-	if streams.has("music"):
-		music.stream = streams.music
-		music.finished.connect(music.play)
-		music.play()
+
+# Switches the soundtrack, fading the old track out and the new one in. Calling it
+# with the track that is already playing only restores full volume.
+func play_music(track: String, fade: float = 0.6) -> void:
+	if not MUSIC_TRACKS.has(track) or not is_instance_valid(music):
+		return
+	if track == music_track and music.playing:
+		_fade_music(MUSIC_DB, fade * 0.5)
+		return
+	var stream: Variant = load(MUSIC_TRACKS[track]) if ResourceLoader.exists(MUSIC_TRACKS[track]) else null
+	if not stream is AudioStream:
+		return
+	if stream is AudioStreamOggVorbis:
+		(stream as AudioStreamOggVorbis).loop = true
+	music_track = track
+	_kill_music_tween()
+	if music.playing and fade > 0.0:
+		music_tween = create_tween()
+		music_tween.tween_property(music, "volume_db", MUSIC_SILENT_DB, fade * 0.5)
+		music_tween.tween_callback(func() -> void: _start_music(stream, fade * 0.5))
+	else:
+		_start_music(stream, fade)
+
+func _start_music(stream: AudioStream, fade: float) -> void:
+	music.stream = stream
+	music.volume_db = MUSIC_SILENT_DB if fade > 0.0 else MUSIC_DB
+	music.play()
+	_fade_music(MUSIC_DB, fade)
+
+# Fades the current track away and stops it (the result sign plays its own reaction).
+func stop_music(fade: float = 0.8) -> void:
+	if not is_instance_valid(music) or not music.playing:
+		return
+	music_track = ""
+	_kill_music_tween()
+	music_tween = create_tween()
+	music_tween.tween_property(music, "volume_db", MUSIC_SILENT_DB, fade)
+	music_tween.tween_callback(music.stop)
+
+# Pause menus keep the music playing but quietly underneath.
+func duck_music(ducked: bool) -> void:
+	if is_instance_valid(music) and music.playing:
+		_fade_music(MUSIC_DUCK_DB if ducked else MUSIC_DB, 0.25)
+
+func _fade_music(target_db: float, duration: float) -> void:
+	_kill_music_tween()
+	if duration <= 0.0:
+		music.volume_db = target_db
+		return
+	music_tween = create_tween()
+	music_tween.tween_property(music, "volume_db", target_db, duration)
+
+func _kill_music_tween() -> void:
+	if music_tween != null and music_tween.is_valid():
+		music_tween.kill()
 
 func stop_all() -> void:
 	for player: Node in get_children():

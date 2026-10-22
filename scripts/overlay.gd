@@ -84,16 +84,16 @@ func setup(owner_game: BeachGame) -> void:
 	score_announcement.hide()
 	rival_score_panel = BeachUI.panel(self,Color(0.055,0.14,0.19,0.92))
 	rival_score_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	rival_score_panel.offset_left = -86.0
+	rival_score_panel.offset_left = -56.0
 	rival_score_panel.offset_top = 76.0
 	rival_score_panel.offset_right = -4.0
 	rival_score_panel.mouse_filter = MOUSE_FILTER_IGNORE
 	var rival_panel_style: StyleBoxFlat = rival_score_panel.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
-	rival_panel_style.content_margin_left = 4.0
-	rival_panel_style.content_margin_right = 4.0
+	rival_panel_style.content_margin_left = 2.0
+	rival_panel_style.content_margin_right = 2.0
 	rival_panel_style.content_margin_top = 3.0
-	rival_panel_style.content_margin_bottom = 3.0
-	rival_panel_style.border_color = Color("397a85")
+	rival_panel_style.content_margin_bottom = 1.0
+	rival_panel_style.border_color = BeachUI.CREAM
 	rival_panel_style.set_border_width_all(1)
 	rival_score_panel.add_theme_stylebox_override("panel",rival_panel_style)
 	rival_score_list = VBoxContainer.new()
@@ -125,7 +125,7 @@ func setup(owner_game: BeachGame) -> void:
 	lesson_column.mouse_filter = MOUSE_FILTER_IGNORE
 	lesson_column.add_theme_constant_override("separation",2)
 	training_panel.add_child(lesson_column)
-	lesson_label = BeachUI.label(lesson_column,"TRAINING DAY  /  LESSON 1/6",8,BeachUI.GOLD)
+	lesson_label = BeachUI.label(lesson_column,"LESSON 1/%d" % BeachGame.TRAINING_LESSONS,8,BeachUI.GOLD)
 	lesson_prompt = BeachUI.label(lesson_column,"",8,BeachUI.CREAM)
 	for tip_label: Label in [lesson_label,lesson_prompt]:
 		tip_label.add_theme_font_size_override("font_size",6)
@@ -144,9 +144,9 @@ func setup(owner_game: BeachGame) -> void:
 	intro_panel.add_child(intro)
 	BeachUI.label(intro,"TRAINING DAY" if game.training else "%02d / %s" % [game.level.id,game.level.name.to_upper()],8,BeachUI.GOLD)
 	if game.training:
-		BeachUI.label(intro,"SIX SHORT LESSONS. TAKE YOUR TIME.")
-		BeachUI.label(intro,"AIM, FLAP, DIVE AND PECK TO LEARN.",8,Color("80bcb8"))
-		BeachUI.label(intro,"YOUR NEXT STEP APPEARS ON THE BEACH.",8,BeachUI.GOLD)
+		BeachUI.label(intro,"SEVEN SHORT LESSONS. TAKE YOUR TIME.")
+		BeachUI.label(intro,"NO TIMER. NO SCORE. NO MANNERS.",8,Color("80bcb8"))
+		BeachUI.label(intro,"FOLLOW THE GOLDEN RING.",8,BeachUI.GOLD)
 	else:
 		BeachUI.label(intro,"15 SNATCHES. NO TIMER." if game.casual else "STEAL LUNCH. MAKE IT COUNT.")
 		BeachUI.label(intro,"CALM AIR" if game.wind.direction == 0 else ("WIND > TOWARD PIER" if game.wind.direction > 0 else "WIND < TOWARD FAMILY END"))
@@ -156,7 +156,7 @@ func setup(owner_game: BeachGame) -> void:
 		BeachUI.label(intro,"HOLD A / SPACE / LEFT CLICK TO FLAP",8,Color("80bcb8"))
 		BeachUI.label(intro,"DIVE: B / SHIFT / RIGHT CLICK",8,Color("80bcb8"))
 		BeachUI.label(intro,"TAP E / X / PECK DURING THE DIVE",8,BeachUI.GOLD)
-		BeachUI.label(intro,"AIM UP TO SWOOP. FAST CRASH = 0!",8,Color("80bcb8"))
+		BeachUI.label(intro,"AIM UP TO SWOOP. CRASH = HALF POINTS!",8,Color("80bcb8"))
 	if int(game.level.id) == 1:
 		intro_panel.mouse_filter = MOUSE_FILTER_STOP
 		start_button = BeachUI.button(intro,"LET'S GULL IT",game.dismiss_intro)
@@ -171,7 +171,7 @@ func _process(_delta: float) -> void:
 	intro_panel.visible = game.intro > 0
 	training_panel.visible = game.training and game.running and game.intro <= 0
 	if game.training:
-		lesson_label.text = "TRAINING DAY  /  LESSON %d/6" % mini(game.lesson + 1, 6)
+		lesson_label.text = "LESSON %d/%d" % [mini(game.lesson + 1, BeachGame.TRAINING_LESSONS), BeachGame.TRAINING_LESSONS]
 		lesson_prompt.text = game.training_text()
 	pause_button.visible = game.running
 	if rival_score_labels.size() != game.pilots.size():
@@ -179,7 +179,7 @@ func _process(_delta: float) -> void:
 	rival_score_panel.visible = not game.pilots.is_empty() and game.running and game.intro <= 0.0
 	for i: int in rival_score_labels.size():
 		var pilot: RivalPilot = game.pilots[i]
-		rival_score_labels[i].text = "%s  %03d" % [pilot.gull.rival_name.to_upper(),pilot.score]
+		rival_score_labels[i].text = "%03d" % pilot.score
 
 func sync_rival_scores() -> void:
 	if not is_instance_valid(rival_score_list) or game == null:
@@ -191,14 +191,37 @@ func sync_rival_scores() -> void:
 	if game.pilots.is_empty():
 		rival_score_panel.hide()
 		return
-	var title: Label = BeachUI.label(rival_score_list,"RIVALS",BeachUI.FONT_NATIVE,BeachUI.GOLD)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var title: Label = BeachUI.label(rival_score_list,"RIVALS",BeachUI.FONT_NATIVE,BeachUI.CREAM)
+	title.add_theme_font_override("font",HUD_FONT)
+	title.add_theme_font_size_override("font_size",6)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	for pilot: RivalPilot in game.pilots:
-		var label: Label = BeachUI.label(rival_score_list,"",BeachUI.FONT_NATIVE,pilot.gull.rival_tint)
+		var frame: PanelContainer = PanelContainer.new()
+		frame.mouse_filter = MOUSE_FILTER_IGNORE
+		var style: StyleBoxFlat = StyleBoxFlat.new()
+		style.bg_color = Color("183b4e").lerp(pilot.gull.rival_tint,0.10)
+		style.border_color = pilot.gull.rival_tint
+		style.set_border_width_all(1)
+		style.content_margin_left = 2
+		style.content_margin_right = 2
+		style.content_margin_top = 1
+		style.content_margin_bottom = 1
+		frame.add_theme_stylebox_override("panel",style)
+		rival_score_list.add_child(frame)
+		var row: HBoxContainer = HBoxContainer.new()
+		row.mouse_filter = MOUSE_FILTER_IGNORE
+		row.add_theme_constant_override("separation",2)
+		frame.add_child(row)
+		var name_label: Label = BeachUI.label(row,pilot.gull.rival_name.to_upper(),6,pilot.gull.rival_tint)
+		name_label.size_flags_horizontal = SIZE_EXPAND_FILL
+		var label: Label = BeachUI.label(row,"%03d" % pilot.score,6,BeachUI.CREAM)
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		label.custom_minimum_size.x = 72.0
+		label.custom_minimum_size.x = 12
+		for item: Label in [name_label,label]:
+			item.add_theme_font_override("font",HUD_FONT)
+			item.add_theme_font_size_override("font_size",6)
 		rival_score_labels.append(label)
-	var height: float = 8.0 + float(game.pilots.size()) * 9.0 + 7.0
+	var height: float = 11.0 + float(game.pilots.size()) * 9.0
 	rival_score_panel.offset_bottom = rival_score_panel.offset_top + height
 	rival_score_panel.show()
 
@@ -399,6 +422,10 @@ func context_hint() -> Dictionary:
 		return {}
 	var peck: String = input_word("peck")
 	var flap: String = input_word("flap")
+	# During lessons the panel already gives the ground and peck instruction;
+	# repeating it in a second box only competes with the lesson.
+	if game.training and game.player.state == BeachGull.State.GROUNDED:
+		return {}
 	if game.player.state == BeachGull.State.GROUNDED:
 		if game.stash_raids.nearby_toddler() != null:
 			return {"text":"TAP %s AT TODDLER" % peck}
@@ -409,7 +436,7 @@ func context_hint() -> Dictionary:
 		if game.player.crash_warning():
 			return {"text":"PULL UP! CRASH AHEAD","danger":true}
 		if not game.player.peck_used:
-			return {"text":"TAP %s AT THE SNACK" % peck}
+			return {} if game.training else {"text":"TAP %s AT THE SNACK" % peck}
 		return {"text":"PECK ACTIVE" if game.player.peck_time > 0 else "PECK SPENT - DIVE AGAIN"}
 	if game.player.landing_aim():
 		return {"text":"LANDING / HOLD %s TO CLIMB" % flap}

@@ -80,7 +80,7 @@ func run() -> void:
 	layout(main.game.overlay)
 	check(is_equal_approx(main.game.overlay.training_panel.global_position.y,BeachOverlay.TOP_BAR_HEIGHT),"training panel sits immediately below top bar")
 	check(main.game.overlay.lesson_label.get_global_rect().intersection(main.game.overlay.lesson_prompt.get_global_rect()).size == Vector2.ZERO,"training title and prompt have separate rows")
-	for lesson_index: int in range(1,6):
+	for lesson_index: int in range(1,BeachGame.TRAINING_LESSONS):
 		main.game.lesson = lesson_index
 		main.game.overlay.queue_redraw()
 		await snapshot("training-lesson-%d" % lesson_index)
@@ -91,7 +91,7 @@ func run() -> void:
 	await snapshot("training-touch")
 	layout(main.game.overlay)
 	check(is_equal_approx(main.game.overlay.training_panel.global_position.y,BeachOverlay.TOP_BAR_HEIGHT),"training panel sits immediately below top bar")
-	main.game.lesson = 6
+	main.game.lesson = BeachGame.TRAINING_LESSONS
 	main.game.finish()
 	await snapshot("training-complete")
 	layout(main.menus)
@@ -109,12 +109,14 @@ func run() -> void:
 	await family_food_foundation_checks()
 	await family_trip_checks()
 	await preload("res://tests/stall_service_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/crab_checks.gd").run(self,Callable(self,"check"))
 	await refinement_checks()
 	await landing_aim_checks()
 	await perch_checks()
 	await stash_raid_checks()
 	await preload("res://tests/bin_leftover_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/wheelie_bin_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/score_rules_checks.gd").run(self,Callable(self,"check"))
 	preload("res://tests/sunbather_reactions_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/retro_environment_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/retro_adult_art_checks.gd").run_checks(Callable(self,"check"))
@@ -1153,7 +1155,7 @@ func target_checks(game: BeachGame) -> void:
 	check(target.food,"robbed shopper visits a vendor and receives replacement food")
 	target.take(game.player)
 	eat_pending(game)
-	check(not target.leaving and target.reaction.mode == "chase","repeat theft starts a chase rather than permanent departure")
+	check(not target.leaving and target.reaction.mode in ["surprise","chase"],"repeat theft starts the committed reaction rather than permanent departure")
 	var family: BeachTarget = game.spawner.create("picnic_family",430,{"family_id":"test_family"})
 	family.alert = 1
 	family.tick(0.01,game.gulls)
@@ -1913,7 +1915,7 @@ func refinement_checks() -> void:
 	await settle()
 
 func food_checks() -> void:
-	var expected_points: Dictionary = {"crumbs":5,"single_chip":10,"cookie":15,"half_eaten_doughnut":10,"half_eaten_sandwich":15,"half_eaten_pizza":20,"ice_cream":25,"crisps_bag":30,"crisps_box":35,"hotdog":45,"fried_fish":55}
+	var expected_points: Dictionary = {"crab":100,"crumbs":5,"single_chip":10,"cookie":15,"half_eaten_doughnut":10,"half_eaten_sandwich":15,"half_eaten_pizza":20,"ice_cream":25,"crisps_bag":30,"crisps_box":35,"hotdog":45,"fried_fish":55}
 	var categories: Dictionary = {"small":0,"medium":0,"large":0}
 	for id: String in Config.foods:
 		var definition: Dictionary = Config.foods[id]
@@ -1922,7 +1924,7 @@ func food_checks() -> void:
 		var frame: AtlasTexture = Config.frames(definition.sprite).get_frame_texture(&"idle",0) as AtlasTexture
 		check(frame != null and Rect2(Vector2.ZERO,frame.atlas.get_size()).encloses(frame.region),"food artwork is inside atlas: "+id)
 		check(Vector2(definition.size[0],definition.size[1]) == Vector2(definition.pickup_radius[0],definition.pickup_radius[1])*2,"pickup size matches food artwork: "+id)
-	check(categories == {"small":6,"medium":3,"large":2},"all eleven foods belong to requested categories")
+	check(categories == {"small":6,"medium":3,"large":3},"all twelve foods including crabs belong to requested categories")
 	main.start_level(1)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
@@ -2114,9 +2116,12 @@ func generated_layout_checks() -> void:
 				if actor.kind == "toddler":
 					continue
 				var texture: Texture2D = actor.sprite.sprite_frames.get_frame_texture(actor.sprite.animation,actor.sprite.frame)
-				var height: float = texture.get_height()*absf(actor.sprite.scale.y)
-				var head: float = minf(160-height,actor.position.y+actor.sprite.position.y-height*0.5)
-				check(board.end.y <= head,"level %d sign %s above %s standing sprite band" % [number,sign.name,actor.kind])
+				# Generated sheets include transparent padding above the actual head.
+				# Check visible artwork rather than the full atlas cell's empty margin.
+				var used: Rect2i = texture.get_image().get_used_rect()
+				var local_bounds := Rect2(Vector2(used.position)-texture.get_size()*0.5,Vector2(used.size))
+				var painted_bounds: Rect2 = actor.sprite.get_global_transform()*local_bounds
+				check(board.end.y <= painted_bounds.position.y,"level %d sign %s above %s visible standing sprite" % [number,sign.name,actor.kind])
 			if absi(int(sign.shift)) > 40:
 				moved_far += 1
 				print("SIGN SHIFT: level %d %s %+d px (x=%d)" % [number,sign.name,int(sign.shift),int(board.position.x)])
@@ -2304,7 +2309,7 @@ func beachgoer_art_checks() -> void:
 	game.running = true
 	for target: BeachTarget in game.spawner.targets:
 		target.hide()
-	var customer: BeachTarget = game.spawner.create("kiosk_customer",150,{"food_id":"ice_cream"})
+	var customer: BeachTarget = game.spawner.create("kiosk_customer",150,{"food_id":"ice_cream","appearance":"kiosk_customer"})
 	var owner: BeachTarget = game.spawner.create("dog_owner",245)
 	game.player.position = Vector2(50,70)
 	customer.tick(0.1,[])
@@ -2339,11 +2344,15 @@ func beachgoer_art_checks() -> void:
 	check(not customer.food and not customer.food_sprite.visible,"visible customer snack is stolen through swept collision")
 	var before: float = customer.position.x
 	customer.tick(0.1,[])
-	check(customer.position.x != before and customer.sprite.animation == &"run","perfectly robbed customer immediately runs after the gull")
+	check(customer.position.x == before and customer.sprite.animation == &"surprise","perfectly robbed customer first reacts to the empty hand")
+	customer.tick(AdultReaction.THEFT_SURPRISE_TIME-0.09,[])
+	check(customer.reaction.mode == "chase" and is_equal_approx(customer.reaction.timer,float(Config.tuning.world.snatch_chase_time)),"surprise hands off to the full chase clock")
+	customer.tick(0.1,[])
+	check(customer.position.x != before and customer.sprite.animation == &"run","robbed customer uses the existing chase run after surprise")
 	await snapshot("polished-customer-theft")
 	customer.tick(2.2,[])
-	check(customer.reaction.mode == "give_up" and customer.sprite.animation == &"angry","robbed customer gives up visibly after the short chase")
-	customer.tick(0.7,[])
+	check(customer.reaction.mode == "give_up" and customer.sprite.animation == &"fist_shake","robbed original shopper gives up with the planted fist shake")
+	customer.tick(AdultReaction.FAILED_CHASE_ANGER_TIME+0.01,[])
 	check(customer.reaction.mode.is_empty(),"robbed customer resumes strolling after giving up")
 	owner.leaving = true
 	owner.update_art_pose(true)
@@ -2354,11 +2363,13 @@ func beachgoer_art_checks() -> void:
 func pier_diner_art_checks() -> void:
 	preload("res://tests/isolated_sprite_checks.gd").run(Callable(self,"check"),Config.frames("pier_diner"),"diner poses")
 	preload("res://tests/isolated_sprite_checks.gd").run(Callable(self,"check"),Config.frames("pier_diner_motion"),"diner motion")
+	preload("res://tests/isolated_sprite_checks.gd").run(Callable(self,"check"),Config.frames("pier_diner_reactions"),"diner reactions")
 	var frames: SpriteFrames = PierDinerArt.frames()
-	for motion: StringName in [&"walk", &"run", &"eat"]:
-		check(frames.get_frame_count(motion) == 4,"retro diner has a four-frame "+String(motion)+" cycle")
+	check(frames.get_frame_count(&"walk") == 6,"retro diner has a six-phase walk cycle")
+	for motion: StringName in [&"run", &"eat"]:
+		check(frames.get_frame_count(motion) == 4,"retro diner retains its four-frame "+String(motion)+" cycle")
 	for animation: StringName in frames.get_animation_names():
-		var definition: Dictionary = Config.sprites.pier_diner_motion if animation in [&"walk", &"run", &"eat"] else Config.sprites.pier_diner
+		var definition: Dictionary = Config.sprites.pier_diner_reactions if animation in [&"surprise", &"fist_shake"] else (Config.sprites.pier_diner_motion if animation in [&"walk", &"run", &"eat"] else Config.sprites.pier_diner)
 		for index: int in frames.get_frame_count(animation):
 			var texture: AtlasTexture = frames.get_frame_texture(animation,index) as AtlasTexture
 			check(texture.get_size() == Vector2(definition.frame_w,definition.frame_h),"retro diner uses an aligned frame canvas")

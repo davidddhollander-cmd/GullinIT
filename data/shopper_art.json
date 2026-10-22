@@ -1,6 +1,6 @@
 {
   "kiosk_customer": {
-    "file": "res://assets/sprites/shopper-diner-style.png",
+    "file": "res://assets/sprites/shopper-diner-style-v2.png",
     "frame_w": 128,
     "frame_h": 128,
     "visual_scale": 0.5,
@@ -79,6 +79,30 @@
           25
         ],
         "fps": 10,
+        "loop": false
+      },
+      "surprise": {
+        "frames": [
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "fps": 18,
+        "loop": false
+      },
+      "fist_shake": {
+        "frames": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37
+        ],
+        "fps": 7,
         "loop": false
       }
     },

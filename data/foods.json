@@ -1,4 +1,13 @@
 {
+  "crab": {
+    "name": "Crab",
+    "category": "large",
+    "points": 100,
+    "sprite": "crab_red",
+    "size": [20, 16],
+    "pickup_radius": [10, 8],
+    "ground": true
+  },
   "crumbs": {
     "name": "Crumbs",
     "category": "small",

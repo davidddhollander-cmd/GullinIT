@@ -1,5 +1,6 @@
 {
   "id": 2,
+  "crabs": {"enabled": true},
   "name": "Family Picnic",
   "seed": 7102,
   "time_limit": 120,

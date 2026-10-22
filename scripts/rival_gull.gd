@@ -4,6 +4,7 @@ extends RefCounted
 ## PATROL sweeps the beach, STALK picks a target and climbs, LINE_UP holds a dive position,
 ## DIVE strikes and pecks, ESCAPE flees after a theft, RECOVER climbs away after a miss.
 enum Mode { PATROL, STALK, LINE_UP, DIVE, ESCAPE, RECOVER }
+const COLOURS: Array[Color] = [Color("a5c7e6"), Color("d3b9e8"), Color("a4d8c4")]
 var gull: BeachGull
 var target: BeachTarget
 var personality: Dictionary
@@ -36,8 +37,7 @@ func setup(actor: BeachGull, profile: Dictionary, random: RandomNumberGenerator)
 	gull.speed_factor = profile.speed
 	gull.rival_name = str(profile.name)
 	gull.species = str(profile.get("species","great-black-backed"))
-	var colors: Array[Color] = [Color("a5c7e6"), Color("d3b9e8"), Color("a4d8c4")]
-	gull.rival_tint = colors[absi(str(profile.name).hash()) % colors.size()]
+	gull.rival_tint = COLOURS[absi(str(profile.name).hash()) % COLOURS.size()]
 	gull.dive_started.connect(func() -> void: dives += 1)
 	gull.ground_crashed.connect(func() -> void: crashes += 1)
 	gull.refresh_art()

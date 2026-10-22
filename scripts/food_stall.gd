@@ -67,7 +67,13 @@ func sync_pose() -> void:
 		Phase.IDLE:
 			frame = 1 if fmod(clock,4.5)>4.3 else 0
 		Phase.PREPARE:
-			frame = 2 if progress<0.5 else 3
+			var poses: Dictionary = VendorArt.entry(hotdog).poses
+			if progress<0.2:
+				frame = int(poses.turn_away)
+			elif progress<0.78:
+				frame = int(poses.work_a) if int((progress-0.2)*10.0)%2==0 else int(poses.work_b)
+			else:
+				frame = int(poses.turn_back)
 		Phase.PLACE:
 			frame = 4 if progress<0.5 else 5
 		Phase.COUNTER:
@@ -76,7 +82,8 @@ func sync_pose() -> void:
 			frame = 7
 	vendor.frame = frame
 	vendor.flip_h = side<0
-	prepared_food.visible = food_texture!=null and phase in [Phase.PREPARE,Phase.PLACE]
+	# Preparation happens behind the vendor; the snack appears only on returning to PLACE.
+	prepared_food.visible = food_texture!=null and phase==Phase.PLACE
 	if prepared_food.visible:
 		var from := Vector2(side*11,-24)
 		prepared_food.position = from.lerp(counter_food_position()-position,progress if phase==Phase.PLACE else 0.0)

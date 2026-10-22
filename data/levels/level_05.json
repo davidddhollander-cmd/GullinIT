@@ -1,5 +1,6 @@
 {
   "id": 5,
+  "crabs": {"enabled": true},
   "name": "Pier patrol",
   "seed": 7105,
   "time_limit": 150,

@@ -1,5 +1,6 @@
 {
   "id": 3,
+  "crabs": {"enabled": true},
   "name": "Boardwalk Bustle",
   "seed": 7103,
   "time_limit": 135,
@@ -36,8 +37,11 @@
     {"type": "bin", "x": 816},
     {"type": "beach_bench", "x": 850, "y": 153, "jitter": true},
     {"type": "beach_lamp", "x": 890, "y": 151},
+    {"type": "bin", "x": 1160},
     {"type": "beach_bench", "x": 1190, "y": 153},
-    {"type": "bin", "x": 1222}
+    {"type": "wheelie_bin", "x": 1220},
+    {"type": "wheelie_bin", "x": 1244},
+    {"type": "wheelie_bin", "x": 1268}
   ],
   "map_version": 3
 }

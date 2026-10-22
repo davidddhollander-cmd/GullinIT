@@ -1,4 +1,18 @@
 {
+  "crab_red": {
+    "file": "res://assets/sprites/crab-red-v2.png",
+    "frame_w": 48,
+    "frame_h": 40,
+    "visual_scale": 0.375,
+    "animations": {"idle": {"fps": 8, "loop": true, "frames": [0,1,2,3,4,5]}}
+  },
+  "crab_blue": {
+    "file": "res://assets/sprites/crab-blue-v2.png",
+    "frame_w": 48,
+    "frame_h": 40,
+    "visual_scale": 0.375,
+    "animations": {"idle": {"fps": 8, "loop": true, "frames": [0,1,2,3,4,5]}}
+  },
   "player_gull": {
     "file": "res://assets/sprites/gull-herring-diner-style.png",
     "frame_w": 256.0,
@@ -1344,7 +1358,7 @@
     }
   },
   "kiosk_customer": {
-    "file": "res://assets/sprites/shopper-diner-style.png",
+    "file": "res://assets/sprites/shopper-diner-style-v2.png",
     "frame_w": 128.0,
     "frame_h": 128.0,
     "visual_scale": 0.5,
@@ -1423,6 +1437,30 @@
           25.0
         ],
         "fps": 10.0,
+        "loop": false
+      },
+      "surprise": {
+        "frames": [
+          26.0,
+          27.0,
+          28.0,
+          29.0,
+          30.0,
+          31.0
+        ],
+        "fps": 18.0,
+        "loop": false
+      },
+      "fist_shake": {
+        "frames": [
+          32.0,
+          33.0,
+          34.0,
+          35.0,
+          36.0,
+          37.0
+        ],
+        "fps": 7.0,
         "loop": false
       }
     },
@@ -1681,6 +1719,28 @@
           -19.0
         ]
       ]
+    }
+  },
+  "pier_diner_reactions": {
+    "file": "res://assets/sprites/pier-diner-reactions-v1.png",
+    "frame_w": 400.0,
+    "frame_h": 400.0,
+    "visual_scale": 0.11,
+    "animations": {
+      "surprise": {
+        "frames": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
+        "fps": 18.0,
+        "loop": false
+      },
+      "fist_shake": {
+        "frames": [6.0, 7.0, 8.0, 9.0, 10.0, 11.0],
+        "fps": 7.0,
+        "loop": false
+      }
+    },
+    "food_anchors": {
+      "surprise": [[14.0, -22.0], [14.0, -22.0], [14.0, -22.0], [14.0, -22.0], [14.0, -22.0], [14.0, -22.0]],
+      "fist_shake": [[14.0, -22.0], [14.0, -22.0], [14.0, -22.0], [14.0, -22.0], [14.0, -22.0], [14.0, -22.0]]
     }
   },
   "lifeguard": {
@@ -2006,32 +2066,10 @@
     }
   },
   "food_crumbs": {
-    "file": "res://assets/sprites/food_bites.png",
-    "frame_w": 275.0,
-    "frame_h": 216.0,
-    "regions": [
-      {
-        "region": [
-          98.0,
-          153.0,
-          275.0,
-          216.0
-        ],
-        "offset": [
-          0.0,
-          0.0
-        ]
-      }
-    ],
-    "animations": {
-      "idle": {
-        "frames": [
-          0.0
-        ],
-        "fps": 1.0,
-        "loop": true
-      }
-    }
+    "file": "res://assets/sprites/food-crumbs-retro-v2.png",
+    "frame_w": 5,
+    "frame_h": 3,
+    "animations": {"idle": {"frames": [0,1,2], "fps": 1, "loop": false}}
   },
   "food_single_chip": {
     "file": "res://assets/sprites/food_bites.png",
@@ -2442,7 +2480,7 @@
     "perch_inset_y": 2
   },
   "pier_diner_motion": {
-    "file": "res://assets/sprites/pier-diner-motion-clean.png",
+    "file": "res://assets/sprites/pier-diner-motion-v2.png",
     "frame_w": 400.0,
     "frame_h": 400.0,
     "visual_scale": 0.11,
@@ -2452,27 +2490,29 @@
           0.0,
           1.0,
           2.0,
-          3.0
+          3.0,
+          4.0,
+          5.0
         ],
         "fps": 7.0,
         "loop": true
       },
       "run": {
         "frames": [
-          4.0,
-          5.0,
           6.0,
-          7.0
+          7.0,
+          8.0,
+          9.0
         ],
         "fps": 10.0,
         "loop": true
       },
       "eat": {
         "frames": [
-          8.0,
-          9.0,
           10.0,
-          11.0
+          11.0,
+          12.0,
+          13.0
         ],
         "fps": 5.0,
         "loop": true
@@ -2480,6 +2520,14 @@
     },
     "food_anchors": {
       "walk": [
+        [
+          10.0,
+          -22.0
+        ],
+        [
+          10.0,
+          -22.0
+        ],
         [
           10.0,
           -22.0

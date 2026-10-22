@@ -17,6 +17,7 @@ var wind: BeachWind = BeachWind.new()
 var score: BeachScore = BeachScore.new()
 var spawner: BeachSpawner = BeachSpawner.new()
 var stalls: StallService = StallService.new()
+var crabs: CrabPopulation
 var beach: BeachBackdrop
 var scraps: BeachScraps
 var stash_raids: BeachStashRaids
@@ -29,6 +30,10 @@ var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var last_near: float = -10.0
 var training: bool = false
 var lesson: int = 0
+const TRAINING_LESSONS: int = 7
+const BIN_LESSON: int = 4
+const WHEELIE_LESSON: int = 5
+const FINAL_LESSON: int = 6
 var training_took_off: bool = false
 var training_clean_snatch: bool = false
 var training_raid_started: bool = false
@@ -39,7 +44,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	level = definition
 	Config.apply_level_world(level)
 	training = bool(level.get("tutorial",false)) and (force_training or not bool(GameState.entry(1).get("training_complete",false)))
-	lesson = 0 if force_training else clampi(int(GameState.entry(1).get("training_step",0)),0,5)
+	lesson = 0 if force_training else clampi(int(GameState.entry(1).get("training_step",0)),0,TRAINING_LESSONS-1)
 	casual = is_casual and not training
 	rng.seed = int(level.seed) + 91
 	wind.setup(level)
@@ -60,6 +65,10 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	spawner.setup(actors,level)
 	stalls.setup(beach,spawner)
 	stalls.portion_created.connect(_wire_target)
+	crabs = CrabPopulation.new()
+	add_child(crabs)
+	crabs.setup(level,beach.props,spawner)
+	crabs.crab_created.connect(_wire_target)
 	player = BeachGull.new()
 	player.species = str(level.get("player_species","herring"))
 	player.digestion_enabled = true
@@ -93,8 +102,10 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		if training and lesson == 3 and training_raid_started:
 			_training_advance()
 	)
-	stash_raids.bin_opened.connect(func() -> void:
-		if training and lesson == 4:
+	stash_raids.bin_opened.connect(func(bin_type: String) -> void:
+		if not training:
+			return
+		if (lesson == BIN_LESSON and bin_type != BeachBackdrop.WHEELIE_BIN_TYPE) or (lesson == WHEELIE_LESSON and bin_type == BeachBackdrop.WHEELIE_BIN_TYPE):
 			_training_advance()
 	)
 	pending_rivals = level.rivals.duplicate(true)
@@ -135,6 +146,16 @@ func _release_rivals() -> void:
 		gulls.append(rival)
 		var pilot: RivalPilot = RivalPilot.new()
 		pilot.setup(rival,profile,rng)
+		# Match each frame to distinct feathers within this round.
+		var used_colours: Array[Color] = []
+		for existing: RivalPilot in pilots:
+			used_colours.append(existing.gull.rival_tint)
+		if rival.rival_tint in used_colours:
+			for colour: Color in RivalPilot.COLOURS:
+				if colour not in used_colours:
+					rival.rival_tint = colour
+					break
+			rival.refresh_art()
 		pilots.append(pilot)
 	pending_rivals.clear()
 	if is_instance_valid(overlay):
@@ -201,6 +222,7 @@ func _physics_process(delta: float) -> void:
 	if player.state != BeachGull.State.STUNNED:
 		player.digestion.tick(step,player.state == BeachGull.State.GROUNDED)
 	scraps.tick(step,player)
+	crabs.tick(step,camera_x,not training,gulls)
 	var food_targets: Array[BeachTarget] = stalls.portions.duplicate()
 	food_targets.append_array(spawner.targets)
 	var claims: Dictionary = {}
@@ -217,7 +239,11 @@ func _physics_process(delta: float) -> void:
 	stash_raids.tick(step)
 	for gull: BeachGull in gulls:
 		if gull.visible:
-			BeachCollisions.resolve(gull,food_targets,beach.props)
+			var available: Array[BeachTarget] = food_targets
+			if gull==player:
+				available = food_targets.duplicate()
+				available.append_array(crabs.targets)
+			BeachCollisions.resolve(gull,available,beach.props)
 	_mugging()
 	_near_misses()
 	spawner.tick(step,elapsed)
@@ -264,6 +290,9 @@ func _peck() -> void:
 	if player.state == BeachGull.State.STRIKE:
 		player.attempt_peck()
 	elif player.state == BeachGull.State.GROUNDED:
+		if crabs.peck(player) or crabs.peck_attempted:
+			player.show_ground_peck()
+			return
 		if training and lesson == 3 and stash_raids.nearby_stash() != null:
 			training_raid_started = true
 		if stash_raids.peck():
@@ -383,7 +412,7 @@ func finish() -> void:
 	input.clear_touch()
 	var result: Dictionary = score.result(level,casual,elapsed)
 	if training:
-		if lesson < 6:
+		if lesson < TRAINING_LESSONS:
 			running = true
 			input.enabled = true
 			return
@@ -397,20 +426,20 @@ func finish() -> void:
 	level_finished.emit(result)
 
 func _training_snatch(_target: BeachTarget) -> void:
-	if lesson in [2,5]:
+	if lesson in [2,FINAL_LESSON]:
 		training_clean_snatch = true
 
 func _training_advance() -> void:
 	lesson += 1
 	training_clean_snatch = false
-	if lesson == 4:
+	if lesson in [BIN_LESSON,WHEELIE_LESSON]:
 		# A bin explored earlier must still support a complete practice attempt.
 		for bin: Dictionary in stash_raids.bins:
 			bin.remaining = int(bin.get("capacity",Config.tuning.world.bin_stash_size))
 			bin.pecks = 0
 	GameState.save_training_step(lesson)
 	effects.message(player.position-Vector2(0,24),"LESSON COMPLETE",BeachUI.GOLD)
-	if lesson >= 6:
+	if lesson >= TRAINING_LESSONS:
 		finish()
 
 func _training_tick(delta: float) -> void:
@@ -420,7 +449,7 @@ func _training_tick(delta: float) -> void:
 			training_took_off = true
 		if training_took_off and player.state == BeachGull.State.GLIDE and player.position.x > float(level.world.start_x) + 30:
 			_training_advance()
-	elif lesson in [2,5] and training_clean_snatch and player.position.y < 100 and player.velocity.y <= 0 and player.state in [BeachGull.State.GLIDE,BeachGull.State.STRIKE]:
+	elif lesson in [2,FINAL_LESSON] and training_clean_snatch and player.position.y < 100 and player.velocity.y <= 0 and player.state in [BeachGull.State.GLIDE,BeachGull.State.STRIKE]:
 		_training_advance()
 	# Lessons cannot run out of food. Restore only after all loose food clears,
 	# so a missed peck never duplicates an item still lying on the beach.
@@ -465,15 +494,39 @@ func training_text() -> String:
 			return "HOLD %s TO TAKE OFF\nTHEN STEER RIGHT TOWARD THE RING" % flap
 		1: return "RELEASE FLAP. AIM DOWN TO LAND\nWALK OVER A GOLDEN CRUMB"
 		2:
-			return "SNACK TAKEN! AIM UP AND CLIMB" if training_clean_snatch else "DIVE: %s\nTAP %s AT THE SNACK. THEN AIM UP" % [dive_key,peck_key]
+			if training_clean_snatch:
+				return "SNACK TAKEN! AIM UP AND CLIMB"
+			if player.state == BeachGull.State.STRIKE and not player.peck_used:
+				return "NOW! TAP %s AT THE SNACK" % peck_key
+			return "DIVE: %s\nTAP %s AT THE SNACK. THEN AIM UP" % [dive_key,peck_key]
 		3: return "LAND BESIDE THE PICNIC BAG\nTAP %s THREE TIMES. COLLECT FOOD" % peck_key
 		4: return "LAND BY THE BIN. TAP %s %d TIMES\nSCRAPS ARE FOOD. WRAPPERS ARE NOT" % [peck_key,int(Config.tuning.world.bin_pecks)]
-		5: return "ONE MORE CLEAN SWOOP THEN ESCAPE\nCHOOSE A HELD SNACK YOURSELF"
+		5:
+			var wheelie: Dictionary = training_bin(true)
+			if player.state == BeachGull.State.GROUNDED and not wheelie.is_empty() and player.support.is_empty() and absf(player.position.x-float(wheelie.x)) < 28.0:
+				return "TOO LOW! FLY UP AND LAND\nON TOP OF THE LID"
+			return "FLY UP AND LAND ON THE WHEELIE BIN\nTAP %s %d TIMES. POSH TRASH INSIDE!" % [peck_key,int(Config.tuning.world.bin_pecks)]
+		6:
+			if training_clean_snatch:
+				return "GOT IT! NOW CLIMB BACK UP HIGH"
+			if player.state == BeachGull.State.STRIKE and not player.peck_used:
+				return "NOW! TAP %s AT THE SNACK" % peck_key
+			return "DIVE AT ANYONE'S SNACK. PECK IT\nTHEN CLIMB BACK UP HIGH"
 	return "TRAINING COMPLETE!"
 
+# The bin used by the bin lessons: the ordinary sand bin, or the wheelie bin.
+func training_bin(wheelie: bool) -> Dictionary:
+	for bin: Dictionary in stash_raids.bins:
+		if (str(bin.type) == BeachBackdrop.WHEELIE_BIN_TYPE) == wheelie:
+			return bin
+	return {}
+
 func training_target() -> Vector2:
-	if lesson == 4 and not stash_raids.bins.is_empty():
-		return Vector2(float(stash_raids.bins[0].x),float(Config.tuning.world.ground)-18)
+	if lesson in [BIN_LESSON,WHEELIE_LESSON]:
+		var bin: Dictionary = training_bin(lesson == WHEELIE_LESSON)
+		if not bin.is_empty():
+			# The wheelie ring marks its lid, where the gull has to stand.
+			return Vector2(float(bin.x),float(bin.content_y)-6.0 if lesson == WHEELIE_LESSON else float(Config.tuning.world.ground)-18)
 	if lesson == 0:
 		return Vector2(245,75)
 	if lesson == 1:

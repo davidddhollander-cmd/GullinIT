@@ -1,5 +1,7 @@
 class_name AdultReaction
 extends RefCounted
+const THEFT_SURPRISE_TIME: float = 0.32
+const FAILED_CHASE_ANGER_TIME: float = 0.9
 var mode: String = ""
 var timer: float = 0
 var window: float = 0
@@ -11,6 +13,12 @@ var swat: float = 0
 var swat_timer: float = -1
 var committed: bool = false
 var escape_direction: float = 1.0
+
+func _is_original_shopper(owner: BeachTarget) -> bool:
+	return owner.kind == "kiosk_customer" and owner.shopper_appearance == "kiosk_customer"
+
+func _uses_theft_reaction_pilot(owner: BeachTarget) -> bool:
+	return _is_original_shopper(owner) or owner.kind == "pier_diner"
 
 func theft(owner: BeachTarget, gull: BeachGull, perfect: bool = false) -> void:
 	if owner.kind == "toddler" or owner.leaving:
@@ -28,8 +36,15 @@ func theft(owner: BeachTarget, gull: BeachGull, perfect: bool = false) -> void:
 		escape_direction = signf(gull.velocity.x) if absf(gull.velocity.x)>1.0 else signf(gull.direction.x)
 		if is_zero_approx(escape_direction):
 			escape_direction = owner.facing
-	mode = "notice" if owner.kind == "sunbather" else "chase"
-	timer = float(Config.tuning.world.sunbather_notice_delay)*owner.reaction_delay if mode == "notice" else (float(Config.tuning.world.snatch_chase_time) if committed else 3.0)
+		if _uses_theft_reaction_pilot(owner):
+			owner.facing = escape_direction
+	mode = "notice" if owner.kind == "sunbather" else ("surprise" if committed and _uses_theft_reaction_pilot(owner) else "chase")
+	if mode == "notice":
+		timer = float(Config.tuning.world.sunbather_notice_delay)*owner.reaction_delay
+	elif mode == "surprise":
+		timer = THEFT_SURPRISE_TIME
+	else:
+		timer = float(Config.tuning.world.snatch_chase_time) if committed else 3.0
 	swat_timer = -1.0
 	window = 5
 
@@ -59,12 +74,19 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 			near[gull] = false
 	if mode.is_empty():
 		return false
-	if is_instance_valid(focus) and mode in ["warning","notice"]:
+	if mode == "surprise":
+		owner.facing = escape_direction
+	elif is_instance_valid(focus) and mode in ["warning","notice"]:
 		owner.facing = signf(focus.position.x-owner.position.x) if absf(focus.position.x-owner.position.x)>1 else owner.facing
 	timer -= delta
 	var moving: bool = false
 	var whistle_pause: bool = owner.kind == "lifeguard" and owner.lifeguard_whistle_time > 0
-	if mode == "warning":
+	if mode == "surprise":
+		if timer <= 0.0:
+			# The full bounded pursuit begins after, rather than during, the readable beat.
+			mode = "chase"
+			timer = float(Config.tuning.world.snatch_chase_time)
+	elif mode == "warning":
 		if timer <= 0:
 			# A warning only connects if the gull ignores it and stays within reach.
 			if is_instance_valid(focus) and focus.position.distance_to(owner.position-Vector2(0,12)) < 24:
@@ -82,8 +104,10 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 	elif mode == "chase":
 		if not is_instance_valid(focus) or timer <= 0 or (not committed and (focus.position.y < 100 or absf(focus.position.x-home)>85)):
 			mode = "give_up" if committed else "return"
-			timer = float(Config.tuning.world.snatch_give_up_time) if committed else 0.0
+			timer = (FAILED_CHASE_ANGER_TIME if _uses_theft_reaction_pilot(owner) else float(Config.tuning.world.snatch_give_up_time)) if committed else 0.0
 			swat_timer = -1
+			if _uses_theft_reaction_pilot(owner):
+				owner.facing = escape_direction
 		else:
 			var reach: float = float(Config.tuning.world.snatch_chase_distance) if committed else 80.0
 			var destination: float = clampf(focus.position.x,home-reach,home+reach)
@@ -105,7 +129,9 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 			elif moving and not whistle_pause:
 				owner.position.x = move_toward(owner.position.x,destination,(30.0 if owner.kind == "sunbather" else 45.0)*delta)
 	elif mode == "give_up":
-		# Dedicated yell/curse artwork is tracked in docs/CHARACTER_ANIMATION_TODO.md.
+		if _uses_theft_reaction_pilot(owner):
+			# Planted presentation only: this state never arms the swat timer or calls _hit().
+			owner.facing = escape_direction
 		if timer <= 0.0:
 			committed = false
 			cooldown = 1.0

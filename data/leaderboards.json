@@ -1,0 +1,209 @@
+{
+ "_note": "Starter leaderboard entries shown on the result sign until real online scores replace them. Spread across each level's star thresholds: ranks 1-3 beat three stars comfortably, 4 is a narrow three-star run, 5-6 two stars, 7-8 one star.",
+ "levels": {
+  "1": [
+   {
+    "name": "TIDES",
+    "score": 430
+   },
+   {
+    "name": "GULLIVER",
+    "score": 375
+   },
+   {
+    "name": "SPRAT",
+    "score": 345
+   },
+   {
+    "name": "HERRING",
+    "score": 300
+   },
+   {
+    "name": "SANDY",
+    "score": 260
+   },
+   {
+    "name": "SNAFFLE",
+    "score": 205
+   },
+   {
+    "name": "BEAKY",
+    "score": 145
+   },
+   {
+    "name": "GUSTO",
+    "score": 100
+   }
+  ],
+  "2": [
+   {
+    "name": "NIBBLES",
+    "score": 790
+   },
+   {
+    "name": "BISCUIT",
+    "score": 680
+   },
+   {
+    "name": "BEAKY",
+    "score": 620
+   },
+   {
+    "name": "CRUMBS",
+    "score": 560
+   },
+   {
+    "name": "SCAVVY",
+    "score": 490
+   },
+   {
+    "name": "DIVEBOMB",
+    "score": 415
+   },
+   {
+    "name": "FLAPJACK",
+    "score": 320
+   },
+   {
+    "name": "BREEZE",
+    "score": 265
+   }
+  ],
+  "3": [
+   {
+    "name": "FRYTHIEF",
+    "score": 1075
+   },
+   {
+    "name": "WADDLES",
+    "score": 960
+   },
+   {
+    "name": "PIPER",
+    "score": 855
+   },
+   {
+    "name": "DRIFT",
+    "score": 755
+   },
+   {
+    "name": "BEAKY",
+    "score": 655
+   },
+   {
+    "name": "TIDES",
+    "score": 570
+   },
+   {
+    "name": "ROGUE",
+    "score": 390
+   },
+   {
+    "name": "MUGGINS",
+    "score": 260
+   }
+  ],
+  "4": [
+   {
+    "name": "LOLLY",
+    "score": 1320
+   },
+   {
+    "name": "CRUMBS",
+    "score": 1165
+   },
+   {
+    "name": "BEAKY",
+    "score": 1070
+   },
+   {
+    "name": "DRIFT",
+    "score": 945
+   },
+   {
+    "name": "SKUA",
+    "score": 850
+   },
+   {
+    "name": "GUSTO",
+    "score": 710
+   },
+   {
+    "name": "PEBBLE",
+    "score": 570
+   },
+   {
+    "name": "KITTI",
+    "score": 460
+   }
+  ],
+  "5": [
+   {
+    "name": "SALTY",
+    "score": 1640
+   },
+   {
+    "name": "SPRAT",
+    "score": 1410
+   },
+   {
+    "name": "HERRING",
+    "score": 1290
+   },
+   {
+    "name": "GULLIVER",
+    "score": 1175
+   },
+   {
+    "name": "SNAFFLE",
+    "score": 1040
+   },
+   {
+    "name": "NIBBLES",
+    "score": 880
+   },
+   {
+    "name": "MUGGINS",
+    "score": 685
+   },
+   {
+    "name": "SQUAWK",
+    "score": 565
+   }
+  ],
+  "6": [
+   {
+    "name": "PIPER",
+    "score": 2015
+   },
+   {
+    "name": "SPRAT",
+    "score": 1730
+   },
+   {
+    "name": "SKUA",
+    "score": 1580
+   },
+   {
+    "name": "BISCUIT",
+    "score": 1400
+   },
+   {
+    "name": "DRIFT",
+    "score": 1265
+   },
+   {
+    "name": "BEAKY",
+    "score": 1080
+   },
+   {
+    "name": "HERRING",
+    "score": 895
+   },
+   {
+    "name": "TIDES",
+    "score": 725
+   }
+  ]
+ }
+}

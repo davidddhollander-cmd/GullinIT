@@ -3,7 +3,7 @@ extends Node2D
 ## Scattered items remain owned by their source until the gull or owner claims them.
 signal collected(position: Vector2, food_id: String, scrap: bool)
 signal bag_collected
-signal bin_opened
+signal bin_opened(bin_type: String)
 var game: BeachGame
 var items: Array[Dictionary] = []
 var raids: Dictionary = {}
@@ -150,7 +150,8 @@ func _peck_bin(bin: Dictionary) -> bool:
 	bin.pecks = int(bin.pecks)+1
 	var final_hit: bool = int(bin.pecks) >= int(t.bin_pecks)
 	var progress: float = clampf(float(bin.pecks)/float(maxi(1,int(t.bin_pecks))),0.0,1.0)
-	game.effects.message(content_position,"RATTLE!",BeachUI.GOLD)
+	var wheelie: bool = str(bin.type) == BeachBackdrop.WHEELIE_BIN_TYPE
+	game.effects.message(content_position,"POSH TRASH!" if wheelie and final_hit else "RATTLE!",BeachUI.GOLD)
 	game.beach.wobble_bin(float(bin.x),progress,final_hit)
 	Audio.play("bin_rattle",0.90+0.20*progress)
 	if final_hit:
@@ -162,14 +163,15 @@ func _peck_bin(bin: Dictionary) -> bool:
 			Audio.play("release_accent",1.0,-4.0)
 		for i: int in count:
 			bin.remaining = int(bin.remaining)-1
-			var choices: Array = t.bin_scatter
+			# Wheelie bins are harder to reach, so their scatter list is richer.
+			var choices: Array = t.get("wheelie_bin_scatter",t.bin_scatter) if wheelie else t.bin_scatter
 			var kind: String = str(choices[int(bin.scatter_index)%choices.size()])
 			var is_food: bool = Config.foods.has(kind)
 			bin.scatter_index = int(bin.scatter_index)+1
 			var direction: float = -1.0 if i%2 == 0 else 1.0
 			items.append({"owner":null,"source":"bin","food_id":kind if is_food else "","garbage":not is_food,"garbage_kind":kind,"position":content_position+Vector2(0,6),"velocity":Vector2(direction*rng.randf_range(35,65),-rng.randf_range(65,95)),"grounded":false,"age":0.0})
 		if count > 0:
-			bin_opened.emit()
+			bin_opened.emit(str(bin.type))
 	queue_redraw()
 	return true
 
@@ -386,13 +388,13 @@ func _draw() -> void:
 			var definition: Dictionary = Config.foods[item.food_id]
 			var display_size: Array = definition.get("display_size",definition.size)
 			var size: Vector2 = Vector2(display_size[0],display_size[1])
-			var texture: Texture2D = Config.frames(definition.sprite).get_frame_texture(&"idle",0)
+			if item.food_id == "crumbs" and not item.has("crumb_variant"):
+				item.crumb_variant = items.find(item)%3
+			var texture: Texture2D = Config.frames(definition.sprite).get_frame_texture(&"idle",int(item.crumb_variant) if item.food_id == "crumbs" else 0)
 			var rect: Rect2 = Rect2(item.position-size*0.5,size)
-			if item.food_id == "crumbs":
-				draw_texture_rect(texture,Rect2(rect.position+Vector2(0,1),size),false,Color("754a39"))
 			draw_texture_rect(texture,rect,false)
 			# Glint only once the item can be picked up and the gull has room for it.
-			if float(item.get("age",1.0)) >= float(Config.tuning.world.stash_pickup_delay) and is_instance_valid(game) and game.player.can_collect_food(item.food_id):
+			if item.food_id != "crumbs" and float(item.get("age",1.0)) >= float(Config.tuning.world.stash_pickup_delay) and is_instance_valid(game) and game.player.can_collect_food(item.food_id):
 				if not item.has("shine_seed"):
 					item.shine_seed = fposmod(float(item.position.x)*0.37,3.0)
 				var glint: Texture2D = PickupShine.overlay(texture,shine_clock,float(item.shine_seed))

@@ -36,7 +36,7 @@ static func run(host: Node, check: Callable) -> void:
 		game._physics_process(1.0/60)
 	check.call(game.lesson == 1 and int(GameState.entry(1).get("training_step",0)) == 1,"takeoff and steer saves lesson checkpoint")
 	game.overlay._process(0)
-	check.call(game.overlay.lesson_label.text.contains("LESSON 2/6") and game.overlay.lesson_prompt.text.contains("CRUMB"),"landing tip replaces first tip after takeoff then steering")
+	check.call(game.overlay.lesson_label.text.contains("LESSON 2/%d" % BeachGame.TRAINING_LESSONS) and game.overlay.lesson_prompt.text.contains("CRUMB"),"landing tip replaces first tip after takeoff then steering")
 	game.player.state = BeachGull.State.GLIDE
 	game._scrap_collected(Vector2(60,156),"crumbs")
 	check.call(game.lesson == 1,"airborne crumb pickup does not satisfy landing lesson")
@@ -92,6 +92,39 @@ static func run(host: Node, check: Callable) -> void:
 		check.call(game.lesson == (5 if tap == int(Config.tuning.world.bin_pecks)-1 else 4),"bin lesson waits for the full peck sequence")
 	check.call(not game.stash_raids.items.is_empty(),"bin lesson releases real scraps and litter")
 	game.stash_raids.items.clear()
+	# Wheelie bin lesson: pecking from the sand does nothing; the lid unlocks better trash.
+	var wheelie: Dictionary = game.training_bin(true)
+	check.call(not wheelie.is_empty() and float(wheelie.x) > 756.0 and float(wheelie.x) < float(game.level.world.width) - 12.0,"training wheelie bin stands right of the stand by the screen edge: "+str(wheelie.get("x")))
+	check.call(game.lesson == BeachGame.WHEELIE_LESSON and game.training_text().contains("WHEELIE"),"wheelie lesson follows the ordinary bin lesson")
+	check.call(game.training_target().y < float(Config.tuning.world.ground) - 25.0,"wheelie lesson ring marks the raised lid")
+	game.player.support = {}
+	game.player.state = BeachGull.State.GROUNDED
+	game.player.position = Vector2(float(wheelie.x) - 10.0,game.player.ground_y())
+	check.call(game.training_text().contains("TOO LOW"),"standing beside the wheelie bin explains the lid rule")
+	for tap: int in range(int(Config.tuning.world.bin_pecks)):
+		game.stash_raids.peck_cooldown = 0
+		game._peck()
+	check.call(game.lesson == BeachGame.WHEELIE_LESSON and game.stash_raids.items.is_empty(),"wheelie lesson cannot be passed from the sand")
+	var lid: Dictionary = {}
+	for surface: Dictionary in game.player.perch_surfaces:
+		if str(surface.get("prop_type","")) == "wheelie_bin":
+			lid = surface
+	game.player.support = lid
+	game.player.state = BeachGull.State.GLIDE
+	game.player.position = Vector2(float(lid.x),float(lid.y) - float(Config.tuning.flight.feet_offset))
+	game.player.land()
+	for tap: int in range(int(Config.tuning.world.bin_pecks)):
+		game.stash_raids.peck_cooldown = 0
+		game._peck()
+		check.call(game.lesson == (BeachGame.FINAL_LESSON if tap == int(Config.tuning.world.bin_pecks)-1 else BeachGame.WHEELIE_LESSON),"wheelie lesson waits for the full lid peck sequence")
+	var wheelie_food: int = 0
+	for item: Dictionary in game.stash_raids.items:
+		if not bool(item.get("garbage",false)):
+			wheelie_food += 1
+	check.call(wheelie_food >= 2,"wheelie bin burst is mostly food: %d of %d" % [wheelie_food,game.stash_raids.items.size()])
+	game.stash_raids.items.clear()
+	game.player.support = {}
+	game.player.state = BeachGull.State.GLIDE
 	customer.food = false
 	customer.food_sprite.hide()
 	customer.dropped_pending = true
@@ -112,8 +145,8 @@ static func run(host: Node, check: Callable) -> void:
 	game._training_snatch(customer)
 	game._training_tick(0.1)
 	var entry: Dictionary = GameState.entry(1)
-	check.call(game.lesson == 6 and not game.running and results.size() == 1,"final clean swoop finishes training exactly once")
-	check.call(bool(entry.get("training_complete",false)) and int(entry.get("training_step",0)) == 6 and GameState.unlocked(2),"completion persists checkpoint and unlocks family beach: "+str(entry))
+	check.call(game.lesson == BeachGame.TRAINING_LESSONS and not game.running and results.size() == 1,"final clean swoop finishes training exactly once")
+	check.call(bool(entry.get("training_complete",false)) and int(entry.get("training_step",0)) == BeachGame.TRAINING_LESSONS and GameState.unlocked(2),"completion persists checkpoint and unlocks family beach: "+str(entry))
 	check.call(not entry.has("best") and not entry.has("stars") and not entry.has("casual_time") and (results.size() == 1 and results[0].stars == 0),"training completion grants no stars or practice record")
 	host.main.start_level(1)
 	check.call(not host.main.game.training,"completed Training Day can be replayed as a regular run")
