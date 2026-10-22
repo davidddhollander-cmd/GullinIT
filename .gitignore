@@ -7,3 +7,4 @@ test-output/
 export_credentials.cfg
 
 .playwright-mcp/
+tasks/LOCK
