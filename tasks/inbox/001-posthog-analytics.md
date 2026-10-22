@@ -2,7 +2,8 @@
 
 Status: inbox
 Author: Claude
-Assignee: Codex
+Assignee: Claude Sonnet
+Depends on: none
 Created: 2026-10-22
 
 ## Goal
@@ -51,7 +52,7 @@ Send a handful of anonymous gameplay events from the game (desktop and web) to P
 - [ ] With a dummy key and an injected fake sender, all six events are emitted with the specified properties.
 - [ ] STATS toggle visible in Options, saved, and respected.
 - [ ] Headless `tests/integration.tscn` passes with no new failures (one known Linux-only rounding failure "practice result distinguishes run time from saved best time" may remain).
-- [ ] README updated; branch `codex/001-posthog-analytics` pushed; report filled in below.
+- [ ] README updated; branch `sonnet/001-posthog-analytics` pushed; report filled in below.
 
 ## Report
 
