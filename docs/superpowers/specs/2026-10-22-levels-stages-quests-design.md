@@ -53,6 +53,8 @@ New core mechanic: **diving** — plunge below the surface to catch fish, with a
 | 9 | Trawler | **Net haul** every ~30 s spills fish on deck: a frenzy window | Cormorant, skua | Grab 3 fish in one net haul · Dive-catch a fish that slid overboard |
 | 10 | **Whale — boss** | Starts at the trawler stern, scrolls out to open water (buoys, debris, the shoal) | Cormorant, skua | 10 dive catches · Mug both sea rivals |
 
+Existing pier/sea environment art to start from (outside this repo): `C:\Users\david\Desktop\Contra-bands\assets\environment\pier\` — `animations/pier_sea_v11_animated.gif`, `references/pier_sea_v11_still.png`, `references/pier_sea_v11_four_frames.png`, and the generator `source/build_pier_v11.py`. Stage 2 art tasks import/adapt these before generating new pier or sea scenery.
+
 Boss objective (L10): race the rivals to the fish shoal. The whale surfaces and swallows everyone (scripted ending → Stage 3).
 
 ## Stage 3 — Future (placeholder)

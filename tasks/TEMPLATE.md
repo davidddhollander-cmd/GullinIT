@@ -2,7 +2,8 @@
 
 Status: inbox            <!-- inbox | doing | done | changes requested | merged -->
 Author: Claude           <!-- who wrote the task -->
-Assignee: Codex
+Assignee: Codex            <!-- Codex (sprite assets) | Claude Sonnet (game code) -->
+Depends on: none          <!-- task numbers that must be merged first -->
 Created: YYYY-MM-DD
 
 ## Goal
