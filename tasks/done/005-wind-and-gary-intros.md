@@ -1,6 +1,6 @@
 # 005 — L2 wind intro and L3 Gary intro twists
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 003
