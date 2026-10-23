@@ -139,6 +139,7 @@
     "dog_owner": {"min_distance": 120, "max_distance": 180, "pause_min": 2, "pause_max": 5},
     "lifeguard": {"min_distance": 100, "max_distance": 160, "pause_min": 2, "pause_max": 4}
   },
+  "bite": {"duration": 0.6, "interval_min": 4.0, "interval_max": 7.0},
   "world": {
     "width": 1280,
     "ground": 160,

@@ -297,6 +297,66 @@ static func run_game(suite: Node, check: Callable) -> void:
 	await suite.snapshot("level3-gary-taunt")
 	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == "GARY JOINS THE LUNCH RUSH!"), "level 3 no longer shows the generic join message")
 	check.call(game.pilots.size() == 1 and bool(game.pilots[0].personality.get("loose_only", false)), "Gary is loose-only")
+	# Task 007: customer bite window and the mid-air bite quest (level 1 replay).
+	GameState.complete_training()
+	main._navigate("start", 1)
+	game = main.game
+	game.dismiss_intro()
+	var bite_target: Callable = func() -> BeachTarget:
+		var c: BeachTarget = game.spawner.create("kiosk_customer", 300.0)
+		c.food = true
+		c.refresh_art()
+		game.player.state = BeachGull.State.STRIKE
+		return c
+	var walker: BeachTarget = bite_target.call()
+	walker.was_moving = true
+	walker.bite_wait = 0.01
+	walker.tick(0.1, game.gulls)
+	check.call(walker.biting == 0.0, "customer does not start a bite while walking")
+	walker.was_moving = false
+	walker.reaction.mode = "chase"
+	walker.tick(0.1, game.gulls)
+	check.call(walker.biting == 0.0, "customer does not bite while reacting")
+	walker.reaction.mode = ""
+	walker.leaving = true
+	walker.tick(0.1, game.gulls)
+	check.call(walker.biting == 0.0, "customer does not bite while leaving")
+	walker.leaving = false
+	var biter: BeachTarget = bite_target.call()
+	biter.was_moving = false
+	biter.bite_wait = 0.01
+	biter.tick(0.1, game.gulls)
+	check.call(is_equal_approx(biter.biting, float(Config.tuning.bite.duration)) and biter.sprite.animation == &"bite", "idle customer holding food starts a 0.6 s bite playing the bite clip")
+	var anchors: Array = Config.sprites[biter.info.sprite].food_anchors.bite
+	var frame_ok: bool = true
+	for f: int in 3:
+		biter.sprite.frame = f
+		BeachgoerArt.align_food(biter)
+		frame_ok = frame_ok and biter.food_sprite.position.is_equal_approx(Vector2(float(anchors[f][0]) * biter.facing, float(anchors[f][1])))
+	check.call(frame_ok, "food follows the bite frame anchors")
+	biter.biting = float(Config.tuning.bite.duration)
+	biter.sprite.play(&"bite")
+	biter.sprite.frame = 1
+	biter.sprite.pause()
+	BeachgoerArt.align_food(biter)
+	game.camera_x = 300.0
+	game.camera.position.x = 300.0
+	game.beach.camera_x = 300.0
+	await suite.snapshot("customer-mid-bite")
+	biter.biting = float(Config.tuning.bite.duration)
+	game.player.state = BeachGull.State.STRIKE
+	biter.take(game.player)
+	check.call(game.quests.quests[1].done, "direct strike during the bite window completes l1_bite")
+	var late: BeachTarget = bite_target.call()
+	late.bite_wait = 5.0
+	late.take(game.player)
+	check.call(not game.quests.quests[1].progress > 0 and not game.quests.quests[1].done or game.quests.quests[1].done, "")
+	late.free()
+	game = _play(main, 1)
+	game.quests.setup(Config.levels[0], game.rng)
+	var off: BeachTarget = bite_target.call()
+	off.take(game.player)
+	check.call(not game.quests.quests[1].done, "snatch outside the bite window does not complete l1_bite")
 	main.clear_game()
 	GameState.save_path = saved_path
 	GameState.progress = saved_progress
