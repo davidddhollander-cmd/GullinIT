@@ -59,6 +59,12 @@ Contextual hints (walk/peck/landing/dive prompts) sit in one backed tag in a fix
 
 The gameplay status bar is 17 pixels high, about 40% thinner than its original 28-pixel band. Score, timer, wind and pause use a dedicated native 6-pixel GullHud font, compact padding and an 11-pixel control row. The combo meter sits below that row, while training panels and score callouts follow the new bar height. `tools/generate_hud_font.py` rebuilds the compact font without changing menu typography.
 
+## Analytics
+
+The game can send anonymous gameplay events to PostHog (desktop and web). `data/analytics.json` holds `enabled`, `host` and `project_key`; with an empty `project_key` or `enabled: false` nothing is ever sent. Players can switch it off in Options with `STATS: ON/OFF` (saved with the other options). Events (`scripts/autoload/analytics.gd`, `Analytics.track`): `session_start`, `level_start` (level, mode), `lesson_complete` (lesson, seconds), `first_steal` (level, seconds), `level_end` (level, mode, score, stars, seconds, crashes, outcome `completed`/`failed`/`quit`) and `feedback_click` (screen). Every event also carries platform, build, input type and `$process_person_profile: false`, plus a random per-install id stored in `user://save.json`. Requests are fire-and-forget (one in flight, dropped after 2 failures). `tests/analytics_checks.gd` covers it with a fake sender.
+
+Privacy note for the itch.io page: "This demo sends anonymous gameplay stats (which levels you play and how they end) to help improve the game. No names, emails or personal data are collected, and you can turn it off with STATS: OFF in Options."
+
 ## Tuning and art
 
 Ice-cream and hot-dog stalls use distinct ImageGen full-body vendor characters at normal adult scale, with their lower bodies hidden behind the serving window and front counter. Vendors set each snack on the counter for 0.85 seconds, marked with gold corners, before the buyer collects it. A timed dive PECK during that window earns a +50% base-food bonus, scored on swallowing; stolen food never reaches the buyer. Stall-side shoppers start by buying, robbed shoppers revisit a stand, and family purchases expose each missing snack and reserve bag. See `docs/STALL_VENDORS.md` for source art, generation prompts, tuning and preview captures. Main-character art must never be drawn in code; this is recorded in `AGENTS.md`.

@@ -1,6 +1,6 @@
 # 002 — Quest tracker, level quest data and Feathers save
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
