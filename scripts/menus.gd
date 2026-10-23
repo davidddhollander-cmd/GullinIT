@@ -164,6 +164,7 @@ func gull_picker() -> void:
 		blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		blurb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		blurb.size_flags_vertical = SIZE_EXPAND_FILL
+		_stat_rows(box,info.get("card",{}),owned)
 		var status: Label = BeachUI.label(box,"UNLOCKED" if owned else "UNLOCK: %d FEATHERS" % int(info.price),BeachUI.FONT_NATIVE,BeachUI.CREAM if owned else BeachUI.CORAL)
 		status.name = "Status"
 		status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -171,6 +172,25 @@ func gull_picker() -> void:
 		if id == chosen:
 			card.grab_focus()
 	BeachUI.button(content,"< BACK",func() -> void: choose("title"),100).size_flags_horizontal = SIZE_SHRINK_CENTER
+
+# Simplified card stats: one row per stat, 1-5 pips from data/species.json "card".
+func _stat_rows(parent: Control, card: Dictionary, owned: bool) -> void:
+	for stat: String in ["speed","dive","tough"]:
+		var line: HBoxContainer = HBoxContainer.new()
+		line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		line.alignment = BoxContainer.ALIGNMENT_CENTER
+		line.add_theme_constant_override("separation",1)
+		parent.add_child(line)
+		var caption: Label = BeachUI.label(line,stat.to_upper(),BeachUI.FONT_NATIVE,Color("a9d7d2") if owned else Color("6b858b"))
+		caption.custom_minimum_size.x = 36
+		for i: int in 5:
+			var pip: ColorRect = ColorRect.new()
+			pip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			pip.custom_minimum_size = Vector2(5,5)
+			pip.size_flags_vertical = SIZE_SHRINK_CENTER
+			var lit: bool = i < int(card.get(stat,0))
+			pip.color = (BeachUI.GOLD if owned else Color("6b858b")) if lit else Color(0.0,0.0,0.0,0.3)
+			line.add_child(pip)
 
 func pause() -> void:
 	clear("TAKING A BREATHER", "YOUR LUNCH CAN WAIT.")
