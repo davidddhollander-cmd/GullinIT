@@ -1,6 +1,6 @@
 # 012 — Level 5 "Three's a Crowd" (Chip debut)
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 011
@@ -29,5 +29,10 @@ Level 5 becomes **Three's a Crowd**, hand-built: Chip debuts as a fast, eager th
 - [ ] One `tools/validate.ps1 -Capture` run at the end (two at most): **0 failures**; screenshot of Chip's intro, path in the Report
 
 ## Report
+Files: `data/levels/level_05.json` (rewritten), `data/levels/level_03.json` (Gary gets `taunt`), `scripts/game.gd` (per-rival `after_snatch` + `taunt`; `_gary_taunt` -> `_rival_taunt`, `taunt_rival`/`taunt_text`), `scripts/level_generator.gd` (levels <= 5 authored), `tests/level5_checks.gd` (new), `tests/integration.gd` (1 line), `tests/level_generator_checks.gd`, `tools/generate_assets.py` (name), docs (README, OPENING_LEVELS, LEVEL_GENERATOR).
+Tests: `validate.ps1 -Capture`: INTEGRATION 14846 checks, 0 failures (baseline 15909: level 5 no longer runs the generated-layout per-variation checks). Screenshot: `test-output/level5-chip-intro.png`.
+Decisions: layout is level 4's boardwalk minus dog/family, with two pier diners (1000, 1140) for the fried fish quest; pier bin 1200 paired with a bench (existing bin rule); time 150 s, wind, stars kept. Chip speed 1.1, accuracy_px 8. Gary's level 3 taunt moved from the `gary_intro` twist check to a `taunt` key on his profile; any rival with `taunt` now works. `random_foods`: hotdog, fried_fish, ice_cream. Sim L5: dives [9,9], thefts [5,8], 50 shared-target frames, 0 crashes/out-of-bounds.
+Merge note: `level_generator.gd` (`<= 5`) and `level_generator_checks.gd` (`number <= 5`) will conflict trivially with task 013 (`<= 6`).
+Branch: sonnet/012-level-5-threes-a-crowd.
 
 ## Review notes

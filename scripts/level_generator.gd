@@ -7,7 +7,7 @@ static func generate(definition: Dictionary, rules: Dictionary) -> Dictionary:
 	random.seed = int(level.seed)
 	# The opening levels are paced as authored routes. Jitter is visual only and
 	# never changes their roster, landmark order, or the space around the start.
-	if int(level.id) <= 4:
+	if int(level.id) <= 5:
 		for spawn: Dictionary in level.spawns:
 			spawn.x = float(spawn.x) + random.randi_range(-3,3)
 		for prop: Dictionary in level.props:
