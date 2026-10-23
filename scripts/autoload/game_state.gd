@@ -1,7 +1,8 @@
 extends Node
 var progress: Dictionary = {}
 var wallet: Dictionary = {"feathers": 0}
-var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false}
+var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false, "stats": true}
+var _anon_id: String = ""
 var save_path: String = "user://save.json"
 var save_error: String = ""
 # Playtest build: every level is selectable. Set to false to restore normal progression.
@@ -30,6 +31,13 @@ func last_playable_level() -> int:
 func feedback_url() -> String:
 	return str(demo.get("feedback_url", "")).strip_edges()
 
+# Random per-install id for anonymous analytics; created on first use and saved.
+func anon_id() -> String:
+	if _anon_id.is_empty():
+		_anon_id = Crypto.new().generate_random_bytes(16).hex_encode()
+		save_progress()
+	return _anon_id
+
 func load_progress() -> void:
 	if not FileAccess.file_exists(save_path):
 		return
@@ -39,6 +47,7 @@ func load_progress() -> void:
 			progress = data.progress
 		if data.get("wallet") is Dictionary:
 			wallet.merge(data.wallet, true)
+		_anon_id = str(data.get("anon_id", ""))
 		if data.get("options") is Dictionary:
 			options.merge(data.options, true)
 
@@ -47,7 +56,7 @@ func save_progress() -> void:
 	if file == null:
 		save_error = "Progress could not be saved."
 		return
-	file.store_string(JSON.stringify({"version": 1, "progress": progress, "wallet": wallet, "options": options}))
+	file.store_string(JSON.stringify({"version": 1, "progress": progress, "wallet": wallet, "options": options, "anon_id": _anon_id}))
 	file.close()
 	var error: Error = DirAccess.rename_absolute(save_path + ".tmp", save_path)
 	save_error = "" if error == OK else "Progress could not be saved."

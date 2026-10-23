@@ -1,6 +1,6 @@
 # 001 — Anonymous gameplay analytics (PostHog)
 
-Status: inbox
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -57,3 +57,18 @@ Send a handful of anonymous gameplay events from the game (desktop and web) to P
 ## Report
 
 ## Review notes
+
+Implemented by Claude Sonnet on branch `sonnet/001-posthog-analytics` (not `codex/...`, not pushed).
+
+**Files changed:** `data/analytics.json` (new), `scripts/autoload/analytics.gd` (new), `project.godot` (autoload + `config/version="0.1.0-demo"`), `scripts/autoload/game_state.gd` (`stats` option, saved `anon_id`), `scripts/menus.gd` (STATS toggle), `scripts/game.gd` (level_start, first_steal, lesson_complete, level_end helper, crash counter), `scripts/main.gd` (session_start, feedback_click, level_end completed/failed/quit), `tests/analytics_checks.gd` (new), `tests/integration.gd`, `README.md`.
+
+**Tests:** headless `tests/integration.tscn`: 15978 checks, 1 failure. The failure ("level 6 rival leaves the scene of a theft", rival sim) also occurs with the analytics test unhooked and is unrelated to analytics; it is not the Linux-only rounding failure named in the task. Not compared against an untouched baseline. 19 new checks pass: empty key sends nothing through a full level, enabled=false, STATS OFF, all events incl. session_start, id persistence across save/load, drop after 2 failures. The startup `grab_focus !is_inside_tree` engine error is pre-existing.
+
+**Decisions:**
+- `lesson_complete.lesson` is the 1-based number of the lesson just finished; the game has 7 lessons, so values are 1-7 (task said 1-6).
+- `level_start` fires in `dismiss_intro()`; `level_end` is emitted once per run (`track_end`); `quit` fires from `main.clear_game()` for a started, unfinished level (covers pause -> LEVEL SELECT and restart). Leaving during the intro reports nothing.
+- `crashes` counts ground crashes only (not RUDE stuns). `outcome` uses the result board's pass rule.
+- Anonymous id is created lazily on the first tracked event, so nothing extra is saved when analytics is off. Endpoint `<host>/i/v0/e/` (PostHog docs not re-checked online).
+- STATS is a third button in the SHAKE/TOUCH row (layout and font-grid checks pass).
+
+**Not done:** branch not pushed (told not to); no real PostHog key; the real `HTTPRequest` path is untested (only the injected sender); not tried in a web build.

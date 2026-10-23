@@ -37,6 +37,7 @@ func _ready() -> void:
 	layer.add_child(menus)
 	menus.requested.connect(_navigate)
 	menus.title()
+	Analytics.track("session_start")
 	Audio.play_music("title", 0.0)
 	get_tree().auto_accept_quit = false
 	get_tree().root.close_requested.connect(_quit)
@@ -97,6 +98,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 		"quit":
 			_quit()
 		"feedback":
+			Analytics.track("feedback_click", {"screen": "results" if screen == "results" else "level_select"})
 			var url: String = GameState.feedback_url()
 			if not url.is_empty():
 				OS.shell_open(url)
@@ -126,6 +128,7 @@ func start_level(id: int, force_training: bool = false) -> void:
 
 func clear_game() -> void:
 	if is_instance_valid(game):
+		game.track_end("quit")
 		remove_child(game)
 		game.queue_free()
 	game = null
@@ -134,6 +137,8 @@ func clear_game() -> void:
 
 func _finished(result: Dictionary) -> void:
 	screen = "results"
+	var passed: bool = bool(result.get("success", false)) or int(result.stars) > 0 or bool(result.casual)
+	game.track_end("completed" if passed else "failed", result)
 	game.set_paused(true)
 	Audio.stop_music()
 	menus.show()

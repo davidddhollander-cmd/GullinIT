@@ -39,6 +39,10 @@ var training_clean_snatch: bool = false
 var training_raid_started: bool = false
 var training_reset_clock: float = 0.0
 var pending_rivals: Array = []
+var crashes: int = 0
+var first_steal_sent: bool = false
+var end_tracked: bool = false
+var lesson_started: float = 0.0
 
 func setup(definition: Dictionary, is_casual: bool, force_training: bool = false) -> void:
 	level = definition
@@ -261,7 +265,23 @@ func _physics_process(delta: float) -> void:
 	elif (casual and score.items >= int(Config.tuning.score.casual_items)) or (not casual and elapsed >= float(level.time_limit)):
 		finish()
 
+func mode_name() -> String:
+	return "training" if training else ("practice" if casual else "arcade")
+
+func track(event: String, props: Dictionary = {}) -> void:
+	Analytics.input_kind = "touch" if input.touch_visible else ("gamepad" if input.gamepad else "keyboard_mouse")
+	Analytics.track(event, props)
+
+# Once per run; "quit" is reported by main when a started level is abandoned.
+func track_end(outcome: String, result: Dictionary = {}) -> void:
+	if end_tracked or intro_dismissed_elapsed < 0.0:
+		return
+	end_tracked = true
+	track("level_end", {"level": int(level.id), "mode": mode_name(), "score": int(result.get("score", score.points)), "stars": int(result.get("stars", 0)), "seconds": snappedf(elapsed, 0.1), "crashes": crashes, "outcome": outcome})
+
 func dismiss_intro() -> void:
+	lesson_started = elapsed
+	track("level_start", {"level": int(level.id), "mode": mode_name()})
 	intro = 0.0
 	intro_dismissed_elapsed = 0.0
 	input.clear_touch()
@@ -343,6 +363,7 @@ func _stunned() -> void:
 	Audio.play("stun")
 
 func _crashed() -> void:
+	crashes += 1
 	training_clean_snatch = false
 	score.points = ceili(score.points * 0.5)
 	score.stunned()
@@ -363,6 +384,9 @@ func _swallowed(snack: Dictionary) -> void:
 		Audio.play("snatch")
 		overlay.show_score_announcement(str(snack.id),value)
 	else:
+		if not first_steal_sent:
+			first_steal_sent = true
+			track("first_steal", {"level": int(level.id), "seconds": snappedf(elapsed, 0.1)})
 		var earned: int = _award(value,snack.get("risky",false),snack.get("upwind",false),snack.get("mugged",false),snack.get("handover",false))
 		overlay.show_score_announcement(str(snack.id),earned)
 		if not pending_rivals.is_empty():
@@ -437,6 +461,8 @@ func _training_advance() -> void:
 		for bin: Dictionary in stash_raids.bins:
 			bin.remaining = int(bin.get("capacity",Config.tuning.world.bin_stash_size))
 			bin.pecks = 0
+	track("lesson_complete", {"lesson": lesson, "seconds": snappedf(elapsed - lesson_started, 0.1)})
+	lesson_started = elapsed
 	GameState.save_training_step(lesson)
 	effects.message(player.position-Vector2(0,24),"LESSON COMPLETE",BeachUI.GOLD)
 	if lesson >= TRAINING_LESSONS:
