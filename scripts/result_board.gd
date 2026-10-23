@@ -31,6 +31,7 @@ var captions: Array[Label] = []
 var scores_panel: Control
 var score_rows: Array[Dictionary] = []
 var star_slots: Array[Label] = []
+var quest_labels: Array[Label] = []
 const STAR_DIM := Color("7d4a28")
 const LEADERBOARD_PATH := "res://data/leaderboards.json"
 static var _seed_boards: Dictionary = {}
@@ -106,7 +107,10 @@ func _build() -> void:
 	_add_rules_link(events)
 	_add_count_row("TOTAL", int(result.score), 126, "%d", GOLD)
 
-	_build_scores_panel()
+	if (result.get("quests", []) as Array).is_empty():
+		_build_scores_panel()
+	else:
+		_build_quests_panel()
 
 	# stars_label keeps the textual result ("**-") for tests and tooling; the three
 	# star slots on the header plank are what players see.
@@ -199,6 +203,38 @@ func _build_scores_panel() -> void:
 		var best: int = maxi(int(GameState.entry(int(level.id)).get("best", 0)), int(result.score))
 		set_high_scores(ranked_view(board, {"name": "YOU", "score": best, "me": true}))
 
+# Right panel for runs that had quests: ticked list plus Feathers in the header. It takes
+# the high score slot because quest names need wrapped, full-width rows to stay readable.
+func _build_quests_panel() -> void:
+	scores_panel = Control.new()
+	scores_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	scores_panel.modulate.a = 0.0
+	add_child(scores_panel)
+	var x := RIGHT_PANEL.position.x
+	var earned: int = int(result.get("feathers_earned", 0))
+	var header := BeachUI.label(scores_panel, "QUESTS" + (" +%d FEATHERS" % earned if earned > 0 else ""), BeachUI.FONT_NATIVE, GOLD)
+	header.name = "Header"
+	header.position = Vector2(x, 66)
+	header.size = Vector2(RIGHT_PANEL.size.x, 10)
+	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var rule := ColorRect.new()
+	rule.color = Color(1.0, 0.82, 0.4, 0.35)
+	rule.position = Vector2(x + 8, 76)
+	rule.size = Vector2(RIGHT_PANEL.size.x - 16, 1)
+	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	scores_panel.add_child(rule)
+	var y := 79.0
+	for quest: Dictionary in result.quests:
+		var done := bool(quest.done)
+		var text := "%s %s" % ["*" if done else "-", quest.text]
+		var row := BeachUI.label(scores_panel, text, BeachUI.FONT_NATIVE, GOLD if done else CREAM)
+		row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		row.position = Vector2(x + 5, y)
+		row.size = Vector2(RIGHT_PANEL.size.x - 10, 9)
+		row.size.y = row.get_line_count() * 8.0 + 1.0
+		quest_labels.append(row)
+		y += row.size.y + 1.0
+
 # Starter entries from data/leaderboards.json, highest first. Online scores will
 # replace these; until then they give each level a field to measure against.
 static func seed_scores(level_id: int) -> Array:
@@ -235,7 +271,7 @@ static func ranked_view(board: Array, player: Dictionary, slots: int = SCORE_SLO
 # An optional "rank" overrides the slot number (a player outside the top shows as e.g. 9).
 # heading names the board, e.g. "HIGH SCORES" or "GLOBAL TOP 5".
 func set_high_scores(entries: Array, heading: String = "HIGH SCORES") -> void:
-	if scores_panel == null:
+	if scores_panel == null or score_rows.is_empty():
 		return
 	for slot: int in score_rows.size():
 		var row: Dictionary = score_rows[slot]

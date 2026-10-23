@@ -81,6 +81,11 @@ func level_select(casual: bool) -> void:
 	var outer: MarginContainer = content.get_parent().get_parent() as MarginContainer
 	for edge: String in ["top","bottom"]:
 		outer.add_theme_constant_override("margin_" + edge,6)
+	var feathers: Label = BeachUI.label(self,"FEATHERS %d" % GameState.feathers(),BeachUI.FONT_NATIVE,BeachUI.CREAM)
+	feathers.name = "Feathers"
+	feathers.position = Vector2(188,20)
+	feathers.size = Vector2(108,9)
+	feathers.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	var grid: GridContainer = GridContainer.new()
 	grid.columns = 3
 	grid.size_flags_vertical = SIZE_EXPAND_FILL
@@ -91,7 +96,9 @@ func level_select(casual: bool) -> void:
 		var unlocked: bool = GameState.unlocked(id)
 		var stars: String = "*".repeat(int(record.get("stars",0)))
 		var status: String = "FULL GAME" if GameState.demo_locked(id) else ("LOCKED" if not unlocked else (("REPLAY LESSONS" if trained else "BEGIN LESSON") if id == 1 else "BEST %d" % int(record.get("best",0))))
-		var caption: String = "%02d %s\n%s\n%s" % [id,stars,level.name.to_upper().replace(" ","\n"),status]
+		var quest_total: int = (level.get("quests",[]) as Array).size() + int(level.has("random_quest")) if id > 1 or trained else 0
+		var quest_line: String = "Q %d/%d" % [(record.get("quests",[]) as Array).size(),quest_total] if unlocked and quest_total > 0 else ""
+		var caption: String = "%02d %s\n%s\n%s" % [id,("%s %s" % [stars,quest_line]).strip_edges(),level.name.to_upper().replace(" ","\n"),status]
 		var button: Button = BeachUI.button(grid,caption,func() -> void: choose("start",id),82)
 		button.size_flags_horizontal = SIZE_EXPAND_FILL
 		button.size_flags_vertical = SIZE_EXPAND_FILL

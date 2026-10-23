@@ -12,6 +12,8 @@ var lesson_label: Label
 var lesson_prompt: Label
 var pause_button: Button
 var top: HBoxContainer
+var quest_box: VBoxContainer
+var quest_labels: Array[Label] = []
 var score_announcement: Label
 var score_announcement_tween: Tween
 var rival_score_panel: PanelContainer
@@ -105,6 +107,17 @@ func setup(owner_game: BeachGame) -> void:
 	space.mouse_filter = MOUSE_FILTER_IGNORE
 	space.size_flags_vertical = SIZE_EXPAND_FILL
 	column.add_child(space)
+	quest_box = VBoxContainer.new()
+	quest_box.mouse_filter = MOUSE_FILTER_IGNORE
+	quest_box.add_theme_constant_override("separation",1)
+	add_child(quest_box)
+	quest_box.position = Vector2(5,TOP_BAR_HEIGHT + 2)
+	for quest: Dictionary in game.quests.quests:
+		var row: Label = BeachUI.label(quest_box,"",BeachUI.FONT_NATIVE,BeachUI.CREAM)
+		row.add_theme_color_override("font_shadow_color",Color(0.0,0.0,0.0,0.65))
+		row.add_theme_constant_override("shadow_offset_x",1)
+		row.add_theme_constant_override("shadow_offset_y",1)
+		quest_labels.append(row)
 	var training_center: CenterContainer = CenterContainer.new()
 	add_child(training_center)
 	BeachUI.full(training_center)
@@ -174,12 +187,24 @@ func _process(_delta: float) -> void:
 		lesson_label.text = "LESSON %d/%d" % [mini(game.lesson + 1, BeachGame.TRAINING_LESSONS), BeachGame.TRAINING_LESSONS]
 		lesson_prompt.text = game.training_text()
 	pause_button.visible = game.running
+	sync_quests()
 	if rival_score_labels.size() != game.pilots.size():
 		sync_rival_scores()
 	rival_score_panel.visible = not game.pilots.is_empty() and game.running and game.intro <= 0.0
 	for i: int in rival_score_labels.size():
 		var pilot: RivalPilot = game.pilots[i]
 		rival_score_labels[i].text = "%03d" % pilot.score
+
+# One row per quest: "- text" until done, gold "* text" after; counted quests add n/N.
+func sync_quests() -> void:
+	quest_box.visible = not quest_labels.is_empty() and game.intro <= 0.0
+	# Replays of the training day keep the lesson panel on top, so the list sits below it.
+	quest_box.position.y = training_panel.get_rect().end.y + 2.0 if game.training else TOP_BAR_HEIGHT + 2.0
+	for i: int in mini(quest_labels.size(),game.quests.quests.size()):
+		var quest: Dictionary = game.quests.quests[i]
+		var count: int = int(quest.count)
+		quest_labels[i].text = "%s %s%s" % ["*" if quest.done else "-",quest.text,"" if count <= 1 else " %d/%d" % [int(quest.progress),count]]
+		quest_labels[i].add_theme_color_override("font_color",BeachUI.GOLD if quest.done else BeachUI.CREAM)
 
 func sync_rival_scores() -> void:
 	if not is_instance_valid(rival_score_list) or game == null:
