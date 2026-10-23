@@ -1,6 +1,6 @@
 # 015 — Feathers shop and perk equip (UI)
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -31,5 +31,11 @@ A **SHOP** where players spend Feathers on gull species and perks, open once the
 - [ ] One `tools/validate.ps1 -Capture` run (two at most): **0 failures**
 
 ## Report
+Files: `data/species.json` (unlock_all false), `scripts/menus.gd` (title SHOP button, `shop()`, `_shop_item`, `_perk_picker`, picker bottom row, bird stage 30->22 px so cards fit), `scripts/main.gd` (`shop`, `buy` actions), `tests/shop_checks.gd` (new), `tests/gull_picker_checks.gd` (unlock_all on for the open-picker part, off at the end), `tests/integration.gd` (one wiring line).
+Tests: `tools/validate.ps1 -Capture` run twice: INTEGRATION 14827 checks, 0 failures (baseline 14577).
+Screenshots: `test-output/shop.png` (Keen Eye + Kittiwake owned, rest too expensive, BOUGHT!), `test-output/gull-picker-perk.png` (BULLET TIME equipped, locked Great Black-back), `test-output/title.png`.
+Decisions: shop is two columns (PERKS left, GULLS right with BACK below). Title row is OPTIONS / SHOP / QUIT; disabled caption is `SHOP - LVL 6`. Perk row shares a line with BACK as one button: click cycles forward, left/right keys cycle, NONE then owned perks; hidden if none owned. The `shop` action only opens when `shop_open()`. Picker card content overflowed before (2-line name + status), so the bird stage was shortened; a new check guards card fit.
+Not done / notes: stderr shows one `grab_focus !is_inside_tree` engine error at exit with all checks passing; not traced (may predate this task). Not merged.
+Branch: sonnet/015-feathers-shop.
 
 ## Review notes
