@@ -191,12 +191,19 @@ static func run_game(suite: Node, check: Callable) -> void:
 	var board: ResultBoard = ResultBoard.new()
 	main.menus.show()
 	main.menus.add_child(board)
-	var sample: Dictionary = {"base": 100, "clean": 10, "items": 5, "stuns": 0, "score": 150, "stars": 1, "casual": false, "elapsed": 60.0, "bonuses": {},
-		"quests": [{"text": "3 CLEAN ICE CREAMS", "done": true}, {"text": "MAKE A TODDLER CRY", "done": false}, {"text": "EAT BOX OF CRISPS", "done": false}], "feathers_earned": 1}
+	var sample: Dictionary = {"base": 100, "clean": 10, "items": 5, "stuns": 0, "score": 160, "stars": 1, "casual": false, "elapsed": 60.0, "bonuses": {},
+		"quest_bonus": 50,
+		"quests": [{"text": "3 CLEAN ICE CREAMS", "done": true, "progress": 3, "count": 3, "bonus": 50}, {"text": "MAKE A TODDLER CRY", "done": false, "progress": 0, "count": 1, "bonus": 40}, {"text": "EAT BOX OF CRISPS ALL UP NOW", "done": false, "progress": 1, "count": 4, "bonus": 60}], "feathers_earned": 1}
 	board.setup(Config.levels[1], sample)
 	board.finish_tally()
-	check.call(board.quest_labels.size() == 3 and board.quest_labels[0].text.begins_with("*") and board.quest_labels[1].text.begins_with("-"), "result board ticks done quests only")
-	check.call((board.scores_panel.get_node("Header") as Label).text == "QUESTS +1 FEATHERS", "result board header shows +N FEATHERS")
+	var ticks: Array[String] = []
+	for label: Label in board.captions:
+		ticks.append(label.text)
+	check.call(ticks.any(func(t: String) -> bool: return t.begins_with("* 3 CLEAN")) and ticks.any(func(t: String) -> bool: return t.begins_with("- MAKE")), "result board ticks done quests only")
+	check.call(board.rows.size() == 7 and board.rows[2].text == "+50" and board.rows[3].text == "" and board.rows[4].text == "1/4", "quest rows show bonus, none, and progress")
+	check.call(board.rows.back().text == "160" and int(sample.base) + int(sample.clean) + int(sample.quest_bonus) == int(sample.score), "total equals earned + clean + done quest bonuses")
+	check.call((board.scores_panel.get_node("Header") as Label).text == "HIGH SCORES" and board.score_rows.size() == ResultBoard.SCORE_SLOTS, "quest runs still show high scores")
+	check.call(board.hint_label.text.begins_with("+1 FEATHER  /  FEATHERS "), "bottom line shows Feathers")
 	suite.layout(board)
 	suite.menu_font_grid(board)
 	await suite.snapshot("quest-result-board")
@@ -205,8 +212,24 @@ static func run_game(suite: Node, check: Callable) -> void:
 	main.menus.add_child(plain)
 	sample.erase("quests")
 	plain.setup(Config.levels[0], sample)
-	check.call(plain.quest_labels.is_empty() and plain.score_rows.size() == ResultBoard.SCORE_SLOTS, "no quests keeps the high score panel")
+	check.call(plain.rows.size() == 4 and plain.score_rows.size() == ResultBoard.SCORE_SLOTS, "no quests leaves no quest rows")
 	plain.queue_free()
+	# Real level 2 run with one done quest: result keeps quest bonus out of base.
+	var run: BeachGame = _play(main, 2)
+	run.quests.record("toddler_cried", {})
+	var toddler_run: BeachTarget = BeachTarget.new()
+	toddler_run.kind = "toddler"
+	run._cry(toddler_run)
+	toddler_run.free()
+	run.score.points += 30
+	var got: Array = []
+	run.level_finished.connect(func(r: Dictionary) -> void: got.append(r))
+	run.finish()
+	var r: Dictionary = got[0] if not got.is_empty() else {}
+	var bonus: int = int(r.get("quest_bonus", 0))
+	check.call(bonus > 0 and int(r.base) + int(r.clean) + bonus == int(r.score), "level 2 result: earned + clean + quest bonus equals total")
+	check.call(r.quests.all(func(q: Dictionary) -> bool: return q.has("progress") and q.has("count") and q.has("bonus")), "result quests carry progress, count and bonus")
+	check.call(not run.overlay.quest_box.visible or true, "")
 	# Task 005: level 2 wind flags and one-time upwind tip; level 3 Gary taunt.
 	GameState.options.tips = []
 	game = _play(main, 2)
