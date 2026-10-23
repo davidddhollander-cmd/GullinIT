@@ -199,7 +199,8 @@ func _process(_delta: float) -> void:
 func sync_quests() -> void:
 	quest_box.visible = not quest_labels.is_empty() and game.intro <= 0.0
 	# Replays of the training day keep the lesson panel on top, so the list sits below it.
-	quest_box.position.y = training_panel.get_rect().end.y + 2.0 if game.training else TOP_BAR_HEIGHT + 2.0
+	# training_panel's rect is relative to training_center, which starts below the top bar.
+	quest_box.position.y = TOP_BAR_HEIGHT + training_panel.get_rect().end.y + 2.0 if game.training else TOP_BAR_HEIGHT + 2.0
 	for i: int in mini(quest_labels.size(),game.quests.quests.size()):
 		var quest: Dictionary = game.quests.quests[i]
 		var count: int = int(quest.count)
