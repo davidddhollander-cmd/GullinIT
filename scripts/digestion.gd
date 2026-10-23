@@ -8,7 +8,7 @@ var rest: float = 0.0
 func cost(id: String) -> int:
 	return {"small":1,"medium":2,"large":4}[Config.foods[id].category]
 
-func duration(id: String) -> float:
+static func duration(id: String) -> float:
 	return {"small":0.5,"medium":1.5,"large":3.0}[Config.foods[id].category]
 
 func can_collect(id: String) -> bool:

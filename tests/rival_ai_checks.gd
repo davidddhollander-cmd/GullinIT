@@ -174,6 +174,14 @@ static func competition_checks(host: Node, main: Node, check: Callable) -> void:
 	var plain := RivalPilot.new()
 	plain.personality = {}
 	check.call(is_equal_approx(plain.mug_chance(), float(Config.tuning.rival.mug_chance)) and float(Config.tuning.rival.mug_range) == 90.0, "mug_chance and mug_range default from tuning")
+	# A rival stays mug-able for the player's in-air swallow time of what it carries.
+	for pair: Array in [["hotdog", 3.0], ["single_chip", 0.5]]:
+		gary.carried_food_id = pair[0]
+		gary.took_food(10)
+		check.call(is_equal_approx(gary.carry_window, pair[1]), "rival carrying %s is mug-able for %.1f s" % pair)
+	gary.leave = 0.0
+	gary.carry_window = 0.0
+	gary.carried = 0
 	# Race: a food another rival is already diving at is still a fair target.
 	var food_targets: Array[BeachTarget] = []
 	for target: BeachTarget in game.spawner.targets:

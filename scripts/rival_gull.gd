@@ -296,7 +296,8 @@ func needs_height() -> bool:
 func took_food(value: int) -> void:
 	carried = value
 	score += value
-	carry_window = Config.tuning.rival.mug_window
+	# Mug-able for as long as the player would take to swallow the same food in the air.
+	carry_window = GullDigestion.duration(carried_food_id)
 	leave = Config.tuning.rival.leave_time
 	# Away from the player, unless that is a dead end against the wall.
 	retreat_direction = signf(gull.position.x - threat_x) if threat_x >= 0.0 and absf(gull.position.x - threat_x) > 10.0 else (-1.0 if gull.position.x > world_width() * 0.5 else 1.0)

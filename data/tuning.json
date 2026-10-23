@@ -254,7 +254,6 @@
     "miss_cooldown": 0.8,
     "edge_margin": 40,
     "leave_time": 4,
-    "mug_window": 0.5,
     "mug_stun": 1,
     "mug_chance": 0.35,
     "mug_range": 90,
