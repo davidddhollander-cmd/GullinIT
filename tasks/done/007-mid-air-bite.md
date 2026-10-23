@@ -1,6 +1,6 @@
 # 007 — Customer bite window and mid-air bite quest
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 003, 006
