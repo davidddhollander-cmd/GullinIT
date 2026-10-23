@@ -293,7 +293,7 @@ func result_board_checks() -> void:
 	var poor := {"score": 20, "base": 20, "clean": 0, "stars": 0, "items": 2, "stuns": 1, "bonuses": {"Risky": 1, "Upwind": 0, "Mugged": 0}, "elapsed": 90.0, "casual": false}
 	main.menus.results(Config.levels[0], poor)
 	var board := main.menus.get_child(0) as ResultBoard
-	check(board != null and board.rows.size() == 6,"result board builds every tally line")
+	check(board != null and board.rows.size() == 4,"result board builds every tally line")
 	for index: int in range(1, board.rows.size()):
 		check(not board.rows[index - 1].get_rect().intersects(board.rows[index].get_rect()),"result tally rows do not overlap: "+board.rows[index - 1].text+" / "+board.rows[index].text)
 	check(not board.complete and board.buttons.all(func(button: Button) -> bool: return button.disabled),"result actions wait for tally or skip")
@@ -312,7 +312,7 @@ func result_board_checks() -> void:
 	action("ui_accept")
 	await settle()
 	check(is_instance_valid(board) and board.complete,"confirm skips tally without activating a focused result action")
-	check(board.complete and board.rows[5].text.ends_with("20"),"total resolves as final tally beat without changing score")
+	check(board.complete and board.rows.back().text.ends_with("20"),"total resolves as final tally beat without changing score")
 	check(board.stars_label.text == "---","poor result reveals zero stars")
 	board._process(0.4)
 	await get_tree().process_frame
@@ -335,7 +335,7 @@ func result_board_checks() -> void:
 	main.menus.results(Config.levels[0], good)
 	board = main.menus.get_child(0) as ResultBoard
 	board.finish_tally()
-	check(board.rows[0].text.ends_with("550") and board.rows[1].text.ends_with("+70") and board.rows[5].text.ends_with("620"),"earned plus clean equals displayed total")
+	check(board.rows[0].text.ends_with("550") and board.rows[1].text.ends_with("+70") and board.rows.back().text.ends_with("620"),"earned plus clean equals displayed total")
 	check(board.stars_label.text == "***","three-star result resolves all stars")
 	board._process(0.25)
 	await get_tree().process_frame
@@ -356,7 +356,7 @@ func result_board_checks() -> void:
 	main.menus.results(Config.levels[0], practice)
 	board = main.menus.get_child(0) as ResultBoard
 	board.finish_tally()
-	check(board.title_label.text == "PRACTICE COMPLETE!" and board.stars_label.text.is_empty() and board.rows[5].text.ends_with(str(practice.score)),"practice completion uses positive result and exact total")
+	check(board.title_label.text == "PRACTICE COMPLETE!" and board.stars_label.text.is_empty() and board.rows.back().text.ends_with(str(practice.score)),"practice completion uses positive result and exact total")
 	check("TIME 73.5" in board.hint_label.text and "BEST 61.3" in board.hint_label.text,"practice result distinguishes run time from saved best time")
 	var previous_save_error := GameState.save_error
 	GameState.save_error = "Progress could not be saved."

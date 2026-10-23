@@ -1,6 +1,6 @@
 # 009 — Result board: one scoreboard with quests, high scores right, Feathers line
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -41,5 +41,11 @@ Simplify the end-of-level sign (David's direction). The left panel is one scoreb
 - [ ] `tools/validate.ps1` passes with no new failures (baseline: 1 known failure `level 6 rival leaves the scene of a theft`)
 
 ## Report
+Files: scripts/result_board.gd, scripts/game.gd (finish: quest_bonus, quest progress/count/bonus, base minus quest bonus), scripts/main.gd (hide game overlay when results show), tests/quest_checks.gd, tests/integration.gd, tests/demo_polish_checks.gd.
+Tests: `INTEGRATION: 16220 checks, 1 failures` (only the known `level 6 rival leaves the scene of a theft`), run with -Capture.
+Screenshots (worktree test-output/): quest-result-board.png (level 2, quests; scores panel mid-fade in this capture), result-5.png (no quests, failed run).
+Decisions: quest value is right-aligned, name trimmed (not wrapped) to leave room, so `* NAME  +50` is two labels; unfinished single quest shows no value. `?` badge sits right of TOTAL caption (whole-line link removed). Casual runs keep their TIME/BEST SEC bottom line (Feathers line applies to arcade runs). Left panel fits 3 quests; a 4th would overlap the TOTAL rule. Hiding is done by hiding the whole game overlay in Main._finished.
+Not done: no separate level 6 capture inspected (no quests there, same layout as result-5).
+Branch: sonnet/009-result-board-layout.
 
 ## Review notes

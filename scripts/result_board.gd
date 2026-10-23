@@ -31,7 +31,6 @@ var captions: Array[Label] = []
 var scores_panel: Control
 var score_rows: Array[Dictionary] = []
 var star_slots: Array[Label] = []
-var quest_labels: Array[Label] = []
 const STAR_DIM := Color("7d4a28")
 const LEADERBOARD_PATH := "res://data/leaderboards.json"
 static var _seed_boards: Dictionary = {}
@@ -91,26 +90,25 @@ func _build() -> void:
 	_place(subtitle, 55, 292, 9)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
-	# Left panel: the run tally, captions left and values right-aligned.
+	# Left panel: the run scoreboard, captions left and values right-aligned. Quests sit
+	# between the clean bonus and the snatch/stun counts; the total ends the panel.
 	_add_count_row("EARNED POINTS", int(result.base), 66)
 	_add_count_row("CLEAN BONUS", int(result.clean), 75, "+%d")
-	_add_count_row("SNATCHES", int(result.items), 84)
-	_add_count_row("STUNS", int(result.stuns), 93)
-
-	var events := BeachUI.label(self, _events_text(0.0), BeachUI.FONT_NATIVE, SEA)
-	events.position = Vector2(LEFT_PANEL.position.x + 2, 102)
-	events.size = Vector2(LEFT_PANEL.size.x - 4, 19)
-	events.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	rows.append(events)
+	var y := 84.0
+	for quest: Dictionary in result.get("quests", []):
+		_add_quest_row(quest, y)
+		y += 9.0
+	var stats := BeachUI.label(self, "", BeachUI.FONT_NATIVE, CREAM)
+	stats.position = Vector2(LEFT_PANEL.position.x + 6, y)
+	stats.size = Vector2(LEFT_PANEL.size.x - 12, 9)
+	rows.append(stats)
 	row_values.append(0)
-	row_formats.append("events")
-	_add_rules_link(events)
+	row_formats.append("stats")
+	_update_row(rows.size() - 1, 0.0)
 	_add_count_row("TOTAL", int(result.score), 126, "%d", GOLD)
+	_add_rules_link()
 
-	if (result.get("quests", []) as Array).is_empty():
-		_build_scores_panel()
-	else:
-		_build_quests_panel()
+	_build_scores_panel()
 
 	# stars_label keeps the textual result ("**-") for tests and tooling; the three
 	# star slots on the header plank are what players see.
@@ -203,38 +201,6 @@ func _build_scores_panel() -> void:
 		var best: int = maxi(int(GameState.entry(int(level.id)).get("best", 0)), int(result.score))
 		set_high_scores(ranked_view(board, {"name": "YOU", "score": best, "me": true}))
 
-# Right panel for runs that had quests: ticked list plus Feathers in the header. It takes
-# the high score slot because quest names need wrapped, full-width rows to stay readable.
-func _build_quests_panel() -> void:
-	scores_panel = Control.new()
-	scores_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	scores_panel.modulate.a = 0.0
-	add_child(scores_panel)
-	var x := RIGHT_PANEL.position.x
-	var earned: int = int(result.get("feathers_earned", 0))
-	var header := BeachUI.label(scores_panel, "QUESTS" + (" +%d FEATHERS" % earned if earned > 0 else ""), BeachUI.FONT_NATIVE, GOLD)
-	header.name = "Header"
-	header.position = Vector2(x, 66)
-	header.size = Vector2(RIGHT_PANEL.size.x, 10)
-	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var rule := ColorRect.new()
-	rule.color = Color(1.0, 0.82, 0.4, 0.35)
-	rule.position = Vector2(x + 8, 76)
-	rule.size = Vector2(RIGHT_PANEL.size.x - 16, 1)
-	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	scores_panel.add_child(rule)
-	var y := 79.0
-	for quest: Dictionary in result.quests:
-		var done := bool(quest.done)
-		var text := "%s %s" % ["*" if done else "-", quest.text]
-		var row := BeachUI.label(scores_panel, text, BeachUI.FONT_NATIVE, GOLD if done else CREAM)
-		row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		row.position = Vector2(x + 5, y)
-		row.size = Vector2(RIGHT_PANEL.size.x - 10, 9)
-		row.size.y = row.get_line_count() * 8.0 + 1.0
-		quest_labels.append(row)
-		y += row.size.y + 1.0
-
 # Starter entries from data/leaderboards.json, highest first. Online scores will
 # replace these; until then they give each level a field to measure against.
 static func seed_scores(level_id: int) -> Array:
@@ -312,20 +278,8 @@ func _reveal_scores() -> void:
 	else:
 		scores_panel.modulate.a = 1.0
 
-# The bonus-count line doubles as a link to the score rules: the whole line is
-# clickable, and a small "?" badge says so.
-func _add_rules_link(events: Label) -> void:
-	events.size.x -= 14
-	var line := Button.new()
-	line.flat = true
-	line.focus_mode = Control.FOCUS_NONE
-	line.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	add_child(line)
-	line.position = events.position
-	line.size = events.size
-	line.pressed.connect(func() -> void: open_score_rules("BACK"))
-	line.mouse_entered.connect(func() -> void: events.add_theme_color_override("font_color", GOLD))
-	line.mouse_exited.connect(func() -> void: events.add_theme_color_override("font_color", SEA))
+# A small "?" badge beside TOTAL opens the score rules.
+func _add_rules_link() -> void:
 	var badge := Button.new()
 	badge.name = "RulesLink"
 	badge.text = "?"
@@ -340,7 +294,7 @@ func _add_rules_link(events: Label) -> void:
 		badge.add_theme_stylebox_override(state, box)
 	add_child(badge)
 	badge.custom_minimum_size = Vector2(11, 11)
-	badge.position = Vector2(LEFT_PANEL.end.x - 15, events.position.y + 4)
+	badge.position = Vector2(LEFT_PANEL.position.x + 50, 125)
 	badge.size = Vector2(11, 11)
 	badge.pressed.connect(func() -> void: open_score_rules("BACK"))
 
@@ -350,14 +304,6 @@ func open_score_rules(button_text: String) -> ScoreRulesCard:
 		if not buttons.is_empty() and is_instance_valid(buttons[0]) and not buttons[0].disabled:
 			buttons[0].grab_focus())
 	return card
-
-func _events_text(progress: float) -> String:
-	var bonuses: Dictionary = result.get("bonuses", {})
-	return "RISKY %d  UPWIND %d\nMUGGED %d  COUNTER %d" % [
-		roundi(int(bonuses.get("Risky", 0)) * progress),
-		roundi(int(bonuses.get("Upwind", 0)) * progress),
-		roundi(int(bonuses.get("Mugged", 0)) * progress),
-		roundi(int(bonuses.get("Handover", 0)) * progress)]
 
 # The last demo level was cleared: the next level exists but belongs to the full game.
 func demo_finished() -> bool:
@@ -377,6 +323,38 @@ func _add_count_row(caption: String, value: int, y: float, format: String = "%d"
 	rows.append(label)
 	row_values.append(value)
 	row_formats.append(caption + "|" + format)
+
+# One quest line: "* NAME" + bonus when done, "- NAME" + n/N when counted. The name is
+# trimmed to leave room for the value, never wrapped.
+func _add_quest_row(quest: Dictionary, y: float) -> void:
+	var x := LEFT_PANEL.position.x + 6
+	var width := LEFT_PANEL.size.x - 12
+	var done := bool(quest.get("done", false))
+	var count := int(quest.get("count", 1))
+	var value_text := ""
+	if done:
+		value_text = "+%d" % int(quest.get("bonus", 0))
+	elif count > 1:
+		value_text = "%d/%d" % [int(quest.get("progress", 0)), count]
+	var color := GOLD if done else CREAM
+	var name_label := BeachUI.label(self, "", BeachUI.FONT_NATIVE, color)
+	name_label.position = Vector2(x, y)
+	name_label.size = Vector2(width, 9)
+	var font := name_label.get_theme_font("font")
+	var room := width - (font.get_string_size(" +%d" % 999, HORIZONTAL_ALIGNMENT_LEFT, -1, BeachUI.FONT_NATIVE).x if done or count > 1 else 0.0)
+	var caption := "%s %s" % ["*" if done else "-", quest.text]
+	while caption.length() > 3 and font.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, BeachUI.FONT_NATIVE).x > room:
+		caption = caption.left(caption.length() - 1)
+	name_label.text = caption
+	name_label.size.x = room
+	captions.append(name_label)
+	var label := BeachUI.label(self, "" if done else value_text, BeachUI.FONT_NATIVE, color)
+	label.position = Vector2(x, y)
+	label.size = Vector2(width, 9)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	rows.append(label)
+	row_values.append(int(quest.get("bonus", 0)) if done else 0)
+	row_formats.append(("quest|+%d" if done else "static|" + value_text.replace("%", "%%")))
 
 func _add_button(parent: HBoxContainer, caption: String, action: String, payload: Variant = null) -> void:
 	var button := BeachUI.button(parent, caption, func() -> void: requested.emit(action, payload), 68)
@@ -404,10 +382,12 @@ func _process(delta: float) -> void:
 func _update_row(index: int, progress: float) -> void:
 	if index < 0 or index >= rows.size():
 		return
-	if row_formats[index] == "events":
-		rows[index].text = _events_text(progress)
+	if row_formats[index] == "stats":
+		rows[index].text = "SNATCHES %d  STUNS %d" % [roundi(int(result.items) * progress), roundi(int(result.stuns) * progress)]
 		return
 	var parts := row_formats[index].split("|")
+	if parts[0] == "static":
+		return
 	rows[index].text = parts[1] % roundi(row_values[index] * progress)
 
 func finish_tally() -> void:
@@ -438,10 +418,9 @@ func _record_text() -> String:
 		return GameState.save_error
 	if bool(result.casual):
 		return "TIME %.1f   BEST %.1f SEC" % [float(result.elapsed), float(record.get("casual_time", result.elapsed))]
-	if int(result.stars) >= 3:
-		return "BEST %d   ALL 3 STARS!" % int(record.get("best", 0))
-	var threshold_index: int = mini(int(result.stars), 2)
-	return "BEST %d   NEXT STAR %d" % [int(record.get("best", 0)), int(level.stars[threshold_index])]
+	var earned := int(result.get("feathers_earned", 0))
+	var total := "FEATHERS %d" % GameState.feathers()
+	return ("+%d FEATHER%s  /  %s" % [earned, "" if earned == 1 else "S", total]) if earned > 0 else total
 
 func _start_reaction() -> void:
 	if reaction_started:

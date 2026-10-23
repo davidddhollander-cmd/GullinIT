@@ -530,7 +530,9 @@ func finish() -> void:
 	input.enabled = false
 	input.clear_touch()
 	var result: Dictionary = score.result(level,casual,elapsed)
-	result.quests = quests.quests.map(func(quest: Dictionary) -> Dictionary: return {"text":quest.text,"done":quest.done})
+	result.quests = quests.quests.map(func(quest: Dictionary) -> Dictionary: return {"text":quest.text,"done":quest.done,"progress":quest.progress,"count":quest.count,"bonus":quest.bonus})
+	result.quest_bonus = quests.bonus_points()
+	result.base = int(result.base) - int(result.quest_bonus)
 	result.feathers_earned = feathers_earned
 	if training:
 		if lesson < TRAINING_LESSONS:

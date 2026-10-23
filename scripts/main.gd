@@ -140,6 +140,7 @@ func _finished(result: Dictionary) -> void:
 	var passed: bool = bool(result.get("success", false)) or int(result.stars) > 0 or bool(result.casual)
 	game.track_end("completed" if passed else "failed", result)
 	game.set_paused(true)
+	game.overlay.hide()
 	Audio.stop_music()
 	menus.show()
 	menus.results(game.level,result)
