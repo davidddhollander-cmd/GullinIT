@@ -1,6 +1,6 @@
 # 016 — Perk effects in play (incl. Bullet time meter)
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
