@@ -1,6 +1,6 @@
 # 009 — Result board: one scoreboard with quests, high scores right, Feathers line
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
