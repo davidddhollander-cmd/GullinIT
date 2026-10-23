@@ -15,8 +15,8 @@
   "random_foods": ["hotdog", "fried_fish", "ice_cream"],
   "stars": [550, 850, 1150],
   "rivals": [
-    {"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16, "mug_chance": 0.3},
-    {"name": "Chip", "species": "kittiwake", "speed": 1.1, "accuracy_px": 8, "mug_chance": 0.8, "after_snatch": true, "taunt": "CHIP: FINDERS KEEPERS!"}
+    {"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16, "mug_chance": 0.3, "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}},
+    {"name": "Chip", "species": "kittiwake", "speed": 1.1, "accuracy_px": 8, "mug_chance": 0.8, "after_snatch": true, "taunt": "CHIP: FINDERS KEEPERS!", "ground": {"scraps": 0.3, "bins": 0.2, "bags": 0.3, "catch": 0.8}}
   ],
   "world": {"width": 1280, "promenade_start": 430, "pier_start": 920, "start_x": 65, "start_y": 105},
   "zones": [
