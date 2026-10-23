@@ -1,6 +1,6 @@
 # 006 — Customer bite pose sprites
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: none
