@@ -1,6 +1,6 @@
 # 012 — Level 5 "Three's a Crowd" (Chip debut)
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 011
