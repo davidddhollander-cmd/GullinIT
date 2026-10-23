@@ -13,7 +13,7 @@ static func run(check: Callable) -> void:
 	check.call(quests.quests.size() == 3, "level 2 has two fixed quests plus a random slot")
 	var random: Dictionary = quests.quests[2]
 	check.call(random.id == "l2_random" and random.filter.food in l2.random_foods and int(random.count) >= 3 and int(random.count) <= 5, "random quest picks a listed food and a 3-5 count")
-	check.call(random.text == "EAT %d %s" % [random.count, str(Config.foods[random.filter.food].name).to_upper()], "random quest text names the food")
+	check.call(random.text == "EAT %s" % str(Config.foods[random.filter.food].name).to_upper(), "random quest text names the food")
 	for seed: int in 40:
 		rng.seed = seed
 		var roll: BeachQuests = BeachQuests.new()
@@ -142,6 +142,67 @@ static func run_game(suite: Node, check: Callable) -> void:
 	game._cry(toddler)
 	check.call(game.quests.quests[1].done, "toddler cry completes l2_cry")
 	toddler.free()
+	# --- quest UI: in-run checklist, level card, result board ---
+	main.start_level(2)
+	game = main.game
+	game.dismiss_intro()
+	game.overlay._process(0.0)
+	var rows: Array[Label] = game.overlay.quest_labels
+	check.call(rows.size() == 3 and game.overlay.quest_box.visible, "level 2 shows a 3 row quest checklist")
+	check.call(rows[0].text.contains("3 CLEAN ICE CREAMS") and rows[0].text.contains("0/3"), "counted quest shows progress 0/3")
+	check.call(not rows[1].text.contains("/"), "single quests show no progress")
+	for i: int in 2:
+		game.quests.record("swallowed", {"food": "ice_cream", "direct": true})
+	game.overlay._process(0.0)
+	check.call(rows[0].text.contains("2/3"), "progress ticks up to 2/3")
+	game.quests.record("swallowed", {"food": "ice_cream", "direct": true})
+	game.overlay._process(0.0)
+	check.call(rows[0].get_theme_color("font_color") == BeachUI.GOLD and rows[0].text.begins_with("*"), "done quest is gold and ticked")
+	suite.layout(game.overlay)
+	await suite.snapshot("quest-checklist")
+	GameState.progress = {}
+	main.start_level(1)
+	main.game.dismiss_intro()
+	main.game.overlay._process(0.0)
+	check.call(not main.game.overlay.quest_box.visible, "no checklist in first-time training")
+	main.clear_game()
+	GameState.progress = {"1": {"training_complete": true, "stars": 1}, "2": {"stars": 1, "quests": ["l2_ice", "l2_cry"]}}
+	GameState.wallet = {"feathers": 7}
+	main.casual = false
+	main._navigate("select")
+	var card_two: String = ""
+	var card_one: String = ""
+	for button: Node in main.menus.find_children("*", "Button", true, false):
+		if button.text.begins_with("02"):
+			card_two = button.text
+		elif button.text.begins_with("01"):
+			card_one = button.text
+	check.call(card_two.contains("Q 2/3"), "level card shows Q 2/3")
+	check.call(card_one.contains("Q 0/2"), "trained level 1 card shows Q 0/2")
+	var feather_label: Label = main.menus.find_child("Feathers", true, false)
+	check.call(feather_label != null and feather_label.text == "FEATHERS 7", "level select header shows Feathers total")
+	suite.layout(main.menus)
+	suite.menu_font_grid(main.menus)
+	await suite.snapshot("quest-level-select")
+	var board: ResultBoard = ResultBoard.new()
+	main.menus.show()
+	main.menus.add_child(board)
+	var sample: Dictionary = {"base": 100, "clean": 10, "items": 5, "stuns": 0, "score": 150, "stars": 1, "casual": false, "elapsed": 60.0, "bonuses": {},
+		"quests": [{"text": "3 CLEAN ICE CREAMS", "done": true}, {"text": "MAKE A TODDLER CRY", "done": false}, {"text": "EAT BOX OF CRISPS", "done": false}], "feathers_earned": 1}
+	board.setup(Config.levels[1], sample)
+	board.finish_tally()
+	check.call(board.quest_labels.size() == 3 and board.quest_labels[0].text.begins_with("*") and board.quest_labels[1].text.begins_with("-"), "result board ticks done quests only")
+	check.call((board.scores_panel.get_node("Header") as Label).text == "QUESTS +1 FEATHERS", "result board header shows +N FEATHERS")
+	suite.layout(board)
+	suite.menu_font_grid(board)
+	await suite.snapshot("quest-result-board")
+	board.queue_free()
+	var plain: ResultBoard = ResultBoard.new()
+	main.menus.add_child(plain)
+	sample.erase("quests")
+	plain.setup(Config.levels[0], sample)
+	check.call(plain.quest_labels.is_empty() and plain.score_rows.size() == ResultBoard.SCORE_SLOTS, "no quests keeps the high score panel")
+	plain.queue_free()
 	main.clear_game()
 	GameState.save_path = saved_path
 	GameState.progress = saved_progress
