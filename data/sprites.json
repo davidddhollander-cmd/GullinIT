@@ -1358,7 +1358,7 @@
     }
   },
   "kiosk_customer": {
-    "file": "res://assets/sprites/shopper-diner-style-v2.png",
+    "file": "res://assets/sprites/shopper-diner-style-v2-bite-v1.png",
     "frame_w": 128.0,
     "frame_h": 128.0,
     "visual_scale": 0.5,
@@ -1461,6 +1461,15 @@
           37.0
         ],
         "fps": 7.0,
+        "loop": false
+      },
+      "bite": {
+        "frames": [
+          38,
+          39,
+          40
+        ],
+        "fps": 5,
         "loop": false
       }
     },
@@ -1583,6 +1592,20 @@
         [
           12.0,
           -22.5
+        ]
+      ],
+      "bite": [
+        [
+          7.5,
+          -27.0
+        ],
+        [
+          6.5,
+          -27.0
+        ],
+        [
+          13.5,
+          -21.0
         ]
       ]
     }
@@ -2584,7 +2607,7 @@
     }
   },
   "shopper_mullet": {
-    "file": "res://assets/sprites/shopper-mullet-walk-v2.png",
+    "file": "res://assets/sprites/shopper-mullet-walk-v2-bite-v1.png",
     "frame_w": 128.0,
     "frame_h": 128.0,
     "visual_scale": 0.5,
@@ -2663,6 +2686,15 @@
           25.0
         ],
         "fps": 10.0,
+        "loop": false
+      },
+      "bite": {
+        "frames": [
+          26,
+          27,
+          28
+        ],
+        "fps": 5,
         "loop": false
       }
     },
@@ -2786,11 +2818,25 @@
           15.0,
           -23.0
         ]
+      ],
+      "bite": [
+        [
+          13.5,
+          -24.0
+        ],
+        [
+          8.0,
+          -27.0
+        ],
+        [
+          14.0,
+          -22.0
+        ]
       ]
     }
   },
   "shopper_sundress": {
-    "file": "res://assets/sprites/shopper-sundress-walk-v2.png",
+    "file": "res://assets/sprites/shopper-sundress-walk-v2-bite-v1.png",
     "frame_w": 128.0,
     "frame_h": 128.0,
     "visual_scale": 0.5,
@@ -2869,6 +2915,15 @@
           25.0
         ],
         "fps": 10.0,
+        "loop": false
+      },
+      "bite": {
+        "frames": [
+          26,
+          27,
+          28
+        ],
+        "fps": 5,
         "loop": false
       }
     },
@@ -2991,6 +3046,20 @@
         [
           13.5,
           -23.0
+        ]
+      ],
+      "bite": [
+        [
+          10.5,
+          -27.0
+        ],
+        [
+          9.0,
+          -27.0
+        ],
+        [
+          15.0,
+          -22.0
         ]
       ]
     }
