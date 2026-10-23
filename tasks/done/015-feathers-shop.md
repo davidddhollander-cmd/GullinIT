@@ -1,6 +1,6 @@
 # 015 — Feathers shop and perk equip (UI)
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
