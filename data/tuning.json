@@ -256,6 +256,8 @@
     "leave_time": 4,
     "mug_window": 0.5,
     "mug_stun": 1,
+    "mug_chance": 0.35,
+    "mug_range": 90,
     "cruise_y": 65
   },
   "wind_flag": {"flap_speed": 7.0, "base_reach": 7, "wind_reach": 3.0, "intro_lift": 14, "intro_reach": 12},

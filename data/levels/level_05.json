@@ -20,12 +20,12 @@
     {
       "name": "Gary", "species": "great-black-backed",
       "speed": 0.8,
-      "accuracy_px": 16
+      "accuracy_px": 16, "mug_chance": 0.3
     },
     {
       "name": "Chip", "species": "kittiwake",
       "speed": 0.8,
-      "accuracy_px": 10
+      "accuracy_px": 10, "mug_chance": 0.8
     }
   ],
   "spawns": [

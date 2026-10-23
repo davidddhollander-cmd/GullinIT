@@ -14,7 +14,7 @@
   "random_quest": {"count": [3, 5], "bonus": 40},
   "random_foods": ["hotdog", "fried_fish", "ice_cream", "half_eaten_doughnut", "half_eaten_pizza"],
   "stars": [250, 550, 750],
-  "rivals": [{"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16, "loose_only": true}],
+  "rivals": [{"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16, "mug_chance": 0.3, "loose_only": true}],
   "rivals_after_snatch": true,
   "world": {"width": 1280, "promenade_start": 430, "pier_start": 920, "start_x": 65, "start_y": 105},
   "zones": [
