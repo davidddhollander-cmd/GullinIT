@@ -199,7 +199,7 @@ static func run_game(suite: Node, check: Callable) -> void:
 	var ticks: Array[String] = []
 	for label: Label in board.captions:
 		ticks.append(label.text)
-	check.call(ticks.any(func(t: String) -> bool: return t.begins_with("* 3 CLEAN")) and ticks.any(func(t: String) -> bool: return t.begins_with("- MAKE")), "result board ticks done quests only")
+	check.call(ticks.any(func(t: String) -> bool: return t.begins_with("> 3 CLEAN")) and ticks.any(func(t: String) -> bool: return t.begins_with("- MAKE")), "result board ticks done quests only")
 	check.call(board.rows.size() == 7 and board.rows[2].text == "+50" and board.rows[3].text == "" and board.rows[4].text == "1/4", "quest rows show bonus, none, and progress")
 	check.call(board.rows.back().text == "160" and int(sample.base) + int(sample.clean) + int(sample.quest_bonus) == int(sample.score), "total equals earned + clean + done quest bonuses")
 	check.call((board.scores_panel.get_node("Header") as Label).text == "HIGH SCORES" and board.score_rows.size() == ResultBoard.SCORE_SLOTS, "quest runs still show high scores")
