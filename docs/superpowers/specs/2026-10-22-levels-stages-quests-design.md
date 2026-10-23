@@ -35,10 +35,15 @@ Replace "the last level with more of everything" with a three-stage story game w
 | 2 | Family Picnic | **Wind intro**: steady breeze, flags show direction, one-time upwind-bonus tip | — | 3 clean ice-cream snatches · Make a toddler cry |
 | 3 | Boardwalk Bustle | **Gary arrives**: intro beat/taunt card; he only steals loose or dropped food | Gary | Mug Gary · Eat a crab |
 | 4 | Dog Day Afternoon *(was Ice Cream Rush)* | **Off-lead dog**: fast, chases you on the ground and in low flight; stuns on catch | Gary | Pull off a COUNTER · Outrun the dog ×3 |
-| 5 | Two's Company *(was Pier Patrol; no whistle mechanic)* | **Chip debut**: sneaky rival who mugs *you*; teams up with Gary | Gary, Chip | 2 fried fish · Mug Chip |
+| 5 | Three's a Crowd *(was Pier Patrol; no whistle mechanic)* | **Chip debut**: a fast thief; Gary, Chip and you all fight over the pier food | Gary, Chip | 2 fried fish · Mug Chip |
 | 6 | **Sunset Showdown — boss** | **Wind flips** periodically. **Bev** debuts: big and bossy, shoves smaller gulls off food, can only be mugged from behind | Gary, Chip, Bev | Mug all 3 rivals · Win by double (2× the second-place rival) |
 
 Boss objective (L6): out-eat Gary, Chip and Bev on a rival scoreboard before the sun sets.
+
+**Rivals compete, never cooperate** (decided 2026-10-23). Every gull is for itself:
+- Rivals no longer split the beach between them: each picks the best food for itself, so they often race for the same target. First beak wins; the loser pulls up and looks elsewhere.
+- Anyone can mug anyone in the air: rivals mug each other, the player mugs rivals, and rivals mug the player when the player carries food. Climbing away or swallowing quickly protects you.
+- Personalities differ by numbers in data (speed, accuracy, how eagerly they mug), not by alliances. Chip is the most eager mugger; Gary's level 3 intro still only takes loose food.
 
 Levels 4–6 become hand-built JSON layouts like 1–3 (`data/levels/level_0X.json`). The generator stays for filler/testing only.
 
@@ -107,7 +112,7 @@ Rule from `AGENTS.md` still applies: no code-drawn bodies, faces or limbs for an
 ## Build order
 
 1. Quest tracker + random food slot + Feathers save, on levels 1–3 (demo). L2 wind intro, L3 Gary intro beat.
-2. Level 4 dog chaser (Codex: off-lead dog sprite sheet first), L5 Chip debut, L6 boss scoreboard + Bev + wind flip (Codex: Bev sprite first). Hand-built JSON for 4–6.
+2. Level 4 dog chaser (Codex: off-lead dog sprite sheet first), L5 Chip debut (competing rivals first, task 011), L6 boss scoreboard + Bev + wind flip (Codex: Bev sprite first). Hand-built JSON for 4–6.
 3. Feathers shop, species stats, perks incl. bullet-time meter.
 4. Diving + breath meter, cormorant and skua (Codex sprites first).
 5. Levels 7–10 and the whale ending (Codex: harbour/market/trawler/whale art first).
