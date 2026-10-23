@@ -44,6 +44,8 @@ var training_reset_clock: float = 0.0
 var pending_rivals: Array = []
 var loose_targets: Array[BeachTarget] = []
 var taunt_wait: float = -1.0
+var taunt_rival: String = ""
+var taunt_text: String = ""
 var crashes: int = 0
 var first_steal_sent: bool = false
 var end_tracked: bool = false
@@ -147,8 +149,11 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 			_training_advance()
 	)
 	pending_rivals = level.rivals.duplicate(true)
-	if not bool(level.get("rivals_after_snatch",false)):
-		_release_rivals()
+	var held: bool = bool(level.get("rivals_after_snatch",false))
+	var later: Array = pending_rivals.filter(func(p: Dictionary) -> bool: return held or bool(p.get("after_snatch",false)))
+	pending_rivals = pending_rivals.filter(func(p: Dictionary) -> bool: return p not in later)
+	_release_rivals()
+	pending_rivals = later
 	effects = BeachEffects.new()
 	effects.z_index = 5
 	add_child(effects)
@@ -185,18 +190,21 @@ func _wind_tip() -> void:
 	# Fixed mid-screen band: clear of the top bar, hint and goal box.
 	effects.message(Vector2(camera_x,84.0),"FLY INTO THE WIND = UPWIND +%d%%" % roundi(float(Config.tuning.score.upwind)*100.0),BeachUI.GOLD,float(Config.tuning.juice.tip_time),0.0)
 
-# Shows Gary's taunt after a delay, never while the score banner is up, below him so his tag stays clear.
-func _gary_taunt(step: float) -> void:
+# Shows a released rival's taunt after a delay, never while the score banner is up, below the rival so the tag stays clear.
+func _rival_taunt(step: float) -> void:
 	if taunt_wait < 0.0 or pilots.is_empty():
 		return
 	taunt_wait = maxf(0.0,taunt_wait-step)
 	if taunt_wait > 0.0 or overlay.score_announcement.visible or effects.texts.any(func(t: Dictionary) -> bool: return t.has("fade_time")):
 		return
 	taunt_wait = -1.0
-	var gary: Vector2 = pilots[0].gull.position
-	var half: float = 108.0
-	var at: Vector2 = Vector2(clampf(gary.x,camera_x-160.0+half,camera_x+160.0-half),gary.y+22.0)
-	effects.message(at,"GARY: OI! THAT'S MY LUNCH!",BeachUI.GOLD,float(Config.tuning.juice.taunt_time),0.0)
+	var from: Vector2 = pilots[0].gull.position
+	for pilot: RivalPilot in pilots:
+		if pilot.gull.rival_name == taunt_rival:
+			from = pilot.gull.position
+	var half: float = taunt_text.length()*4.2
+	var at: Vector2 = Vector2(clampf(from.x,camera_x-160.0+half,camera_x+160.0-half),from.y+22.0)
+	effects.message(at,taunt_text,BeachUI.GOLD,float(Config.tuning.juice.taunt_time),0.0)
 
 # Mirrors claimable stash items as LooseFood targets for loose-only rivals.
 func _sync_loose_targets() -> void:
@@ -316,7 +324,7 @@ func _physics_process(delta: float) -> void:
 	if dog != null:
 		dog.tick(step,player)
 	_sync_loose_targets()
-	_gary_taunt(step)
+	_rival_taunt(step)
 	if player.state != BeachGull.State.STUNNED:
 		player.digestion.tick(step,player.state == BeachGull.State.GROUNDED)
 	scraps.tick(step,player)
@@ -515,8 +523,14 @@ func _swallowed(snack: Dictionary) -> void:
 		var earned: int = _award(value,snack.get("risky",false),snack.get("upwind",false),snack.get("mugged",false),snack.get("handover",false))
 		overlay.show_score_announcement(str(snack.id),earned)
 		if not pending_rivals.is_empty():
+			var taunter: Dictionary = {}
+			for profile: Dictionary in pending_rivals:
+				if profile.has("taunt"):
+					taunter = profile
 			_release_rivals()
-			if _twist() == "gary_intro":
+			if not taunter.is_empty():
+				taunt_rival = str(taunter.name)
+				taunt_text = str(taunter.taunt)
 				taunt_wait = float(Config.tuning.juice.taunt_delay)
 			else:
 				effects.message(player.position-Vector2(0,22),"GARY JOINS THE LUNCH RUSH!",BeachUI.GOLD)
