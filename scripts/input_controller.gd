@@ -5,6 +5,8 @@ var touch_active: bool = false
 var touch_climb: bool = false
 var touch_dive: bool = false
 var touch_peck: bool = false
+var touch_slowmo: bool = false
+var slowmo_ready: bool = false ## set by the game; the touch button only exists while true
 var aim_finger: int = -1
 var climb_fingers: Dictionary = {}
 var gamepad: bool = false
@@ -18,6 +20,7 @@ const TOUCH_BUTTONS: Dictionary = {
 	"flap": Rect2(272,149,44,22),
 	"dive": Rect2(272,124,44,21),
 }
+const SLOWMO_BUTTON: Rect2 = Rect2(226,124,42,21)
 const TOUCH_SLOP: float = 2.0
 
 static func touch_button_at(point: Vector2) -> String:
@@ -27,7 +30,7 @@ static func touch_button_at(point: Vector2) -> String:
 	return ""
 
 static func register_actions() -> void:
-	var keys: Dictionary = {"climb":[KEY_SPACE],"dive":[KEY_SHIFT],"pause":[KEY_ESCAPE],"restart":[KEY_R],"fullscreen":[KEY_F11],"debug":[KEY_F1],"reload":[KEY_F2],"aim_left":[KEY_A,KEY_LEFT],"aim_right":[KEY_D,KEY_RIGHT],"aim_up":[KEY_W,KEY_UP],"aim_down":[KEY_S,KEY_DOWN]}
+	var keys: Dictionary = {"climb":[KEY_SPACE],"dive":[KEY_SHIFT],"pause":[KEY_ESCAPE],"restart":[KEY_R],"slowmo":[KEY_Q],"fullscreen":[KEY_F11],"debug":[KEY_F1],"reload":[KEY_F2],"aim_left":[KEY_A,KEY_LEFT],"aim_right":[KEY_D,KEY_RIGHT],"aim_up":[KEY_W,KEY_UP],"aim_down":[KEY_S,KEY_DOWN]}
 	for action: String in keys:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action,0.2)
@@ -47,7 +50,7 @@ static func register_actions() -> void:
 		var event: InputEventMouseButton = InputEventMouseButton.new()
 		event.button_index = pair[1]
 		InputMap.action_add_event(pair[0],event)
-	for pair: Array in [["climb",JOY_BUTTON_A],["dive",JOY_BUTTON_B],["pause",JOY_BUTTON_START],["restart",JOY_BUTTON_BACK]]:
+	for pair: Array in [["climb",JOY_BUTTON_A],["dive",JOY_BUTTON_B],["pause",JOY_BUTTON_START],["restart",JOY_BUTTON_BACK],["slowmo",JOY_BUTTON_RIGHT_SHOULDER]]:
 		var event: InputEventJoypadButton = InputEventJoypadButton.new()
 		event.button_index = pair[1]
 		InputMap.action_add_event(pair[0],event)
@@ -70,7 +73,9 @@ func _input(event: InputEvent) -> void:
 		touch_visible = true
 		if event.pressed:
 			var button: String = touch_button_at(event.position)
-			if button == "peck":
+			if slowmo_ready and SLOWMO_BUTTON.grow(TOUCH_SLOP).has_point(event.position):
+				touch_slowmo = true
+			elif button == "peck":
 				touch_peck = true
 			elif button == "flap":
 				climb_fingers[event.index] = true
@@ -109,6 +114,7 @@ func update_player(gull: BeachGull, camera_x: float) -> void:
 
 func clear_touch() -> void:
 	touch_peck = false
+	touch_slowmo = false
 	touch_climb = false
 	touch_dive = false
 	aim_finger = -1
