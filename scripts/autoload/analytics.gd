@@ -16,6 +16,9 @@ func _ready() -> void:
 		var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 		if data is Dictionary:
 			config.merge(data, true)
+	# Test suites and headless tools never report to the real project.
+	if DisplayServer.get_name() == "headless" or Array(OS.get_cmdline_args()).any(func(a: String) -> bool: return a.trim_prefix("res://").begins_with("tests/")):
+		config.enabled = false
 
 func active() -> bool:
 	return bool(config.get("enabled", false)) and not str(config.get("project_key", "")).is_empty() and bool(GameState.options.get("stats", true))
