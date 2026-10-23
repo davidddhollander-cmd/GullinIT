@@ -52,7 +52,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	training = bool(level.get("tutorial",false)) and (force_training or not bool(GameState.entry(1).get("training_complete",false)))
 	lesson = 0 if force_training else clampi(int(GameState.entry(1).get("training_step",0)),0,TRAINING_LESSONS-1)
 	casual = is_casual and not training
-	if not training:
+	if not training or (bool(level.get("quests_on_replay_only",false)) and bool(GameState.entry(1).get("training_complete",false))):
 		var quest_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 		quest_rng.randomize()
 		quests.setup(level,quest_rng)

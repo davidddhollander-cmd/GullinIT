@@ -27,11 +27,11 @@ Playing levels 1–3 completes quests from real gameplay, adds bonus points ever
 
 ## Report
 Files: `scripts/game.gd`, `scripts/stash_raids.gd`, `tests/quest_checks.gd` (new `run_game`), `tests/integration.gd`.
-Tests: headless integration 16060 checks, 1 failure (known pre-existing `level 6 rival leaves the scene of a theft`); +14 new checks. Note: my first red run raced with the implementation edits and was discarded, so the fail-first run was not captured.
+Tests: headless integration 16061 checks, 1 failure (known pre-existing `level 6 rival leaves the scene of a theft`); +15 new checks. Test fix: the random quest slot is dropped in game tests (a rolled 3x ice cream quest made them flaky). Note: my first red run raced with the implementation edits and was discarded, so the fail-first run was not captured.
 Decisions:
 - Events are recorded via `_quest_event`, gated on `running`; `bin_emptied` emitted from `_peck_bin` when `remaining` hits 0 after a scatter.
 - `direct` = not scrap and not mugged. Scrap swallows still count for the random "EAT N" quest.
-- Quests are skipped whenever `training` is true (this covers level 1 before `training_complete`); the quest RNG is `randomize()`d per run.
+- Quests are set up when not training, or when the level has `quests_on_replay_only` and `training_complete` was already true (the menu always passes force_training for L1, so replays are training runs). First-time trainees get none. Events record during replay lessons. The quest RNG is `randomize()`d per run.
 - Bonus and Feather paid on completion; `result.quests` and `result.feathers_earned` added to non-training and training results alike (training has all quests undone).
 - Random-food reachability audit from Task 1 not revisited.
 Not done: `mid_air_bite` unreachable (Task 5).

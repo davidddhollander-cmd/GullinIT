@@ -72,6 +72,9 @@ static func run(check: Callable) -> void:
 static func _play(main: Node, level: int) -> BeachGame:
 	main.start_level(level)
 	main.game.dismiss_intro()
+	# Drop the random slot so a rolled ice cream quest cannot add Feathers.
+	if level > 1 and main.game.quests.quests.size() > 2:
+		main.game.quests.quests.resize(2)
 	return main.game
 
 static func _finish(game: BeachGame) -> Dictionary:
@@ -90,18 +93,18 @@ static func run_game(suite: Node, check: Callable) -> void:
 	GameState.wallet = {"feathers": 0}
 	main.casual = false
 	var game: BeachGame = _play(main, 2)
-	check.call(game.quests.quests.size() == 3, "level 2 game builds three quests")
+	check.call(game.quests.quests.size() == 2, "level 2 game keeps its two fixed quests")
 	var before: int = game.score.points
 	for i: int in 3:
 		game._swallowed({"id": "ice_cream"})
 	var ice: Dictionary = game.quests.quests[0]
 	check.call(ice.done and game.score.points >= before + 50, "three clean ice creams complete l2_ice and add its bonus")
 	var result: Dictionary = _finish(game)
-	check.call(result.get("quests", []).size() == 3 and result.quests[0].done and result.quests[0].text == "3 CLEAN ICE CREAMS", "result lists quests with done state")
+	check.call(result.get("quests", []).size() == 2 and result.quests[0].done and result.quests[0].text == "3 CLEAN ICE CREAMS", "result lists quests with done state")
 	check.call(int(result.get("feathers_earned", -1)) == 1 and GameState.feathers() == 1, "first completion earns one Feather")
-	var progress: int = int(game.quests.quests[2].progress)
+	var progress: int = int(game.quests.quests[1].progress)
 	game._swallowed({"id": "ice_cream"})
-	check.call(int(ice.progress) == 3 and int(game.quests.quests[2].progress) == progress, "swallow after finish does not record")
+	check.call(int(ice.progress) == 3 and int(game.quests.quests[1].progress) == progress, "swallow after finish does not record")
 	game = _play(main, 2)
 	before = game.score.points
 	for i: int in 3:
@@ -123,11 +126,16 @@ static func run_game(suite: Node, check: Callable) -> void:
 	main.casual = false
 	main.start_level(1)
 	check.call(main.game.quests.quests.is_empty(), "level 1 first run has no quests")
+	main.start_level(1, true)
+	check.call(main.game.quests.quests.is_empty(), "level 1 first-time training has no quests")
 	GameState.complete_training()
-	game = _play(main, 1)
-	check.call(game.quests.quests.size() == 2, "level 1 after training has quests")
+	main._navigate("start", 1)
+	game = main.game
+	game.dismiss_intro()
+	var feathers: int = GameState.feathers()
+	check.call(game.training and game.quests.quests.size() == 2, "level 1 lesson replay via the menu has two quests")
 	game.stash_raids.bin_emptied.emit("bin")
-	check.call(game.quests.quests[0].done, "bin_emptied completes l1_bin")
+	check.call(game.quests.quests[0].done and GameState.feathers() == feathers + 1, "bin_emptied in a replay completes l1_bin and pays a Feather")
 	game = _play(main, 2)
 	var toddler: BeachTarget = BeachTarget.new()
 	toddler.kind = "toddler"
