@@ -1,5 +1,6 @@
 extends Node
 var progress: Dictionary = {}
+var wallet: Dictionary = {"feathers": 0}
 var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false}
 var save_path: String = "user://save.json"
 var save_error: String = ""
@@ -36,6 +37,8 @@ func load_progress() -> void:
 	if data is Dictionary:
 		if data.get("progress") is Dictionary:
 			progress = data.progress
+		if data.get("wallet") is Dictionary:
+			wallet.merge(data.wallet, true)
 		if data.get("options") is Dictionary:
 			options.merge(data.options, true)
 
@@ -44,7 +47,7 @@ func save_progress() -> void:
 	if file == null:
 		save_error = "Progress could not be saved."
 		return
-	file.store_string(JSON.stringify({"version": 1, "progress": progress, "options": options}))
+	file.store_string(JSON.stringify({"version": 1, "progress": progress, "wallet": wallet, "options": options}))
 	file.close()
 	var error: Error = DirAccess.rename_absolute(save_path + ".tmp", save_path)
 	save_error = "" if error == OK else "Progress could not be saved."
@@ -77,6 +80,22 @@ func complete_training() -> void:
 	previous.training_complete = true
 	progress["1"] = previous
 	save_progress()
+
+# True (and +1 Feather) only the first time a quest is completed.
+func complete_quest(level_id: int, quest_id: String) -> bool:
+	var previous: Dictionary = entry(level_id)
+	var done: Array = previous.get("quests", [])
+	if quest_id in done:
+		return false
+	done.append(quest_id)
+	previous.quests = done
+	progress[str(level_id)] = previous
+	wallet.feathers = feathers() + 1
+	save_progress()
+	return true
+
+func feathers() -> int:
+	return int(wallet.get("feathers", 0))
 
 func entry(id: int) -> Dictionary:
 	var value: Variant = progress.get(str(id), {})
