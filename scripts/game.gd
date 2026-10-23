@@ -18,6 +18,7 @@ var score: BeachScore = BeachScore.new()
 var spawner: BeachSpawner = BeachSpawner.new()
 var stalls: StallService = StallService.new()
 var crabs: CrabPopulation
+var dog: OffLeadDog
 var beach: BeachBackdrop
 var scraps: BeachScraps
 var stash_raids: BeachStashRaids
@@ -79,6 +80,26 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	add_child(actors)
 	spawner.target_created.connect(_wire_target)
 	spawner.setup(actors,level)
+	if _twist() == "off_lead_dog":
+		for spawn: Dictionary in level.spawns:
+			if spawn.type == "off_lead_dog":
+				dog = OffLeadDog.new()
+				actors.add_child(dog)
+				dog.setup(float(spawn.x),spawn.home,int(level.seed)+5)
+				dog.barked.connect(func() -> void:
+					effects.message(dog.position-Vector2(0,24),"WOOF!",BeachUI.GOLD)
+					Audio.play("click")
+				)
+				dog.caught.connect(func() -> void:
+					effects.message(dog.position-Vector2(0,24),"GOTCHA!",Color("ef725c"))
+					_quest_event("dog_caught")
+				)
+				dog.outrun.connect(func() -> void:
+					effects.message(player.position-Vector2(0,18),"OUTRUN!",BeachUI.GOLD)
+					Audio.play("snatch")
+					_quest_event("dog_outrun")
+				)
+				break
 	stalls.setup(beach,spawner)
 	stalls.portion_created.connect(_wire_target)
 	crabs = CrabPopulation.new()
@@ -292,6 +313,8 @@ func _physics_process(delta: float) -> void:
 		_peck()
 	player.tick(step,wind.direction,wind.strength)
 	_wind_tip()
+	if dog != null:
+		dog.tick(step,player)
 	_sync_loose_targets()
 	_gary_taunt(step)
 	if player.state != BeachGull.State.STUNNED:
@@ -405,6 +428,8 @@ func set_paused(value: bool) -> void:
 		gull.sprite.speed_scale = 0 if value else 1
 	for target: BeachTarget in spawner.targets:
 		target.sprite.speed_scale = 0 if value else 1
+	if dog != null:
+		dog.paused = value
 
 func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 	if gull == player:

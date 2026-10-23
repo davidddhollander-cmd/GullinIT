@@ -121,6 +121,7 @@ func run() -> void:
 	await preload("res://tests/score_rules_checks.gd").run(self,Callable(self,"check"))
 	preload("res://tests/quest_checks.gd").run(Callable(self,"check"))
 	await preload("res://tests/quest_checks.gd").run_game(self,Callable(self,"check"))
+	await preload("res://tests/off_lead_dog_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/analytics_checks.gd").run(self,Callable(self,"check"))
 	preload("res://tests/sunbather_reactions_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/retro_environment_checks.gd").run_checks(Callable(self,"check"))
@@ -177,7 +178,7 @@ func run() -> void:
 		var game: BeachGame = main.game
 		game.set_physics_process(false)
 		await settle()
-		check(game.spawner.targets.size()==Config.levels[i-1].spawns.size(),"level %d spawns" % i)
+		check(game.spawner.targets.size()==Config.levels[i-1].spawns.filter(func(spawn: Dictionary) -> bool: return spawn.type != "off_lead_dog").size(),"level %d spawns" % i)
 		check(game.pilots.size()+game.pending_rivals.size()==Config.levels[i-1].rivals.size(),"level %d rivals" % i)
 		if not game.pilots.is_empty():
 			check(game.pilots[0].gull.position.x <= 320 and game.pilots[0].gull.visible,"first rival appears in the opening view")
@@ -2148,7 +2149,7 @@ func generated_layout_checks() -> void:
 			views = [[160,"open-sand"],[400,"snack-and-bag"],[640,"family-bay"]]
 		elif number == 2:
 			views = [[160,"sunbathers"],[480,"first-family"],[720,"second-family"],[880,"snack-kiosk"]]
-		elif number == 3:
+		elif number == 3 or number == 4:
 			views = [[160,"quiet-beach"],[600,"promenade-snacks"],[800,"promenade-stroll"],[1080,"pier-dining"]]
 		if number <= 3:
 			for legacy: Array in [[160,"sunbathers"],[480,"families"],[800,"promenade"],[1120,"pier"]]:

@@ -20,6 +20,8 @@ func setup(owner_node: Node2D, definition: Dictionary) -> void:
 	bag_rng.seed = int(level.seed) + 97
 	shopper_serial = 0
 	for spawn: Dictionary in level.spawns:
+		if spawn.type == "off_lead_dog":
+			continue # BeachGame owns the dog; it is not a BeachTarget.
 		var target: BeachTarget = create(spawn.type,spawn.x,spawn)
 		# Authored buyers beside a stall begin with its visible purchase. The
 		# distant training/strolling snacks still represent earlier purchases.
