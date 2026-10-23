@@ -54,7 +54,7 @@ func request_family(buyer: BeachTarget) -> bool:
 	return true
 
 func request_shopper(buyer: BeachTarget) -> bool:
-	var type: String = "hotdog_stand" if buyer.food_id == "hotdog" else "kiosk"
+	var type: String = buyer.purchase_stall_type()
 	var stand: FoodStall = find_stall(buyer,type)
 	if stand == null or requests.has(stand) or buyer.food or buyer.dropped_pending:
 		return false
@@ -214,6 +214,8 @@ func _intercept(stand: FoodStall, portion: StallPortion, gull: BeachGull) -> voi
 		buyer.reaction.theft(buyer,gull,portion.last_theft_direct)
 		buyer.recover = float(Config.tuning.world.recover_time)
 		buyer.respawn = float(Config.tuning.world.stall_retry_wait)
+		if buyer.kind == "pier_diner":
+			buyer.diner_meal = BeachTarget.DinerMeal.DINING
 		# Counter interception bypasses BeachTarget._finish_theft, so present the
 		# recipient's successful-theft reaction immediately on this same frame.
 		buyer.update_art_pose(false)
@@ -245,7 +247,9 @@ func _finish(stand: FoodStall, success: bool) -> void:
 			owner.family_trip = BeachTarget.FamilyTrip.RETURN
 		elif not bool(request.family):
 			owner.respawn = float(Config.tuning.world.stall_retry_wait)
-			if success:
+			if owner.kind == "pier_diner":
+				owner.diner_meal = BeachTarget.DinerMeal.RETURN if success and owner.food else BeachTarget.DinerMeal.DINING
+			elif success:
 				owner.patrol_home = stand.contact_x()+stand.side*12.0
 				owner.routine.purchased(owner,stand.contact_x())
 	var portion: BeachTarget = request.portion

@@ -84,6 +84,9 @@ var action_pose_time: float = 0.0
 var lifeguard_whistle_time: float = 0.0
 var reaction: AdultReaction = AdultReaction.new()
 var routine: BeachRoutine = BeachRoutine.new()
+enum DinerMeal { DINING, SEEK, RETURN }
+var diner_meal: DinerMeal = DinerMeal.DINING
+var diner_home: float = 0.0
 enum SleepState { SLEEPING, WAKING, AWAKE }
 var sleep_state: SleepState = SleepState.SLEEPING
 var sleep_pecks: int = 0
@@ -173,6 +176,7 @@ func setup(type: String, x: float, random: RandomNumberGenerator, mult: float, s
 	patrol_radius = float(spawn.get("patrol_radius",35.0))
 	stash_home_x = x
 	family_home = x
+	diner_home = x
 	rng = random
 	if kind == "kiosk_customer":
 		var appearance: String = str(spawn.get("appearance","kiosk_customer"))
@@ -334,11 +338,18 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 		_tick_defense(delta,gulls)
 		queue_redraw()
 		return
+	if kind == "pier_diner" and diner_meal == DinerMeal.RETURN and food and not dropped_pending:
+		_tick_diner_return(delta,gulls)
+		return
 	if not food and not dropped_pending and not food_id.is_empty() and kind not in ["toddler", "picnic_family", "sunbather"]:
 		respawn -= delta
 		if respawn <= 0:
-			if kind == "kiosk_customer" and stall_service != null:
-				_tick_shopping(delta)
+			if kind in ["kiosk_customer","pier_diner"]:
+				if stall_service != null:
+					_tick_shopping(delta,gulls)
+				else:
+					respawn = float(t.stall_retry_wait)
+					update_art_pose(false)
 				return
 			else:
 				food = true
@@ -367,19 +378,43 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	update_art_pose(moved)
 	queue_redraw()
 
-func _tick_shopping(delta: float) -> void:
-	var stand: FoodStall = stall_service.find_stall(self,"hotdog_stand" if food_id=="hotdog" else "kiosk")
+func purchase_stall_type() -> String:
+	# The existing cooked-food grill also supplies the diner's fried fish.
+	return "hotdog_stand" if food_id in ["hotdog","fried_fish"] else "kiosk"
+
+func _tick_shopping(delta: float, gulls: Array[BeachGull] = []) -> void:
+	var stand: FoodStall = stall_service.find_stall(self,purchase_stall_type())
 	if stand == null:
 		respawn = float(Config.tuning.world.stall_retry_wait)
 		update_art_pose(false)
 		return
+	if kind == "pier_diner":
+		diner_meal = DinerMeal.SEEK
 	var destination: float = stand.contact_x()
 	var moving: bool = absf(destination-position.x)>0.25
 	facing = signf(destination-position.x) if moving else -stand.side
-	position.x = move_toward(position.x,destination,float(Config.tuning.world.family_trip_speed)*delta)
+	var speed: float = float(Config.tuning.world.diner_trip_speed)*speed_mult if kind=="pier_diner" else float(Config.tuning.world.family_trip_speed)
+	position.x = move_toward(position.x,destination,speed*delta)
+	if kind == "pier_diner":
+		_tick_defense(delta,gulls)
+		_update_defense_art()
 	update_art_pose(moving)
 	if not moving:
 		stall_service.request_shopper(self)
+
+func _tick_diner_return(delta: float, gulls: Array[BeachGull]) -> void:
+	var destination: float = clampf(diner_home,20.0,float(Config.tuning.world.width)-20.0)
+	var before: float = position.x
+	if absf(destination-before)>0.25:
+		facing = signf(destination-before)
+	position.x = move_toward(before,destination,float(Config.tuning.world.diner_trip_speed)*speed_mult*delta)
+	if is_equal_approx(position.x,destination):
+		diner_meal = DinerMeal.DINING
+		routine.dining_returned(self)
+	_tick_defense(delta,gulls)
+	_update_defense_art()
+	update_art_pose(not is_equal_approx(position.x,before))
+	queue_redraw()
 
 func _update_defense_art() -> void:
 	food_sprite.modulate = Color("ef725c") if defense > 0 and info.twist == "shield" else Color.WHITE
@@ -739,6 +774,8 @@ func recover_dropped() -> void:
 	drop_pickup_time = 0.0
 	food = true
 	food_sprite.show()
+	if kind == "pier_diner":
+		diner_meal = DinerMeal.RETURN
 	recover = 0.0
 	update_art_pose(false)
 
@@ -755,6 +792,8 @@ func claim_dropped(gull: BeachGull) -> bool:
 
 func _finish_theft(gull: BeachGull, risky: bool) -> void:
 	thefts += 1
+	if kind == "pier_diner":
+		diner_meal = DinerMeal.DINING
 	respawn = rng.randf_range(Config.tuning.world.respawn_min, Config.tuning.world.respawn_max)
 	recover = Config.tuning.world.recover_time
 	alert = 1.0

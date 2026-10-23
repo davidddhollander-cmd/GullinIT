@@ -71,6 +71,15 @@ func resume(owner: BeachTarget) -> void:
 	if enabled:
 		_choose(owner)
 
+func dining_returned(owner: BeachTarget) -> void:
+	if not enabled:
+		return
+	# The meal source never becomes the diner's new strolling/dining home.
+	anchor = owner.diner_home
+	destination = anchor
+	legs = 0
+	_rest(owner)
+
 func _choose(owner: BeachTarget) -> void:
 	phase = Phase.WALK
 	var radius: float = random.randf_range(float(profile.min_distance),float(profile.max_distance))
