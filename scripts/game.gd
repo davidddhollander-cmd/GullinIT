@@ -66,6 +66,9 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	beach.strength = wind.strength
 	add_child(beach)
 	beach.setup(level.props,level.get("zones",[]),level.get("world",{}))
+	if _twist() == "wind_intro":
+		for flag_x: Variant in level.twist.get("flags",[]):
+			beach.wind_flags.append(int(flag_x))
 	scraps = BeachScraps.new()
 	add_child(scraps)
 	scraps.collected.connect(_scrap_collected)
@@ -146,6 +149,17 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 			player.position = Vector2(180,70)
 			player.state = BeachGull.State.GLIDE
 	Config.reloaded.connect(_reload)
+
+func _twist() -> String:
+	return str(level.get("twist",{}).get("id",""))
+
+# Level 2 teaches upwind scoring once per save, the first time the gull is airborne.
+func _wind_tip() -> void:
+	if _twist() != "wind_intro" or "upwind" in GameState.options.tips or player.state == BeachGull.State.GROUNDED:
+		return
+	GameState.options.tips.append("upwind")
+	GameState.save_progress()
+	effects.message(player.position-Vector2(0,22),"FLY INTO THE WIND = UPWIND +%d%%" % roundi(float(Config.tuning.score.upwind)*100.0),BeachUI.GOLD,float(Config.tuning.juice.tip_time))
 
 func _release_rivals() -> void:
 	for profile: Dictionary in pending_rivals:
@@ -231,6 +245,7 @@ func _physics_process(delta: float) -> void:
 		input.touch_peck = false
 		_peck()
 	player.tick(step,wind.direction,wind.strength)
+	_wind_tip()
 	if player.state != BeachGull.State.STUNNED:
 		player.digestion.tick(step,player.state == BeachGull.State.GROUNDED)
 	scraps.tick(step,player)
@@ -411,7 +426,13 @@ func _swallowed(snack: Dictionary) -> void:
 		overlay.show_score_announcement(str(snack.id),earned)
 		if not pending_rivals.is_empty():
 			_release_rivals()
-			effects.message(player.position-Vector2(0,22),"GARY JOINS THE LUNCH RUSH!",BeachUI.GOLD)
+			if _twist() == "gary_intro":
+				var gary: Vector2 = pilots[0].gull.position
+				var half: float = 100.0
+				var taunt_at: Vector2 = Vector2(clampf(gary.x,camera_x-160.0+half,camera_x+160.0-half),gary.y-16.0)
+				effects.message(taunt_at,"GARY: OI! THAT'S MY LUNCH!",BeachUI.GOLD,float(Config.tuning.juice.taunt_time))
+			else:
+				effects.message(player.position-Vector2(0,22),"GARY JOINS THE LUNCH RUSH!",BeachUI.GOLD)
 
 func _cry(source: BeachTarget) -> void:
 	if source.kind == "toddler":

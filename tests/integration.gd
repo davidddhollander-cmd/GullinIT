@@ -142,6 +142,7 @@ func run() -> void:
 	preload("res://tests/flight_dynamics_checks.gd").run(self,Callable(self,"check"))
 	preload("res://tests/gull_tumble_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/rival_ai_checks.gd").run(self,main,Callable(self,"check"))
+	await preload("res://tests/rival_ai_checks.gd").loose_only_checks(self,main,Callable(self,"check"))
 	await digestion_reaction_checks()
 	await bag_variety_checks()
 	preload("res://tests/pickup_shine_checks.gd").run(Callable(self,"check"))

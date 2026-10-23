@@ -85,6 +85,10 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 		check.call(r.hud_visible and r.hud_rows == r.pilots,"level %d shows one right-side score row per rival" % level)
 		check.call((r.hud_rect as Rect2).end.x <= 320.0 and (r.hud_rect as Rect2).position.y >= 74.0 and (r.hud_rect as Rect2).end.y < 124.0,"level %d rival score meter stays in its right-side safe area" % level)
 		for i: int in r.pilots:
+			# Loose-only rivals (Gary) wait for food that is off the person, so they dive rarely.
+			if bool(main.game.pilots[i].personality.get("loose_only",false)):
+				check.call(r.crashes[i] == 0,"level %d loose-only rival %d never crashes its own dives" % [level,i])
+				continue
 			check.call(r.dives[i] >= 3,"level %d rival %d dives at least 3 times (%d)" % [level,i,r.dives[i]])
 			check.call(r.thefts[i] >= need_thefts,"level %d rival %d steals at least %d times (%d)" % [level,i,need_thefts,r.thefts[i]])
 			check.call(r.scores[i] > 0,"level %d rival %d accumulates a visible food score (%d)" % [level,i,r.scores[i]])
@@ -94,3 +98,20 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 		check.call(r.shared_target == 0,"level %d rivals never chase the same target" % level)
 		check.call(r.cooldown_dives == 0,"level %d rival waits out the cooldown after a theft" % level)
 		check.call(r.escape_short == 0,"level %d rival leaves the scene of a theft" % level)
+
+## A loose-only rival (Gary) must never steal or knock food a person is holding.
+static func loose_only_checks(host: Node, main: Node, check: Callable) -> void:
+	await simulate(host, main, 3, 60.0)
+	var game: BeachGame = main.game
+	var held_thefts: int = 0
+	for target: BeachTarget in game.spawner.targets:
+		held_thefts += target.thefts + (1 if target.dropped_pending else 0)
+	check.call(bool(game.pilots[0].personality.get("loose_only", false)), "level 3 Gary profile is loose-only")
+	check.call(held_thefts == 0, "loose-only Gary never steals or knocks held food over 60 s (%d)" % held_thefts)
+	game.pilots[0].target = null
+	var held: Array[BeachTarget] = []
+	for target: BeachTarget in game.spawner.targets:
+		target.food = true
+		held.append(target)
+	game.pilots[0].pick_target(held, {})
+	check.call(game.pilots[0].target == null, "loose-only Gary ignores every held-food target")

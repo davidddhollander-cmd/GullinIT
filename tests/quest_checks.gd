@@ -142,6 +142,47 @@ static func run_game(suite: Node, check: Callable) -> void:
 	game._cry(toddler)
 	check.call(game.quests.quests[1].done, "toddler cry completes l2_cry")
 	toddler.free()
+	# Task 005: level 2 wind flags and one-time upwind tip; level 3 Gary taunt.
+	GameState.options.tips = []
+	game = _play(main, 2)
+	check.call(game.beach.wind_flags.size() == 2, "level 2 has two wind flags")
+	for id: int in [1, 3, 4, 5, 6]:
+		main.start_level(id)
+		check.call(main.game.beach.wind_flags.is_empty(), "level %d has no wind flags" % id)
+	game = _play(main, 2)
+	game.player.position = Vector2(215, 100)
+	game.player.state = BeachGull.State.GLIDE
+	game.camera_x = 215.0
+	game.camera.position.x = 215.0
+	game.beach.camera_x = 215.0
+	game.beach.wind_dir = 1
+	game.beach.strength = 0.2
+	game.beach.time = 0.0
+	game.beach.tick(0.0)
+	game.beach.wind_dir = -1
+	game.beach.strength = 0.6
+	await suite.snapshot("level2-wind-flags-left")
+	game.beach.wind_dir = 1
+	await suite.snapshot("level2-wind-flags-right")
+	GameState.options.tips = []
+	game = _play(main, 2)
+	game.player.state = BeachGull.State.GLIDE
+	game._physics_process(1.0 / 60)
+	await suite.snapshot("level2-upwind-tip")
+	var tip: String = "FLY INTO THE WIND = UPWIND +%d%%" % roundi(float(Config.tuning.score.upwind) * 100.0)
+	check.call(game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == tip), "airborne in level 2 shows the upwind tip")
+	check.call("upwind" in GameState.options.tips, "upwind tip is remembered in options.tips")
+	game = _play(main, 2)
+	game.player.state = BeachGull.State.GLIDE
+	game._physics_process(1.0 / 60)
+	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == tip), "upwind tip is not shown on the second run")
+	game = _play(main, 3)
+	game._swallowed({"id": "hotdog"})
+	var taunt: Array = game.effects.texts.filter(func(t: Dictionary) -> bool: return t.text == "GARY: OI! THAT'S MY LUNCH!")
+	await suite.snapshot("level3-gary-taunt")
+	check.call(taunt.size() == 1 and float(taunt[0].life) >= 1.9, "level 3 releasing Gary shows a 2 s taunt")
+	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == "GARY JOINS THE LUNCH RUSH!"), "level 3 no longer shows the generic join message")
+	check.call(game.pilots.size() == 1 and bool(game.pilots[0].personality.get("loose_only", false)), "Gary is loose-only")
 	main.clear_game()
 	GameState.save_path = saved_path
 	GameState.progress = saved_progress

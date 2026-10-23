@@ -257,6 +257,7 @@
     "mug_stun": 1,
     "cruise_y": 65
   },
+  "wind_flag": {"flap_speed": 7.0, "base_reach": 7, "wind_reach": 3.0, "intro_lift": 14, "intro_reach": 12},
   "juice": {
     "audio": true,
     "shine": true,
@@ -276,6 +277,8 @@
     "slow_time": 0.25,
     "slow_scale": 0.5,
     "float_time": 1.3,
+    "taunt_time": 2.0,
+    "tip_time": 3.0,
     "feathers": 8
   }
 }
