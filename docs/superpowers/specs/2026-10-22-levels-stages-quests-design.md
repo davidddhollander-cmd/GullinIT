@@ -38,7 +38,7 @@ Replace "the last level with more of everything" with a three-stage story game w
 | 5 | Three's a Crowd *(was Pier Patrol; no whistle mechanic)* | **Chip debut**: a fast thief; Gary, Chip and you all fight over the pier food | Gary, Chip | 2 fried fish · Mug Chip |
 | 6 | **Sunset Showdown — boss** | **Wind flips** periodically. **Bev** debuts: big and bossy, shoves smaller gulls off food, can only be mugged from behind | Gary, Chip, Bev | Mug all 3 rivals · Win by double (2× the second-place rival) |
 
-Boss objective (L6): out-eat Gary, Chip and Bev on a rival scoreboard before the sun sets.
+Boss objective (L6): out-eat Gary, Chip and Bev on a rival scoreboard before time runs out (no dusk effect — decided 2026-10-23).
 
 **Rivals compete, never cooperate** (decided 2026-10-23). Every gull is for itself:
 - Rivals no longer split the beach between them: each picks the best food for itself, so they often race for the same target. First beak wins; the loser pulls up and looks elsewhere.
