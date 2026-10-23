@@ -1,6 +1,6 @@
 # 011 — Competing rivals: race for food, mug each other, mug the player
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
