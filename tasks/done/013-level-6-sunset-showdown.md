@@ -1,6 +1,6 @@
 # 013 — Level 6 "Sunset Showdown" boss (Bev, wind flips, out-eat before dark)
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 011
