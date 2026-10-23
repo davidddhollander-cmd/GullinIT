@@ -12,7 +12,7 @@ static func run(check: Callable) -> void:
 			check.call(level == BeachLevelGenerator.generate(recipe,Config.layout_rules),"same seed reproduces complete layout")
 			check.call(not JSON.stringify(level.spawns).contains("dog_owner"),"dog owner never spawns")
 			_check_palms(check,level)
-			if number <= 3:
+			if number <= 4:
 				_check_opening_level(check,source,level,number)
 			else:
 				_check_later_level(check,level)
@@ -83,6 +83,11 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 		check.call(float(family_positions["family_2"])-float(family_positions["family_1"])>250.0,"family groups have separate stations")
 		check.call(stand_count==1 and kiosk_x>float(family_positions["family_2"])+200.0,"family kiosk sits at far end")
 		check.call(int(level.world.promenade_start)==int(level.world.width) and int(level.world.pier_start)==int(level.world.width),"family beach remains all sand")
+	elif number == 4:
+		check.call(types==["sunbather","toddler","picnic_family","sunbather","kiosk_customer","kiosk_customer","kiosk_customer","pier_diner","off_lead_dog"],"dog day adds a picnic family and exactly one off-lead dog to the boardwalk cast")
+		var dog_spawn: Dictionary = level.spawns[8]
+		check.call(float(dog_spawn.home[0])>=float(level.world.start_x)+150.0 and float(dog_spawn.home[1])<float(level.world.promenade_start) and float(dog_spawn.x)>=float(dog_spawn.home[0]) and float(dog_spawn.x)<=float(dog_spawn.home[1]),"dog home zone is open sand away from the start")
+		check.call(stand_count==2 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1,"dog day keeps both stands and Gary from the start")
 	else:
 		check.call(types==["sunbather","sunbather","kiosk_customer","kiosk_customer","kiosk_customer","pier_diner"],"boardwalk leads from sunbathers through customers to diner")
 		check.call(not types.has("dog_owner") and not types.has("seafood_vendor") and not types.has("lifeguard"),"boardwalk leaves later hazards for later levels")

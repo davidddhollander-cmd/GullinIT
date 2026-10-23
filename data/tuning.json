@@ -259,6 +259,13 @@
     "cruise_y": 65
   },
   "wind_flag": {"flap_speed": 7.0, "base_reach": 7, "wind_reach": 3.0, "intro_lift": 14, "intro_reach": 12},
+  "off_lead_dog": {
+    "notice_radius": 70, "chase_ceiling": 40, "windup": 0.4, "run_speed": 95, "wander_speed": 28,
+    "leap_range": 26, "leap_height": 28, "leap_time": 0.6, "leap_speed": 100, "leap_lift": 22, "leap_cooldown": 0.8,
+    "catch_radius": 9, "mouth_x": 9, "mouth_y": -7, "catch_time": 0.5,
+    "cooldown": 4.0, "min_chase": 1.5, "lose_radius": 120,
+    "sniff_min": 1.5, "sniff_max": 3.0, "rest_min": 0.5, "rest_max": 1.2
+  },
   "juice": {
     "audio": true,
     "shine": true,

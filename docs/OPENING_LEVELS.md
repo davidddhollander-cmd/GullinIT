@@ -1,12 +1,13 @@
 # Opening level redesign — 18 October 2026
 
-The first three levels use authored JSON layouts with deterministic +/-3 position variation. Their rosters are not filled by the legacy generator. Levels 4–6 keep the existing generation rules.
+The first four levels use authored JSON layouts with deterministic +/-3 position variation. Their rosters are not filled by the legacy generator. Levels 5–6 keep the existing generation rules.
 
 | Level | Geometry | Cast and rhythm |
 | --- | --- | --- |
 | Training Day | 800 units of sand; open flight area, customer, bag, family | Four actors, calm air, slower customer and longer warnings. Six action-driven lessons on the first visit. |
 | Family Picnic | 1040 units of sand; quiet sunbathers, separated families, kiosk | Seven actors; gentle steady breeze; family restocking creates moving opportunities. No rival, dog, or pier. |
 | Boardwalk Bustle | 1280 units; promenade begins at 430, pier at 920 | Sunbather, two customers, dog owner, pier diner. Gary arrives after the first swallowed non-scrap snack. No vendor or lifeguard. |
+| Dog Day Afternoon | 1280 units; Boardwalk Bustle's promenade/pier layout, wind gusts, Gary from the start | The Boardwalk cast plus an off-lead terrier (`scripts/off_lead_dog.gd`, tuning in `data/tuning.json` under `off_lead_dog`) roaming the quiet beach x=250-410. It barks (0.4 s windup), chases at 95 px/s, leaps at low fliers and stuns on a bite. A gull more than 40 px above the sand is safe. A chase of 1.5 s or more that ends without a catch is an OUTRUN. |
 
 ## Training rules
 
