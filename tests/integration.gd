@@ -2305,7 +2305,7 @@ func beachgoer_art_checks() -> void:
 				var texture: AtlasTexture = frames.get_frame_texture(animation,index) as AtlasTexture
 				check(texture.get_size() == Vector2(definition.frame_w,definition.frame_h),"beachgoer aligned frame canvas")
 				check(Rect2(Vector2.ZERO,texture.atlas.get_size()).encloses(texture.region),"beachgoer atlas stays inside sheet")
-		check((frames.get_frame_texture(&"idle",0).atlas.get_image().get_mipmap_count() > 0)==(key=="dog"),"beachgoer source sampling matches current art treatment")
+		check(frames.get_frame_texture(&"idle",0).atlas.get_image().get_mipmap_count() == 0,"pixel beachgoers preserve source pixels without mipmaps")
 	main.start_level(4)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
@@ -2315,6 +2315,8 @@ func beachgoer_art_checks() -> void:
 		target.hide()
 	var customer: BeachTarget = game.spawner.create("kiosk_customer",150,{"food_id":"ice_cream","appearance":"kiosk_customer"})
 	var owner: BeachTarget = game.spawner.create("dog_owner",245)
+	check(owner.art_height()==40 and owner.sprite.texture_filter==CanvasItem.TEXTURE_FILTER_NEAREST,"pixel dog walker matches adult scale with nearest sampling")
+	check(owner.sprite.material==null,"pixel dog walker renders native hard alpha without the old cutout shader")
 	game.player.position = Vector2(50,70)
 	customer.tick(0.1,[])
 	check(customer.sprite.animation == &"walk","customer walks while carrying food")
