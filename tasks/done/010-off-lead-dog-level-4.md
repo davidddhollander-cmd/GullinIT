@@ -1,6 +1,6 @@
 # 010 — Off-lead dog and Level 4 "Dog Day Afternoon"
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 008
