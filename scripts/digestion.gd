@@ -4,11 +4,12 @@ signal swallowed(snack: Dictionary)
 var snacks: Array[Dictionary] = []
 var progress: float = 0.0
 var rest: float = 0.0
+var capacity: int = 4 ## units of stomach; Bigger stomach perk raises it
 
 func cost(id: String) -> int:
 	return {"small":1,"medium":2,"large":4}[Config.foods[id].category]
 
-func duration(id: String) -> float:
+static func duration(id: String) -> float:
 	return {"small":0.5,"medium":1.5,"large":3.0}[Config.foods[id].category]
 
 func can_collect(id: String) -> bool:
@@ -17,7 +18,7 @@ func can_collect(id: String) -> bool:
 	var used: int = 0
 	for snack: Dictionary in snacks:
 		used += cost(snack.id)
-	return used+cost(id) <= 4
+	return used+cost(id) <= capacity
 
 func collect(id: String, details: Dictionary = {}) -> bool:
 	if not can_collect(id):

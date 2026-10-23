@@ -1,7 +1,7 @@
 extends Node
 var progress: Dictionary = {}
 var wallet: Dictionary = {"feathers": 0}
-var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false, "stats": true}
+var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false, "stats": true, "tips": [], "gull": "herring"}
 var _anon_id: String = ""
 var save_path: String = "user://save.json"
 var save_error: String = ""
@@ -103,6 +103,11 @@ func complete_quest(level_id: int, quest_id: String) -> bool:
 	save_progress()
 	return true
 
+func set_flag(flag: String) -> void:
+	if not bool(progress.get(flag, false)):
+		progress[flag] = true
+		save_progress()
+
 func feathers() -> int:
 	return int(wallet.get("feathers", 0))
 
@@ -117,3 +122,43 @@ func unlocked(id: int) -> bool:
 		return true
 	var previous: Dictionary = entry(id - 1)
 	return int(previous.get("stars", 0)) > 0 or previous.has("casual_time") or (id == 2 and bool(previous.get("training_complete", false)))
+
+## Free gulls, bought gulls and testing mode are pickable.
+func gull_owned(id: String) -> bool:
+	return bool(Config.species.get("unlock_all", false)) or int(Config.species.species[id].get("price", 0)) <= 0 or owns(id)
+
+## Shop purchases (gull species ids and perk ids) live in wallet.owned.
+func owns(id: String) -> bool:
+	return id in wallet.get("owned", [])
+
+## Spends Feathers; false (nothing changes) if already owned or too poor.
+func buy(id: String, price: int) -> bool:
+	if owns(id) or feathers() < price:
+		return false
+	var owned: Array = wallet.get("owned", [])
+	owned.append(id)
+	wallet.owned = owned
+	wallet.feathers = feathers() - price
+	save_progress()
+	return true
+
+func perk_owned(id: String) -> bool:
+	return Config.perks.perks.has(id) and owns(id)
+
+## The equipped perk id, or "" for none. Only owned perks count.
+func equipped_perk() -> String:
+	var id: String = str(options.get("perk", ""))
+	return id if perk_owned(id) else ""
+
+func equip_perk(id: String) -> void:
+	options.perk = id if id.is_empty() or perk_owned(id) else ""
+	save_progress()
+
+## The shop opens once the Stage 1 boss is beaten.
+func shop_open() -> bool:
+	return bool(progress.get("stage1_complete", false))
+
+## The last pick if it exists and is owned, else the herring gull.
+func chosen_gull() -> String:
+	var id: String = str(options.get("gull", "herring"))
+	return id if Config.species.species.has(id) and gull_owned(id) else "herring"

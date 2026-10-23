@@ -67,6 +67,7 @@ func _initialize() -> void:
 		# Hand points measured on full source; stored in the same world units as existing anchors.
 		var palms: Array = definition.palms
 		var anchors: Array = []
+		var output: String = "res://assets/sprites/shopper-%s-bench-v1.png" % definition.name
 		for i: int in 8:
 			var sole: float = soles[i]
 			anchors.append([(float(palms[i][0])-float(hips[i]))*scale_factor*0.5,(float(palms[i][1])-sole)*scale_factor*0.5+sole_adjustments[i]*0.5])
@@ -76,10 +77,10 @@ func _initialize() -> void:
 			for i: int in clips[clip]:
 				indices.append(first+i)
 				hand.append(anchors[i])
-			entry.animations[clip] = {"frames":indices,"fps":8,"loop":clip.begins_with("seated")}
+			entry.animations[clip] = {"frames":indices,"fps":8,"loop":clip.begins_with("seated"),"file":output}
 			entry.food_anchors[clip] = hand
-		entry.file = "res://assets/sprites/shopper-%s-bench-v1.png" % definition.name
-		assert(atlas.save_png(entry.file)==OK)
+		# Keep the standing/bite atlas selected; only bench clips use this sheet.
+		assert(atlas.save_png(output)==OK)
 		entries[id] = entry
 		var prefix: String = "  \"%s\": " % id
 		var start: int = metadata.find(prefix)+prefix.length()

@@ -7,6 +7,7 @@ var stalls: Array[FoodStall] = []
 var portions: Array[BeachTarget] = []
 var requests: Dictionary = {}
 var spawner: BeachSpawner
+var handover_mult: float = 1.0 ## Keen eye: longer counter window
 
 func setup(backdrop: BeachBackdrop, source: BeachSpawner) -> void:
 	stalls = backdrop.stalls
@@ -161,7 +162,7 @@ func _tick_request(stand: FoodStall, delta: float) -> void:
 				stand.progress = 0.0
 				request.time = 0.0
 		FoodStall.Phase.COUNTER:
-			duration = float(Config.tuning.world.stall_handover_time)
+			duration = float(Config.tuning.world.stall_handover_time)*handover_mult
 			var portion: BeachTarget = request.portion
 			if not portion.food:
 				_finish(stand,false)

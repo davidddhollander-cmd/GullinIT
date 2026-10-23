@@ -135,3 +135,15 @@ User requested that walkers stop using the raised lane over benches, and that mu
 - Final `tools/validate.ps1`: **16,515 checks, 1 failure**, the pre-existing `level 6 rival leaves the scene of a theft` (`escape_short=4`). No new failures. The existing outside-tree `grab_focus` error is unchanged. Log: `test-output/family-lanes-integration.log`.
 - Rendered `assets/previews/family-ground-lane.png` inspected: mum and two toddlers stay together on the ground line; the crowded two-family case retains distinct silhouettes. Existing generated character artwork is used unchanged.
 - Reproducible family preview: `tools/family_lane_preview.tscn`. Focused suite: `tests/crowd_spacing_checks.tscn`.
+
+## Merge with updated main
+
+Created `codex/beach-life-rework` from the saved beach-life commit `d81d65d` and merged local `main` at `366948c` (71 incoming commits). The separate `GullinIt-main` play copy was not accessed. No push was performed.
+
+- Preserved main's quests, bite window, rival ground skills, levels, gull selection, shop/perks and save options. Retained the diner purchase/return behavior, bench visits, blocked bench walking lanes and family ground-lane spacing.
+- Resolved the shopper atlas collision using an optional `file` on individual animation definitions. Standing, walking, reactions and bites keep main's exact atlases; bench clips use the existing bench atlases, including their original frame indices and hand anchors. No artwork was repainted or regenerated.
+- Updated atlas boundary, isolation and walk regression checks to use each clip's actual source. The preparation tool now preserves the standing/bite atlas when rebuilding bench assets.
+- Rendered both previews after merging: the bite sheet passed 45 alignment assertions, and the bench sequence captured 220 production simulation frames. Inspected both outputs.
+- Focused bench checks: **537 checks, 0 failures**, including atlas selection and seated theft/stand/chase behavior.
+- Final `tools/validate.ps1`: **15,407 checks, 0 failures**, exit code 0. The previous rival escape failure is gone. The existing outside-tree `grab_focus` diagnostic remains non-failing. Log: `test-output/main-merge-validation-final.log`.
+- The initial merge validation found 68 atlas-boundary/baseline test failures because those checks read every animation from the idle atlas. The final run verifies each frame against its own atlas without weakening the boundary, baseline, isolation or unchanged-art assertions.

@@ -6,6 +6,7 @@
   "time_limit": 135,
   "wind": {"dir": -1, "strength": 0.35, "gusts": false, "flip": false},
   "awareness_mult": 1.08,
+  "twist": {"id": "gary_intro"},
   "quests": [
     {"id": "l3_mug_gary", "text": "MUG GARY", "event": "swallowed", "filter": {"mugged_from": "Gary"}, "count": 1, "bonus": 50},
     {"id": "l3_crab", "text": "EAT A CRAB", "event": "swallowed", "filter": {"food": "crab"}, "count": 1, "bonus": 40}
@@ -13,7 +14,7 @@
   "random_quest": {"count": [3, 5], "bonus": 40},
   "random_foods": ["hotdog", "fried_fish", "ice_cream", "half_eaten_doughnut", "half_eaten_pizza"],
   "stars": [250, 550, 750],
-  "rivals": [{"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16}],
+  "rivals": [{"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16, "mug_chance": 0.3, "loose_only": true, "taunt": "GARY: OI! THAT'S MY LUNCH!", "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}}],
   "rivals_after_snatch": true,
   "world": {"width": 1280, "promenade_start": 430, "pier_start": 920, "start_x": 65, "start_y": 105},
   "zones": [

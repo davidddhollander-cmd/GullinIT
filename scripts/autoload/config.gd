@@ -6,6 +6,8 @@ var targets: Dictionary = {}
 var foods: Dictionary = {}
 var sprites: Dictionary = {}
 var quips: Dictionary = {}
+var species: Dictionary = {} ## data/species.json: {unlock_all, species:{id:{name,blurb,price,flight,dive,wind,stun,shove}}}
+var perks: Dictionary = {} ## data/perks.json: {slots, perks:{id:{name,blurb,price,...effect values}}}
 var levels: Array[Dictionary] = []
 var frames_cache: Dictionary = {}
 var last_error: String = ""
@@ -35,7 +37,7 @@ func read_json(path: String) -> Dictionary:
 func reload_data() -> bool:
 	last_error = ""
 	var next: Dictionary = {}
-	for key: String in ["tuning", "targets", "foods", "sprites", "quips"]:
+	for key: String in ["tuning", "targets", "foods", "sprites", "quips", "species", "perks"]:
 		next[key] = read_json("res://data/%s.json" % key)
 	var next_levels: Array[Dictionary] = []
 	var next_layout: Dictionary = read_json("res://data/level_layout.json")
@@ -63,6 +65,8 @@ func reload_data() -> bool:
 	foods = next.foods
 	sprites = next.sprites
 	quips = next.quips
+	species = next.species
+	perks = next.perks
 	levels = next_levels
 	layout_rules = next_layout
 	for i: int in levels.size():
@@ -75,12 +79,14 @@ func frames(sprite_id: String) -> SpriteFrames:
 	if frames_cache.has(sprite_id):
 		return frames_cache[sprite_id]
 	var entry: Dictionary = sprites[sprite_id]
-	var texture: Texture2D = load(entry.file) as Texture2D
 	var result: SpriteFrames = SpriteFrames.new()
 	result.remove_animation(&"default")
-	var columns: int = maxi(1, texture.get_width() / int(entry.frame_w))
 	for animation: String in entry.animations:
 		var details: Dictionary = entry.animations[animation]
+		# Independent generated animation sets can share an identity without
+		# overwriting atlas cells used by its walk, bite or reaction artwork.
+		var texture: Texture2D = load(details.get("file",entry.file)) as Texture2D
+		var columns: int = maxi(1, texture.get_width() / int(entry.frame_w))
 		result.add_animation(animation)
 		result.set_animation_speed(animation, details.fps)
 		result.set_animation_loop(animation, details.loop)

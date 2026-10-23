@@ -3,6 +3,7 @@ extends Node2D
 ## Shared flight model for the player and rivals; swept beak collisions live in Game.
 signal gull_stunned
 signal dive_started
+signal stun_ignored
 signal ground_crashed
 signal peck_started
 signal sand_landed(at: Vector2)
@@ -33,6 +34,8 @@ var invulnerable: float = 0.0
 var climb: bool = false
 var speed_factor: float = 1.0
 var rival: bool = false
+# Rival that only goes for loose food (Gary): never touches food a person holds.
+var loose_only: bool = false
 ## Empty uses the role default; any species can be used by either role.
 var species: String = ""
 var art_id: String = "player_gull"
@@ -44,6 +47,12 @@ var rival_tint: Color = Color("a5c7e6")
 var rival_label: Label
 var rival_badge: ColorRect
 var upwind: bool = false
+## Player-only species stats (data/species.json); rivals keep their profile tuning.
+var dive_mult: float = 1.0
+var stun_shield: int = 0 ## Strong skull: stuns still to shrug off
+var wind_mult: float = 1.0
+var stun_mult: float = 1.0
+var shoves: bool = false
 var dive_speed: float = 0.0
 var walk_phase: float = 0.0
 var coasting: bool = false
@@ -55,6 +64,7 @@ var stroke_started: bool = false
 var sprite: AnimatedSprite2D
 var detailed_art: bool = false
 var art_scale: float = 1.0
+var body_scale: float = 1.0 ## boss-sized rivals: multiplies the species art scale
 var perch_surfaces: Array[Dictionary] = []
 var support: Dictionary = {}
 var departing_perch: Dictionary = {}
@@ -165,7 +175,7 @@ func refresh_art() -> void:
 		art_id = species_id
 	art_entry = Config.sprites[art_id]
 	detailed_art = art_entry.has("regions") or bool(art_entry.get("native_alpha",false))
-	art_scale = float(art_entry.get("visual_scale",1.0))
+	art_scale = float(art_entry.get("visual_scale",1.0)) * body_scale
 	sprite.sprite_frames = Config.frames(art_id)
 	sprite.scale = Vector2.ONE * art_scale
 	sprite.material = null
@@ -184,8 +194,20 @@ func refresh_art() -> void:
 	art_event = &""
 	art_event_left = 0.0
 
+func species_stats() -> Dictionary:
+	return Config.species.get("species",{}).get(species,{})
+
 func species_speed() -> float:
-	return float(art_entry.get("flight_speed_mult",1.0))
+	# Rivals keep their tuned pre-picker speeds (rival_flight); the player gets the picked species' flight.
+	return float(species_stats().get("rival_flight" if rival else "flight",1.0))
+
+## The player's species changes more than flight: dive speed, wind push, stun length and shoving.
+func apply_species_stats() -> void:
+	var s: Dictionary = species_stats()
+	dive_mult = float(s.get("dive",1.0))
+	wind_mult = float(s.get("wind",1.0))
+	stun_mult = float(s.get("stun",1.0))
+	shoves = bool(s.get("shove",false))
 
 func show_ground_peck() -> void:
 	art_event = &"peck"
@@ -301,7 +323,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			if descending:
 				# Brake toward the landing point, gently steering against the normal wind drift.
 				var landing_x: float = float(perch_target.x) if not perch_target.is_empty() and bool(perch_target.pole) else aim.x
-				horizontal_target = clampf((landing_x-position.x)*float(f.landing_alignment),-float(f.landing_side_speed),float(f.landing_side_speed)) - wind_force*float(w.drift)
+				horizontal_target = clampf((landing_x-position.x)*float(f.landing_alignment),-float(f.landing_side_speed),float(f.landing_side_speed)) - wind_force*wind_mult*float(w.drift)
 			velocity.x = move_toward(velocity.x, horizontal_target, float(f.acceleration) * delta)
 			if on_ground:
 				velocity.y = 0
@@ -355,9 +377,9 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			# Climbing spends momentum faster than descending builds it.
 			# A tailwind pushes the swoop along; a headwind drags it in proportion to speed, mostly on shallow angles.
 			var tail: float = tailwind(direction.x)
-			var slope_force: float = float(d.acceleration) * maxf(direction.y, 0) + float(d.uphill_deceleration) * minf(direction.y, 0) + float(w.dive_tailwind) * maxf(tail,0)
+			var slope_force: float = dive_mult * float(d.acceleration) * maxf(direction.y, 0) + float(d.uphill_deceleration) * minf(direction.y, 0) + float(w.dive_tailwind) * maxf(tail,0)
 			var drag: float = float(d.drag) + float(d.uphill_drag) * maxf(-direction.y,0) + (float(w.dive_drag) * wind_lift() + float(w.dive_headwind_drag) * maxf(-tail,0) * absf(direction.x)) * dive_speed
-			dive_speed = clampf(dive_speed + (slope_force - drag) * delta, 0, float(d.max_speed))
+			dive_speed = clampf(dive_speed + (slope_force - drag) * delta, 0, float(d.max_speed) * dive_mult)
 			velocity = direction * dive_speed
 			position += velocity * delta
 			upwind = direction.x * wind_force < 0
@@ -380,7 +402,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 		State.STUNNED:
 			tick_tumble(delta)
 	if state in [State.GLIDE,State.WINDUP,State.STRIKE]:
-		position.x += wind_force * float(w.drift) * delta
+		position.x += wind_force * wind_mult * float(w.drift) * delta
 	if position.y < float(f.min_y):
 		position.y = f.min_y
 		velocity.y = maxf(velocity.y, 0)
@@ -503,6 +525,10 @@ func crash_warning() -> bool:
 func stun(duration: float = -1.0, attacker: Vector2 = Vector2.INF) -> void:
 	if state == State.STUNNED or invulnerable > 0:
 		return
+	if stun_shield > 0:
+		stun_shield -= 1
+		stun_ignored.emit()
+		return
 	begin_tumble(duration,attacker)
 	gull_stunned.emit()
 
@@ -520,7 +546,7 @@ func begin_tumble(duration: float = -1.0, attacker: Vector2 = Vector2.INF) -> vo
 	peck_used = true
 	art_event_left = 0.0
 	stroke_left = 0.0
-	timer = float(t.duration) if duration < 0.0 else maxf(duration,float(t.recovery_time))
+	timer = (float(t.duration) if duration < 0.0 else maxf(duration,float(t.recovery_time))) * stun_mult
 	velocity = Vector2(away*float(t.launch_speed),-float(t.launch_up))
 	facing = away
 	tumble_angle = sprite.rotation

@@ -17,6 +17,11 @@ var drop_retrieve: bool = false
 var drop_pickup_time: float = 0.0
 var thefts: int = 0
 var last_theft_direct: bool = false
+var last_theft_biting: bool = false
+## Customer bite window: biting counts down while the bite clip plays; bite_wait until the next one.
+var biting: float = 0.0
+var bite_wait: float = -1.0
+var was_moving: bool = false
 var last_theft_handover: bool = false
 var stall_service: StallService
 var service_locked: bool = false
@@ -237,15 +242,13 @@ func refresh_art() -> void:
 	else:
 		sprite.sprite_frames = Config.frames(info.sprite)
 	sprite.scale = Vector2.ONE * AdultPixelArt.DISPLAY_SCALE if kind in ["picnic_family", "sunbather"] else Vector2.ONE * float(Config.sprites[info.sprite].get("visual_scale",1.0))
-	if kind == "dog_owner":
-		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	elif kind in ["toddler", "pier_diner", "picnic_family", "sunbather", "lifeguard", "kiosk_customer"]:
+	if kind in ["toddler", "pier_diner", "picnic_family", "sunbather", "lifeguard", "kiosk_customer", "dog_owner"]:
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	sprite.position.y = -26.0 if kind in ["picnic_family", "sunbather"] else -art_height() * 0.5
 	if Config.sprites[info.sprite].has("sprite_offset_y"):
 		sprite.position.y = float(Config.sprites[info.sprite].sprite_offset_y)
 	sprite.material = null
-	if Config.sprites[info.sprite].has("visual_scale") and kind not in ["toddler", "picnic_family", "sunbather", "lifeguard", "kiosk_customer"]:
+	if Config.sprites[info.sprite].has("visual_scale") and kind not in ["toddler", "picnic_family", "sunbather", "lifeguard", "kiosk_customer", "dog_owner"]:
 		var cutout: ShaderMaterial = ShaderMaterial.new()
 		cutout.shader = preload("res://assets/shaders/gull_cutout.gdshader")
 		sprite.material = cutout
@@ -264,6 +267,10 @@ func refresh_art() -> void:
 
 func food_position() -> Vector2:
 	return position + food_sprite.position
+
+# Food resting on a stall counter rather than held by a person.
+func is_loose() -> bool:
+	return kind == "stall_handover" or kind == "loose_item"
 
 func food_value() -> int:
 	return int(Config.foods[food_id].points) if not food_id.is_empty() else 0
@@ -365,6 +372,9 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	var toddler_pause: bool = kind == "toddler" and not seeking_parent and ((not food and recover > 0) or (food and fmod(art_time,6.0) < 1.2))
 	# A short planted reaction makes the customer's empty-hand surprise readable.
 	var customer_pause: bool = kind == "kiosk_customer" and not food and recover > float(t.recover_time)-0.5
+	if kind == "kiosk_customer":
+		_tick_bite(delta)
+		customer_pause = customer_pause or biting > 0.0
 	var whistle_pause: bool = kind == "lifeguard" and lifeguard_whistle_time > 0
 	if routine.enabled and not customer_pause and not whistle_pause:
 		moved = routine.tick(self,delta)
@@ -382,8 +392,26 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 			facing = 1.0
 	_tick_defense(delta,gulls)
 	_update_defense_art()
+	was_moving = moved
 	update_art_pose(moved)
 	queue_redraw()
+
+## A holding customer stops for ~0.6 s every 4-7 s; never while walking, buying, leaving or reacting.
+func _tick_bite(delta: float) -> void:
+	var cfg: Dictionary = Config.tuning.bite
+	if biting > 0.0:
+		biting = maxf(0.0, biting-delta)
+		if not food or leaving or recover > 0 or not reaction.mode.is_empty() or reaction.swat_timer >= 0:
+			biting = 0.0
+		return
+	if bite_wait < 0.0:
+		bite_wait = rng.randf_range(float(cfg.interval_min), float(cfg.interval_max))
+	if not food or leaving or recover > 0 or not reaction.mode.is_empty() or dropped_pending:
+		return
+	bite_wait -= delta
+	if bite_wait <= 0.0 and not was_moving:
+		biting = float(cfg.duration)
+		bite_wait = -1.0
 
 func purchase_stall_type() -> String:
 	# The existing cooked-food grill also supplies the diner's fried fish.
@@ -748,6 +776,8 @@ func take(gull: BeachGull) -> bool:
 	var risky: bool = alert >= 1.0 or defense > 0
 	food = false
 	food_sprite.hide()
+	last_theft_biting = biting > 0.0
+	biting = 0.0
 	last_theft_direct = true
 	last_theft_handover = false
 	_finish_theft(gull,risky)

@@ -58,7 +58,28 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			Audio.play_music("title")
 		"arcade", "casual":
 			casual = action == "casual"
-			_navigate("select")
+			clear_game()
+			screen = "pick"
+			menus.show()
+			menus.gull_picker()
+			Audio.play_music("title")
+		"gull":
+			if Config.species.species.has(str(payload)) and GameState.gull_owned(str(payload)):
+				GameState.options.gull = str(payload)
+				GameState.save_progress()
+				_navigate("select")
+		"shop":
+			if GameState.shop_open():
+				clear_game()
+				screen = "shop"
+				menus.show()
+				menus.shop()
+				Audio.play_music("title")
+		"buy":
+			var id: String = str(payload)
+			var price: int = int(Config.perks.perks[id].price) if Config.perks.perks.has(id) else (int(Config.species.species[id].price) if Config.species.species.has(id) else -1)
+			if price > 0 and screen == "shop" and GameState.buy(id,price):
+				menus.shop(true)
 		"select":
 			clear_game()
 			screen = "select"
@@ -140,6 +161,7 @@ func _finished(result: Dictionary) -> void:
 	var passed: bool = bool(result.get("success", false)) or int(result.stars) > 0 or bool(result.casual)
 	game.track_end("completed" if passed else "failed", result)
 	game.set_paused(true)
+	game.overlay.hide()
 	Audio.stop_music()
 	menus.show()
 	menus.results(game.level,result)

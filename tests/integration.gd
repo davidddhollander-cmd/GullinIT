@@ -43,7 +43,9 @@ func menu_font_grid(node: Node) -> void:
 	for child: Node in node.get_children():
 		if child is Label or child is Button:
 			var font_size: int = child.get_theme_font_size("font_size")
-			check(font_size >= BeachUI.FONT_NATIVE and font_size % BeachUI.FONT_NATIVE == 0,"menu font uses native 8 px grid: "+child.text+" ("+str(font_size)+")")
+			# Each bitmap face stays on its own native grid: GullPixel 8 px, the compact HUD face 6 px.
+			var native: int = 6 if child.get_theme_font("font").resource_path.ends_with("gull_hud.fnt") else BeachUI.FONT_NATIVE
+			check(font_size >= native and font_size % native == 0,"menu font uses native %d px grid: " % native+child.text+" ("+str(font_size)+")")
 			var minimum: Vector2 = child.get_combined_minimum_size()
 			check(minimum.x <= child.size.x + 0.1 and minimum.y <= child.size.y + 0.1,"menu text fits control: "+child.text+" "+str(minimum)+" in "+str(child.size))
 		menu_font_grid(child)
@@ -60,6 +62,10 @@ func run() -> void:
 	layout(main.menus)
 	menu_font_grid(main.menus)
 	main._navigate("arcade")
+	await snapshot("gull-picker")
+	layout(main.menus)
+	menu_font_grid(main.menus)
+	main._navigate("gull","herring")
 	await snapshot("level-select")
 	layout(main.menus)
 	menu_font_grid(main.menus)
@@ -119,6 +125,12 @@ func run() -> void:
 	await preload("res://tests/wheelie_bin_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/score_rules_checks.gd").run(self,Callable(self,"check"))
 	preload("res://tests/quest_checks.gd").run(Callable(self,"check"))
+	await preload("res://tests/quest_checks.gd").run_game(self,Callable(self,"check"))
+	await preload("res://tests/off_lead_dog_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/level5_checks.gd").run(self,main,Callable(self,"check"))
+	await preload("res://tests/boss_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/gull_picker_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/shop_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/analytics_checks.gd").run(self,Callable(self,"check"))
 	preload("res://tests/sunbather_reactions_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/retro_environment_checks.gd").run_checks(Callable(self,"check"))
@@ -142,7 +154,13 @@ func run() -> void:
 	preload("res://tests/flight_dynamics_checks.gd").run(self,Callable(self,"check"))
 	preload("res://tests/gull_tumble_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/rival_ai_checks.gd").run(self,main,Callable(self,"check"))
+	await preload("res://tests/rival_ai_checks.gd").loose_only_checks(self,main,Callable(self,"check"))
+	await preload("res://tests/rival_ai_checks.gd").competition_checks(self,main,Callable(self,"check"))
+	await preload("res://tests/rival_ai_checks.gd").ground_checks(self,main,Callable(self,"check"))
+	await preload("res://tests/rival_ai_checks.gd").scavenger_checks(self,main,Callable(self,"check"))
+	await preload("res://tests/rival_ai_checks.gd").ground_captures(self,main)
 	await digestion_reaction_checks()
+	await preload("res://tests/perk_checks.gd").run(self,Callable(self,"check"))
 	await bag_variety_checks()
 	preload("res://tests/pickup_shine_checks.gd").run(Callable(self,"check"))
 	await bin_shine_checks()
@@ -174,7 +192,7 @@ func run() -> void:
 		var game: BeachGame = main.game
 		game.set_physics_process(false)
 		await settle()
-		check(game.spawner.targets.size()==Config.levels[i-1].spawns.size(),"level %d spawns" % i)
+		check(game.spawner.targets.size()==Config.levels[i-1].spawns.filter(func(spawn: Dictionary) -> bool: return spawn.type != "off_lead_dog").size(),"level %d spawns" % i)
 		check(game.pilots.size()+game.pending_rivals.size()==Config.levels[i-1].rivals.size(),"level %d rivals" % i)
 		if not game.pilots.is_empty():
 			check(game.pilots[0].gull.position.x <= 320 and game.pilots[0].gull.visible,"first rival appears in the opening view")
@@ -292,7 +310,7 @@ func result_board_checks() -> void:
 	var poor := {"score": 20, "base": 20, "clean": 0, "stars": 0, "items": 2, "stuns": 1, "bonuses": {"Risky": 1, "Upwind": 0, "Mugged": 0}, "elapsed": 90.0, "casual": false}
 	main.menus.results(Config.levels[0], poor)
 	var board := main.menus.get_child(0) as ResultBoard
-	check(board != null and board.rows.size() == 6,"result board builds every tally line")
+	check(board != null and board.rows.size() == 4,"result board builds every tally line")
 	for index: int in range(1, board.rows.size()):
 		check(not board.rows[index - 1].get_rect().intersects(board.rows[index].get_rect()),"result tally rows do not overlap: "+board.rows[index - 1].text+" / "+board.rows[index].text)
 	check(not board.complete and board.buttons.all(func(button: Button) -> bool: return button.disabled),"result actions wait for tally or skip")
@@ -311,7 +329,7 @@ func result_board_checks() -> void:
 	action("ui_accept")
 	await settle()
 	check(is_instance_valid(board) and board.complete,"confirm skips tally without activating a focused result action")
-	check(board.complete and board.rows[5].text.ends_with("20"),"total resolves as final tally beat without changing score")
+	check(board.complete and board.rows.back().text.ends_with("20"),"total resolves as final tally beat without changing score")
 	check(board.stars_label.text == "---","poor result reveals zero stars")
 	board._process(0.4)
 	await get_tree().process_frame
@@ -334,7 +352,7 @@ func result_board_checks() -> void:
 	main.menus.results(Config.levels[0], good)
 	board = main.menus.get_child(0) as ResultBoard
 	board.finish_tally()
-	check(board.rows[0].text.ends_with("550") and board.rows[1].text.ends_with("+70") and board.rows[5].text.ends_with("620"),"earned plus clean equals displayed total")
+	check(board.rows[0].text.ends_with("550") and board.rows[1].text.ends_with("+70") and board.rows.back().text.ends_with("620"),"earned plus clean equals displayed total")
 	check(board.stars_label.text == "***","three-star result resolves all stars")
 	board._process(0.25)
 	await get_tree().process_frame
@@ -355,7 +373,7 @@ func result_board_checks() -> void:
 	main.menus.results(Config.levels[0], practice)
 	board = main.menus.get_child(0) as ResultBoard
 	board.finish_tally()
-	check(board.title_label.text == "PRACTICE COMPLETE!" and board.stars_label.text.is_empty() and board.rows[5].text.ends_with(str(practice.score)),"practice completion uses positive result and exact total")
+	check(board.title_label.text == "PRACTICE COMPLETE!" and board.stars_label.text.is_empty() and board.rows.back().text.ends_with(str(practice.score)),"practice completion uses positive result and exact total")
 	check("TIME 73.5" in board.hint_label.text and "BEST 61.3" in board.hint_label.text,"practice result distinguishes run time from saved best time")
 	var previous_save_error := GameState.save_error
 	GameState.save_error = "Progress could not be saved."
@@ -2145,7 +2163,7 @@ func generated_layout_checks() -> void:
 			views = [[160,"open-sand"],[400,"snack-and-bag"],[640,"family-bay"]]
 		elif number == 2:
 			views = [[160,"sunbathers"],[480,"first-family"],[720,"second-family"],[880,"snack-kiosk"]]
-		elif number == 3:
+		elif number == 3 or number == 4:
 			views = [[160,"quiet-beach"],[600,"promenade-snacks"],[800,"promenade-stroll"],[1080,"pier-dining"]]
 		if number <= 3:
 			for legacy: Array in [[160,"sunbathers"],[480,"families"],[800,"promenade"],[1120,"pier"]]:
@@ -2304,7 +2322,7 @@ func beachgoer_art_checks() -> void:
 				var texture: AtlasTexture = frames.get_frame_texture(animation,index) as AtlasTexture
 				check(texture.get_size() == Vector2(definition.frame_w,definition.frame_h),"beachgoer aligned frame canvas")
 				check(Rect2(Vector2.ZERO,texture.atlas.get_size()).encloses(texture.region),"beachgoer atlas stays inside sheet")
-		check((frames.get_frame_texture(&"idle",0).atlas.get_image().get_mipmap_count() > 0)==(key=="dog"),"beachgoer source sampling matches current art treatment")
+		check(frames.get_frame_texture(&"idle",0).atlas.get_image().get_mipmap_count() == 0,"pixel beachgoers preserve source pixels without mipmaps")
 	main.start_level(4)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
@@ -2314,6 +2332,8 @@ func beachgoer_art_checks() -> void:
 		target.hide()
 	var customer: BeachTarget = game.spawner.create("kiosk_customer",150,{"food_id":"ice_cream","appearance":"kiosk_customer"})
 	var owner: BeachTarget = game.spawner.create("dog_owner",245)
+	check(owner.art_height()==40 and owner.sprite.texture_filter==CanvasItem.TEXTURE_FILTER_NEAREST,"pixel dog walker matches adult scale with nearest sampling")
+	check(owner.sprite.material==null,"pixel dog walker renders native hard alpha without the old cutout shader")
 	game.player.position = Vector2(50,70)
 	customer.tick(0.1,[])
 	check(customer.sprite.animation == &"walk","customer walks while carrying food")

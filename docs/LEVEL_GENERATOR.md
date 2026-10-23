@@ -1,6 +1,6 @@
 # Level layout generator — 10 October 2026
 
-**18 October update:** Levels 1–3 now use distinct authored routes; see [OPENING_LEVELS.md](OPENING_LEVELS.md). The shared route and station contract below now apply only to levels 4–6.
+**18 October update:** Levels 1–3 now use distinct authored routes; see [OPENING_LEVELS.md](OPENING_LEVELS.md). Levels 4 (Dog Day Afternoon) and 5 (Three's a Crowd) are authored too. The shared route and station contract below now apply only to level 6.
 
 Levels 4–6 follow the same readable route, with bounded variation in positions, stand order and scenery:
 

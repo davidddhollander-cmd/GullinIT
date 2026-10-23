@@ -18,6 +18,7 @@ var score: BeachScore = BeachScore.new()
 var spawner: BeachSpawner = BeachSpawner.new()
 var stalls: StallService = StallService.new()
 var crabs: CrabPopulation
+var dog: OffLeadDog
 var beach: BeachBackdrop
 var scraps: BeachScraps
 var stash_raids: BeachStashRaids
@@ -30,6 +31,9 @@ var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var last_near: float = -10.0
 var training: bool = false
 var lesson: int = 0
+var quests: BeachQuests = BeachQuests.new()
+var feathers_earned: int = 0
+var mugged_rivals: Dictionary = {}
 const TRAINING_LESSONS: int = 7
 const BIN_LESSON: int = 4
 const WHEELIE_LESSON: int = 5
@@ -39,10 +43,16 @@ var training_clean_snatch: bool = false
 var training_raid_started: bool = false
 var training_reset_clock: float = 0.0
 var pending_rivals: Array = []
+var taunt_wait: float = -1.0
+var taunt_rival: String = ""
+var taunt_text: String = ""
 var crashes: int = 0
 var first_steal_sent: bool = false
 var end_tracked: bool = false
 var lesson_started: float = 0.0
+var perk_id: String = ""
+var bullet_meter: float = 0.0
+var slowmo_end_msec: int = -1 ## real-clock end of bullet time (-1 = off); Engine.time_scale slows delta, so never count it
 
 func setup(definition: Dictionary, is_casual: bool, force_training: bool = false) -> void:
 	level = definition
@@ -50,15 +60,23 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	training = bool(level.get("tutorial",false)) and (force_training or not bool(GameState.entry(1).get("training_complete",false)))
 	lesson = 0 if force_training else clampi(int(GameState.entry(1).get("training_step",0)),0,TRAINING_LESSONS-1)
 	casual = is_casual and not training
+	if not training or (bool(level.get("quests_on_replay_only",false)) and bool(GameState.entry(1).get("training_complete",false))):
+		var quest_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+		quest_rng.randomize()
+		quests.setup(level,quest_rng)
+	quests.quest_completed.connect(_quest_completed)
 	rng.seed = int(level.seed) + 91
 	wind.setup(level)
 	wind.gust_warning.connect(_gust)
 	beach = BeachBackdrop.new()
-	beach.sunset = int(level.id) == 6
+	beach.sunset = level.has("sunset")
 	beach.wind_dir = wind.direction
 	beach.strength = wind.strength
 	add_child(beach)
 	beach.setup(level.props,level.get("zones",[]),level.get("world",{}))
+	if _twist() == "wind_intro":
+		for flag_x: Variant in level.twist.get("flags",[]):
+			beach.wind_flags.append(int(flag_x))
 	scraps = BeachScraps.new()
 	add_child(scraps)
 	scraps.collected.connect(_scrap_collected)
@@ -67,6 +85,26 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	add_child(actors)
 	spawner.target_created.connect(_wire_target)
 	spawner.setup(actors,level)
+	if _twist() == "off_lead_dog":
+		for spawn: Dictionary in level.spawns:
+			if spawn.type == "off_lead_dog":
+				dog = OffLeadDog.new()
+				actors.add_child(dog)
+				dog.setup(float(spawn.x),spawn.home,int(level.seed)+5)
+				dog.barked.connect(func() -> void:
+					effects.message(dog.position-Vector2(0,24),"WOOF!",BeachUI.GOLD)
+					Audio.play("click")
+				)
+				dog.caught.connect(func() -> void:
+					effects.message(dog.position-Vector2(0,24),"GOTCHA!",Color("ef725c"))
+					_quest_event("dog_caught")
+				)
+				dog.outrun.connect(func() -> void:
+					effects.message(player.position-Vector2(0,18),"OUTRUN!",BeachUI.GOLD)
+					Audio.play("snatch")
+					_quest_event("dog_outrun")
+				)
+				break
 	stalls.setup(beach,spawner)
 	stalls.portion_created.connect(_wire_target)
 	crabs = CrabPopulation.new()
@@ -74,8 +112,10 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	crabs.setup(level,beach.props,spawner)
 	crabs.crab_created.connect(_wire_target)
 	player = BeachGull.new()
-	player.species = str(level.get("player_species","herring"))
+	player.species = str(level.get("player_species",GameState.chosen_gull()))
+	player.apply_species_stats()
 	player.digestion_enabled = true
+	_apply_perk()
 	player.digestion.swallowed.connect(_swallowed)
 	player.name = "Player"
 	# Flight and loose food stay in front of the stall's complete scenery layer.
@@ -87,6 +127,10 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	player.gull_stunned.connect(_stunned)
 	player.ground_crashed.connect(_crashed)
 	player.dive_started.connect(func() -> void: Audio.play("dive"))
+	player.stun_ignored.connect(func() -> void:
+		effects.message(player.position,"SKULL!",BeachUI.GOLD)
+		Audio.play("click")
+	)
 	player.peck_started.connect(func() -> void:
 		effects.message(player.beak(),"PECK!",BeachUI.GOLD)
 		Audio.play("click")
@@ -106,6 +150,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		if training and lesson == 3 and training_raid_started:
 			_training_advance()
 	)
+	stash_raids.bin_emptied.connect(func(_bin_type: String) -> void: _quest_event("bin_emptied"))
 	stash_raids.bin_opened.connect(func(bin_type: String) -> void:
 		if not training:
 			return
@@ -113,8 +158,11 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 			_training_advance()
 	)
 	pending_rivals = level.rivals.duplicate(true)
-	if not bool(level.get("rivals_after_snatch",false)):
-		_release_rivals()
+	var held: bool = bool(level.get("rivals_after_snatch",false))
+	var later: Array = pending_rivals.filter(func(p: Dictionary) -> bool: return held or bool(p.get("after_snatch",false)))
+	pending_rivals = pending_rivals.filter(func(p: Dictionary) -> bool: return p not in later)
+	_release_rivals()
+	pending_rivals = later
 	effects = BeachEffects.new()
 	effects.z_index = 5
 	add_child(effects)
@@ -139,6 +187,34 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 			player.state = BeachGull.State.GLIDE
 	Config.reloaded.connect(_reload)
 
+func _twist() -> String:
+	return str(level.get("twist",{}).get("id",""))
+
+# Level 2 teaches upwind scoring once per save, the first time the gull is airborne.
+func _wind_tip() -> void:
+	if _twist() != "wind_intro" or "upwind" in GameState.options.tips or player.state == BeachGull.State.GROUNDED:
+		return
+	GameState.options.tips.append("upwind")
+	GameState.save_progress()
+	# Fixed mid-screen band: clear of the top bar, hint and goal box.
+	effects.message(Vector2(camera_x,84.0),"FLY INTO THE WIND = UPWIND +%d%%" % roundi(float(Config.tuning.score.upwind)*100.0),BeachUI.GOLD,float(Config.tuning.juice.tip_time),0.0)
+
+# Shows a released rival's taunt after a delay, never while the score banner is up, below the rival so the tag stays clear.
+func _rival_taunt(step: float) -> void:
+	if taunt_wait < 0.0 or pilots.is_empty():
+		return
+	taunt_wait = maxf(0.0,taunt_wait-step)
+	if taunt_wait > 0.0 or overlay.score_announcement.visible or effects.texts.any(func(t: Dictionary) -> bool: return t.has("fade_time")):
+		return
+	taunt_wait = -1.0
+	var from: Vector2 = pilots[0].gull.position
+	for pilot: RivalPilot in pilots:
+		if pilot.gull.rival_name == taunt_rival:
+			from = pilot.gull.position
+	var half: float = taunt_text.length()*4.2
+	var at: Vector2 = Vector2(clampf(from.x,camera_x-160.0+half,camera_x+160.0-half),from.y+22.0)
+	effects.message(at,taunt_text,BeachUI.GOLD,float(Config.tuning.juice.taunt_time),0.0)
+
 func _release_rivals() -> void:
 	for profile: Dictionary in pending_rivals:
 		var rival: BeachGull = BeachGull.new()
@@ -150,6 +226,9 @@ func _release_rivals() -> void:
 		gulls.append(rival)
 		var pilot: RivalPilot = RivalPilot.new()
 		pilot.setup(rival,profile,rng)
+		pilot.game = self
+		rival.setup_perches(level.props)
+		rival.perch_surfaces = rival.perch_surfaces.filter(func(surface: Dictionary) -> bool: return str(surface.prop_type) == BeachBackdrop.WHEELIE_BIN_TYPE)
 		# Match each frame to distinct feathers within this round.
 		var used_colours: Array[Color] = []
 		for existing: RivalPilot in pilots:
@@ -197,7 +276,57 @@ func _reload() -> void:
 		target.awareness_mult = float(level.awareness_mult) * target.encounter_awareness
 	effects.message(player.position,"DATA RELOADED")
 
+func _exit_tree() -> void:
+	end_slowmo()
+
+func perk_value(key: String, fallback: Variant) -> Variant:
+	return Config.perks.perks.get(perk_id,{}).get(key,fallback)
+
+func _apply_perk() -> void:
+	perk_id = GameState.equipped_perk()
+	player.digestion.capacity = int(perk_value("stomach",4))
+	player.dive_mult *= float(perk_value("dive_mult",1.0))
+	player.stun_shield = int(perk_value("ignore_stuns",0))
+	stalls.handover_mult = float(perk_value("handover_window_mult",1.0))
+
+## Keen eye: the most valuable food on offer that a dive could actually take.
+func keen_target() -> BeachTarget:
+	if perk_id != "keen_eye":
+		return null
+	var best: BeachTarget = null
+	for target: BeachTarget in spawner.targets + stalls.portions:
+		if not target.food or target.leaving or target.kind == "sunbather" or (target.info.twist == "shield" and target.defense > 0):
+			continue
+		if best == null or target.food_value() > best.food_value():
+			best = target
+	return best
+
+func slowmo_ready() -> bool:
+	return perk_id == "bullet_time" and slowmo_end_msec < 0 and bullet_meter >= 1.0
+
+func slowmo_active() -> bool:
+	return slowmo_end_msec >= 0
+
+func start_slowmo() -> void:
+	if not running or not slowmo_ready():
+		return
+	slowmo_end_msec = Time.get_ticks_msec() + roundi(float(perk_value("duration",2.5))*1000.0)
+	Engine.time_scale = float(perk_value("time_scale",0.5))
+	input.slowmo_ready = false
+
+func end_slowmo() -> void:
+	if slowmo_end_msec >= 0:
+		slowmo_end_msec = -1
+		bullet_meter = 0.0
+	Engine.time_scale = 1.0
+
+func _slowmo_tick() -> void:
+	if slowmo_end_msec >= 0 and Time.get_ticks_msec() >= slowmo_end_msec:
+		end_slowmo()
+	input.slowmo_ready = slowmo_ready()
+
 func _physics_process(delta: float) -> void:
+	_slowmo_tick()
 	if intro > 0 and int(level.id) != 1:
 		intro -= delta
 		if intro <= 0:
@@ -222,7 +351,14 @@ func _physics_process(delta: float) -> void:
 	if input.touch_peck:
 		input.touch_peck = false
 		_peck()
+	if input.touch_slowmo:
+		input.touch_slowmo = false
+		start_slowmo()
 	player.tick(step,wind.direction,wind.strength)
+	_wind_tip()
+	if dog != null:
+		dog.tick(step,player)
+	_rival_taunt(step)
 	if player.state != BeachGull.State.STUNNED:
 		player.digestion.tick(step,player.state == BeachGull.State.GROUNDED)
 	scraps.tick(step,player)
@@ -233,7 +369,14 @@ func _physics_process(delta: float) -> void:
 	for pilot: RivalPilot in pilots:
 		if is_instance_valid(pilot.target) and pilot.target.food:
 			claims[pilot.target] = pilot
+	var carriers: Array[BeachGull] = []
 	for pilot: RivalPilot in pilots:
+		if pilot.carry_window > 0.0 and pilot.carried > 0 and pilot.gull.state != BeachGull.State.STUNNED:
+			carriers.append(pilot.gull)
+	if not player.digestion.snacks.is_empty() and player.state != BeachGull.State.STUNNED and player.invulnerable <= 0.0:
+		carriers.append(player)
+	for pilot: RivalPilot in pilots:
+		pilot.prey = carriers
 		pilot.tick(step,food_targets,claims,wind,player.position)
 	for target: BeachTarget in spawner.targets.duplicate():
 		target.tick(step,gulls)
@@ -248,7 +391,11 @@ func _physics_process(delta: float) -> void:
 				available = food_targets.duplicate()
 				available.append_array(crabs.targets)
 			BeachCollisions.resolve(gull,available,beach.props)
+	if level.has("boss"):
+		BeachBoss.shove(self)
+	BeachBoss.shove_player(self)
 	_mugging()
+	_rival_mugging()
 	_near_misses()
 	spawner.tick(step,elapsed)
 	spawner.apply_spacing(step)
@@ -298,6 +445,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if running and event.is_action_pressed("dive"):
 		input.update_player(player,camera_x)
 		player.dive(wind.direction)
+	if event.is_action_pressed("slowmo") and not event.is_echo():
+		start_slowmo()
 	if running and event.is_action_pressed("peck") and not event.is_echo():
 		_peck()
 	if event.is_action_pressed("debug"):
@@ -319,6 +468,8 @@ func _peck() -> void:
 			player.show_ground_peck()
 
 func set_paused(value: bool) -> void:
+	if value:
+		end_slowmo()
 	set_physics_process(not value)
 	set_process_unhandled_input(not value)
 	input.enabled = not value and running and intro <= 0
@@ -327,12 +478,16 @@ func set_paused(value: bool) -> void:
 		gull.sprite.speed_scale = 0 if value else 1
 	for target: BeachTarget in spawner.targets:
 		target.sprite.speed_scale = 0 if value else 1
+	if dog != null:
+		dog.paused = value
 
 func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 	if gull == player:
 		if training and target.last_theft_direct and player.state == BeachGull.State.STRIKE:
 			_training_snatch(target)
 		var handover: bool = target.last_theft_handover and target.last_theft_direct and (player.state == BeachGull.State.STRIKE or player.sweep_state == BeachGull.State.STRIKE)
+		if target.last_theft_biting and target.last_theft_direct and player.state == BeachGull.State.STRIKE:
+			_quest_event("mid_air_bite")
 		player.digestion.collect(target.food_id,{"risky":risky,"upwind":player.upwind,"handover":handover})
 		if handover:
 			effects.message(target.food_position()-Vector2(0,12),"COUNTER +%d%%!" % roundi(float(Config.tuning.score.handover)*100),BeachUI.GOLD)
@@ -376,7 +531,19 @@ func _scrap_collected(at: Vector2, food_id: String) -> void:
 	if training and lesson == 1 and player.state == BeachGull.State.GROUNDED:
 		_training_advance()
 
+func _quest_event(event: String, data: Dictionary = {}) -> void:
+	if running:
+		quests.record(event,data)
+
+func _quest_completed(quest: Dictionary) -> void:
+	score.points += int(quest.bonus)
+	effects.message(player.position-Vector2(0,22),"QUEST! +%d" % int(quest.bonus),BeachUI.GOLD)
+	Audio.play("snatch")
+	if GameState.complete_quest(int(level.id),str(quest.id)):
+		feathers_earned += 1
+
 func _swallowed(snack: Dictionary) -> void:
+	_quest_event("swallowed",{"food":snack.id,"direct":not snack.get("scrap",false) and not snack.get("mugged",false),"mugged_from":snack.get("mugged_from",""),"handover":snack.get("handover",false)})
 	var value: int = int(snack.get("value",Config.foods[snack.id].points))
 	if snack.get("scrap",false):
 		score.points += value
@@ -387,13 +554,26 @@ func _swallowed(snack: Dictionary) -> void:
 		if not first_steal_sent:
 			first_steal_sent = true
 			track("first_steal", {"level": int(level.id), "seconds": snappedf(elapsed, 0.1)})
+		if perk_id == "bullet_time" and not snack.get("mugged",false) and not slowmo_active():
+			bullet_meter = minf(1.0,bullet_meter+float(perk_value("fill_per_clean_snatch",0.34)))
 		var earned: int = _award(value,snack.get("risky",false),snack.get("upwind",false),snack.get("mugged",false),snack.get("handover",false))
 		overlay.show_score_announcement(str(snack.id),earned)
 		if not pending_rivals.is_empty():
+			var taunter: Dictionary = {}
+			for profile: Dictionary in pending_rivals:
+				if profile.has("taunt"):
+					taunter = profile
 			_release_rivals()
-			effects.message(player.position-Vector2(0,22),"GARY JOINS THE LUNCH RUSH!",BeachUI.GOLD)
+			if not taunter.is_empty():
+				taunt_rival = str(taunter.name)
+				taunt_text = str(taunter.taunt)
+				taunt_wait = float(Config.tuning.juice.taunt_delay)
+			else:
+				effects.message(player.position-Vector2(0,22),"GARY JOINS THE LUNCH RUSH!",BeachUI.GOLD)
 
 func _cry(source: BeachTarget) -> void:
+	if source.kind == "toddler":
+		_quest_event("toddler_cried")
 	if is_instance_valid(source.family_parent):
 		source.family_parent.alert = 1
 
@@ -413,10 +593,43 @@ func _mugging() -> void:
 		return
 	for pilot: RivalPilot in pilots:
 		if pilot.carry_window > 0 and player.can_collect_food(pilot.carried_food_id) and BeachCollisions.segment_hits(player.previous_beak,player.sweep_beak,pilot.gull.position,Vector2(14,10)):
+			if BeachBoss.blocks_mug(self,pilot,player):
+				return
 			var value: int = pilot.mug(player.position)
 			if value > 0:
-				player.digestion.collect(pilot.carried_food_id,{"value":value,"upwind":player.upwind,"mugged":true})
+				if not mugged_rivals.has(pilot.gull.rival_name):
+					mugged_rivals[pilot.gull.rival_name] = true
+					_quest_event("rival_mugged_distinct")
+				player.digestion.collect(pilot.carried_food_id,{"value":value,"upwind":player.upwind,"mugged":true,"mugged_from":pilot.gull.rival_name})
 				return
+
+## Rivals mug anyone holding food: other rivals in their grace window, or the player's unswallowed snack.
+func _rival_mugging() -> void:
+	for attacker: RivalPilot in pilots:
+		var beak: BeachGull = attacker.gull
+		if beak.state != BeachGull.State.STRIKE or attacker.leave > 0.0:
+			continue
+		for victim: RivalPilot in pilots:
+			if victim != attacker and victim.carry_window > 0.0 and BeachCollisions.segment_hits(beak.previous_beak,beak.sweep_beak,victim.gull.position,Vector2(14,10)):
+				if BeachBoss.blocks_mug(self,victim,beak):
+					break
+				var value: int = victim.mug(beak.position)
+				if value > 0:
+					attacker.carried_food_id = victim.carried_food_id
+					attacker.took_food(value)
+					attacker.mugs += 1
+					effects.message(beak.position,"MUGGED!",Color("ffc65c"))
+					break
+		if attacker.leave > 0.0:
+			continue
+		if not player.digestion.snacks.is_empty() and player.state != BeachGull.State.STUNNED and player.invulnerable <= 0.0 and BeachCollisions.segment_hits(beak.previous_beak,beak.sweep_beak,player.position,Vector2(14,10)):
+			# The food goes into the rival's beak, not onto the sand: take it before the stun can drop it.
+			var taken: Dictionary = player.digestion.drop_current()
+			attacker.carried_food_id = str(taken.id)
+			attacker.took_food(int(taken.get("value",Config.foods[taken.id].points)))
+			attacker.mugs += 1
+			player.stun(Config.tuning.rival.mug_stun,beak.position)
+			effects.message(player.position-Vector2(0,20),"MUGGED BY %s!" % attacker.gull.rival_name.to_upper(),Color("ef725c"))
 
 func _near_misses() -> void:
 	if not Config.tuning.juice.near_miss or elapsed-last_near < 1 or player.state != BeachGull.State.STRIKE:
@@ -431,10 +644,20 @@ func _near_misses() -> void:
 func finish() -> void:
 	if not running:
 		return
+	var boss: bool = level.has("boss") and not casual
+	if boss:
+		BeachBoss.conclude(self)
 	running = false
+	end_slowmo()
 	input.enabled = false
 	input.clear_touch()
 	var result: Dictionary = score.result(level,casual,elapsed)
+	result.quests = quests.quests.map(func(quest: Dictionary) -> Dictionary: return {"text":quest.text,"done":quest.done,"progress":quest.progress,"count":quest.count,"bonus":quest.bonus})
+	result.quest_bonus = quests.bonus_points()
+	result.base = int(result.base) - int(result.quest_bonus)
+	result.feathers_earned = feathers_earned
+	if boss:
+		BeachBoss.verdict(self,result)
 	if training:
 		if lesson < TRAINING_LESSONS:
 			running = true

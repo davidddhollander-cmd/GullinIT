@@ -34,10 +34,14 @@ func run() -> void:
 	Audio.music.stop()
 	for id: String in ShopperArt.APPEARANCES:
 		var frames: SpriteFrames = Config.frames(id)
+		var entry: Dictionary = Config.sprites[id]
+		var bite_texture: AtlasTexture = frames.get_frame_texture(&"bite",0)
+		check(bite_texture.atlas.resource_path==entry.file,"standing bite retains main's generated atlas")
 		preload("res://tests/isolated_sprite_checks.gd").run(check,frames,id)
 		for clip: StringName in [&"sit_down",&"seated_idle",&"seated_eat",&"stand_up"]:
 			for index: int in frames.get_frame_count(clip):
 				var texture: AtlasTexture = frames.get_frame_texture(clip,index)
+				check(texture.atlas.resource_path==entry.animations[String(clip)].file,"bench clip selects its separate generated atlas")
 				var cell: Image = texture.atlas.get_image().get_region(Rect2i(texture.region))
 				check(cell.get_used_rect().end.y == 116,"generated bench frame uses approved sole baseline")
 	spawner.setup(self,{"id":3,"seed":571,"awareness_mult":1.0,"spawns":[],"props":[{"type":"beach_bench","x":200,"y":160}]})

@@ -3,6 +3,8 @@ extends Node2D
 var camera_x: float = 160.0
 var time: float = 0.0
 var wind_dir: int = 1
+# Scenery-only wind flags (level 2 intro): x positions, flap with wind_dir/strength.
+var wind_flags: Array[int] = []
 var strength: float = 0.3
 var sunset: bool = false
 var props: Array[Dictionary] = []
@@ -198,6 +200,8 @@ func _draw() -> void:
 		if entry.type in ["tower", "kiosk", "hotdog_stand"]:
 			var top: int = 103 if entry.type == "tower" else 110
 			_draw_flagpole(roundi(float(entry.x)) + 12, top, Color("ef725c") if entry.type != "kiosk" else Color("408fa8"))
+	for flag_x: int in wind_flags:
+		_draw_flagpole(flag_x,141,Color("ef725c"),int(Config.tuning.wind_flag.intro_lift),int(Config.tuning.wind_flag.intro_reach))
 	if strength > 0.5:
 		for i: int in range(20):
 			var x: float = left + fposmod(i * 37 + time * strength * wind_dir * 70,320)
@@ -317,15 +321,17 @@ func _sign_hits_prop(x: int,board_width: int,entries: Array,board_height: int = 
 			return true
 	return false
 
-func _draw_flagpole(x: int, top: int, accent: Color) -> void:
+func _draw_flagpole(x: int, top: int, accent: Color, lift: int = 0, extra_reach: int = 0) -> void:
 	# Three stepped flutter poses; all coordinates stay on the native pixel grid.
-	draw_rect(Rect2(x - 1, top - 16, 4, 25), Color("183b4e"))
-	draw_rect(Rect2(x, top - 15, 2, 22), Color("d59a5e"))
-	draw_rect(Rect2(x - 2, top - 18, 5, 3), Color("fff4da"))
-	var flutter: int = int(floor(time * 7.0)) % 3
-	var reach: int = 7 + flutter * 2 + roundi(strength * 3.0)
+	var f: Dictionary = Config.tuning.wind_flag
+	var flag_top: int = top - lift
+	draw_rect(Rect2(x - 1, flag_top - 16, 4, 25 + lift), Color("183b4e"))
+	draw_rect(Rect2(x, flag_top - 15, 2, 22 + lift), Color("d59a5e"))
+	draw_rect(Rect2(x - 2, flag_top - 18, 5, 3), Color("fff4da"))
+	var flutter: int = int(floor(time * float(f.flap_speed))) % 3
+	var reach: int = int(f.base_reach) + extra_reach + flutter * 2 + roundi(strength * float(f.wind_reach))
 	var start_x: int = x + 3 if wind_dir >= 0 else x - reach
 	for row: int in 6:
 		var width: int = reach - (row / 2) * 2
 		var row_x: int = start_x + (row / 2 if wind_dir >= 0 else reach - width - row / 2)
-		draw_rect(Rect2(row_x, top - 15 + row, width, 1), Color("183b4e") if row in [0, 5] else (accent if row < 3 else Color("fff4da")))
+		draw_rect(Rect2(row_x, flag_top - 15 + row, width, 1), Color("183b4e") if row in [0, 5] else (accent if row < 3 else Color("fff4da")))

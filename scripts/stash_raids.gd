@@ -4,6 +4,7 @@ extends Node2D
 signal collected(position: Vector2, food_id: String, scrap: bool)
 signal bag_collected
 signal bin_opened(bin_type: String)
+signal bin_emptied(bin_type: String)
 var game: BeachGame
 var items: Array[Dictionary] = []
 var raids: Dictionary = {}
@@ -12,6 +13,21 @@ var peck_cooldown: float = 0.0
 var peck_flash: float = 0.0
 var bins: Array[Dictionary] = []
 var shine_clock: float = 0.0
+var actor: BeachGull ## set while a rival pecks, so the player's code path serves any gull
+
+func _gull() -> BeachGull:
+	return actor if actor != null else game.player
+
+## A rival pecks with its own beak and cooldown; bins, bags and risks are the player's.
+func peck_as(who: BeachGull) -> bool:
+	var saved: Array[float] = [peck_cooldown,peck_flash]
+	actor = who
+	peck_cooldown = 0.0
+	var ok: bool = peck()
+	actor = null
+	peck_cooldown = saved[0]
+	peck_flash = saved[1]
+	return ok
 
 func setup(owner_game: BeachGame) -> void:
 	game = owner_game
@@ -25,16 +41,16 @@ func setup(owner_game: BeachGame) -> void:
 			bins.append({"type":type,"x":float(prop.x),"content_y":BeachBackdrop.bin_content_y(prop),"requires_top_landing":type==BeachBackdrop.WHEELIE_BIN_TYPE,"capacity":capacity,"remaining":capacity,"pecks":0,"scatter_index":0})
 
 func nearby_bin(include_empty: bool = false) -> Dictionary:
-	if game.player.state != BeachGull.State.GROUNDED:
+	if _gull().state != BeachGull.State.GROUNDED:
 		return {}
 	var nearest: Dictionary = {}
 	var distance: float = float(Config.tuning.world.peck_reach)
 	for bin: Dictionary in bins:
 		if int(bin.remaining) <= 0 and not include_empty:
 			continue
-		if bool(bin.get("requires_top_landing",false)) and not game.player.is_supported_by(str(bin.type),float(bin.x)):
+		if bool(bin.get("requires_top_landing",false)) and not _gull().is_supported_by(str(bin.type),float(bin.x)):
 			continue
-		var gap: float = absf(float(bin.x)-game.player.beak().x)
+		var gap: float = absf(float(bin.x)-_gull().beak().x)
 		if gap <= distance:
 			distance = gap
 			nearest = bin
@@ -44,9 +60,9 @@ func has_nearby_source() -> bool:
 	return nearby_stash(true) != null or not nearby_bin(true).is_empty()
 
 func nearby_toddler() -> BeachTarget:
-	if game.player.state != BeachGull.State.GROUNDED:
+	if _gull().state != BeachGull.State.GROUNDED:
 		return null
-	var beak: Vector2 = game.player.beak()
+	var beak: Vector2 = _gull().beak()
 	var reach: float = float(Config.tuning.world.peck_reach)
 	var vertical_tolerance: float = float(Config.tuning.world.toddler_peck_vertical_tolerance)
 	var nearest: BeachTarget
@@ -55,7 +71,7 @@ func nearby_toddler() -> BeachTarget:
 		if not is_instance_valid(target) or target.kind != "toddler" or not target.food or target.leaving or target.dropped_pending or not Config.foods.has(target.food_id):
 			continue
 		var food: Vector2 = target.food_position()
-		var forward_gap: float = (food.x-beak.x)*game.player.facing
+		var forward_gap: float = (food.x-beak.x)*_gull().facing
 		if forward_gap < 0.0 or forward_gap > reach or absf(food.y-beak.y) > vertical_tolerance:
 			continue
 		if forward_gap < distance:
@@ -64,14 +80,14 @@ func nearby_toddler() -> BeachTarget:
 	return nearest
 
 func nearby_stash(include_empty: bool = false) -> BeachTarget:
-	if game.player.state != BeachGull.State.GROUNDED:
+	if _gull().state != BeachGull.State.GROUNDED:
 		return null
 	var nearest: BeachTarget
 	var distance: float = float(Config.tuning.world.peck_reach)
 	for target: BeachTarget in game.spawner.targets:
 		if target.kind != "sunbather" or (target.stash_remaining <= 0 and not include_empty):
 			continue
-		var gap: float = absf(target.stash_position().x-game.player.beak().x)
+		var gap: float = absf(target.stash_position().x-_gull().beak().x)
 		if gap <= distance:
 			distance = gap
 			nearest = target
@@ -80,7 +96,7 @@ func nearby_stash(include_empty: bool = false) -> BeachTarget:
 func peck() -> bool:
 	if peck_cooldown > 0 or not game.running:
 		return false
-	var toddler: BeachTarget = nearby_toddler()
+	var toddler: BeachTarget = nearby_toddler() if actor == null else null
 	if toddler != null:
 		return _peck_toddler(toddler)
 	var owner: BeachTarget = nearby_stash()
@@ -105,6 +121,7 @@ func peck() -> bool:
 		raid.action = ""
 		raid.action_time = 0.0
 		raid.notice = float(t.sunbather_notice_delay)*owner.reaction_delay
+	raid.raider = _gull()
 	raid.pecks += 1
 	owner.register_bag_peck()
 	if owner.sleep_state == BeachTarget.SleepState.AWAKE:
@@ -172,6 +189,8 @@ func _peck_bin(bin: Dictionary) -> bool:
 			items.append({"owner":null,"source":"bin","food_id":kind if is_food else "","garbage":not is_food,"garbage_kind":kind,"position":content_position+Vector2(0,6),"velocity":Vector2(direction*rng.randf_range(35,65),-rng.randf_range(65,95)),"grounded":false,"age":0.0})
 		if count > 0:
 			bin_opened.emit(str(bin.type))
+			if int(bin.remaining) <= 0:
+				bin_emptied.emit(str(bin.type))
 	queue_redraw()
 	return true
 
@@ -235,26 +254,28 @@ func tick(delta: float) -> void:
 		if is_garbage:
 			continue
 		var radius: Vector2 = Vector2(definition.pickup_radius[0],definition.pickup_radius[1])+Vector2(float(Config.tuning.dive.beak_w),float(Config.tuning.dive.beak_h))*0.5
-		var hit: bool = false
 		var pickup_delay: float = float(t.stash_pickup_delay)
-		if item.age >= pickup_delay and gull.state != BeachGull.State.STUNNED:
-			if item.grounded and gull.state == BeachGull.State.GROUNDED:
-				hit = absf(gull.beak().x-float(item.position.x)) <= radius.x
-			else:
-				# If grace expires during this frame, ignore the protected part of both paths.
-				var eligible_fraction: float = clampf((pickup_delay-previous_age)/delta,0,1) if delta > 0 else 0
-				var eligible_food_start: Vector2 = previous.lerp(item.position,eligible_fraction)
-				var eligible_beak_start: Vector2 = gull.previous_beak.lerp(gull.sweep_beak,eligible_fraction)
-				hit = BeachCollisions.segment_hits(eligible_beak_start-eligible_food_start,gull.sweep_beak-item.position,Vector2.ZERO,radius)
-		if hit and gull.can_collect_food(item.food_id):
+		var taker: BeachGull
+		var pilot: RivalPilot
+		if _hit(gull,item,radius,previous,previous_age,delta,pickup_delay) and gull.can_collect_food(item.food_id):
+			taker = gull
+		else:
+			for candidate: RivalPilot in game.pilots:
+				if candidate.accepts_item(item) and _hit(candidate.gull,item,radius,previous,previous_age,delta,pickup_delay):
+					pilot = candidate
+					taker = candidate.gull
+					break
+		if taker != null:
 			if item.get("source","") == "near_miss":
-				if is_instance_valid(item.owner) and item.owner.claim_dropped(gull):
+				if is_instance_valid(item.owner) and item.owner.claim_dropped(taker):
 					items.remove_at(index)
 				continue
 			items.remove_at(index)
 			if is_instance_valid(item.get("owner")):
-				item.owner.reaction.theft(item.owner,gull)
-			if item.has("snack"):
+				item.owner.reaction.theft(item.owner,taker)
+			if pilot != null:
+				pilot.ate_ground(str(item.food_id))
+			elif item.has("snack"):
 				game.player.digestion.collect(item.food_id,item.snack)
 			else:
 				collected.emit(item.position,item.food_id,item.get("source","") == "bin")
@@ -265,6 +286,7 @@ func tick(delta: float) -> void:
 			raids.erase(owner)
 			continue
 		var raid: Dictionary = raids[owner]
+		var raider: BeachGull = raid.get("raider",gull) if is_instance_valid(raid.get("raider",gull)) else gull
 		if owner.sleep_state != BeachTarget.SleepState.AWAKE:
 			continue
 		if not owner.reaction.mode.is_empty():
@@ -292,8 +314,8 @@ func tick(delta: float) -> void:
 		elif action == "swat_windup":
 			raid.action_time -= delta
 			if raid.action_time <= 0:
-				if gull.state != BeachGull.State.STUNNED and gull.position.distance_to(owner.position-Vector2(0,12)) < float(t.stash_swat_reach):
-					gull.stun(-1.0,owner.position)
+				if raider.state != BeachGull.State.STUNNED and raider.position.distance_to(owner.position-Vector2(0,12)) < float(t.stash_swat_reach):
+					raider.stun(-1.0,owner.position)
 				raid.swat = float(t.stash_swat_cooldown)
 				raid.action = "swat_follow"
 				raid.action_time = SunbatherArt.SWAT_FOLLOW
@@ -332,11 +354,11 @@ func tick(delta: float) -> void:
 		var destination: float = float(items[nearest].position.x) if nearest >= 0 else owner.stash_home_x
 		var moving: bool = false
 		# Start the telegraphed attack before choosing a return/settle action.
-		if action == "" and raid.swat <= 0 and gull.state != BeachGull.State.STUNNED and gull.position.distance_to(owner.position-Vector2(0,12)) < float(t.stash_swat_reach):
+		if action == "" and raid.swat <= 0 and raider.state != BeachGull.State.STUNNED and raider.position.distance_to(owner.position-Vector2(0,12)) < float(t.stash_swat_reach):
 			raid.action = "swat_windup"
 			raid.action_time = SunbatherArt.SWAT_WINDUP
 			action = "swat_windup"
-			destination = gull.position.x
+			destination = raider.position.x
 			owner.facing = signf(destination-owner.position.x) if absf(destination-owner.position.x)>1 else owner.facing
 		if action == "":
 			owner.facing = signf(destination-owner.position.x) if absf(destination-owner.position.x)>1 else owner.facing
@@ -373,6 +395,18 @@ func tick(delta: float) -> void:
 		SunbatherArt.reaction_pose(owner,reaction,phase,int(owner.sunbather_run_time*10)%7 if moving else 0)
 		owner.queue_redraw()
 	queue_redraw()
+
+## Does this gull's beak reach the item this frame? Grounded items need a standing gull; moving ones use the swept beak.
+func _hit(who: BeachGull, item: Dictionary, radius: Vector2, previous: Vector2, previous_age: float, delta: float, pickup_delay: float) -> bool:
+	if item.age < pickup_delay or who.state == BeachGull.State.STUNNED:
+		return false
+	if item.grounded and who.state == BeachGull.State.GROUNDED:
+		return absf(who.beak().x-float(item.position.x)) <= radius.x
+	# If grace expires during this frame, ignore the protected part of both paths.
+	var eligible_fraction: float = clampf((pickup_delay-previous_age)/delta,0,1) if delta > 0 else 0
+	var eligible_food_start: Vector2 = previous.lerp(item.position,eligible_fraction)
+	var eligible_beak_start: Vector2 = who.previous_beak.lerp(who.sweep_beak,eligible_fraction)
+	return BeachCollisions.segment_hits(eligible_beak_start-eligible_food_start,who.sweep_beak-item.position,Vector2.ZERO,radius)
 
 func _draw() -> void:
 	for item: Dictionary in items:

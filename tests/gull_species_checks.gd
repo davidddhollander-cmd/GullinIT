@@ -81,7 +81,7 @@ static func run(host: Node, check: Callable) -> void:
 			if not role:
 				speeds.append(gull.velocity.x)
 			gull.queue_free()
-	check.call(speeds[1] > speeds[0]*1.15 and is_equal_approx(speeds[2],speeds[0]),"kittiwake flies faster; the larger gull keeps standard movement")
+	check.call(speeds[1] > speeds[0]*1.15 and speeds[2] < speeds[0],"as player gulls, kittiwake flies faster and the great black-back slower than the herring gull")
 	await host.get_tree().process_frame
 	# Exercise the authored rival assignments and capture their real game rendering.
 	host.main.start_level(6)
@@ -99,7 +99,7 @@ static func run(host: Node, check: Callable) -> void:
 	game.player.tick(0,0,0)
 	for pilot: RivalPilot in game.pilots:
 		var gull: BeachGull = pilot.gull
-		var expected := {"Gary":"great-black-backed","Chip":"kittiwake","Bev":"herring"}
+		var expected := {"Gary":"great-black-backed","Chip":"kittiwake","Bev":"great-black-backed"}
 		check.call(gull.species == expected[pilot.gull.rival_name],"authored rival uses its chosen species")
 		gull.position = Vector2(xs[gull.rival_name],gull.ground_y())
 		gull.state = BeachGull.State.GROUNDED

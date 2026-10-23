@@ -124,9 +124,11 @@ static func _readability_checks(suite: Node, check: Callable) -> void:
 	board.level = game.level
 	board.result = {"stars":1,"casual":false,"elapsed":120.0}
 	var text: String = board._record_text()
-	check.call(text.ends_with("NEXT STAR 400") and not ".0" in text and not "SEC" in text,"arcade result uses integer next star and omits fixed elapsed time: "+text)
-	board.result.stars = 3
-	check.call("ALL 3 STARS!" in board._record_text() and not "SEC" in board._record_text(),"three-star arcade result omits fixed elapsed time")
+	check.call(text == "FEATHERS %d" % GameState.feathers(),"arcade result bottom line shows Feathers only: "+text)
+	board.result.feathers_earned = 1
+	check.call(board._record_text() == "+1 FEATHER  /  FEATHERS %d" % GameState.feathers(),"one earned Feather is singular")
+	board.result.feathers_earned = 2
+	check.call(board._record_text().begins_with("+2 FEATHERS  /  "),"several earned Feathers are plural")
 	board.free()
 	suite.main.clear_game()
 	await suite.settle()
