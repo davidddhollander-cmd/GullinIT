@@ -14,6 +14,8 @@ static func run(check: Callable) -> void:
 			_check_palms(check,level)
 			if number <= 4:
 				_check_opening_level(check,source,level,number)
+			elif bool(source.get("authored",false)):
+				_check_boss_level(check,source,level)
 			else:
 				_check_later_level(check,level)
 			if variation == 0:
@@ -93,6 +95,17 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 		check.call(not types.has("dog_owner") and not types.has("seafood_vendor") and not types.has("lifeguard"),"boardwalk leaves later hazards for later levels")
 		check.call(float(level.spawns[1].x)<float(level.world.promenade_start) and float(level.spawns[2].x)>float(level.world.promenade_start) and float(level.spawns[5].x)>float(level.world.pier_start),"boardwalk actors occupy their zones")
 		check.call(stand_count==2 and bool(level.rivals_after_snatch),"boardwalk includes both stands and delayed Gary")
+
+static func _check_boss_level(check: Callable, source: Dictionary, level: Dictionary) -> void:
+	check.call(level.spawns.size()==source.spawns.size() and level.props.size()==source.props.size() and level.zones==source.zones and level.world==source.world,"boss level stays hand-built")
+	var types: Array[String] = []
+	for spawn: Dictionary in level.spawns:
+		types.append(str(spawn.type))
+		check.call(float(spawn.x)>20 and float(spawn.x)<float(level.world.width)-20,"boss actor remains inside map")
+	check.call(types.has("seafood_vendor") and types.has("pier_diner") and types.count("kiosk_customer")==3,"boss level has the pier, vendor and promenade customers")
+	for a: int in level.spawns.size():
+		for b: int in range(a+1,level.spawns.size()):
+			check.call(absf(float(level.spawns[a].x)-float(level.spawns[b].x))>=35.0,"boss characters start separated")
 
 static func _check_later_level(check: Callable, level: Dictionary) -> void:
 	var food_positions: Array[float] = []

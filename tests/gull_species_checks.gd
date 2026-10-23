@@ -99,7 +99,7 @@ static func run(host: Node, check: Callable) -> void:
 	game.player.tick(0,0,0)
 	for pilot: RivalPilot in game.pilots:
 		var gull: BeachGull = pilot.gull
-		var expected := {"Gary":"great-black-backed","Chip":"kittiwake","Bev":"herring"}
+		var expected := {"Gary":"great-black-backed","Chip":"kittiwake","Bev":"great-black-backed"}
 		check.call(gull.species == expected[pilot.gull.rival_name],"authored rival uses its chosen species")
 		gull.position = Vector2(xs[gull.rival_name],gull.ground_y())
 		gull.state = BeachGull.State.GROUNDED

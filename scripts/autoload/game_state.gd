@@ -103,6 +103,11 @@ func complete_quest(level_id: int, quest_id: String) -> bool:
 	save_progress()
 	return true
 
+func set_flag(flag: String) -> void:
+	if not bool(progress.get(flag, false)):
+		progress[flag] = true
+		save_progress()
+
 func feathers() -> int:
 	return int(wallet.get("feathers", 0))
 
