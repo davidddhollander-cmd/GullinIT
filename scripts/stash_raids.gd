@@ -4,6 +4,7 @@ extends Node2D
 signal collected(position: Vector2, food_id: String, scrap: bool)
 signal bag_collected
 signal bin_opened(bin_type: String)
+signal bin_emptied(bin_type: String)
 var game: BeachGame
 var items: Array[Dictionary] = []
 var raids: Dictionary = {}
@@ -172,6 +173,8 @@ func _peck_bin(bin: Dictionary) -> bool:
 			items.append({"owner":null,"source":"bin","food_id":kind if is_food else "","garbage":not is_food,"garbage_kind":kind,"position":content_position+Vector2(0,6),"velocity":Vector2(direction*rng.randf_range(35,65),-rng.randf_range(65,95)),"grounded":false,"age":0.0})
 		if count > 0:
 			bin_opened.emit(str(bin.type))
+			if int(bin.remaining) <= 0:
+				bin_emptied.emit(str(bin.type))
 	queue_redraw()
 	return true
 

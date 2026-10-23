@@ -30,6 +30,8 @@ var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var last_near: float = -10.0
 var training: bool = false
 var lesson: int = 0
+var quests: BeachQuests = BeachQuests.new()
+var feathers_earned: int = 0
 const TRAINING_LESSONS: int = 7
 const BIN_LESSON: int = 4
 const WHEELIE_LESSON: int = 5
@@ -50,6 +52,11 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	training = bool(level.get("tutorial",false)) and (force_training or not bool(GameState.entry(1).get("training_complete",false)))
 	lesson = 0 if force_training else clampi(int(GameState.entry(1).get("training_step",0)),0,TRAINING_LESSONS-1)
 	casual = is_casual and not training
+	if not training:
+		var quest_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+		quest_rng.randomize()
+		quests.setup(level,quest_rng)
+	quests.quest_completed.connect(_quest_completed)
 	rng.seed = int(level.seed) + 91
 	wind.setup(level)
 	wind.gust_warning.connect(_gust)
@@ -106,6 +113,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		if training and lesson == 3 and training_raid_started:
 			_training_advance()
 	)
+	stash_raids.bin_emptied.connect(func(_bin_type: String) -> void: _quest_event("bin_emptied"))
 	stash_raids.bin_opened.connect(func(bin_type: String) -> void:
 		if not training:
 			return
@@ -376,7 +384,19 @@ func _scrap_collected(at: Vector2, food_id: String) -> void:
 	if training and lesson == 1 and player.state == BeachGull.State.GROUNDED:
 		_training_advance()
 
+func _quest_event(event: String, data: Dictionary = {}) -> void:
+	if running:
+		quests.record(event,data)
+
+func _quest_completed(quest: Dictionary) -> void:
+	score.points += int(quest.bonus)
+	effects.message(player.position-Vector2(0,22),"QUEST! +%d" % int(quest.bonus),BeachUI.GOLD)
+	Audio.play("snatch")
+	if GameState.complete_quest(int(level.id),str(quest.id)):
+		feathers_earned += 1
+
 func _swallowed(snack: Dictionary) -> void:
+	_quest_event("swallowed",{"food":snack.id,"direct":not snack.get("scrap",false) and not snack.get("mugged",false),"mugged_from":snack.get("mugged_from",""),"handover":snack.get("handover",false)})
 	var value: int = int(snack.get("value",Config.foods[snack.id].points))
 	if snack.get("scrap",false):
 		score.points += value
@@ -394,6 +414,8 @@ func _swallowed(snack: Dictionary) -> void:
 			effects.message(player.position-Vector2(0,22),"GARY JOINS THE LUNCH RUSH!",BeachUI.GOLD)
 
 func _cry(source: BeachTarget) -> void:
+	if source.kind == "toddler":
+		_quest_event("toddler_cried")
 	if is_instance_valid(source.family_parent):
 		source.family_parent.alert = 1
 
@@ -415,7 +437,7 @@ func _mugging() -> void:
 		if pilot.carry_window > 0 and player.can_collect_food(pilot.carried_food_id) and BeachCollisions.segment_hits(player.previous_beak,player.sweep_beak,pilot.gull.position,Vector2(14,10)):
 			var value: int = pilot.mug(player.position)
 			if value > 0:
-				player.digestion.collect(pilot.carried_food_id,{"value":value,"upwind":player.upwind,"mugged":true})
+				player.digestion.collect(pilot.carried_food_id,{"value":value,"upwind":player.upwind,"mugged":true,"mugged_from":pilot.gull.rival_name})
 				return
 
 func _near_misses() -> void:
@@ -435,6 +457,8 @@ func finish() -> void:
 	input.enabled = false
 	input.clear_touch()
 	var result: Dictionary = score.result(level,casual,elapsed)
+	result.quests = quests.quests.map(func(quest: Dictionary) -> Dictionary: return {"text":quest.text,"done":quest.done})
+	result.feathers_earned = feathers_earned
 	if training:
 		if lesson < TRAINING_LESSONS:
 			running = true

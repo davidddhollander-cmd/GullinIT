@@ -67,3 +67,74 @@ static func run(check: Callable) -> void:
 	GameState.save_path = saved_path
 	GameState.progress = saved_progress
 	GameState.wallet = saved_wallet
+
+
+static func _play(main: Node, level: int) -> BeachGame:
+	main.start_level(level)
+	main.game.dismiss_intro()
+	return main.game
+
+static func _finish(game: BeachGame) -> Dictionary:
+	var out: Array[Dictionary] = []
+	game.level_finished.connect(func(result: Dictionary) -> void: out.append(result))
+	game.finish()
+	return out[0] if not out.is_empty() else {}
+
+static func run_game(suite: Node, check: Callable) -> void:
+	var main: Node = suite.main
+	var saved_path: String = GameState.save_path
+	var saved_progress: Dictionary = GameState.progress
+	var saved_wallet: Dictionary = GameState.wallet
+	GameState.save_path = "res://test-output/quest-game-save.json"
+	GameState.progress = {}
+	GameState.wallet = {"feathers": 0}
+	main.casual = false
+	var game: BeachGame = _play(main, 2)
+	check.call(game.quests.quests.size() == 3, "level 2 game builds three quests")
+	var before: int = game.score.points
+	for i: int in 3:
+		game._swallowed({"id": "ice_cream"})
+	var ice: Dictionary = game.quests.quests[0]
+	check.call(ice.done and game.score.points >= before + 50, "three clean ice creams complete l2_ice and add its bonus")
+	var result: Dictionary = _finish(game)
+	check.call(result.get("quests", []).size() == 3 and result.quests[0].done and result.quests[0].text == "3 CLEAN ICE CREAMS", "result lists quests with done state")
+	check.call(int(result.get("feathers_earned", -1)) == 1 and GameState.feathers() == 1, "first completion earns one Feather")
+	var progress: int = int(game.quests.quests[2].progress)
+	game._swallowed({"id": "ice_cream"})
+	check.call(int(ice.progress) == 3 and int(game.quests.quests[2].progress) == progress, "swallow after finish does not record")
+	game = _play(main, 2)
+	before = game.score.points
+	for i: int in 3:
+		game._swallowed({"id": "ice_cream"})
+	check.call(game.score.points >= before + 50, "replay still adds bonus points")
+	result = _finish(game)
+	check.call(int(result.get("feathers_earned", -1)) == 0 and GameState.feathers() == 1, "replay earns no Feather")
+	game = _play(main, 3)
+	game._swallowed({"id": "hotdog", "mugged": true, "mugged_from": "Gary"})
+	check.call(game.quests.quests[0].done, "mugging Gary completes l3_mug_gary")
+	game._swallowed({"id": "hotdog", "scrap": true})
+	check.call(not game.quests.quests[1].done, "scrap hotdog does not complete the crab quest")
+	main.casual = true
+	game = _play(main, 2)
+	for i: int in 3:
+		game._swallowed({"id": "ice_cream"})
+	result = _finish(game)
+	check.call(result.get("casual", false) and game.quests.quests[0].done and GameState.entry(2).quests.size() == 1, "casual run tracks quests")
+	main.casual = false
+	main.start_level(1)
+	check.call(main.game.quests.quests.is_empty(), "level 1 first run has no quests")
+	GameState.complete_training()
+	game = _play(main, 1)
+	check.call(game.quests.quests.size() == 2, "level 1 after training has quests")
+	game.stash_raids.bin_emptied.emit("bin")
+	check.call(game.quests.quests[0].done, "bin_emptied completes l1_bin")
+	game = _play(main, 2)
+	var toddler: BeachTarget = BeachTarget.new()
+	toddler.kind = "toddler"
+	game._cry(toddler)
+	check.call(game.quests.quests[1].done, "toddler cry completes l2_cry")
+	toddler.free()
+	main.clear_game()
+	GameState.save_path = saved_path
+	GameState.progress = saved_progress
+	GameState.wallet = saved_wallet
