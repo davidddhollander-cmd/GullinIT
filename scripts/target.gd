@@ -17,6 +17,11 @@ var drop_retrieve: bool = false
 var drop_pickup_time: float = 0.0
 var thefts: int = 0
 var last_theft_direct: bool = false
+var last_theft_biting: bool = false
+## Customer bite window: biting counts down while the bite clip plays; bite_wait until the next one.
+var biting: float = 0.0
+var bite_wait: float = -1.0
+var was_moving: bool = false
 var last_theft_handover: bool = false
 var stall_service: StallService
 var service_locked: bool = false
@@ -351,6 +356,9 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	var toddler_pause: bool = kind == "toddler" and not seeking_parent and ((not food and recover > 0) or (food and fmod(art_time,6.0) < 1.2))
 	# A short planted reaction makes the customer's empty-hand surprise readable.
 	var customer_pause: bool = kind == "kiosk_customer" and not food and recover > float(t.recover_time)-0.5
+	if kind == "kiosk_customer":
+		_tick_bite(delta)
+		customer_pause = customer_pause or biting > 0.0
 	var whistle_pause: bool = kind == "lifeguard" and lifeguard_whistle_time > 0
 	if routine.enabled and not customer_pause and not whistle_pause:
 		moved = routine.tick(self,delta)
@@ -368,8 +376,26 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 			facing = 1.0
 	_tick_defense(delta,gulls)
 	_update_defense_art()
+	was_moving = moved
 	update_art_pose(moved)
 	queue_redraw()
+
+## A holding customer stops for ~0.6 s every 4-7 s; never while walking, buying, leaving or reacting.
+func _tick_bite(delta: float) -> void:
+	var cfg: Dictionary = Config.tuning.bite
+	if biting > 0.0:
+		biting = maxf(0.0, biting-delta)
+		if not food or leaving or recover > 0 or not reaction.mode.is_empty() or reaction.swat_timer >= 0:
+			biting = 0.0
+		return
+	if bite_wait < 0.0:
+		bite_wait = rng.randf_range(float(cfg.interval_min), float(cfg.interval_max))
+	if not food or leaving or recover > 0 or not reaction.mode.is_empty() or dropped_pending:
+		return
+	bite_wait -= delta
+	if bite_wait <= 0.0 and not was_moving:
+		biting = float(cfg.duration)
+		bite_wait = -1.0
 
 func _tick_shopping(delta: float) -> void:
 	var stand: FoodStall = stall_service.find_stall(self,"hotdog_stand" if food_id=="hotdog" else "kiosk")
@@ -710,6 +736,8 @@ func take(gull: BeachGull) -> bool:
 	var risky: bool = alert >= 1.0 or defense > 0
 	food = false
 	food_sprite.hide()
+	last_theft_biting = biting > 0.0
+	biting = 0.0
 	last_theft_direct = true
 	last_theft_handover = false
 	_finish_theft(gull,risky)

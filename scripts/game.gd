@@ -411,6 +411,8 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 		if training and target.last_theft_direct and player.state == BeachGull.State.STRIKE:
 			_training_snatch(target)
 		var handover: bool = target.last_theft_handover and target.last_theft_direct and (player.state == BeachGull.State.STRIKE or player.sweep_state == BeachGull.State.STRIKE)
+		if target.last_theft_biting and target.last_theft_direct and player.state == BeachGull.State.STRIKE:
+			_quest_event("mid_air_bite")
 		player.digestion.collect(target.food_id,{"risky":risky,"upwind":player.upwind,"handover":handover})
 		if handover:
 			effects.message(target.food_position()-Vector2(0,12),"COUNTER +%d%%!" % roundi(float(Config.tuning.score.handover)*100),BeachUI.GOLD)

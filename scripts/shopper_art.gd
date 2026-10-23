@@ -14,6 +14,8 @@ static func update(target: BeachTarget,moving: bool) -> void:
 			pose = &"surprise"
 		elif original_pilot and target.reaction.mode == "give_up" and target.reaction.committed:
 			pose = &"fist_shake"
+		elif target.biting > 0.0 and not moving:
+			pose = &"bite"
 		elif target.reaction.mode == "warning":
 			pose = &"warning"
 		elif target.reaction.mode in ["follow","give_up"] or (not target.food and target.recover > 0 and not moving):

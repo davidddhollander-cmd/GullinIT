@@ -1,6 +1,6 @@
 # 007 — Customer bite window and mid-air bite quest
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 003, 006
@@ -26,5 +26,9 @@ Customers periodically take a bite; snatching during it completes Training Day's
 - [ ] `./tools/validate.ps1` passes with no new failures (report check count)
 
 ## Report
+Files: `data/tuning.json` (new `bite` block: duration 0.6, interval 4-7 s), `scripts/target.gd` (`biting`, `bite_wait`, `was_moving`, `last_theft_biting`, `_tick_bite`; `take()` records the window), `scripts/shopper_art.gd` (bite pose), `scripts/game.gd` (`_snatched` records `mid_air_bite`), `tests/quest_checks.gd` (+8 checks, `customer-mid-bite` capture).
+Tests: `INTEGRATION: 16279 checks, 1 failures` (only the known `level 6 rival leaves the scene of a theft`); baseline was 16271.
+Decisions: a bite starts only when the customer holds food, is idle (did not move the previous tick), not leaving, not recovering, no reaction mode and no pending drop; it is cancelled if any of those change. The customer stands still during the bite. Only `kiosk_customer` kind (all three shopper appearances) bites. Quest needs `take()` while `biting > 0` plus the existing STRIKE direct check. Stall counter handover untouched.
+Not done: bite frame timing is tied to the 0.6 s window via the clip's 5 fps; no sound.
 
 ## Review notes
