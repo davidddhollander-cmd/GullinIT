@@ -1,6 +1,6 @@
 # 008 — Off-lead dog sprite sheet (Level 4 prep)
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: none
