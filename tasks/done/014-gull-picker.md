@@ -1,6 +1,6 @@
 # 014 — "Pick your gull" at arcade start, with species stats
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
