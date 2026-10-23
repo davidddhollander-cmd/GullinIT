@@ -2,7 +2,20 @@ class_name ShopperArt
 extends RefCounted
 const APPEARANCES: Array[String] = ["kiosk_customer","shopper_mullet","shopper_sundress"]
 
+static func supports_bench(target: BeachTarget) -> bool:
+	return target.sprite.sprite_frames.has_animation(&"seated_idle")
+
 static func update(target: BeachTarget,moving: bool) -> void:
+	if target.bench_visit.anchored():
+		var visit: BenchVisit = target.bench_visit
+		var clip: StringName = visit.pose()
+		target.sprite.flip_h = visit.seat_facing < 0
+		target.sprite.play(clip)
+		target.sprite.pause()
+		var count: int = target.sprite.sprite_frames.get_frame_count(clip)
+		target.sprite.set_frame_and_progress(mini(count-1,int(visit.progress()*count)),0.0)
+		BeachgoerArt.align_food(target)
+		return
 	var pose: StringName = &"walk" if moving else &"idle"
 	var original_pilot: bool = target.shopper_appearance == "kiosk_customer"
 	if not target.leaving:

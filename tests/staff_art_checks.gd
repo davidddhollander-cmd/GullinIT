@@ -16,14 +16,14 @@ static func run(harness: Node,check: Callable) -> void:
 			for index: int in frames.get_frame_count(clip):
 				var texture := frames.get_frame_texture(clip,index) as AtlasTexture
 				check.call(texture.get_size()==Vector2(128,128),id+" uses adult source canvas")
-				check.call(Rect2(Vector2.ZERO,atlas.get_size()).encloses(texture.region),id+" crop stays inside atlas")
-				var cell := image.get_region(Rect2i(texture.region))
+				check.call(Rect2(Vector2.ZERO,texture.atlas.get_size()).encloses(texture.region),id+" crop stays inside atlas")
+				var cell := texture.atlas.get_image().get_region(Rect2i(texture.region))
 				check.call(cell.get_used_rect().end.y==116,id+" feet share adult baseline")
 		for clip: StringName in [&"walk",&"run",&"swat"]:
 			var previous := PackedByteArray()
 			for index: int in frames.get_frame_count(clip):
 				var texture := frames.get_frame_texture(clip,index) as AtlasTexture
-				var pixels := image.get_region(Rect2i(texture.region)).get_data()
+				var pixels := texture.atlas.get_image().get_region(Rect2i(texture.region)).get_data()
 				check.call(previous!=pixels,id+" "+String(clip)+" advances drawn limbs")
 				previous = pixels
 	harness.main.start_level(4)

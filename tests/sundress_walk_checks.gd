@@ -9,18 +9,25 @@ static func run(check: Callable) -> void:
 	expected.food_anchors.walk = current.food_anchors.walk
 	expected.animations.bite = {"frames":[26.0,27.0,28.0],"fps":5.0,"loop":false}
 	expected.food_anchors.bite = current.food_anchors.bite
-	check.call(current==expected,"sundress preserves existing registration while adding bite poses and anchors")
+	for clip: String in ["sit_down","seated_idle","seated_eat","stand_up"]:
+		expected.animations[clip] = current.animations[clip]
+		expected.food_anchors[clip] = current.food_anchors[clip]
+	check.call(current==expected,"sundress preserves walk and bite registration with separate bench clips")
 	var frames := Config.frames("shopper_sundress")
 	check.call(frames.get_frame_count(&"walk")==6 and is_equal_approx(frames.get_animation_speed(&"walk"),8.0),"sundress retains approved six-frame walking timing")
 	var before := Image.load_from_file(ProjectSettings.globalize_path(previous.file))
 	var after := Image.load_from_file(ProjectSettings.globalize_path(current.file))
 	before.convert(Image.FORMAT_RGBA8)
 	after.convert(Image.FORMAT_RGBA8)
-	check.call(before.get_size()==after.get_size(),"sundress atlas retains its existing canvas")
+	check.call(after.get_size()==before.get_size(),"sundress walk and bite atlas keeps original dimensions")
+	var approved := Image.load_from_file(ProjectSettings.globalize_path("res://assets/sprites/shopper-sundress-walk-v2.png"))
+	approved.convert(Image.FORMAT_RGBA8)
 	for index: int in 32:
 		var region := Rect2i(index%8*128,index/8*128,128,128)
 		var old_cell := before.get_region(region)
 		var new_cell := after.get_region(region)
+		if not float(index) in current.animations.bite.frames:
+			check.call(new_cell.get_data()==approved.get_region(region).get_data(),"sundress approved walk and reaction pixels remain exact")
 		if index in [1,2,3,4,5,6]:
 			var lower := Rect2i(20,94,88,22)
 			check.call(old_cell.get_region(lower).get_data()!=new_cell.get_region(lower).get_data(),"sundress walk %d replaces the lower-leg drawing" % index)

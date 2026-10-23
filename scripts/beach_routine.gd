@@ -66,10 +66,20 @@ func purchased(owner: BeachTarget, at: float) -> void:
 	# The next stop is away from the serving window, even near a map edge.
 	if absf(destination-owner.position.x) < 60.0:
 		destination = clampf(anchor+(-1.0 if anchor>(bounds.x+bounds.y)*0.5 else 1.0)*float(profile.min_distance),bounds.x,bounds.y)
+	owner.bench_visit.consider(owner)
 
 func resume(owner: BeachTarget) -> void:
 	if enabled:
 		_choose(owner)
+
+func dining_returned(owner: BeachTarget) -> void:
+	if not enabled:
+		return
+	# The meal source never becomes the diner's new strolling/dining home.
+	anchor = owner.diner_home
+	destination = anchor
+	legs = 0
+	_rest(owner)
 
 func _choose(owner: BeachTarget) -> void:
 	phase = Phase.WALK
@@ -96,3 +106,4 @@ func _rest(owner: BeachTarget) -> void:
 	pause = random.randf_range(4.0,8.0) if eating else random.randf_range(float(profile.pause_min),float(profile.pause_max))
 	if owner.kind == "pier_diner" and absf(owner.position.x-anchor) < 2.0:
 		pause = random.randf_range(6.0,12.0)
+	owner.bench_visit.consider(owner)

@@ -45,6 +45,8 @@ static func update(target: BeachTarget, moving: bool = false) -> void:
 	# The leaving state moves three times faster than the promenade. Match its
 	# cadence without replacing the separately approved pursuit run.
 	var playback_scale := 3.0 if pose == &"walk" and target.leaving else 1.0
+	if pose == &"walk" and not target.leaving and target.diner_meal != BeachTarget.DinerMeal.DINING:
+		playback_scale = float(Config.tuning.world.diner_trip_speed)/float(Config.tuning.world.walk_speed)
 	target.sprite.play(pose, playback_scale)
 	if pose == &"surprise":
 		_timed_pose(target,AdultReaction.THEFT_SURPRISE_TIME)

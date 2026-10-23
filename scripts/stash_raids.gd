@@ -422,13 +422,13 @@ func _draw() -> void:
 			var definition: Dictionary = Config.foods[item.food_id]
 			var display_size: Array = definition.get("display_size",definition.size)
 			var size: Vector2 = Vector2(display_size[0],display_size[1])
-			if item.food_id == "crumbs" and not item.has("crumb_variant"):
-				item.crumb_variant = items.find(item)%3
-			var texture: Texture2D = Config.frames(definition.sprite).get_frame_texture(&"idle",int(item.crumb_variant) if item.food_id == "crumbs" else 0)
+			var texture: Texture2D = Config.frames(definition.sprite).get_frame_texture(&"idle",0)
 			var rect: Rect2 = Rect2(item.position-size*0.5,size)
+			if item.food_id == "crumbs":
+				draw_texture_rect(texture,Rect2(rect.position+Vector2(0,1),size),false,Color("754a39"))
 			draw_texture_rect(texture,rect,false)
 			# Glint only once the item can be picked up and the gull has room for it.
-			if item.food_id != "crumbs" and float(item.get("age",1.0)) >= float(Config.tuning.world.stash_pickup_delay) and is_instance_valid(game) and game.player.can_collect_food(item.food_id):
+			if float(item.get("age",1.0)) >= float(Config.tuning.world.stash_pickup_delay) and is_instance_valid(game) and game.player.can_collect_food(item.food_id):
 				if not item.has("shine_seed"):
 					item.shine_seed = fposmod(float(item.position.x)*0.37,3.0)
 				var glint: Texture2D = PickupShine.overlay(texture,shine_clock,float(item.shine_seed))

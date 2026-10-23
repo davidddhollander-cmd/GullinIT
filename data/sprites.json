@@ -3,14 +3,14 @@
     "file": "res://assets/sprites/crab-red-v2.png",
     "frame_w": 48,
     "frame_h": 40,
-    "visual_scale": 0.375,
+    "visual_scale": 0.25,
     "animations": {"idle": {"fps": 8, "loop": true, "frames": [0,1,2,3,4,5]}}
   },
   "crab_blue": {
     "file": "res://assets/sprites/crab-blue-v2.png",
     "frame_w": 48,
     "frame_h": 40,
-    "visual_scale": 0.375,
+    "visual_scale": 0.25,
     "animations": {"idle": {"fps": 8, "loop": true, "frames": [0,1,2,3,4,5]}}
   },
   "player_gull": {
@@ -1373,6 +1373,48 @@
         ],
         "fps": 5,
         "loop": false
+      },
+      "sit_down": {
+        "frames": [
+          40,
+          41,
+          42,
+          44
+        ],
+        "fps": 8,
+        "loop": false,
+        "file": "res://assets/sprites/shopper-yellow-bench-v1.png"
+      },
+      "seated_idle": {
+        "frames": [
+          44
+        ],
+        "fps": 8,
+        "loop": true,
+        "file": "res://assets/sprites/shopper-yellow-bench-v1.png"
+      },
+      "seated_eat": {
+        "frames": [
+          44,
+          45,
+          46,
+          47,
+          44
+        ],
+        "fps": 8,
+        "loop": true,
+        "file": "res://assets/sprites/shopper-yellow-bench-v1.png"
+      },
+      "stand_up": {
+        "frames": [
+          44,
+          42,
+          41,
+          40
+        ],
+        "fps": 8,
+        "loop": false,
+        "file": "res://assets/sprites/shopper-yellow-bench-v1.png"
       }
     },
     "food_anchors": {
@@ -1508,6 +1550,70 @@
         [
           13.5,
           -21.0
+        ]
+      ],
+      "sit_down": [
+        [
+          11.8414918414918,
+          -18.9871794871795
+        ],
+        [
+          11.5617715617716,
+          -17.2156177156177
+        ],
+        [
+          12.5874125874126,
+          -13.986013986014
+        ],
+        [
+          14.4522144522145,
+          -18.1142191142191
+        ]
+      ],
+      "seated_idle": [
+        [
+          14.4522144522145,
+          -18.1142191142191
+        ]
+      ],
+      "seated_eat": [
+        [
+          14.4522144522145,
+          -18.1142191142191
+        ],
+        [
+          8.01864801864802,
+          -22.4032634032634
+        ],
+        [
+          6.34032634032634,
+          -22.1235431235431
+        ],
+        [
+          10.5361305361305,
+          -11.8076923076923
+        ],
+        [
+          14.4522144522145,
+          -18.1142191142191
+        ]
+      ],
+      "stand_up": [
+        [
+          14.4522144522145,
+          -18.1142191142191
+        ],
+        [
+          12.5874125874126,
+          -13.986013986014
+        ],
+        [
+          11.5617715617716,
+          -17.2156177156177
+        ],
+        [
+          11.8414918414918,
+          -18.9871794871795
         ]
       ]
     }
@@ -1653,19 +1759,83 @@
     "visual_scale": 0.11,
     "animations": {
       "surprise": {
-        "frames": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
+        "frames": [
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ],
         "fps": 18.0,
         "loop": false
       },
       "fist_shake": {
-        "frames": [6.0, 7.0, 8.0, 9.0, 10.0, 11.0],
+        "frames": [
+          6.0,
+          7.0,
+          8.0,
+          9.0,
+          10.0,
+          11.0
+        ],
         "fps": 7.0,
         "loop": false
       }
     },
     "food_anchors": {
-      "surprise": [[14.0, -22.0], [14.0, -22.0], [14.0, -22.0], [14.0, -22.0], [14.0, -22.0], [14.0, -22.0]],
-      "fist_shake": [[14.0, -22.0], [14.0, -22.0], [14.0, -22.0], [14.0, -22.0], [14.0, -22.0], [14.0, -22.0]]
+      "surprise": [
+        [
+          14.0,
+          -22.0
+        ],
+        [
+          14.0,
+          -22.0
+        ],
+        [
+          14.0,
+          -22.0
+        ],
+        [
+          14.0,
+          -22.0
+        ],
+        [
+          14.0,
+          -22.0
+        ],
+        [
+          14.0,
+          -22.0
+        ]
+      ],
+      "fist_shake": [
+        [
+          14.0,
+          -22.0
+        ],
+        [
+          14.0,
+          -22.0
+        ],
+        [
+          14.0,
+          -22.0
+        ],
+        [
+          14.0,
+          -22.0
+        ],
+        [
+          14.0,
+          -22.0
+        ],
+        [
+          14.0,
+          -22.0
+        ]
+      ]
     }
   },
   "lifeguard": {
@@ -1991,10 +2161,32 @@
     }
   },
   "food_crumbs": {
-    "file": "res://assets/sprites/food-crumbs-retro-v2.png",
-    "frame_w": 5,
-    "frame_h": 3,
-    "animations": {"idle": {"frames": [0,1,2], "fps": 1, "loop": false}}
+    "file": "res://assets/sprites/food_bites.png",
+    "frame_w": 275.0,
+    "frame_h": 216.0,
+    "regions": [
+      {
+        "region": [
+          98.0,
+          153.0,
+          275.0,
+          216.0
+        ],
+        "offset": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0.0
+        ],
+        "fps": 1.0,
+        "loop": true
+      }
+    }
   },
   "food_single_chip": {
     "file": "res://assets/sprites/food_bites.png",
@@ -2390,8 +2582,8 @@
   },
   "beach_lamp": {
     "file": "res://assets/sprites/retro-beach-lamp-tall-v1.png",
-    "frame_w": 24,
-    "frame_h": 90,
+    "frame_w": 24.0,
+    "frame_h": 90.0,
     "animations": {
       "idle": {
         "frames": [
@@ -2402,7 +2594,7 @@
       }
     },
     "perch_offset_x": 3.0,
-    "perch_inset_y": 2
+    "perch_inset_y": 2.0
   },
   "pier_diner_motion": {
     "file": "res://assets/sprites/pier-diner-motion-v2.png",
@@ -2598,6 +2790,48 @@
         ],
         "fps": 5,
         "loop": false
+      },
+      "sit_down": {
+        "frames": [
+          32,
+          33,
+          34,
+          36
+        ],
+        "fps": 8,
+        "loop": false,
+        "file": "res://assets/sprites/shopper-mullet-bench-v1.png"
+      },
+      "seated_idle": {
+        "frames": [
+          36
+        ],
+        "fps": 8,
+        "loop": true,
+        "file": "res://assets/sprites/shopper-mullet-bench-v1.png"
+      },
+      "seated_eat": {
+        "frames": [
+          36,
+          37,
+          38,
+          39,
+          36
+        ],
+        "fps": 8,
+        "loop": true,
+        "file": "res://assets/sprites/shopper-mullet-bench-v1.png"
+      },
+      "stand_up": {
+        "frames": [
+          36,
+          34,
+          33,
+          32
+        ],
+        "fps": 8,
+        "loop": false,
+        "file": "res://assets/sprites/shopper-mullet-bench-v1.png"
       }
     },
     "food_anchors": {
@@ -2734,6 +2968,70 @@
           14.0,
           -22.0
         ]
+      ],
+      "sit_down": [
+        [
+          15.2763819095477,
+          -21.4070351758794
+        ],
+        [
+          16.78391959799,
+          -19.2964824120603
+        ],
+        [
+          16.78391959799,
+          -15.9798994974874
+        ],
+        [
+          18.894472361809,
+          -17.891959798995
+        ]
+      ],
+      "seated_idle": [
+        [
+          18.894472361809,
+          -17.891959798995
+        ]
+      ],
+      "seated_eat": [
+        [
+          18.894472361809,
+          -17.891959798995
+        ],
+        [
+          12.964824120603,
+          -23.4195979899498
+        ],
+        [
+          10.6532663316583,
+          -23.4195979899498
+        ],
+        [
+          13.1658291457286,
+          -13.8718592964824
+        ],
+        [
+          18.894472361809,
+          -17.891959798995
+        ]
+      ],
+      "stand_up": [
+        [
+          18.894472361809,
+          -17.891959798995
+        ],
+        [
+          16.78391959799,
+          -15.9798994974874
+        ],
+        [
+          16.78391959799,
+          -19.2964824120603
+        ],
+        [
+          15.2763819095477,
+          -21.4070351758794
+        ]
       ]
     }
   },
@@ -2827,6 +3125,48 @@
         ],
         "fps": 5,
         "loop": false
+      },
+      "sit_down": {
+        "frames": [
+          32,
+          33,
+          34,
+          36
+        ],
+        "fps": 8,
+        "loop": false,
+        "file": "res://assets/sprites/shopper-sundress-bench-v1.png"
+      },
+      "seated_idle": {
+        "frames": [
+          36
+        ],
+        "fps": 8,
+        "loop": true,
+        "file": "res://assets/sprites/shopper-sundress-bench-v1.png"
+      },
+      "seated_eat": {
+        "frames": [
+          36,
+          37,
+          38,
+          39,
+          36
+        ],
+        "fps": 8,
+        "loop": true,
+        "file": "res://assets/sprites/shopper-sundress-bench-v1.png"
+      },
+      "stand_up": {
+        "frames": [
+          36,
+          34,
+          33,
+          32
+        ],
+        "fps": 8,
+        "loop": false,
+        "file": "res://assets/sprites/shopper-sundress-bench-v1.png"
       }
     },
     "food_anchors": {
@@ -2962,6 +3302,70 @@
         [
           15.0,
           -22.0
+        ]
+      ],
+      "sit_down": [
+        [
+          13.3009708737864,
+          -19.8058252427184
+        ],
+        [
+          13.5922330097087,
+          -18.4466019417476
+        ],
+        [
+          15.8252427184466,
+          -14.5631067961165
+        ],
+        [
+          16.0194174757282,
+          -18.3203883495146
+        ]
+      ],
+      "seated_idle": [
+        [
+          16.0194174757282,
+          -18.3203883495146
+        ]
+      ],
+      "seated_eat": [
+        [
+          16.0194174757282,
+          -18.3203883495146
+        ],
+        [
+          10.1941747572816,
+          -22.6893203883495
+        ],
+        [
+          8.54368932038835,
+          -22.8834951456311
+        ],
+        [
+          11.8446601941748,
+          -12.5922330097087
+        ],
+        [
+          16.0194174757282,
+          -18.3203883495146
+        ]
+      ],
+      "stand_up": [
+        [
+          16.0194174757282,
+          -18.3203883495146
+        ],
+        [
+          15.8252427184466,
+          -14.5631067961165
+        ],
+        [
+          13.5922330097087,
+          -18.4466019417476
+        ],
+        [
+          13.3009708737864,
+          -19.8058252427184
         ]
       ]
     }

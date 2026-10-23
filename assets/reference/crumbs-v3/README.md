@@ -1,0 +1,5 @@
+# Finer, darker crumbs
+
+Built-in ChatGPT image generation edited each preserved v2 source separately. Complete outputs remain here. `tools/prepare_crumbs_v3.gd` derives the three 10x6 frames in `assets/sprites/food-crumbs-retro-v3.png`, doubling texture detail while keeping the existing 5x3 on-screen footprint. Collection, scoring, respawn and variety selection are unchanged.
+
+Shared edit prompt: Edit this retro pixel-art bread crumb cluster. Keep the overall cluster arrangement, transparent background and blocky square-pixel style, but give it finer texture: subdivide the very large square blocks into smaller crisp pixel flecks and jagged toasted fragments. Darken the entire palette noticeably to toasted ochre, medium chestnut, dark umber, with only a few muted tan highlight pixels. No pale cream or bright yellow areas. Limited 5-colour palette, no gradients, no antialiasing, no gloss, no cast shadow, no outline around the whole cluster. Tiny game sprite designed on a 10 by 6 pixel grid with clear gaps between fragments. Do not add scenery or text. Genuinely transparent PNG.

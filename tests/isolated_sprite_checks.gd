@@ -5,7 +5,7 @@ static func run(check: Callable, frames: SpriteFrames, label: String) -> void:
 	for animation: StringName in frames.get_animation_names():
 		for frame: int in frames.get_frame_count(animation):
 			var texture := frames.get_frame_texture(animation, frame) as AtlasTexture
-			var key := str(texture.region)
+			var key := texture.atlas.resource_path+str(texture.region)
 			if seen.has(key):
 				continue
 			seen[key] = true

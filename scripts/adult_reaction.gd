@@ -74,6 +74,11 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 			near[gull] = false
 	if mode.is_empty():
 		return false
+	if owner.bench_visit.phase != BenchVisit.Phase.NONE:
+		owner.bench_visit.interrupt(owner)
+		if owner.bench_visit.anchored():
+			owner.update_art_pose(false)
+			return true
 	if mode == "surprise":
 		owner.facing = escape_direction
 	elif is_instance_valid(focus) and mode in ["warning","notice"]:

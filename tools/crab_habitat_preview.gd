@@ -12,7 +12,7 @@ func _ready() -> void:
 	var level: Dictionary = Config.levels[2].duplicate(true)
 	level.world = {"width":1280,"promenade_start":640,"pier_start":960,"start_x":50,"start_y":70}
 	level.spawns = [{"type":"sunbather","x":270,"appearance":"female_blue"}]
-	level.props = [{"type":"beach_palm","x":40,"y":148}]
+	level.props = [{"type":"beach_palm","x":40,"y":160},{"type":"beach_hut","x":210,"y":160}]
 	level.zones = [{"name":"QUIET BEACH","from":0,"to":640}]
 	level.rivals = []
 	level.crabs = {"enabled":false}
@@ -48,6 +48,53 @@ func shot(label: String) -> void:
 		print(label," crab=",crab.position," phase=",crab.phase," activity=",crab.activity)
 	else:
 		print(label," collected")
+
+func depth_frame(at: Vector2) -> Image:
+	for frame: int in 2:
+		await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	var rendered: Image = get_viewport().get_texture().get_image()
+	var scale_factor: float = float(rendered.get_width())/320.0
+	return rendered.get_region(Rect2i(roundi((at.x-14.0)*scale_factor),roundi((at.y-20.0)*scale_factor),roundi(28.0*scale_factor),roundi(24.0*scale_factor)))
+
+func changed_pixels(a: Image, b: Image) -> int:
+	var changed: int = 0
+	for y: int in a.get_height():
+		for x: int in a.get_width():
+			if a.get_pixel(x,y)!=b.get_pixel(x,y):
+				changed += 1
+	return changed
+
+func check_depth() -> bool:
+	crab = BeachCrab.new()
+	game.crabs.add_child(crab)
+	crab.prepare(Vector2(40,146),"sea",1.0,false,game.crabs.settings)
+	crab.phase = BeachCrab.Phase.SCUTTLE
+	crab.sprite.modulate.a = 1.0
+	game.player.hide()
+	var correct: bool = true
+	for index: int in 2:
+		var prop: AnimatedSprite2D = game.beach.prop_sprites[index]
+		for lane_y: float in [crab.rear_y,crab.front_y]:
+			crab.position = Vector2(prop.position.x,lane_y)
+			crab._update_depth()
+			prop.hide()
+			crab.hide()
+			var sand: Image = await depth_frame(crab.position)
+			crab.show()
+			var uncovered: Image = await depth_frame(crab.position)
+			prop.show()
+			var covered: Image = await depth_frame(crab.position)
+			crab.hide()
+			var scenery: Image = await depth_frame(crab.position)
+			var all_pixels: int = changed_pixels(sand,uncovered)
+			var visible_pixels: int = changed_pixels(scenery,covered)
+			correct = correct and all_pixels>0 and visible_pixels<all_pixels
+			print("Depth ",game.beach.props[index].type," lane ",lane_y,": uncovered=",all_pixels,", visible behind prop=",visible_pixels)
+			crab.show()
+			await shot("depth-"+str(game.beach.props[index].type)+("-rear" if lane_y==crab.rear_y else "-front"))
+	crab.queue_free()
+	return correct
 
 func capture() -> void:
 	crab = game.crabs.spawn("sea",160)
@@ -101,4 +148,5 @@ func capture() -> void:
 	await shot("dive-catch")
 	game.player.digestion.tick(3.1,false)
 	print("Habitat preview: ",game.score.items," catches, ",game.score.points," points")
-	get_tree().quit(0 if game.score.items==2 and game.score.points==200 else 1)
+	var depth_ok: bool = await check_depth()
+	get_tree().quit(0 if game.score.items==2 and game.score.points==200 and depth_ok else 1)

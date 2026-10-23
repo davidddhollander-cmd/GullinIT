@@ -79,12 +79,14 @@ func frames(sprite_id: String) -> SpriteFrames:
 	if frames_cache.has(sprite_id):
 		return frames_cache[sprite_id]
 	var entry: Dictionary = sprites[sprite_id]
-	var texture: Texture2D = load(entry.file) as Texture2D
 	var result: SpriteFrames = SpriteFrames.new()
 	result.remove_animation(&"default")
-	var columns: int = maxi(1, texture.get_width() / int(entry.frame_w))
 	for animation: String in entry.animations:
 		var details: Dictionary = entry.animations[animation]
+		# Independent generated animation sets can share an identity without
+		# overwriting atlas cells used by its walk, bite or reaction artwork.
+		var texture: Texture2D = load(details.get("file",entry.file)) as Texture2D
+		var columns: int = maxi(1, texture.get_width() / int(entry.frame_w))
 		result.add_animation(animation)
 		result.set_animation_speed(animation, details.fps)
 		result.set_animation_loop(animation, details.loop)
