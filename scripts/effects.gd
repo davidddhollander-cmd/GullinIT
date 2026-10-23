@@ -18,9 +18,9 @@ const SCORE_MESSAGE_HOLD: float = 3.0
 const SCORE_MESSAGE_FADE: float = 1.5
 const SCORE_MESSAGE_RISE_SPEED: float = 4.0
 
-func message(at: Vector2, text: String, color: Color = Color("fff4da"), life: float = 0.0) -> void:
+func message(at: Vector2, text: String, color: Color = Color("fff4da"), life: float = 0.0, rise_speed: float = 10.0) -> void:
 	if Config.tuning.juice.floating_text:
-		texts.append({"at":at,"text":text,"color":color,"life":life if life > 0.0 else float(Config.tuning.juice.float_time)})
+		texts.append({"at":at,"text":text,"color":color,"life":life if life > 0.0 else float(Config.tuning.juice.float_time),"rise_speed":rise_speed})
 
 func score_message(at: Vector2, text: String, color: Color = Color("fff4da")) -> void:
 	if Config.tuning.juice.floating_text:

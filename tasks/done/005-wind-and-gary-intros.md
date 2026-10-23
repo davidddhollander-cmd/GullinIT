@@ -27,16 +27,17 @@ Family Picnic introduces wind with flags and a one-time upwind tip; Boardwalk Bu
 
 ## Report
 
-Branch `sonnet/005-wind-and-gary-intros`.
+Branch `sonnet/005-wind-and-gary-intros` (review round 2 applied).
 
-Files changed: `data/levels/level_02.json` (twist `wind_intro`, flag x list), `data/levels/level_03.json` (twist `gary_intro`, Gary `loose_only`), `data/tuning.json` (`wind_flag`, `juice.taunt_time`, `juice.tip_time`), `scripts/beach.gd` (wind flags reuse `_draw_flagpole`), `scripts/game.gd` (twist helper, `_wind_tip`, Gary taunt), `scripts/rival_gull.gd`, `scripts/gull.gd`, `scripts/collisions.gd`, `scripts/target.gd` (`is_loose()`), `scripts/effects.gd` (optional message life), `scripts/autoload/game_state.gd` (`options.tips`), tests `quest_checks.gd`, `rival_ai_checks.gd`, `integration.gd`.
+Files changed: `data/levels/level_02.json`, `level_03.json` (twists, Gary `loose_only`), `data/tuning.json` (`wind_flag`, `juice.taunt_time/taunt_delay/tip_time`), `scripts/beach.gd` (wind flags reuse `_draw_flagpole`), `scripts/game.gd` (twist helper, tip, delayed taunt, loose-target sync), new `scripts/loose_food.gd`, `scripts/rival_gull.gd`, `scripts/gull.gd`, `scripts/collisions.gd`, `scripts/target.gd` (`is_loose()`), `scripts/effects.gd` (message life and rise speed), `scripts/autoload/game_state.gd` (`options.tips`), tests `quest_checks.gd`, `rival_ai_checks.gd`, `integration.gd`.
 
-Tests: `INTEGRATION: 16073 checks, 1 failures` (only the known `level 6 rival leaves the scene of a theft`). Capture run also passes the same. 12 new checks (flags only in L2, tip once across two runs and saved in `options.tips`, taunt shown for 2 s in L3 and the old message gone, loose-only Gary never steals or knocks held food over 60 s and ignores held targets).
+Tests: `INTEGRATION: 16088 checks, 1 failures` (only the known level 6 theft-scene check), headless and capture runs.
 
-Decisions: flags reuse the existing kiosk flagpole drawing (taller pole, larger cloth, flap speed and size in `data/tuning.json` `wind_flag`); they sit at x 215 and 600 in L2. Tip text is shown once at 3 s, taunt 2 s clamped on-screen above Gary. Loose food means food resting on a stall counter (`stall_handover` portions); loose-only is enforced in target picking and in beak collisions.
+Round 2 changes:
+- Gary plays: `LooseFood` (a `BeachTarget` stand-in per claimable `stash_raids` item: dropped, knocked, ground, bin food; never garbage, respects the pickup delay) is offered only to loose-only pilots and loose-only beak sweeps. Claims use the normal claims path; `take()` removes the item (or runs the owner's `claim_dropped`) and emits `snatched`, so `carried_food_id`, `took_food`, `_mugging` and `mugged_from` work. Level 3 sim (food scattered every 4 s): 14 dives, 3 steals, score 135; the original minimums are restored. Levels 4-6 counts unchanged. New checks: loose-only rivals never target held food, and the player mugging a Gary who claimed sand food completes `l3_mug_gary`.
+- Upwind tip: fixed band at screen y 84, no rise; check that it is on screen and clear of the top bar, goal box and hint.
+- Gary taunt: waits 1.5 s after release and until the score banner and floating score text are gone; drawn 22 px below Gary, clamped on screen. Checks: not shown while the banner is up, covers neither Gary nor his tag.
 
-Gap: knocked and dropped food lives in `stash_raids.items` as player-only dicts, so rivals cannot target it. Counter portions last about a second, so loose-only Gary almost never dives or steals (0 dives in a 90 s idle sim), which makes the L3 "MUG GARY" quest hard. I relaxed the L3 rival dive/theft/score minimums for loose-only rivals. Follow-up needed: let rivals claim `stash_raids` items (dropped, knocked, grounded).
-
-Screenshots (ignored dir): `test-output/level2-wind-flags-left.png`, `level2-wind-flags-right.png`, `level2-upwind-tip.png`, `level3-gary-taunt.png`.
+Screenshots (`test-output/`): `level2-upwind-tip.png`, `level3-gary-taunt.png`, `level2-wind-flags-left.png`, `level2-wind-flags-right.png`. No dedicated capture of Gary diving on loose food (covered by the sim checks).
 
 ## Review notes
