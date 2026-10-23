@@ -6,8 +6,7 @@
   "time_limit": 150,
   "authored": true,
   "boss": true,
-  "objective": "OUT-EAT THE GANG BEFORE DARK",
-  "sunset": {"to": "4f4a7a"},
+  "objective": "OUT-EAT THE GANG",
   "wind": {"dir": 1, "strength": 0.65, "gusts": true, "flip": true},
   "awareness_mult": 1.4,
   "quests": [

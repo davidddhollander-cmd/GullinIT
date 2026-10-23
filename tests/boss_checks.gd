@@ -53,7 +53,7 @@ static func run(suite: Node, check: Callable) -> void:
 	var level: Dictionary = Config.levels[5]
 	check.call(level.name == "Sunset Showdown" and bool(level.get("boss", false)) and int(level.time_limit) == 150 and level.wind.flip == true, "level 6 is the hand-built Sunset Showdown boss with a flipping wind")
 	check.call(level.rivals.size() == 3 and level.world.width == 1280 and level.spawns.any(func(s: Dictionary) -> bool: return s.type == "seafood_vendor"), "level 6 has Gary, Chip, Bev and the seafood vendor")
-	check.call(str(level.objective) == "OUT-EAT THE GANG BEFORE DARK", "level 6 states the objective")
+	check.call(str(level.objective) == "OUT-EAT THE GANG", "level 6 states the objective")
 	var game: BeachGame = _fresh(suite)
 	var bev: RivalPilot = _bev(game)
 	var gary: RivalPilot = _pilot(game, "Gary")
@@ -62,17 +62,6 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(is_equal_approx(bev.gull.art_scale, gary.gull.art_scale * 1.3) and bev.gull.species == gary.gull.species, "Bev is Gary's gull sprite scaled 1.3x through data")
 	game.player.digestion.snacks.clear()
 
-	# Sunset: scenery tint darkens from white to dusk over the level time.
-	check.call(BeachBoss.tint(level, 0.0) == Color.WHITE and BeachBoss.tint(level, 75.0).v < 1.0, "sunset tint starts white and darkens")
-	var dark: Color = BeachBoss.tint(level, float(level.time_limit))
-	check.call(dark.v < 0.5 and BeachBoss.tint(level, 75.0).v > dark.v, "sunset reaches dark at the time limit")
-	game.elapsed = 0.0
-	game._physics_process(DT)
-	check.call(game.beach.modulate.v > 0.99 and game.actors.modulate == Color.WHITE, "level 6 starts bright; actors are never tinted")
-	game.elapsed = float(level.time_limit) - 1.0
-	game._physics_process(DT)
-	check.call(game.beach.modulate.v < 0.55, "level 6 scenery is dusky near the time limit")
-	check.call(Config.levels[2].get("sunset") == null and Color.WHITE == BeachBoss.tint(Config.levels[2], 100.0), "other levels never tint")
 	game.elapsed = 0.0
 	await _scenes(suite, game)
 
@@ -163,9 +152,8 @@ static func _scenes(suite: Node, game: BeachGame) -> void:
 	game.player.tick(0, 0, 0)
 	game.camera_x = 175.0
 	game.camera.position.x = 175.0
-	for label: String in ["boss-start", "boss-dusk"]:
-		game.elapsed = 0.0 if label == "boss-start" else float(game.level.time_limit) * 0.93
-		game.beach.modulate = BeachBoss.tint(game.level, game.elapsed)
+	for label: String in ["boss-start"]:
+		game.elapsed = 0.0
 		game.beach.camera_x = 175.0
 		game.beach.queue_redraw()
 		game.overlay._process(0.0)

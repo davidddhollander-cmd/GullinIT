@@ -1,14 +1,7 @@
 class_name BeachBoss
 extends RefCounted
 ## Level 6 boss rules, kept out of BeachGame: Bev shoves rivals off contested food, she can only
-## be mugged from behind, the beach darkens towards dusk, and the level is won by out-eating the gang.
-
-## Scenery tint for the sunset: white at the start, the level's "sunset.to" colour at the time limit.
-static func tint(level: Dictionary, elapsed: float) -> Color:
-	var sunset: Dictionary = level.get("sunset", {})
-	if sunset.is_empty():
-		return Color.WHITE
-	return Color.WHITE.lerp(Color(str(sunset.to)), clampf(elapsed / float(level.time_limit), 0.0, 1.0))
+## be mugged from behind, and the level is won by out-eating the gang.
 
 ## True when the attacker is on the opposite side of the victim from where she faces.
 static func is_behind(victim: BeachGull, attacker: Vector2) -> bool:

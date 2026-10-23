@@ -369,7 +369,6 @@ func _physics_process(delta: float) -> void:
 		BeachBoss.shove(self)
 	_mugging()
 	_rival_mugging()
-	beach.modulate = BeachBoss.tint(level,elapsed)
 	_near_misses()
 	spawner.tick(step,elapsed)
 	spawner.apply_spacing(step)
