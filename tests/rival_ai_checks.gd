@@ -14,7 +14,7 @@ static func simulate(host: Node, main: Node, level: int, seconds: float) -> Dict
 	game.player.position = Vector2(40,game.player.ground_y())
 	game.player.state = BeachGull.State.GROUNDED
 	var width: float = float(Config.tuning.world.width)
-	var report: Dictionary = {"pilots":game.pilots.size(),"edge_max":0.0,"out_of_bounds":0,"sand_frames":0,"shared_target":0,"cooldown_dives":0,"escape_short":0,"dives":[],"thefts":[],"crashes":[],"scores":[]}
+	var report: Dictionary = {"pilots":game.pilots.size(),"edge_max":0.0,"out_of_bounds":0,"sand_frames":0,"shared_target":0,"cooldown_dives":0,"escape_short":0,"held_picks":0,"dives":[],"thefts":[],"crashes":[],"scores":[]}
 	var edge_time: Array[float] = []
 	var last_theft: Array[float] = []
 	var dives_seen: Array[int] = []
@@ -28,7 +28,13 @@ static func simulate(host: Node, main: Node, level: int, seconds: float) -> Dict
 		escape_origin.append(0.0)
 	var clock: float = 0.0
 	var window: float = float(Config.tuning.rival.leave_time) + float(Config.tuning.rival.cooldown)
+	var feed: bool = false
+	for pilot: RivalPilot in game.pilots:
+		feed = feed or pilot.gull.loose_only
 	for frame: int in int(seconds*60.0):
+		# Loose-only rivals live off dropped food: scatter a hotdog on the sand every 4 s.
+		if feed and frame % 240 == 120:
+			game.stash_raids.items.append({"owner":null,"source":"bin","food_id":"hotdog","position":Vector2(220.0+float((frame/240)*173 % 700),float(Config.tuning.world.ground)-5.0),"velocity":Vector2.ZERO,"grounded":true,"age":1.0})
 		game._physics_process(1.0/60)
 		clock += 1.0/60
 		# Keep the idle player from wandering into the fight or finishing the level.
@@ -39,6 +45,8 @@ static func simulate(host: Node, main: Node, level: int, seconds: float) -> Dict
 		for i: int in game.pilots.size():
 			var pilot: RivalPilot = game.pilots[i]
 			var gull: BeachGull = pilot.gull
+			if gull.loose_only and is_instance_valid(pilot.target) and not pilot.target.is_loose():
+				report.held_picks += 1
 			if pilot.thefts > thefts_seen[i]:
 				thefts_seen[i] = pilot.thefts
 				last_theft[i] = clock
@@ -89,8 +97,53 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 			check.call(r.thefts[i] >= need_thefts,"level %d rival %d steals at least %d times (%d)" % [level,i,need_thefts,r.thefts[i]])
 			check.call(r.scores[i] > 0,"level %d rival %d accumulates a visible food score (%d)" % [level,i,r.scores[i]])
 			check.call(r.crashes[i] == 0,"level %d rival %d never crashes its own dives" % [level,i])
+		check.call(r.held_picks == 0,"level %d loose-only rivals never target held food" % level)
 		check.call(r.edge_max <= 1.5,"level %d rival never lingers at the edge (%.2f s)" % [level,r.edge_max])
 		check.call(r.out_of_bounds == 0,"level %d rivals stay inside the beach" % level)
 		check.call(r.shared_target == 0,"level %d rivals never chase the same target" % level)
 		check.call(r.cooldown_dives == 0,"level %d rival waits out the cooldown after a theft" % level)
 		check.call(r.escape_short == 0,"level %d rival leaves the scene of a theft" % level)
+
+## A loose-only rival (Gary) never steals or knocks food a person holds, and can be mugged
+## while carrying food he claimed from the sand.
+static func loose_only_checks(host: Node, main: Node, check: Callable) -> void:
+	var r: Dictionary = await simulate(host, main, 3, 60.0)
+	var game: BeachGame = main.game
+	var held_thefts: int = 0
+	for target: BeachTarget in game.spawner.targets:
+		held_thefts += target.thefts + (1 if target.dropped_pending else 0)
+	check.call(bool(game.pilots[0].personality.get("loose_only", false)), "level 3 Gary profile is loose-only")
+	check.call(held_thefts == 0 and r.held_picks == 0, "loose-only Gary never steals or knocks held food over 60 s (%d)" % held_thefts)
+	game.pilots[0].target = null
+	var held: Array[BeachTarget] = []
+	for target: BeachTarget in game.spawner.targets:
+		target.food = true
+		held.append(target)
+	game.pilots[0].pick_target(held, {})
+	check.call(game.pilots[0].target == null, "loose-only Gary ignores every held-food target")
+	# Gary claims a hotdog from the sand, then the player mugs him.
+	main.start_level(3)
+	game = main.game
+	game.set_physics_process(false)
+	await host.settle()
+	game.dismiss_intro()
+	game._release_rivals()
+	var gary: RivalPilot = game.pilots[0]
+	game.player.position = Vector2(40, game.player.ground_y())
+	game.player.state = BeachGull.State.GROUNDED
+	game.stash_raids.items.append({"owner":null,"source":"bin","food_id":"hotdog","position":Vector2(gary.gull.position.x + 60.0, float(Config.tuning.world.ground) - 5.0),"velocity":Vector2.ZERO,"grounded":true,"age":1.0})
+	var steps: int = 0
+	while gary.thefts == 0 and steps < 60 * 40:
+		game._physics_process(1.0 / 60)
+		game.player.position = Vector2(40, game.player.ground_y())
+		game.player.state = BeachGull.State.GROUNDED
+		game.elapsed = minf(game.elapsed, 10.0)
+		steps += 1
+	check.call(gary.thefts == 1 and gary.carried_food_id == "hotdog" and gary.carry_window > 0.0 and game.stash_raids.items.is_empty(), "loose-only Gary claims loose food off the sand (%d steps)" % steps)
+	game.player.position = gary.gull.position
+	game.player.state = BeachGull.State.STRIKE
+	game.player.previous_beak = gary.gull.position
+	game.player.sweep_beak = gary.gull.position
+	game._mugging()
+	host.eat_pending(game)
+	check.call(game.quests.quests[0].id == "l3_mug_gary" and game.quests.quests[0].done, "mugging loose-only Gary completes l3_mug_gary")

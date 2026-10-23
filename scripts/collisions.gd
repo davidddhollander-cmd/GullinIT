@@ -31,7 +31,7 @@ static func resolve(gull: BeachGull, targets: Array[BeachTarget], props: Array[D
 				gull.pullup()
 				return
 	for target: BeachTarget in targets:
-		if not target.food:
+		if not target.food or (gull.loose_only and not target.is_loose()):
 			continue
 		if walking and target.kind != "sunbather":
 			continue

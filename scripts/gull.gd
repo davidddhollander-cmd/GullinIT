@@ -33,6 +33,8 @@ var invulnerable: float = 0.0
 var climb: bool = false
 var speed_factor: float = 1.0
 var rival: bool = false
+# Rival that only goes for loose food (Gary): never touches food a person holds.
+var loose_only: bool = false
 ## Empty uses the role default; any species can be used by either role.
 var species: String = ""
 var art_id: String = "player_gull"

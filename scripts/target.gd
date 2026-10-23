@@ -260,6 +260,10 @@ func refresh_art() -> void:
 func food_position() -> Vector2:
 	return position + food_sprite.position
 
+# Food resting on a stall counter rather than held by a person.
+func is_loose() -> bool:
+	return kind == "stall_handover" or kind == "loose_item"
+
 func food_value() -> int:
 	return int(Config.foods[food_id].points) if not food_id.is_empty() else 0
 

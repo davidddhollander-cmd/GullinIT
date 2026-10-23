@@ -36,6 +36,7 @@ func setup(actor: BeachGull, profile: Dictionary, random: RandomNumberGenerator)
 	rng = random
 	gull.speed_factor = profile.speed
 	gull.rival_name = str(profile.name)
+	gull.loose_only = bool(profile.get("loose_only",false))
 	gull.species = str(profile.get("species","great-black-backed"))
 	gull.rival_tint = COLOURS[absi(str(profile.name).hash()) % COLOURS.size()]
 	gull.dive_started.connect(func() -> void: dives += 1)
@@ -134,7 +135,7 @@ func pick_target(targets: Array[BeachTarget], claims: Dictionary) -> void:
 	var best_target: BeachTarget
 	var current: float = 0.0
 	for candidate: BeachTarget in targets:
-		if not candidate.food or candidate.leaving or candidate.defense > 0.0 or claimed_elsewhere(candidate, claims):
+		if not candidate.food or candidate.leaving or candidate.defense > 0.0 or claimed_elsewhere(candidate, claims) or (gull.loose_only and not candidate.is_loose()):
 			continue
 		var distance: float = absf(gull.position.x - candidate.food_position().x)
 		if distance > float(Config.tuning.rival.search_radius):
@@ -168,7 +169,7 @@ func pick_waypoint(targets: Array[BeachTarget]) -> float:
 	# Prefer places where someone is holding food; otherwise sweep the width of the beach.
 	var spots: Array[float] = []
 	for candidate: BeachTarget in targets:
-		if candidate.food and not candidate.leaving and absf(candidate.position.x - gull.position.x) > 120.0:
+		if candidate.food and not candidate.leaving and (not gull.loose_only or candidate.is_loose()) and absf(candidate.position.x - gull.position.x) > 120.0:
 			spots.append(candidate.position.x)
 	var x: float
 	if not spots.is_empty() and rng.randf() < 0.7:

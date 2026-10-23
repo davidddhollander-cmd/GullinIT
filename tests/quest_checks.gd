@@ -69,6 +69,10 @@ static func run(check: Callable) -> void:
 	GameState.wallet = saved_wallet
 
 
+static func _text_rect(game: BeachGame, item: Dictionary) -> Rect2:
+	var width: float = game.effects.font.get_string_size(item.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 8).x
+	return Rect2(item.at - Vector2(width * 0.5 + 2.0, 8.0), Vector2(width + 4.0, 11.0))
+
 static func _play(main: Node, level: int) -> BeachGame:
 	main.start_level(level)
 	main.game.dismiss_intro()
@@ -203,6 +207,73 @@ static func run_game(suite: Node, check: Callable) -> void:
 	plain.setup(Config.levels[0], sample)
 	check.call(plain.quest_labels.is_empty() and plain.score_rows.size() == ResultBoard.SCORE_SLOTS, "no quests keeps the high score panel")
 	plain.queue_free()
+	# Task 005: level 2 wind flags and one-time upwind tip; level 3 Gary taunt.
+	GameState.options.tips = []
+	game = _play(main, 2)
+	check.call(game.beach.wind_flags.size() == 2, "level 2 has two wind flags")
+	for id: int in [1, 3, 4, 5, 6]:
+		main.start_level(id)
+		check.call(main.game.beach.wind_flags.is_empty(), "level %d has no wind flags" % id)
+	game = _play(main, 2)
+	game.player.position = Vector2(215, 100)
+	game.player.state = BeachGull.State.GLIDE
+	game.camera_x = 215.0
+	game.camera.position.x = 215.0
+	game.beach.camera_x = 215.0
+	game.beach.wind_dir = 1
+	game.beach.strength = 0.2
+	game.beach.time = 0.0
+	game.beach.tick(0.0)
+	game.beach.wind_dir = -1
+	game.beach.strength = 0.6
+	await suite.snapshot("level2-wind-flags-left")
+	game.beach.wind_dir = 1
+	await suite.snapshot("level2-wind-flags-right")
+	GameState.options.tips = []
+	game = _play(main, 2)
+	game.player.state = BeachGull.State.GLIDE
+	game._physics_process(1.0 / 60)
+	await suite.snapshot("level2-upwind-tip")
+	var tip: String = "FLY INTO THE WIND = UPWIND +%d%%" % roundi(float(Config.tuning.score.upwind) * 100.0)
+	check.call(game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == tip), "airborne in level 2 shows the upwind tip")
+	check.call("upwind" in GameState.options.tips, "upwind tip is remembered in options.tips")
+	var tip_texts: Array = game.effects.texts.filter(func(t: Dictionary) -> bool: return t.text == tip)
+	if tip_texts.size() == 1:
+		var tip_rect: Rect2 = _text_rect(game, tip_texts[0])
+		var screen: Rect2 = Rect2(tip_rect.position - Vector2(game.camera_x - 160.0, 0.0), tip_rect.size)
+		var hud: Array[Rect2] = [Rect2(0, 0, 320, 17), Rect2(232, 44, 84, 28), game.overlay.hint_rect("LANDING / HOLD SPACE TO CLIMB")]
+		var clear: bool = screen.position.x >= 0.0 and screen.end.x <= 320.0
+		for box: Rect2 in hud:
+			clear = clear and not screen.intersects(box)
+		check.call(clear, "upwind tip is on screen and clear of the top bar, goal box and hint")
+	game = _play(main, 2)
+	game.player.state = BeachGull.State.GLIDE
+	game._physics_process(1.0 / 60)
+	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == tip), "upwind tip is not shown on the second run")
+	game = _play(main, 3)
+	game._swallowed({"id": "hotdog"})
+	var is_taunt: Callable = func(t: Dictionary) -> bool: return t.text == "GARY: OI! THAT'S MY LUNCH!"
+	check.call(not game.effects.texts.any(is_taunt) and game.taunt_wait > 0.0, "level 3 taunt waits after Gary is released")
+	game.effects.freeze = 0.0
+	game.taunt_wait = 0.0
+	check.call(game.overlay.score_announcement.visible, "score announcement is up after the first swallow")
+	game._physics_process(1.0 / 60)
+	check.call(not game.effects.texts.any(is_taunt), "taunt is not shown while the score announcement is visible")
+	game.overlay.score_announcement.hide()
+	game._physics_process(1.0 / 60)
+	check.call(not game.effects.texts.any(is_taunt), "taunt also waits for floating score text")
+	game.effects.texts.clear()
+	game._physics_process(1.0 / 60)
+	var taunt: Array = game.effects.texts.filter(is_taunt)
+	check.call(taunt.size() == 1 and float(taunt[0].life) >= 1.9, "level 3 releasing Gary shows a 2 s taunt")
+	if taunt.size() == 1:
+		var taunt_rect: Rect2 = _text_rect(game, taunt[0])
+		var gary: Vector2 = game.pilots[0].gull.position
+		check.call(not taunt_rect.intersects(Rect2(gary - Vector2(12, 28), Vector2(24, 36))), "taunt covers neither Gary nor his name tag")
+		check.call(taunt_rect.position.x >= game.camera_x - 160.0 and taunt_rect.end.x <= game.camera_x + 160.0, "taunt stays on screen")
+	await suite.snapshot("level3-gary-taunt")
+	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == "GARY JOINS THE LUNCH RUSH!"), "level 3 no longer shows the generic join message")
+	check.call(game.pilots.size() == 1 and bool(game.pilots[0].personality.get("loose_only", false)), "Gary is loose-only")
 	main.clear_game()
 	GameState.save_path = saved_path
 	GameState.progress = saved_progress

@@ -1,7 +1,7 @@
 extends Node
 var progress: Dictionary = {}
 var wallet: Dictionary = {"feathers": 0}
-var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false, "stats": true}
+var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false, "stats": true, "tips": []}
 var _anon_id: String = ""
 var save_path: String = "user://save.json"
 var save_error: String = ""

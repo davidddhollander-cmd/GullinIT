@@ -41,6 +41,8 @@ var training_clean_snatch: bool = false
 var training_raid_started: bool = false
 var training_reset_clock: float = 0.0
 var pending_rivals: Array = []
+var loose_targets: Array[BeachTarget] = []
+var taunt_wait: float = -1.0
 var crashes: int = 0
 var first_steal_sent: bool = false
 var end_tracked: bool = false
@@ -66,6 +68,9 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	beach.strength = wind.strength
 	add_child(beach)
 	beach.setup(level.props,level.get("zones",[]),level.get("world",{}))
+	if _twist() == "wind_intro":
+		for flag_x: Variant in level.twist.get("flags",[]):
+			beach.wind_flags.append(int(flag_x))
 	scraps = BeachScraps.new()
 	add_child(scraps)
 	scraps.collected.connect(_scrap_collected)
@@ -147,6 +152,55 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 			player.state = BeachGull.State.GLIDE
 	Config.reloaded.connect(_reload)
 
+func _twist() -> String:
+	return str(level.get("twist",{}).get("id",""))
+
+# Level 2 teaches upwind scoring once per save, the first time the gull is airborne.
+func _wind_tip() -> void:
+	if _twist() != "wind_intro" or "upwind" in GameState.options.tips or player.state == BeachGull.State.GROUNDED:
+		return
+	GameState.options.tips.append("upwind")
+	GameState.save_progress()
+	# Fixed mid-screen band: clear of the top bar, hint and goal box.
+	effects.message(Vector2(camera_x,84.0),"FLY INTO THE WIND = UPWIND +%d%%" % roundi(float(Config.tuning.score.upwind)*100.0),BeachUI.GOLD,float(Config.tuning.juice.tip_time),0.0)
+
+# Shows Gary's taunt after a delay, never while the score banner is up, below him so his tag stays clear.
+func _gary_taunt(step: float) -> void:
+	if taunt_wait < 0.0 or pilots.is_empty():
+		return
+	taunt_wait = maxf(0.0,taunt_wait-step)
+	if taunt_wait > 0.0 or overlay.score_announcement.visible or effects.texts.any(func(t: Dictionary) -> bool: return t.has("fade_time")):
+		return
+	taunt_wait = -1.0
+	var gary: Vector2 = pilots[0].gull.position
+	var half: float = 108.0
+	var at: Vector2 = Vector2(clampf(gary.x,camera_x-160.0+half,camera_x+160.0-half),gary.y+22.0)
+	effects.message(at,"GARY: OI! THAT'S MY LUNCH!",BeachUI.GOLD,float(Config.tuning.juice.taunt_time),0.0)
+
+# Mirrors claimable stash items as LooseFood targets for loose-only rivals.
+func _sync_loose_targets() -> void:
+	var wanted: bool = false
+	for pilot: RivalPilot in pilots:
+		wanted = wanted or pilot.gull.loose_only
+	if not wanted:
+		return
+	for i: int in range(loose_targets.size()-1,-1,-1):
+		var proxy: LooseFood = loose_targets[i] as LooseFood
+		if not proxy.present() or not proxy.food:
+			loose_targets.remove_at(i)
+			proxy.free()
+	for item: Dictionary in stash_raids.items:
+		if bool(item.get("garbage",false)) or bool(item.get("recovered",false)) or str(item.get("food_id","")).is_empty() or float(item.get("age",0.0)) < float(Config.tuning.world.stash_pickup_delay):
+			continue
+		var known: bool = false
+		for proxy: LooseFood in loose_targets:
+			known = known or is_same(proxy.item,item)
+		if not known:
+			var fresh: LooseFood = LooseFood.new()
+			fresh.prepare(item,stash_raids)
+			fresh.snatched.connect(_snatched)
+			loose_targets.append(fresh)
+
 func _release_rivals() -> void:
 	for profile: Dictionary in pending_rivals:
 		var rival: BeachGull = BeachGull.new()
@@ -205,6 +259,12 @@ func _reload() -> void:
 		target.awareness_mult = float(level.awareness_mult) * target.encounter_awareness
 	effects.message(player.position,"DATA RELOADED")
 
+# LooseFood proxies live outside the tree, so free them with the level.
+func _exit_tree() -> void:
+	for proxy: BeachTarget in loose_targets:
+		proxy.free()
+	loose_targets.clear()
+
 func _physics_process(delta: float) -> void:
 	if intro > 0 and int(level.id) != 1:
 		intro -= delta
@@ -231,6 +291,9 @@ func _physics_process(delta: float) -> void:
 		input.touch_peck = false
 		_peck()
 	player.tick(step,wind.direction,wind.strength)
+	_wind_tip()
+	_sync_loose_targets()
+	_gary_taunt(step)
 	if player.state != BeachGull.State.STUNNED:
 		player.digestion.tick(step,player.state == BeachGull.State.GROUNDED)
 	scraps.tick(step,player)
@@ -242,7 +305,11 @@ func _physics_process(delta: float) -> void:
 		if is_instance_valid(pilot.target) and pilot.target.food:
 			claims[pilot.target] = pilot
 	for pilot: RivalPilot in pilots:
-		pilot.tick(step,food_targets,claims,wind,player.position)
+		var pilot_targets: Array[BeachTarget] = food_targets
+		if pilot.gull.loose_only:
+			pilot_targets = food_targets.duplicate()
+			pilot_targets.append_array(loose_targets)
+		pilot.tick(step,pilot_targets,claims,wind,player.position)
 	for target: BeachTarget in spawner.targets.duplicate():
 		target.tick(step,gulls)
 	stalls.tick(step)
@@ -255,6 +322,9 @@ func _physics_process(delta: float) -> void:
 			if gull==player:
 				available = food_targets.duplicate()
 				available.append_array(crabs.targets)
+			elif gull.loose_only:
+				available = food_targets.duplicate()
+				available.append_array(loose_targets)
 			BeachCollisions.resolve(gull,available,beach.props)
 	_mugging()
 	_near_misses()
@@ -411,7 +481,10 @@ func _swallowed(snack: Dictionary) -> void:
 		overlay.show_score_announcement(str(snack.id),earned)
 		if not pending_rivals.is_empty():
 			_release_rivals()
-			effects.message(player.position-Vector2(0,22),"GARY JOINS THE LUNCH RUSH!",BeachUI.GOLD)
+			if _twist() == "gary_intro":
+				taunt_wait = float(Config.tuning.juice.taunt_delay)
+			else:
+				effects.message(player.position-Vector2(0,22),"GARY JOINS THE LUNCH RUSH!",BeachUI.GOLD)
 
 func _cry(source: BeachTarget) -> void:
 	if source.kind == "toddler":

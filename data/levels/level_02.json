@@ -6,6 +6,7 @@
   "time_limit": 120,
   "wind": {"dir": 1, "strength": 0.2, "gusts": false, "flip": false},
   "awareness_mult": 0.9,
+  "twist": {"id": "wind_intro", "flags": [215, 600]},
   "quests": [
     {"id": "l2_ice", "text": "3 CLEAN ICE CREAMS", "event": "swallowed", "filter": {"food": "ice_cream", "direct": true}, "count": 3, "bonus": 50},
     {"id": "l2_cry", "text": "MAKE A TODDLER CRY", "event": "toddler_cried", "filter": {}, "count": 1, "bonus": 30}
