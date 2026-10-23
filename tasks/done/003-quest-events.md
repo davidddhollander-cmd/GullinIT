@@ -1,6 +1,6 @@
 # 003 — Wire quest events, bonus points and Feathers payout
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 002
