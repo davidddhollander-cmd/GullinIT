@@ -1,6 +1,6 @@
 # 017 — Rival gulls that land, scavenge, peck bins/bags and catch falling food
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
