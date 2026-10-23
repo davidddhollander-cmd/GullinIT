@@ -110,7 +110,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	crabs.setup(level,beach.props,spawner)
 	crabs.crab_created.connect(_wire_target)
 	player = BeachGull.new()
-	player.species = str(level.get("player_species","herring"))
+	player.species = str(level.get("player_species",GameState.chosen_gull()))
+	player.apply_species_stats()
 	player.digestion_enabled = true
 	player.digestion.swallowed.connect(_swallowed)
 	player.name = "Player"
@@ -367,6 +368,7 @@ func _physics_process(delta: float) -> void:
 			BeachCollisions.resolve(gull,available,beach.props)
 	if level.has("boss"):
 		BeachBoss.shove(self)
+	BeachBoss.shove_player(self)
 	_mugging()
 	_rival_mugging()
 	_near_misses()

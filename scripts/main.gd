@@ -58,7 +58,16 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			Audio.play_music("title")
 		"arcade", "casual":
 			casual = action == "casual"
-			_navigate("select")
+			clear_game()
+			screen = "pick"
+			menus.show()
+			menus.gull_picker()
+			Audio.play_music("title")
+		"gull":
+			if Config.species.species.has(str(payload)) and GameState.gull_owned(str(payload)):
+				GameState.options.gull = str(payload)
+				GameState.save_progress()
+				_navigate("select")
 		"select":
 			clear_game()
 			screen = "select"

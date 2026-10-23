@@ -115,6 +115,63 @@ func level_select(casual: bool) -> void:
 		BeachUI.button(actions,"FEEDBACK",func() -> void: choose("feedback"),action_width)
 	BeachUI.button(actions,"< BACK",func() -> void: choose("title"),action_width)
 
+func gull_picker() -> void:
+	clear("PICK YOUR GULL")
+	content.add_theme_constant_override("separation",3)
+	var outer: MarginContainer = content.get_parent().get_parent() as MarginContainer
+	for edge: String in ["top","bottom"]:
+		outer.add_theme_constant_override("margin_" + edge,6)
+	var row: HBoxContainer = HBoxContainer.new()
+	row.size_flags_vertical = SIZE_EXPAND_FILL
+	row.add_theme_constant_override("separation",4)
+	content.add_child(row)
+	var chosen: String = GameState.chosen_gull()
+	for id: String in Config.species.species:
+		var info: Dictionary = Config.species.species[id]
+		var owned: bool = GameState.gull_owned(id)
+		var card: Button = BeachUI.button(row,"",func() -> void: choose("gull",id),82)
+		card.name = "Card_" + id
+		card.size_flags_horizontal = SIZE_EXPAND_FILL
+		card.size_flags_vertical = SIZE_EXPAND_FILL
+		card.disabled = not owned
+		var box: VBoxContainer = VBoxContainer.new()
+		box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		box.add_theme_constant_override("separation",2)
+		card.add_child(box)
+		BeachUI.full(box)
+		box.offset_left = 3
+		box.offset_right = -3
+		box.offset_top = 3
+		box.offset_bottom = -3
+		var stage: Control = Control.new()
+		stage.custom_minimum_size = Vector2(0,30)
+		stage.clip_contents = true
+		stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		box.add_child(stage)
+		var art_id: String = "gull_" + id.replace("-","_")
+		var bird: AnimatedSprite2D = AnimatedSprite2D.new()
+		bird.sprite_frames = Config.frames(art_id)
+		bird.scale = Vector2.ONE * float(Config.sprites[art_id].visual_scale) * 1.5
+		bird.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		bird.modulate = Color.WHITE if owned else Color(0.5,0.55,0.6)
+		bird.position = Vector2(50,16) # the frames carry the bird left of centre
+		bird.play(&"glide")
+		stage.add_child(bird)
+		var name_label: Label = BeachUI.label(box,str(info.name),BeachUI.FONT_NATIVE,BeachUI.GOLD if owned else Color("6b858b"))
+		name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var blurb: Label = BeachUI.label(box,str(info.blurb),BeachUI.FONT_NATIVE,Color("a9d7d2") if owned else Color("6b858b"))
+		blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		blurb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		blurb.size_flags_vertical = SIZE_EXPAND_FILL
+		var status: Label = BeachUI.label(box,"UNLOCKED" if owned else "UNLOCK: %d FEATHERS" % int(info.price),BeachUI.FONT_NATIVE,BeachUI.CREAM if owned else BeachUI.CORAL)
+		status.name = "Status"
+		status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		if id == chosen:
+			card.grab_focus()
+	BeachUI.button(content,"< BACK",func() -> void: choose("title"),100).size_flags_horizontal = SIZE_SHRINK_CENTER
+
 func pause() -> void:
 	clear("TAKING A BREATHER", "YOUR LUNCH CAN WAIT.")
 	var resume: Button = BeachUI.button(content,"RESUME",func() -> void: choose("resume"))

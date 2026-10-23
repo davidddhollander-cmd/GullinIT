@@ -34,6 +34,20 @@ static func shove(game: BeachGame) -> void:
 				_bump(other, bev.position, float(pilot.personality.get("shove_stun", 0.4)))
 				game.effects.message(other.position - Vector2(0, 18), "MOVE IT!", Color("ffc65c"))
 
+## A great-black-backed player diving at food a rival is also diving for bumps the rival away.
+static func shove_player(game: BeachGame) -> void:
+	var player: BeachGull = game.player
+	if not player.shoves or player.state != BeachGull.State.STRIKE:
+		return
+	var radius: float = float(Config.tuning.boss.player_shove_radius)
+	for pilot: RivalPilot in game.pilots:
+		if pilot.gull.state != BeachGull.State.STRIKE or not is_instance_valid(pilot.target) or not pilot.target.food:
+			continue
+		var food: Vector2 = pilot.target.food_position()
+		if player.beak().distance_to(food) <= radius and pilot.gull.beak().distance_to(food) <= radius:
+			_bump(pilot.gull, player.position, float(Config.tuning.boss.player_shove_stun))
+			game.effects.message(pilot.gull.position - Vector2(0, 18), "MOVE IT!", Color("ffc65c"))
+
 static func best_rival(game: BeachGame) -> int:
 	var best: int = 0
 	for pilot: RivalPilot in game.pilots:

@@ -1,0 +1,8 @@
+{
+  "unlock_all": true,
+  "species": {
+    "herring": {"name": "HERRING GULL", "blurb": "ALL-ROUNDER", "price": 0, "flight": 1.0, "rival_flight": 1.0, "dive": 1.0, "wind": 1.0, "stun": 1.0, "shove": false},
+    "great-black-backed": {"name": "GREAT BLACK-BACK", "blurb": "SLOW AND HEAVY. SHOVES RIVALS", "price": 6, "flight": 0.9, "rival_flight": 1.0, "dive": 0.95, "wind": 0.8, "stun": 0.7, "shove": true},
+    "kittiwake": {"name": "KITTIWAKE", "blurb": "QUICK. BEST IN WIND AND DIVES", "price": 6, "flight": 1.2, "rival_flight": 1.2, "dive": 1.15, "wind": 0.6, "stun": 1.15, "shove": false}
+  }
+}
