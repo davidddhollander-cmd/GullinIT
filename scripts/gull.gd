@@ -3,6 +3,7 @@ extends Node2D
 ## Shared flight model for the player and rivals; swept beak collisions live in Game.
 signal gull_stunned
 signal dive_started
+signal stun_ignored
 signal ground_crashed
 signal peck_started
 signal sand_landed(at: Vector2)
@@ -48,6 +49,7 @@ var rival_badge: ColorRect
 var upwind: bool = false
 ## Player-only species stats (data/species.json); rivals keep their profile tuning.
 var dive_mult: float = 1.0
+var stun_shield: int = 0 ## Strong skull: stuns still to shrug off
 var wind_mult: float = 1.0
 var stun_mult: float = 1.0
 var shoves: bool = false
@@ -522,6 +524,10 @@ func crash_warning() -> bool:
 
 func stun(duration: float = -1.0, attacker: Vector2 = Vector2.INF) -> void:
 	if state == State.STUNNED or invulnerable > 0:
+		return
+	if stun_shield > 0:
+		stun_shield -= 1
+		stun_ignored.emit()
 		return
 	begin_tumble(duration,attacker)
 	gull_stunned.emit()

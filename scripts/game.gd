@@ -51,6 +51,9 @@ var crashes: int = 0
 var first_steal_sent: bool = false
 var end_tracked: bool = false
 var lesson_started: float = 0.0
+var perk_id: String = ""
+var bullet_meter: float = 0.0
+var slowmo_end_msec: int = -1 ## real-clock end of bullet time (-1 = off); Engine.time_scale slows delta, so never count it
 
 func setup(definition: Dictionary, is_casual: bool, force_training: bool = false) -> void:
 	level = definition
@@ -113,6 +116,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	player.species = str(level.get("player_species",GameState.chosen_gull()))
 	player.apply_species_stats()
 	player.digestion_enabled = true
+	_apply_perk()
 	player.digestion.swallowed.connect(_swallowed)
 	player.name = "Player"
 	# Flight and loose food stay in front of the stall's complete scenery layer.
@@ -124,6 +128,10 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	player.gull_stunned.connect(_stunned)
 	player.ground_crashed.connect(_crashed)
 	player.dive_started.connect(func() -> void: Audio.play("dive"))
+	player.stun_ignored.connect(func() -> void:
+		effects.message(player.position,"SKULL!",BeachUI.GOLD)
+		Audio.play("click")
+	)
 	player.peck_started.connect(func() -> void:
 		effects.message(player.beak(),"PECK!",BeachUI.GOLD)
 		Audio.play("click")
@@ -292,11 +300,59 @@ func _reload() -> void:
 
 # LooseFood proxies live outside the tree, so free them with the level.
 func _exit_tree() -> void:
+	end_slowmo()
 	for proxy: BeachTarget in loose_targets:
 		proxy.free()
 	loose_targets.clear()
 
+func perk_value(key: String, fallback: Variant) -> Variant:
+	return Config.perks.perks.get(perk_id,{}).get(key,fallback)
+
+func _apply_perk() -> void:
+	perk_id = GameState.equipped_perk()
+	player.digestion.capacity = int(perk_value("stomach",4))
+	player.dive_mult *= float(perk_value("dive_mult",1.0))
+	player.stun_shield = int(perk_value("ignore_stuns",0))
+	stalls.handover_mult = float(perk_value("handover_window_mult",1.0))
+
+## Keen eye: the most valuable food on offer that a dive could actually take.
+func keen_target() -> BeachTarget:
+	if perk_id != "keen_eye":
+		return null
+	var best: BeachTarget = null
+	for target: BeachTarget in spawner.targets + stalls.portions:
+		if not target.food or target.leaving or target.kind == "sunbather" or (target.info.twist == "shield" and target.defense > 0):
+			continue
+		if best == null or target.food_value() > best.food_value():
+			best = target
+	return best
+
+func slowmo_ready() -> bool:
+	return perk_id == "bullet_time" and slowmo_end_msec < 0 and bullet_meter >= 1.0
+
+func slowmo_active() -> bool:
+	return slowmo_end_msec >= 0
+
+func start_slowmo() -> void:
+	if not running or not slowmo_ready():
+		return
+	slowmo_end_msec = Time.get_ticks_msec() + roundi(float(perk_value("duration",2.5))*1000.0)
+	Engine.time_scale = float(perk_value("time_scale",0.5))
+	input.slowmo_ready = false
+
+func end_slowmo() -> void:
+	if slowmo_end_msec >= 0:
+		slowmo_end_msec = -1
+		bullet_meter = 0.0
+	Engine.time_scale = 1.0
+
+func _slowmo_tick() -> void:
+	if slowmo_end_msec >= 0 and Time.get_ticks_msec() >= slowmo_end_msec:
+		end_slowmo()
+	input.slowmo_ready = slowmo_ready()
+
 func _physics_process(delta: float) -> void:
+	_slowmo_tick()
 	if intro > 0 and int(level.id) != 1:
 		intro -= delta
 		if intro <= 0:
@@ -321,6 +377,9 @@ func _physics_process(delta: float) -> void:
 	if input.touch_peck:
 		input.touch_peck = false
 		_peck()
+	if input.touch_slowmo:
+		input.touch_slowmo = false
+		start_slowmo()
 	player.tick(step,wind.direction,wind.strength)
 	_wind_tip()
 	if dog != null:
@@ -420,6 +479,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if running and event.is_action_pressed("dive"):
 		input.update_player(player,camera_x)
 		player.dive(wind.direction)
+	if event.is_action_pressed("slowmo") and not event.is_echo():
+		start_slowmo()
 	if running and event.is_action_pressed("peck") and not event.is_echo():
 		_peck()
 	if event.is_action_pressed("debug"):
@@ -441,6 +502,8 @@ func _peck() -> void:
 			player.show_ground_peck()
 
 func set_paused(value: bool) -> void:
+	if value:
+		end_slowmo()
 	set_physics_process(not value)
 	set_process_unhandled_input(not value)
 	input.enabled = not value and running and intro <= 0
@@ -525,6 +588,8 @@ func _swallowed(snack: Dictionary) -> void:
 		if not first_steal_sent:
 			first_steal_sent = true
 			track("first_steal", {"level": int(level.id), "seconds": snappedf(elapsed, 0.1)})
+		if perk_id == "bullet_time" and not snack.get("mugged",false) and not slowmo_active():
+			bullet_meter = minf(1.0,bullet_meter+float(perk_value("fill_per_clean_snatch",0.34)))
 		var earned: int = _award(value,snack.get("risky",false),snack.get("upwind",false),snack.get("mugged",false),snack.get("handover",false))
 		overlay.show_score_announcement(str(snack.id),earned)
 		if not pending_rivals.is_empty():
@@ -617,6 +682,7 @@ func finish() -> void:
 	if boss:
 		BeachBoss.conclude(self)
 	running = false
+	end_slowmo()
 	input.enabled = false
 	input.clear_touch()
 	var result: Dictionary = score.result(level,casual,elapsed)

@@ -1,6 +1,6 @@
 # 016 — Perk effects in play (incl. Bullet time meter)
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -30,5 +30,16 @@ The equipped perk changes how the run plays. All values come from `data/perks.js
 - [ ] One `tools/validate.ps1 -Capture` run (two at most): **0 failures**
 
 ## Report
+Files: scripts/digestion.gd (capacity), gull.gd (stun_shield, stun_ignored), game.gd (perk apply, keen_target, bullet time), stall_service.gd (handover_mult), input_controller.gd (slowmo action, touch button), overlay.gd (meter, keen arrow, SLOW touch button), tests/perk_checks.gd (new), tests/integration.gd (one wiring line).
+Tests: `validate.ps1 -Capture` run once (first invocation aborted on an import hiccup, second clean): INTEGRATION: 14605 checks, 0 failures.
+Screenshots (test-output/): perk-bullet-meter-partial.png, perk-bullet-meter-full.png, perk-bullet-touch-button.png, perk-keen-eye-marker.png.
+Decisions:
+- Keyboard binding is Q, not Shift: Shift is already DIVE. Gamepad is right shoulder; touch button sits above PECK and is only active/drawn while the meter is full.
+- Meter fills in `_swallowed` (same clean rule as quests: not scrap, not mugged), not while slow-mo is running. Starting slow-mo, pausing, finishing, or leaving the level all reset time_scale to 1; pause/finish also empty the meter.
+- Slow-mo timer uses the real clock (Time.get_ticks_msec) since Engine.time_scale scales delta.
+- Keen eye window multiplier is on StallService, so it applies to any stall counter (rivals included); marker skips sunbathers, leaving and shielded targets.
+- Strong skull blocks only gull.stun(); begin_tumble (ground crash, boss bump) is unaffected. Message "SKULL!".
+Not done: no dedicated check of the stall COUNTER duration itself, only that handover_mult is 1.5.
+Branch: sonnet/016-perk-effects
 
 ## Review notes

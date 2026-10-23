@@ -309,6 +309,31 @@ func _draw_digestion(offset: Vector2) -> void:
 	var size: Vector2 = Vector2(definition.size[0],definition.size[1])
 	draw_texture_rect(Config.frames(definition.sprite).get_frame_texture(&"idle",0),Rect2(game.player.beak()-offset-size*0.5,size),false)
 
+const METER_RECT: Rect2 = Rect2(92,4,36,8)
+
+func meter_fill() -> float:
+	if game.slowmo_active():
+		return clampf(float(game.slowmo_end_msec-Time.get_ticks_msec())/(float(game.perk_value("duration",2.5))*1000.0),0.0,1.0)
+	return game.bullet_meter
+
+## Bullet time meter in the top bar, and the Keen eye arrow over the best snack.
+func _draw_perks(offset: Vector2) -> void:
+	if game.perk_id == "bullet_time":
+		var ready: bool = game.slowmo_ready()
+		draw_rect(METER_RECT,BeachUI.INK)
+		draw_rect(METER_RECT.grow(-1),Color("397a85"))
+		draw_rect(Rect2(METER_RECT.position+Vector2.ONE,Vector2(34*meter_fill(),6)),BeachUI.GOLD if ready or game.slowmo_active() else Color("7fd0d8"))
+		if ready:
+			draw_rect(METER_RECT,BeachUI.CREAM,false,1.0)
+			draw_string(HUD_FONT,METER_RECT.position+Vector2(6,6),"SLOW",HORIZONTAL_ALIGNMENT_LEFT,-1,6,BeachUI.INK)
+	var target: BeachTarget = game.keen_target()
+	if target != null:
+		var at: Vector2 = target.food_position()-offset
+		if at.x > 4 and at.x < 316:
+			var tip: Vector2 = Vector2(at.x,maxf(at.y-target.food_radius().y-3+sin(Time.get_ticks_msec()*0.008)*1.5,TOP_BAR_HEIGHT+5))
+			draw_colored_polygon(PackedVector2Array([tip,tip+Vector2(-4,-5),tip+Vector2(4,-5)]),BeachUI.GOLD)
+			draw_polyline(PackedVector2Array([tip,tip+Vector2(-4,-5),tip+Vector2(4,-5),tip]),BeachUI.INK,1.0)
+
 func goal_status() -> Dictionary:
 	if game.casual:
 		return {"title":"PRACTICE","progress":game.score.items,"goal":int(Config.tuning.score.casual_items)}
@@ -325,6 +350,8 @@ func _draw() -> void:
 	draw_rect(Rect2(5,TOP_BAR_HEIGHT-3,85*game.score.window/float(Config.tuning.score.combo_window),2),BeachUI.GOLD)
 	var offset: Vector2 = Vector2(game.camera_x-160,0)
 	_draw_digestion(offset)
+	if game.running:
+		_draw_perks(offset)
 	var aim: Vector2 = game.player.aim-offset
 	if game.running:
 		if not game.training:
@@ -492,6 +519,11 @@ func peck_available() -> bool:
 	return game.player.state in [BeachGull.State.GROUNDED,BeachGull.State.WINDUP,BeachGull.State.STRIKE]
 
 func _draw_touch_buttons() -> void:
+	if game.input.slowmo_ready:
+		var slow_box: Rect2 = GullInput.SLOWMO_BUTTON
+		draw_rect(slow_box,Color(0.78,0.6,0.1,0.6))
+		draw_rect(slow_box,Color(1.0,0.96,0.85,0.8),false,1.0)
+		draw_string(font,Vector2(slow_box.position.x+5,slow_box.position.y+14),"SLOW",HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color(1.0,0.96,0.85))
 	for kind: String in GullInput.TOUCH_BUTTONS:
 		var box: Rect2 = GullInput.TOUCH_BUTTONS[kind]
 		var held: bool = (kind == "flap" and game.input.touch_climb)
