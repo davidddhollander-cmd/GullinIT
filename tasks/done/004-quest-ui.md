@@ -1,6 +1,6 @@
 # 004 — Quest checklist, level card and result board
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 003
