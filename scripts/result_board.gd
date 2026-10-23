@@ -40,9 +40,6 @@ const LEFT_PANEL := Rect2(26, 64, 144, 72)
 const RIGHT_PANEL := Rect2(176, 64, 118, 72)
 const SCORE_SLOTS := 5
 const STAR_TAB := Rect2(110, 13, 100, 24)
-# Quest rows use the smaller HUD font (no "*" glyph, so done quests are marked ">").
-const QUEST_FONT: Font = preload("res://assets/fonts/gull_hud.fnt")
-const QUEST_FONT_SIZE := 6
 
 func setup(for_level: Dictionary, for_result: Dictionary) -> void:
 	level = for_level
@@ -340,30 +337,24 @@ func _add_quest_row(quest: Dictionary, y: float) -> void:
 	elif count > 1:
 		value_text = "%d/%d" % [int(quest.get("progress", 0)), count]
 	var color := GOLD if done else CREAM
-	var name_label := _quest_label("", color)
+	var name_label := BeachUI.label(self, "", BeachUI.FONT_NATIVE, color)
 	name_label.position = Vector2(x, y)
 	name_label.size = Vector2(width, 9)
-	var font := QUEST_FONT
-	var room := width - (font.get_string_size(" +%d" % 999, HORIZONTAL_ALIGNMENT_LEFT, -1, QUEST_FONT_SIZE).x if done or count > 1 else 0.0)
-	var caption := "%s %s" % [">" if done else "-", quest.text]
-	while caption.length() > 3 and font.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, QUEST_FONT_SIZE).x > room:
+	var font := name_label.get_theme_font("font")
+	var room := width - (font.get_string_size(" +%d" % 999, HORIZONTAL_ALIGNMENT_LEFT, -1, BeachUI.FONT_NATIVE).x if done or count > 1 else 0.0)
+	var caption := "%s %s" % ["*" if done else "-", quest.text]
+	while caption.length() > 3 and font.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, BeachUI.FONT_NATIVE).x > room:
 		caption = caption.left(caption.length() - 1)
 	name_label.text = caption
 	name_label.size.x = room
 	captions.append(name_label)
-	var label := _quest_label("" if done else value_text, color)
+	var label := BeachUI.label(self, "" if done else value_text, BeachUI.FONT_NATIVE, color)
 	label.position = Vector2(x, y)
 	label.size = Vector2(width, 9)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	rows.append(label)
 	row_values.append(int(quest.get("bonus", 0)) if done else 0)
 	row_formats.append(("quest|+%d" if done else "static|" + value_text.replace("%", "%%")))
-
-func _quest_label(value: String, color: Color) -> Label:
-	var label := BeachUI.label(self, value, QUEST_FONT_SIZE, color)
-	label.add_theme_font_override("font", QUEST_FONT)
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	return label
 
 func _add_button(parent: HBoxContainer, caption: String, action: String, payload: Variant = null) -> void:
 	var button := BeachUI.button(parent, caption, func() -> void: requested.emit(action, payload), 68)
