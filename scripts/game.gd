@@ -327,7 +327,14 @@ func _physics_process(delta: float) -> void:
 	for pilot: RivalPilot in pilots:
 		if is_instance_valid(pilot.target) and pilot.target.food:
 			claims[pilot.target] = pilot
+	var carriers: Array[BeachGull] = []
 	for pilot: RivalPilot in pilots:
+		if pilot.carry_window > 0.0 and pilot.carried > 0 and pilot.gull.state != BeachGull.State.STUNNED:
+			carriers.append(pilot.gull)
+	if not player.digestion.snacks.is_empty() and player.state != BeachGull.State.STUNNED and player.invulnerable <= 0.0:
+		carriers.append(player)
+	for pilot: RivalPilot in pilots:
+		pilot.prey = carriers
 		var pilot_targets: Array[BeachTarget] = food_targets
 		if pilot.gull.loose_only:
 			pilot_targets = food_targets.duplicate()
@@ -350,6 +357,7 @@ func _physics_process(delta: float) -> void:
 				available.append_array(loose_targets)
 			BeachCollisions.resolve(gull,available,beach.props)
 	_mugging()
+	_rival_mugging()
 	_near_misses()
 	spawner.tick(step,elapsed)
 	spawner.apply_spacing(step)
@@ -539,6 +547,32 @@ func _mugging() -> void:
 			if value > 0:
 				player.digestion.collect(pilot.carried_food_id,{"value":value,"upwind":player.upwind,"mugged":true,"mugged_from":pilot.gull.rival_name})
 				return
+
+## Rivals mug anyone holding food: other rivals in their grace window, or the player's unswallowed snack.
+func _rival_mugging() -> void:
+	for attacker: RivalPilot in pilots:
+		var beak: BeachGull = attacker.gull
+		if beak.state != BeachGull.State.STRIKE or attacker.leave > 0.0:
+			continue
+		for victim: RivalPilot in pilots:
+			if victim != attacker and victim.carry_window > 0.0 and BeachCollisions.segment_hits(beak.previous_beak,beak.sweep_beak,victim.gull.position,Vector2(14,10)):
+				var value: int = victim.mug(beak.position)
+				if value > 0:
+					attacker.carried_food_id = victim.carried_food_id
+					attacker.took_food(value)
+					attacker.mugs += 1
+					effects.message(beak.position,"MUGGED!",Color("ffc65c"))
+					break
+		if attacker.leave > 0.0:
+			continue
+		if not player.digestion.snacks.is_empty() and player.state != BeachGull.State.STUNNED and player.invulnerable <= 0.0 and BeachCollisions.segment_hits(beak.previous_beak,beak.sweep_beak,player.position,Vector2(14,10)):
+			# The food goes into the rival's beak, not onto the sand: take it before the stun can drop it.
+			var taken: Dictionary = player.digestion.drop_current()
+			attacker.carried_food_id = str(taken.id)
+			attacker.took_food(int(taken.get("value",Config.foods[taken.id].points)))
+			attacker.mugs += 1
+			player.stun(Config.tuning.rival.mug_stun,beak.position)
+			effects.message(player.position-Vector2(0,20),"MUGGED BY %s!" % attacker.gull.rival_name.to_upper(),Color("ef725c"))
 
 func _near_misses() -> void:
 	if not Config.tuning.juice.near_miss or elapsed-last_near < 1 or player.state != BeachGull.State.STRIKE:
