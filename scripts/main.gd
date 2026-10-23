@@ -68,6 +68,18 @@ func _navigate(action: String, payload: Variant = null) -> void:
 				GameState.options.gull = str(payload)
 				GameState.save_progress()
 				_navigate("select")
+		"shop":
+			if GameState.shop_open():
+				clear_game()
+				screen = "shop"
+				menus.show()
+				menus.shop()
+				Audio.play_music("title")
+		"buy":
+			var id: String = str(payload)
+			var price: int = int(Config.perks.perks[id].price) if Config.perks.perks.has(id) else (int(Config.species.species[id].price) if Config.species.species.has(id) else -1)
+			if price > 0 and screen == "shop" and GameState.buy(id,price):
+				menus.shop(true)
 		"select":
 			clear_game()
 			screen = "select"

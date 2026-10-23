@@ -1,5 +1,5 @@
 {
-  "unlock_all": true,
+  "unlock_all": false,
   "species": {
     "herring": {"name": "HERRING GULL", "blurb": "ALL-ROUNDER", "price": 0, "flight": 1.0, "rival_flight": 1.0, "dive": 1.0, "wind": 1.0, "stun": 1.0, "shove": false, "card": {"speed": 3, "dive": 3, "tough": 3}},
     "great-black-backed": {"name": "GREAT BLACK-BACK", "blurb": "SHOVES RIVALS", "price": 6, "flight": 0.9, "rival_flight": 1.0, "dive": 0.95, "wind": 0.8, "stun": 0.7, "shove": true, "card": {"speed": 2, "dive": 3, "tough": 5}},

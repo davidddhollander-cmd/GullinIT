@@ -97,7 +97,8 @@ static func run(suite: Node, check: Callable) -> void:
 	var main: Node = suite.main
 	await _stats(suite, check)
 	await _shove(suite, check)
-	# Picker flow.
+	# Picker flow (all gulls unlocked; the locked case is checked below).
+	Config.species.unlock_all = true
 	GameState.options.gull = "kittiwake"
 	main._navigate("arcade")
 	await suite.settle()
@@ -134,6 +135,6 @@ static func run(suite: Node, check: Callable) -> void:
 	main._navigate("gull", "kittiwake")
 	check.call(GameState.options.gull == "great-black-backed" and main.screen == "pick", "a locked gull cannot be chosen")
 	check.call(GameState.chosen_gull() == "herring", "a saved gull that is not owned falls back to herring")
-	Config.species.unlock_all = true
+	Config.species.unlock_all = false
 	GameState.options.gull = "herring"
 	main._navigate("title")

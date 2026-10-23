@@ -71,6 +71,10 @@ func title() -> void:
 	BeachUI.button(small,"OPTIONS",func() -> void: choose("options"))
 	if not OS.has_feature("web"):
 		BeachUI.button(small,"QUIT",func() -> void: choose("quit"))
+	var shop: Button = BeachUI.button(small,"SHOP" if GameState.shop_open() else "SHOP - LVL 6",func() -> void: choose("shop"))
+	shop.name = "ShopButton"
+	shop.disabled = not GameState.shop_open()
+	small.move_child(shop,1)
 	hint(content,"AIM. CLIMB. DIVE. SNATCH.")
 	hint(content,"MOUSE / KEYS / PAD / TOUCH")
 
@@ -144,7 +148,7 @@ func gull_picker() -> void:
 		box.offset_top = 3
 		box.offset_bottom = -3
 		var stage: Control = Control.new()
-		stage.custom_minimum_size = Vector2(0,30)
+		stage.custom_minimum_size = Vector2(0,22)
 		stage.clip_contents = true
 		stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		box.add_child(stage)
@@ -154,7 +158,7 @@ func gull_picker() -> void:
 		bird.scale = Vector2.ONE * float(Config.sprites[art_id].visual_scale) * 1.5
 		bird.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		bird.modulate = Color.WHITE if owned else Color(0.5,0.55,0.6)
-		bird.position = Vector2(50,16) # the frames carry the bird left of centre
+		bird.position = Vector2(50,12) # the frames carry the bird left of centre
 		bird.play(&"glide")
 		stage.add_child(bird)
 		var name_label: Label = BeachUI.label(box,str(info.name),BeachUI.FONT_NATIVE,BeachUI.GOLD if owned else Color("6b858b"))
@@ -171,7 +175,114 @@ func gull_picker() -> void:
 		status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		if id == chosen:
 			card.grab_focus()
-	BeachUI.button(content,"< BACK",func() -> void: choose("title"),100).size_flags_horizontal = SIZE_SHRINK_CENTER
+	var bottom: HBoxContainer = HBoxContainer.new()
+	bottom.alignment = BoxContainer.ALIGNMENT_CENTER
+	content.add_child(bottom)
+	BeachUI.button(bottom,"< BACK",func() -> void: choose("title"),70)
+	_perk_picker(bottom)
+
+# One owned perk may be equipped: a single button that cycles NONE and the owned perks.
+func _perk_picker(parent: Control) -> void:
+	var options: Array[String] = [""]
+	for id: String in Config.perks.perks:
+		if GameState.perk_owned(id):
+			options.append(id)
+	if options.size() == 1:
+		return
+	var caption: Callable = func() -> String:
+		var id: String = GameState.equipped_perk()
+		return "PERK:  < %s >" % (str(Config.perks.perks[id].name) if not id.is_empty() else "NONE")
+	var step: Callable = func(dir: int) -> void:
+		var at: int = options.find(GameState.equipped_perk())
+		GameState.equip_perk(options[posmod(at + dir,options.size())])
+	var pick: Button = BeachUI.button(parent,"",func() -> void: pass,150)
+	pick.name = "PerkPick"
+	pick.text = caption.call()
+	pick.pressed.connect(func() -> void:
+		step.call(1)
+		pick.text = caption.call())
+	pick.gui_input.connect(func(event: InputEvent) -> void:
+		var dir: int = int(event.is_action_pressed("ui_right")) - int(event.is_action_pressed("ui_left"))
+		if dir != 0:
+			step.call(dir)
+			pick.text = caption.call()
+			pick.accept_event())
+
+# Feathers shop: perks on the left, priced gulls on the right (two columns fit 320x180).
+func shop(bought: bool = false) -> void:
+	clear("FEATHER SHOP")
+	content.add_theme_constant_override("separation",2)
+	var outer: MarginContainer = content.get_parent().get_parent() as MarginContainer
+	for edge: String in ["top","bottom"]:
+		outer.add_theme_constant_override("margin_" + edge,6)
+	var feathers: Label = BeachUI.label(self,"FEATHERS %d" % GameState.feathers(),BeachUI.FONT_NATIVE,BeachUI.CREAM)
+	feathers.name = "Feathers"
+	feathers.position = Vector2(188,20)
+	feathers.size = Vector2(108,9)
+	feathers.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var columns: HBoxContainer = HBoxContainer.new()
+	columns.size_flags_vertical = SIZE_EXPAND_FILL
+	columns.add_theme_constant_override("separation",4)
+	content.add_child(columns)
+	var left: VBoxContainer = VBoxContainer.new()
+	left.add_theme_constant_override("separation",2)
+	columns.add_child(left)
+	var right: VBoxContainer = VBoxContainer.new()
+	right.add_theme_constant_override("separation",2)
+	columns.add_child(right)
+	BeachUI.label(left,"PERKS",BeachUI.FONT_NATIVE,Color("a9d7d2"))
+	BeachUI.label(right,"GULLS",BeachUI.FONT_NATIVE,Color("a9d7d2"))
+	var first: Button
+	for id: String in Config.perks.perks:
+		var info: Dictionary = Config.perks.perks[id]
+		var item: Button = _shop_item(left,id,str(info.name),str(info.blurb),int(info.price),170,false)
+		first = first if first != null or item.disabled else item
+	for id: String in Config.species.species:
+		var info: Dictionary = Config.species.species[id]
+		if int(info.price) > 0:
+			var item: Button = _shop_item(right,id,str(info.name),str(info.blurb),int(info.price),122,true)
+			first = first if first != null or item.disabled else item
+	var message: Label = BeachUI.label(right,"BOUGHT!" if bought else "",BeachUI.FONT_NATIVE,BeachUI.GOLD)
+	message.name = "Message"
+	var spacer: Control = Control.new()
+	spacer.size_flags_vertical = SIZE_EXPAND_FILL
+	right.add_child(spacer)
+	var back: Button = BeachUI.button(right,"< BACK",func() -> void: choose("title"),122)
+	(first if first != null else back).grab_focus()
+
+func _shop_item(parent: Control, id: String, item_name: String, blurb: String, price: int, width: int, stacked: bool) -> Button:
+	var owned: bool = GameState.owns(id)
+	var affordable: bool = GameState.feathers() >= price
+	var button: Button = BeachUI.button(parent,"",func() -> void: choose("buy",id),width)
+	button.name = "Item_" + id
+	button.custom_minimum_size.y = 32 if stacked else 24
+	button.disabled = owned or not affordable
+	var box: VBoxContainer = VBoxContainer.new()
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_theme_constant_override("separation",0)
+	button.add_child(box)
+	BeachUI.full(box)
+	box.offset_left = 4
+	box.offset_right = -4
+	box.offset_top = 3
+	box.offset_bottom = -3
+	var status_text: String = "OWNED" if owned else ("BUY  %d" % price if affordable else "%d FEATHERS" % price)
+	var status_color: Color = BeachUI.CREAM if owned else (BeachUI.GOLD if affordable else Color("6b858b"))
+	var dim: bool = owned or not affordable
+	var head: HBoxContainer = HBoxContainer.new()
+	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(head)
+	var title_label: Label = BeachUI.label(head,item_name,BeachUI.FONT_NATIVE,Color("6b858b") if dim and not owned else BeachUI.GOLD)
+	title_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	var blurb_label: Label = BeachUI.label(box,blurb,BeachUI.FONT_NATIVE,Color("6b858b") if dim else Color("a9d7d2"))
+	blurb_label.name = "Blurb"
+	var status: Label
+	if stacked:
+		status = BeachUI.label(box,status_text,BeachUI.FONT_NATIVE,status_color)
+	else:
+		status = BeachUI.label(head,status_text,BeachUI.FONT_NATIVE,status_color)
+	status.name = "Status"
+	return button
 
 # Simplified card stats: one row per stat, 1-5 pips from data/species.json "card".
 func _stat_rows(parent: Control, card: Dictionary, owned: bool) -> void:
