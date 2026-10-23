@@ -1,0 +1,10 @@
+{
+  "slots": 1,
+  "perks": {
+    "bigger_stomach": {"name": "BIGGER STOMACH", "blurb": "CARRY MORE FOOD", "price": 3, "stomach": 6},
+    "keen_eye": {"name": "KEEN EYE", "blurb": "SPOT THE BEST SNACK", "price": 3, "handover_window_mult": 1.5},
+    "dive_speed": {"name": "DIVE SPEED", "blurb": "FASTER DIVES", "price": 4, "dive_mult": 1.15},
+    "strong_skull": {"name": "STRONG SKULL", "blurb": "SHRUG OFF THE FIRST SWAT", "price": 4, "ignore_stuns": 1},
+    "bullet_time": {"name": "BULLET TIME", "blurb": "SLOW THE BEACH DOWN", "price": 5, "fill_per_clean_snatch": 0.34, "duration": 2.5, "time_scale": 0.5}
+  }
+}

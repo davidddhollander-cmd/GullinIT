@@ -7,6 +7,7 @@ var foods: Dictionary = {}
 var sprites: Dictionary = {}
 var quips: Dictionary = {}
 var species: Dictionary = {} ## data/species.json: {unlock_all, species:{id:{name,blurb,price,flight,dive,wind,stun,shove}}}
+var perks: Dictionary = {} ## data/perks.json: {slots, perks:{id:{name,blurb,price,...effect values}}}
 var levels: Array[Dictionary] = []
 var frames_cache: Dictionary = {}
 var last_error: String = ""
@@ -36,7 +37,7 @@ func read_json(path: String) -> Dictionary:
 func reload_data() -> bool:
 	last_error = ""
 	var next: Dictionary = {}
-	for key: String in ["tuning", "targets", "foods", "sprites", "quips", "species"]:
+	for key: String in ["tuning", "targets", "foods", "sprites", "quips", "species", "perks"]:
 		next[key] = read_json("res://data/%s.json" % key)
 	var next_levels: Array[Dictionary] = []
 	var next_layout: Dictionary = read_json("res://data/level_layout.json")
@@ -65,6 +66,7 @@ func reload_data() -> bool:
 	sprites = next.sprites
 	quips = next.quips
 	species = next.species
+	perks = next.perks
 	levels = next_levels
 	layout_rules = next_layout
 	for i: int in levels.size():
