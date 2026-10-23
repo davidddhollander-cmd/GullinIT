@@ -43,7 +43,9 @@ func menu_font_grid(node: Node) -> void:
 	for child: Node in node.get_children():
 		if child is Label or child is Button:
 			var font_size: int = child.get_theme_font_size("font_size")
-			check(font_size >= BeachUI.FONT_NATIVE and font_size % BeachUI.FONT_NATIVE == 0,"menu font uses native 8 px grid: "+child.text+" ("+str(font_size)+")")
+			# Each bitmap face stays on its own native grid: GullPixel 8 px, the compact HUD face 6 px.
+			var native: int = 6 if child.get_theme_font("font").resource_path.ends_with("gull_hud.fnt") else BeachUI.FONT_NATIVE
+			check(font_size >= native and font_size % native == 0,"menu font uses native %d px grid: " % native+child.text+" ("+str(font_size)+")")
 			var minimum: Vector2 = child.get_combined_minimum_size()
 			check(minimum.x <= child.size.x + 0.1 and minimum.y <= child.size.y + 0.1,"menu text fits control: "+child.text+" "+str(minimum)+" in "+str(child.size))
 		menu_font_grid(child)
