@@ -33,6 +33,7 @@ var training: bool = false
 var lesson: int = 0
 var quests: BeachQuests = BeachQuests.new()
 var feathers_earned: int = 0
+var mugged_rivals: Dictionary = {}
 const TRAINING_LESSONS: int = 7
 const BIN_LESSON: int = 4
 const WHEELIE_LESSON: int = 5
@@ -66,7 +67,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	wind.setup(level)
 	wind.gust_warning.connect(_gust)
 	beach = BeachBackdrop.new()
-	beach.sunset = int(level.id) == 6
+	beach.sunset = level.has("sunset")
 	beach.wind_dir = wind.direction
 	beach.strength = wind.strength
 	add_child(beach)
@@ -364,8 +365,11 @@ func _physics_process(delta: float) -> void:
 				available = food_targets.duplicate()
 				available.append_array(loose_targets)
 			BeachCollisions.resolve(gull,available,beach.props)
+	if level.has("boss"):
+		BeachBoss.shove(self)
 	_mugging()
 	_rival_mugging()
+	beach.modulate = BeachBoss.tint(level,elapsed)
 	_near_misses()
 	spawner.tick(step,elapsed)
 	spawner.apply_spacing(step)
@@ -557,8 +561,13 @@ func _mugging() -> void:
 		return
 	for pilot: RivalPilot in pilots:
 		if pilot.carry_window > 0 and player.can_collect_food(pilot.carried_food_id) and BeachCollisions.segment_hits(player.previous_beak,player.sweep_beak,pilot.gull.position,Vector2(14,10)):
+			if BeachBoss.blocks_mug(self,pilot,player):
+				return
 			var value: int = pilot.mug(player.position)
 			if value > 0:
+				if not mugged_rivals.has(pilot.gull.rival_name):
+					mugged_rivals[pilot.gull.rival_name] = true
+					_quest_event("rival_mugged_distinct")
 				player.digestion.collect(pilot.carried_food_id,{"value":value,"upwind":player.upwind,"mugged":true,"mugged_from":pilot.gull.rival_name})
 				return
 
@@ -570,6 +579,8 @@ func _rival_mugging() -> void:
 			continue
 		for victim: RivalPilot in pilots:
 			if victim != attacker and victim.carry_window > 0.0 and BeachCollisions.segment_hits(beak.previous_beak,beak.sweep_beak,victim.gull.position,Vector2(14,10)):
+				if BeachBoss.blocks_mug(self,victim,beak):
+					break
 				var value: int = victim.mug(beak.position)
 				if value > 0:
 					attacker.carried_food_id = victim.carried_food_id
@@ -601,6 +612,9 @@ func _near_misses() -> void:
 func finish() -> void:
 	if not running:
 		return
+	var boss: bool = level.has("boss") and not casual
+	if boss:
+		BeachBoss.conclude(self)
 	running = false
 	input.enabled = false
 	input.clear_touch()
@@ -609,6 +623,8 @@ func finish() -> void:
 	result.quest_bonus = quests.bonus_points()
 	result.base = int(result.base) - int(result.quest_bonus)
 	result.feathers_earned = feathers_earned
+	if boss:
+		BeachBoss.verdict(self,result)
 	if training:
 		if lesson < TRAINING_LESSONS:
 			running = true

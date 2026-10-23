@@ -57,6 +57,7 @@ var stroke_started: bool = false
 var sprite: AnimatedSprite2D
 var detailed_art: bool = false
 var art_scale: float = 1.0
+var body_scale: float = 1.0 ## boss-sized rivals: multiplies the species art scale
 var perch_surfaces: Array[Dictionary] = []
 var support: Dictionary = {}
 var departing_perch: Dictionary = {}
@@ -167,7 +168,7 @@ func refresh_art() -> void:
 		art_id = species_id
 	art_entry = Config.sprites[art_id]
 	detailed_art = art_entry.has("regions") or bool(art_entry.get("native_alpha",false))
-	art_scale = float(art_entry.get("visual_scale",1.0))
+	art_scale = float(art_entry.get("visual_scale",1.0)) * body_scale
 	sprite.sprite_frames = Config.frames(art_id)
 	sprite.scale = Vector2.ONE * art_scale
 	sprite.material = null

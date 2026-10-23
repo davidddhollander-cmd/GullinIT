@@ -50,6 +50,7 @@ func setup(actor: BeachGull, profile: Dictionary, random: RandomNumberGenerator)
 	gull.rival_name = str(profile.name)
 	gull.loose_only = bool(profile.get("loose_only",false))
 	gull.species = str(profile.get("species","great-black-backed"))
+	gull.body_scale = float(profile.get("scale",1.0))
 	gull.rival_tint = COLOURS[absi(str(profile.name).hash()) % COLOURS.size()]
 	gull.dive_started.connect(func() -> void: dives += 1)
 	gull.ground_crashed.connect(func() -> void: crashes += 1)

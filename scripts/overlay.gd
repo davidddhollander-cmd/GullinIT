@@ -170,7 +170,7 @@ func setup(owner_game: BeachGame) -> void:
 		BeachUI.label(intro,"NO TIMER. NO SCORE. NO MANNERS.",8,Color("80bcb8"))
 		BeachUI.label(intro,"FOLLOW THE GOLDEN RING.",8,BeachUI.GOLD)
 	else:
-		BeachUI.label(intro,"15 SNATCHES. NO TIMER." if game.casual else "STEAL LUNCH. MAKE IT COUNT.")
+		BeachUI.label(intro,"15 SNATCHES. NO TIMER." if game.casual else str(game.level.get("objective","STEAL LUNCH. MAKE IT COUNT.")))
 		BeachUI.label(intro,"CALM AIR" if game.wind.direction == 0 else ("WIND > TOWARD PIER" if game.wind.direction > 0 else "WIND < TOWARD FAMILY END"))
 		var quote: Label = BeachUI.label(intro,Config.quips.rivals[(int(game.level.id)-1)%3])
 		quote.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

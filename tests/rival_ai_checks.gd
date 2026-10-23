@@ -51,6 +51,8 @@ static func simulate(host: Node, main: Node, level: int, seconds: float) -> Dict
 				thefts_seen[i] = pilot.thefts
 				last_theft[i] = clock
 				escape_origin[i] = gull.position.x
+			if pilot.carried == 0 and pilot.leave <= 0.0 and clock - last_theft[i] < float(Config.tuning.rival.leave_time) - 0.05:
+				last_theft[i] = -100.0 # mugged mid-escape: the theft is over, so its escape and cooldown windows no longer apply
 			if pilot.dives > dives_seen[i]:
 				dives_seen[i] = pilot.dives
 				if clock - last_theft[i] < window - 0.2 and clock - last_theft[i] > 0.1:
