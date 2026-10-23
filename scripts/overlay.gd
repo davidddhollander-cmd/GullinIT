@@ -12,6 +12,7 @@ var lesson_label: Label
 var lesson_prompt: Label
 var pause_button: Button
 var top: HBoxContainer
+var quest_panel: PanelContainer
 var quest_box: VBoxContainer
 var quest_labels: Array[Label] = []
 var score_announcement: Label
@@ -107,11 +108,19 @@ func setup(owner_game: BeachGame) -> void:
 	space.mouse_filter = MOUSE_FILTER_IGNORE
 	space.size_flags_vertical = SIZE_EXPAND_FILL
 	column.add_child(space)
+	# Dark backing keeps the checklist readable over clouds and above world name tags.
+	quest_panel = BeachUI.panel(self,Color(0.094,0.23,0.30,0.85))
+	var quest_style: StyleBoxFlat = quest_panel.get_theme_stylebox("panel") as StyleBoxFlat
+	quest_style.content_margin_left = 3
+	quest_style.content_margin_right = 3
+	quest_style.content_margin_top = 1
+	quest_style.content_margin_bottom = 1
+	quest_panel.mouse_filter = MOUSE_FILTER_IGNORE
+	quest_panel.position = Vector2(3,TOP_BAR_HEIGHT + 1)
 	quest_box = VBoxContainer.new()
 	quest_box.mouse_filter = MOUSE_FILTER_IGNORE
 	quest_box.add_theme_constant_override("separation",0)
-	add_child(quest_box)
-	quest_box.position = Vector2(5,TOP_BAR_HEIGHT + 2)
+	quest_panel.add_child(quest_box)
 	for quest: Dictionary in game.quests.quests:
 		var row: Label = BeachUI.label(quest_box,"",BeachUI.FONT_NATIVE,BeachUI.CREAM)
 		row.add_theme_color_override("font_shadow_color",Color(0.0,0.0,0.0,0.65))
@@ -198,9 +207,10 @@ func _process(_delta: float) -> void:
 # One row per quest: "- text" until done, gold "* text" after; counted quests add n/N.
 func sync_quests() -> void:
 	quest_box.visible = not quest_labels.is_empty() and game.intro <= 0.0
+	quest_panel.visible = quest_box.visible
 	# Replays of the training day keep the lesson panel on top, so the list sits below it.
 	# training_panel's rect is relative to training_center, which starts below the top bar.
-	quest_box.position.y = TOP_BAR_HEIGHT + training_panel.get_rect().end.y + 2.0 if game.training else TOP_BAR_HEIGHT + 2.0
+	quest_panel.position.y = TOP_BAR_HEIGHT + training_panel.get_rect().end.y + 1.0 if game.training else TOP_BAR_HEIGHT + 1.0
 	for i: int in mini(quest_labels.size(),game.quests.quests.size()):
 		var quest: Dictionary = game.quests.quests[i]
 		var count: int = int(quest.count)
