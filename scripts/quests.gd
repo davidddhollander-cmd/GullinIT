@@ -17,7 +17,7 @@ func setup(level: Dictionary, rng: RandomNumberGenerator) -> void:
 		var food: String = str(foods[rng.randi_range(0, foods.size() - 1)])
 		var range_: Array = random.count
 		var count: int = rng.randi_range(int(range_[0]), int(range_[1]))
-		quests.append({"id": "l%d_random" % int(level.get("id", 0)), "text": "EAT %d %s" % [count, str(Config.foods[food].name).to_upper()],
+		quests.append({"id": "l%d_random" % int(level.get("id", 0)), "text": "EAT %s" % str(Config.foods[food].name).to_upper(),
 			"event": "swallowed", "filter": {"food": food}, "count": count, "bonus": int(random.bonus), "progress": 0, "done": false})
 
 func record(event: String, data: Dictionary = {}) -> Array[Dictionary]:

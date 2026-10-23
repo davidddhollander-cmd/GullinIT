@@ -34,3 +34,8 @@ Decisions: checklist top-left under HUD, "- text" / gold "* text", n/N for count
 Gaps: training-day completion screen does not list quests/Feathers; no result-board progress counts (result only carries text/done).
 
 ## Review notes
+
+## Review follow-up
+- Checklist rows were already GullPixel 8 px (screenshots are 4x). Tried the 6 px HUD font; it lacks the tick glyph and misrenders digits, so reverted to native 8 px with row separation 0 (block is 3 x 8 px, below the top bar, left of the hint).
+- Random quest text is now `EAT <FOOD>` (no number); progress n/N already shows in the checklist. Level card and result board do not show counts. Test updated.
+- validate.ps1 -Capture: 16083 checks, 1 failure (known level 6 rival).

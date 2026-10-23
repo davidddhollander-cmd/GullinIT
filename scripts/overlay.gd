@@ -109,7 +109,7 @@ func setup(owner_game: BeachGame) -> void:
 	column.add_child(space)
 	quest_box = VBoxContainer.new()
 	quest_box.mouse_filter = MOUSE_FILTER_IGNORE
-	quest_box.add_theme_constant_override("separation",1)
+	quest_box.add_theme_constant_override("separation",0)
 	add_child(quest_box)
 	quest_box.position = Vector2(5,TOP_BAR_HEIGHT + 2)
 	for quest: Dictionary in game.quests.quests:

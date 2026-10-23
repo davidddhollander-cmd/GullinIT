@@ -13,7 +13,7 @@ static func run(check: Callable) -> void:
 	check.call(quests.quests.size() == 3, "level 2 has two fixed quests plus a random slot")
 	var random: Dictionary = quests.quests[2]
 	check.call(random.id == "l2_random" and random.filter.food in l2.random_foods and int(random.count) >= 3 and int(random.count) <= 5, "random quest picks a listed food and a 3-5 count")
-	check.call(random.text == "EAT %d %s" % [random.count, str(Config.foods[random.filter.food].name).to_upper()], "random quest text names the food")
+	check.call(random.text == "EAT %s" % str(Config.foods[random.filter.food].name).to_upper(), "random quest text names the food")
 	for seed: int in 40:
 		rng.seed = seed
 		var roll: BeachQuests = BeachQuests.new()
@@ -188,7 +188,7 @@ static func run_game(suite: Node, check: Callable) -> void:
 	main.menus.show()
 	main.menus.add_child(board)
 	var sample: Dictionary = {"base": 100, "clean": 10, "items": 5, "stuns": 0, "score": 150, "stars": 1, "casual": false, "elapsed": 60.0, "bonuses": {},
-		"quests": [{"text": "3 CLEAN ICE CREAMS", "done": true}, {"text": "MAKE A TODDLER CRY", "done": false}, {"text": "EAT 5 BOX OF CRISPS", "done": false}], "feathers_earned": 1}
+		"quests": [{"text": "3 CLEAN ICE CREAMS", "done": true}, {"text": "MAKE A TODDLER CRY", "done": false}, {"text": "EAT BOX OF CRISPS", "done": false}], "feathers_earned": 1}
 	board.setup(Config.levels[1], sample)
 	board.finish_tally()
 	check.call(board.quest_labels.size() == 3 and board.quest_labels[0].text.begins_with("*") and board.quest_labels[1].text.begins_with("-"), "result board ticks done quests only")
