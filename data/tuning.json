@@ -257,7 +257,16 @@
     "mug_stun": 1,
     "mug_chance": 0.35,
     "mug_range": 90,
-    "cruise_y": 65
+    "cruise_y": 65,
+    "ground": {"scraps": 0.5, "bins": 0.5, "bags": 0.5, "catch": 0.5},
+    "bin_value": 12,
+    "bag_value": 14,
+    "peck_interval": 0.4,
+    "ground_session": 5.0,
+    "ground_cooldown": 1.0,
+    "walk_range": 120,
+    "work_timeout": 12.0,
+    "avoid_time": 15.0
   },
   "boss": {"bounce_stun": 0.6, "player_shove_radius": 20, "player_shove_stun": 0.4},
   "wind_flag": {"flap_speed": 7.0, "base_reach": 7, "wind_reach": 3.0, "intro_lift": 14, "intro_reach": 12},

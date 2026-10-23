@@ -1,6 +1,6 @@
 # 017 — Rival gulls that land, scavenge, peck bins/bags and catch falling food
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -37,5 +37,31 @@ David playtested level 3: Gary is "very incapable" — he doesn't catch food, ca
 - [ ] One `tools/validate.ps1 -Capture` run (two at most): **0 failures**; screenshots of a rival on the ground pecking a bin and eating a scrap, paths in the Report
 
 ## Report
+
+**Before (level 3, 90 s, no scattered food, idle player):** Gary dives 0, landings 0, items eaten 0, pecks 0, score 0, bins untouched (99/99 scraps left). The old sim only "worked" because it dropped a hotdog every 4 s.
+
+**After (same sim):** Gary eats 20 items (all counted as thefts, score 205), skills used: scraps 20, bins 1 (a full bin peck-open), bags 4 (sunbather stashes pecked open), catch 0 in the sim (covered by a dedicated check). 0 dives (still `loose_only`), 0 crashes, 0 out of bounds, longest continuous time on the ground 5.0 s. Levels 4-6 unchanged in spirit: dives 9/10/9 (Gary L4/L5/L6), thefts and mugs intact, a few ground meals on top (Gary 2-4, Bev 1, Chip 0-2).
+
+**Tests:** `validate.ps1 -Capture`: INTEGRATION: 14882 checks, 0 failures (baseline ~14855). One run.
+
+**Screenshots:** `test-output/rival-pecks-bin.png` (Gary standing at a bin, RATTLE!), `test-output/rival-eats-scrap.png` (Gary "MINE!" after a spilled scrap). Not committed (test-output is ignored).
+
+**Design**
+- `RivalPilot` (scripts/rival_gull.gd) gains modes `LAND` (glide down beside the job, wheelie bins from the lid via the real perch landing), `WALK` (ground stroll), `PECK` (taps a bin or bag). `RECOVER` doubles as take-off. Ground jobs: item (dropped/knocked/bin/bag food), catch (food still in the air), scrap (crumbs/chips), bin, bag. A job is chosen in `hunt()` when its score (food value / (distance + 80) x weight) beats the best air snatch; jobs are re-picked when lost to the player (no stuck rival), and `work_timeout`/`ground_session` force a take-off.
+- `BeachStashRaids` is reused, not duplicated: `peck_as(gull)` runs the player's `peck()` for a rival (same bins, bags, `bin_pecks`/`stash_pecks` taps, alert and swat risk; a swatting owner stuns the raiding rival via a per-raid `raider`); item pickup now tests every gull through one `_hit()` helper and `RivalPilot.accepts_item()`/`ate_ground()`. Bins emptied by a rival stay empty for the player (shared dictionaries).
+- Eating a ground item calls `took_food` (score, mug window = swallow time) but the rival stands still for the swallow (`eat_timer`) instead of fleeing, so the player can mug a grounded rival. `thefts` counts ground meals too; `ground_eats` counts them separately and the sim ignores them for the escape/cooldown checks.
+- `loose_food.gd` (and `LooseFood` proxies in game.gd) deleted: real landing makes it redundant. Gary is still `loose_only` (never takes from hands) and now uses all four skills.
+- Rivals get only the wheelie-bin perches (`setup_perches` filtered) so they never perch on kiosks or lamps.
+- Food spilled by a bin is eaten before the bin is pecked again; a bag just pecked is avoided for 7.5 s (owner is up).
+
+**Tuning (data):** `tuning.json rival`: `ground` defaults 0.5 each, `bin_value` 12, `bag_value` 14, `peck_interval` 0.4, `ground_session` 5.0, `ground_cooldown` 1.0, `walk_range` 120, `work_timeout` 12, `avoid_time` 15. Level profiles Gary/Chip/Bev carry the `ground` block from the task (Gary 0.9/0.9/0.6/0.7, Chip 0.3/0.2/0.3/0.8, Bev 0.6/0.5/0.5/0.5).
+
+**Checks added (tests/rival_ai_checks.gd, `ground_checks`, `scavenger_checks`, `ground_captures`):** land-and-eat, player wins the race, bin peck and scrap, wheelie lid landing, bag peck, swat stun, catch, all-zero weights and per-skill weight 0, data weights, level 3 sim (>= 4 eaten, >= 2 skills, no stuck > 6 s). Existing level 3-6 sims adjusted: no scatter, Gary's dive count only required for non-loose rivals, escape/cooldown checks use air thefts.
+
+**Decisions / gaps**
+- Catch in the 90 s sim was 0 for Gary (no falling food unless the player knocks something); proven by a dedicated check only.
+- Bin use is modest in the level 3 sim (1 bin) because nearer crumbs and bags score higher; raise `bin_value` to make scavengers favour bins.
+- Rivals walk through sunbather towels to reach food, same as the player.
+- A rival on the ground does not chase carriers (mugs) until it takes off.
 
 ## Review notes

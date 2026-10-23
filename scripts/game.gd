@@ -43,7 +43,6 @@ var training_clean_snatch: bool = false
 var training_raid_started: bool = false
 var training_reset_clock: float = 0.0
 var pending_rivals: Array = []
-var loose_targets: Array[BeachTarget] = []
 var taunt_wait: float = -1.0
 var taunt_rival: String = ""
 var taunt_text: String = ""
@@ -216,30 +215,6 @@ func _rival_taunt(step: float) -> void:
 	var at: Vector2 = Vector2(clampf(from.x,camera_x-160.0+half,camera_x+160.0-half),from.y+22.0)
 	effects.message(at,taunt_text,BeachUI.GOLD,float(Config.tuning.juice.taunt_time),0.0)
 
-# Mirrors claimable stash items as LooseFood targets for loose-only rivals.
-func _sync_loose_targets() -> void:
-	var wanted: bool = false
-	for pilot: RivalPilot in pilots:
-		wanted = wanted or pilot.gull.loose_only
-	if not wanted:
-		return
-	for i: int in range(loose_targets.size()-1,-1,-1):
-		var proxy: LooseFood = loose_targets[i] as LooseFood
-		if not proxy.present() or not proxy.food:
-			loose_targets.remove_at(i)
-			proxy.free()
-	for item: Dictionary in stash_raids.items:
-		if bool(item.get("garbage",false)) or bool(item.get("recovered",false)) or str(item.get("food_id","")).is_empty() or float(item.get("age",0.0)) < float(Config.tuning.world.stash_pickup_delay):
-			continue
-		var known: bool = false
-		for proxy: LooseFood in loose_targets:
-			known = known or is_same(proxy.item,item)
-		if not known:
-			var fresh: LooseFood = LooseFood.new()
-			fresh.prepare(item,stash_raids)
-			fresh.snatched.connect(_snatched)
-			loose_targets.append(fresh)
-
 func _release_rivals() -> void:
 	for profile: Dictionary in pending_rivals:
 		var rival: BeachGull = BeachGull.new()
@@ -251,6 +226,9 @@ func _release_rivals() -> void:
 		gulls.append(rival)
 		var pilot: RivalPilot = RivalPilot.new()
 		pilot.setup(rival,profile,rng)
+		pilot.game = self
+		rival.setup_perches(level.props)
+		rival.perch_surfaces = rival.perch_surfaces.filter(func(surface: Dictionary) -> bool: return str(surface.prop_type) == BeachBackdrop.WHEELIE_BIN_TYPE)
 		# Match each frame to distinct feathers within this round.
 		var used_colours: Array[Color] = []
 		for existing: RivalPilot in pilots:
@@ -298,12 +276,8 @@ func _reload() -> void:
 		target.awareness_mult = float(level.awareness_mult) * target.encounter_awareness
 	effects.message(player.position,"DATA RELOADED")
 
-# LooseFood proxies live outside the tree, so free them with the level.
 func _exit_tree() -> void:
 	end_slowmo()
-	for proxy: BeachTarget in loose_targets:
-		proxy.free()
-	loose_targets.clear()
 
 func perk_value(key: String, fallback: Variant) -> Variant:
 	return Config.perks.perks.get(perk_id,{}).get(key,fallback)
@@ -384,7 +358,6 @@ func _physics_process(delta: float) -> void:
 	_wind_tip()
 	if dog != null:
 		dog.tick(step,player)
-	_sync_loose_targets()
 	_rival_taunt(step)
 	if player.state != BeachGull.State.STUNNED:
 		player.digestion.tick(step,player.state == BeachGull.State.GROUNDED)
@@ -404,11 +377,7 @@ func _physics_process(delta: float) -> void:
 		carriers.append(player)
 	for pilot: RivalPilot in pilots:
 		pilot.prey = carriers
-		var pilot_targets: Array[BeachTarget] = food_targets
-		if pilot.gull.loose_only:
-			pilot_targets = food_targets.duplicate()
-			pilot_targets.append_array(loose_targets)
-		pilot.tick(step,pilot_targets,claims,wind,player.position)
+		pilot.tick(step,food_targets,claims,wind,player.position)
 	for target: BeachTarget in spawner.targets.duplicate():
 		target.tick(step,gulls)
 	stalls.tick(step)
@@ -421,9 +390,6 @@ func _physics_process(delta: float) -> void:
 			if gull==player:
 				available = food_targets.duplicate()
 				available.append_array(crabs.targets)
-			elif gull.loose_only:
-				available = food_targets.duplicate()
-				available.append_array(loose_targets)
 			BeachCollisions.resolve(gull,available,beach.props)
 	if level.has("boss"):
 		BeachBoss.shove(self)
