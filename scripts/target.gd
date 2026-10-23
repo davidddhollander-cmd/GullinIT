@@ -237,15 +237,13 @@ func refresh_art() -> void:
 	else:
 		sprite.sprite_frames = Config.frames(info.sprite)
 	sprite.scale = Vector2.ONE * AdultPixelArt.DISPLAY_SCALE if kind in ["picnic_family", "sunbather"] else Vector2.ONE * float(Config.sprites[info.sprite].get("visual_scale",1.0))
-	if kind == "dog_owner":
-		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	elif kind in ["toddler", "pier_diner", "picnic_family", "sunbather", "lifeguard", "kiosk_customer"]:
+	if kind in ["toddler", "pier_diner", "picnic_family", "sunbather", "lifeguard", "kiosk_customer", "dog_owner"]:
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	sprite.position.y = -26.0 if kind in ["picnic_family", "sunbather"] else -art_height() * 0.5
 	if Config.sprites[info.sprite].has("sprite_offset_y"):
 		sprite.position.y = float(Config.sprites[info.sprite].sprite_offset_y)
 	sprite.material = null
-	if Config.sprites[info.sprite].has("visual_scale") and kind not in ["toddler", "picnic_family", "sunbather", "lifeguard", "kiosk_customer"]:
+	if Config.sprites[info.sprite].has("visual_scale") and kind not in ["toddler", "picnic_family", "sunbather", "lifeguard", "kiosk_customer", "dog_owner"]:
 		var cutout: ShaderMaterial = ShaderMaterial.new()
 		cutout.shader = preload("res://assets/shaders/gull_cutout.gdshader")
 		sprite.material = cutout
