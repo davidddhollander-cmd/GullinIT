@@ -7,7 +7,6 @@
     "species": "herring",
     "art_height": 16.5,
     "native_alpha": true,
-    "flight_speed_mult": 1.0,
     "ground_beak_y": -7.5,
     "frame_beaks": [
       [
@@ -333,7 +332,6 @@
     "species": "kittiwake",
     "art_height": 12.75,
     "native_alpha": true,
-    "flight_speed_mult": 1.2,
     "ground_beak_y": -4.3125,
     "frame_beaks": [
       [
@@ -659,7 +657,6 @@
     "species": "great-black-backed",
     "art_height": 21,
     "native_alpha": true,
-    "flight_speed_mult": 1.0,
     "ground_beak_y": -11.625,
     "frame_beaks": [
       [
@@ -985,7 +982,6 @@
     "species": "herring",
     "art_height": 16.5,
     "native_alpha": true,
-    "flight_speed_mult": 1.0,
     "ground_beak_y": -7.5,
     "frame_beaks": [
       [
@@ -1311,7 +1307,6 @@
     "species": "great-black-backed",
     "art_height": 21,
     "native_alpha": true,
-    "flight_speed_mult": 1.0,
     "ground_beak_y": -11.625,
     "frame_beaks": [
       [

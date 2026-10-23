@@ -1,7 +1,7 @@
 extends Node
 var progress: Dictionary = {}
 var wallet: Dictionary = {"feathers": 0}
-var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false, "stats": true, "tips": []}
+var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false, "stats": true, "tips": [], "gull": "herring"}
 var _anon_id: String = ""
 var save_path: String = "user://save.json"
 var save_error: String = ""
@@ -122,3 +122,12 @@ func unlocked(id: int) -> bool:
 		return true
 	var previous: Dictionary = entry(id - 1)
 	return int(previous.get("stars", 0)) > 0 or previous.has("casual_time") or (id == 2 and bool(previous.get("training_complete", false)))
+
+## Free gulls and testing mode are pickable; the Feathers shop will track purchases later.
+func gull_owned(id: String) -> bool:
+	return bool(Config.species.get("unlock_all", false)) or int(Config.species.species[id].get("price", 0)) <= 0
+
+## The last pick if it exists and is owned, else the herring gull.
+func chosen_gull() -> String:
+	var id: String = str(options.get("gull", "herring"))
+	return id if Config.species.species.has(id) and gull_owned(id) else "herring"

@@ -101,7 +101,7 @@ def prepare(species, height, speed):
         'file': f'res://assets/sprites/gull-{species}-diner-style.png',
         'frame_w': CELL, 'frame_h': CELL, 'visual_scale': DISPLAY_SCALE,
         'species': species, 'art_height': height*DISPLAY_SCALE, 'native_alpha': True,
-        'flight_speed_mult': speed, 'ground_beak_y': anchors[0][1],
+        'ground_beak_y': anchors[0][1],
         'frame_beaks': anchors, 'frame_bounds': bounds,
         'animations': {k: {'frames':v[0], 'fps':v[1], 'loop':v[2], 'source_left':False} for k,v in animations.items()},
     }
