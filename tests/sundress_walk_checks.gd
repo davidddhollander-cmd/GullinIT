@@ -3,18 +3,24 @@ extends RefCounted
 static func run(check: Callable) -> void:
 	var current: Dictionary = Config.sprites.shopper_sundress
 	var previous: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/reference/sundress-walk-v2/previous-entry.json"))
-	check.call(current.file=="res://assets/sprites/shopper-sundress-walk-v2.png","sundress selects the new generated walk atlas")
+	check.call(current.file=="res://assets/sprites/shopper-sundress-bench-v1.png","sundress selects the atlas retaining generated walk and appended bench poses")
 	var expected: Dictionary = previous.duplicate(true)
 	expected.file = current.file
 	expected.food_anchors.walk = current.food_anchors.walk
-	check.call(current==expected,"only sundress atlas and walking food anchors change")
+	for clip: String in ["sit_down","seated_idle","seated_eat","stand_up"]:
+		expected.animations[clip] = current.animations[clip]
+		expected.food_anchors[clip] = current.food_anchors[clip]
+	check.call(current==expected,"sundress retains previous metadata with only walk anchors and bench additions")
 	var frames := Config.frames("shopper_sundress")
 	check.call(frames.get_frame_count(&"walk")==6 and is_equal_approx(frames.get_animation_speed(&"walk"),8.0),"sundress retains approved six-frame walking timing")
 	var before := Image.load_from_file(ProjectSettings.globalize_path(previous.file))
 	var after := Image.load_from_file(ProjectSettings.globalize_path(current.file))
 	before.convert(Image.FORMAT_RGBA8)
 	after.convert(Image.FORMAT_RGBA8)
-	check.call(before.get_size()==after.get_size(),"sundress atlas retains its existing canvas")
+	check.call(after.get_size()==before.get_size()+Vector2i(0,128),"sundress atlas appends one bench row without changing old cell coordinates")
+	var approved := Image.load_from_file(ProjectSettings.globalize_path("res://assets/sprites/shopper-sundress-walk-v2.png"))
+	approved.convert(Image.FORMAT_RGBA8)
+	check.call(after.get_region(Rect2i(Vector2i.ZERO,approved.get_size())).get_data()==approved.get_data(),"sundress approved walk and reaction pixels remain exact")
 	for index: int in 32:
 		var region := Rect2i(index%8*128,index/8*128,128,128)
 		var old_cell := before.get_region(region)

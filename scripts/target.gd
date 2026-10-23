@@ -84,6 +84,7 @@ var action_pose_time: float = 0.0
 var lifeguard_whistle_time: float = 0.0
 var reaction: AdultReaction = AdultReaction.new()
 var routine: BeachRoutine = BeachRoutine.new()
+var bench_visit: BenchVisit = BenchVisit.new()
 enum DinerMeal { DINING, SEEK, RETURN }
 var diner_meal: DinerMeal = DinerMeal.DINING
 var diner_home: float = 0.0
@@ -271,6 +272,10 @@ func food_radius() -> Vector2:
 	var radius: Array = Config.foods[food_id].pickup_radius
 	return Vector2(radius[0],radius[1])
 
+func _exit_tree() -> void:
+	if bench_visit.registry != null:
+		bench_visit.registry.release(self)
+
 func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	shine_time += delta
 	seen_time = seen_time+delta if alert > 0.05 else 0.0
@@ -287,6 +292,8 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	var moved: bool = false
 	recover = maxf(0.0, recover - delta)
 	defense = maxf(0.0, defense - delta)
+	if bench_visit.tick(self,delta,gulls):
+		return
 	if service_locked:
 		update_art_pose(false)
 		return
@@ -758,6 +765,7 @@ func knock_food(gull: BeachGull) -> bool:
 	alert = 1.0
 	var impulse: Vector2 = gull.velocity.normalized()*float(Config.tuning.world.drop_impulse_side)+Vector2(0,-float(Config.tuning.world.drop_impulse_up))
 	food_knocked.emit(self,food_id,food_position(),impulse)
+	bench_visit.interrupt(self)
 	update_art_pose(false)
 	return true
 
@@ -806,6 +814,7 @@ func _finish_theft(gull: BeachGull, risky: bool) -> void:
 	# Repeated theft now leads to a bounded chase and return, not departure.
 	snatched.emit(self, gull, risky)
 	reaction.theft(self,gull,last_theft_direct)
+	bench_visit.interrupt(self)
 	if info.twist == "cry":
 		toddler_cry_timer = float(Config.tuning.world.toddler_cry_duration)
 		toddler_run_speed = 0.0

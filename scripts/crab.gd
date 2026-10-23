@@ -64,7 +64,9 @@ func _update_depth() -> void:
 	else:
 		depth = lerpf(float(settings.rear_scale),1.0,clampf((position.y-rear_y)/(front_y-rear_y),0.0,1.0))
 	apply_depth(depth)
-	z_index = 1 if position.y<front_y-4.0 else 3
+	# Sand stays below both lanes; scenery covers the rear lane and tall props
+	# cover crabs in either lane, including their arrival and sea retreat.
+	z_index = 0 if position.y<front_y-4.0 else 1
 
 func _enter_activity(next: Activity, duration: float) -> void:
 	activity = next
@@ -118,7 +120,7 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	if delta<=0.0 or phase==Phase.CAUGHT:
 		return
 	clock += delta
-	sprite.frame = int(clock*(12.0 if activity==Activity.ESCAPE else 8.0))%6
+	sprite.frame = int(clock*(18.0 if activity==Activity.ESCAPE else 12.0))%6
 	if phase==Phase.EXIT:
 		exit_clock += delta
 		var retreat: float = clampf(exit_clock/float(settings.retreat_time),0.0,1.0)

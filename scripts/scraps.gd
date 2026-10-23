@@ -6,13 +6,8 @@ var clock: float = 0.0
 var collector: BeachGull
 
 func _ready() -> void:
-	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	var variant: int = 0
 	for x: int in range(60, int(Config.tuning.world.width) - 20, int(Config.tuning.world.scrap_spacing)):
-		var food_id: String = "single_chip" if crumbs.size()%3 == 2 else "crumbs"
-		crumbs.append({"x": float(x), "wait": 0.0,"food_id":food_id,"variant":variant%3})
-		if food_id == "crumbs":
-			variant += 1
+		crumbs.append({"x": float(x), "wait": 0.0,"food_id":"single_chip" if crumbs.size()%3 == 2 else "crumbs"})
 
 func tick(delta: float, gull: BeachGull) -> void:
 	clock += delta
@@ -34,10 +29,14 @@ func _draw() -> void:
 			var definition: Dictionary = Config.foods[crumb.food_id]
 			var display_size: Array = definition.get("display_size",definition.size)
 			var size: Vector2 = Vector2(display_size[0],display_size[1])
-			var texture: Texture2D = Config.frames(definition.sprite).get_frame_texture(&"idle",int(crumb.variant) if crumb.food_id == "crumbs" else 0)
+			var texture: Texture2D = Config.frames(definition.sprite).get_frame_texture(&"idle",0)
 			var rect: Rect2 = Rect2(point-Vector2(size.x*0.5,size.y),size)
-			draw_texture_rect(texture,rect,false)
-			if crumb.food_id != "crumbs" and (collector == null or collector.can_collect_food(crumb.food_id)):
+			if crumb.food_id == "crumbs":
+				draw_texture_rect(texture,Rect2(rect.position+Vector2(0,1),size),false,Color("754a39"))
+				draw_texture_rect(texture,rect,false,Color(1.18,1.12,1.0))
+			else:
+				draw_texture_rect(texture,rect,false)
+			if collector == null or collector.can_collect_food(crumb.food_id):
 				var glint: Texture2D = PickupShine.overlay(texture,clock,float(crumb.x))
 				if glint != null:
 					draw_texture_rect(glint,rect,false)
