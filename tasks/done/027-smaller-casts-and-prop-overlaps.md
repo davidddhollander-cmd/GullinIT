@@ -1,6 +1,6 @@
 # 027 — Smaller casts; no overlapping props
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -32,5 +32,26 @@ Playnotes, 24 Oct:
 - [ ] One `tools/validate.ps1 -Capture` run at the end: 0 failures. Screenshot of L5's right side, path in the Report.
 
 ## Report
+Branch `sonnet/027-smaller-casts-and-prop-overlaps`. Test: `INTEGRATION: 12605 checks, 0 failures` (headless and the `--capture` run).
+
+Cast counts (spawns, family = toddler + parent, dog and vendor counted):
+| Level | Before | After | Cast now |
+|---|---|---|---|
+| L1 | 4 | 4 | unchanged |
+| L2 | 8 | 6 | sunbather, 2 families, ice-cream shopper (dropped family 3) |
+| L3 | 7 | 5 | sunbather, 3 shoppers, 1 pier diner (dropped one shopper, one diner) |
+| L4 | 9 | 6 | 1 sunbather, 2 shoppers (one per stand), 1 family, dog (dropped 3 sunbathers) |
+| L5 | 6 | 4 | 2 hotdog shoppers, 2 pier diners (dropped sunbather and the stroller) |
+| L6 | 10 | 7 | sunbather, 3 shoppers, 2 diners, seafood vendor (dropped the family and one sunbather) |
+
+Props: L5 palm/bench fixed by moving the right bench 1225 to 1185 and its bin 1200 to 1160. Other overlaps found by the new check and fixed: L1 blue chair 470 to 474 (under parasol pole), L5 bin 870 to 860, L6 bin 1170 to 1160. Orphan parasols removed in L4 (190, 430).
+
+New check `tests/prop_overlap_checks.gd` (registered in integration.gd): base span is read from the sprite's lowest opaque pixel rows; props within 10 px ground-line of each other must not overlap, tall props (palm, lamp, parasol, umbrella) need an 8 px clear gap, and nothing may overlap a stall in any band. It first failed on L1, L5 (x3) and L6 with the old data, and a built-in case (palm 1230 + bench 1225) proves it flags the old L5 clash.
+
+Test updates for the new casts: `level_generator_checks.gd` (L2, L3, L4, L5 type lists, spawn indexes), `off_lead_dog_checks.gd` (dog spawn index 8 to 5).
+
+Decisions: L4 keeps both stall shoppers because a stand with no station customer makes the spawner add one (an existing check failed otherwise); every bench level still has bench-capable shoppers (mullet, sundress, kiosk_customer); no quest changed or became impossible (L5 keeps both fish diners). L2/L4/L6 cuts are 25-35%, rounded to keep each level's identity.
+
+Screenshot: `test-output/level5-right-side-props.png` (in the worktree; added to `tests/level5_checks.gd`). Not pushed.
 
 ## Review notes

@@ -25,10 +25,8 @@
     {"name": "PIER DINING", "from": 920, "to": 1280}
   ],
   "spawns": [
-    {"type": "sunbather", "x": 250, "appearance": "male_red", "station": "sun_0", "patrol_radius": 0},
     {"type": "kiosk_customer", "x": 555, "food_id": "hotdog", "appearance": "shopper_mullet", "station": "hotdogs", "patrol_radius": 14},
     {"type": "kiosk_customer", "x": 680, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "hotdogs", "patrol_radius": 12},
-    {"type": "kiosk_customer", "x": 765, "food_id": "hotdog", "appearance": "kiosk_customer", "station": "promenade_stroll", "patrol_radius": 24},
     {"type": "pier_diner", "x": 1000, "station": "pier_dining", "patrol_radius": 8},
     {"type": "pier_diner", "x": 1140, "station": "pier_dining", "patrol_radius": 8}
   ],
@@ -43,11 +41,11 @@
     {"type": "hotdog_stand", "x": 640, "customer_x": 680},
     {"type": "beach_lamp", "x": 740, "y": 151},
     {"type": "bin", "x": 790},
-    {"type": "bin", "x": 870},
+    {"type": "bin", "x": 860},
     {"type": "beach_bench", "x": 895, "y": 153},
     {"type": "umbrella", "x": 1040},
-    {"type": "bin", "x": 1200},
-    {"type": "beach_bench", "x": 1225, "y": 153},
+    {"type": "bin", "x": 1160},
+    {"type": "beach_bench", "x": 1185, "y": 153},
     {"type": "beach_rocks", "x": 1255, "y": 172}
   ],
   "map_version": 3

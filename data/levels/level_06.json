@@ -29,9 +29,6 @@
   ],
   "spawns": [
     {"type": "sunbather", "x": 110, "appearance": "female_blue", "station": "sun_0", "patrol_radius": 0},
-    {"type": "toddler", "x": 318, "family_id": "family_1", "station": "family_1", "patrol_radius": 6},
-    {"type": "picnic_family", "x": 362, "family_id": "family_1", "station": "family_1", "patrol_radius": 0},
-    {"type": "sunbather", "x": 412, "appearance": "male_red", "station": "sun_1", "patrol_radius": 0},
     {"type": "kiosk_customer", "x": 265, "food_id": "ice_cream", "appearance": "shopper_mullet", "station": "ice_cream", "patrol_radius": 12},
     {"type": "kiosk_customer", "x": 780, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "promenade_stroll", "patrol_radius": 24},
     {"type": "kiosk_customer", "x": 1000, "food_id": "hotdog", "appearance": "shopper_mullet", "station": "hotdogs", "patrol_radius": 12},
@@ -54,7 +51,7 @@
     {"type": "bin", "x": 816},
     {"type": "beach_bench", "x": 850, "y": 153},
     {"type": "umbrella", "x": 1060},
-    {"type": "bin", "x": 1170},
+    {"type": "bin", "x": 1160},
     {"type": "beach_bench", "x": 1195, "y": 153},
     {"type": "beach_rocks", "x": 1255, "y": 172}
   ],

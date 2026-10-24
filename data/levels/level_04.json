@@ -24,10 +24,7 @@
     {"name": "PIER DINING", "from": 920, "to": 1280}
   ],
   "spawns": [
-    {"type": "sunbather", "x": 170, "appearance": "male_blue", "station": "sun_0", "patrol_radius": 0},
-    {"type": "sunbather", "x": 215, "appearance": "female_red", "station": "sun_1", "patrol_radius": 0},
     {"type": "sunbather", "x": 365, "appearance": "male_red", "station": "sun_2", "patrol_radius": 0},
-    {"type": "sunbather", "x": 410, "appearance": "female_blue", "station": "sun_3", "patrol_radius": 0},
     {"type": "kiosk_customer", "x": 545, "food_id": "ice_cream", "appearance": "shopper_mullet", "station": "ice_cream", "patrol_radius": 12},
     {"type": "kiosk_customer", "x": 685, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "hotdogs", "patrol_radius": 12},
     {"type": "toddler", "x": 760, "family_id": "family_1", "station": "family_1", "patrol_radius": 6},
@@ -36,9 +33,7 @@
   ],
   "props": [
     {"type": "beach_palm", "x": 30, "y": 148},
-    {"type": "beach_parasol_blue", "x": 190, "y": 143},
     {"type": "beach_parasol", "x": 385, "y": 143},
-    {"type": "beach_parasol_blue", "x": 430, "y": 143},
     {"type": "beach_rocks", "x": 120, "y": 172},
     {"type": "beach_rocks", "x": 290, "y": 172},
     {"type": "beach_rocks", "x": 1000, "y": 172},

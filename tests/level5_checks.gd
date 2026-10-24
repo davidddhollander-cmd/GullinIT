@@ -24,6 +24,15 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 	await host.settle()
 	game.dismiss_intro()
 	check.call(game.pilots.size() == 1 and game.pilots[0].gull.rival_name == "Gary" and game.pending_rivals.size() == 1, "level 5 starts with Gary only")
+	# Task 027: right side of the beach (palm, bench, bin, rocks) no longer overlaps.
+	var view_x: float = 1120.0
+	game.camera_x = view_x
+	game.camera.position.x = view_x
+	game.beach.camera_x = view_x
+	await host.snapshot("level5-right-side-props")
+	game.camera_x = 0.0
+	game.camera.position.x = 0.0
+	game.beach.camera_x = 0.0
 	var is_taunt: Callable = func(t: Dictionary) -> bool: return t.text == "CHIP: FINDERS KEEPERS!"
 	game._swallowed({"id": "hotdog"})
 	check.call(game.pilots.size() == 2 and game.pilots[1].gull.rival_name == "Chip", "Chip joins after the first swallow")
