@@ -2,7 +2,22 @@ Gullin'it playnotes
 
 
 - UI scores on right hand need to be higher on the screen, taking up to much space
-- Levels all have the same population and set'up - need more variation
-- Dog chasing across all
-- Pixel art consistency still a problem
--
+- Dog chasing across wider range
+- Gull carrying food in beek needs slightly different sprite, now its' just the same foot sprite pasted on top 
+
+-levels all have the same population and set'up - need more variation
+- Flying and diving physics needs tweaking: building a bit of velocity before the dive, and than the peck itself slows down the gull
+- Pixel art consistency still a problem - need a strict art consistency audit on coarseness of pixels and outlines. Some characters hit the mark, others not. 
+- Character behaviour and animations still need tweaking and improving#
+
+
+
+New playnotes 24 Oct:
+
+- characters switching lanes too chaotic, once they lane switched they should stay there for a few seconds so there's no chaotic switching with larger groups of characters.
+- In second lane characters still walk over rather than behind the green bins - check and create a clearer rule for object placement
+- in level 5, theres also objects overlapping, palm tree and bench on the right side. 
+- the dog should have a wider chase territory and keep chasing even if gull goes higher, he should be a continuous threat but avoidable
+- there's almost nobody going to sit down on the benches - either the mechanic doesn't work, or the characters are not getting there. Fix this. I would also suggest each level starts with at least one bench occupied.
+- overall, there are too many characters clustering together after a while - I suggest we start with reducing the number of characters per level, and secondly think about an idle or wander pattern for characters that have their food stolen, so they don't immediately go to the stands
+- there's no artwork for grill or fish n' ship stand - delegate to codex
