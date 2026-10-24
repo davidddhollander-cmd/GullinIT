@@ -1,6 +1,6 @@
 # 024 — Dog: wide chase territory, keeps chasing high gulls
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
