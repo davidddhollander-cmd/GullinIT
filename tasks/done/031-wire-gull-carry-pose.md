@@ -1,6 +1,6 @@
 # 031 — Gulls use the beak-carry art while holding food
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 029
@@ -29,5 +29,14 @@ Codex delivered beak-carry frames for every gull (task 029, art only). Today the
 - [ ] One capture run at the end with 0 failures; screenshots of the player and a rival carrying food (left and right facing), paths in the Report
 
 ## Report
+Files: scripts/gull.gd (carry sprites, `sync_carry`, `carry_for`), scripts/rival_gull.gd (`carry_source` callable), scripts/overlay.gd (removed the old pasted food draw; belly panel kept), tests/integration.gd (`carry_pose_checks`).
+Tests: `INTEGRATION: 12864 checks, 0 failures` (capture run, GL compatibility).
+Screenshots: test-output/gull-carry-right.png, test-output/gull-carry-left.png (player on the left, rival Gary on the right, both carrying ice cream).
+Decisions:
+- Carry data is read from data/gull_art.json (`carry` blocks); sprites.json does not contain it.
+- Three child sprites on the gull (carry body, food, upper beak) copy the normal sprite's position, rotation, scale, flip, modulate and material (so the rival tint is shared); the normal sprite is hidden only while food is held. Sync runs at the end of `tick` and in `_process`, so swallow/drop/mug switch back on the same rendered frame.
+- Grounded idle uses carry walk frame 7 (the idle source); airborne uses `fly` while climbing, otherwise `glide` (dive/windup/stun also glide).
+- Anchors are multiplied by `body_scale` (Bev). Player food = first snack when not resting; rival food = `carried_food_id` while `carry_window` > 0.
+Not done: nothing. Branch sonnet/031-wire-gull-carry-pose.
 
 ## Review notes

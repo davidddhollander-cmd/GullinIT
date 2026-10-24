@@ -303,9 +303,6 @@ func _draw_digestion(offset: Vector2) -> void:
 		var texture: Texture2D = Config.frames(Config.foods[snack.id].sprite).get_frame_texture(&"idle",0)
 		draw_texture_rect(texture,Rect2(point+Vector2(2+i*12,1),Vector2(10,10)),false,Color.WHITE if i == 0 else Color(0.65,0.7,0.7))
 	draw_rect(Rect2(point+Vector2(2,12),Vector2(46*belly.progress/belly.duration(belly.snacks[0].id),2)),BeachUI.GOLD)
-	var definition: Dictionary = Config.foods[belly.snacks[0].id]
-	var size: Vector2 = Vector2(definition.size[0],definition.size[1])
-	draw_texture_rect(Config.frames(definition.sprite).get_frame_texture(&"idle",0),Rect2(game.player.beak()-offset-size*0.5,size),false)
 
 const METER_RECT: Rect2 = Rect2(92,4,36,8)
 
