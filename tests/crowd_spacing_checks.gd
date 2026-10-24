@@ -55,6 +55,7 @@ static func _lane_hold(root: Node, check: Callable) -> void:
 	var last_y: Dictionary = {}
 	var last_change: Dictionary = {}
 	var worst: float = INF
+	var any_gap: float = INF
 	var steps: int = 600
 	for step: int in steps:
 		for i: int in spawner.targets.size():
@@ -65,12 +66,15 @@ static func _lane_hold(root: Node, check: Callable) -> void:
 		for target: BeachTarget in spawner.targets:
 			var lane: float = float(spawner.lane_holds[target].y)
 			if last_y.has(target) and not is_equal_approx(float(last_y[target]),lane):
-				if last_change.has(target) and not bool(spawner.lane_holds[target].blocked):
-					worst = minf(worst,now-float(last_change[target]))
+				if last_change.has(target):
+					any_gap = minf(any_gap,now-float(last_change[target]))
+					if not bool(spawner.lane_holds[target].blocked):
+						worst = minf(worst,now-float(last_change[target]))
 				last_change[target] = now
 			last_y[target] = lane
 		spawner.reset_spacing()
 	check.call(worst>=hold-0.05,"6-person crowd: no lane change within lane_hold of the previous one (shortest gap %.2f)" % worst)
+	check.call(any_gap>=BeachSpawner.LANE_GRACE,"6-person crowd: even blocked walkers never flicker between lanes (shortest gap %.2f)" % any_gap)
 	stage.queue_free()
 
 static func _bin_depth(root: Node, check: Callable) -> void:

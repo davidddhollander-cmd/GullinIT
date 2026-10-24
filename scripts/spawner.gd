@@ -16,6 +16,7 @@ var depth_props: Array[Rect2] = [] # x-extent and base y (as position.y) of grou
 const DEPTH_PROP_TYPES: Array[String] = ["bin","wheelie_bin","beach_bench","beach_chair_blue","beach_castle","beach_rocks"]
 const SUNBATHER_LOOKS: Array[String] = ["male_red","male_blue","female_red","female_blue"]
 const BEHIND_PROP_Z: int = 0 # below ordinary scenery (z 1); crabs in the rear lane share it
+const LANE_GRACE: float = 0.5 # seconds a held lane may stay blocked before the walker changes lane
 const CROWD_OFFSETS: Array[Vector2] = [Vector2.ZERO, Vector2(26,-14), Vector2(-26,-14), Vector2(26,12), Vector2(-26,12), Vector2(52,0), Vector2(-52,0)]
 
 func setup(owner_node: Node2D, definition: Dictionary) -> void:
@@ -251,14 +252,23 @@ func apply_spacing(delta: float) -> void:
 		var hold: Dictionary = lane_holds.get(target,{})
 		hold.t = float(hold.get("t",0.0))-delta
 		var pick: Variant = null
-		if hold.t > 0.0:
-			pick = _free_offset(target,placed,float(hold.y)) # stay in the lane just chosen
+		if hold.has("y"):
+			# Lanes are sticky: drift home only once the hold is over, otherwise keep the current lane while it is clear.
+			if hold.t <= 0.0 and not is_zero_approx(float(hold.y)):
+				pick = _free_offset(target,placed,0.0)
+			if pick == null:
+				pick = _free_offset(target,placed,float(hold.y))
+		# Someone passing through the lane is waited out briefly before stepping aside.
+		hold.wait = 0.0 if pick != null else float(hold.get("wait",0.0))+delta
 		hold.blocked = false
-		if pick == null:
+		if pick == null and (not hold.has("y") or hold.wait >= LANE_GRACE):
 			hold.blocked = hold.t > 0.0 # the held lane is taken: release it early
 			pick = _free_offset(target,placed)
+		if pick == null and hold.has("offset"):
+			pick = benches.clear_walking_offset(target.position,hold.offset) # nowhere clear: keep the spot and overlap briefly
 		if pick != null:
 			desired = pick
+		hold.offset = desired
 		if not hold.has("y"):
 			hold.y = desired.y
 			hold.t = 0.0
