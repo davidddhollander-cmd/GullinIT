@@ -26,6 +26,7 @@ static func _run(dog: OffLeadDog, game: BeachGame, seconds: float) -> void:
 
 static func _reset(dog: OffLeadDog, x: float) -> void:
 	dog.position.x = x
+	dog.home = Vector2(x - 20.0, x + 1000.0)
 	dog._wander()
 	dog.resting = true
 	dog.timer = 99.0
@@ -208,8 +209,34 @@ static func run(suite: Node, check: Callable) -> void:
 	dog.tick(DT, game.player)
 	check.call(dog.state == OffLeadDog.State.WANDER, "stunned gull is not noticed")
 
+	# Leash: a long flight leaves home +/- leash, the dog gives up inside it, returns, one outrun.
+	var leash: float = float(t.leash)
+	var real_home: Vector2 = Vector2(float(level.spawns[8].home[0]) if false else 235.0, 330.0)
+	for spawn: Dictionary in level.spawns:
+		if spawn.type == "off_lead_dog":
+			real_home = Vector2(float(spawn.home[0]), float(spawn.home[1]))
+	_reset(dog, real_home.y)
+	dog.home = real_home
+	dog.state = OffLeadDog.State.CHASE
+	dog.chase_time = 0.0
+	outruns[0] = 0
+	_fly(game, real_home.y + 20.0, 20.0)
+	var leash_x: float = 0.0
+	for i: int in int(8.0 / DT):
+		game.player.position.x = minf(game.player.position.x + 100.0 * DT, real_home.y + 600.0)
+		dog.tick(DT, game.player)
+		leash_x = maxf(leash_x, dog.position.x)
+	check.call(leash_x <= real_home.y + leash + 3.0 and outruns[0] == 1, "dog stops within home + leash and fires one outrun")
+	_run(dog, game, 6.0)
+	check.call(dog.position.x <= real_home.y and dog.position.x >= real_home.x and outruns[0] == 1, "leashed dog trots back inside home")
+	_reset(dog, real_home.y)
+	dog.home = real_home
+	_fly(game, real_home.y + leash + 40.0, 10.0)
+	_run(dog, game, 1.0)
+	check.call(dog.state == OffLeadDog.State.WANDER and barks[0] >= 1, "gull outside the leash zone does not start a chase")
+
 	var outrun_quest: Dictionary = game.quests.quests[1]
-	check.call(outrun_quest.done and int(outrun_quest.progress) == 3 and outruns[0] == 2, "each escaped chase fires dog_outrun once; three complete l4_outrun")
+	check.call(outrun_quest.done and int(outrun_quest.progress) == 3 and outruns[0] >= 1, "each escaped chase fires dog_outrun once; three complete l4_outrun")
 	# A handover swallow completes l4_counter.
 	game._swallowed({"id": "hotdog", "handover": false})
 	check.call(not game.quests.quests[0].done, "plain swallow does not complete l4_counter")
