@@ -1,6 +1,6 @@
 # 031 — Gulls use the beak-carry art while holding food
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 029
