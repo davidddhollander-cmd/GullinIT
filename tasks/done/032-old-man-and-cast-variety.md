@@ -1,6 +1,6 @@
 # 032 — Old man joins the cast (replacing, not adding); maximise variety per level
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
