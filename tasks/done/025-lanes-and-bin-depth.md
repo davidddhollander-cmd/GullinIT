@@ -1,6 +1,6 @@
 # 025 — Calmer lane switching; people pass behind bins
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
