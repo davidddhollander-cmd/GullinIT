@@ -394,10 +394,11 @@ static func ground_checks(host: Node, main: Node, check: Callable) -> void:
 	check.call(wrappers >= 1 and gary.score <= 15, "rival leaves garbage on the sand")
 	# Wheelie bin: top landing.
 	game = await fresh(host, main, 3)
-	gary = isolate(game, {"scraps": 1.0, "bins": 1.0}, 560.0)
+	var wheelie_x: float = float(game.level.props.filter(func(prop: Dictionary) -> bool: return prop.type == "wheelie_bin")[0].x)
+	gary = isolate(game, {"scraps": 1.0, "bins": 1.0}, wheelie_x - 40.0)
 	var lid_seen: Array[bool] = [false]
 	steps = step(game, 60 * 40, func() -> bool:
-		lid_seen[0] = lid_seen[0] or gary.gull.is_supported_by(BeachBackdrop.WHEELIE_BIN_TYPE, 600.0)
+		lid_seen[0] = lid_seen[0] or gary.gull.is_supported_by(BeachBackdrop.WHEELIE_BIN_TYPE, wheelie_x)
 		return gary.stats.bins > 0)
 	check.call(lid_seen[0] and gary.stats.bins >= 1, "rival lands on the wheelie bin lid and pecks it open (%d steps)" % steps)
 	# Bag: peck a sunbather's stash open.

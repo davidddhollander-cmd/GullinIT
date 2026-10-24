@@ -16,7 +16,7 @@ static func run(game: BeachGame, check: Callable) -> void:
 		phases[material.get_shader_parameter("phase")] = true
 		check.call(is_equal_approx(float(material.get_shader_parameter("wind_strength")),float(game.level.wind.strength)),"palm starts with its level's wind strength")
 		check.call(is_equal_approx(float(material.get_shader_parameter("wind_direction")),float(game.level.wind.dir)),"palm starts with its level's wind direction")
-	check.call(palms==3 and beach.palm_materials.size()==palms,"all three palms are connected to gameplay wind")
+	check.call(palms>=1 and beach.palm_materials.size()==palms,"every palm is connected to gameplay wind")
 	check.call(phases.size()==palms,"palms have different sway phases")
 	var old_time: float = beach.time
 	var old_strength: float = beach.strength

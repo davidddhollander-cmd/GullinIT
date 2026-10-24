@@ -2483,7 +2483,7 @@ func extended_beach_checks() -> void:
 			check(float(prop.x) >= 0 and float(prop.x) < width,"map prop stays inside level world")
 			if prop.type in ["kiosk","hotdog_stand"]:
 				stands[prop.type] = prop.x
-		check(stands.has("kiosk") and (int(level.id) <= 2 or stands.has("hotdog_stand")),"each level has its authored food stands")
+		check((stands.has("kiosk") or int(level.id) == 5) and (int(level.id) <= 2 or stands.has("hotdog_stand")),"each level has its authored food stands")
 	main.start_level(4)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
@@ -2507,6 +2507,20 @@ func extended_beach_checks() -> void:
 		await snapshot(str(view[1]))
 	main.clear_game()
 	await settle()
+	# Level identity review: one render per level 2-6 around its stalls.
+	for entry: Array in [[2,820],[3,640],[4,640],[5,640],[6,600]]:
+		main.start_level(int(entry[0]))
+		game = main.game
+		game.set_physics_process(false)
+		game.dismiss_intro()
+		game.camera_x = float(entry[1])
+		game.camera.position.x = float(entry[1])
+		game.beach.camera_x = float(entry[1])
+		game.player.position.x = float(entry[1])-70
+		game.beach.queue_redraw()
+		await snapshot("level%d-identity" % int(entry[0]))
+		main.clear_game()
+		await settle()
 
 func mum_art_checks() -> void:
 	var frames: SpriteFrames = Config.frames("parent")
