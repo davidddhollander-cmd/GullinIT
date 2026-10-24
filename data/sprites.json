@@ -4440,5 +4440,23 @@
         "loop": true
       }
     }
+  },
+  "old_man": {
+    "file": "res://assets/sprites/retro-old-man-stick-32bit.png",
+    "frame_w": 128,
+    "frame_h": 128,
+    "visual_scale": 0.5,
+    "art_height": 40,
+    "sprite_offset_y": -26,
+    "animations": {},
+    "food_anchors": {
+      "idle": [[11, -22]],
+      "walk": [[11, -22]],
+      "walk_left": [[11, -22]],
+      "eat": [[11, -26]],
+      "alert": [[11, -22]],
+      "run": [[11, -22]],
+      "stick_hit": [[11, -22]]
+    }
   }
 }

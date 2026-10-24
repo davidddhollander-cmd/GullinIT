@@ -30,8 +30,8 @@
   "spawns": [
     {"type": "sunbather", "x": 110, "appearance": "female_blue", "station": "sun_0", "patrol_radius": 0},
     {"type": "kiosk_customer", "x": 265, "food_id": "ice_cream", "appearance": "shopper_mullet", "station": "ice_cream", "patrol_radius": 12},
-    {"type": "kiosk_customer", "x": 640, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "promenade_stroll", "patrol_radius": 24},
-    {"type": "kiosk_customer", "x": 840, "food_id": "hotdog", "appearance": "shopper_mullet", "station": "hotdogs", "patrol_radius": 12},
+    {"type": "kiosk_customer", "x": 640, "food_id": "hotdog", "appearance": "old_man", "station": "promenade_stroll", "patrol_radius": 24},
+    {"type": "kiosk_customer", "x": 840, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "hotdogs", "patrol_radius": 12},
     {"type": "pier_diner", "x": 1105, "station": "pier_dining", "patrol_radius": 8},
     {"type": "pier_diner", "x": 1165, "station": "pier_dining", "patrol_radius": 8},
     {"type": "off_lead_dog", "x": 560, "home": [520, 610]},
