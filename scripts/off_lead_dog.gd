@@ -16,6 +16,7 @@ var air: float = 0.0
 var destination: float = 0.0
 var resting: bool = true
 var paused: bool = false
+var returning: bool = false
 var cooldown_sniff: bool = false
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var sprite: AnimatedSprite2D
@@ -42,8 +43,13 @@ func gull_height(gull: BeachGull) -> float:
 func mouth() -> Vector2:
 	return position + Vector2(facing * float(_t().mouth_x), float(_t().mouth_y) - air)
 
+# Leash: the dog never works outside home +/- leash, and ignores gulls out there.
+func _in_leash(x: float) -> bool:
+	var leash: float = float(_t().leash)
+	return x >= home.x - leash and x <= home.y + leash
+
 func _can_chase(gull: BeachGull) -> bool:
-	return gull.state != BeachGull.State.STUNNED and gull.invulnerable <= 0.0 and gull_height(gull) < float(_t().chase_ceiling)
+	return _in_leash(gull.position.x) and gull.state != BeachGull.State.STUNNED and gull.invulnerable <= 0.0 and gull_height(gull) < float(_t().chase_ceiling)
 
 func _wander() -> void:
 	state = State.WANDER
@@ -57,7 +63,7 @@ func _face(x: float) -> void:
 
 func _move(target_x: float, speed: float, delta: float) -> void:
 	_face(target_x)
-	position.x = clampf(move_toward(position.x, target_x, speed * delta), 12.0, float(Config.tuning.world.width) - 12.0)
+	position.x = clampf(move_toward(position.x, target_x, speed * delta), maxf(12.0, home.x - float(_t().leash)), minf(float(Config.tuning.world.width) - 12.0, home.y + float(_t().leash)))
 
 func tick(delta: float, gull: BeachGull) -> void:
 	var t: Dictionary = _t()
@@ -99,7 +105,9 @@ func tick(delta: float, gull: BeachGull) -> void:
 		State.CHASE:
 			clip = &"run"
 			chase_time += delta
-			if not _can_chase(gull) or position.distance_to(gull.position) > float(t.lose_radius):
+			if not _in_leash(gull.position.x) or not _in_leash(position.x):
+				_give_up(true)
+			elif not _can_chase(gull) or position.distance_to(gull.position) > float(t.lose_radius):
 				_give_up()
 			else:
 				_move(gull.position.x, float(t.run_speed), delta)
@@ -126,13 +134,14 @@ func tick(delta: float, gull: BeachGull) -> void:
 			timer -= delta
 			if cooldown_sniff:
 				clip = &"sniff"
-			elif position.x < home.x - 20.0 or position.x > home.y + 20.0:
+			elif position.x < home.x or position.x > home.y:
 				clip = &"run"
 				rate = 0.5
-				_move(clampf(position.x, home.x, home.y), float(t.wander_speed), delta)
+				_move(clampf(position.x, home.x, home.y), float(t.run_speed) * 0.5 if returning else float(t.wander_speed), delta)
 			else:
+				returning = false
 				clip = &"sniff"
-			if timer <= 0.0:
+			if timer <= 0.0 and not returning:
 				_wander()
 	_animate(clip, rate)
 
@@ -162,10 +171,13 @@ func _try_catch(gull: BeachGull) -> void:
 	timer = float(_t().catch_time)
 	caught.emit()
 
-func _give_up() -> void:
-	if chase_time >= float(_t().min_chase):
+func _give_up(leashed: bool = false) -> void:
+	if leashed:
+		barked.emit()
+	if leashed or chase_time >= float(_t().min_chase):
 		outrun.emit()
 	air = 0.0
+	returning = leashed
 	_cooldown(false)
 
 func _cooldown(sniff: bool) -> void:
