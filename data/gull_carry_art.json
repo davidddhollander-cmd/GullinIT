@@ -1,0 +1,687 @@
+{
+  "gull_herring": {
+    "file": "res://assets/sprites/gull-herring-carry-v1.png",
+    "overlay_file": "res://assets/sprites/gull-herring-carry-v1-upper-beak.png",
+    "source": "res://assets/reference/gull-carry-v1/herring-carry-source.png",
+    "frame_w": 256,
+    "frame_h": 256,
+    "visual_scale": 0.375,
+    "frame_sources": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      0,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "animations": {
+      "walk": {
+        "frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "fly": {
+        "frames": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "fps": 10,
+        "loop": true
+      },
+      "glide": {
+        "frames": [
+          12
+        ],
+        "fps": 1,
+        "loop": true
+      }
+    },
+    "beak_anchors": {
+      "walk": [
+        [
+          5.25,
+          -9.0
+        ],
+        [
+          4.875,
+          -9.0
+        ],
+        [
+          4.875,
+          -9.0
+        ],
+        [
+          4.875,
+          -8.25
+        ],
+        [
+          4.875,
+          -8.25
+        ],
+        [
+          4.875,
+          -8.625
+        ],
+        [
+          4.875,
+          -8.625
+        ],
+        [
+          4.5,
+          -9.0
+        ]
+      ],
+      "fly": [
+        [
+          4.5,
+          1.125
+        ],
+        [
+          4.875,
+          1.125
+        ],
+        [
+          5.625,
+          1.125
+        ],
+        [
+          4.875,
+          1.5
+        ]
+      ],
+      "glide": [
+        [
+          10.125,
+          0.375
+        ]
+      ]
+    },
+    "overlay_frames": {
+      "walk": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "fly": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "glide": [
+        12
+      ]
+    }
+  },
+  "player_gull": {
+    "file": "res://assets/sprites/gull-herring-carry-v1.png",
+    "overlay_file": "res://assets/sprites/gull-herring-carry-v1-upper-beak.png",
+    "source": "res://assets/reference/gull-carry-v1/herring-carry-source.png",
+    "frame_w": 256,
+    "frame_h": 256,
+    "visual_scale": 0.375,
+    "frame_sources": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      0,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "animations": {
+      "walk": {
+        "frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "fly": {
+        "frames": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "fps": 10,
+        "loop": true
+      },
+      "glide": {
+        "frames": [
+          12
+        ],
+        "fps": 1,
+        "loop": true
+      }
+    },
+    "beak_anchors": {
+      "walk": [
+        [
+          5.25,
+          -9.0
+        ],
+        [
+          4.875,
+          -9.0
+        ],
+        [
+          4.875,
+          -9.0
+        ],
+        [
+          4.875,
+          -8.25
+        ],
+        [
+          4.875,
+          -8.25
+        ],
+        [
+          4.875,
+          -8.625
+        ],
+        [
+          4.875,
+          -8.625
+        ],
+        [
+          4.5,
+          -9.0
+        ]
+      ],
+      "fly": [
+        [
+          4.5,
+          1.125
+        ],
+        [
+          4.875,
+          1.125
+        ],
+        [
+          5.625,
+          1.125
+        ],
+        [
+          4.875,
+          1.5
+        ]
+      ],
+      "glide": [
+        [
+          10.125,
+          0.375
+        ]
+      ]
+    },
+    "overlay_frames": {
+      "walk": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "fly": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "glide": [
+        12
+      ]
+    }
+  },
+  "gull_kittiwake": {
+    "file": "res://assets/sprites/gull-kittiwake-carry-v1.png",
+    "overlay_file": "res://assets/sprites/gull-kittiwake-carry-v1-upper-beak.png",
+    "source": "res://assets/reference/gull-carry-v1/kittiwake-carry-source.png",
+    "frame_w": 256,
+    "frame_h": 256,
+    "visual_scale": 0.375,
+    "frame_sources": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      0,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "animations": {
+      "walk": {
+        "frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "fly": {
+        "frames": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "fps": 10,
+        "loop": true
+      },
+      "glide": {
+        "frames": [
+          12
+        ],
+        "fps": 1,
+        "loop": true
+      }
+    },
+    "beak_anchors": {
+      "walk": [
+        [
+          6.375,
+          -5.625
+        ],
+        [
+          6.0,
+          -5.625
+        ],
+        [
+          6.0,
+          -6.0
+        ],
+        [
+          6.0,
+          -5.625
+        ],
+        [
+          6.0,
+          -5.625
+        ],
+        [
+          6.375,
+          -6.0
+        ],
+        [
+          6.0,
+          -6.0
+        ],
+        [
+          6.0,
+          -5.625
+        ]
+      ],
+      "fly": [
+        [
+          6.0,
+          0.375
+        ],
+        [
+          6.75,
+          -0.375
+        ],
+        [
+          7.125,
+          1.125
+        ],
+        [
+          6.375,
+          0.75
+        ]
+      ],
+      "glide": [
+        [
+          11.625,
+          1.125
+        ]
+      ]
+    },
+    "overlay_frames": {
+      "walk": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "fly": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "glide": [
+        12
+      ]
+    }
+  },
+  "gull_great_black_backed": {
+    "file": "res://assets/sprites/gull-great-black-backed-carry-v1.png",
+    "overlay_file": "res://assets/sprites/gull-great-black-backed-carry-v1-upper-beak.png",
+    "source": "res://assets/reference/gull-carry-v1/great-black-backed-carry-source.png",
+    "frame_w": 256,
+    "frame_h": 256,
+    "visual_scale": 0.375,
+    "frame_sources": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      0,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "animations": {
+      "walk": {
+        "frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "fly": {
+        "frames": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "fps": 10,
+        "loop": true
+      },
+      "glide": {
+        "frames": [
+          12
+        ],
+        "fps": 1,
+        "loop": true
+      }
+    },
+    "beak_anchors": {
+      "walk": [
+        [
+          4.5,
+          -12.75
+        ],
+        [
+          4.5,
+          -12.75
+        ],
+        [
+          4.5,
+          -12.75
+        ],
+        [
+          4.5,
+          -12.75
+        ],
+        [
+          4.5,
+          -13.5
+        ],
+        [
+          4.5,
+          -13.5
+        ],
+        [
+          4.5,
+          -13.5
+        ],
+        [
+          4.125,
+          -13.5
+        ]
+      ],
+      "fly": [
+        [
+          5.25,
+          1.5
+        ],
+        [
+          6.375,
+          1.875
+        ],
+        [
+          5.25,
+          1.125
+        ],
+        [
+          4.875,
+          1.5
+        ]
+      ],
+      "glide": [
+        [
+          12.375,
+          0.75
+        ]
+      ]
+    },
+    "overlay_frames": {
+      "walk": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "fly": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "glide": [
+        12
+      ]
+    }
+  },
+  "rival_gull": {
+    "file": "res://assets/sprites/gull-rival-tint-base-carry-v1.png",
+    "overlay_file": "res://assets/sprites/gull-rival-tint-base-carry-v1-upper-beak.png",
+    "source": "res://assets/reference/gull-carry-v1/rival-tint-base-carry-source.png",
+    "frame_w": 256,
+    "frame_h": 256,
+    "visual_scale": 0.375,
+    "frame_sources": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      0,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "animations": {
+      "walk": {
+        "frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "fly": {
+        "frames": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "fps": 10,
+        "loop": true
+      },
+      "glide": {
+        "frames": [
+          12
+        ],
+        "fps": 1,
+        "loop": true
+      }
+    },
+    "beak_anchors": {
+      "walk": [
+        [
+          4.5,
+          -12.0
+        ],
+        [
+          4.5,
+          -12.0
+        ],
+        [
+          4.875,
+          -12.0
+        ],
+        [
+          4.5,
+          -12.0
+        ],
+        [
+          4.5,
+          -12.75
+        ],
+        [
+          4.5,
+          -12.75
+        ],
+        [
+          5.25,
+          -12.75
+        ],
+        [
+          4.5,
+          -12.75
+        ]
+      ],
+      "fly": [
+        [
+          4.875,
+          1.5
+        ],
+        [
+          6.375,
+          1.5
+        ],
+        [
+          5.25,
+          2.25
+        ],
+        [
+          5.25,
+          1.5
+        ]
+      ],
+      "glide": [
+        [
+          12.375,
+          0.75
+        ]
+      ]
+    },
+    "overlay_frames": {
+      "walk": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "fly": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "glide": [
+        12
+      ]
+    }
+  }
+}

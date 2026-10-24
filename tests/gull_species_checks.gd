@@ -3,6 +3,7 @@ extends RefCounted
 const SPECIES := ["herring","kittiwake","great-black-backed"]
 
 static func run(host: Node, check: Callable) -> void:
+	_check_carry_art(check)
 	var speeds: Array[float] = []
 	for index: int in SPECIES.size():
 		var species: String = SPECIES[index]
@@ -113,3 +114,30 @@ static func run(host: Node, check: Callable) -> void:
 	await host.snapshot("gull-species-game-lineup")
 	host.main.clear_game()
 	await host.get_tree().process_frame
+
+static func _check_carry_art(check: Callable) -> void:
+	var metadata: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/gull_art.json"))
+	var ids := ["gull_herring", "gull_kittiwake", "gull_great_black_backed", "rival_gull"]
+	var previous_file: String = ""
+	for id: String in ids:
+		var label: String = id.replace("gull_", "").replace("_", "-")
+		var carry: Dictionary = metadata[id].carry
+		check.call(is_equal_approx(float(carry.visual_scale), 0.375), label + " carry art retains the approved gull density")
+		check.call(FileAccess.file_exists(str(carry.source)), label + " preserves its untouched generated carry source")
+		check.call(FileAccess.file_exists(str(carry.file)) and FileAccess.file_exists(str(carry.overlay_file)), label + " has carry and upper-mandible atlases")
+		check.call(str(carry.file) != previous_file, label + " uses its own generated carry sheet")
+		previous_file = str(carry.file)
+		var atlas := Image.load_from_file(ProjectSettings.globalize_path(str(carry.file)))
+		var overlay := Image.load_from_file(ProjectSettings.globalize_path(str(carry.overlay_file)))
+		check.call(atlas != null and atlas.get_size() == Vector2i(13 * 256, 256), label + " packs eight walk, four fly and one glide carry frames")
+		check.call(overlay != null and overlay.get_size() == atlas.get_size(), label + " aligns a generated upper-beak overlay to every carry frame")
+		for clip: String in ["walk", "fly", "glide"]:
+			var count: int = {"walk": 8, "fly": 4, "glide": 1}[clip]
+			check.call(carry.beak_anchors[clip].size() == count and carry.overlay_frames[clip].size() == count, label + " supplies per-frame " + clip + " anchors and overlays")
+			for frame: int in carry.overlay_frames[clip]:
+				var bird: Image = atlas.get_region(Rect2i(frame * 256, 0, 256, 256))
+				var upper: Image = overlay.get_region(Rect2i(frame * 256, 0, 256, 256))
+				check.call(bird.get_used_rect().has_area(), label + " has a drawn carry pose " + str(frame))
+				check.call(upper.get_used_rect().has_area(), label + " has a generated upper-mandible overlay " + str(frame))
+	check.call(str(metadata.rival_gull.carry.file).contains("rival-tint-base"), "rival carry art uses the separate neutral tint base")
+	check.call(FileAccess.file_exists("res://assets/previews/gull-carry-v1-comparison.png"), "carry preview shows every gull and food combination")
