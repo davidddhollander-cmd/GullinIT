@@ -235,11 +235,11 @@ func sync_rival_scores() -> void:
 		row.mouse_filter = MOUSE_FILTER_IGNORE
 		row.add_theme_constant_override("separation",2)
 		rival_score_list.add_child(row)
-		var name_label: Label = BeachUI.label(row,pilot.gull.rival_name.to_upper().left(1),6,pilot.gull.rival_tint)
+		var name_label: Label = BeachUI.label(row,pilot.gull.rival_name.to_upper(),6,pilot.gull.rival_tint)
 		name_label.size_flags_horizontal = SIZE_EXPAND_FILL
 		var label: Label = BeachUI.label(row,"%03d" % pilot.score,6,BeachUI.CREAM)
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		label.custom_minimum_size.x = 18
+		label.custom_minimum_size.x = 12
 		for item: Label in [name_label,label]:
 			item.add_theme_font_override("font",HUD_FONT)
 			item.add_theme_font_size_override("font_size",6)
@@ -248,7 +248,7 @@ func sync_rival_scores() -> void:
 	you_row.mouse_filter = MOUSE_FILTER_IGNORE
 	you_row.add_theme_constant_override("separation",2)
 	rival_score_list.add_child(you_row)
-	var you_name: Label = BeachUI.label(you_row,"Y",6,BeachUI.GOLD)
+	var you_name: Label = BeachUI.label(you_row,"YOU",6,BeachUI.GOLD)
 	you_name.size_flags_horizontal = SIZE_EXPAND_FILL
 	you_score_label = BeachUI.label(you_row,"0",6,BeachUI.GOLD)
 	you_score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
