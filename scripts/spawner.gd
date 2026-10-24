@@ -12,6 +12,10 @@ var previous_x: Dictionary = {}
 var bag_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var shopper_serial: int = 0
 var benches: BenchRegistry = BenchRegistry.new()
+var lane_holds: Dictionary = {} # target -> {"y": held lane offset, "t": seconds left}
+var depth_props: Array[Rect2] = [] # x-extent and base y (as position.y) of ground props
+const DEPTH_PROP_TYPES: Array[String] = ["bin","wheelie_bin","beach_bench","beach_chair_blue","beach_castle","beach_rocks"]
+const BEHIND_PROP_Z: int = 0 # below ordinary scenery (z 1); crabs in the rear lane share it
 const CROWD_OFFSETS: Array[Vector2] = [Vector2.ZERO, Vector2(26,-14), Vector2(-26,-14), Vector2(26,12), Vector2(-26,12), Vector2(52,0), Vector2(-52,0)]
 
 func setup(owner_node: Node2D, definition: Dictionary) -> void:
@@ -21,6 +25,11 @@ func setup(owner_node: Node2D, definition: Dictionary) -> void:
 	bag_rng.seed = int(level.seed) + 97
 	shopper_serial = 0
 	benches.setup(level.props)
+	depth_props.clear()
+	for prop: Dictionary in level.props:
+		if str(prop.type) in DEPTH_PROP_TYPES and Config.sprites.has(prop.type):
+			var width: float = float(Config.sprites[prop.type].frame_w)*float(Config.sprites[prop.type].get("visual_scale",1.0))*0.4
+			depth_props.append(Rect2(float(prop.x)-width,float(prop.get("y",160)),width*2.0,0.0))
 	for spawn: Dictionary in level.spawns:
 		if spawn.type == "off_lead_dog":
 			continue # BeachGame owns the dog; it is not a BeachTarget.
@@ -92,6 +101,7 @@ func _departed(target: BeachTarget) -> void:
 	replacements.append({"type":target.kind,"delay":float(Config.tuning.world.replacement_delay)})
 	targets.erase(target)
 	visual_offsets.erase(target)
+	lane_holds.erase(target)
 	previous_x.erase(target)
 	target.queue_free()
 
@@ -150,6 +160,26 @@ func _family_offset(target: BeachTarget, placed: Dictionary) -> Vector2:
 			best_score = score
 	return best
 
+# First crowd offset that is clear of benches and already placed people; lane_y limits it to one lane.
+func _free_offset(target: BeachTarget, placed: Dictionary, lane_y: float = NAN) -> Variant:
+	for candidate: Vector2 in CROWD_OFFSETS:
+		if not is_nan(lane_y) and not is_equal_approx(candidate.y,lane_y):
+			continue
+		if not benches.clear_walking_offset(target.position,candidate).is_equal_approx(candidate):
+			continue
+		var clear: bool = true
+		for other: BeachTarget in placed:
+			if absf(target.position.x-other.position.x) > 75.0:
+				continue
+			var other_offset: Vector2 = placed[other]
+			var min_x: float = 25.0 if target.kind == "toddler" or other.kind == "toddler" else 30.0
+			if absf(target.position.x+candidate.x-other.position.x-other_offset.x) < min_x and absf(target.position.y+candidate.y-other.position.y-other_offset.y) < 14.0:
+				clear = false
+				break
+		if clear:
+			return candidate
+	return null
+
 func apply_spacing(delta: float) -> void:
 	var placed: Dictionary = {}
 	var ordered: Array[BeachTarget] = []
@@ -178,21 +208,24 @@ func apply_spacing(delta: float) -> void:
 			placed[target] = desired
 			continue
 		desired = benches.clear_walking_offset(target.position,desired)
-		for candidate: Vector2 in CROWD_OFFSETS:
-			if not benches.clear_walking_offset(target.position,candidate).is_equal_approx(candidate):
-				continue
-			var clear: bool = true
-			for other: BeachTarget in placed:
-				if absf(target.position.x-other.position.x) > 75.0:
-					continue
-				var other_offset: Vector2 = placed[other]
-				var min_x: float = 25.0 if target.kind == "toddler" or other.kind == "toddler" else 30.0
-				if absf(target.position.x+candidate.x-other.position.x-other_offset.x) < min_x and absf(target.position.y+candidate.y-other.position.y-other_offset.y) < 14.0:
-					clear = false
-					break
-			if clear:
-				desired = candidate
-				break
+		var hold: Dictionary = lane_holds.get(target,{})
+		hold.t = float(hold.get("t",0.0))-delta
+		var pick: Variant = null
+		if hold.t > 0.0:
+			pick = _free_offset(target,placed,float(hold.y)) # stay in the lane just chosen
+		hold.blocked = false
+		if pick == null:
+			hold.blocked = hold.t > 0.0 # the held lane is taken: release it early
+			pick = _free_offset(target,placed)
+		if pick != null:
+			desired = pick
+		if not hold.has("y"):
+			hold.y = desired.y
+			hold.t = 0.0
+		elif not is_equal_approx(float(hold.y),desired.y):
+			hold.y = desired.y
+			hold.t = float(Config.tuning.world.lane_hold)
+		lane_holds[target] = hold
 		placed[target] = desired
 	for target: BeachTarget in ordered:
 		var old_offset: Vector2 = visual_offsets.get(target,Vector2.ZERO)
@@ -210,6 +243,11 @@ func apply_spacing(delta: float) -> void:
 		target.position += next_offset
 		# The nearer feet cover the farther feet when paths briefly cross.
 		target.z_index = 1 if next_offset.y < -4.0 else (3 if next_offset.y > 4.0 else 2)
+		# Y-sort against ground props: feet above the prop's base pass behind it, level or below pass in front.
+		for prop: Rect2 in depth_props:
+			if absf(target.position.x-(prop.position.x+prop.size.x*0.5)) < prop.size.x*0.5+6.0:
+				target.z_index = BEHIND_PROP_Z if target.position.y < prop.position.y-4.0 else maxi(target.z_index,3)
+				break
 
 func tick(delta: float, elapsed: float) -> void:
 	for i: int in range(replacements.size()-1,-1,-1):

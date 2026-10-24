@@ -34,11 +34,63 @@ static func run_checks(root: Node, check: Callable) -> void:
 	spawner.reset_spacing()
 	check.call(first.position == Vector2(200,160) and second.position == Vector2(202,160), "spacing leaves gameplay positions unchanged")
 	second.position.x = 280.0
-	spawner.apply_spacing(1.0)
+	spawner.apply_spacing(float(Config.tuning.world.lane_hold))
 	check.call(second.position == Vector2(280,160), "visual offset clears once people part")
 	stage.queue_free()
 	_bench_lanes(root,check)
 	_family_lane(root,check)
+	_lane_hold(root,check)
+	_bin_depth(root,check)
+
+static func _lane_hold(root: Node, check: Callable) -> void:
+	var stage := Node2D.new()
+	root.add_child(stage)
+	var spawner := BeachSpawner.new()
+	var spawns: Array = []
+	for i: int in 6:
+		spawns.append({"type":"kiosk_customer","x":300.0+i*9.0})
+	spawner.setup(stage,{"seed":3,"id":1,"time_limit":90.0,"awareness_mult":1.0,"props":[],"spawns":spawns})
+	var hold: float = float(Config.tuning.world.lane_hold)
+	var last_y: Dictionary = {}
+	var last_change: Dictionary = {}
+	var worst: float = INF
+	var steps: int = 600
+	for step: int in steps:
+		for i: int in spawner.targets.size():
+			# Walkers drift at different speeds so the crowd keeps reshuffling.
+			spawner.targets[i].position.x = 300.0+i*9.0+float(step)/60.0*(6.0+i*2.0)*(1.0 if i%2==0 else -0.5)
+		spawner.apply_spacing(1.0/60.0)
+		var now: float = float(step)/60.0
+		for target: BeachTarget in spawner.targets:
+			var lane: float = float(spawner.lane_holds[target].y)
+			if last_y.has(target) and not is_equal_approx(float(last_y[target]),lane):
+				if last_change.has(target) and not bool(spawner.lane_holds[target].blocked):
+					worst = minf(worst,now-float(last_change[target]))
+				last_change[target] = now
+			last_y[target] = lane
+		spawner.reset_spacing()
+	check.call(worst>=hold-0.05,"6-person crowd: no lane change within lane_hold of the previous one (shortest gap %.2f)" % worst)
+	stage.queue_free()
+
+static func _bin_depth(root: Node, check: Callable) -> void:
+	var stage := Node2D.new()
+	root.add_child(stage)
+	var spawner := BeachSpawner.new()
+	var props: Array = [{"type":"wheelie_bin","x":226}]
+	spawner.setup(stage,{"seed":3,"id":1,"time_limit":90.0,"awareness_mult":1.0,"props":props,"spawns":[{"type":"kiosk_customer","x":200.0}]})
+	var walker: BeachTarget = spawner.targets[0]
+	var bin_z: int = 1
+	for lane_y: float in [-14.0,12.0]:
+		spawner.visual_offsets[walker] = Vector2(0,lane_y)
+		spawner.lane_holds[walker] = {"y":lane_y,"t":10.0}
+		walker.position = Vector2(200,160)
+		spawner.apply_spacing(1.0) # held lane puts the walker 26 px along, level with the bin
+		if lane_y < 0.0:
+			check.call(walker.z_index < bin_z,"rear-lane walker draws behind a wheelie bin")
+		else:
+			check.call(walker.z_index > bin_z,"front-lane walker draws in front of a wheelie bin")
+		spawner.reset_spacing()
+	stage.queue_free()
 
 static func _family_lane(root: Node, check: Callable) -> void:
 	var stage := Node2D.new()

@@ -165,6 +165,7 @@
     "whistle_radius": 120,
     "whistle_trigger": 80,
     "kiosk_rate": 6,
+    "lane_hold": 3.0,
     "max_targets": 18,
     "scrap_spacing": 75,
     "scrap_respawn": 18,

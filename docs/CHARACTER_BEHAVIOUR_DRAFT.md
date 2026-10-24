@@ -89,3 +89,9 @@ Rival personality differences are proposals beyond the existing shared hunting l
 5. Implement only approved rules and check interrupted actions, catch/food ownership, pause behaviour, clear cues and return to routine.
 
 Sources reviewed: docs/CRABS.md, scripts/crab.gd, scripts/crab_population.gd, data/targets.json, scripts/beach_routine.gd, scripts/target.gd, scripts/stall_service.gd, scripts/shopper_art.gd, data/levels/level_06.json, docs/FOOD_AND_REACTIONS_SPEC.md, docs/FOOD_REPLENISHMENT_SPEC.md and the approved character-routines/sunbather-sleep plan.
+
+## Lanes and ground-prop depth (task 025)
+
+- **Lane hold:** when a walker's crowd offset changes lane (offset y differs), it keeps that lane for `world.lane_hold` seconds (3 s). Horizontal nudges within the lane may continue. The hold ends early only if the held lane is taken by another person, a service lock or a bench footprint.
+- **Depth rule for ground props** (bins, wheelie bins, benches, chairs, castles, rocks): y-sort by feet. A person overlapping the prop's x-extent whose feet y is more than 4 px above the prop's base y draws behind it (z 0); level with or below the base draws in front (z 3). This is decided per frame in `BeachSpawner.apply_spacing`, not by a fixed z per prop type. Rear-lane walkers therefore pass behind a wheelie bin and front-lane walkers pass in front.
+- Palms, huts, lamps and stalls keep their fixed z (stalls: `FoodStall.DRAW_DEPTH`).
