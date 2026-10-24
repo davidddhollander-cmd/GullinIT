@@ -1,6 +1,6 @@
 # 025 — Calmer lane switching; people pass behind bins
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -31,5 +31,10 @@ Playnotes, 24 Oct:
 - [ ] One `tools/validate.ps1 -Capture` run at the end: 0 failures. Screenshot of a rear-lane walker behind a wheelie bin, path in the Report.
 
 ## Report
+Files: scripts/spawner.gd (lane hold via `lane_holds`, `_free_offset`, y-sort against `depth_props`), data/tuning.json (`world.lane_hold` 3.0), tests/crowd_spacing_checks.gd (+ lane hold and bin depth checks; the "offset clears" check now advances by lane_hold), tests/bin_depth_preview.gd/.tscn (screenshot scene), docs/CHARACTER_BEHAVIOUR_DRAFT.md (depth rule).
+Tests: INTEGRATION: 14672 checks, 0 failures (capture run).
+Screenshot: test-output/bin-depth.png (gitignored; in the worktree): rear-lane walker behind wheelie bin, front-lane walker in front.
+Decisions: ground props (bin, wheelie_bin, beach_bench, beach_chair_blue, beach_castle, beach_rocks) keep z 1; a person overlapping a prop's x-extent (0.4 x sprite width + 6 px) gets z 0 if feet y is >4 px above the prop base y, else z 3. Lane hold ends early if the held lane has no free slot. Palms/huts/lamps/stalls unchanged. Target.gd untouched.
+Branch: sonnet/025-lanes-and-bin-depth
 
 ## Review notes
