@@ -34,6 +34,14 @@
     "retreat_time": 0.7,
     "miss_range": 28.0
   },
+  "touch": {
+    "stick_radius": 24,
+    "stick_deadzone": 0.15,
+    "assist_range": 140,
+    "assist_angle": 25,
+    "assist_strength": 0.5,
+    "mouse_ignore_after_touch": 0.5
+  },
   "flight": {
     "acceleration": 400,
     "max_speed": 140,

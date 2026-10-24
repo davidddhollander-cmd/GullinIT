@@ -24,14 +24,16 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(game.running and game.lesson == 0,"training ignores arcade time and Practice snatch quota")
 	# Take off first, then release flap and steer: the actions need not overlap.
 	game.input.touch_active = true
-	game.input.touch_aim = Vector2(70,40)
+	game.input.aim_finger = 7
+	game.input.stick_anchor = Vector2(100,100)
+	game.input.stick_pos = Vector2(100,84)
 	game.input.touch_climb = true
 	for frame: int in range(90):
 		game._physics_process(1.0/60)
 	check.call(game.player.position.y < 110 and game.lesson == 0,"vertical takeoff waits for steering")
 	check.call(game.training_text().contains("STEER RIGHT"),"takeoff updates the tip with the remaining steering action")
 	game.input.touch_climb = false
-	game.input.touch_aim = Vector2(245,75)
+	game.input.stick_pos = Vector2(124,96)
 	for frame: int in range(40):
 		game._physics_process(1.0/60)
 	check.call(game.lesson == 1 and int(GameState.entry(1).get("training_step",0)) == 1,"takeoff and steer saves lesson checkpoint")

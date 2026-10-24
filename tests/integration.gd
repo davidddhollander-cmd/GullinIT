@@ -171,6 +171,7 @@ func run() -> void:
 	preload("res://tests/prop_overlap_checks.gd").run(Callable(self,"check"))
 	await generated_layout_checks()
 	await preload("res://tests/demo_polish_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/touch_stick_checks.gd").run(self,Callable(self,"check"))
 	var model: BeachScore = BeachScore.new()
 	check(model.snatch(10,false,false,false)==10,"first snatch")
 	check(model.snatch(20,true,true,true)==66,"additive bonuses before combo")

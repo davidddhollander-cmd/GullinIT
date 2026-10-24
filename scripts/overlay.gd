@@ -514,6 +514,9 @@ func peck_available() -> bool:
 	return game.player.state in [BeachGull.State.GROUNDED,BeachGull.State.WINDUP,BeachGull.State.STRIKE]
 
 func _draw_touch_buttons() -> void:
+	if game.input.aim_finger >= 0:
+		draw_arc(game.input.stick_anchor,float(Config.tuning.touch.stick_radius),0,TAU,24,Color(1.0,0.96,0.85,0.28),1.0)
+		draw_circle(game.input.stick_pos,4.0,Color(1.0,0.96,0.85,0.55))
 	if game.input.slowmo_ready:
 		var slow_box: Rect2 = GullInput.SLOWMO_BUTTON
 		draw_rect(slow_box,Color(0.78,0.6,0.1,0.6))
