@@ -20,6 +20,7 @@ var score_announcement_tween: Tween
 var rival_score_panel: PanelContainer
 var rival_score_list: VBoxContainer
 var rival_score_labels: Array[Label] = []
+var you_score_label: Label
 var score_announcement_fonts: Array[Font] = [
 	preload("res://assets/arcade_score_blue.fnt"),
 	preload("res://assets/arcade_score_hot.fnt"),
@@ -87,20 +88,20 @@ func setup(owner_game: BeachGame) -> void:
 	score_announcement.hide()
 	rival_score_panel = BeachUI.panel(self,Color(0.055,0.14,0.19,0.92))
 	rival_score_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	rival_score_panel.offset_left = -56.0
-	rival_score_panel.offset_top = 76.0
+	rival_score_panel.offset_left = -44.0
+	rival_score_panel.offset_top = float(TOP_BAR_HEIGHT)
 	rival_score_panel.offset_right = -4.0
 	rival_score_panel.mouse_filter = MOUSE_FILTER_IGNORE
 	var rival_panel_style: StyleBoxFlat = rival_score_panel.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
 	rival_panel_style.content_margin_left = 2.0
 	rival_panel_style.content_margin_right = 2.0
-	rival_panel_style.content_margin_top = 3.0
-	rival_panel_style.content_margin_bottom = 1.0
+	rival_panel_style.content_margin_top = 1.0
+	rival_panel_style.content_margin_bottom = 0.0
 	rival_panel_style.border_color = BeachUI.CREAM
 	rival_panel_style.set_border_width_all(1)
 	rival_score_panel.add_theme_stylebox_override("panel",rival_panel_style)
 	rival_score_list = VBoxContainer.new()
-	rival_score_list.add_theme_constant_override("separation",1)
+	rival_score_list.add_theme_constant_override("separation",0)
 	rival_score_list.mouse_filter = MOUSE_FILTER_IGNORE
 	rival_score_panel.add_child(rival_score_list)
 	sync_rival_scores()
@@ -203,6 +204,8 @@ func _process(_delta: float) -> void:
 	for i: int in rival_score_labels.size():
 		var pilot: RivalPilot = game.pilots[i]
 		rival_score_labels[i].text = "%03d" % pilot.score
+	if you_score_label != null:
+		you_score_label.text = str(game.score.points)
 
 # One row per quest: "- text" until done, gold "* text" after; counted quests add n/N.
 func sync_quests() -> void:
@@ -227,37 +230,32 @@ func sync_rival_scores() -> void:
 	if game.pilots.is_empty():
 		rival_score_panel.hide()
 		return
-	var title: Label = BeachUI.label(rival_score_list,"RIVALS",BeachUI.FONT_NATIVE,BeachUI.CREAM)
-	title.add_theme_font_override("font",HUD_FONT)
-	title.add_theme_font_size_override("font_size",6)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	for pilot: RivalPilot in game.pilots:
-		var frame: PanelContainer = PanelContainer.new()
-		frame.mouse_filter = MOUSE_FILTER_IGNORE
-		var style: StyleBoxFlat = StyleBoxFlat.new()
-		style.bg_color = Color("183b4e").lerp(pilot.gull.rival_tint,0.10)
-		style.border_color = pilot.gull.rival_tint
-		style.set_border_width_all(1)
-		style.content_margin_left = 2
-		style.content_margin_right = 2
-		style.content_margin_top = 1
-		style.content_margin_bottom = 1
-		frame.add_theme_stylebox_override("panel",style)
-		rival_score_list.add_child(frame)
 		var row: HBoxContainer = HBoxContainer.new()
 		row.mouse_filter = MOUSE_FILTER_IGNORE
 		row.add_theme_constant_override("separation",2)
-		frame.add_child(row)
-		var name_label: Label = BeachUI.label(row,pilot.gull.rival_name.to_upper(),6,pilot.gull.rival_tint)
+		rival_score_list.add_child(row)
+		var name_label: Label = BeachUI.label(row,pilot.gull.rival_name.to_upper().left(1),6,pilot.gull.rival_tint)
 		name_label.size_flags_horizontal = SIZE_EXPAND_FILL
 		var label: Label = BeachUI.label(row,"%03d" % pilot.score,6,BeachUI.CREAM)
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		label.custom_minimum_size.x = 12
+		label.custom_minimum_size.x = 18
 		for item: Label in [name_label,label]:
 			item.add_theme_font_override("font",HUD_FONT)
 			item.add_theme_font_size_override("font_size",6)
 		rival_score_labels.append(label)
-	var height: float = 11.0 + float(game.pilots.size()) * 9.0
+	var you_row: HBoxContainer = HBoxContainer.new()
+	you_row.mouse_filter = MOUSE_FILTER_IGNORE
+	you_row.add_theme_constant_override("separation",2)
+	rival_score_list.add_child(you_row)
+	var you_name: Label = BeachUI.label(you_row,"Y",6,BeachUI.GOLD)
+	you_name.size_flags_horizontal = SIZE_EXPAND_FILL
+	you_score_label = BeachUI.label(you_row,"0",6,BeachUI.GOLD)
+	you_score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	for item: Label in [you_name,you_score_label]:
+		item.add_theme_font_override("font",HUD_FONT)
+		item.add_theme_font_size_override("font_size",6)
+	var height: float = 3.0 + float(game.pilots.size() + 1) * 6.0
 	rival_score_panel.offset_bottom = rival_score_panel.offset_top + height
 	rival_score_panel.show()
 
@@ -417,8 +415,8 @@ func _draw() -> void:
 			right_food = right_food or target.food
 			right_threat = right_threat or target.defense > 0
 	var arrow_y: float = maxf(116.0,training_panel.get_rect().end.y+22.0) if game.training else 108.0
-	var right_food_x: float = 186.0 if rival_score_panel.visible else 280.0
-	var right_threat_x: float = 214.0 if rival_score_panel.visible else 302.0
+	var right_food_x: float = 280.0
+	var right_threat_x: float = 302.0
 	for item: Array in [[left_food,Vector2(3,arrow_y),"< FOOD",BeachUI.GOLD],[right_food,Vector2(right_food_x,arrow_y),"FOOD >",BeachUI.GOLD],[left_threat,Vector2(3,arrow_y+11),"< !",Color("ef725c")],[right_threat,Vector2(right_threat_x,arrow_y+11),"! >",Color("ef725c")]]:
 		if item[0]:
 			draw_string(font,item[1],item[2],HORIZONTAL_ALIGNMENT_LEFT,-1,8,item[3])
@@ -445,7 +443,7 @@ func _you_marker_visible() -> bool:
 func you_marker_rect(pos: Vector2) -> Rect2:
 	var initial := Vector2(roundf(clampf(pos.x-10,2,294)),roundf(clampf(pos.y-23,30,165)))
 	var obstacles: Array[Rect2] = []
-	obstacles.append(Rect2(232,44,84,29) if not game.training else training_panel.get_global_rect())
+	obstacles.append(rival_score_panel.get_global_rect().grow(2) if not game.training else training_panel.get_global_rect())
 	var hint: Dictionary = context_hint()
 	if not hint.is_empty():
 		obstacles.append(hint_rect(str(hint.text)).grow(1))

@@ -1,6 +1,6 @@
 # 018 — Rival score panel: higher and smaller
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -29,5 +29,11 @@ Playtest note: "UI scores on right hand need to be higher on the screen, taking 
 - [ ] One `tools/validate.ps1 -Capture` run at the end: 0 failures. Screenshot paths of levels 5 and 6 with the panel visible in the Report.
 
 ## Report
+- Files: scripts/overlay.gd, tests/rival_ai_checks.gd.
+- Tests: validate.ps1 -Capture: INTEGRATION 15407 checks, 0 failures.
+- Panel now x 276..316 (40 px), y 17..44 (directly under top bar), no title, no per-row frames, one 6 px HUD line per gull: tinted initial + 3-digit score; extra gold "Y" row for YOU (game.score.points). No leader highlight existed, none added.
+- Decisions: panel ends at y=44 so it sits above the (out of scope) star-goal panel at Rect2(232,44,84,29) instead of overlapping it. Edge markers restored to x 280/302. You-marker obstacle now uses the panel rect.
+- Test: replaced the old safe-area check with one asserting right edge <=316, width <=40, y>=17, bottom <=44, no intersection with the quest panel (levels 3,4,6). Level 5 gets a capture-only 6 s sim.
+- Screenshots (worktree test-output/): rival-score-meter-l5.png, rival-score-meter.png (level 6).
 
 ## Review notes
