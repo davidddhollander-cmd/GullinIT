@@ -1,6 +1,6 @@
 # 023 — Give each level its own cast and layout
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
