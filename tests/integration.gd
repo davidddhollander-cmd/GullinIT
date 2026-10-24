@@ -2156,6 +2156,9 @@ func generated_layout_checks() -> void:
 		for point: Vector2 in [Vector2(-20,0),Vector2(160,70),Vector2(350,180)]:
 			var marker: Rect2 = game.overlay.you_marker_rect(point)
 			check(marker.position.y >= 30 and marker.position.x >= 0 and marker.end.x <= 320 and marker.end.y <= 180,"YOU tag remains below HUD and on screen")
+		# A bench starter may vacate its station once; that single refill is settled first.
+		for i: int in 30:
+			game.spawner.tick(10,40)
 		var count: int = game.spawner.targets.size()
 		for i: int in 30:
 			game.spawner.tick(10,40)

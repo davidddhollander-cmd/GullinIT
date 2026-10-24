@@ -26,7 +26,7 @@ static func run(host: Node, check: Callable) -> void:
 	for id: int in [3,4,5,6]:
 		var game := new_game(host,id)
 		var seated: Array = game.spawner.targets.filter(func(t: BeachTarget) -> bool: return t.bench_visit.phase == BenchVisit.Phase.REST and t.food)
-		check.call(seated.size() >= 1 or id == 4,"level %d starts with a bench occupied by a holding shopper" % id)
+		check.call(seated.size() >= 1,"level %d starts with a bench occupied by a holding shopper" % id)
 		if true:
 			if not seated.is_empty():
 				var starter: BeachTarget = seated[0]

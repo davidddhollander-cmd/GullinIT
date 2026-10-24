@@ -49,16 +49,23 @@ func _seat_starter() -> void:
 	var best: BeachTarget = null
 	var best_seat: Dictionary = {}
 	var best_gap: float = INF
-	for target: BeachTarget in targets:
-		if not target.bench_visit.enabled or not target.food or not ShopperArt.supports_bench(target):
-			continue
-		for seat: Dictionary in benches.seats:
-			var gap: float = absf(target.position.x-float(seat.ground.x))
-			if gap < best_gap:
-				best = target
-				best_seat = seat
-				best_gap = gap
+	# Prefer shoppers already holding food; otherwise hand the nearest one their own snack.
+	for holding: bool in [true,false]:
+		for target: BeachTarget in targets:
+			if not target.bench_visit.enabled or (holding and not target.food) or target.food_id.is_empty() or not ShopperArt.supports_bench(target):
+				continue
+			for seat: Dictionary in benches.seats:
+				var gap: float = absf(target.position.x-float(seat.ground.x))
+				if gap < best_gap:
+					best = target
+					best_seat = seat
+					best_gap = gap
+		if best != null:
+			break
 	if best != null:
+		best.food = true
+		best.food_sprite.show()
+		best.respawn = 0.0
 		best.bench_visit.start_seated(best,best_seat)
 
 func create(kind: String, x: float, spawn: Dictionary = {}) -> BeachTarget:
