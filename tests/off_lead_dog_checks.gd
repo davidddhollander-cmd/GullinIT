@@ -72,18 +72,32 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(saw_sniff and min_x >= dog.home.x - 0.5 and max_x <= dog.home.y + 0.5 and barks[0] == 0, "wander trots and sniffs inside the home zone")
 	check.call(is_equal_approx(dog.position.y, float(Config.tuning.world.ground)), "dog stays on the sand line")
 
-	# A gull above the chase ceiling never wakes the dog and is never caught.
+	# A high gull (about 2x the old ceiling) still wakes the dog; it shadows underneath, barks, never catches.
+	var high: float = float(t.leap_height) * 2.0
 	_reset(dog, 300.0)
-	_fly(game, 300.0, float(t.chase_ceiling) + 5.0)
-	_run(dog, game, 2.0)
-	check.call(dog.state == OffLeadDog.State.WANDER and barks[0] == 0, "high gull is ignored")
-	dog.state = OffLeadDog.State.CHASE
-	dog.chase_time = 2.0
-	_run(dog, game, 2.0)
-	check.call(catches[0] == 0 and game.player.state != BeachGull.State.STUNNED, "gull above chase_ceiling is never caught")
-	check.call(outruns[0] == 1, "dog that loses a long-enough chase records the outrun")
+	_fly(game, 320.0, high)
+	dog.resting = false
+	_run(dog, game, 1.0)
+	check.call(dog.state == OffLeadDog.State.CHASE and barks[0] >= 1, "high gull still wakes the dog")
+	_fly(game, 380.0, high)
+	var bark_before: int = barks[0]
+	var worst_gap: float = 0.0
+	for i: int in int(5.0 / DT):
+		_fly(game, 380.0 + 20.0 * sin(i * DT), high)
+		dog.tick(DT, game.player)
+		if i > int(1.5 / DT):
+			worst_gap = maxf(worst_gap, absf(dog.position.x - game.player.position.x))
+	check.call(worst_gap <= 20.0 and dog.state == OffLeadDog.State.CHASE, "dog shadows a high gull's x (within 20 px)")
+	check.call(barks[0] >= bark_before + 1, "dog barks while shadowing a high gull")
+	check.call(catches[0] == 0 and game.player.state != BeachGull.State.STUNNED and dog.state != OffLeadDog.State.LEAP, "a high gull is never caught or leapt at")
+	# A chase that runs past chase_timeout ends as one outrun.
+	outruns[0] = 0
+	dog.chase_time = float(t.chase_timeout) - 0.2
+	_run(dog, game, 0.5)
+	check.call(outruns[0] == 1 and dog.state == OffLeadDog.State.COOLDOWN, "chase times out after chase_timeout: one outrun then cooldown")
 
 	# Notice -> bark -> 0.4 s windup -> chase.
+	barks[0] = 0
 	_reset(dog, 300.0)
 	_ground(game)
 	game.player.position.x = 300.0 + float(t.notice_radius) - 5.0
@@ -128,9 +142,23 @@ static func run(suite: Node, check: Callable) -> void:
 		_fly(game, 900.0, 18.0)
 		dog.tick(DT, game.player)
 		peak = maxf(peak, dog.air)
-	check.call(peak > 5.0, "leap rises on an arc")
+	check.call(peak > float(t.leap_lift) * 0.8, "leap rises on an arc")
 	_run(dog, game, float(t.leap_time))
 	check.call(dog.air == 0.0 and dog.state != OffLeadDog.State.LEAP, "leap lands again")
+
+	# Mid-height gull is at risk: the higher leap reaches it.
+	_reset(dog, 550.0)
+	dog.state = OffLeadDog.State.CHASE
+	var mid_caught: bool = false
+	for i: int in 60:
+		_fly(game, dog.position.x + float(t.mouth_x) * dog.facing, 38.0)
+		dog.tick(DT, game.player)
+		if dog.state == OffLeadDog.State.CATCH:
+			mid_caught = true
+			break
+	check.call(mid_caught and game.player.state == BeachGull.State.STUNNED, "a gull at mid-height can be caught by a leap")
+	_run(dog, game, 5.0)
+	catches[0] = 0
 
 	# Ground catch: stun, dropped food, message data, event, cooldown.
 	_reset(dog, 600.0)
@@ -184,21 +212,23 @@ static func run(suite: Node, check: Callable) -> void:
 		dog.tick(DT, game.player)
 	check.call(dog.state == OffLeadDog.State.CHASE and outruns[0] == 0 and catches[0] == 2, "flying away low keeps the chase going without a catch")
 	game.player.position.y = float(Config.tuning.world.ground) - 70.0
-	dog.tick(DT, game.player)
 	_run(dog, game, 1.0)
-	check.call(outruns[0] == 1 and dog.state == OffLeadDog.State.COOLDOWN, "climbing above chase_ceiling after a 1.5 s chase is one outrun")
+	check.call(dog.state == OffLeadDog.State.CHASE and outruns[0] == 0, "climbing high does not end the chase")
+	dog.chase_time = float(t.chase_timeout)
+	dog.tick(DT, game.player)
+	check.call(outruns[0] == 1 and dog.state == OffLeadDog.State.COOLDOWN, "a long chase that times out is one outrun")
 	# Escape by distance.
 	_reset(dog, 800.0)
 	dog.state = OffLeadDog.State.CHASE
 	dog.chase_time = 1.6
 	_fly(game, 800.0 + float(t.lose_radius) + 10.0, 20.0)
 	dog.tick(DT, game.player)
-	check.call(outruns[0] == 2, "getting more than lose_radius away is an outrun")
+	check.call(outruns[0] == 2, "getting more than lose_radius away (horizontally) is an outrun")
 	# A chase that ends too soon is not an outrun.
 	_reset(dog, 800.0)
 	dog.state = OffLeadDog.State.CHASE
 	dog.chase_time = 0.0
-	_fly(game, 830.0, 80.0)
+	_fly(game, 800.0 + float(t.lose_radius) + 10.0, 20.0)
 	dog.tick(DT, game.player)
 	check.call(outruns[0] == 2 and dog.state == OffLeadDog.State.COOLDOWN, "a chase shorter than min_chase records nothing")
 	# A stunned gull is never chased.
@@ -211,6 +241,7 @@ static func run(suite: Node, check: Callable) -> void:
 
 	# Leash: a long flight leaves home +/- leash, the dog gives up inside it, returns, one outrun.
 	var leash: float = float(t.leash)
+	check.call(leash * 2.0 + 80.0 >= 580.0, "leash zone spans about 600 px")
 	var real_home: Vector2 = Vector2(float(level.spawns[8].home[0]) if false else 235.0, 330.0)
 	for spawn: Dictionary in level.spawns:
 		if spawn.type == "off_lead_dog":
@@ -227,7 +258,7 @@ static func run(suite: Node, check: Callable) -> void:
 		dog.tick(DT, game.player)
 		leash_x = maxf(leash_x, dog.position.x)
 	check.call(leash_x <= real_home.y + leash + 3.0 and outruns[0] == 1, "dog stops within home + leash and fires one outrun")
-	_run(dog, game, 6.0)
+	_run(dog, game, 9.0)
 	check.call(dog.position.x <= real_home.y and dog.position.x >= real_home.x and outruns[0] == 1, "leashed dog trots back inside home")
 	_reset(dog, real_home.y)
 	dog.home = real_home
