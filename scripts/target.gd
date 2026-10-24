@@ -833,6 +833,15 @@ func _finish_theft(gull: BeachGull, risky: bool) -> void:
 	if kind == "pier_diner":
 		diner_meal = DinerMeal.DINING
 	respawn = rng.randf_range(Config.tuning.world.respawn_min, Config.tuning.world.respawn_max)
+	if kind in ["kiosk_customer","pier_diner"]:
+		# Sulk (the reaction), then stroll away from the stall before queueing again.
+		respawn = rng.randf_range(float(Config.tuning.world.theft_wander_min), float(Config.tuning.world.theft_wander_max))
+		if stall_service != null:
+			var stand: FoodStall = stall_service.find_stall(self,purchase_stall_type())
+			routine.purchased(self,stand.contact_x() if stand != null else position.x)
+			# Rivals refuse food at the world edge; keep the sulk-stroll inside their reach.
+			var margin: float = float(Config.tuning.rival.edge_margin)+10.0
+			routine.destination = clampf(routine.destination,margin,float(Config.tuning.world.width)-margin)
 	recover = Config.tuning.world.recover_time
 	alert = 1.0
 	var stolen_purchase_serial: int = purchase_trip_serial

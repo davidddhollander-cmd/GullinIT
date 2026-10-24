@@ -26,16 +26,28 @@ func consider(owner: BeachTarget, force: bool = false) -> bool:
 	if phase != Phase.NONE or cooldown > 0 or not eligible(owner):
 		return false
 	# One roll per destination/purchase; never per frame.
-	cooldown = owner.routine.random.randf_range(20.0,35.0)
-	if not force and owner.routine.random.randf() >= 0.3:
+	cooldown = owner.routine.random.randf_range(float(Config.tuning.bench.cooldown_min),float(Config.tuning.bench.cooldown_max))
+	if not force and owner.routine.random.randf() >= float(Config.tuning.bench.chance):
 		return false
-	seat = registry.reserve(owner,owner.routine.bounds)
+	seat = registry.reserve(owner,owner.routine.bounds,float(Config.tuning.bench.reach))
 	if seat.is_empty():
 		return false
 	phase = Phase.APPROACH
 	start_y = owner.position.y
 	returning_to_lane = false
 	return true
+
+## Level-start helper: skip the walk and sit straight into the resting phase.
+func start_seated(owner: BeachTarget, chosen: Dictionary) -> void:
+	seat = chosen
+	registry.claim(seat,owner)
+	start_y = float(seat.ground.y)
+	seat_facing = owner.facing
+	phase = Phase.REST
+	rest_time = owner.routine.random.randf_range(14.0,22.0)
+	next_bite = 1.3
+	owner.position = Vector2(float(seat.ground.x),float(seat.hip.y)+10.0)
+	owner.update_art_pose(false)
 
 func interrupt(owner: BeachTarget) -> void:
 	if phase == Phase.NONE or phase == Phase.STAND:
@@ -54,7 +66,7 @@ func finish(owner: BeachTarget) -> void:
 	returning_to_lane = true
 	phase = Phase.NONE
 	seat = {}
-	cooldown = owner.routine.random.randf_range(20.0,35.0)
+	cooldown = owner.routine.random.randf_range(float(Config.tuning.bench.cooldown_min),float(Config.tuning.bench.cooldown_max))
 	owner.routine.resume(owner)
 
 func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
@@ -76,8 +88,9 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 		var gap: float = float(seat.ground.x)-before
 		if absf(gap) > 0.25:
 			owner.facing = signf(gap)
-		owner.position.x = move_toward(before,float(seat.ground.x),float(Config.tuning.world.walk_speed)*owner.speed_mult*delta)
-		owner.position.y = move_toward(owner.position.y,float(seat.ground.y),float(Config.tuning.world.walk_speed)*owner.speed_mult*delta)
+		var pace: float = float(Config.tuning.world.walk_speed)*float(Config.tuning.bench.approach_speed)*owner.speed_mult*delta
+		owner.position.x = move_toward(before,float(seat.ground.x),pace)
+		owner.position.y = move_toward(owner.position.y,float(seat.ground.y),pace)
 		owner.update_art_pose(not is_equal_approx(before,owner.position.x))
 		# Existing proximity warning may cancel an approach immediately.
 		if owner.reaction.tick(owner,delta,gulls):

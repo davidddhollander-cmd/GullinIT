@@ -116,6 +116,7 @@ func run() -> void:
 	await family_trip_checks()
 	await preload("res://tests/stall_service_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/pier_diner_meal_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/bench_wander_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/crab_checks.gd").run(self,Callable(self,"check"))
 	await refinement_checks()
 	await landing_aim_checks()

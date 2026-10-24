@@ -31,8 +31,26 @@ func setup(owner_node: Node2D, definition: Dictionary) -> void:
 			target.food = false
 			target.food_sprite.hide()
 			target.respawn = 0.0
+	_seat_starter()
 	_link_families()
 	kiosk_timer = Config.tuning.world.kiosk_rate
+
+# Every level with a bench opens with one holding shopper already resting on the nearest one.
+func _seat_starter() -> void:
+	var best: BeachTarget = null
+	var best_seat: Dictionary = {}
+	var best_gap: float = INF
+	for target: BeachTarget in targets:
+		if not target.bench_visit.enabled or not target.food or not ShopperArt.supports_bench(target):
+			continue
+		for seat: Dictionary in benches.seats:
+			var gap: float = absf(target.position.x-float(seat.ground.x))
+			if gap < best_gap:
+				best = target
+				best_seat = seat
+				best_gap = gap
+	if best != null:
+		best.bench_visit.start_seated(best,best_seat)
 
 func create(kind: String, x: float, spawn: Dictionary = {}) -> BeachTarget:
 	var target: BeachTarget = BeachTarget.new()
