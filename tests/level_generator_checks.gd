@@ -86,7 +86,7 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 		check.call(stand_count==1 and kiosk_x>float(family_positions["family_2"])+200.0,"family kiosk sits at far end")
 		check.call(int(level.world.promenade_start)==int(level.world.width) and int(level.world.pier_start)==int(level.world.width),"family beach remains all sand")
 	elif number == 4:
-		check.call(types==["sunbather","kiosk_customer","kiosk_customer","toddler","picnic_family","off_lead_dog"],"dog day is one sunbather, two shoppers, one family and exactly one off-lead dog")
+		check.call(types==["sunbather","sunbather","sunbather","kiosk_customer","kiosk_customer","off_lead_dog"],"dog day is a sunbathers strip with two shoppers and exactly one off-lead dog")
 		var dog_spawn: Dictionary = level.spawns[5]
 		check.call(float(dog_spawn.home[0])>=float(level.world.start_x)+150.0 and float(dog_spawn.home[1])<float(level.world.promenade_start) and float(dog_spawn.x)>=float(dog_spawn.home[0]) and float(dog_spawn.x)<=float(dog_spawn.home[1]),"dog home zone is open sand away from the start")
 		check.call(stand_count==2 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1,"dog day keeps both stands and Gary from the start")

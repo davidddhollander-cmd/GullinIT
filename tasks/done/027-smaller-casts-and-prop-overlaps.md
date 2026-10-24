@@ -32,6 +32,8 @@ Playnotes, 24 Oct:
 - [ ] One `tools/validate.ps1 -Capture` run at the end: 0 failures. Screenshot of L5's right side, path in the Report.
 
 ## Report
+Review fix (L4): the cast is now 3 sunbathers (170, 365, 410) with their parasols restored (190, 385, 430), 2 stall shoppers and the dog, no family (still 6 spawns, dog index 5). Sunbathers sit outside the dog patch [250,330] and the start. `tests/level_generator_checks.gd` L4 type list updated; the one-child family test in `tests/integration.gd` now uses level 2 (L4 has no family). Re-run: `INTEGRATION: 12599 checks, 0 failures` (headless). The L4 line in the table and the "1 sunbather ... 1 family" wording below are superseded by this.
+
 Branch `sonnet/027-smaller-casts-and-prop-overlaps`. Test: `INTEGRATION: 12605 checks, 0 failures` (headless and the `--capture` run).
 
 Cast counts (spawns, family = toddler + parent, dog and vendor counted):
