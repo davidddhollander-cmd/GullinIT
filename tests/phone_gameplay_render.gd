@@ -13,7 +13,7 @@ func _ready() -> void:
 	game.player.position = Vector2(470,72)
 	game.player.aim = game.player.position
 	game.player.tick(0.016,0,0.0)
-	game.spawner.apply_spacing(1.0)
+	game.spawner.apply_spacing(3.0)
 	game.camera.position = Vector2(480,90)
 	game.beach.camera_x = 480.0
 	game.overlay.hide()

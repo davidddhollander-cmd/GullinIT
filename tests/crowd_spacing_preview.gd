@@ -10,7 +10,7 @@ func _ready() -> void:
 	add_child(backdrop)
 	backdrop.setup(level.props)
 	spawner.setup(self,level)
-	spawner.apply_spacing(1.0)
+	spawner.apply_spacing(3.0)
 	camera = Camera2D.new()
 	add_child(camera)
 	camera.enabled = true
@@ -27,7 +27,7 @@ func _capture() -> void:
 	if mums.size() >= 2:
 		mums[0].position.x = 510.0
 		mums[1].position.x = 512.0
-	spawner.apply_spacing(1.0)
+	spawner.apply_spacing(3.0)
 	await _save(510.0,"crossing")
 	get_tree().quit()
 

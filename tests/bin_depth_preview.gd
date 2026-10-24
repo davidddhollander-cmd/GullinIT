@@ -10,7 +10,7 @@ func _ready() -> void:
 		"spawns":[{"type":"kiosk_customer","x":200.0},{"type":"kiosk_customer","x":300.0}]})
 	for i: int in 2:
 		spawner.lane_holds[spawner.targets[i]] = {"y":-14.0 if i == 0 else 12.0,"t":10.0}
-	spawner.apply_spacing(1.0)
+	spawner.apply_spacing(3.0)
 	var camera := Camera2D.new()
 	add_child(camera)
 	camera.position = Vector2(270,90)

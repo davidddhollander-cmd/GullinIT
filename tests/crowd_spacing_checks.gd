@@ -16,7 +16,7 @@ static func run_checks(root: Node, check: Callable) -> void:
 	})
 	var first: BeachTarget = spawner.targets[0]
 	var second: BeachTarget = spawner.targets[1]
-	spawner.apply_spacing(1.0)
+	spawner.apply_spacing(3.0)
 	check.call(first.position.distance_to(second.position) >= 25.0, "overlapping adults receive separate visual positions")
 	check.call(first.z_index != second.z_index, "crossing adults draw in depth order")
 	var beach := BeachBackdrop.new()
@@ -89,7 +89,7 @@ static func _bin_depth(root: Node, check: Callable) -> void:
 		spawner.visual_offsets[walker] = Vector2(0,lane_y)
 		spawner.lane_holds[walker] = {"y":lane_y,"t":10.0}
 		walker.position = Vector2(200,160)
-		spawner.apply_spacing(1.0) # held lane puts the walker 26 px along, level with the bin
+		spawner.apply_spacing(3.0) # held lane puts the walker 26 px along, level with the bin
 		if lane_y < 0.0:
 			check.call(walker.z_index < bin_z,"rear-lane walker draws behind a wheelie bin")
 		else:
@@ -147,7 +147,7 @@ static func _bench_lanes(root: Node, check: Callable) -> void:
 		"spawns":[{"type":"kiosk_customer","x":220.0},{"type":"kiosk_customer","x":222.0}]})
 	var first: BeachTarget = spawner.targets[0]
 	var walker: BeachTarget = spawner.targets[1]
-	spawner.apply_spacing(1.0)
+	spawner.apply_spacing(3.0)
 	check.call(walker.position.y >= 155.0,"empty bench blocks raised walking lane")
 	check.call(first.position.distance_to(walker.position) >= 25.0,"bench detour still separates overlapping people")
 	spawner.reset_spacing()
@@ -171,7 +171,7 @@ static func _bench_lanes(root: Node, check: Callable) -> void:
 	first.bench_visit.seat = spawner.benches.reserve(first,Vector2(0,600))
 	first.bench_visit.phase = BenchVisit.Phase.REST
 	walker.position = Vector2(222,160)
-	spawner.apply_spacing(1.0)
+	spawner.apply_spacing(3.0)
 	check.call(first.position == Vector2(220,153),"seated visitor retains exact seat anchor")
 	check.call(walker.position.y >= 155.0,"occupied bench blocks raised lane too")
 	spawner.reset_spacing()
@@ -182,7 +182,7 @@ static func _bench_lanes(root: Node, check: Callable) -> void:
 	first.bench_visit.phase = BenchVisit.Phase.NONE
 	first.position = Vector2(220,180)
 	walker.position = Vector2(222,180)
-	spawner.apply_spacing(1.0)
+	spawner.apply_spacing(3.0)
 	check.call(walker.position.y >= 176.0,"bench block follows scaled width and authored base height")
 	if old_scale == null:
 		Config.sprites.beach_bench.erase("visual_scale")

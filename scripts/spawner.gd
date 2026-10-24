@@ -279,7 +279,7 @@ func apply_spacing(delta: float) -> void:
 		placed[target] = desired
 	for target: BeachTarget in ordered:
 		var old_offset: Vector2 = visual_offsets.get(target,Vector2.ZERO)
-		var next_offset: Vector2 = Vector2.ZERO if target.service_locked or target.bench_visit.anchored() else old_offset.move_toward(placed[target],300.0*delta)
+		var next_offset: Vector2 = Vector2.ZERO if target.service_locked or target.bench_visit.anchored() else old_offset.move_toward(placed[target],float(Config.tuning.world.lane_shift_speed)*delta)
 		if _ground_lane_family(target):
 			# Do not interpolate through another family member, or retain an old
 			# rear-lane offset after this rule becomes active.
