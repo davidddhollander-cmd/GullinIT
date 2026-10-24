@@ -11,6 +11,7 @@ var clock: float = 0.0
 var progress: float = 0.0
 var side: float = 1.0
 var hotdog: bool = false
+var stall_type: String = "kiosk"
 var stand_index: int = -1
 var food_texture: Texture2D
 var food_size: Vector2
@@ -22,7 +23,8 @@ func setup(entry: Dictionary, index: int) -> void:
 	z_index = DRAW_DEPTH
 	stand_index = index
 	position = Vector2(float(entry.x),float(entry.get("y",160)))
-	hotdog = str(entry.type)=="hotdog_stand"
+	stall_type = str(entry.type)
+	hotdog = stall_type=="hotdog_stand"
 	side = -1.0 if float(entry.get("customer_x",position.x+48))-position.x<0 else 1.0
 	clock = float(index)*1.71
 	window = Control.new()
@@ -34,10 +36,10 @@ func setup(entry: Dictionary, index: int) -> void:
 	add_child(window)
 	vendor = AnimatedSprite2D.new()
 	vendor.name = "FullBodyVendor"
-	vendor.sprite_frames = VendorArt.frames(hotdog)
+	vendor.sprite_frames = VendorArt.frames(stall_type)
 	vendor.animation = &"poses"
-	vendor.scale = Vector2.ONE*float(VendorArt.entry(hotdog).visual_scale)
-	vendor.position = Vector2(0,float(VendorArt.entry(hotdog).sprite_offset_y))-WINDOW.position
+	vendor.scale = Vector2.ONE*float(VendorArt.entry(stall_type).visual_scale)
+	vendor.position = Vector2(0,float(VendorArt.entry(stall_type).sprite_offset_y))-WINDOW.position
 	vendor.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	window.add_child(vendor)
 	prepared_food = Sprite2D.new()
@@ -67,7 +69,7 @@ func sync_pose() -> void:
 		Phase.IDLE:
 			frame = 1 if fmod(clock,4.5)>4.3 else 0
 		Phase.PREPARE:
-			var poses: Dictionary = VendorArt.entry(hotdog).poses
+			var poses: Dictionary = VendorArt.entry(stall_type).poses
 			if progress<0.2:
 				frame = int(poses.turn_away)
 			elif progress<0.78:

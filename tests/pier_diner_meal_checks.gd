@@ -9,7 +9,7 @@ static func fixture(host: Node, grill: bool = true) -> BeachGame:
 	level.crabs = {"enabled":false}
 	level.props = [{"type":"kiosk","x":800,"customer_x":847}]
 	if grill:
-		level.props.append({"type":"hotdog_stand","x":900,"customer_x":947})
+		level.props.append({"type":"fish_chips_stand","x":900,"customer_x":947})
 	game.setup(level,false)
 	game.set_physics_process(false)
 	game.set_process_unhandled_input(false)
@@ -52,7 +52,7 @@ static func run(host: Node, check: Callable) -> void:
 	var portion: StallPortion = wait_for_fish(game)
 	check.call(portion!=null,"diner orders a real fish portion from the compatible grill")
 	if portion!=null:
-		var stand: FoodStall = game.stalls.find_stall(diner,"hotdog_stand")
+		var stand: FoodStall = game.stalls.find_stall(diner,"fish_chips_stand")
 		check.call(diner.service_locked and not diner.food and is_equal_approx(diner.position.x,stand.contact_x()),"diner waits empty-handed beside the serving counter")
 		var at: Vector2 = portion.position
 		step(game,0.65)
@@ -94,7 +94,7 @@ static func run(host: Node, check: Callable) -> void:
 		empty(diner)
 		if scenario=="busy":
 			diner.position.x = 947
-			var shopper: BeachTarget = game.spawner.create("kiosk_customer",947,{"food_id":"hotdog"})
+			var shopper: BeachTarget = game.spawner.create("kiosk_customer",947,{"food_id":"fried_fish"})
 			empty(shopper)
 			check.call(game.stalls.request_shopper(shopper),"grill accepts its existing hotdog customer")
 			step(game,0.1)
@@ -139,7 +139,7 @@ static func run(host: Node, check: Callable) -> void:
 					game.stash_raids.tick(delta)
 				check.call(diner.food and not diner.dropped_pending and is_equal_approx(diner.position.x,home),"recovering the fish resumes the trip back to the dining spot")
 			"busy":
-				step(game,8.0)
+				step(game,14.0)
 				check.call(diner.food and is_equal_approx(diner.position.x,home) and game.stalls.requests.is_empty(),"diner waits its turn then returns home with one fish")
 			"held_theft":
 				step(game,1.1)
@@ -161,4 +161,35 @@ static func run(host: Node, check: Callable) -> void:
 						break
 				check.call(diner.food and returned and diner.routine.anchor==home,"interrupted return resumes towards the original dining home")
 		game.queue_free()
+		await host.get_tree().process_frame
+
+	# Real levels: each pier diner buys fried fish at that level's fish & chips stand.
+	for index: int in [2,4,5]:
+		var real := BeachGame.new()
+		host.add_child(real)
+		var definition: Dictionary = Config.levels[index].duplicate(true)
+		definition.rivals = []
+		definition.crabs = {"enabled":false}
+		real.setup(definition,false)
+		real.set_physics_process(false)
+		real.set_process_unhandled_input(false)
+		real.running = true
+		real.intro = 0.0
+		real.player.position = Vector2(100,50)
+		var fish_stand: FoodStall = real.stalls.find_stall(real.spawner.targets[0],"fish_chips_stand")
+		check.call(fish_stand!=null,"level %d has a fish & chips stand"%(index+1))
+		var buyer: BeachTarget
+		for target: BeachTarget in real.spawner.targets:
+			if target.kind=="pier_diner":
+				empty(target)
+				buyer = buyer if buyer!=null else target
+		check.call(buyer!=null and buyer.purchase_stall_type()=="fish_chips_stand","level %d diners buy at the fish & chips stand"%(index+1))
+		var served: bool = false
+		for frame: int in 1500:
+			step(real,0.02)
+			if real.stalls.requests.has(fish_stand):
+				served = true
+				break
+		check.call(served,"level %d fish & chips stand serves a diner"%(index+1))
+		real.queue_free()
 		await host.get_tree().process_frame

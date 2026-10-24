@@ -65,7 +65,7 @@ func quiet_ranges() -> Array[Vector2]:
 	ranges.append(beach_bounds)
 	for prop: Dictionary in scenery:
 		var kind: String = str(prop.type)
-		if kind in ["kiosk","hotdog_stand"]:
+		if kind in ["kiosk","hotdog_stand","fish_chips_stand"]:
 			ranges = _exclude(ranges,float(prop.x),64.0)
 		elif kind in ["bin","wheelie_bin","beach_rocks","beach_castle","tower"]:
 			ranges = _exclude(ranges,float(prop.x),24.0)

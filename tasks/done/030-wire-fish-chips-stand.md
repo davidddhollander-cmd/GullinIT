@@ -1,6 +1,6 @@
 # 030 — Wire the fish & chips stand into gameplay
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 028
@@ -29,5 +29,12 @@ Codex delivered the fish & chips stall, sign and vendor (task 028, art only). Pi
 - [ ] One capture run at the end with 0 failures; screenshot of the L6 fish & chips stand serving a diner, path in the Report
 
 ## Report
+Status: done. Branch sonnet/030-wire-fish-chips-stand.
+- Files: scripts/{food_stall,vendor_art,stand_sign,stall_service,target,beach,crab_population}.gd, data/levels/level_03/05/06.json, tests/pier_diner_meal_checks.gd, tools/pier_diner_meal_preview.gd, new tools/fish_chips_l6_preview.{gd,tscn}.
+- Tests: INTEGRATION: 12858 checks, 0 failures (headless and rendered --capture; one earlier capture run hung after RIVAL SIM level 5, killed, rerun passed).
+- Stands: L3 x=960 (customer_x 1000); L5 x=950 (990); L6 x=1030 (1070). Prop overlap check passes unchanged.
+- Screenshots: test-output/fish-chips-l6-prepare.png, test-output/fish-chips-l6-counter.png (not committed).
+- Decisions: FoodStall gets stall_type; VendorArt/StandSign keyed by stand type (bool API kept). purchase_stall_type() returns fish_chips_stand for fried_fish when the level has one, else hotdog_stand (L4 fish shoppers still work). Fish stand is excluded from signpost destinations and random shopper spawns (diner-only). Pier diner fixture now uses a fish stand; its "busy" check uses a fried_fish shopper and waits 14 s (was 8). Added per-level checks for L3/L5/L6. Gull perch on the stand (gull.gd) left to task 031.
+- Ran rendered test run; umbrella in L6 (x=1060) sits partly behind the fish stand sign, left as is.
 
 ## Review notes

@@ -58,13 +58,13 @@ func setup(entries: Array, zone_entries: Array = [], world_settings: Dictionary 
 			glint.visible = false
 			sprite.add_child(glint)
 			bin_glints[bin_glints.size()-1] = glint
-		if entry.type in ["kiosk","hotdog_stand"]:
+		if entry.type in ["kiosk","hotdog_stand","fish_chips_stand"]:
 			var stall := FoodStall.new()
 			add_child(stall)
 			stall.setup(entry,props.size()-1)
 			stalls.append(stall)
 			var sign_node: Node2D = preload("res://scripts/stand_sign.gd").new()
-			sign_node.hotdog = entry.type == "hotdog_stand"
+			sign_node.stall_type = str(entry.type)
 			sign_node.z_index = FoodStall.DRAW_DEPTH
 			sign_node.position = Vector2(entry.x,float(entry.get("y",160))-11)
 			add_child(sign_node)
@@ -75,7 +75,7 @@ func _apply_prop_art(sprite: AnimatedSprite2D, entry: Dictionary) -> void:
 	# Keep ordinary scenery above rear-lane crabs. Palms and shacks also
 	# occlude front-lane crabs, while adults and flying gulls retain their depth.
 	sprite.z_index = 2 if entry.type in ["beach_palm","beach_hut"] else 1
-	if entry.type in ["kiosk","hotdog_stand"]:
+	if entry.type in ["kiosk","hotdog_stand","fish_chips_stand"]:
 		sprite.z_index = FoodStall.DRAW_DEPTH
 	var definition: Dictionary = Config.sprites[entry.type]
 	var scale_factor: float = float(definition.get("visual_scale",1.0))
@@ -197,7 +197,7 @@ func _draw() -> void:
 			continue
 		SignArt.draw_sign(self,sign)
 	for entry: Dictionary in props:
-		if entry.type in ["tower", "kiosk", "hotdog_stand"]:
+		if entry.type in ["tower", "kiosk", "hotdog_stand", "fish_chips_stand"]:
 			var top: int = 103 if entry.type == "tower" else 110
 			_draw_flagpole(roundi(float(entry.x)) + 12, top, Color("ef725c") if entry.type != "kiosk" else Color("408fa8"))
 	for flag_x: int in wind_flags:
@@ -308,12 +308,12 @@ func _sign_hits_prop(x: int,board_width: int,entries: Array,board_height: int = 
 		if entry.type == "umbrella":
 			prop_y = 125.0 + float(sprite.frame_h)*scale_factor*0.5
 		var prop_rect: Rect2 = Rect2(float(entry.x)-float(sprite.frame_w)*scale_factor*0.5,prop_y-float(sprite.frame_h)*scale_factor,float(sprite.frame_w)*scale_factor,float(sprite.frame_h)*scale_factor)
-		if entry.type in ["tower","kiosk","hotdog_stand"]:
+		if entry.type in ["tower","kiosk","hotdog_stand","fish_chips_stand"]:
 			var flag_top: int = 85 if entry.type == "tower" else 92
 			if sign_rect.intersects(Rect2(float(entry.x)-5,flag_top,37,25)):
 				return true
-		if entry.type in ["kiosk","hotdog_stand"]:
-			var roof: Rect2 = StandSignArt.local_bounds(entry.type=="hotdog_stand")
+		if entry.type in ["kiosk","hotdog_stand","fish_chips_stand"]:
+			var roof: Rect2 = StandSignArt.local_bounds(str(entry.type))
 			roof.position += Vector2(float(entry.x),prop_y-11)
 			if sign_rect.intersects(roof) or post_rect.intersects(roof):
 				return true
