@@ -83,6 +83,7 @@ static func simulate(host: Node, main: Node, level: int, seconds: float) -> Dict
 	report.hud_visible = game.overlay.rival_score_panel.visible
 	report.hud_rows = game.overlay.rival_score_labels.size()
 	report.hud_rect = game.overlay.rival_score_panel.get_global_rect()
+	report.quest_rect = game.overlay.quest_panel.get_global_rect()
 	if level == 6:
 		game.overlay.queue_redraw()
 		await host.snapshot("rival-score-meter")
@@ -95,7 +96,7 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 		var need_thefts: int = 2 if level == 6 else 1
 		check.call(r.pilots == (3 if level == 6 else 1),"level %d rival count" % level)
 		check.call(r.hud_visible and r.hud_rows == r.pilots,"level %d shows one right-side score row per rival" % level)
-		check.call((r.hud_rect as Rect2).end.x <= 320.0 and (r.hud_rect as Rect2).position.y >= 74.0 and (r.hud_rect as Rect2).end.y < 124.0,"level %d rival score meter stays in its right-side safe area" % level)
+		check.call((r.hud_rect as Rect2).end.x <= 316.0 and (r.hud_rect as Rect2).size.x <= 40.0 and (r.hud_rect as Rect2).position.y >= 17.0 and not (r.hud_rect as Rect2).intersects(r.quest_rect) and (r.hud_rect as Rect2).end.y <= 44.0,"level %d rival score meter sits compact in the top-right corner, clear of the quest and goal panels" % level)
 		for i: int in r.pilots:
 			check.call(r.dives[i] >= 3 or main.game.pilots[i].gull.loose_only,"level %d rival %d dives at least 3 times (%d)" % [level,i,r.dives[i]])
 			check.call(r.thefts[i] >= need_thefts,"level %d rival %d steals at least %d times (%d)" % [level,i,need_thefts,r.thefts[i]])
