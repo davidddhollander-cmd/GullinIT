@@ -84,12 +84,13 @@ static func simulate(host: Node, main: Node, level: int, seconds: float) -> Dict
 	report.hud_rows = game.overlay.rival_score_labels.size()
 	report.hud_rect = game.overlay.rival_score_panel.get_global_rect()
 	report.quest_rect = game.overlay.quest_panel.get_global_rect()
-	if level == 6:
+	if level == 5 or level == 6:
 		game.overlay.queue_redraw()
-		await host.snapshot("rival-score-meter")
+		await host.snapshot("rival-score-meter" if level == 6 else "rival-score-meter-l5")
 	return report
 
 static func run(host: Node, main: Node, check: Callable) -> void:
+	await simulate(host, main, 5, 6.0)  # capture only
 	for level: int in [3,4,6]:
 		var r: Dictionary = await simulate(host, main, level, 90.0)
 		print("RIVAL SIM level %d: %s" % [level,str(r)])
