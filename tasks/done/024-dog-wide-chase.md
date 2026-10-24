@@ -1,6 +1,6 @@
 # 024 — Dog: wide chase territory, keeps chasing high gulls
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -23,10 +23,15 @@ Playnotes, 24 Oct: "the dog should have a wider chase territory and keep chasing
 - New dog art; the dog in other levels.
 
 ## Done when (acceptance)
-- [ ] Checks: a high gull is shadowed (dog under it ±20 px) and never caught; a mid-height gull can be caught by a leap; a gull leaving the ~600 px zone ends the chase with one outrun; the chase times out
-- [ ] Existing dog checks updated (not deleted) to the new rules
-- [ ] One `tools/validate.ps1` run at the end: 0 failures
+- [x] Checks: a high gull is shadowed (dog under it ±20 px) and never caught; a mid-height gull can be caught by a leap; a gull leaving the ~600 px zone ends the chase with one outrun; the chase times out
+- [x] Existing dog checks updated (not deleted) to the new rules
+- [x] One `tools/validate.ps1` run at the end: 0 failures
 
 ## Report
+Files: scripts/off_lead_dog.gd, data/tuning.json, tests/off_lead_dog_checks.gd.
+Tests: INTEGRATION: 14648 checks, 0 failures (headless run, no -Capture).
+Tuning: leash 120 -> 260 (zone -10..590, ~600 px); chase_ceiling removed; leap_height 28 -> 42, leap_lift 22 -> 33 (leap_time unchanged 0.6); lose_radius 120 -> 140 and now horizontal only; new chase_timeout 8.0, bark_gap 2.5.
+Decisions: ceiling no longer gates noticing or chasing; a gull above leap_height is shadowed at run speed with a bark every 2.5 s; peak mouth reach ~49 px so an 84 px gull is safe. Timeout and horizontal lose_radius give-ups count as outruns after min_chase; leash give-up unchanged. Tests updated (high gull, mid-height leap catch, timeout, zone width, return trip 9 s).
+Branch: sonnet/024-dog-wide-chase
 
 ## Review notes

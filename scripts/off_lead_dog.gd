@@ -11,6 +11,7 @@ var home: Vector2 = Vector2(250, 410)
 var facing: float = 1.0
 var timer: float = 0.0
 var chase_time: float = 0.0
+var bark_timer: float = 0.0
 var leap_gap: float = 0.0
 var air: float = 0.0
 var destination: float = 0.0
@@ -43,13 +44,13 @@ func gull_height(gull: BeachGull) -> float:
 func mouth() -> Vector2:
 	return position + Vector2(facing * float(_t().mouth_x), float(_t().mouth_y) - air)
 
-# Leash: the dog never works outside home +/- leash, and ignores gulls out there.
+# Leash: the dog covers about half the beach (home +/- leash) and ignores gulls outside it.
 func _in_leash(x: float) -> bool:
 	var leash: float = float(_t().leash)
 	return x >= home.x - leash and x <= home.y + leash
 
 func _can_chase(gull: BeachGull) -> bool:
-	return _in_leash(gull.position.x) and gull.state != BeachGull.State.STUNNED and gull.invulnerable <= 0.0 and gull_height(gull) < float(_t().chase_ceiling)
+	return _in_leash(gull.position.x) and gull.state != BeachGull.State.STUNNED and gull.invulnerable <= 0.0
 
 func _wander() -> void:
 	state = State.WANDER
@@ -102,14 +103,21 @@ func tick(delta: float, gull: BeachGull) -> void:
 			elif timer <= 0.0:
 				state = State.CHASE
 				chase_time = 0.0
+				bark_timer = float(t.bark_gap)
 		State.CHASE:
 			clip = &"run"
 			chase_time += delta
 			if not _in_leash(gull.position.x) or not _in_leash(position.x):
 				_give_up(true)
-			elif not _can_chase(gull) or position.distance_to(gull.position) > float(t.lose_radius):
+			elif not _can_chase(gull) or absf(gull.position.x - position.x) > float(t.lose_radius) or chase_time >= float(t.chase_timeout):
 				_give_up()
 			else:
+				# Above leap reach the dog shadows the gull's x and barks; it can't catch it.
+				bark_timer -= delta
+				if bark_timer <= 0.0:
+					bark_timer = float(t.bark_gap)
+					if gull_height(gull) >= float(t.leap_height):
+						barked.emit()
 				_move(gull.position.x, float(t.run_speed), delta)
 				_try_leap(gull)
 				_try_catch(gull)
