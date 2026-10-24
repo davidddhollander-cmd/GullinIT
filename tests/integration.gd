@@ -165,6 +165,7 @@ func run() -> void:
 	preload("res://tests/pickup_shine_checks.gd").run(Callable(self,"check"))
 	await bin_shine_checks()
 	preload("res://tests/level_generator_checks.gd").run(Callable(self,"check"))
+	preload("res://tests/prop_overlap_checks.gd").run(Callable(self,"check"))
 	await generated_layout_checks()
 	await preload("res://tests/demo_polish_checks.gd").run(self,Callable(self,"check"))
 	var model: BeachScore = BeachScore.new()
@@ -1067,7 +1068,7 @@ func family_trip_checks() -> void:
 	main.clear_game()
 	await settle()
 	# A one-child family uses the same lifecycle without assuming a sibling exists.
-	main.start_level(4)
+	main.start_level(2)
 	game = main.game
 	game.set_physics_process(false)
 	var one_mum: BeachTarget

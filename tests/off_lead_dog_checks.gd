@@ -242,7 +242,7 @@ static func run(suite: Node, check: Callable) -> void:
 	# Leash: a long flight leaves home +/- leash, the dog gives up inside it, returns, one outrun.
 	var leash: float = float(t.leash)
 	check.call(leash * 2.0 + 80.0 >= 580.0, "leash zone spans about 600 px")
-	var real_home: Vector2 = Vector2(float(level.spawns[8].home[0]) if false else 235.0, 330.0)
+	var real_home: Vector2 = Vector2(235.0, 330.0)
 	for spawn: Dictionary in level.spawns:
 		if spawn.type == "off_lead_dog":
 			real_home = Vector2(float(spawn.home[0]), float(spawn.home[1]))
