@@ -139,6 +139,7 @@
     "dog_owner": {"min_distance": 120, "max_distance": 180, "pause_min": 2, "pause_max": 5},
     "lifeguard": {"min_distance": 100, "max_distance": 160, "pause_min": 2, "pause_max": 4}
   },
+  "bench": {"chance": 0.8, "cooldown_min": 6.0, "cooldown_max": 12.0, "reach": 320.0, "approach_speed": 1.0},
   "bite": {"duration": 0.6, "interval_min": 4.0, "interval_max": 7.0},
   "world": {
     "width": 1280,
@@ -150,6 +151,8 @@
     "food_offset_y": -14,
     "respawn_min": 6,
     "respawn_max": 10,
+    "theft_wander_min": 10,
+    "theft_wander_max": 20,
     "depart_thefts": 2,
     "walk_speed": 9,
     "replacement_delay": 2,

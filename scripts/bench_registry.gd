@@ -25,9 +25,9 @@ func clear_walking_offset(origin: Vector2, offset: Vector2) -> Vector2:
 			result.y = maxf(result.y,bounds.end.y-origin.y)
 	return result
 
-func reserve(actor: BeachTarget, bounds: Vector2) -> Dictionary:
+func reserve(actor: BeachTarget, bounds: Vector2, reach: float = 220.0) -> Dictionary:
 	var best: Dictionary = {}
-	var distance: float = 220.0
+	var distance: float = reach
 	for seat: Dictionary in seats:
 		var occupant: WeakRef = seat.owner
 		if occupant != null and is_instance_valid(occupant.get_ref()):
@@ -41,6 +41,9 @@ func reserve(actor: BeachTarget, bounds: Vector2) -> Dictionary:
 	if not best.is_empty():
 		best.owner = weakref(actor)
 	return best
+
+func claim(seat: Dictionary, actor: BeachTarget) -> void:
+	seat.owner = weakref(actor)
 
 func owns(seat: Dictionary, actor: BeachTarget) -> bool:
 	return seats.has(seat) and seat.owner != null and seat.owner.get_ref() == actor
