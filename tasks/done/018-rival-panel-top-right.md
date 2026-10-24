@@ -1,6 +1,6 @@
 # 018 — Rival score panel: higher and smaller
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
