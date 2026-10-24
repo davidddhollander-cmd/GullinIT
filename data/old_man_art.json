@@ -1,0 +1,35 @@
+{
+  "cell": 128,
+  "clips": {
+    "alert": 4,
+    "block": 4,
+    "carry": 6,
+    "carry_left": 6,
+    "chase": 6,
+    "chase_left": 6,
+    "eat": 4,
+    "handover": 5,
+    "idle": 4,
+    "kick": 6,
+    "kick_left": 6,
+    "pickup": 5,
+    "rest": 4,
+    "rise": 7,
+    "run": 7,
+    "run_left": 7,
+    "shield": 4,
+    "stick_hit": 6,
+    "stick_hit_left": 6,
+    "swat": 6,
+    "walk": 6,
+    "walk_left": 6
+  },
+  "columns": 8,
+  "display_scale": 0.5,
+  "hit_frames": {
+    "stick_hit": 4,
+    "stick_hit_left": 3
+  },
+  "sole": 116,
+  "source": "res://assets/reference/old-man-stick-v1/"
+}
