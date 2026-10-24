@@ -22,27 +22,24 @@
     {"name": "SNACK KIOSK", "from": 775, "to": 1040}
   ],
   "spawns": [
-    {"type": "sunbather", "x": 155, "appearance": "male_red", "station": "sun_0", "patrol_radius": 0},
-    {"type": "sunbather", "x": 245, "appearance": "female_blue", "station": "sun_1", "patrol_radius": 0},
+    {"type": "sunbather", "x": 155, "appearance": "female_blue", "station": "sun_0", "patrol_radius": 0},
     {"type": "toddler", "x": 326, "family_id": "family_1", "station": "family_1", "patrol_radius": 6},
     {"type": "picnic_family", "x": 370, "family_id": "family_1", "station": "family_1", "patrol_radius": 0},
-    {"type": "kiosk_customer", "x": 505, "food_id": "ice_cream", "appearance": "shopper_mullet", "station": "family_stroll", "patrol_radius": 20},
-    {"type": "toddler", "x": 636, "family_id": "family_2", "station": "family_2", "patrol_radius": 6},
-    {"type": "picnic_family", "x": 680, "family_id": "family_2", "station": "family_2", "patrol_radius": 0},
+    {"type": "toddler", "x": 440, "family_id": "family_2", "station": "family_2", "patrol_radius": 6},
+    {"type": "picnic_family", "x": 484, "family_id": "family_2", "station": "family_2", "patrol_radius": 0},
+    {"type": "toddler", "x": 554, "family_id": "family_3", "station": "family_3", "patrol_radius": 6},
+    {"type": "picnic_family", "x": 598, "family_id": "family_3", "station": "family_3", "patrol_radius": 0},
     {"type": "kiosk_customer", "x": 865, "food_id": "ice_cream", "appearance": "shopper_sundress", "station": "ice_cream", "patrol_radius": 10}
   ],
   "props": [
     {"type": "beach_palm", "x": 70, "y": 148},
-    {"type": "beach_palm", "x": 570, "y": 148},
-    {"type": "beach_parasol", "x": 182, "y": 143},
-    {"type": "beach_parasol_blue", "x": 270, "y": 143},
+    {"type": "beach_parasol_blue", "x": 182, "y": 143},
     {"type": "bin", "x": 470},
-    {"type": "beach_castle", "x": 525, "y": 171, "jitter": true},
-    {"type": "wheelie_bin", "x": 715},
-    {"type": "beach_hut", "x": 755, "y": 151},
-    {"type": "bin", "x": 805},
-    {"type": "kiosk", "x": 925, "customer_x": 865},
-    {"type": "beach_palm", "x": 1005, "y": 151}
+    {"type": "beach_castle", "x": 650, "y": 171, "jitter": true},
+    {"type": "bin", "x": 780},
+    {"type": "wheelie_bin", "x": 950},
+    {"type": "kiosk", "x": 905, "customer_x": 845},
+    {"type": "beach_hut", "x": 1000, "y": 151}
   ],
   "map_version": 3
 }
