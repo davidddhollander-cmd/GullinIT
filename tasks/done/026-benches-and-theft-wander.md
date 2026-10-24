@@ -1,6 +1,6 @@
 # 026 — Benches get used; theft victims sulk and wander
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
