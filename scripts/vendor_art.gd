@@ -4,13 +4,20 @@ extends RefCounted
 static var metadata: Dictionary = {}
 static var cache: Dictionary = {}
 
-static func entry(hotdog: bool) -> Dictionary:
+## kind: a stand type string, or a bool (true = hotdog, false = ice cream).
+static func key_for(kind: Variant) -> String:
+	match kind:
+		"hotdog_stand", true: return "hotdog"
+		"fish_chips_stand": return "vendor_fish_chips"
+	return "ice_cream"
+
+static func entry(hotdog: Variant) -> Dictionary:
 	if metadata.is_empty():
 		metadata = JSON.parse_string(FileAccess.get_file_as_string("res://data/vendor_art.json"))
-	return metadata["hotdog" if hotdog else "ice_cream"]
+	return metadata[key_for(hotdog)]
 
-static func frames(hotdog: bool) -> SpriteFrames:
-	var key: String = "hotdog" if hotdog else "ice_cream"
+static func frames(hotdog: Variant) -> SpriteFrames:
+	var key: String = key_for(hotdog)
 	if cache.has(key):
 		return cache[key]
 	var definition: Dictionary = entry(hotdog)

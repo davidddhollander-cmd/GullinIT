@@ -48,7 +48,7 @@ func counter() -> StallPortion:
 func capture() -> void:
 	step(2.0)
 	await shot("to-grill")
-	var stand: FoodStall = game.stalls.find_stall(diner,"hotdog_stand")
+	var stand: FoodStall = game.stalls.find_stall(diner,"fish_chips_stand")
 	for frame: int in 600:
 		step(0.02)
 		if diner.service_locked and stand.phase==FoodStall.Phase.PREPARE:

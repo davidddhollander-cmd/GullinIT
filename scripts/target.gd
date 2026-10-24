@@ -414,8 +414,10 @@ func _tick_bite(delta: float) -> void:
 		bite_wait = -1.0
 
 func purchase_stall_type() -> String:
-	# The existing cooked-food grill also supplies the diner's fried fish.
-	return "hotdog_stand" if food_id in ["hotdog","fried_fish"] else "kiosk"
+	if food_id == "fried_fish":
+		# Levels without a fish & chips stand fall back to the grill.
+		return "fish_chips_stand" if stall_service != null and stall_service.find_stall(self,"fish_chips_stand") != null else "hotdog_stand"
+	return "hotdog_stand" if food_id == "hotdog" else "kiosk"
 
 func _tick_shopping(delta: float, gulls: Array[BeachGull] = []) -> void:
 	var stand: FoodStall = stall_service.find_stall(self,purchase_stall_type())

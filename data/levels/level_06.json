@@ -48,6 +48,7 @@
     {"type": "beach_lamp", "x": 470, "y": 151},
     {"type": "beach_lamp", "x": 890, "y": 151},
     {"type": "hotdog_stand", "x": 960, "customer_x": 1000},
+    {"type": "fish_chips_stand", "x": 1030, "customer_x": 1070},
     {"type": "bin", "x": 816},
     {"type": "beach_bench", "x": 850, "y": 153},
     {"type": "umbrella", "x": 1060},

@@ -26,7 +26,7 @@ func find_stall(buyer: BeachTarget, type: String = "") -> FoodStall:
 	var best: FoodStall
 	var gap: float = INF
 	for stand: FoodStall in stalls:
-		if not type.is_empty() and ("hotdog_stand" if stand.hotdog else "kiosk") != type:
+		if not type.is_empty() and stand.stall_type != type:
 			continue
 		var distance: float = absf(stand.position.x-buyer.position.x)
 		if distance < gap:
