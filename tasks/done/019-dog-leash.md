@@ -1,6 +1,6 @@
 # 019 — Off-lead dog stays near its patch
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
