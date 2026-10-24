@@ -2,9 +2,14 @@ extends RefCounted
 
 static func run(check: Callable) -> void:
 	var previous_file: String = ""
-	for hotdog: bool in [false,true]:
-		var entry: Dictionary = VendorArt.entry(hotdog)
-		var label: String = "hotdog vendor" if hotdog else "ice-cream vendor"
+	var entries: Array[Dictionary] = [
+		{"entry": VendorArt.entry(false), "label": "ice-cream vendor"},
+		{"entry": VendorArt.entry(true), "label": "hotdog vendor"},
+		{"entry": JSON.parse_string(FileAccess.get_file_as_string("res://data/vendor_art.json")).vendor_fish_chips, "label": "fish-and-chips vendor"}
+	]
+	for item: Dictionary in entries:
+		var entry: Dictionary = item.entry
+		var label: String = item.label
 		var atlas := Image.load_from_file(ProjectSettings.globalize_path(str(entry.file)))
 		check.call(FileAccess.file_exists(str(entry.source)),label+" preserves untouched generated full-body source")
 		check.call(FileAccess.file_exists(str(entry.base_source)),label+" also preserves original approved full-body source")
