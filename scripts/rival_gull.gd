@@ -69,6 +69,7 @@ func setup(actor: BeachGull, profile: Dictionary, random: RandomNumberGenerator)
 	gull.rival_tint = COLOURS[absi(str(profile.name).hash()) % COLOURS.size()]
 	gull.dive_started.connect(func() -> void: dives += 1)
 	gull.ground_crashed.connect(func() -> void: crashes += 1)
+	gull.carry_source = func() -> String: return carried_food_id if carry_window > 0.0 and carried > 0 else ""
 	gull.refresh_art()
 
 func world_width() -> float:

@@ -62,6 +62,20 @@ var stroke_cooldown: float = 0.0
 var stroke_left: float = 0.0
 var stroke_started: bool = false
 var sprite: AnimatedSprite2D
+var carry_source: Callable ## rivals: returns the held food id ("" when empty); the player reads its own belly
+var carry_food: String = ""
+var carry_body: AnimatedSprite2D ## generated beak-carry frames, shown instead of `sprite` while food is held
+var carry_item: Sprite2D
+var carry_beak: AnimatedSprite2D ## generated upper-beak overlay, drawn over the food
+static var carry_frames_cache: Dictionary = {}
+static var carry_art: Dictionary = {} ## `carry` blocks from data/gull_art.json, by art id
+
+static func carry_for(id: String) -> Dictionary:
+	if carry_art.is_empty():
+		var all: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/gull_art.json"))
+		for key: String in all:
+			carry_art[key] = all[key].get("carry", {})
+	return carry_art.get(id, {})
 var detailed_art: bool = false
 var art_scale: float = 1.0
 var body_scale: float = 1.0 ## boss-sized rivals: multiplies the species art scale
@@ -149,6 +163,13 @@ func resolve_perches(before: Vector2, started: State) -> void:
 func _ready() -> void:
 	sprite = AnimatedSprite2D.new()
 	add_child(sprite)
+	carry_body = AnimatedSprite2D.new()
+	carry_item = Sprite2D.new()
+	carry_beak = AnimatedSprite2D.new()
+	for node: CanvasItem in [carry_body, carry_item, carry_beak]:
+		node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		node.visible = false
+		add_child(node)
 	if rival:
 		rival_badge = ColorRect.new()
 		rival_badge.position = Vector2(-22,-30)
@@ -457,7 +478,87 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 				top = minf(top,(point.rotated(sprite.rotation)+sprite.position).y)
 			rival_badge.position.y = top-12
 			rival_label.position.y = top-12
+	sync_carry()
 	queue_redraw()
+
+func _process(_delta: float) -> void:
+	sync_carry() # food can be swallowed, mugged or dropped after tick(): switch art on the same rendered frame
+
+static func carry_frames(id: String, entry: Dictionary, overlay: bool) -> SpriteFrames:
+	var key: String = id + ("/beak" if overlay else "")
+	if not carry_frames_cache.has(key):
+		var carry: Dictionary = carry_for(id)
+		var texture: Texture2D = load(str(carry.overlay_file if overlay else carry.file)) as Texture2D
+		var result: SpriteFrames = SpriteFrames.new()
+		result.remove_animation(&"default")
+		for clip: String in carry.beak_anchors:
+			result.add_animation(clip)
+			result.set_animation_speed(clip, float(entry.animations[clip].fps))
+			result.set_animation_loop(clip, true)
+			for index: int in carry.overlay_frames[clip]:
+				var atlas: AtlasTexture = AtlasTexture.new()
+				atlas.atlas = texture
+				atlas.region = Rect2(index * int(carry.frame_w), 0, carry.frame_w, carry.frame_h)
+				atlas.filter_clip = true
+				result.add_frame(clip, atlas)
+		carry_frames_cache[key] = result
+	return carry_frames_cache[key]
+
+func held_food_id() -> String:
+	if rival:
+		return str(carry_source.call()) if carry_source.is_valid() else ""
+	if digestion_enabled and digestion.rest <= 0 and not digestion.snacks.is_empty():
+		return str(digestion.snacks[0].id)
+	return ""
+
+## Swap to the beak-carry art while food is held: same transform as `sprite`, food at the
+## per-frame beak anchor, upper beak on top. Falls back to the normal art when food is gone.
+func sync_carry() -> void:
+	carry_food = held_food_id() if is_instance_valid(sprite) else ""
+	var active: bool = not carry_food.is_empty() and not carry_for(art_id).is_empty() and Config.foods.has(carry_food)
+	if not is_instance_valid(carry_body):
+		return
+	if not active:
+		carry_body.visible = false
+		carry_item.visible = false
+		carry_beak.visible = false
+		if is_instance_valid(sprite) and detailed_art and sprite.sprite_frames != null:
+			sprite.visible = true
+		return
+	var clip: StringName = &"glide"
+	var local: int = 0
+	if state == State.GROUNDED:
+		clip = &"walk"
+		local = 7 # idle pose
+		if absf(velocity.x) > 1:
+			local = int(walk_phase / TAU * 8) % 8
+	elif climb:
+		clip = &"fly"
+		local = sprite.frame % 4 if sprite.animation == &"climb" else int(Time.get_ticks_msec() / 100) % 4
+	if carry_body.sprite_frames == null or carry_body.get_meta(&"art_id", "") != art_id:
+		carry_body.sprite_frames = carry_frames(art_id, art_entry, false)
+		carry_beak.sprite_frames = carry_frames(art_id, art_entry, true)
+		carry_body.set_meta(&"art_id", art_id)
+	for part: AnimatedSprite2D in [carry_body, carry_beak]:
+		part.animation = clip
+		part.frame = local
+		part.position = sprite.position
+		part.rotation = sprite.rotation
+		part.scale = sprite.scale
+		part.flip_h = facing < 0
+		part.modulate = sprite.modulate
+		part.material = sprite.material
+		part.visible = true
+	sprite.visible = false
+	var anchor: Array = carry_for(art_id).beak_anchors[String(clip)][local]
+	var offset := Vector2(float(anchor[0]) * (-1.0 if facing < 0 else 1.0), float(anchor[1])) * body_scale
+	var definition: Dictionary = Config.foods[carry_food]
+	carry_item.texture = Config.frames(definition.sprite).get_frame_texture(&"idle", 0)
+	carry_item.scale = Vector2(float(definition.size[0]), float(definition.size[1])) / carry_item.texture.get_size() * body_scale
+	carry_item.position = sprite.position + (offset * Vector2(sprite.scale.x / maxf(art_scale, 0.001), sprite.scale.y / maxf(art_scale, 0.001))).rotated(sprite.rotation)
+	carry_item.rotation = sprite.rotation
+	carry_item.modulate = sprite.modulate
+	carry_item.visible = true
 
 func wind_lift() -> float:
 	return clampf(absf(wind_force) / float(Config.tuning.wind.lift_ref), 0.0, 1.5)

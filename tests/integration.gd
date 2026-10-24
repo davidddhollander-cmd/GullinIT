@@ -255,6 +255,7 @@ func run() -> void:
 			game.beach.queue_redraw()
 			await snapshot("game-pier")
 			await target_checks(game)
+			await carry_pose_checks(game)
 			var pilot: RivalPilot = game.pilots[0]
 			check(pilot.gull.detailed_art and pilot.gull.sprite.sprite_frames.get_frame_texture(&"glide",0).get_size().x > 100,"rival uses full-size gull artwork")
 			pilot.gull.position = Vector2(800,65)
@@ -306,6 +307,61 @@ func run() -> void:
 	DirAccess.remove_absolute(GameState.save_path)
 	print("INTEGRATION: %d checks, %d failures" % [checks,failures])
 	get_tree().quit(0 if failures==0 else 1)
+
+func carry_pose_checks(game: BeachGame) -> void:
+	var player: BeachGull = game.player
+	player.state = BeachGull.State.GLIDE
+	player.climb = false
+	player.invulnerable = 0.0
+	for species: String in ["herring","kittiwake","great-black-backed"]:
+		player.species = species
+		player.refresh_art()
+		player.digestion.snacks.clear()
+		player.digestion.rest = 0
+		for facing: int in [1,-1]:
+			player.facing = facing
+			player.velocity.x = 60.0*facing
+			player.tick(1.0/60,0,0)
+			check(player.sprite.visible and not player.carry_body.visible,species+" uses normal art without food")
+			player.digestion.collect("ice_cream")
+			player.tick(1.0/60,0,0)
+			var anchor: Array = BeachGull.carry_for(player.art_id).beak_anchors.glide[0]
+			var want: Vector2 = player.sprite.position+Vector2(float(anchor[0])*facing,float(anchor[1]))
+			check(player.carry_body.visible and not player.sprite.visible and player.carry_body.animation==&"glide",species+" switches to carry frames on pickup (facing %d)" % facing)
+			check(player.carry_item.visible and player.carry_item.position.distance_to(want)<=1.0,species+" food sits at the beak anchor (facing %d)" % facing)
+			check(player.carry_beak.visible and player.carry_beak.get_index()>player.carry_item.get_index() and player.carry_item.get_index()>player.carry_body.get_index() and player.carry_beak.flip_h==(facing<0),species+" upper beak draws above the food (facing %d)" % facing)
+			player.digestion.drop_current()
+			player.sync_carry()
+			check(player.sprite.visible and not player.carry_body.visible and not player.carry_item.visible and not player.carry_beak.visible,species+" returns to normal art when food is gone")
+	var rival: RivalPilot = game.pilots[0]
+	rival.carried = 5
+	rival.carried_food_id = "ice_cream"
+	rival.carry_window = 3.0
+	rival.gull.sync_carry()
+	check(rival.gull.carry_body.visible and rival.gull.carry_beak.material==rival.gull.sprite.material and rival.gull.carry_body.material==rival.gull.sprite.material,"rival carry art and upper beak share the body tint")
+	var before: Vector2 = rival.gull.carry_item.position-rival.gull.sprite.position
+	var old_scale: float = rival.gull.body_scale
+	rival.gull.body_scale = 2.0*old_scale
+	rival.gull.refresh_art()
+	rival.gull.sync_carry()
+	check(rival.gull.carry_item.position.distance_to(rival.gull.sprite.position+before*2.0)<=1.0,"scaled gull scales the beak anchor")
+	rival.gull.body_scale = old_scale
+	rival.gull.refresh_art()
+	player.species = "herring"
+	player.refresh_art()
+	player.digestion.collect("ice_cream")
+	player.position = Vector2(770,95)
+	rival.gull.position = Vector2(840,95)
+	for face: int in [1,-1]:
+		for actor: BeachGull in [player,rival.gull]:
+			actor.facing = face
+			actor.velocity = Vector2(60.0*face,0)
+			actor.tick(1.0/60,0,0)
+		await snapshot("gull-carry-%s" % ("right" if face > 0 else "left"))
+	player.digestion.drop_current()
+	rival.mug()
+	rival.gull.sync_carry()
+	check(rival.gull.sprite.visible and not rival.gull.carry_body.visible,"mugged rival returns to normal art")
 
 func result_board_checks() -> void:
 	main.menus.show()
