@@ -44,10 +44,13 @@ static func run(suite: Node, check: Callable) -> void:
 		dog_spawns += int(spawn.type == "off_lead_dog")
 	check.call(dog_spawns == 1 and level.twist.id == "off_lead_dog", "level 4 has one off-lead dog spawn and its twist")
 	check.call(level.quests.size() == 2 and level.quests[0].id == "l4_counter" and level.quests[1].id == "l4_outrun" and int(level.quests[1].count) == 3 and level.has("random_quest"), "level 4 quests are counter, outrun x3 plus random")
-	for number: int in [1, 2, 3, 5, 6]:
+	for number: int in [1, 2, 3, 5]:
 		var other: BeachGame = _fresh(suite, number)
 		check.call(other.dog == null, "level %d has no off-lead dog" % number)
 		suite.main.clear_game()
+	var six: BeachGame = _fresh(suite, 6)
+	check.call(six.dog != null, "level 6 has an off-lead dog")
+	suite.main.clear_game()
 	var game: BeachGame = _fresh(suite, 4)
 	var dog: OffLeadDog = game.dog
 	check.call(dog != null and game.spawner.targets.size() == level.spawns.size() - 1, "dog is its own actor, not a target")

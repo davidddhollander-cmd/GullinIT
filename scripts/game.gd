@@ -85,7 +85,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	add_child(actors)
 	spawner.target_created.connect(_wire_target)
 	spawner.setup(actors,level)
-	if _twist() == "off_lead_dog":
+	if level.spawns.any(func(spawn: Dictionary) -> bool: return spawn.type == "off_lead_dog"):
 		for spawn: Dictionary in level.spawns:
 			if spawn.type == "off_lead_dog":
 				dog = OffLeadDog.new()

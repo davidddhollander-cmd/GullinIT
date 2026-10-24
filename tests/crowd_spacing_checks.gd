@@ -41,6 +41,7 @@ static func run_checks(root: Node, check: Callable) -> void:
 	_family_lane(root,check)
 	_lane_hold(root,check)
 	_bin_depth(root,check)
+	_stand_spacing(root,check)
 
 static func _lane_hold(root: Node, check: Callable) -> void:
 	var stage := Node2D.new()
@@ -183,4 +184,30 @@ static func _bench_lanes(root: Node, check: Callable) -> void:
 		Config.sprites.beach_bench.erase("visual_scale")
 	else:
 		Config.sprites.beach_bench.visual_scale = old_scale
+	stage.queue_free()
+
+## Stands keep their distance so each serving window has its own crowd room.
+static func _stand_spacing(root: Node, check: Callable) -> void:
+	var min_gap: float = 140.0
+	var clear: float = 50.0
+	for level: Dictionary in Config.levels:
+		var stands: Array = level.props.filter(func(prop: Dictionary) -> bool: return prop.type in ["kiosk","hotdog_stand","fish_chips_stand"])
+		for i: int in stands.size():
+			for j: int in range(i+1,stands.size()):
+				check.call(absf(float(stands[i].x)-float(stands[j].x)) >= min_gap,"level %d stands %d and %d keep %d px apart" % [level.id,int(stands[i].x),int(stands[j].x),int(min_gap)])
+			for spawn: Dictionary in level.spawns:
+				if spawn.type in ["pier_diner","seafood_vendor","off_lead_dog","sunbather","picnic_family","toddler"]:
+					check.call(absf(float(spawn.x)-float(stands[i].customer_x)) >= clear,"level %d %s at %d clear of stand %d customer slot" % [level.id,spawn.type,int(spawn.x),int(stands[i].x)])
+	var stage := Node2D.new()
+	root.add_child(stage)
+	var spawner := BeachSpawner.new()
+	spawner.setup(stage,{"seed":1,"id":1,"time_limit":90.0,"awareness_mult":1.0,"props":[],"spawns":[{"type":"sunbather","x":100.0}]})
+	var sleeper: BeachTarget = spawner.targets[0]
+	var rival := BeachGull.new()
+	rival.rival = true
+	rival.state = BeachGull.State.GROUNDED
+	rival.position = Vector2(105,160)
+	sleeper._tick_sleep(0.0,[rival])
+	check.call(sleeper.sleep_state == BeachTarget.SleepState.WAKING,"rival standing on a sleeping sunbather wakes them at once")
+	rival.free()
 	stage.queue_free()

@@ -97,6 +97,7 @@ enum SleepState { SLEEPING, WAKING, AWAKE }
 var sleep_state: SleepState = SleepState.SLEEPING
 var sleep_pecks: int = 0
 var rise_remaining: float = 0.0
+const STEP_ON_RADIUS: float = 18.0
 
 func register_bag_peck() -> void:
 	if sleep_state != SleepState.SLEEPING:
@@ -107,9 +108,16 @@ func register_bag_peck() -> void:
 		rise_remaining = float(Config.tuning.world.sunbather_rise_time)*reaction_delay
 	queue_redraw()
 
-func _tick_sleep(delta: float) -> bool:
+func _tick_sleep(delta: float, gulls: Array[BeachGull] = []) -> bool:
 	if kind != "sunbather" or sleep_state == SleepState.AWAKE:
 		return false
+	# A rival standing on the sleeper wakes them at once; only pecks at the bag are protected.
+	if sleep_state == SleepState.SLEEPING:
+		for gull: BeachGull in gulls:
+			if gull.rival and gull.state == BeachGull.State.GROUNDED and absf(gull.position.x-position.x) < STEP_ON_RADIUS:
+				sleep_state = SleepState.WAKING
+				rise_remaining = float(Config.tuning.world.sunbather_rise_time)*reaction_delay
+				break
 	# Neither proximity nor first-burst theft can bypass the four protected hits.
 	alert = 0.0
 	defense = 0.0
@@ -294,7 +302,7 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	mum_swat_time = maxf(0,mum_swat_time-delta)
 	action_pose_time = maxf(0, action_pose_time-delta)
 	lifeguard_whistle_time = maxf(0,lifeguard_whistle_time-delta)
-	if _tick_sleep(delta):
+	if _tick_sleep(delta,gulls):
 		return
 	var moved: bool = false
 	recover = maxf(0.0, recover - delta)

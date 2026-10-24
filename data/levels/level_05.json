@@ -27,8 +27,8 @@
   "spawns": [
     {"type": "kiosk_customer", "x": 555, "food_id": "hotdog", "appearance": "shopper_mullet", "station": "hotdogs", "patrol_radius": 14},
     {"type": "kiosk_customer", "x": 680, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "hotdogs", "patrol_radius": 12},
-    {"type": "pier_diner", "x": 1000, "station": "pier_dining", "patrol_radius": 8},
-    {"type": "pier_diner", "x": 1140, "station": "pier_dining", "patrol_radius": 8}
+    {"type": "pier_diner", "x": 1075, "station": "pier_dining", "patrol_radius": 8},
+    {"type": "pier_diner", "x": 1150, "station": "pier_dining", "patrol_radius": 8}
   ],
   "props": [
     {"type": "beach_palm", "x": 125, "y": 148},
@@ -44,7 +44,7 @@
     {"type": "bin", "x": 790},
     {"type": "bin", "x": 860},
     {"type": "beach_bench", "x": 895, "y": 153},
-    {"type": "umbrella", "x": 1040},
+    {"type": "umbrella", "x": 1075},
     {"type": "bin", "x": 1160},
     {"type": "beach_bench", "x": 1185, "y": 153},
     {"type": "beach_rocks", "x": 1255, "y": 172}
