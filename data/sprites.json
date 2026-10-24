@@ -4445,18 +4445,18 @@
     "file": "res://assets/sprites/retro-old-man-stick-32bit.png",
     "frame_w": 128,
     "frame_h": 128,
-    "visual_scale": 0.5,
-    "art_height": 40,
-    "sprite_offset_y": -26,
+    "visual_scale": 0.3,
+    "art_height": 24,
+    "sprite_offset_y": -16,
     "animations": {},
     "food_anchors": {
-      "idle": [[11, -22]],
-      "walk": [[11, -22]],
-      "walk_left": [[11, -22]],
-      "eat": [[11, -26]],
-      "alert": [[11, -22]],
-      "run": [[11, -22]],
-      "stick_hit": [[11, -22]]
+      "idle": [[7, -13]],
+      "walk": [[7, -13]],
+      "walk_left": [[7, -13]],
+      "eat": [[7, -16]],
+      "alert": [[7, -13]],
+      "run": [[7, -13]],
+      "stick_hit": [[7, -13]]
     }
   }
 }

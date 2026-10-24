@@ -57,7 +57,7 @@ static func run(harness: Node, check: Callable) -> void:
 	definition.spawns = []
 	spawner.setup(holder,definition)
 	var man := spawner.create("kiosk_customer",500,{"appearance":"old_man","food_id":"ice_cream"})
-	check.call(man.sprite.scale == Vector2(0.5,0.5) and man.art_height() == 40.0,"old man uses the adult scale")
+	check.call(man.sprite.scale == Vector2(0.3,0.3) and man.art_height() == 24.0,"old man is drawn 40% smaller than the adult scale")
 	for facing: float in [1.0,-1.0]:
 		man.facing = facing
 		man.update_art_pose(true)
