@@ -1,6 +1,6 @@
 # 027 — Smaller casts; no overlapping props
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
