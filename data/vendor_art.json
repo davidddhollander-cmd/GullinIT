@@ -36,5 +36,24 @@
       "work_b": 10,
       "turn_back": 11
     }
+  },
+  "vendor_fish_chips": {
+    "file": "res://assets/sprites/vendor-fish-chips-full-body-v1.png",
+    "source": "res://assets/reference/fish-chips-stand-v1/vendor-fish-chips-turn-source.png",
+    "base_source": "res://assets/reference/fish-chips-stand-v1/vendor-fish-chips-full-body-source.png",
+    "base_atlas": "res://assets/sprites/vendor-fish-chips-full-body-v1-base.png",
+    "frame_w": 128,
+    "frame_h": 128,
+    "frames": 12,
+    "visual_scale": 0.5,
+    "art_height": 40,
+    "sole": 116,
+    "sprite_offset_y": -26,
+    "poses": {
+      "turn_away": 8,
+      "work_a": 9,
+      "work_b": 10,
+      "turn_back": 11
+    }
   }
 }

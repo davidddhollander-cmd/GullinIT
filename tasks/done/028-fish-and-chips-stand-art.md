@@ -1,6 +1,6 @@
 # 028 — Fish & chips stand and vendor (art)
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Codex
 Depends on: none
@@ -17,10 +17,18 @@ Playnotes, 24 Oct: "there's no artwork for grill or fish n' chip stand." Pier di
 5. Register the sprites in `data/sprites.json` / `data/vendor_art.json` under new ids (`fish_chips_stand`, `vendor_fish_chips`). Wiring the stall into gameplay (`stall_service`, the diner's `purchase_stall_type`, level placement) is a follow-up Sonnet task; don't change gameplay code.
 
 ## Done when (acceptance)
-- [ ] Stall and vendor sprites and art entries exist; a preview image shows them next to the kiosk and hot-dog stand at in-game size
-- [ ] Art-check tests (vendor/stall art checks) cover the new ids
-- [ ] `tools/validate.ps1`: 0 failures
+- [x] Stall and vendor sprites and art entries exist; a preview image shows them next to the kiosk and hot-dog stand at in-game size
+- [x] Art-check tests (vendor/stall art checks) cover the new ids
+- [x] `tools/validate.ps1`: 0 failures
 
 ## Report
+
+- Files changed: added four untouched ImageGen source PNGs and prompt records under `assets/reference/fish-chips-stand-v1/`; added native stall, roof-sign, eight-pose base vendor and twelve-pose final vendor runtime assets plus import metadata; registered `fish_chips_stand` and `vendor_fish_chips`; added deterministic import/preview tools; extended vendor and retro-environment art checks; added `assets/previews/fish-chips-stand-v1-comparison.png`.
+- Tests: required Godot import completed successfully. Direct integration run: `INTEGRATION: 12689 checks, 0 failures`. `tools/validate.ps1`: `INTEGRATION: 12689 checks, 0 failures`.
+- Decisions: used a distinct middle-aged fish-and-chips vendor at the established `visual_scale` 0.5 and 80-pixel source-art height. Preserved complete full-body source art and clips it only in the preview/runtime convention. Kept the 52x56 body separate from the 256-pixel runtime roof sign, matching the existing stall pipeline. No gameplay code was changed.
+- Built-in image generator prompts and reference roles are recorded in `assets/reference/fish-chips-stand-v1/PROMPTS.md`.
+- Branch: `codex/028-fish-and-chips-stand-art`
+- Implementation commit: `3f2b152`
+- Completion bookkeeping: branch HEAD (reported in handoff after this report commit)
 
 ## Review notes

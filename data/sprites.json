@@ -2426,6 +2426,20 @@
       }
     }
   },
+  "fish_chips_stand": {
+    "file": "res://assets/sprites/retro-fish-chips-stand-32bit.png",
+    "frame_w": 52.0,
+    "frame_h": 56.0,
+    "animations": {
+      "idle": {
+        "frames": [
+          0.0
+        ],
+        "fps": 1.0,
+        "loop": true
+      }
+    }
+  },
   "beach_parasol": {
     "file": "res://assets/sprites/retro-beach-parasol-32bit.png",
     "frame_w": 40.0,
