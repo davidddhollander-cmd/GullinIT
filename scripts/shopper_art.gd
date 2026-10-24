@@ -1,6 +1,6 @@
 class_name ShopperArt
 extends RefCounted
-const APPEARANCES: Array[String] = ["kiosk_customer","shopper_mullet","shopper_sundress"]
+const APPEARANCES: Array[String] = ["kiosk_customer","shopper_mullet","shopper_sundress","old_man"]
 
 static func supports_bench(target: BeachTarget) -> bool:
 	return target.sprite.sprite_frames.has_animation(&"seated_idle")
@@ -15,6 +15,9 @@ static func update(target: BeachTarget,moving: bool) -> void:
 		var count: int = target.sprite.sprite_frames.get_frame_count(clip)
 		target.sprite.set_frame_and_progress(mini(count-1,int(visit.progress()*count)),0.0)
 		BeachgoerArt.align_food(target)
+		return
+	if target.shopper_appearance == "old_man":
+		_update_old_man(target,moving)
 		return
 	var pose: StringName = &"walk" if moving else &"idle"
 	var original_pilot: bool = target.shopper_appearance == "kiosk_customer"
@@ -56,3 +59,31 @@ static func _timed_pose(target: BeachTarget,duration: float) -> void:
 	var count: int = target.sprite.sprite_frames.get_frame_count(target.sprite.animation)
 	var progress: float = clampf(1.0-target.reaction.timer/duration,0.0,0.999)
 	target.sprite.set_frame_and_progress(clampi(floori(progress*count),0,count-1),0.0)
+
+# The old man has his own clip set; "_left" variants are drawn, so he is never mirrored.
+static func _update_old_man(target: BeachTarget,moving: bool) -> void:
+	var left: bool = target.facing < 0
+	var pose: StringName = &"walk" if moving else &"idle"
+	var hit_frame: int = -1
+	if not target.leaving:
+		if target.action_pose_time > 0:
+			pose = &"stick_hit"
+			hit_frame = clampi(int((0.28-target.action_pose_time)/0.28*6.0),0,5)
+		elif target.reaction.swat_timer >= 0:
+			pose = &"stick_hit"
+			hit_frame = 0 if target.reaction.swat_timer > 0.2*target.reaction_delay else 1
+		elif target.biting > 0.0 and not moving:
+			pose = &"eat"
+		elif target.reaction.mode == "chase" and moving:
+			pose = &"run"
+		elif target.reaction.mode in ["warning","follow","give_up"] or (not target.food and target.recover > 0 and not moving) or (not moving and target.alert >= float(Config.tuning.world.suspicious)):
+			pose = &"alert"
+	var clip: StringName = pose
+	if left and pose in [&"walk",&"run",&"stick_hit"]:
+		clip = StringName(String(pose)+"_left")
+	target.sprite.flip_h = left and clip == pose
+	target.sprite.play(clip)
+	if hit_frame >= 0:
+		target.sprite.pause()
+		target.sprite.set_frame_and_progress(hit_frame,0.0)
+	BeachgoerArt.align_food(target)

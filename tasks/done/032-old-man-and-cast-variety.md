@@ -1,6 +1,6 @@
 # 032 — Old man joins the cast (replacing, not adding); maximise variety per level
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -33,5 +33,18 @@ Codex delivered the old man with a walking stick (art only: `scripts/old_man_art
 - [ ] One capture run at the end: 0 failures. A screenshot of the old man on the beach, path in the Report.
 
 ## Report
+Branch `sonnet/032-old-man-and-cast-variety`. Tests: `INTEGRATION: 13594 checks, 0 failures` (capture run, no SCRIPT ERROR). Screenshot: `test-output/old-man-on-beach.png` (worktree).
+
+Shopper casts (before -> after; looks: K=kiosk_customer, M=mullet, S=sundress, O=old man):
+- L2: S -> S (unchanged; task scope is L3-6)
+- L3: M, S, K (+diner) -> M, O, K (+diner)
+- L4: sunbathers male_blue/male_red/female_blue; M, S -> same sunbathers; M, O
+- L5: M, S (+2 diners) -> M, O (+2 diners)
+- L6: female_blue sunbather; M, S, M (+2 diners) -> same sunbather; M, O, S (+2 diners), duplicate mullet fixed
+Head counts unchanged; every bench level keeps a bench-capable shopper (seated starter verified in test).
+
+Changes: `old_man` added to `ShopperArt.APPEARANCES`, `data/sprites.json` entry (adult scale 0.5, art height 40, food anchors), `Config.frames("old_man")` returns `OldManArt.frames()`, `ShopperArt._update_old_man` (walk/idle/eat/alert/run, stick_hit for windup and swat, uses the drawn `_left` clips instead of mirroring). `BeachSpawner.create` now picks the least-used look (shoppers and sunbathers gender+colour) for any spawn without an authored appearance, covering auto-assign, replacements and station refills. Trailing comma removed from level_03.json. New `tests/cast_variety_checks.gd` (120 s-style sim per level); patrol check updated for left clips.
+
+Decisions: the old man has no seated clips so `supports_bench` excludes him automatically. Windup uses stick_hit frames 0-1; swat maps the 0.28 s action time across all 6 stick_hit frames. Carry/handover/kick/pickup clips unused (no matching gameplay hook). Food hand anchor is an approximate shared point (11,-22), eat clip (11,-26); not tuned per frame. Ties in least-used look take list order (deterministic).
 
 ## Review notes

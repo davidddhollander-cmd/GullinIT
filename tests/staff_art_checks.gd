@@ -45,6 +45,15 @@ static func run(harness: Node,check: Callable) -> void:
 	guard.tick(0.1,[])
 	check.call(guard.sprite.animation==&"walk" and not guard.food_sprite.visible,"lifeguard patrols without carrying food")
 	await harness.snapshot("staff-patrol-and-shopper")
+	var old_man := game.spawner.create("kiosk_customer",550,{"food_id":"ice_cream","appearance":"old_man"})
+	old_man.update_art_pose(true)
+	shopper.hide()
+	guard.hide()
+	await harness.snapshot("old-man-on-beach")
+	shopper.show()
+	guard.show()
+	game.spawner.targets.erase(old_man)
+	old_man.queue_free()
 	var whistles := {"count":0,"visible":false}
 	guard.whistled.connect(func(_owner: BeachTarget) -> void:
 		whistles.count += 1

@@ -10,11 +10,11 @@ var replacements: Array[Dictionary] = []
 var visual_offsets: Dictionary = {}
 var previous_x: Dictionary = {}
 var bag_rng: RandomNumberGenerator = RandomNumberGenerator.new()
-var shopper_serial: int = 0
 var benches: BenchRegistry = BenchRegistry.new()
 var lane_holds: Dictionary = {} # target -> {"y": held lane offset, "t": seconds left}
 var depth_props: Array[Rect2] = [] # x-extent and base y (as position.y) of ground props
 const DEPTH_PROP_TYPES: Array[String] = ["bin","wheelie_bin","beach_bench","beach_chair_blue","beach_castle","beach_rocks"]
+const SUNBATHER_LOOKS: Array[String] = ["male_red","male_blue","female_red","female_blue"]
 const BEHIND_PROP_Z: int = 0 # below ordinary scenery (z 1); crabs in the rear lane share it
 const CROWD_OFFSETS: Array[Vector2] = [Vector2.ZERO, Vector2(26,-14), Vector2(-26,-14), Vector2(26,12), Vector2(-26,12), Vector2(52,0), Vector2(-52,0)]
 
@@ -23,7 +23,6 @@ func setup(owner_node: Node2D, definition: Dictionary) -> void:
 	level = definition
 	rng.seed = int(level.seed)
 	bag_rng.seed = int(level.seed) + 97
-	shopper_serial = 0
 	benches.setup(level.props)
 	depth_props.clear()
 	for prop: Dictionary in level.props:
@@ -71,11 +70,9 @@ func _seat_starter() -> void:
 func create(kind: String, x: float, spawn: Dictionary = {}) -> BeachTarget:
 	var target: BeachTarget = BeachTarget.new()
 	parent.add_child(target)
-	if kind == "kiosk_customer":
+	if kind in ["kiosk_customer","sunbather"] and not spawn.has("appearance"):
 		spawn = spawn.duplicate()
-		if not spawn.has("appearance"):
-			spawn.appearance = ShopperArt.APPEARANCES[shopper_serial % ShopperArt.APPEARANCES.size()]
-		shopper_serial += 1
+		spawn.appearance = _least_used_look(kind)
 	target.setup(kind,x,rng,level.awareness_mult,spawn)
 	target.routine.setup(target,level,spawn)
 	target.bench_visit.registry = benches
@@ -86,6 +83,24 @@ func create(kind: String, x: float, spawn: Dictionary = {}) -> BeachTarget:
 	targets.append(target)
 	target_created.emit(target)
 	return target
+
+# Look (shopper appearance or sunbather gender+colour) fewest people on the beach already wear; ties take list order.
+func _least_used_look(kind: String) -> String:
+	var looks: Array = ShopperArt.APPEARANCES if kind == "kiosk_customer" else SUNBATHER_LOOKS
+	var best: String = looks[0]
+	var best_count: int = 1 << 30
+	for look: String in looks:
+		var count: int = 0
+		for other: BeachTarget in targets:
+			if is_instance_valid(other) and other.kind == kind and ((other.shopper_appearance if kind == "kiosk_customer" else _sunbather_look(other)) == look):
+				count += 1
+		if count < best_count:
+			best = look
+			best_count = count
+	return best
+
+func _sunbather_look(target: BeachTarget) -> String:
+	return ("female_" if target.sunbather_female else "male_")+("blue" if target.sunbather_blue else "red")
 
 # Random bag style that no other sunbather in the level is using; reuses the least-used style if all are taken.
 func _free_bag_variant() -> int:

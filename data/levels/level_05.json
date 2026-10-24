@@ -26,7 +26,7 @@
   ],
   "spawns": [
     {"type": "kiosk_customer", "x": 555, "food_id": "hotdog", "appearance": "shopper_mullet", "station": "hotdogs", "patrol_radius": 14},
-    {"type": "kiosk_customer", "x": 680, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "hotdogs", "patrol_radius": 12},
+    {"type": "kiosk_customer", "x": 680, "food_id": "hotdog", "appearance": "old_man", "station": "hotdogs", "patrol_radius": 12},
     {"type": "pier_diner", "x": 1075, "station": "pier_dining", "patrol_radius": 8},
     {"type": "pier_diner", "x": 1150, "station": "pier_dining", "patrol_radius": 8}
   ],

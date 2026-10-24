@@ -78,6 +78,9 @@ func reload_data() -> bool:
 func frames(sprite_id: String) -> SpriteFrames:
 	if frames_cache.has(sprite_id):
 		return frames_cache[sprite_id]
+	if sprite_id == "old_man":
+		frames_cache[sprite_id] = OldManArt.frames()
+		return frames_cache[sprite_id]
 	var entry: Dictionary = sprites[sprite_id]
 	var result: SpriteFrames = SpriteFrames.new()
 	result.remove_animation(&"default")
