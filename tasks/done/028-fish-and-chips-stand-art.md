@@ -1,6 +1,6 @@
 # 028 — Fish & chips stand and vendor (art)
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: none
