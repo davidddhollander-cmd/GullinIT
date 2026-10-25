@@ -17,7 +17,7 @@ Status key: `open` (not yet actioned), `tasked` (a task file exists), `fixed`.
 | # | Feedback | Status |
 |---|----------|--------|
 | F1 | Overshoots the snack on the dive; the gull carries a lot of speed. May be learning, but a little more slowdown on releasing flap would make lining up a dive fairer. | open |
-| F2 | Lesson 3 showed `DIVE: B / TAP X` on keyboard and switched to `SHIFT / E` once the mouse moved. Keyboard-only players see controller prompts until they touch the mouse. | open |
+| F2 | Lesson 3 showed `DIVE: B / TAP X` on keyboard and switched to `SHIFT / E` once the mouse moved. Keyboard-only players see controller prompts until they touch the mouse. | fixed (suggestion 1) |
 
 **Unknown:** no clean snatch landed yet, so no verdict on whether stealing feels great. Worth asking for a follow-up report, and checking the `first_steal` seconds in analytics for the Training Day cohort.
 
@@ -41,5 +41,7 @@ Status key: `open` (not yet actioned), `tasked` (a task file exists), `fixed`.
 3. **Make the overshoot readable.** A cheap aid for lesson 3 and early levels: show a faint aim line or target marker on the snack while a dive is possible, so the player can judge the intercept earlier. This needs a design decision, so treat it as optional after 1 and 2.
 4. **Measure it.** Add an analytics event (or extend `level_end`) for dive outcomes: dive started, peck window reached, snatched, overshoot (passed the target's x without a peck). Then the "is this just learning?" question can be answered from data rather than anecdote.
 5. **Follow up on the unknown.** Ask this player (itch.io comments are the feedback link in `data/demo.json`) whether stealing feels good once F1 is eased and they have landed a snatch.
+
+**Done 2026-10-25:** suggestion 1 (the last device used now sets the prompts; WASD/arrows steer without switching to pad prompts; stick drift under 0.3 is ignored; checks in `tests/touch_stick_checks.gd`) and suggestion 4 (`level_end` now carries `dives`, `dive_pecks`, `dive_snatches` and `dive_overshoots`; an overshoot is a dive that ends past the snack nearest its dive line without a snatch; checks in `tests/analytics_checks.gd`). Suggestions 2, 3 and 5 are still open.
 
 **Suggested task split (Opus to confirm):** one Sonnet task covering suggestions 1 and 2 (both small, both testable); suggestions 3 and 4 as separate later tasks.
