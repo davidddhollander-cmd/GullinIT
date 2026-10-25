@@ -171,15 +171,15 @@ func setup(owner_game: BeachGame) -> void:
 		BeachUI.label(intro,"NO TIMER. NO SCORE. NO MANNERS.",8,Color("80bcb8"))
 		BeachUI.label(intro,"FOLLOW THE GOLDEN RING.",8,BeachUI.GOLD)
 	else:
-		BeachUI.label(intro,"15 SNATCHES. NO TIMER." if game.casual else str(game.level.get("objective","STEAL LUNCH. MAKE IT COUNT.")))
-		BeachUI.label(intro,"CALM AIR" if game.wind.direction == 0 else ("WIND > TOWARD PIER" if game.wind.direction > 0 else "WIND < TOWARD FAMILY END"))
-		var quote: Label = BeachUI.label(intro,Config.quips.rivals[(int(game.level.id)-1)%3])
-		quote.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		quote.custom_minimum_size.x = 234
-		BeachUI.label(intro,"HOLD A / SPACE / LEFT CLICK TO FLAP",8,Color("80bcb8"))
-		BeachUI.label(intro,"DIVE: B / SHIFT / RIGHT CLICK",8,Color("80bcb8"))
-		BeachUI.label(intro,"TAP E / X / PECK DURING THE DIVE",8,BeachUI.GOLD)
-		BeachUI.label(intro,"AIM UP TO SWOOP. CRASH = HALF POINTS!",8,Color("80bcb8"))
+		# Just the pass mark and the quests; controls live in the training day.
+		if game.level.has("objective"):
+			BeachUI.label(intro,str(game.level.objective))
+		var seconds: int = int(game.level.time_limit)
+		BeachUI.label(intro,"15 SNATCHES. NO TIMER." if game.casual else "SCORE %d IN %d:%02d TO PASS" % [int(game.level.stars[0]),seconds/60,seconds%60])
+		if not game.quests.quests.is_empty():
+			BeachUI.label(intro,"QUESTS",8,BeachUI.GOLD)
+			for quest: Dictionary in game.quests.quests:
+				BeachUI.label(intro,"- %s  +%d" % [quest.text,int(quest.bonus)],8,Color("80bcb8"))
 	if int(game.level.id) == 1:
 		intro_panel.mouse_filter = MOUSE_FILTER_STOP
 		start_button = BeachUI.button(intro,"LET'S GULL IT",game.dismiss_intro)
