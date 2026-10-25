@@ -265,7 +265,7 @@ static func _touch_checks(suite: Node, check: Callable) -> void:
 	aim_tap.position = Vector2(160, 160)
 	aim_tap.pressed = true
 	game.input._input(aim_tap)
-	check.call(game.input.touch_active and game.input.aim_finger == 3, "former PECK position now steers")
+	check.call(game.input.touch_active and game.input.aim_finger == 3 and game.input.stick_anchor == Vector2(160, 160), "former PECK position now starts the stick")
 	game.input.clear_touch()
 	game.input.touch_dive = false
 	game.input.touch_visible = true

@@ -167,6 +167,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	effects.z_index = 5
 	add_child(effects)
 	input = GullInput.new()
+	input.game = self
 	add_child(input)
 	input.touch_visible = DisplayServer.is_touchscreen_available() or bool(GameState.options.touch)
 	camera = Camera2D.new()
@@ -295,10 +296,29 @@ func keen_target() -> BeachTarget:
 		return null
 	var best: BeachTarget = null
 	for target: BeachTarget in spawner.targets + stalls.portions:
-		if not target.food or target.leaving or target.kind == "sunbather" or (target.info.twist == "shield" and target.defense > 0):
+		if not snatchable(target):
 			continue
 		if best == null or target.food_value() > best.food_value():
 			best = target
+	return best
+
+func snatchable(target: BeachTarget) -> bool:
+	return target.food and not target.leaving and target.kind != "sunbather" and not (target.info.twist == "shield" and target.defense > 0)
+
+## Touch aim assist: the snatchable food nearest the aimed direction, within range and cone.
+func assist_target(origin: Vector2, dir: Vector2, max_range: float, max_angle: float) -> BeachTarget:
+	var best: BeachTarget = null
+	var best_angle: float = max_angle
+	for target: BeachTarget in spawner.targets + stalls.portions:
+		if not snatchable(target):
+			continue
+		var offset: Vector2 = target.food_position() - origin
+		if offset.length() > max_range:
+			continue
+		var angle: float = absf(dir.angle_to(offset))
+		if angle <= best_angle:
+			best = target
+			best_angle = angle
 	return best
 
 func slowmo_ready() -> bool:
@@ -739,7 +759,7 @@ func training_text() -> String:
 	match lesson:
 		0:
 			if training_took_off:
-				return "STEER RIGHT: %s\nFLY TOWARD THE GOLDEN RING" % ("DRAG" if input.touch_visible else ("LEFT STICK" if input.gamepad else "MOUSE / WASD"))
+				return "STEER RIGHT: %s\nFLY TOWARD THE GOLDEN RING" % ("DRAG THUMB" if input.touch_visible else ("LEFT STICK" if input.gamepad else "MOUSE / WASD"))
 			return "HOLD %s TO TAKE OFF\nTHEN STEER RIGHT TOWARD THE RING" % flap
 		1: return "RELEASE FLAP. AIM DOWN TO LAND\nWALK OVER A GOLDEN CRUMB"
 		2:
