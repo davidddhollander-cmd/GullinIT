@@ -12,24 +12,34 @@ func _ready() -> void:
 	background = BeachBackdrop.new()
 	add_child(background)
 	background.sunset = true
+	# Only x >= ~207 shows beside the menu panel. Hut, castle and palm sit further back (y 142-148);
+	# sunbathers and towels draw above every prop (z 3), so parasol poles stay behind them.
 	background.setup([
-		{"type":"beach_lamp","x":190},{"type":"beach_hut","x":212},{"type":"beach_parasol","x":244},
-		{"type":"beach_parasol_blue","x":282},{"type":"beach_castle","x":305},{"type":"beach_palm","x":317}
+		{"type":"beach_lamp","x":TitleFlyby.LAMP_X,"y":TitleFlyby.LAMP_BASE_Y},{"type":"beach_hut","x":240,"y":148},{"type":"beach_parasol","x":244,"y":152},
+		{"type":"beach_parasol_blue","x":282,"y":162},{"type":"beach_castle","x":304,"y":144},{"type":"beach_palm","x":172,"y":142}
 	])
-	for spec: Array in [[false,true,244.0],[true,false,282.0]]:
+	var lamp: AnimatedSprite2D = background.prop_sprites[0]
+	lamp.scale = Vector2.ONE * TitleFlyby.LAMP_SCALE
+	lamp.position.y = TitleFlyby.LAMP_BASE_Y - 90.0 * TitleFlyby.LAMP_SCALE * 0.5
+	background.prop_sprites[1].z_index = 1 # hut behind the red parasol (props are listed in setup order)
+	for spec: Array in [[false,true,244.0,0.0],[true,false,282.0,10.0]]:
 		var towel := SunbatherTowel.new()
 		towel.blue = spec[0]
 		towel.female = spec[1]
-		towel.position = Vector2(spec[2],160)
+		towel.position = Vector2(spec[2],152.0 + spec[3])
+		towel.z_index = 3
 		background.add_child(towel)
 		var sunbather: AnimatedSprite2D = AnimatedSprite2D.new()
 		sunbather.sprite_frames = SunbatherArt.frames(spec[0],spec[1])
 		sunbather.play(&"rest")
 		sunbather.scale = Vector2.ONE * AdultPixelArt.DISPLAY_SCALE
 		sunbather.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		sunbather.position = Vector2(spec[2],134)
+		sunbather.position = Vector2(spec[2],126.0 + spec[3])
+		sunbather.z_index = 3
 		background.add_child(sunbather)
-	background.add_child(TitleFlyby.new())
+	var flyby := TitleFlyby.new()
+	flyby.z_index = 4
+	background.add_child(flyby)
 	var layer: CanvasLayer = CanvasLayer.new()
 	layer.layer = 5
 	add_child(layer)
@@ -62,7 +72,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			screen = "pick"
 			menus.show()
 			menus.gull_picker()
-			Audio.play_music("title")
+			Audio.stop_music()  # selection screens: gull calls stay audible
 		"gull":
 			if Config.species.species.has(str(payload)) and GameState.gull_owned(str(payload)):
 				GameState.options.gull = str(payload)
@@ -74,7 +84,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 				screen = "shop"
 				menus.show()
 				menus.shop()
-				Audio.play_music("title")
+				Audio.stop_music()  # selection screens: gull calls stay audible
 		"buy":
 			var id: String = str(payload)
 			var price: int = int(Config.perks.perks[id].price) if Config.perks.perks.has(id) else (int(Config.species.species[id].price) if Config.species.species.has(id) else -1)
@@ -85,7 +95,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			screen = "select"
 			menus.show()
 			menus.level_select(casual)
-			Audio.play_music("title")
+			Audio.stop_music()  # selection screens: gull calls stay audible
 		"start":
 			if GameState.unlocked(int(payload)):
 				# The Training Day card always opens lessons, even on a completed save.

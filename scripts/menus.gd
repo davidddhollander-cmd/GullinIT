@@ -66,17 +66,15 @@ func title() -> void:
 	row.add_child(buttons)
 	BeachUI.button(buttons,"ARCADE  >",func() -> void: choose("arcade"),115).grab_focus()
 	BeachUI.button(buttons,"CASUAL  /  PRACTICE",func() -> void: choose("casual"),115)
+	var coming: Button = BeachUI.button(buttons,"VS / COOP - LATER",func() -> void: pass,115)
+	coming.name = "ComingSoonButton"
+	coming.disabled = true
+	coming.custom_minimum_size.y = 15
 	var small: HBoxContainer = HBoxContainer.new()
 	buttons.add_child(small)
 	BeachUI.button(small,"OPTIONS",func() -> void: choose("options"))
 	if not OS.has_feature("web"):
 		BeachUI.button(small,"QUIT",func() -> void: choose("quit"))
-	var shop: Button = BeachUI.button(small,"SHOP" if GameState.shop_open() else "SHOP - LVL 6",func() -> void: choose("shop"))
-	shop.name = "ShopButton"
-	shop.disabled = not GameState.shop_open()
-	small.move_child(shop,1)
-	hint(content,"AIM. CLIMB. DIVE. SNATCH.")
-	hint(content,"MOUSE / KEYS / PAD / TOUCH")
 
 func level_select(casual: bool) -> void:
 	var trained: bool = bool(GameState.entry(1).get("training_complete", false))
@@ -99,10 +97,11 @@ func level_select(casual: bool) -> void:
 		var record: Dictionary = GameState.entry(id)
 		var unlocked: bool = GameState.unlocked(id)
 		var stars: String = "*".repeat(int(record.get("stars",0)))
-		var status: String = "FULL GAME" if GameState.demo_locked(id) else ("LOCKED" if not unlocked else (("REPLAY LESSONS" if trained else "BEGIN LESSON") if id == 1 else "BEST %d" % int(record.get("best",0))))
-		var quest_total: int = (level.get("quests",[]) as Array).size() + int(level.has("random_quest")) if id > 1 or trained else 0
-		var quest_line: String = "Q %d/%d" % [(record.get("quests",[]) as Array).size(),quest_total] if unlocked and quest_total > 0 else ""
-		var caption: String = "%02d %s\n%s\n%s" % [id,("%s %s" % [stars,quest_line]).strip_edges(),level.name.to_upper().replace(" ","\n"),status]
+		var status: String = "FULL GAME" if GameState.demo_locked(id) else ("LOCKED" if not unlocked else (("REPLAY LESSONS" if trained else "BEGIN LESSON") if id == 1 else ""))
+		var caption: String = "%02d %s
+%s
+%s" % [id,stars,level.name.to_upper().replace(" ","
+"),status]
 		var button: Button = BeachUI.button(grid,caption,func() -> void: choose("start",id),82)
 		button.size_flags_horizontal = SIZE_EXPAND_FILL
 		button.size_flags_vertical = SIZE_EXPAND_FILL

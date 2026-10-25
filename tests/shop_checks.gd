@@ -19,8 +19,7 @@ static func run(suite: Node, check: Callable) -> void:
 	# SHOP button: always there, disabled until Stage 1 is beaten.
 	main._navigate("title")
 	await suite.settle()
-	var shop_button: Button = main.menus.find_child("ShopButton", true, false) as Button
-	check.call(shop_button != null and shop_button.disabled, "SHOP is disabled before the Stage 1 boss is beaten")
+	check.call(main.menus.find_child("ShopButton", true, false) == null, "the main menu has no SHOP button")
 	suite.layout(main.menus)
 	suite.menu_font_grid(main.menus)
 	main._navigate("shop")
@@ -28,11 +27,7 @@ static func run(suite: Node, check: Callable) -> void:
 	GameState.set_flag("stage1_complete")
 	main._navigate("title")
 	await suite.settle()
-	shop_button = main.menus.find_child("ShopButton", true, false) as Button
-	check.call(not shop_button.disabled, "SHOP is enabled after stage1_complete")
-	suite.layout(main.menus)
-	suite.menu_font_grid(main.menus)
-	shop_button.pressed.emit()
+	main._navigate("shop")
 	await suite.settle()
 	check.call(main.screen == "shop", "SHOP opens the feather shop")
 	# Poor: everything greyed, buying does nothing.

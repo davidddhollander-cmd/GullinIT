@@ -181,8 +181,8 @@ static func run_game(suite: Node, check: Callable) -> void:
 			card_two = button.text
 		elif button.text.begins_with("01"):
 			card_one = button.text
-	check.call(card_two.contains("Q 2/3"), "level card shows Q 2/3")
-	check.call(card_one.contains("Q 0/2"), "trained level 1 card shows Q 0/2")
+	check.call(card_two != "" and not card_two.contains("Q ") and not card_two.contains("BEST"), "level card shows stars only, no quest count or best score")
+	check.call(card_one != "" and not card_one.contains("Q "), "trained level 1 card has no quest count")
 	var feather_label: Label = main.menus.find_child("Feathers", true, false)
 	check.call(feather_label != null and feather_label.text == "FEATHERS 7", "level select header shows Feathers total")
 	suite.layout(main.menus)
