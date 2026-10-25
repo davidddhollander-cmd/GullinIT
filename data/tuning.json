@@ -305,6 +305,12 @@
     "taunt_time": 2.0,
     "taunt_delay": 1.5,
     "tip_time": 3.0,
-    "feathers": 8
+    "feathers": 8,
+    "peck_contact_count": 3,
+    "peck_contact_life": 0.2,
+    "snatch_contact_count": 5,
+    "snatch_contact_life": 0.26,
+    "trash_spin_min": 5.0,
+    "trash_spin_max": 9.0
   }
 }

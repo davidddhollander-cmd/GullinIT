@@ -1,0 +1,13 @@
+{
+  "source": "source.png",
+  "source_size": [1536, 1024],
+  "grid": [3, 2],
+  "cells": [
+    {"name": "peck-star", "rect": [0, 0, 512, 512], "runtime_size": [12, 12]},
+    {"name": "snatch-slash", "rect": [512, 0, 512, 512], "runtime_size": [16, 10]},
+    {"name": "impact-wedge", "rect": [1024, 0, 512, 512], "runtime_size": [12, 10]},
+    {"name": "crumb-flecks", "rect": [0, 512, 512, 512], "runtime_size": [8, 8]},
+    {"name": "dust-puff", "rect": [512, 512, 512, 512], "runtime_size": [10, 8]},
+    {"name": "speed-streak", "rect": [1024, 512, 512, 512], "runtime_size": [14, 8]}
+  ]
+}
