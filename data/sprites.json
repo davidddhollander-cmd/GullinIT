@@ -1947,33 +1947,66 @@
     }
   },
   "seafood_vendor": {
-    "file": "res://assets/sprites/seafood_vendor.png",
-    "frame_w": 16.0,
-    "frame_h": 32.0,
+    "file": "res://assets/sprites/seafood-vendor-generated-v1.png",
+    "frame_w": 128.0,
+    "frame_h": 128.0,
+    "visual_scale": 0.5,
+    "art_height": 40.0,
+    "sprite_offset_y": -26.0,
     "animations": {
       "idle": {
         "frames": [
           0.0,
-          1.0
+          1.0,
+          2.0,
+          3.0
         ],
-        "fps": 8.0,
+        "fps": 3.0,
         "loop": true
       },
       "windup": {
         "frames": [
-          2.0,
-          3.0
+          8.0,
+          9.0
         ],
-        "fps": 8.0,
+        "fps": 4.0,
         "loop": true
       },
       "swat": {
         "frames": [
-          4.0,
-          5.0
+          10.0,
+          11.0
         ],
         "fps": 8.0,
         "loop": false
+      },
+      "walk": {
+        "frames": [
+          12.0,
+          13.0,
+          14.0,
+          15.0,
+          16.0,
+          17.0
+        ],
+        "fps": 7.0,
+        "loop": true
+      },
+      "alert": {
+        "frames": [
+          4.0,
+          5.0
+        ],
+        "fps": 4.0,
+        "loop": true
+      },
+      "angry": {
+        "frames": [
+          6.0,
+          7.0
+        ],
+        "fps": 3.0,
+        "loop": true
       }
     }
   },
