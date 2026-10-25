@@ -1,6 +1,6 @@
 # 034 — Cast rotation across levels (code + level data)
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: 033 (merged)
