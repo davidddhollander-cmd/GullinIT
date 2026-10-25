@@ -1,6 +1,6 @@
 # 035 — Seafood vendor art (replace placeholder)
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: none
