@@ -1,6 +1,6 @@
 # 033 — Second pier diner look (art)
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: none
