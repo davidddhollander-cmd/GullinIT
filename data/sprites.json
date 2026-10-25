@@ -4441,6 +4441,120 @@
       }
     }
   },
+  "pier_diner_b": {
+    "file": "res://assets/sprites/pier-diner-b-base-v1.png",
+    "frame_w": 128,
+    "frame_h": 128,
+    "visual_scale": 0.5,
+    "art_height": 40,
+    "sprite_offset_y": -26,
+    "animations": {
+      "idle": {
+        "frames": [0, 1, 2, 3],
+        "fps": 3,
+        "loop": true
+      },
+      "notice": {
+        "frames": [4],
+        "fps": 1,
+        "loop": true
+      },
+      "watch": {
+        "frames": [5],
+        "fps": 1,
+        "loop": true
+      },
+      "alert": {
+        "frames": [6],
+        "fps": 1,
+        "loop": true
+      },
+      "brace": {
+        "frames": [7],
+        "fps": 1,
+        "loop": true
+      },
+      "windup": {
+        "frames": [8],
+        "fps": 1,
+        "loop": true
+      },
+      "swat": {
+        "frames": [9, 10],
+        "fps": 9,
+        "loop": false
+      },
+      "angry": {
+        "frames": [11],
+        "fps": 1,
+        "loop": true
+      }
+    },
+    "food_anchors": {
+      "idle": [[15, -22], [12, -28], [15, -22], [15, -22]],
+      "notice": [[15, -22]],
+      "watch": [[15, -22]],
+      "alert": [[-8, -23]],
+      "brace": [[17, -22]],
+      "windup": [[15, -22]],
+      "swat": [[-10, -22], [-10, -22]],
+      "angry": [[10, -20]]
+    }
+  },
+  "pier_diner_b_motion": {
+    "file": "res://assets/sprites/pier-diner-b-motion-v1.png",
+    "frame_w": 128,
+    "frame_h": 128,
+    "visual_scale": 0.5,
+    "art_height": 40,
+    "sprite_offset_y": -26,
+    "animations": {
+      "walk": {
+        "frames": [0, 1, 2, 3, 4, 5],
+        "fps": 7,
+        "loop": true
+      },
+      "run": {
+        "frames": [6, 7, 8, 9],
+        "fps": 10,
+        "loop": true
+      },
+      "eat": {
+        "frames": [10, 11, 12, 13],
+        "fps": 5,
+        "loop": true
+      }
+    },
+    "food_anchors": {
+      "walk": [[15, -22], [15, -22], [15, -22], [15, -22], [15, -22], [15, -22]],
+      "run": [[16, -22], [16, -22], [16, -22], [16, -22]],
+      "eat": [[15, -22], [9, -28], [7, -31], [15, -22]]
+    }
+  },
+  "pier_diner_b_reactions": {
+    "file": "res://assets/sprites/pier-diner-b-reactions-v1.png",
+    "frame_w": 128,
+    "frame_h": 128,
+    "visual_scale": 0.5,
+    "art_height": 40,
+    "sprite_offset_y": -26,
+    "animations": {
+      "surprise": {
+        "frames": [0, 1, 2, 3, 4, 5],
+        "fps": 18,
+        "loop": false
+      },
+      "fist_shake": {
+        "frames": [6, 7, 8, 9, 10, 11],
+        "fps": 7,
+        "loop": false
+      }
+    },
+    "food_anchors": {
+      "surprise": [[15, -22], [15, -22], [15, -22], [15, -22], [15, -22], [15, -22]],
+      "fist_shake": [[15, -22], [15, -22], [15, -22], [15, -22], [15, -22], [15, -22]]
+    }
+  },
   "old_man": {
     "file": "res://assets/sprites/retro-old-man-stick-32bit.png",
     "frame_w": 128,

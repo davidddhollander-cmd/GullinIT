@@ -2450,6 +2450,26 @@ func pier_diner_art_checks() -> void:
 	preload("res://tests/isolated_sprite_checks.gd").run(Callable(self,"check"),Config.frames("pier_diner"),"diner poses")
 	preload("res://tests/isolated_sprite_checks.gd").run(Callable(self,"check"),Config.frames("pier_diner_motion"),"diner motion")
 	preload("res://tests/isolated_sprite_checks.gd").run(Callable(self,"check"),Config.frames("pier_diner_reactions"),"diner reactions")
+	var diner_b_specs := {
+		"pier_diner_b": {"idle":4,"notice":1,"watch":1,"alert":1,"brace":1,"windup":1,"swat":2,"angry":1},
+		"pier_diner_b_motion": {"walk":6,"run":4,"eat":4},
+		"pier_diner_b_reactions": {"surprise":6,"fist_shake":6}
+	}
+	var diner_b_animation_count := 0
+	for id: String in diner_b_specs:
+		check(Config.sprites.has(id),"second pier diner registers "+id)
+		var definition: Dictionary = Config.sprites[id]
+		check(definition.frame_w==128 and definition.frame_h==128 and definition.visual_scale==0.5 and definition.art_height==40,"second pier diner uses shopper-density 128px frames at adult scale: "+id)
+		var variant_frames := Config.frames(id)
+		preload("res://tests/isolated_sprite_checks.gd").run(Callable(self,"check"),variant_frames,"second diner "+id)
+		for animation: String in diner_b_specs[id]:
+			diner_b_animation_count += 1
+			var expected: int = diner_b_specs[id][animation]
+			check(variant_frames.get_frame_count(animation)==expected,"second pier diner exposes %d %s frames"%[expected,animation])
+			check(definition.food_anchors.has(animation) and definition.food_anchors[animation].size()==expected,"second pier diner keeps one food anchor per "+animation+" frame")
+	check(diner_b_animation_count==13,"second pier diner registers all 13 required animations")
+	var diner_b_preview := Image.load_from_file("res://assets/previews/pier-diner-b-v1-comparison.png")
+	check(diner_b_preview!=null and diner_b_preview.get_size()==Vector2i(256,128),"second pier diner comparison preserves both looks at in-game scale")
 	var frames: SpriteFrames = PierDinerArt.frames()
 	check(frames.get_frame_count(&"walk") == 6,"retro diner has a six-phase walk cycle")
 	for motion: StringName in [&"run", &"eat"]:
