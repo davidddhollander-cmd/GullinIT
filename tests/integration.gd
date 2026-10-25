@@ -122,6 +122,7 @@ func run() -> void:
 	await landing_aim_checks()
 	await perch_checks()
 	await stash_raid_checks()
+	await preload("res://tests/vfx_polish_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/bin_leftover_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/wheelie_bin_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/score_rules_checks.gd").run(self,Callable(self,"check"))

@@ -13,6 +13,12 @@ const FEATHER_TEXTURES: Array[Texture2D] = [
 	preload("res://assets/sprites/feather-tip-v1.png"),
 	preload("res://assets/sprites/feather-fluff-v1.png"),
 ]
+const PECK_STAR_TEXTURE: Texture2D = preload("res://assets/sprites/vfx-peck-star-v1.png")
+const SNATCH_SLASH_TEXTURE: Texture2D = preload("res://assets/sprites/vfx-snatch-slash-v1.png")
+const IMPACT_WEDGE_TEXTURE: Texture2D = preload("res://assets/sprites/vfx-impact-wedge-v1.png")
+const CRUMB_FLECKS_TEXTURE: Texture2D = preload("res://assets/sprites/vfx-crumb-flecks-v1.png")
+const DUST_PUFF_TEXTURE: Texture2D = preload("res://assets/sprites/vfx-dust-puff-v1.png")
+const SPEED_STREAK_TEXTURE: Texture2D = preload("res://assets/sprites/vfx-speed-streak-v1.png")
 var feather_rng := RandomNumberGenerator.new()
 const SCORE_MESSAGE_HOLD: float = 3.0
 const SCORE_MESSAGE_FADE: float = 1.5
@@ -51,10 +57,50 @@ func impact(at: Vector2, stunned: bool) -> void:
 		freeze = float(t.stun_stop if stunned else t.snatch_stop)
 	if t.shake and GameState.options.shake:
 		shake = float(t.stun_shake if stunned else t.snatch_shake)
-	if t.particles and not stunned:
-		for i: int in int(t.feathers):
-			var angle: float = TAU * i / float(t.feathers)
-			particles.append({"at":at,"v":Vector2(cos(angle),sin(angle))*35,"life":0.5})
+
+func _texture_particle(kind: String,texture: Texture2D,at: Vector2,velocity: Vector2,life: float,angle: float = 0.0,spin: float = 0.0,scale: float = 1.0,gravity: float = 0.0,modulate: Color = Color.WHITE) -> void:
+	particles.append({
+		"texture_particle":true,"effect_kind":kind,"texture":texture,
+		"at":at,"v":velocity,"life":life,"duration":life,
+		"angle":angle,"spin":spin,"scale":scale,"gravity":gravity,
+		"color":modulate,
+	})
+
+## A successful source interaction owns this burst, so input misses never fake contact.
+func peck_contact(at: Vector2,direction: Vector2,strength: float = 0.0,material: String = "hard") -> void:
+	if not bool(Config.tuning.juice.particles):
+		return
+	var heading: Vector2 = direction.normalized() if direction.length_squared() > 0.01 else Vector2.RIGHT
+	var normal := Vector2(-heading.y,heading.x)
+	var life: float = float(Config.tuning.juice.peck_contact_life)
+	var count: int = maxi(2,int(Config.tuning.juice.peck_contact_count))
+	var power: float = clampf(strength,0.0,1.0)
+	_texture_particle("peck_star",PECK_STAR_TEXTURE,at,heading*(5.0+power*4.0)+Vector2.UP*5.0,life,heading.angle(),0.0,0.75+power*0.22)
+	var debris_texture: Texture2D = DUST_PUFF_TEXTURE if material == "bag" else (IMPACT_WEDGE_TEXTURE if material == "glance" else CRUMB_FLECKS_TEXTURE)
+	var debris_color: Color = Color("ef725c") if material == "glance" else Color.WHITE
+	for index: int in count-1:
+		var side: float = -1.0 if index%2 == 0 else 1.0
+		var spread: float = 10.0+float(index/2)*5.0
+		_texture_particle("peck_debris",debris_texture,at+normal*side*2.0,heading*(12.0+power*10.0)+normal*side*spread+Vector2.UP*(10.0+power*8.0),life+0.04*float(index%2),heading.angle(),side*(3.0+power*2.0),0.58+power*0.16,55.0,debris_color)
+	queue_redraw()
+
+## Snatch feedback happens at food/beak contact; scoring still waits for swallowing.
+func snatch_contact(at: Vector2,motion: Vector2,bonus: bool = false) -> void:
+	impact(at,false)
+	if not bool(Config.tuning.juice.particles):
+		return
+	var heading: Vector2 = motion.normalized() if motion.length_squared() > 0.01 else Vector2.RIGHT
+	var normal := Vector2(-heading.y,heading.x)
+	var angle: float = heading.angle()
+	var life: float = float(Config.tuning.juice.snatch_contact_life)
+	var count: int = maxi(3,int(Config.tuning.juice.snatch_contact_count))
+	_texture_particle("snatch_slash",SNATCH_SLASH_TEXTURE,at-heading*2.0,heading*18.0,life,angle,0.0,1.12 if bonus else 0.92)
+	_texture_particle("snatch_streak",SPEED_STREAK_TEXTURE,at-heading*5.0,heading*9.0,life*0.72,angle,0.0,1.0 if bonus else 0.78)
+	for index: int in count-2:
+		var side: float = -1.0 if index%2 == 0 else 1.0
+		var texture: Texture2D = IMPACT_WEDGE_TEXTURE if bonus and index == 0 else CRUMB_FLECKS_TEXTURE
+		_texture_particle("snatch_fleck",texture,at+normal*side*2.0,heading*(12.0+float(index)*4.0)+normal*side*(18.0+float(index)*4.0)+Vector2.UP*8.0,life+0.04*float(index),angle,side*4.0,0.62 if bonus else 0.52,45.0)
+	queue_redraw()
 
 func sand_puff(at: Vector2, taking_off: bool = false) -> void:
 	if not bool(Config.tuning.juice.particles) or at.x >= float(Config.tuning.world.promenade_start):
@@ -118,6 +164,13 @@ func tick(delta: float) -> void:
 			if item.life <= 0.0:
 				particles.remove_at(i)
 			continue
+		if particles[i].get("texture_particle",false):
+			particles[i].at += particles[i].v*delta
+			particles[i].v.y += delta*float(particles[i].get("gravity",0.0))
+			particles[i].angle += delta*float(particles[i].get("spin",0.0))
+			if particles[i].life <= 0.0:
+				particles.remove_at(i)
+			continue
 		particles[i].at += particles[i].v*delta
 		particles[i].v.y += delta*float(particles[i].get("gravity",65 if particles[i].get("sand",false) else 80))
 		if particles[i].life <= 0:
@@ -152,6 +205,18 @@ func _draw() -> void:
 			var flutter: float = sin((float(item.duration)-float(item.life))*9.0+float(item.phase))
 			draw_set_transform(item.at,item.angle,Vector2(0.6+absf(flutter)*0.4,1.0))
 			draw_texture_rect(item.texture,Rect2(-item.size*0.5,item.size),false,Color(1,1,1,alpha))
+			draw_set_transform(Vector2.ZERO)
+			continue
+		if item.get("texture_particle",false):
+			var duration: float = float(item.duration)
+			var remaining: float = clampf(float(item.life)/duration,0.0,1.0)
+			var progress: float = 1.0-remaining
+			var tint: Color = item.get("color",Color.WHITE)
+			tint.a *= minf(1.0,remaining*2.5)
+			var scale: float = float(item.get("scale",1.0))*(0.78+sin(progress*PI)*0.28)
+			var size: Vector2 = item.texture.get_size()
+			draw_set_transform(Vector2(roundf(item.at.x),roundf(item.at.y)),float(item.angle),Vector2.ONE*scale)
+			draw_texture_rect(item.texture,Rect2(-size*0.5,size),false,tint)
 			draw_set_transform(Vector2.ZERO)
 			continue
 		var color: Color = item.get("color",Color("fff4da"))

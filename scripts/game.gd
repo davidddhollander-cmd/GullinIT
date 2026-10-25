@@ -154,6 +154,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		if scrap:
 			_scrap_collected(at,food_id)
 		else:
+			effects.snatch_contact(at,player.velocity,false)
+			Audio.play("snatch",1+score.tier*0.08)
 			player.digestion.collect(food_id)
 	)
 	stash_raids.bag_collected.connect(func() -> void:
@@ -270,6 +272,7 @@ func _wire_target(target: BeachTarget) -> void:
 
 func _food_knocked(target: BeachTarget, food_id: String, at: Vector2, impulse: Vector2) -> void:
 	stash_raids.add_knocked_food(target,food_id,at,impulse)
+	effects.peck_contact(at,impulse,0.55,"glance")
 	effects.food_crumble(at,impulse)
 	effects.message(at-Vector2(0,18),"DROPPED!",Color("ef725c"))
 	effects.impact(at,false)
@@ -531,6 +534,7 @@ func set_paused(value: bool) -> void:
 
 func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 	if gull == player:
+		var contact_at: Vector2 = target.food_position()
 		if training and target.last_theft_direct and player.state == BeachGull.State.STRIKE:
 			_training_snatch(target)
 		var handover: bool = target.last_theft_handover and target.last_theft_direct and (player.state == BeachGull.State.STRIKE or player.sweep_state == BeachGull.State.STRIKE)
@@ -540,6 +544,8 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 			dive_hit = true
 			dive_stats.dive_snatches += 1
 		player.digestion.collect(target.food_id,{"risky":risky,"upwind":player.upwind,"handover":handover})
+		effects.snatch_contact(contact_at,gull.velocity,handover)
+		Audio.play("snatch",1+score.tier*0.08)
 		if handover:
 			effects.message(target.food_position()-Vector2(0,12),"COUNTER +%d%%!" % roundi(float(Config.tuning.score.handover)*100),BeachUI.GOLD)
 	else:
@@ -553,8 +559,6 @@ func _award(value: int, risky: bool, upwind: bool, mugged: bool, handover: bool 
 	var earned: int = score.snatch(value,risky,upwind,mugged,handover)
 	var quip: String = "COUNTER!" if handover else ("MUGGED!" if mugged else str(Config.quips.snatch[rng.randi_range(0,Config.quips.snatch.size()-1)]))
 	effects.score_message(player.position-Vector2(0,15),"+%d %s" % [earned,quip],Color("ffc65c"))
-	effects.impact(player.position,false)
-	Audio.play("snatch",1+score.tier*0.08)
 	return earned
 
 func _stunned() -> void:
@@ -651,6 +655,8 @@ func _mugging() -> void:
 				if not mugged_rivals.has(pilot.gull.rival_name):
 					mugged_rivals[pilot.gull.rival_name] = true
 					_quest_event("rival_mugged_distinct")
+				effects.snatch_contact(pilot.gull.position,player.velocity,false)
+				Audio.play("snatch",1+score.tier*0.08)
 				player.digestion.collect(pilot.carried_food_id,{"value":value,"upwind":player.upwind,"mugged":true,"mugged_from":pilot.gull.rival_name})
 				return
 

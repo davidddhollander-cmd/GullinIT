@@ -9,8 +9,8 @@ var game: BeachGame
 var items: Array[Dictionary] = []
 var raids: Dictionary = {}
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var visual_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var peck_cooldown: float = 0.0
-var peck_flash: float = 0.0
 var bins: Array[Dictionary] = []
 var shine_clock: float = 0.0
 var actor: BeachGull ## set while a rival pecks, so the player's code path serves any gull
@@ -20,18 +20,19 @@ func _gull() -> BeachGull:
 
 ## A rival pecks with its own beak and cooldown; bins, bags and risks are the player's.
 func peck_as(who: BeachGull) -> bool:
-	var saved: Array[float] = [peck_cooldown,peck_flash]
+	var saved_cooldown: float = peck_cooldown
 	actor = who
 	peck_cooldown = 0.0
 	var ok: bool = peck()
 	actor = null
-	peck_cooldown = saved[0]
-	peck_flash = saved[1]
+	peck_cooldown = saved_cooldown
 	return ok
 
 func setup(owner_game: BeachGame) -> void:
 	game = owner_game
 	rng.seed = int(game.level.seed) + 307
+	# Cosmetic tumble must not advance the gameplay RNG that controls food trajectories.
+	visual_rng.seed = int(game.level.seed) + 1307
 	for prop: Dictionary in game.beach.props:
 		var type: String = str(prop.type)
 		if BeachBackdrop.is_bin_type(type):
@@ -113,7 +114,6 @@ func peck() -> bool:
 		return false
 	var t: Dictionary = Config.tuning.world
 	peck_cooldown = float(t.peck_cooldown)
-	peck_flash = 0.15
 	if not raids.has(owner):
 		raids[owner] = {"pecks":0,"notice":float(t.sunbather_notice_delay)*owner.reaction_delay if owner.sleep_state == BeachTarget.SleepState.AWAKE else 0.0,"swat":0.0,"action":"","action_time":0.0,"pickup_item":{}}
 	var raid: Dictionary = raids[owner]
@@ -131,6 +131,7 @@ func peck() -> bool:
 	var progress: float = clampf(float(raid.pecks)/float(maxi(1,int(t.stash_pecks))),0.0,1.0)
 	game.effects.message(owner.stash_position()-Vector2(0,10),"PECK!",BeachUI.GOLD)
 	owner.peck_bag(progress,final_hit)
+	game.effects.peck_contact(owner.stash_position()-Vector2(0,4),Vector2(_gull().facing,-0.25),progress,"bag")
 	Audio.play("bag_thump",0.88+0.22*progress)
 	if final_hit:
 		raid.pecks = 0
@@ -153,7 +154,6 @@ func _peck_toddler(toddler: BeachTarget) -> bool:
 	if not toddler.knock_food(game.player):
 		return false
 	peck_cooldown = float(Config.tuning.world.peck_cooldown)
-	peck_flash = 0.15
 	game.effects.message(toddler.food_position()-Vector2(0,10),"PECK!",BeachUI.GOLD)
 	Audio.play("click")
 	queue_redraw()
@@ -163,13 +163,13 @@ func _peck_bin(bin: Dictionary) -> bool:
 	var t: Dictionary = Config.tuning.world
 	var content_position: Vector2 = _bin_content_position(bin)
 	peck_cooldown = float(t.peck_cooldown)
-	peck_flash = 0.15
 	bin.pecks = int(bin.pecks)+1
 	var final_hit: bool = int(bin.pecks) >= int(t.bin_pecks)
 	var progress: float = clampf(float(bin.pecks)/float(maxi(1,int(t.bin_pecks))),0.0,1.0)
 	var wheelie: bool = str(bin.type) == BeachBackdrop.WHEELIE_BIN_TYPE
 	game.effects.message(content_position,"POSH TRASH!" if wheelie and final_hit else "RATTLE!",BeachUI.GOLD)
 	game.beach.wobble_bin(float(bin.x),progress,final_hit)
+	game.effects.peck_contact(content_position,Vector2(_gull().facing,-0.35),progress,"bin")
 	Audio.play("bin_rattle",0.90+0.20*progress)
 	if final_hit:
 		bin.pecks = 0
@@ -186,7 +186,13 @@ func _peck_bin(bin: Dictionary) -> bool:
 			var is_food: bool = Config.foods.has(kind)
 			bin.scatter_index = int(bin.scatter_index)+1
 			var direction: float = -1.0 if i%2 == 0 else 1.0
-			items.append({"owner":null,"source":"bin","food_id":kind if is_food else "","garbage":not is_food,"garbage_kind":kind,"position":content_position+Vector2(0,6),"velocity":Vector2(direction*rng.randf_range(35,65),-rng.randf_range(65,95)),"grounded":false,"age":0.0})
+			var item: Dictionary = {"owner":null,"source":"bin","food_id":kind if is_food else "","garbage":not is_food,"garbage_kind":kind,"position":content_position+Vector2(0,6),"velocity":Vector2(direction*rng.randf_range(35,65),-rng.randf_range(65,95)),"grounded":false,"age":0.0}
+			if not is_food:
+				var rest_limit: float = 0.52 if kind == "wrapper" else 0.34
+				item.rotation = visual_rng.randf_range(-0.18,0.18)
+				item.angular_velocity = -direction*visual_rng.randf_range(float(Config.tuning.juice.trash_spin_min),float(Config.tuning.juice.trash_spin_max))
+				item.rest_angle = visual_rng.randf_range(-rest_limit,rest_limit)
+			items.append(item)
 		if count > 0:
 			bin_opened.emit(str(bin.type))
 			if int(bin.remaining) <= 0:
@@ -199,7 +205,6 @@ func _bin_content_position(bin: Dictionary) -> Vector2:
 
 func _peck_empty(at: Vector2) -> bool:
 	peck_cooldown = float(Config.tuning.world.peck_cooldown)
-	peck_flash = 0.15
 	game.effects.empty_message(at)
 	Audio.play("empty_tap",1.0,-8.0)
 	queue_redraw()
@@ -216,7 +221,6 @@ func tick(delta: float) -> void:
 	for bin: Dictionary in bins:
 		game.beach.set_bin_full(float(bin.x),int(bin.remaining) > 0)
 	peck_cooldown = maxf(0,peck_cooldown-delta)
-	peck_flash = maxf(0,peck_flash-delta)
 	var t: Dictionary = Config.tuning.world
 	var gull: BeachGull = game.player
 	# Resolve moving food against the moving beak in relative coordinates.
@@ -232,6 +236,8 @@ func tick(delta: float) -> void:
 		var is_garbage: bool = bool(item.get("garbage",false))
 		var definition: Dictionary = {} if is_garbage else Config.foods[item.food_id]
 		if not item.grounded:
+			if is_garbage:
+				item.rotation = wrapf(float(item.get("rotation",0.0))+float(item.get("angular_velocity",0.0))*delta,-PI,PI)
 			if item.get("source","") == "near_miss" and float(item.age)<0.7:
 				item.crumb_trail = float(item.get("crumb_trail",0.0))+delta
 				if float(item.crumb_trail)>=0.09:
@@ -242,12 +248,17 @@ func tick(delta: float) -> void:
 			if item.position.x < 12 or item.position.x > float(t.width)-12:
 				item.position.x = clampf(item.position.x,12,float(t.width)-12)
 				item.velocity.x *= -0.5
+				if is_garbage:
+					item.angular_velocity = -float(item.get("angular_velocity",0.0))*0.55
 			var item_height: float = 5.0 if is_garbage else float(definition.size[1])
 			var floor_y: float = float(t.ground)-item_height*0.5
 			if item.position.y >= floor_y:
 				item.position.y = floor_y
 				item.velocity = Vector2.ZERO
 				item.grounded = true
+				if is_garbage:
+					item.rotation = float(item.get("rest_angle",clampf(float(item.get("rotation",0.0)),-0.4,0.4)))
+					item.angular_velocity = 0.0
 		# Sand sources cannot throw food onto the paved promenade.
 		if item.get("source","") == "bin" or (item.get("owner") is BeachTarget and item.owner.kind == "sunbather"):
 			item.position.x = clampf(float(item.position.x),float(t.beach_min_x),float(t.beach_scatter_max_x))
@@ -276,6 +287,8 @@ func tick(delta: float) -> void:
 			if pilot != null:
 				pilot.ate_ground(str(item.food_id))
 			elif item.has("snack"):
+				game.effects.snatch_contact(item.position,taker.velocity,false)
+				Audio.play("snatch",1+game.score.tier*0.08)
 				game.player.digestion.collect(item.food_id,item.snack)
 			else:
 				collected.emit(item.position,item.food_id,item.get("source","") == "bin")
@@ -411,13 +424,15 @@ func _hit(who: BeachGull, item: Dictionary, radius: Vector2, previous: Vector2, 
 func _draw() -> void:
 	for item: Dictionary in items:
 		if bool(item.get("garbage",false)):
-			var at: Vector2 = item.position
+			var at := Vector2(roundf(float(item.position.x)),roundf(float(item.position.y)))
+			draw_set_transform(at,float(item.get("rotation",0.0)))
 			if item.get("garbage_kind","") == "wrapper":
-				draw_colored_polygon(PackedVector2Array([at+Vector2(-4,-2),at+Vector2(3,-3),at+Vector2(4,2),at+Vector2(-3,3)]),Color("8bc6b4"))
-				draw_line(at+Vector2(-3,0),at+Vector2(3,-1),Color("fff1cc"),1)
+				draw_colored_polygon(PackedVector2Array([Vector2(-4,-2),Vector2(3,-3),Vector2(4,2),Vector2(-3,3)]),Color("8bc6b4"))
+				draw_line(Vector2(-3,0),Vector2(3,-1),Color("fff1cc"),1)
 			else:
-				draw_rect(Rect2(at-Vector2(2,3),Vector2(4,6)),Color("d7d9cf"))
-				draw_line(at+Vector2(-2,-2),at+Vector2(2,2),Color("7993a3"),1)
+				draw_rect(Rect2(Vector2(-2,-3),Vector2(4,6)),Color("d7d9cf"))
+				draw_line(Vector2(-2,-2),Vector2(2,2),Color("7993a3"),1)
+			draw_set_transform(Vector2.ZERO)
 		else:
 			var definition: Dictionary = Config.foods[item.food_id]
 			var display_size: Array = definition.get("display_size",definition.size)
@@ -434,8 +449,6 @@ func _draw() -> void:
 				var glint: Texture2D = PickupShine.overlay(texture,shine_clock,float(item.shine_seed))
 				if glint != null:
 					draw_texture_rect(glint,rect,false)
-	if peck_flash > 0 and is_instance_valid(game):
-		draw_line(game.player.beak(),game.player.beak()+Vector2(game.player.facing*7,4),BeachUI.GOLD,2)
 	for owner: BeachTarget in raids.keys():
 		if not is_instance_valid(owner):
 			continue
