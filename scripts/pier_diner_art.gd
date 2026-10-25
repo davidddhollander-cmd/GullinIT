@@ -2,10 +2,16 @@ class_name PierDinerArt
 extends RefCounted
 ## The same warning and hit timers that drive gameplay select readable poses.
 
-static func frames() -> SpriteFrames:
+const APPEARANCES: Array[String] = ["pier_diner", "pier_diner_b"]
+
+static func normalize_appearance(appearance: String) -> String:
+	return appearance if appearance in APPEARANCES else APPEARANCES[0]
+
+static func frames(appearance: String = "pier_diner") -> SpriteFrames:
+	var base_id: String = normalize_appearance(appearance)
 	var combined: SpriteFrames = SpriteFrames.new()
 	combined.remove_animation(&"default")
-	for id: String in ["pier_diner", "pier_diner_motion", "pier_diner_reactions"]:
+	for id: String in [base_id, base_id + "_motion", base_id + "_reactions"]:
 		var source: SpriteFrames = Config.frames(id)
 		for name: StringName in source.get_animation_names():
 			combined.add_animation(name)
@@ -63,7 +69,8 @@ static func _timed_pose(target: BeachTarget,duration: float) -> void:
 
 static func align_food(target: BeachTarget) -> void:
 	var animation: String = String(target.sprite.animation)
-	var id: String = "pier_diner_reactions" if animation in ["surprise", "fist_shake"] else ("pier_diner_motion" if animation in ["walk", "run", "eat"] else "pier_diner")
+	var base_id: String = normalize_appearance(target.diner_appearance)
+	var id: String = base_id + ("_reactions" if animation in ["surprise", "fist_shake"] else ("_motion" if animation in ["walk", "run", "eat"] else ""))
 	var anchors: Dictionary = Config.sprites[id].food_anchors
 	var sequence: Array = anchors.get(String(target.sprite.animation), [[14, -22]])
 	var anchor: Array = sequence[mini(target.sprite.frame, sequence.size() - 1)]

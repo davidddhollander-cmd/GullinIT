@@ -22,7 +22,7 @@
     {"name": "FAMILY BAY", "from": 550, "to": 800}
   ],
   "spawns": [
-    {"type": "kiosk_customer", "x": 250, "food_id": "ice_cream", "station": "first_snack", "patrol_radius": 5, "speed_mult": 0.45, "awareness_mult": 0.65, "reaction_delay": 3},
+    {"type": "kiosk_customer", "x": 250, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "first_snack", "patrol_radius": 5, "speed_mult": 0.45, "awareness_mult": 0.65, "reaction_delay": 3},
     {"type": "sunbather", "x": 430, "appearance": "female_blue", "station": "first_bag", "patrol_radius": 0, "awareness_mult": 0.65, "reaction_delay": 3},
     {"type": "toddler", "x": 575, "family_id": "family_1", "station": "family_1", "patrol_radius": 5, "speed_mult": 0.6},
     {"type": "picnic_family", "x": 620, "family_id": "family_1", "station": "family_1", "patrol_radius": 0, "awareness_mult": 0.75, "reaction_delay": 1.5}

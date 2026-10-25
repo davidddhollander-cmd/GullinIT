@@ -1312,11 +1312,7 @@ func stash_raid_checks() -> void:
 	var gull: BeachGull = game.player
 	var stock: int = owner.stash_remaining
 	check(owner.sprite.sprite_frames.get_frame_count(&"rise") == 7 and owner.sprite.sprite_frames.get_frame_count(&"run") == 7,"supplied sunbather sheet has seven rise and run frames")
-	var has_blue_sunbather: bool = false
-	for target: BeachTarget in game.spawner.targets:
-		if target.kind == "sunbather" and target.sunbather_blue:
-			has_blue_sunbather = true
-	check(has_blue_sunbather,"sunbathers use supplied blue colour variation")
+	check(not owner.sunbather_female and not owner.sunbather_blue,"level 2 uses the rotated male-red sunbather look")
 	await snapshot("sunbather-new-rest")
 	gull.land()
 	gull.position.x = owner.stash_position().x-10
@@ -2480,6 +2476,10 @@ func pier_diner_art_checks() -> void:
 			var texture: AtlasTexture = frames.get_frame_texture(animation,index) as AtlasTexture
 			check(texture.get_size() == Vector2(definition.frame_w,definition.frame_h),"retro diner uses an aligned frame canvas")
 			check(Rect2(Vector2.ZERO,texture.atlas.get_size()).encloses(texture.region),"retro diner atlas frame stays inside source")
+	var alternate_frames: SpriteFrames = PierDinerArt.frames("pier_diner_b")
+	check(alternate_frames.get_frame_count(&"idle")==4 and alternate_frames.get_frame_count(&"walk")==6 and alternate_frames.get_frame_count(&"eat")==4,"second diner combines the complete idle, walk and eating clips")
+	check(alternate_frames.get_frame_count(&"surprise")==6 and alternate_frames.get_frame_count(&"fist_shake")==6,"second diner combines both complete reaction clips")
+	check(PierDinerArt.frames("unknown").get_frame_texture(&"idle",0)==frames.get_frame_texture(&"idle",0),"missing or invalid diner appearance keeps the original look")
 	main.start_level(3)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
@@ -2492,6 +2492,25 @@ func pier_diner_art_checks() -> void:
 	game.camera.position = Vector2(1040,90)
 	game.beach.camera_x = 1040
 	game.player.position = Vector2(50,70)
+	var diner_b: BeachTarget = game.spawner.create("pier_diner",1120,{"appearance":"pier_diner_b","food_id":"fish_chips"})
+	check(diner_b.diner_appearance=="pier_diner_b" and diner_b.info.sprite=="pier_diner_b" and diner_b.sprite.scale==Vector2(0.5,0.5) and diner_b.sprite.position.y==-26.0,"second diner uses its adult-scale art metadata")
+	diner_b.update_art_pose(true)
+	check(diner_b.sprite.animation==&"walk" and diner_b.food_sprite.position==Vector2(15,-22),"second diner walks with its matching serving-palm anchor")
+	await snapshot("pier-diner-b-walk")
+	diner_b.art_time = 3.1
+	diner_b.update_art_pose(false)
+	diner_b.sprite.pause()
+	diner_b.sprite.frame = 1
+	check(diner_b.sprite.animation==&"eat" and diner_b.food_sprite.position==Vector2(9,-28),"second diner eats with food aligned to the mouth")
+	await snapshot("pier-diner-b-eat")
+	diner_b.art_time = 0.0
+	diner_b.reaction.mode = "surprise"
+	diner_b.reaction.committed = true
+	diner_b.reaction.timer = AdultReaction.THEFT_SURPRISE_TIME
+	diner_b.update_art_pose(false)
+	check(diner_b.sprite.animation==&"surprise" and diner_b.food_sprite.position==Vector2(15,-22),"second diner uses its own theft reaction and anchor")
+	await snapshot("pier-diner-b-reaction")
+	diner_b.hide()
 	check(diner.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST,"retro diner keeps crisp nearest-neighbour pixels")
 	check(diner.sprite.animation == &"idle" and diner.food_position().x > diner.position.x,"retro diner starts calm with food in forward hand")
 	var idle_food_y: float = diner.food_position().y
@@ -2567,6 +2586,15 @@ func extended_beach_checks() -> void:
 			if prop.type in ["kiosk","hotdog_stand"]:
 				stands[prop.type] = prop.x
 		check((stands.has("kiosk") or int(level.id) == 5) and (int(level.id) <= 2 or stands.has("hotdog_stand")),"each level has its authored food stands")
+	# Task 034 review set: the first playable frame of every level, before anyone moves.
+	for number: int in range(1,7):
+		main.start_level(number)
+		var opening_game: BeachGame = main.game
+		opening_game.set_physics_process(false)
+		opening_game.dismiss_intro()
+		await snapshot("cast-rotation-level-%d-opening" % number)
+		main.clear_game()
+		await settle()
 	main.start_level(4)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)

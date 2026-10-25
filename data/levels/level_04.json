@@ -25,10 +25,10 @@
   ],
   "spawns": [
     {"type": "sunbather", "x": 170, "appearance": "male_blue", "station": "sun_0", "patrol_radius": 0},
-    {"type": "sunbather", "x": 365, "appearance": "male_red", "station": "sun_2", "patrol_radius": 0},
-    {"type": "sunbather", "x": 410, "appearance": "female_blue", "station": "sun_3", "patrol_radius": 0},
-    {"type": "kiosk_customer", "x": 545, "food_id": "ice_cream", "appearance": "shopper_mullet", "station": "ice_cream", "patrol_radius": 12},
-    {"type": "kiosk_customer", "x": 685, "food_id": "hotdog", "appearance": "old_man", "station": "hotdogs", "patrol_radius": 12},
+    {"type": "sunbather", "x": 365, "appearance": "female_blue", "station": "sun_2", "patrol_radius": 0},
+    {"type": "sunbather", "x": 410, "appearance": "male_red", "station": "sun_3", "patrol_radius": 0},
+    {"type": "kiosk_customer", "x": 545, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "ice_cream", "patrol_radius": 12},
+    {"type": "kiosk_customer", "x": 685, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "hotdogs", "patrol_radius": 12},
     {"type": "off_lead_dog", "x": 290, "home": [250, 330]}
   ],
   "props": [

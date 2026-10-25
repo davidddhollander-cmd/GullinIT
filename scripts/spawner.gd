@@ -71,7 +71,7 @@ func _seat_starter() -> void:
 func create(kind: String, x: float, spawn: Dictionary = {}) -> BeachTarget:
 	var target: BeachTarget = BeachTarget.new()
 	parent.add_child(target)
-	if kind in ["kiosk_customer","sunbather"] and not spawn.has("appearance"):
+	if kind in ["kiosk_customer","sunbather","pier_diner"] and not spawn.has("appearance"):
 		spawn = spawn.duplicate()
 		spawn.appearance = _least_used_look(kind)
 	target.setup(kind,x,rng,level.awareness_mult,spawn)
@@ -85,20 +85,39 @@ func create(kind: String, x: float, spawn: Dictionary = {}) -> BeachTarget:
 	target_created.emit(target)
 	return target
 
-# Look (shopper appearance or sunbather gender+colour) fewest people on the beach already wear; ties take list order.
+# Look for this kind that the fewest people on the beach already wear; ties take list order.
 func _least_used_look(kind: String) -> String:
-	var looks: Array = ShopperArt.APPEARANCES if kind == "kiosk_customer" else SUNBATHER_LOOKS
+	var looks: Array[String] = []
+	match kind:
+		"kiosk_customer":
+			looks = ShopperArt.APPEARANCES
+		"sunbather":
+			looks = SUNBATHER_LOOKS
+		"pier_diner":
+			looks = PierDinerArt.APPEARANCES
+		_:
+			return ""
 	var best: String = looks[0]
 	var best_count: int = 1 << 30
 	for look: String in looks:
 		var count: int = 0
 		for other: BeachTarget in targets:
-			if is_instance_valid(other) and other.kind == kind and ((other.shopper_appearance if kind == "kiosk_customer" else _sunbather_look(other)) == look):
+			if is_instance_valid(other) and other.kind == kind and _target_look(other) == look:
 				count += 1
 		if count < best_count:
 			best = look
 			best_count = count
 	return best
+
+func _target_look(target: BeachTarget) -> String:
+	match target.kind:
+		"kiosk_customer":
+			return target.shopper_appearance
+		"sunbather":
+			return _sunbather_look(target)
+		"pier_diner":
+			return target.diner_appearance
+	return ""
 
 func _sunbather_look(target: BeachTarget) -> String:
 	return ("female_" if target.sunbather_female else "male_")+("blue" if target.sunbather_blue else "red")

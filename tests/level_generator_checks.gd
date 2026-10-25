@@ -91,7 +91,8 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 		check.call(float(dog_spawn.home[0])>=float(level.world.start_x)+150.0 and float(dog_spawn.home[1])<float(level.world.promenade_start) and float(dog_spawn.x)>=float(dog_spawn.home[0]) and float(dog_spawn.x)<=float(dog_spawn.home[1]),"dog home zone is open sand away from the start")
 		check.call(stand_count==2 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1,"dog day keeps both stands and Gary from the start")
 	elif number == 5:
-		check.call(types==["kiosk_customer","kiosk_customer","pier_diner","pier_diner"],"three's a crowd is a lunch rush of two shoppers and two pier diners, no dog or families")
+		check.call(types==["kiosk_customer","kiosk_customer","pier_diner","pier_diner","toddler","picnic_family"],"three's a crowd has two shoppers, both pier diners and one mum with one toddler")
+		check.call(family_positions.size()==1 and children.size()==1,"level 5 adds exactly one linked family pair")
 		check.call(stand_count==1 and kiosk_x<0.0 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==2,"three's a crowd has a single grill (no kiosk) and two rivals")
 	else:
 		check.call(types==["sunbather","kiosk_customer","kiosk_customer","kiosk_customer","pier_diner"],"boardwalk is a busy promenade of three shoppers and a diner, no families")
