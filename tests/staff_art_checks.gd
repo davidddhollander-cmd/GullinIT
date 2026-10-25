@@ -1,7 +1,7 @@
 extends RefCounted
 
 static func run(harness: Node,check: Callable) -> void:
-	for id: String in ["lifeguard","kiosk_customer","shopper_mullet","shopper_sundress"]:
+	for id: String in ["lifeguard","kiosk_customer","shopper_mullet","shopper_sundress","seafood_vendor"]:
 		var frames := Config.frames(id)
 		preload("res://tests/isolated_sprite_checks.gd").run(check,frames,id)
 		var atlas: Texture2D = frames.get_frame_texture(&"idle",0).atlas
@@ -20,12 +20,27 @@ static func run(harness: Node,check: Callable) -> void:
 				var cell := texture.atlas.get_image().get_region(Rect2i(texture.region))
 				check.call(cell.get_used_rect().end.y==116,id+" feet share adult baseline")
 		for clip: StringName in [&"walk",&"run",&"swat"]:
+			if not frames.has_animation(clip):
+				continue
 			var previous := PackedByteArray()
 			for index: int in frames.get_frame_count(clip):
 				var texture := frames.get_frame_texture(clip,index) as AtlasTexture
 				var pixels := texture.atlas.get_image().get_region(Rect2i(texture.region)).get_data()
 				check.call(previous!=pixels,id+" "+String(clip)+" advances drawn limbs")
 				previous = pixels
+	var seafood_entry: Dictionary = Config.sprites.seafood_vendor
+	check.call(seafood_entry.file=="res://assets/sprites/seafood-vendor-generated-v1.png" and seafood_entry.frame_w==128 and seafood_entry.frame_h==128,"seafood guard replaces the 16x32 placeholder with generated adult art")
+	check.call(seafood_entry.visual_scale==0.5 and seafood_entry.art_height==40 and seafood_entry.sprite_offset_y==-26,"seafood guard matches the approved adult display scale and foot offset")
+	var seafood_expected := {"idle":4,"windup":2,"swat":2,"walk":6,"alert":2,"angry":2}
+	var seafood_frames := Config.frames("seafood_vendor")
+	for clip: String in seafood_expected:
+		check.call(seafood_frames.has_animation(clip) and seafood_frames.get_frame_count(clip)==seafood_expected[clip],"seafood guard exposes the generated "+clip+" animation")
+		for frame: int in seafood_frames.get_frame_count(clip):
+			var texture := seafood_frames.get_frame_texture(clip,frame) as AtlasTexture
+			var bounds := texture.atlas.get_image().get_region(Rect2i(texture.region)).get_used_rect()
+			check.call(bounds.size.x>=35 and bounds.size.y>=45,"seafood guard keeps the full body and visible broom in "+clip+" frame")
+	check.call(FileAccess.file_exists("res://assets/sprites/seafood_vendor.png"),"legacy seafood placeholder stays in the project but unused")
+	check.call(FileAccess.file_exists("res://assets/previews/seafood-vendor-v1-comparison.png"),"seafood guard comparison preview is preserved")
 	harness.main.start_level(4)
 	var game: BeachGame = harness.main.game
 	game.set_physics_process(false)
@@ -143,5 +158,39 @@ static func run(harness: Node,check: Callable) -> void:
 	game.player.sweep_beak = food_at+Vector2(15,0)
 	BeachCollisions.resolve(game.player,[shopper],[])
 	check.call(not shopper.food and not shopper.food_sprite.visible,"new shopper snack remains stealable at the visible mirrored hand")
+	harness.main.clear_game()
+	await harness.settle()
+	harness.main.start_level(6)
+	var boss: BeachGame = harness.main.game
+	boss.set_physics_process(false)
+	boss.intro = 0
+	boss.running = true
+	boss.overlay.hide()
+	boss.camera_x = 1235
+	boss.camera.position = Vector2(1235,90)
+	boss.beach.camera_x = 1235
+	boss.player.position = Vector2(900,50)
+	var seafood_guard: BeachTarget
+	for actor: BeachTarget in boss.spawner.targets:
+		if actor.kind=="seafood_vendor":
+			seafood_guard = actor
+			break
+	check.call(seafood_guard!=null,"level 6 pier end contains the seafood guard")
+	if seafood_guard!=null:
+		seafood_guard.sprite.play(&"idle")
+		seafood_guard.sprite.pause()
+		seafood_guard.sprite.frame = 0
+		check.call(seafood_guard.art_height()==40 and seafood_guard.sprite.scale==Vector2(0.5,0.5),"level 6 seafood guard stands at the same adult scale as pier diners")
+		await harness.snapshot("seafood-vendor-l6-pier-end")
+		seafood_guard.alert = 1
+		# Stay inside broom awareness but outside the shared 38 px proximity warning,
+		# so the broom-specific telegraph can advance through windup to swat.
+		boss.player.position = seafood_guard.position+Vector2(-55,-12)
+		boss.player.state = BeachGull.State.GLIDE
+		boss.player.invulnerable = 0
+		seafood_guard.tick(0.01,boss.gulls)
+		check.call(seafood_guard.sprite.animation==&"windup","level 6 broom warning plays the generated windup")
+		seafood_guard.tick(0.7,boss.gulls)
+		check.call(seafood_guard.sprite.animation==&"swat","level 6 broom defense advances to the generated swat")
 	harness.main.clear_game()
 	await harness.settle()
