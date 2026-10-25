@@ -183,7 +183,37 @@ func _finished(result: Dictionary) -> void:
 	menus.show()
 	menus.results(game.level,result)
 
+## Touch drives the menus and the HUD pause button by replaying a finger as a left mouse click:
+## mouse emulation is off so a beach touch never also counts as a FLAP click, which means
+## GUI buttons would otherwise ignore touches (iPhone Safari: nothing responded). In play only
+## the top bar strip is forwarded; the rest of the screen belongs to the stick and buttons.
+const TOP_BAR_TOUCH_Y: float = 28.0
+var gui_fingers: Dictionary = {}
+
+func _touch_to_gui(event: InputEventScreenTouch) -> void:
+	if event.pressed:
+		if screen == "game" and event.position.y > TOP_BAR_TOUCH_Y:
+			return
+		gui_fingers[event.index] = true
+	elif not gui_fingers.erase(event.index):
+		return
+	var motion := InputEventMouseMotion.new()
+	motion.position = event.position
+	motion.global_position = event.position
+	var click := InputEventMouseButton.new()
+	click.position = event.position
+	click.global_position = event.position
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = event.pressed
+	click.button_mask = MOUSE_BUTTON_MASK_LEFT if event.pressed else 0
+	if event.pressed:
+		get_viewport().push_input(motion,true)
+	get_viewport().push_input(click,true)
+
 func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		_touch_to_gui(event)
+		return
 	if event.is_action_pressed("fullscreen"):
 		_navigate("fullscreen")
 		get_viewport().set_input_as_handled()

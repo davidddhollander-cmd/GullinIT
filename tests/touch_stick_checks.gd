@@ -216,6 +216,31 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(not input.key_aim, "mouse motion hands aim back to the mouse")
 	host.main.clear_game()
 	await host.settle()
+	# Mouse emulation is off, so a finger must still press menu buttons (iPhone: nothing responded).
+	host.main._navigate("title")
+	await host.settle()
+	var arcade: Button = null
+	for button: Node in host.main.menus.find_children("*","Button",true,false):
+		if (button as Button).text.begins_with("ARCADE"):
+			arcade = button as Button
+	check.call(arcade != null,"title menu has an ARCADE button to tap")
+	if arcade != null:
+		var tap: Vector2 = arcade.get_global_rect().get_center()
+		var press := InputEventScreenTouch.new()
+		press.index = 0
+		press.position = tap
+		press.pressed = true
+		host.main._input(press)
+		await host.settle()
+		var release := InputEventScreenTouch.new()
+		release.index = 0
+		release.position = tap
+		release.pressed = false
+		host.main._input(release)
+		await host.settle()
+		check.call(host.main.screen == "pick","a touch tap presses the ARCADE button and opens the gull picker")
+	host.main._navigate("title")
+	await host.settle()
 
 static func _place_target(target: BeachTarget, at: Vector2) -> void:
 	target.position += at - target.food_position()
