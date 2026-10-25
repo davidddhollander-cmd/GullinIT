@@ -1,6 +1,6 @@
 # 034 — Cast rotation across levels (code + level data)
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Codex
 Depends on: 033 (merged)
@@ -33,12 +33,28 @@ Bold = change from today. Shopper looks are `ShopperArt.APPEARANCES`: `kiosk_cus
 6. **No new art.** Only generated sprites that already exist. AGENTS.md applies.
 
 ## Done when (acceptance)
-- [ ] Every level's cast matches the table
-- [ ] L5 and L6 have one diner of each look; both look right walking, eating and reacting
-- [ ] No level repeats a look at start (test enforced)
-- [ ] A capture of each level's opening frame is saved in `test-output/` and listed in the Report
-- [ ] `tools/validate.ps1`: 0 failures (the play copy's demo-lock check aside)
+- [x] Every level's cast matches the table
+- [x] L5 and L6 have one diner of each look; both look right walking, eating and reacting
+- [x] No level repeats a look at start (test enforced)
+- [x] A capture of each level's opening frame is saved in `test-output/` and listed in the Report
+- [x] `tools/validate.ps1`: 0 failures (the play copy's demo-lock check aside)
 
 ## Report
+
+**Files changed:** `data/levels/level_01.json` through `level_06.json`; `scripts/pier_diner_art.gd`, `scripts/spawner.gd`, `scripts/target.gd`; `tests/cast_variety_checks.gd`, `tests/integration.gd`, `tests/level_generator_checks.gd`, and `tests/prop_overlap_checks.gd`.
+
+**Tests:** `./tools/validate.ps1` — **13,773 checks, 0 failures**. `./tools/validate.ps1 -Capture` — **13,773 checks, 0 failures** using the GL Compatibility renderer. `git diff --check` also passed. The rendered run retains the existing non-failing focus warning and preview-image import warning.
+
+**Captures:** `test-output/cast-rotation-level-1-opening.png`, `test-output/cast-rotation-level-2-opening.png`, `test-output/cast-rotation-level-3-opening.png`, `test-output/cast-rotation-level-4-opening.png`, `test-output/cast-rotation-level-5-opening.png`, and `test-output/cast-rotation-level-6-opening.png`. These are local ignored review artifacts, as established by `.gitignore`.
+
+**Decisions:** Authored appearances now match the target table, including explicit original/alternate diner assignments in L5 and L6. `BeachTarget` keeps diner appearance per person so `PierDinerArt` selects the matching base, motion, reaction and food-anchor metadata without mutating `Config.targets`. Missing or invalid appearances retain the original diner look; un-authored diners created by the spawner use the least-used of the two valid looks, with list order making the first diner the original. The L5 family uses shared `family_id: family_1`, with the toddler at x 210 and mum at x 255 on open sand; automated prop-base and busy customer/bench spot checks plus the opening capture verify the placement. No new art or code-drawn character imagery was added.
+
+The worktree was clean, so nothing was stashed. The branch was created directly from the local `main` commit `e3e4037` as requested; `main` was never checked out.
+
+**Not done:** Nothing. The branch is intentionally unmerged for Claude review.
+
+**Branch:** `codex/034-cast-rotation`
+
+**Implementation commit:** `eb5f7d6` (`Implement cast rotation across levels`). The task-report move is committed separately after this report.
 
 ## Review notes

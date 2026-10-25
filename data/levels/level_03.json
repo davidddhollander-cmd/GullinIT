@@ -27,7 +27,7 @@
     {"type": "kiosk_customer", "x": 545, "food_id": "ice_cream", "appearance": "shopper_mullet", "station": "ice_cream", "patrol_radius": 12},
     {"type": "kiosk_customer", "x": 730, "food_id": "hotdog", "appearance": "old_man", "station": "hotdogs", "patrol_radius": 12},
     {"type": "kiosk_customer", "x": 830, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "promenade_stroll", "patrol_radius": 24},
-    {"type": "pier_diner", "x": 1100, "station": "pier_dining", "patrol_radius": 8}
+    {"type": "pier_diner", "x": 1100, "appearance": "pier_diner", "station": "pier_dining", "patrol_radius": 8}
   ],
   "props": [
     {"type": "beach_palm", "x": 125, "y": 148},

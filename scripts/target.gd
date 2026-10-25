@@ -60,6 +60,7 @@ const BAG_TEXTURES: Array[Texture2D] = [
 ]
 var bag_variant: int = 0
 var shopper_appearance: String = "kiosk_customer"
+var diner_appearance: String = "pier_diner"
 var shine_time: float = 0.0
 var bag_squish_time: float = 0.0
 var bag_squish_duration: float = BAG_SQUISH_TIME
@@ -195,6 +196,8 @@ func setup(type: String, x: float, random: RandomNumberGenerator, mult: float, s
 	if kind == "kiosk_customer":
 		var appearance: String = str(spawn.get("appearance","kiosk_customer"))
 		shopper_appearance = appearance if appearance in ShopperArt.APPEARANCES else "kiosk_customer"
+	elif kind == "pier_diner":
+		diner_appearance = PierDinerArt.normalize_appearance(str(spawn.get("appearance","pier_diner")))
 	encounter_awareness = float(spawn.get("awareness_mult",1.0))
 	awareness_mult = mult * encounter_awareness
 	speed_mult = float(spawn.get("speed_mult",1.0))
@@ -239,14 +242,14 @@ func setup(type: String, x: float, random: RandomNumberGenerator, mult: float, s
 
 func refresh_art() -> void:
 	info = Config.targets[kind]
-	if kind == "kiosk_customer":
+	if kind in ["kiosk_customer", "pier_diner"]:
 		# Per-person art must not change the shared gameplay target definition.
 		info = info.duplicate()
-		info.sprite = shopper_appearance
+		info.sprite = shopper_appearance if kind == "kiosk_customer" else diner_appearance
 	if kind == "sunbather":
 		sprite.sprite_frames = SunbatherArt.frames(sunbather_blue,sunbather_female)
 	elif kind == "pier_diner":
-		sprite.sprite_frames = PierDinerArt.frames()
+		sprite.sprite_frames = PierDinerArt.frames(diner_appearance)
 	else:
 		sprite.sprite_frames = Config.frames(info.sprite)
 	sprite.scale = Vector2.ONE * AdultPixelArt.DISPLAY_SCALE if kind in ["picnic_family", "sunbather"] else Vector2.ONE * float(Config.sprites[info.sprite].get("visual_scale",1.0))
