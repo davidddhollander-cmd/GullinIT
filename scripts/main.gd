@@ -16,11 +16,18 @@ func _ready() -> void:
 	# sunbathers and towels draw above every prop (z 3), so parasol poles stay behind them.
 	background.setup([
 		{"type":"beach_lamp","x":TitleFlyby.LAMP_X,"y":TitleFlyby.LAMP_BASE_Y},{"type":"beach_hut","x":240,"y":148},{"type":"beach_parasol","x":244,"y":152},
-		{"type":"beach_parasol_blue","x":282,"y":162},{"type":"beach_castle","x":304,"y":144},{"type":"beach_palm","x":172,"y":142}
+		{"type":"beach_parasol_blue","x":282,"y":162},{"type":"beach_castle","x":310,"y":175},{"type":"beach_palm","x":172,"y":142}
 	])
 	var lamp: AnimatedSprite2D = background.prop_sprites[0]
 	lamp.scale = Vector2.ONE * TitleFlyby.LAMP_SCALE
 	lamp.position.y = TitleFlyby.LAMP_BASE_Y - 90.0 * TitleFlyby.LAMP_SCALE * 0.5
+	# Sandcastle in the foreground, in front of and below the sunbathers: smaller and smoothed so the downscale is less blocky.
+	var castle: AnimatedSprite2D = background.prop_sprites[4]
+	var castle_half: float = 175.0 - castle.position.y
+	castle.scale *= 0.7
+	castle.position.y = 175.0 - castle_half * 0.7
+	castle.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	castle.z_index = 4
 	background.prop_sprites[1].z_index = 1 # hut behind the red parasol (props are listed in setup order)
 	for spec: Array in [[false,true,244.0,0.0],[true,false,282.0,10.0]]:
 		var towel := SunbatherTowel.new()

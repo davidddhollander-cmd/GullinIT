@@ -161,7 +161,7 @@ static func run_game(suite: Node, check: Callable) -> void:
 	check.call(rows[0].text.contains("2/3"), "progress ticks up to 2/3")
 	game.quests.record("swallowed", {"food": "ice_cream", "direct": true})
 	game.overlay._process(0.0)
-	check.call(rows[0].get_theme_color("font_color") == BeachUI.GOLD and rows[0].text.begins_with("*"), "done quest is gold and ticked")
+	check.call(rows[0].get_theme_color("font_color") == BeachUI.GOLD and rows[0].text.begins_with(">"), "done quest is gold and ticked")
 	suite.layout(game.overlay)
 	await suite.snapshot("quest-checklist")
 	GameState.progress = {}
@@ -233,46 +233,15 @@ static func run_game(suite: Node, check: Callable) -> void:
 	# Task 005: level 2 wind flags and one-time upwind tip; level 3 Gary taunt.
 	GameState.options.tips = []
 	game = _play(main, 2)
-	check.call(game.beach.wind_flags.size() == 2, "level 2 has two wind flags")
+	check.call(game.beach.wind_flags.is_empty(), "level 2 has no flagpoles")
 	for id: int in [1, 3, 4, 5, 6]:
 		main.start_level(id)
 		check.call(main.game.beach.wind_flags.is_empty(), "level %d has no wind flags" % id)
-	game = _play(main, 2)
-	game.player.position = Vector2(215, 100)
-	game.player.state = BeachGull.State.GLIDE
-	game.camera_x = 215.0
-	game.camera.position.x = 215.0
-	game.beach.camera_x = 215.0
-	game.beach.wind_dir = 1
-	game.beach.strength = 0.2
-	game.beach.time = 0.0
-	game.beach.tick(0.0)
-	game.beach.wind_dir = -1
-	game.beach.strength = 0.6
-	await suite.snapshot("level2-wind-flags-left")
-	game.beach.wind_dir = 1
-	await suite.snapshot("level2-wind-flags-right")
 	GameState.options.tips = []
 	game = _play(main, 2)
 	game.player.state = BeachGull.State.GLIDE
 	game._physics_process(1.0 / 60)
-	await suite.snapshot("level2-upwind-tip")
-	var tip: String = "FLY INTO THE WIND = UPWIND +%d%%" % roundi(float(Config.tuning.score.upwind) * 100.0)
-	check.call(game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == tip), "airborne in level 2 shows the upwind tip")
-	check.call("upwind" in GameState.options.tips, "upwind tip is remembered in options.tips")
-	var tip_texts: Array = game.effects.texts.filter(func(t: Dictionary) -> bool: return t.text == tip)
-	if tip_texts.size() == 1:
-		var tip_rect: Rect2 = _text_rect(game, tip_texts[0])
-		var screen: Rect2 = Rect2(tip_rect.position - Vector2(game.camera_x - 160.0, 0.0), tip_rect.size)
-		var hud: Array[Rect2] = [Rect2(0, 0, 320, 17), Rect2(232, 44, 84, 28), game.overlay.hint_rect("LANDING / HOLD SPACE TO CLIMB")]
-		var clear: bool = screen.position.x >= 0.0 and screen.end.x <= 320.0
-		for box: Rect2 in hud:
-			clear = clear and not screen.intersects(box)
-		check.call(clear, "upwind tip is on screen and clear of the top bar, goal box and hint")
-	game = _play(main, 2)
-	game.player.state = BeachGull.State.GLIDE
-	game._physics_process(1.0 / 60)
-	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == tip), "upwind tip is not shown on the second run")
+	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return str(t.text).begins_with("FLY INTO THE WIND")) and not ("upwind" in GameState.options.tips), "level 2 has no wind, so no upwind tip")
 	game = _play(main, 3)
 	game._swallowed({"id": "hotdog"})
 	var is_taunt: Callable = func(t: Dictionary) -> bool: return t.text == "GARY: OI! THAT'S MY LUNCH!"

@@ -1025,7 +1025,7 @@ func family_trip_checks() -> void:
 			mum = target
 		elif target.family_id == "family_1" and target.kind == "toddler":
 			siblings.append(target)
-	check(mum.family_kiosk_x >= 775 and siblings.size() == 2,"two-child mum receives far beach stand position and both siblings")
+	check(mum.family_kiosk_x >= 500 and siblings.size() == 2,"two-child mum receives the mid beach stand position and both siblings")
 	# Preserve one sibling's existing food while the empty sibling triggers shopping.
 	siblings[0].food = false
 	siblings[0].food_sprite.hide()

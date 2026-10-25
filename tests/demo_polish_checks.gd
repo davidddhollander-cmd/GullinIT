@@ -106,9 +106,9 @@ static func _readability_checks(suite: Node, check: Callable) -> void:
 		game.elapsed = float(game.level.time_limit)-seconds
 		overlay._process(0.0)
 		check.call(overlay.time_label.text == "%02d" % seconds,"timer shows only padded digits: "+overlay.time_label.text)
-	for score: int in [249,250,399,400,550]:
+	for score: int in [149,150,399,400,550]:
 		game.score.points = score
-		var index: int = 0 if score < 250 else (1 if score < 400 else 2)
+		var index: int = 0 if score < 150 else (1 if score < 400 else 2)
 		var status: Dictionary = overlay.goal_status()
 		check.call(int(status.goal) == int(game.level.stars[index]),"HUD advances to the next star at %d points" % score)
 		check.call(overlay.font.get_string_size(str(status.title),HORIZONTAL_ALIGNMENT_LEFT,-1,8).x <= 74,"star title fits goal box: "+str(status.title))

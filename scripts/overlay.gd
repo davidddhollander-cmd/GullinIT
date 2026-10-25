@@ -13,7 +13,7 @@ var lesson_prompt: Label
 var pause_button: Button
 var top: HBoxContainer
 var quest_panel: PanelContainer
-var quest_box: VBoxContainer
+var quest_box: HBoxContainer
 var quest_labels: Array[Label] = []
 var score_announcement: Label
 var score_announcement_tween: Tween
@@ -30,7 +30,8 @@ const SCORE_ANNOUNCEMENT_HOLD: float = BeachEffects.SCORE_MESSAGE_HOLD
 const SCORE_ANNOUNCEMENT_FADE: float = BeachEffects.SCORE_MESSAGE_FADE
 const TOP_BAR_HEIGHT: int = 17
 const TOP_BAR_FONT_SIZE: int = 6
-const SCORE_CALLOUT_TOP: float = TOP_BAR_HEIGHT + 2.0
+const QUEST_STRIP_HEIGHT: float = 10.0 ## small-font quest row directly under the top bar
+const SCORE_CALLOUT_TOP: float = TOP_BAR_HEIGHT + QUEST_STRIP_HEIGHT + 2.0 ## pop-ups sit below the strip
 const HUD_FONT: Font = preload("res://assets/fonts/gull_hud.fnt")
 
 func setup(owner_game: BeachGame) -> void:
@@ -118,12 +119,14 @@ func setup(owner_game: BeachGame) -> void:
 	quest_style.content_margin_bottom = 1
 	quest_panel.mouse_filter = MOUSE_FILTER_IGNORE
 	quest_panel.position = Vector2(3,TOP_BAR_HEIGHT + 1)
-	quest_box = VBoxContainer.new()
+	quest_box = HBoxContainer.new()
 	quest_box.mouse_filter = MOUSE_FILTER_IGNORE
-	quest_box.add_theme_constant_override("separation",0)
+	quest_box.add_theme_constant_override("separation",6)
 	quest_panel.add_child(quest_box)
 	for quest: Dictionary in game.quests.quests:
-		var row: Label = BeachUI.label(quest_box,"",BeachUI.FONT_NATIVE,BeachUI.CREAM)
+		var row: Label = BeachUI.label(quest_box,"",TOP_BAR_FONT_SIZE,BeachUI.CREAM)
+		row.add_theme_font_override("font",HUD_FONT)
+		row.add_theme_font_size_override("font_size",TOP_BAR_FONT_SIZE)
 		row.add_theme_color_override("font_shadow_color",Color(0.0,0.0,0.0,0.65))
 		row.add_theme_constant_override("shadow_offset_x",1)
 		row.add_theme_constant_override("shadow_offset_y",1)
@@ -207,7 +210,7 @@ func _process(_delta: float) -> void:
 	if you_score_label != null:
 		you_score_label.text = str(game.score.points)
 
-# One row per quest: "- text" until done, gold "* text" after; counted quests add n/N.
+# One row per quest, laid out horizontally: "- text" until done, gold "> text" after; counted quests add n/N.
 func sync_quests() -> void:
 	quest_box.visible = not quest_labels.is_empty() and game.intro <= 0.0
 	quest_panel.visible = quest_box.visible
@@ -217,7 +220,7 @@ func sync_quests() -> void:
 	for i: int in mini(quest_labels.size(),game.quests.quests.size()):
 		var quest: Dictionary = game.quests.quests[i]
 		var count: int = int(quest.count)
-		quest_labels[i].text = "%s %s%s" % ["*" if quest.done else "-",quest.text,"" if count <= 1 else " %d/%d" % [int(quest.progress),count]]
+		quest_labels[i].text = "%s %s%s" % [">" if quest.done else "-",quest.text,"" if count <= 1 else " %d/%d" % [int(quest.progress),count]]
 		quest_labels[i].add_theme_color_override("font_color",BeachUI.GOLD if quest.done else BeachUI.CREAM)
 
 func sync_rival_scores() -> void:

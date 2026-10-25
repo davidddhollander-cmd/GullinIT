@@ -4,16 +4,15 @@
   "name": "Family Picnic",
   "seed": 7102,
   "time_limit": 120,
-  "wind": {"dir": 1, "strength": 0.2, "gusts": false, "flip": false},
+  "wind": {"dir": 1, "strength": 0, "gusts": false, "flip": false},
   "awareness_mult": 0.9,
-  "twist": {"id": "wind_intro", "flags": [215, 600]},
   "quests": [
     {"id": "l2_ice", "text": "3 CLEAN ICE CREAMS", "event": "swallowed", "filter": {"food": "ice_cream", "direct": true}, "count": 3, "bonus": 50},
     {"id": "l2_cry", "text": "MAKE A TODDLER CRY", "event": "toddler_cried", "filter": {}, "count": 1, "bonus": 30}
   ],
   "random_quest": {"count": [3, 5], "bonus": 40},
   "random_foods": ["ice_cream", "crisps_bag", "half_eaten_doughnut", "half_eaten_sandwich"],
-  "stars": [250, 400, 550],
+  "stars": [150, 400, 550],
   "rivals": [],
   "world": {"width": 1040, "promenade_start": 1040, "pier_start": 1040, "start_x": 40, "start_y": 125},
   "zones": [
@@ -27,6 +26,7 @@
     {"type": "picnic_family", "x": 370, "family_id": "family_1", "station": "family_1", "patrol_radius": 0},
     {"type": "toddler", "x": 440, "family_id": "family_2", "station": "family_2", "patrol_radius": 6},
     {"type": "picnic_family", "x": 484, "family_id": "family_2", "station": "family_2", "patrol_radius": 0},
+    {"type": "kiosk_customer", "x": 545, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "ice_cream_mid", "patrol_radius": 10},
     {"type": "kiosk_customer", "x": 865, "food_id": "ice_cream", "appearance": "shopper_sundress", "station": "ice_cream", "patrol_radius": 10}
   ],
   "props": [
@@ -36,6 +36,7 @@
     {"type": "beach_castle", "x": 650, "y": 171, "jitter": true},
     {"type": "bin", "x": 780},
     {"type": "wheelie_bin", "x": 950},
+    {"type": "kiosk", "x": 600, "customer_x": 545},
     {"type": "kiosk", "x": 905, "customer_x": 845},
     {"type": "beach_hut", "x": 1000, "y": 151}
   ],
