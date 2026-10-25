@@ -1255,7 +1255,7 @@ func target_checks(game: BeachGame) -> void:
 	family.tick(0.01,game.gulls)
 	family.tick(0.4,game.gulls)
 	check(game.player.state==BeachGull.State.STUNNED,"parent swats after warning")
-	var vendor: BeachTarget = game.spawner.create("seafood_vendor",890)
+	var vendor: BeachTarget = game.spawner.create("market_cleaner",890)
 	vendor.alert = 1
 	game.player.state = BeachGull.State.GLIDE
 	game.player.invulnerable = 0

@@ -46,7 +46,7 @@ static func generate(definition: Dictionary, rules: Dictionary) -> Dictionary:
 			families[str(spawn.family_id)] = []
 	for i: int in range(sun_count,rules.sunbather_centres.size()):
 		spawns.append({"type":"sunbather"})
-	for kind: String in ["pier_diner","seafood_vendor"]:
+	for kind: String in ["pier_diner"]:
 		if not kinds.has(kind):
 			spawns.append({"type":kind})
 	for spawn: Dictionary in spawns:
@@ -101,9 +101,6 @@ static func generate(definition: Dictionary, rules: Dictionary) -> Dictionary:
 			"pier_diner":
 				spawn.x = 1018+random.randi_range(-6,6)
 				spawn.station = "pier_dining"
-			"seafood_vendor":
-				spawn.x = 1180+random.randi_range(-6,6)
-				spawn.station = "fish_counter"
 			"lifeguard":
 				spawn.x = 1138
 				spawn.station = "lifeguard"

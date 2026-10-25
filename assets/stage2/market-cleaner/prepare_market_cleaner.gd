@@ -5,8 +5,8 @@ extends SceneTree
 const CELL := 128
 const SOLE := 116
 const HEIGHT := 80
-const SOURCE := "res://assets/reference/seafood-vendor-v1/"
-const OUTPUT := "res://assets/sprites/seafood-vendor-generated-v1.png"
+const SOURCE := "res://assets/stage2/market-cleaner/reference/"
+const OUTPUT := "res://assets/stage2/market-cleaner/market-cleaner-v1.png"
 
 func _read(name: String) -> Image:
 	var image := Image.load_from_file(ProjectSettings.globalize_path(SOURCE + name))
@@ -108,7 +108,7 @@ func _preview(atlas: Image) -> void:
 		var actor := actors[index]
 		var centre_x := 64 + index * 128
 		preview.blend_rect(actor, Rect2i(Vector2i.ZERO, actor.get_size()), Vector2i(centre_x - actor.get_width() / 2, 104 - actor.get_height()))
-	assert(preview.save_png("res://assets/previews/seafood-vendor-v1-comparison.png") == OK)
+	assert(preview.save_png("res://assets/stage2/market-cleaner/market-cleaner-v1-comparison.png") == OK)
 
 func _initialize() -> void:
 	var actions := _read("seafood-vendor-actions-source.png")

@@ -34,8 +34,7 @@
     {"type": "kiosk_customer", "x": 840, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "hotdogs", "patrol_radius": 12},
     {"type": "pier_diner", "x": 1105, "appearance": "pier_diner", "station": "pier_dining", "patrol_radius": 8},
     {"type": "pier_diner", "x": 1165, "appearance": "pier_diner_b", "station": "pier_dining", "patrol_radius": 8},
-    {"type": "off_lead_dog", "x": 560, "home": [520, 610]},
-    {"type": "seafood_vendor", "x": 1235, "station": "fish_counter", "patrol_radius": 8}
+    {"type": "off_lead_dog", "x": 560, "home": [520, 610]}
   ],
   "props": [
     {"type": "beach_palm", "x": 60, "y": 148},

@@ -89,8 +89,8 @@
     "zone": 2,
     "foods": []
   },
-  "seafood_vendor": {
-    "sprite": "seafood_vendor",
+  "market_cleaner": {
+    "sprite": "market_cleaner",
     "awareness": 85,
     "rise": 1,
     "altitude": 115,
@@ -98,8 +98,6 @@
     "danger": 30,
     "windup": 0.6,
     "zone": 2,
-    "foods": [
-      "fried_fish"
-    ]
+    "foods": []
   }
 }

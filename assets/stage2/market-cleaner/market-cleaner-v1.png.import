@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ulyd28fgga45"
-path="res://.godot/imported/seafood-vendor-v1-comparison.png-97f920845db4654fb4ad4ee02c22eb8d.ctex"
+uid="uid://bci8drh2m67a3"
+path="res://.godot/imported/market-cleaner-v1.png-371e37a1332b80491bdff169678a546e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/previews/seafood-vendor-v1-comparison.png"
-dest_files=["res://.godot/imported/seafood-vendor-v1-comparison.png-97f920845db4654fb4ad4ee02c22eb8d.ctex"]
+source_file="res://assets/stage2/market-cleaner/market-cleaner-v1.png"
+dest_files=["res://.godot/imported/market-cleaner-v1.png-371e37a1332b80491bdff169678a546e.ctex"]
 
 [params]
 

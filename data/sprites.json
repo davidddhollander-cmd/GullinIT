@@ -1946,8 +1946,8 @@
       }
     }
   },
-  "seafood_vendor": {
-    "file": "res://assets/sprites/seafood-vendor-generated-v1.png",
+  "market_cleaner": {
+    "file": "res://assets/stage2/market-cleaner/market-cleaner-v1.png",
     "frame_w": 128.0,
     "frame_h": 128.0,
     "visual_scale": 0.5,

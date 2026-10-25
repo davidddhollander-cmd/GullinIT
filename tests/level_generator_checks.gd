@@ -96,7 +96,7 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 		check.call(stand_count==1 and kiosk_x<0.0 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==2,"three's a crowd has a single grill (no kiosk) and two rivals")
 	else:
 		check.call(types==["sunbather","kiosk_customer","kiosk_customer","kiosk_customer","pier_diner"],"boardwalk is a busy promenade of three shoppers and a diner, no families")
-		check.call(not types.has("dog_owner") and not types.has("seafood_vendor") and not types.has("lifeguard"),"boardwalk leaves later hazards for later levels")
+		check.call(not types.has("dog_owner") and not types.has("market_cleaner") and not types.has("lifeguard"),"boardwalk leaves later hazards for later levels")
 		check.call(float(level.spawns[0].x)<float(level.world.promenade_start) and float(level.spawns[1].x)>float(level.world.promenade_start) and float(level.spawns[4].x)>float(level.world.pier_start),"boardwalk actors occupy their zones")
 		check.call(stand_count==2 and bool(level.rivals_after_snatch),"boardwalk includes both stands and delayed Gary")
 
@@ -106,7 +106,7 @@ static func _check_boss_level(check: Callable, source: Dictionary, level: Dictio
 	for spawn: Dictionary in level.spawns:
 		types.append(str(spawn.type))
 		check.call(float(spawn.x)>20 and float(spawn.x)<float(level.world.width)-20,"boss actor remains inside map")
-	check.call(types.has("seafood_vendor") and types.has("pier_diner") and types.count("kiosk_customer")==3,"boss level has the pier, vendor and promenade customers")
+	check.call(types.has("pier_diner") and types.count("kiosk_customer")==3,"boss level has the pier and promenade customers")
 	for a: int in level.spawns.size():
 		for b: int in range(a+1,level.spawns.size()):
 			check.call(absf(float(level.spawns[a].x)-float(level.spawns[b].x))>=35.0,"boss characters start separated")
@@ -131,7 +131,7 @@ static func _check_later_level(check: Callable, level: Dictionary) -> void:
 		elif spawn.type == "kiosk_customer":
 			check.call(x>=640 and x<960,"promenade food stays on promenade")
 			food_positions.append(x)
-		elif spawn.type in ["pier_diner","seafood_vendor"]:
+		elif spawn.type == "pier_diner":
 			check.call(x>=960,"pier dining stays on pier")
 			food_positions.append(x)
 	for spawn: Dictionary in level.spawns:

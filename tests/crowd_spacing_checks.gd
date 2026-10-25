@@ -200,7 +200,7 @@ static func _stand_spacing(root: Node, check: Callable) -> void:
 			for j: int in range(i+1,stands.size()):
 				check.call(absf(float(stands[i].x)-float(stands[j].x)) >= min_gap,"level %d stands %d and %d keep %d px apart" % [level.id,int(stands[i].x),int(stands[j].x),int(min_gap)])
 			for spawn: Dictionary in level.spawns:
-				if spawn.type in ["pier_diner","seafood_vendor","off_lead_dog","sunbather","picnic_family","toddler"]:
+				if spawn.type in ["pier_diner","off_lead_dog","sunbather","picnic_family","toddler"]:
 					check.call(absf(float(spawn.x)-float(stands[i].customer_x)) >= clear,"level %d %s at %d clear of stand %d customer slot" % [level.id,spawn.type,int(spawn.x),int(stands[i].x)])
 	var stage := Node2D.new()
 	root.add_child(stage)

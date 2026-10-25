@@ -52,7 +52,7 @@ static func _player_mug(suite: Node, game: BeachGame, pilot: RivalPilot, side: f
 static func run(suite: Node, check: Callable) -> void:
 	var level: Dictionary = Config.levels[5]
 	check.call(level.name == "Sunset Showdown" and bool(level.get("boss", false)) and int(level.time_limit) == 150 and level.wind.flip == true, "level 6 is the hand-built Sunset Showdown boss with a flipping wind")
-	check.call(level.rivals.size() == 3 and level.world.width == 1280 and level.spawns.any(func(s: Dictionary) -> bool: return s.type == "seafood_vendor"), "level 6 has Gary, Chip, Bev and the seafood vendor")
+	check.call(level.rivals.size() == 3 and level.world.width == 1280 and not level.spawns.any(func(s: Dictionary) -> bool: return s.type == "market_cleaner"), "level 6 has Gary, Chip, Bev and no stage 2 market cleaner")
 	check.call(str(level.objective) == "OUT-EAT THE GANG", "level 6 states the objective")
 	var game: BeachGame = _fresh(suite)
 	var bev: RivalPilot = _bev(game)
