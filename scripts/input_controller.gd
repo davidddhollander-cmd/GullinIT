@@ -13,7 +13,9 @@ var touch_slowmo: bool = false
 var slowmo_ready: bool = false ## set by the game; the touch button only exists while true
 var aim_finger: int = -1
 var climb_fingers: Dictionary = {}
-var gamepad: bool = false
+var gamepad: bool = false ## last device used was a pad; prompts show pad buttons
+var key_aim: bool = false ## WASD/arrows steer like a stick until the mouse or a touch takes over
+const PAD_DEADZONE: float = 0.3 ## stick drift below this never claims the prompts
 var touch_visible: bool = false
 var enabled: bool = false
 # Compact right-thumb cluster (logical 320x180 coordinates). FLAP sits in the
@@ -71,10 +73,15 @@ func _input(event: InputEvent) -> void:
 			touch_down[event.index] = true
 		else:
 			touch_down.erase(event.index)
-	if event is InputEventJoypadMotion or event is InputEventJoypadButton:
+		key_aim = false
+	# The last device used wins: pad buttons or a real stick push, otherwise keys and mouse.
+	if event is InputEventJoypadButton or (event is InputEventJoypadMotion and absf(event.axis_value) > PAD_DEADZONE):
 		gamepad = true
+	elif event is InputEventKey or (event is InputEventMouseButton and not touch_recent()):
+		gamepad = false
 	elif event is InputEventMouseMotion and not touch_recent():
 		gamepad = false
+		key_aim = false
 		touch_active = false
 	if not enabled:
 		return
@@ -122,9 +129,9 @@ func touch_stick() -> Vector2:
 func update_player(gull: BeachGull, camera_x: float) -> void:
 	var stick: Vector2 = Input.get_vector("aim_left","aim_right","aim_up","aim_down")
 	if stick.length() > 0.15:
-		gamepad = true
+		key_aim = not gamepad # keys share the aim actions with the pad stick
 		_aim_with_stick(gull,stick)
-	elif gamepad:
+	elif gamepad or key_aim:
 		_aim_without_stick(gull)
 	elif touch_active:
 		var touch_vec: Vector2 = touch_stick()

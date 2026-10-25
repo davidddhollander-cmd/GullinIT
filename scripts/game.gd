@@ -47,6 +47,12 @@ var taunt_wait: float = -1.0
 var taunt_rival: String = ""
 var taunt_text: String = ""
 var crashes: int = 0
+# Dive outcomes for level_end analytics (player feedback F1: are dives overshooting?).
+var dive_stats: Dictionary = {"dives":0,"dive_pecks":0,"dive_snatches":0,"dive_overshoots":0}
+var dive_live: bool = false
+var dive_hit: bool = false
+var dive_target: BeachTarget = null
+var dive_side: float = 0.0
 var first_steal_sent: bool = false
 var end_tracked: bool = false
 var lesson_started: float = 0.0
@@ -126,12 +132,16 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	_wire_sand(player)
 	player.gull_stunned.connect(_stunned)
 	player.ground_crashed.connect(_crashed)
-	player.dive_started.connect(func() -> void: Audio.play("dive"))
+	player.dive_started.connect(func() -> void:
+		Audio.play("dive")
+		_dive_began()
+	)
 	player.stun_ignored.connect(func() -> void:
 		effects.message(player.position,"SKULL!",BeachUI.GOLD)
 		Audio.play("click")
 	)
 	player.peck_started.connect(func() -> void:
+		dive_stats.dive_pecks += 1
 		effects.message(player.beak(),"PECK!",BeachUI.GOLD)
 		Audio.play("click")
 	)
@@ -375,6 +385,7 @@ func _physics_process(delta: float) -> void:
 		input.touch_slowmo = false
 		start_slowmo()
 	player.tick(step,wind.direction,wind.strength)
+	_dive_tick()
 	_wind_tip()
 	if dog != null:
 		dog.tick(step,player)
@@ -444,7 +455,24 @@ func track_end(outcome: String, result: Dictionary = {}) -> void:
 	if end_tracked or intro_dismissed_elapsed < 0.0:
 		return
 	end_tracked = true
-	track("level_end", {"level": int(level.id), "mode": mode_name(), "score": int(result.get("score", score.points)), "stars": int(result.get("stars", 0)), "seconds": snappedf(elapsed, 0.1), "crashes": crashes, "outcome": outcome})
+	track("level_end", {"level": int(level.id), "mode": mode_name(), "score": int(result.get("score", score.points)), "stars": int(result.get("stars", 0)), "seconds": snappedf(elapsed, 0.1), "crashes": crashes, "outcome": outcome}.merged(dive_stats))
+
+func _dive_began() -> void:
+	dive_stats.dives += 1
+	dive_live = true
+	dive_hit = false
+	# ponytail: the intended snack is guessed as the nearest one along the dive line (the touch-assist cone); use real intent if an aim marker lands.
+	var t: Dictionary = Config.tuning.touch
+	dive_target = assist_target(player.position,player.direction,float(t.assist_range),deg_to_rad(float(t.assist_angle)))
+	dive_side = signf(dive_target.food_position().x-player.position.x) if dive_target != null else 0.0
+
+# A dive ends when the gull leaves WINDUP/STRIKE; ending past the lined-up snack without a snatch is an overshoot.
+func _dive_tick() -> void:
+	if not dive_live or player.state in [BeachGull.State.WINDUP,BeachGull.State.STRIKE]:
+		return
+	dive_live = false
+	if not dive_hit and dive_side != 0.0 and is_instance_valid(dive_target) and dive_target.food and signf(dive_target.food_position().x-player.position.x) != dive_side:
+		dive_stats.dive_overshoots += 1
 
 func dismiss_intro() -> void:
 	lesson_started = elapsed
@@ -508,6 +536,9 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 		var handover: bool = target.last_theft_handover and target.last_theft_direct and (player.state == BeachGull.State.STRIKE or player.sweep_state == BeachGull.State.STRIKE)
 		if target.last_theft_biting and target.last_theft_direct and player.state == BeachGull.State.STRIKE:
 			_quest_event("mid_air_bite")
+		if dive_live and target.last_theft_direct and not dive_hit:
+			dive_hit = true
+			dive_stats.dive_snatches += 1
 		player.digestion.collect(target.food_id,{"risky":risky,"upwind":player.upwind,"handover":handover})
 		if handover:
 			effects.message(target.food_position()-Vector2(0,12),"COUNTER +%d%%!" % roundi(float(Config.tuning.score.handover)*100),BeachUI.GOLD)

@@ -62,9 +62,34 @@ static func run(suite: Node, check: Callable) -> void:
 	game._swallowed({"id": "ice_cream"})
 	game._swallowed({"id": "ice_cream"})
 	check.call(rec.names().count("first_steal") == 1 and rec.last("first_steal").level == 2 and is_equal_approx(rec.last("first_steal").seconds, 12.3), "first_steal fires once per run")
+	# Dive outcomes ride on level_end (player feedback suggestion 4): a dive that ends past its lined-up snack is an overshoot.
+	var snack: BeachTarget = null
+	for target: BeachTarget in game.spawner.targets:
+		if game.snatchable(target):
+			snack = target
+			break
+	check.call(snack != null, "level 2 has a snack to dive at")
+	var gull: BeachGull = game.player
+	gull.position = snack.food_position() + Vector2(-60, -40)
+	gull.direction = (snack.food_position() - gull.position).normalized()
+	game._dive_began()
+	gull.state = BeachGull.State.STRIKE
+	game._dive_tick()
+	gull.peck_started.emit()
+	gull.position = snack.food_position() + Vector2(40, -5)
+	gull.state = BeachGull.State.GLIDE
+	game._dive_tick()
+	game._dive_tick()
+	check.call(game.dive_stats == {"dives": 1, "dive_pecks": 1, "dive_snatches": 0, "dive_overshoots": 1}, "a dive that flies past its snack counts once as an overshoot")
+	gull.position = snack.food_position() + Vector2(-60, -40)
+	game._dive_began()
+	gull.state = BeachGull.State.GLIDE
+	game._dive_tick()
+	check.call(game.dive_stats.dives == 2 and game.dive_stats.dive_overshoots == 1, "a dive pulled up short of the snack is not an overshoot")
 	game._crashed()
 	game.finish()
 	var ended: Dictionary = rec.last("level_end")
+	check.call(ended.dives == 2 and ended.dive_pecks == 1 and ended.dive_snatches == 0 and ended.dive_overshoots == 1, "level_end reports dive outcomes")
 	check.call(rec.names().count("level_end") == 1 and ended.level == 2 and ended.mode == "arcade" and ended.has("score") and ended.has("stars") and ended.crashes == 1 and is_equal_approx(ended.seconds, 12.3) and ended.outcome in ["completed", "failed"], "level_end fires on finish with its properties")
 	main.clear_game()
 	check.call(rec.names().count("level_end") == 1, "leaving the results screen does not report a second end")

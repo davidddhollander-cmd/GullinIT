@@ -187,6 +187,33 @@ static func run(host: Node, check: Callable) -> void:
 	input.touch_last_msec = Time.get_ticks_msec() - int(float(Config.tuning.touch.mouse_ignore_after_touch) * 1000.0) - 100
 	_mouse_move(input)
 	check.call(not input.touch_active and not input.gamepad, "mouse motion after the ignore window switches back to the mouse")
+	# Prompts follow the last device used; WASD/arrows never count as a pad (player feedback F2).
+	var key := InputEventKey.new()
+	key.physical_keycode = KEY_A
+	key.pressed = true
+	input._input(key)
+	Input.action_press("aim_left")
+	input.update_player(gull, 160)
+	Input.action_release("aim_left")
+	check.call(not input.gamepad and input.key_aim, "WASD steering keeps keyboard prompts")
+	gull.state = BeachGull.State.GLIDE
+	gull.velocity = Vector2(30, 0)
+	input.update_player(gull, 160)
+	check.call(_near(gull.aim, gull.position + Vector2(radius, 0)), "released keys hold the heading, not the stale mouse position")
+	var drift := InputEventJoypadMotion.new()
+	drift.axis = JOY_AXIS_LEFT_X
+	drift.axis_value = 0.1
+	input._input(drift)
+	check.call(not input.gamepad, "pad stick drift never switches prompts to the pad")
+	var pad := InputEventJoypadButton.new()
+	pad.button_index = JOY_BUTTON_A
+	pad.pressed = true
+	input._input(pad)
+	check.call(input.gamepad, "a pad button switches prompts to the pad")
+	input._input(key)
+	check.call(not input.gamepad, "a key press switches prompts back to the keyboard")
+	_mouse_move(input)
+	check.call(not input.key_aim, "mouse motion hands aim back to the mouse")
 	host.main.clear_game()
 	await host.settle()
 
