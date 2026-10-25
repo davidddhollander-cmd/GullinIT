@@ -1,6 +1,6 @@
 # 018 — Touch floating stick and aim assist
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
