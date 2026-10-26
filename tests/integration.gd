@@ -138,7 +138,6 @@ func run() -> void:
 	preload("res://tests/retro_environment_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/retro_adult_art_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/old_man_art_checks.gd").run_checks(Callable(self,"check"))
-	preload("res://tests/carried_food_art_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/slow_adult_checks.gd").run_checks(self,Callable(self,"check"))
 	preload("res://tests/crowd_spacing_checks.gd").run_checks(self, Callable(self,"check"))
 	await sunbather_reaction_flow_checks()
@@ -332,7 +331,7 @@ func carry_pose_checks(game: BeachGame) -> void:
 			player.digestion.collect("ice_cream")
 			player.tick(1.0/60,0,0)
 			var anchor: Array = BeachGull.carry_for(player.art_id).beak_anchors.glide[0]
-			var want: Vector2 = player.sprite.position+Vector2(float(anchor[0])*facing,float(anchor[1]))+Vector2(BeachGull.carried_food_art().ice_cream.offset.x*facing,BeachGull.carried_food_art().ice_cream.offset.y)*player.body_scale
+			var want: Vector2 = player.sprite.position+Vector2(float(anchor[0])*facing,float(anchor[1]))
 			check(player.carry_body.visible and not player.sprite.visible and player.carry_body.animation==&"glide",species+" switches to carry frames on pickup (facing %d)" % facing)
 			check(player.carry_item.visible and player.carry_item.position.distance_to(want)<=1.0,species+" food sits at the beak anchor (facing %d)" % facing)
 			check(player.carry_beak.visible and player.carry_beak.get_index()>player.carry_item.get_index() and player.carry_item.get_index()>player.carry_body.get_index() and player.carry_beak.flip_h==(facing<0),species+" upper beak draws above the food (facing %d)" % facing)
@@ -345,8 +344,6 @@ func carry_pose_checks(game: BeachGame) -> void:
 	rival.carry_window = 3.0
 	rival.gull.sync_carry()
 	check(rival.gull.carry_body.visible and rival.gull.carry_beak.material==rival.gull.sprite.material and rival.gull.carry_body.material==rival.gull.sprite.material,"rival carry art and upper beak share the body tint")
-	var cue_art: Dictionary = BeachGull.carried_food_art()
-	check(cue_art.has("ice_cream") and cue_art.ice_cream.texture.get_size() == Vector2(6,10) and rival.gull.carry_item.texture == cue_art.ice_cream.texture and not rival.gull.carry_item.region_enabled,"carry_item uses the carried-food atlas region for ice_cream")
 	var before: Vector2 = rival.gull.carry_item.position-rival.gull.sprite.position
 	var old_scale: float = rival.gull.body_scale
 	rival.gull.body_scale = 2.0*old_scale

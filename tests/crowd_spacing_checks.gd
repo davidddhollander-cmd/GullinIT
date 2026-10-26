@@ -33,6 +33,14 @@ static func run_checks(root: Node, check: Callable) -> void:
 	beach.queue_free()
 	spawner.reset_spacing()
 	check.call(first.position == Vector2(200,160) and second.position == Vector2(202,160), "spacing leaves gameplay positions unchanged")
+	# Feet above a stand's base pass behind it, whatever lane offset they have.
+	spawner.depth_props.assign([Rect2(180.0,160.0,40.0,0.0)])
+	first.position.y = 153.0
+	spawner.apply_spacing(0.0)
+	check.call(first.z_index < FoodStall.DRAW_DEPTH,"walker with feet above a stand's base draws behind the stand")
+	spawner.reset_spacing()
+	spawner.depth_props.clear()
+	first.position.y = 160.0
 	second.position.x = 280.0
 	spawner.apply_spacing(float(Config.tuning.world.lane_hold))
 	check.call(second.position == Vector2(280,160), "visual offset clears once people part")

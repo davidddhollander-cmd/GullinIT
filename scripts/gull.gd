@@ -68,7 +68,6 @@ var carry_body: AnimatedSprite2D ## generated beak-carry frames, shown instead o
 var carry_item: Sprite2D
 var carry_glint: Sprite2D
 var mug_cue: bool = false ## rivals: player is in mug range, so the held food shines
-static var carried_art: Dictionary = {}
 var carry_beak: AnimatedSprite2D ## generated upper-beak overlay, drawn over the food
 static var carry_frames_cache: Dictionary = {}
 static var carry_art: Dictionary = {} ## `carry` blocks from data/gull_art.json, by art id
@@ -558,46 +557,24 @@ func sync_carry() -> void:
 	var anchor: Array = carry_for(art_id).beak_anchors[String(clip)][local]
 	var offset := Vector2(float(anchor[0]) * (-1.0 if facing < 0 else 1.0), float(anchor[1])) * body_scale
 	var definition: Dictionary = Config.foods[carry_food]
-	var art: Dictionary = carried_food_art().get(carry_food, {})
-	var food_offset := Vector2.ZERO
-	if art.is_empty():
-		carry_item.texture = Config.frames(definition.sprite).get_frame_texture(&"idle", 0)
-		# Full-size food, half of it hidden in the beak: show only the half that sticks out in front.
-		var food_size: Vector2 = carry_item.texture.get_size()
-		carry_item.region_enabled = true
-		carry_item.region_rect = Rect2(Vector2(0.0 if facing < 0 else food_size.x*0.5, 0.0), Vector2(food_size.x*0.5, food_size.y))
-		carry_item.scale = Vector2(float(definition.size[0]), float(definition.size[1])) / food_size
-		carry_item.flip_h = false
-	else:
-		carry_item.texture = art.texture
-		carry_item.region_enabled = false
-		carry_item.scale = Vector2.ONE * body_scale
-		carry_item.flip_h = facing < 0
-		food_offset = Vector2(art.offset.x * (-1.0 if facing < 0 else 1.0), art.offset.y) * body_scale
-	carry_item.position = sprite.position + ((offset + food_offset) * Vector2(sprite.scale.x / maxf(art_scale, 0.001), sprite.scale.y / maxf(art_scale, 0.001))).rotated(sprite.rotation)
+	carry_item.texture = Config.frames(definition.sprite).get_frame_texture(&"idle", 0)
+	# Full-size food, half of it hidden in the beak: show only the half that sticks out in front.
+	var food_size: Vector2 = carry_item.texture.get_size()
+	carry_item.region_enabled = true
+	carry_item.region_rect = Rect2(Vector2(0.0 if facing < 0 else food_size.x*0.5, 0.0), Vector2(food_size.x*0.5, food_size.y))
+	carry_item.scale = Vector2(float(definition.size[0]), float(definition.size[1])) / food_size
+	carry_item.position = sprite.position + (offset * Vector2(sprite.scale.x / maxf(art_scale, 0.001), sprite.scale.y / maxf(art_scale, 0.001))).rotated(sprite.rotation)
 	carry_item.rotation = sprite.rotation
 	carry_item.modulate = sprite.modulate
 	carry_item.visible = true
-	carry_glint.texture = PickupShine.overlay(carry_item.texture, Time.get_ticks_msec() / 1000.0, float(get_instance_id() % 7)) if mug_cue and not art.is_empty() else null
+	carry_glint.texture = PickupShine.overlay(carry_item.texture, Time.get_ticks_msec() / 1000.0, float(get_instance_id() % 7)) if mug_cue else null
 	carry_glint.visible = carry_glint.texture != null
 	if carry_glint.visible:
 		carry_glint.position = carry_item.position
 		carry_glint.rotation = carry_item.rotation
 		carry_glint.scale = carry_item.scale
-		carry_glint.flip_h = carry_item.flip_h
-
-## Carried-food atlas entries by food id: {texture, offset}; empty until the data file exists.
-static func carried_food_art() -> Dictionary:
-	if carried_art.is_empty():
-		var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/carried_food_art.json"))
-		var sheet: Texture2D = load(str(data.file))
-		for id: String in data.foods:
-			var entry: Dictionary = data.foods[id]
-			var atlas := AtlasTexture.new()
-			atlas.atlas = sheet
-			atlas.region = Rect2(float(entry.region[0]), float(entry.region[1]), float(entry.region[2]), float(entry.region[3]))
-			carried_art[id] = {"texture": atlas, "offset": Vector2(float(entry.offset[0]), float(entry.offset[1]))}
-	return carried_art
+		carry_glint.region_enabled = true
+		carry_glint.region_rect = carry_item.region_rect
 
 func wind_lift() -> float:
 	return clampf(absf(wind_force) / float(Config.tuning.wind.lift_ref), 0.0, 1.5)
