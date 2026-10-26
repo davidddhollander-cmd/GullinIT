@@ -105,6 +105,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 					effects.message(dog.position-Vector2(0,24),"GOTCHA!",Color("ef725c"))
 					_quest_event("dog_caught")
 				)
+				dog.rival_caught.connect(_dog_caught_rival)
 				dog.outrun.connect(func() -> void:
 					effects.message(player.position-Vector2(0,18),"OUTRUN!",BeachUI.GOLD)
 					Audio.play("snatch")
@@ -391,7 +392,10 @@ func _physics_process(delta: float) -> void:
 	_dive_tick()
 	_wind_tip()
 	if dog != null:
-		dog.tick(step,player)
+		var rival_gulls: Array[BeachGull] = []
+		for pilot: RivalPilot in pilots:
+			rival_gulls.append(pilot.gull)
+		dog.tick(step,player,rival_gulls)
 	_rival_taunt(step)
 	if player.state != BeachGull.State.STUNNED:
 		player.digestion.tick(step,player.state == BeachGull.State.GROUNDED)
@@ -571,6 +575,14 @@ func _stunned() -> void:
 	effects.message(player.position,"RUDE.",Color("ef725c"))
 	effects.impact(player.position,true)
 	Audio.play("stun")
+
+func _dog_caught_rival(rival: BeachGull) -> void:
+	effects.message(dog.position-Vector2(0,24),"GOTCHA!",Color("ef725c"))
+	for pilot: RivalPilot in pilots:
+		if pilot.gull == rival:
+			var food_id: String = pilot.carried_food_id
+			if pilot.mug(dog.position) > 0:
+				stash_raids.items.append({"owner":null,"source":"dropped","food_id":food_id,"position":rival.position-Vector2(0,10),"velocity":Vector2(-rival.facing*35,-55),"grounded":false,"age":0.0})
 
 func _crashed() -> void:
 	crashes += 1

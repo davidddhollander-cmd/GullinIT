@@ -1,9 +1,10 @@
 class_name OffLeadDog
 extends Node2D
 ## Level 4 terrier: wanders, warns, chases on the sand and in low flight, leaps, catches.
-## It only ever interacts with the player gull and never touches food or rivals.
+## It chases the nearest low gull (the player, or a rival when chase_rivals is on) and never touches food.
 signal barked
 signal caught
+signal rival_caught(rival: BeachGull)
 signal outrun
 enum State { WANDER, SNIFF, WARN, CHASE, LEAP, CATCH, COOLDOWN }
 var state: State = State.WANDER
@@ -21,6 +22,7 @@ var returning: bool = false
 var cooldown_sniff: bool = false
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var sprite: AnimatedSprite2D
+var prey: BeachGull ## current chase target, re-picked only while the dog is idle
 
 func setup(x: float, home_range: Array, seed_value: int) -> void:
 	var art: Dictionary = Config.sprites.off_lead_dog
@@ -66,8 +68,24 @@ func _move(target_x: float, speed: float, delta: float) -> void:
 	_face(target_x)
 	position.x = clampf(move_toward(position.x, target_x, speed * delta), maxf(12.0, home.x - float(_t().leash)), minf(float(Config.tuning.world.width) - 12.0, home.y + float(_t().leash)))
 
-func tick(delta: float, gull: BeachGull) -> void:
+# Nearest chaseable gull within notice range (player or rival); the player when nobody is close.
+func _pick_prey(player: BeachGull, rivals: Array[BeachGull]) -> BeachGull:
+	if state != State.WANDER and state != State.SNIFF and is_instance_valid(prey):
+		return prey
+	var best: BeachGull = player
+	var best_gap: float = absf(player.position.x - position.x) if _can_chase(player) else INF
+	if _t().get("chase_rivals", false):
+		for rival: BeachGull in rivals:
+			var gap: float = absf(rival.position.x - position.x)
+			if _can_chase(rival) and gap <= float(_t().notice_radius) and gap < best_gap:
+				best = rival
+				best_gap = gap
+	prey = best
+	return best
+
+func tick(delta: float, player: BeachGull, rivals: Array[BeachGull] = []) -> void:
 	var t: Dictionary = _t()
+	var gull: BeachGull = _pick_prey(player, rivals)
 	var notice: bool = _can_chase(gull) and absf(gull.position.x - position.x) <= float(t.notice_radius)
 	leap_gap = maxf(0.0, leap_gap - delta)
 	var clip: StringName = &"idle"
@@ -177,7 +195,10 @@ func _try_catch(gull: BeachGull) -> void:
 	air = 0.0
 	state = State.CATCH
 	timer = float(_t().catch_time)
-	caught.emit()
+	if gull.rival:
+		rival_caught.emit(gull)
+	else:
+		caught.emit()
 
 func _give_up(leashed: bool = false) -> void:
 	if leashed:

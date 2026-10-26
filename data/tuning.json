@@ -285,7 +285,7 @@
   "boss": {"bounce_stun": 0.6, "player_shove_radius": 20, "player_shove_stun": 0.4},
   "wind_flag": {"flap_speed": 7.0, "base_reach": 7, "wind_reach": 3.0, "intro_lift": 14, "intro_reach": 12},
   "off_lead_dog": {
-    "notice_radius": 70, "windup": 0.4, "run_speed": 95, "wander_speed": 28,
+    "chase_rivals": true, "notice_radius": 70, "windup": 0.4, "run_speed": 95, "wander_speed": 28,
     "leap_range": 26, "leap_height": 42, "leap_time": 0.6, "leap_speed": 100, "leap_lift": 33, "leap_cooldown": 0.8,
     "catch_radius": 9, "mouth_x": 9, "mouth_y": -7, "catch_time": 0.5,
     "cooldown": 4.0, "min_chase": 1.5, "lose_radius": 140, "leash": 260, "chase_timeout": 8.0, "bark_gap": 2.5,
