@@ -5,6 +5,7 @@ var config: Dictionary = {"enabled": true, "host": "", "project_key": ""}
 var queue: Array[Dictionary] = []
 var in_flight: bool = false
 var input_kind: String = "keyboard_mouse"
+var page_host: String = ""
 # Replaceable in tests: sender.call(url: String, body: String, done: Callable(ok: bool)).
 var sender: Callable = _http_send
 var _http: HTTPRequest
@@ -16,9 +17,12 @@ func _ready() -> void:
 		var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 		if data is Dictionary:
 			config.merge(data, true)
-	# Test suites and headless tools never report to the real project.
-	if DisplayServer.get_name() == "headless" or Array(OS.get_cmdline_args()).any(func(a: String) -> bool: return a.trim_prefix("res://").begins_with("tests/")):
+	# Test suites, headless tools and runs from the Godot editor never report to the real project.
+	if OS.has_feature("editor") or DisplayServer.get_name() == "headless" or Array(OS.get_cmdline_args()).any(func(a: String) -> bool: return a.trim_prefix("res://").begins_with("tests/")):
 		config.enabled = false
+	# The page hosting a web build: html-classic.itch.zone on itch, localhost for local tests.
+	if OS.has_feature("web"):
+		page_host = str(JavaScriptBridge.eval("location.hostname", true))
 
 func active() -> bool:
 	return bool(config.get("enabled", false)) and not str(config.get("project_key", "")).is_empty() and bool(GameState.options.get("stats", true))
@@ -30,6 +34,8 @@ func track(event: String, props: Dictionary = {}) -> void:
 	properties.platform = "web" if OS.has_feature("web") else ("windows" if OS.has_feature("windows") else OS.get_name().to_lower())
 	properties.build = str(ProjectSettings.get_setting("application/config/version", "dev"))
 	properties.input = input_kind
+	if not page_host.is_empty():
+		properties.host = page_host
 	properties["$process_person_profile"] = false
 	var body: String = JSON.stringify({
 		"api_key": config.project_key, "event": event, "distinct_id": GameState.anon_id(),
