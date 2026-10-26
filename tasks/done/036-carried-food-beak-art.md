@@ -1,6 +1,6 @@
 # 036 — Carried-food beak art (rival mug clarity)
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Codex
 Depends on: none
@@ -24,11 +24,19 @@ Playnotes 25 Oct: "Should be clearer when you can mug a rival gull — the food 
 - Gameplay code, `gull.gd`, ground food sprites.
 
 ## Done when (acceptance)
-- [ ] Sheet + `data/carried_food_art.json` cover every carryable food id
-- [ ] Preview shows items clearly readable at 1x in the beak
-- [ ] Art check added and wired into `tests/integration.gd`
-- [ ] `./tools/validate.ps1`: 0 failures
+- [x] Sheet + `data/carried_food_art.json` cover every carryable food id
+- [x] Preview shows items clearly readable at 1x in the beak
+- [x] Art check added and wired into `tests/integration.gd`
+- [x] `./tools/validate.ps1`: 0 failures
 
 ## Report
+
+- Files changed: added the complete untouched ImageGen source and exact prompt/provenance under `assets/reference/carried-food-v1/`; added the 48×36 native production atlas `assets/sprites/carried-food-v1.png`; added `data/carried_food_art.json` with a bounded region, beak offset and source cell for all 12 entries in `data/foods.json`; added lossless/no-mipmap import metadata; added deterministic preparation and herring-gull preview tools; added `assets/previews/carried-food-v1-comparison.png`; added `tests/carried_food_art_checks.gd` and wired it into `tests/integration.gd`.
+- Tests: `tools/validate.ps1 -Godot C:\Users\david\Documents\ChatGPT\GullinIt\.tools\Godot_v4.7.2-stable_win64_console.exe` — `INTEGRATION: 14071 checks, 0 failures`.
+- Decisions: the generated sheet is an exact 4×3 grid. The production atlas uses twelve 12×12 cells with 6–10 px-wide silhouettes, hard alpha, a dark navy outline and a warm or white highlight. The preparation step only thresholds alpha, crops, nearest-neighbour reduces and packs generated pixels; it does not paint or recolor art. The preview composes the real herring carry body and upper-beak overlay, showing each food at 1× and 4×. Per-food offsets bias the readable silhouette forward from the bill.
+- Not done: gameplay wiring in `gull.gd` and the mug-range shine remain intentionally out of scope for dependent task 039.
+- Branch: `codex/036-carried-food-beak-art`
+- Implementation commit: `c706367`
+- Completion bookkeeping: branch HEAD after this report commit (reported in the handoff).
 
 ## Review notes

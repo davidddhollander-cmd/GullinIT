@@ -138,6 +138,7 @@ func run() -> void:
 	preload("res://tests/retro_environment_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/retro_adult_art_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/old_man_art_checks.gd").run_checks(Callable(self,"check"))
+	preload("res://tests/carried_food_art_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/crowd_spacing_checks.gd").run_checks(self, Callable(self,"check"))
 	await sunbather_reaction_flow_checks()
 	await art_checks()
