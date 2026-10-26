@@ -393,7 +393,7 @@ static func ground_checks(host: Node, main: Node, check: Callable) -> void:
 	var wrappers: int = game.stash_raids.items.filter(func(item: Dictionary) -> bool: return bool(item.get("garbage", false))).size()
 	check.call(wrappers >= 1 and gary.score <= 15, "rival leaves garbage on the sand")
 	# Wheelie bin: top landing.
-	game = await fresh(host, main, 3)
+	game = await fresh(host, main, 6)
 	var wheelie_x: float = float(game.level.props.filter(func(prop: Dictionary) -> bool: return prop.type == "wheelie_bin")[0].x)
 	gary = isolate(game, {"scraps": 1.0, "bins": 1.0}, wheelie_x - 40.0)
 	var lid_seen: Array[bool] = [false]

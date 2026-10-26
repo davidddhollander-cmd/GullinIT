@@ -37,7 +37,6 @@
     {"type": "beach_lamp", "x": 465, "y": 151},
     {"type": "kiosk", "x": 500, "customer_x": 545},
     {"type": "hotdog_stand", "x": 690, "customer_x": 730},
-    {"type": "wheelie_bin", "x": 540},
     {"type": "fish_chips_stand", "x": 960, "customer_x": 1000},
     {"type": "beach_lamp", "x": 620, "y": 151},
     {"type": "beach_bench", "x": 770, "y": 153, "jitter": true},

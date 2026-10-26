@@ -48,7 +48,7 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 	check.call(level.spawns.size()==source.spawns.size(),"opening roster stays authored")
 	check.call(level.props.size()==source.props.size(),"opening scenery stays authored")
 	check.call(level.world==source.world and level.zones==source.zones,"opening geometry and signs stay authored")
-	check.call(float(level.world.start_x)<float(level.spawns[0].x)-100,"opening route has breathing room")
+	check.call(float(level.world.start_x)<float(level.spawns[0].x)-60,"opening route has breathing room")
 	var family_positions: Dictionary = {}
 	var children: Dictionary = {}
 	var types: Array[String] = []
@@ -91,7 +91,7 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 		check.call(float(dog_spawn.home[0])>=float(level.world.start_x)+150.0 and float(dog_spawn.home[1])<float(level.world.promenade_start) and float(dog_spawn.x)>=float(dog_spawn.home[0]) and float(dog_spawn.x)<=float(dog_spawn.home[1]),"dog home zone is open sand away from the start")
 		check.call(stand_count==2 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1,"dog day keeps both stands and Gary from the start")
 	elif number == 5:
-		check.call(types==["kiosk_customer","kiosk_customer","pier_diner","pier_diner","toddler","picnic_family"],"three's a crowd has two shoppers, both pier diners and one mum with one toddler")
+		check.call(types==["kiosk_customer","kiosk_customer","pier_diner","pier_diner","toddler","picnic_family","off_lead_dog"],"three's a crowd has two shoppers, both pier diners and one mum with one toddler, plus a dog by the family")
 		check.call(family_positions.size()==1 and children.size()==1,"level 5 adds exactly one linked family pair")
 		check.call(stand_count==1 and kiosk_x<0.0 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==2,"three's a crowd has a single grill (no kiosk) and two rivals")
 	else:

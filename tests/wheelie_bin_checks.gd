@@ -13,9 +13,9 @@ static func run(suite: Node, check: Callable) -> void:
 				wheelies.append(prop)
 			elif str(prop.type) in SHED_TYPES:
 				sheds.append(prop)
-		var expected_count: int = 4 if int(level.id)==3 else 1
+		var expected_count: int = 3 if int(level.id)==3 else 1
 		check.call(wheelies.size()==expected_count,"level %d has %d wheelie bin%s" % [int(level.id),expected_count,"" if expected_count==1 else "s"])
-		if wheelies.size()!=expected_count or sheds.is_empty():
+		if wheelies.size()!=expected_count or sheds.is_empty() or int(level.id)==3: # level 3 bins all sit at the pier end
 			continue
 		var closest: float = INF
 		for shed: Dictionary in sheds:

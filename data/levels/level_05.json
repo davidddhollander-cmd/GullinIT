@@ -30,14 +30,14 @@
     {"type": "pier_diner", "x": 1075, "appearance": "pier_diner", "station": "pier_dining", "patrol_radius": 8},
     {"type": "pier_diner", "x": 1150, "appearance": "pier_diner_b", "station": "pier_dining", "patrol_radius": 8},
     {"type": "toddler", "x": 210, "family_id": "family_1", "station": "family_1", "patrol_radius": 5, "speed_mult": 0.6},
-    {"type": "picnic_family", "x": 255, "family_id": "family_1", "station": "family_1", "patrol_radius": 0}
+    {"type": "picnic_family", "x": 255, "family_id": "family_1", "station": "family_1", "patrol_radius": 0},
+    {"type": "off_lead_dog", "x": 300, "home": [240, 320]}
   ],
   "props": [
     {"type": "beach_palm", "x": 125, "y": 148},
     {"type": "beach_palm", "x": 1230, "y": 148},
     {"type": "beach_parasol", "x": 300, "y": 143},
     {"type": "bin", "x": 380},
-    {"type": "bin", "x": 520},
     {"type": "beach_lamp", "x": 500, "y": 151},
     {"type": "wheelie_bin", "x": 600},
     {"type": "hotdog_stand", "x": 640, "customer_x": 680},
