@@ -59,6 +59,10 @@ var lesson_started: float = 0.0
 var perk_id: String = ""
 var bullet_meter: float = 0.0
 var slowmo_end_msec: int = -1 ## real-clock end of bullet time (-1 = off); Engine.time_scale slows delta, so never count it
+const SCREECH_HOLD_TIME: float = 0.24
+var peck_hold_pending: bool = false
+var peck_hold_elapsed: float = 0.0
+var screech_audio: AudioStreamPlayer
 
 func setup(definition: Dictionary, is_casual: bool, force_training: bool = false) -> void:
 	level = definition
@@ -293,6 +297,7 @@ func _reload() -> void:
 
 func _exit_tree() -> void:
 	end_slowmo()
+	_stop_screech(false)
 
 func perk_value(key: String, fallback: Variant) -> Variant:
 	return Config.perks.perks.get(perk_id,{}).get(key,fallback)
@@ -379,6 +384,7 @@ func _physics_process(delta: float) -> void:
 	wind.tick(step)
 	score.tick(step)
 	input.update_player(player,camera_x)
+	_advance_screech_hold(step)
 	if input.touch_dive:
 		input.touch_dive = false
 		player.dive(wind.direction)
@@ -503,7 +509,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("slowmo") and not event.is_echo():
 		start_slowmo()
 	if running and event.is_action_pressed("peck") and not event.is_echo():
-		_peck()
+		if event is InputEventKey and _can_screech():
+			peck_hold_pending = true
+			peck_hold_elapsed = 0.0
+		else:
+			_peck()
+	elif event is InputEventKey and event.is_action_released("peck") and peck_hold_pending:
+		peck_hold_pending = false
+		if player.screech_held:
+			_stop_screech()
+		elif running:
+			_peck()
 	if event.is_action_pressed("debug"):
 		debug = not debug
 	if event.is_action_pressed("reload"):
@@ -522,9 +538,41 @@ func _peck() -> void:
 		if stash_raids.peck():
 			player.show_ground_peck()
 
+func _can_screech() -> bool:
+	return player != null and player.species == "herring" and player.detailed_art and player.state == BeachGull.State.GROUNDED and not player.climb and absf(player.velocity.x) <= 1.0 and Input.get_vector("aim_left","aim_right","aim_up","aim_down").length() <= 0.15
+
+func _advance_screech_hold(delta: float) -> void:
+	if not peck_hold_pending:
+		return
+	if not _can_screech():
+		if player.screech_held:
+			_stop_screech(false)
+		else:
+			_peck()
+		peck_hold_pending = false
+		return
+	# Ground movement follows aim; pin it while E is held so mouse position
+	# cannot make an otherwise stationary gull walk out of its call.
+	player.aim = player.position
+	if player.screech_held:
+		return
+	peck_hold_elapsed += delta
+	if peck_hold_elapsed >= SCREECH_HOLD_TIME and player.start_screech():
+		screech_audio = Audio.play("gull_call",1.0,-8.0)
+
+func _stop_screech(recover: bool = true) -> void:
+	if is_instance_valid(player):
+		player.stop_screech(recover)
+	if is_instance_valid(screech_audio):
+		screech_audio.stop()
+		screech_audio.queue_free()
+	screech_audio = null
+
 func set_paused(value: bool) -> void:
 	if value:
 		end_slowmo()
+		peck_hold_pending = false
+		_stop_screech(false)
 	set_physics_process(not value)
 	set_process_unhandled_input(not value)
 	input.enabled = not value and running and intro <= 0
@@ -713,6 +761,8 @@ func _near_misses() -> void:
 func finish() -> void:
 	if not running:
 		return
+	peck_hold_pending = false
+	_stop_screech(false)
 	var boss: bool = level.has("boss") and not casual
 	if boss:
 		BeachBoss.conclude(self)
