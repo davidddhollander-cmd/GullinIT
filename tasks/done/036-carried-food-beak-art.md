@@ -1,6 +1,6 @@
 # 036 — Carried-food beak art (rival mug clarity)
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: none

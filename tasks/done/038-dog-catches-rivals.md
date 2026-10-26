@@ -1,6 +1,6 @@
 # 038 — Off-lead dog also chases rival gulls
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
