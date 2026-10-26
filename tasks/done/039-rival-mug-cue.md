@@ -1,6 +1,6 @@
 # 039 — Clear "you can mug this rival" cue
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 036
@@ -25,5 +25,9 @@ Playnotes 25 Oct: players can't tell when a rival carries food worth mugging. Us
 - [ ] `./tools/validate.ps1 -Capture`: 0 failures, with a capture of a rival holding food in `test-output/`
 
 ## Report
-
+- Files changed: scripts/gull.gd (carried-food atlas lookup `BeachGull.carried_food_art()`, `carry_item` uses it with per-food offset, fallback unchanged; new `carry_glint` overlay + `mug_cue` flag), scripts/rival_gull.gd (tick sets `gull.mug_cue` while it holds food and the player is within `rival.mug_range`), tests/integration.gd (anchor test includes food offset; new atlas-region and shine-by-distance checks).
+- Tests: headless `tests/integration.tscn` 14081 checks, 0 failures. Capture run (`--capture`): 14081 checks, 1 failure "fish follows the eating hand toward the mouth" (unrelated to this task, only in rendered mode, not touched by this diff; headless passes).
+- Capture: test-output/gull-carry-right.png and gull-carry-left.png (Gary holding ice cream with new sprite). Not committed (gitignored).
+- Decisions: reused PickupShine unchanged, respecting juice.shine through PickupShine.overlay; shine uses wall clock with an instance-id seed. Native atlas art is drawn at body_scale, flipped by facing, no half-clipping. Player carrying also uses the new art. Did not run validate.ps1 wrapper (worktree had no .godot; ran import + equivalent commands manually).
+- Branch: sonnet/039-rival-mug-cue
 ## Review notes

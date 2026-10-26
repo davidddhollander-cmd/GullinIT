@@ -82,6 +82,7 @@ func cruise() -> float:
 	return float(Config.tuning.rival.cruise_y)
 
 func tick(delta: float, targets: Array[BeachTarget], claims: Dictionary, wind: BeachWind, threat: Vector2 = Vector2(-1, -1)) -> void:
+	gull.mug_cue = carry_window > 0.0 and carried > 0 and threat.x >= 0.0 and gull.position.distance_to(threat) <= mug_range()
 	carry_window = maxf(0.0, carry_window - delta)
 	cooldown = maxf(0.0, cooldown - delta)
 	mug_timer = maxf(0.0, mug_timer - delta)
