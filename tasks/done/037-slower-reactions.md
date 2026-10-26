@@ -1,6 +1,6 @@
 # 037 — Slower old man and old lady
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
