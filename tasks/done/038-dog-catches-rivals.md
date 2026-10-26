@@ -1,6 +1,6 @@
 # 038 — Off-lead dog also chases rival gulls
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -28,5 +28,9 @@ Playnotes 25 Oct: "Dog doesn't catch rival gulls?" The dog should threaten every
 - [ ] `./tools/validate.ps1`: 0 failures
 
 ## Report
+Files: scripts/off_lead_dog.gd, scripts/game.gd, data/tuning.json (`chase_rivals: true`), tests/off_lead_dog_checks.gd.
+Tests: headless integration 13959 checks, 0 failures (3 new: nearer rival chosen, catch stuns + drops food, chase_rivals false ignores rivals).
+Decisions: `tick(delta, player, rivals=[])`; prey is re-picked only in WANDER/SNIFF (nearest chaseable gull by x, rival only within notice_radius, else player), kept through the chase. Rival catch emits `rival_caught`, not `caught` (no dog_caught quest, no score change); game.gd `_dog_caught_rival` calls `pilot.mug()` (existing stun path) and spawns the food as a dropped item on the sand. A rival carrying nothing is just stunned.
+Not done: -Capture run not needed (no visual change).
 
 ## Review notes

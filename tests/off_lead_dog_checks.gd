@@ -277,6 +277,41 @@ static func run(suite: Node, check: Callable) -> void:
 	game._swallowed({"id": "hotdog", "handover": true})
 	check.call(game.quests.quests[0].done, "counter handover completes l4_counter")
 
+	# Rivals: the dog chases the nearest low gull, catches it, and the rival drops its food.
+	suite.main.clear_game()
+	await suite.settle()
+	game = _fresh(suite, 4)
+	dog = game.dog
+	game.pending_rivals = Config.levels[2].rivals.duplicate(true)
+	game._release_rivals()
+	var pilot: RivalPilot = game.pilots[0]
+	var rivals: Array[BeachGull] = [pilot.gull]
+	pilot.gull.state = BeachGull.State.GROUNDED
+	pilot.gull.invulnerable = 0.0
+	pilot.gull.position = Vector2(340.0, pilot.gull.ground_y())
+	pilot.carried = 5
+	pilot.carry_window = 5.0
+	pilot.carried_food_id = "hotdog"
+	_reset(dog, 300.0)
+	dog.resting = false
+	_ground(game)
+	game.player.position.x = 300.0 + float(t.notice_radius) - 5.0
+	dog.tick(DT, game.player, rivals)
+	check.call(dog.prey == pilot.gull and dog.state == OffLeadDog.State.WARN, "dog picks a nearer rival over the player")
+	var dropped_before: int = game.stash_raids.items.size()
+	for i: int in int(4.0 / DT):
+		dog.tick(DT, game.player, rivals)
+	check.call(pilot.gull.state == BeachGull.State.STUNNED and pilot.carried == 0 and game.stash_raids.items.size() == dropped_before + 1 and game.stash_raids.items[-1].food_id == "hotdog", "caught rival is stunned and drops its food on the sand")
+	pilot.gull.state = BeachGull.State.GROUNDED
+	_reset(dog, 300.0)
+	dog.resting = false
+	game.player.position.x = 1500.0
+	pilot.gull.position.x = 340.0
+	Config.tuning.off_lead_dog.chase_rivals = false
+	dog.tick(DT, game.player, rivals)
+	Config.tuning.off_lead_dog.chase_rivals = true
+	check.call(dog.state == OffLeadDog.State.WANDER and dog.prey != pilot.gull, "chase_rivals false: dog ignores rivals")
+
 	# Rendered review shots (no-op without --capture).
 	suite.main.clear_game()
 	await suite.settle()
