@@ -47,7 +47,8 @@ static func run(host: Node, check: Callable) -> void:
 						visits += 1
 					phases[t] = phase
 			print("BENCH SIM level %d: %d visits in 120 s" % [id,visits])
-			check.call(visits >= 2,"level %d sees at least 2 bench visits in 120 s (%d)" % [id,visits])
+			# Level 6 has the slow old man and sundress shopper (task 037), so it sees fewer visits.
+			check.call(visits >= (1 if id == 6 else 2),"level %d sees enough bench visits in 120 s (%d)" % [id,visits])
 		game.queue_free()
 	# Theft victim wanders away, does not queue within 10 s, shops again later.
 	var game := new_game(host,6)

@@ -38,6 +38,7 @@ var awareness_mult: float = 1.0
 var encounter_awareness: float = 1.0
 var speed_mult: float = 1.0
 var reaction_delay: float = 1.0
+var chase_speed_mult: float = 1.0
 var sprite: AnimatedSprite2D
 var food_sprite: AnimatedSprite2D
 var rng: RandomNumberGenerator
@@ -200,8 +201,10 @@ func setup(type: String, x: float, random: RandomNumberGenerator, mult: float, s
 		diner_appearance = PierDinerArt.normalize_appearance(str(spawn.get("appearance","pier_diner")))
 	encounter_awareness = float(spawn.get("awareness_mult",1.0))
 	awareness_mult = mult * encounter_awareness
-	speed_mult = float(spawn.get("speed_mult",1.0))
-	reaction_delay = float(spawn.get("reaction_delay",1.0))
+	var mods: Dictionary = info.get("appearance_mods",{}).get(shopper_appearance,{})
+	chase_speed_mult = float(mods.get("speed_mult",1.0))
+	speed_mult = float(spawn.get("speed_mult",1.0))*chase_speed_mult
+	reaction_delay = float(spawn.get("reaction_delay",1.0))*float(mods.get("reaction_mult",1.0))
 	family_id = str(spawn.get("family_id", ""))
 	var choices: Array = info.foods
 	food_id = str(choices[rng.randi_range(0,choices.size()-1)]) if not choices.is_empty() else ""

@@ -139,6 +139,7 @@ func run() -> void:
 	preload("res://tests/retro_adult_art_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/old_man_art_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/carried_food_art_checks.gd").run_checks(Callable(self,"check"))
+	preload("res://tests/slow_adult_checks.gd").run_checks(self,Callable(self,"check"))
 	preload("res://tests/crowd_spacing_checks.gd").run_checks(self, Callable(self,"check"))
 	await sunbather_reaction_flow_checks()
 	await art_checks()
@@ -2319,7 +2320,7 @@ func digestion_reaction_checks() -> void:
 	gull.stun()
 	check(game.score.points==0 and game.stash_raids.items.is_empty() and gull.digestion.rest>0,"empty-mouth hit clamps penalty and preserves swallowed meal")
 	# Independent approaches, real chase movement, height escape and return.
-	var adult: BeachTarget = game.spawner.create("kiosk_customer",100)
+	var adult: BeachTarget = game.spawner.create("kiosk_customer",100,{"appearance":"kiosk_customer"})
 	gull.state = BeachGull.State.GLIDE
 	gull.position = Vector2(130,140)
 	adult.tick(0.01,[gull])

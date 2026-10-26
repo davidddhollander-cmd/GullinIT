@@ -132,7 +132,7 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 			elif focus.position.distance_to(owner.position-Vector2(0,12)) < 24 and swat <= 0:
 				swat_timer = maxf(0.4,0.4 * owner.reaction_delay)
 			elif moving and not whistle_pause:
-				owner.position.x = move_toward(owner.position.x,destination,(30.0 if owner.kind == "sunbather" else 45.0)*delta)
+				owner.position.x = move_toward(owner.position.x,destination,(30.0 if owner.kind == "sunbather" else 45.0*owner.chase_speed_mult)*delta)
 	elif mode == "give_up":
 		if _uses_theft_reaction_pilot(owner):
 			# Planted presentation only: this state never arms the swat timer or calls _hit().
