@@ -19,7 +19,7 @@ static func run(root: Node,check: Callable) -> void:
 				if actor.facing!=before:
 					reversals += 1
 			check.call(reversals==0,appearance+" keeps an inward heading outside patrol instead of flickering")
-			check.call((actor.position.x-start)*side < -15,appearance+" makes steady progress back from counter or chase")
+			check.call((actor.position.x-start)*side < -15*actor.speed_mult,appearance+" makes steady progress back from counter or chase")
 			check.call((actor.sprite.animation==(&"walk_left" if side>0 else &"walk") and not actor.sprite.flip_h if appearance=="old_man" else actor.sprite.animation==&"walk" and actor.sprite.flip_h==(side>0)),appearance+" walk and food use the stable return heading")
 			actor.free()
 	# Outward-facing actors already beyond the endpoint correct once, then return.

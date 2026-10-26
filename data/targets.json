@@ -52,6 +52,10 @@
   },
   "kiosk_customer": {
     "sprite": "kiosk_customer",
+    "appearance_mods": {
+      "old_man": {"speed_mult": 0.75, "reaction_mult": 1.5},
+      "shopper_sundress": {"speed_mult": 0.75, "reaction_mult": 1.5}
+    },
     "awareness": 45,
     "rise": 0.5,
     "altitude": 115,
