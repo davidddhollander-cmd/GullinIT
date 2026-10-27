@@ -3,26 +3,30 @@ extends RefCounted
 static func run(check: Callable) -> void:
 	var current: Dictionary = Config.sprites.shopper_sundress
 	var previous: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/reference/sundress-walk-v2/previous-entry.json"))
-	check.call(current.file=="res://assets/sprites/shopper-sundress-walk-v2-bite-v1.png","sundress selects the approved walk atlas with appended bite poses")
+	check.call(current.file=="res://assets/sprites/shopper-sundress-walk-v2-bite-panic-v1.png","sundress selects the approved walk atlas with appended bite and panic poses")
 	var expected: Dictionary = previous.duplicate(true)
 	expected.file = current.file
 	expected.food_anchors.walk = current.food_anchors.walk
 	expected.animations.bite = {"frames":[26.0,27.0,28.0],"fps":5.0,"loop":false}
 	expected.food_anchors.bite = current.food_anchors.bite
+	expected.animations.look_up = current.animations.look_up
+	expected.animations.panic_run = current.animations.panic_run
+	expected.food_anchors.look_up = current.food_anchors.look_up
+	expected.food_anchors.panic_run = current.food_anchors.panic_run
 	for clip: String in ["sit_down","seated_idle","seated_eat","stand_up"]:
 		expected.animations[clip] = current.animations[clip]
 		expected.food_anchors[clip] = current.food_anchors[clip]
-	check.call(current==expected,"sundress preserves walk and bite registration with separate bench clips")
+	check.call(current==expected,"sundress preserves walk, bite and bench registration while adding panic clips")
 	var frames := Config.frames("shopper_sundress")
 	check.call(frames.get_frame_count(&"walk")==6 and is_equal_approx(frames.get_animation_speed(&"walk"),8.0),"sundress retains approved six-frame walking timing")
 	var before := Image.load_from_file(ProjectSettings.globalize_path(previous.file))
 	var after := Image.load_from_file(ProjectSettings.globalize_path(current.file))
 	before.convert(Image.FORMAT_RGBA8)
 	after.convert(Image.FORMAT_RGBA8)
-	check.call(after.get_size()==before.get_size(),"sundress walk and bite atlas keeps original dimensions")
+	check.call(after.get_size()==before.get_size()+Vector2i(0,256),"sundress panic poses extend the atlas after the bench rows")
 	var approved := Image.load_from_file(ProjectSettings.globalize_path("res://assets/sprites/shopper-sundress-walk-v2.png"))
 	approved.convert(Image.FORMAT_RGBA8)
-	for index: int in 32:
+	for index: int in 29:
 		var region := Rect2i(index%8*128,index/8*128,128,128)
 		var old_cell := before.get_region(region)
 		var new_cell := after.get_region(region)

@@ -1,6 +1,6 @@
 # 041 — Shopper look_up + panic_run art
 
-Status: inbox
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: none
@@ -33,5 +33,14 @@ Gang Call (the herring gull's power) needs two new crowd reactions. First, beach
 - [ ] `./tools/validate.ps1`: 0 new failures
 
 ## Report
+
+- Files changed: added three untouched ImageGen source sheets and their prompt record under `assets/reference/shopper-panic-v1/`; added three versioned production atlases, a real-runtime preview, reproducible crop/pack and preview tools, `look_up`/`panic_run` registrations and food anchors in both art registries plus `data/sprites.json`, and shopper art coverage in the integration suite.
+- Art: each shopper has 2 `look_up` frames at 6 fps (non-looping) and 6 `panic_run` frames at 12 fps (looping), at the existing 128x128 cell / 0.5 visual scale. Generated frames are nearest-neighbour resized to the approved 80 source-pixel adult height and aligned to sole y=116. Existing animation cells, including master-registry-only bench clips, remain visibly pixel-identical.
+- Preview: `assets/previews/shopper-panic-v1.png` renders current idle, look-up, right-facing panic and flipped panic at in-game scale through the production `SpriteFrames` and separate-food anchor path.
+- Tests: clean staged patch validated in a detached worktree with `./tools/validate.ps1 -Godot <Godot 4.7.2 console>`: **14,414 checks, 0 failures** (exit 0). The new shopper panic suite contributes 71 source/registration/timing/frame-density/baseline/legacy-pixel/preview checks. The working checkout itself retains unrelated user edits; its direct run had one pre-existing `data/demo.json` failure, while task 041 added none.
+- Decisions: used the built-in image generator once per shopper with the current production atlas as the identity/style reference. Panic frames are allocated after the highest frame in the composed master registry, not only the local art JSON, so bench animations cannot be overwritten. Food anchors inherit the closest approved idle/run hand tracks and were visually checked in both directions.
+- Anything not done: none.
+- Branch: `codex/041-shopper-look-up-panic-art`
+- Last commit: task completion commit at the pushed branch head.
 
 ## Review notes
