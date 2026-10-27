@@ -1,6 +1,6 @@
 # 040 — Gang Call crowd panic (behaviour, existing poses)
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
