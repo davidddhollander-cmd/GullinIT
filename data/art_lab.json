@@ -1,0 +1,11 @@
+{
+  "comparisons": [
+    {
+      "title": "HERRING GULL SELF-TEST",
+      "description": "Current herring gull vs itself: both sides must match.",
+      "current": "gull_herring",
+      "candidate": {"clone": "gull_herring"},
+      "motion": "dive"
+    }
+  ]
+}
