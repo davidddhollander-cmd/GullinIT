@@ -1,6 +1,6 @@
 extends RefCounted
 ## Demo polish: contextual hint slot, compact touch cluster and the levels 1-3 demo lock.
-const GOAL_PANEL := Rect2(232,44,84,29)
+const GOAL_PANEL := Rect2(232,29,84,29)
 const MINIMAP := Rect2(108,170,106,7)
 const OLD_TOUCH_AREA := 3 * 51 * 27
 

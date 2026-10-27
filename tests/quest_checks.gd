@@ -161,7 +161,7 @@ static func run_game(suite: Node, check: Callable) -> void:
 	check.call(rows[0].text.contains("2/3"), "progress ticks up to 2/3")
 	game.quests.record("swallowed", {"food": "ice_cream", "direct": true})
 	game.overlay._process(0.0)
-	check.call(rows[0].get_theme_color("font_color") == BeachUI.GOLD and rows[0].text.begins_with(">"), "done quest is gold and ticked")
+	check.call(rows[0].get_theme_color("font_color") == Color("7fdc6a") and rows[0].text.begins_with(">"), "done quest is green and ticked")
 	suite.layout(game.overlay)
 	await suite.snapshot("quest-checklist")
 	GameState.progress = {}

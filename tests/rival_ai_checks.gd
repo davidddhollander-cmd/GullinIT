@@ -97,7 +97,7 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 		var need_thefts: int = 2 if level == 6 else 1
 		check.call(r.pilots == (3 if level == 6 else 1),"level %d rival count" % level)
 		check.call(r.hud_visible and r.hud_rows == r.pilots,"level %d shows one right-side score row per rival" % level)
-		check.call((r.hud_rect as Rect2).end.x <= 316.0 and (r.hud_rect as Rect2).size.x <= 40.0 and (r.hud_rect as Rect2).position.y >= 17.0 and not (r.hud_rect as Rect2).intersects(r.quest_rect) and (r.hud_rect as Rect2).end.y <= 44.0,"level %d rival score meter sits compact in the top-right corner, clear of the quest and goal panels" % level)
+		check.call((r.hud_rect as Rect2).end.x <= 316.0 and (r.hud_rect as Rect2).size.x <= 40.0 and (r.hud_rect as Rect2).position.y >= 17.0 and not (r.hud_rect as Rect2).intersects(r.quest_rect) and (r.hud_rect as Rect2).position.y >= 58.0 and not (r.hud_rect as Rect2).intersects(Rect2(232,29,84,29)),"level %d rival score meter sits compact under the goal panel, clear of the quest and goal panels" % level)
 		for i: int in r.pilots:
 			check.call(r.dives[i] >= 3 or main.game.pilots[i].gull.loose_only,"level %d rival %d dives at least 3 times (%d)" % [level,i,r.dives[i]])
 			check.call(r.thefts[i] >= need_thefts,"level %d rival %d steals at least %d times (%d)" % [level,i,need_thefts,r.thefts[i]])

@@ -30,8 +30,10 @@ const SCORE_ANNOUNCEMENT_HOLD: float = BeachEffects.SCORE_MESSAGE_HOLD
 const SCORE_ANNOUNCEMENT_FADE: float = BeachEffects.SCORE_MESSAGE_FADE
 const TOP_BAR_HEIGHT: int = 17
 const TOP_BAR_FONT_SIZE: int = 6
+const TIME_WARNING: float = 20.0 ## seconds left when the timer turns red and flashes
 const QUEST_STRIP_HEIGHT: float = 10.0 ## small-font quest row directly under the top bar
 const SCORE_CALLOUT_TOP: float = TOP_BAR_HEIGHT + QUEST_STRIP_HEIGHT + 2.0 ## pop-ups sit below the strip
+const GOAL_PANEL: Rect2 = Rect2(232,SCORE_CALLOUT_TOP,84,29) ## just under the quest strip
 const HUD_FONT: Font = preload("res://assets/fonts/gull_hud.fnt")
 
 func setup(owner_game: BeachGame) -> void:
@@ -59,7 +61,7 @@ func setup(owner_game: BeachGame) -> void:
 	wind_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	pause_button = BeachUI.button(top,"II",func() -> void: game.pause_requested.emit())
 	pause_button.custom_minimum_size = Vector2(14,11)
-	for item: Control in [score_label,time_label,wind_label,pause_button]:
+	for item: Control in [score_label,wind_label,pause_button]:
 		item.add_theme_font_override("font",HUD_FONT)
 		item.add_theme_font_size_override("font_size",TOP_BAR_FONT_SIZE)
 	for item: Label in [score_label,time_label,wind_label]:
@@ -90,7 +92,7 @@ func setup(owner_game: BeachGame) -> void:
 	rival_score_panel = BeachUI.panel(self,Color(0.055,0.14,0.19,0.92))
 	rival_score_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	rival_score_panel.offset_left = -44.0
-	rival_score_panel.offset_top = float(TOP_BAR_HEIGHT)
+	rival_score_panel.offset_top = GOAL_PANEL.end.y + 2.0
 	rival_score_panel.offset_right = -4.0
 	rival_score_panel.mouse_filter = MOUSE_FILTER_IGNORE
 	var rival_panel_style: StyleBoxFlat = rival_score_panel.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
@@ -192,7 +194,11 @@ func setup(owner_game: BeachGame) -> void:
 
 func _process(_delta: float) -> void:
 	score_label.text = "%04d  X%s" % [game.score.points,str(Config.tuning.score.tiers[game.score.tier])]
-	time_label.text = "TRAINING" if game.training else ("%d/%d" % [game.score.items,Config.tuning.score.casual_items] if game.casual else "%02d" % ceili(maxf(0,float(game.level.time_limit)-game.elapsed)))
+	var time_left: float = maxf(0,float(game.level.time_limit)-game.elapsed)
+	time_label.text = "TRAINING" if game.training else ("%d/%d" % [game.score.items,Config.tuning.score.casual_items] if game.casual else "%02d" % ceili(time_left))
+	var warning: bool = not game.training and not game.casual and game.running and time_left <= TIME_WARNING
+	time_label.add_theme_color_override("font_color",Color("ef725c") if warning else BeachUI.CREAM)
+	time_label.modulate.a = 0.35 if warning and Time.get_ticks_msec()%500 < 200 else 1.0
 	wind_label.text = "CALM" if absf(game.player.wind_force) < 0.01 else "%s %d%%" % ["WIND >" if game.player.wind_force > 0 else "< WIND",roundi(absf(game.player.wind_force)*100)]
 	intro_panel.visible = game.intro > 0
 	training_panel.visible = game.training and game.running and game.intro <= 0
@@ -210,7 +216,7 @@ func _process(_delta: float) -> void:
 	if you_score_label != null:
 		you_score_label.text = str(game.score.points)
 
-# One row per quest, laid out horizontally: "- text" until done, gold "> text" after; counted quests add n/N.
+# One row per quest, laid out horizontally: "- text" until done, green "> text" after; counted quests add n/N.
 func sync_quests() -> void:
 	quest_box.visible = not quest_labels.is_empty() and game.intro <= 0.0
 	quest_panel.visible = quest_box.visible
@@ -221,7 +227,7 @@ func sync_quests() -> void:
 		var quest: Dictionary = game.quests.quests[i]
 		var count: int = int(quest.count)
 		quest_labels[i].text = "%s %s%s" % [">" if quest.done else "-",quest.text,"" if count <= 1 else " %d/%d" % [int(quest.progress),count]]
-		quest_labels[i].add_theme_color_override("font_color",BeachUI.GOLD if quest.done else BeachUI.CREAM)
+		quest_labels[i].add_theme_color_override("font_color",Color("7fdc6a") if quest.done else BeachUI.CREAM)
 
 func sync_rival_scores() -> void:
 	if not is_instance_valid(rival_score_list) or game == null:
@@ -369,11 +375,12 @@ func _draw() -> void:
 			var goal: int = int(status.goal)
 			var progress: int = int(status.progress)
 			var title: String = str(status.title)
-			draw_rect(Rect2(232,44,84,29),Color(0.094,0.23,0.30,0.9))
-			draw_string(font,Vector2(237,53),title,HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.CREAM)
-			draw_rect(Rect2(237,57,74,4),Color("397a85"))
-			draw_rect(Rect2(237,57,74*clampf(float(progress)/maxi(1,goal),0,1),4),BeachUI.GOLD)
-			draw_string(font,Vector2(237,70),"%d / %d" % [progress,goal],HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.CREAM)
+			var p: Vector2 = GOAL_PANEL.position
+			draw_rect(GOAL_PANEL,Color(0.094,0.23,0.30,0.9))
+			draw_string(font,p+Vector2(5,9),title,HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.CREAM)
+			draw_rect(Rect2(p+Vector2(5,13),Vector2(74,4)),Color("397a85"))
+			draw_rect(Rect2(p+Vector2(5,13),Vector2(74*clampf(float(progress)/maxi(1,goal),0,1),4)),BeachUI.GOLD)
+			draw_string(font,p+Vector2(5,26),"%d / %d" % [progress,goal],HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.CREAM)
 		if game.training:
 			var training_target: Vector2 = game.training_target() - offset
 			if training_target.x >= 4 and training_target.x <= 316 and training_target.y >= 28 and training_target.y <= 165:
