@@ -63,6 +63,7 @@ const SCREECH_HOLD_TIME: float = 0.24
 var peck_hold_pending: bool = false
 var peck_hold_elapsed: float = 0.0
 var screech_audio: AudioStreamPlayer
+var brash: BeachBrash = BeachBrash.new()
 
 func setup(definition: Dictionary, is_casual: bool, force_training: bool = false) -> void:
 	level = definition
@@ -133,6 +134,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	player.z_index = 4
 	add_child(player)
 	player.position = Vector2(Config.tuning.world.start_x,Config.tuning.world.start_y)
+	brash.game = self
+	add_child(brash)
 	player.setup_perches(level.props)
 	_wire_sand(player)
 	player.gull_stunned.connect(_stunned)
@@ -347,6 +350,9 @@ func slowmo_active() -> bool:
 	return slowmo_end_msec >= 0
 
 func start_slowmo() -> void:
+	if running and perk_id != "bullet_time" and brash.fire():
+		input.slowmo_ready = false
+		return
 	if not running or not slowmo_ready():
 		return
 	slowmo_end_msec = Time.get_ticks_msec() + roundi(float(perk_value("duration",2.5))*1000.0)
@@ -395,6 +401,9 @@ func _physics_process(delta: float) -> void:
 		input.touch_slowmo = false
 		start_slowmo()
 	player.tick(step,wind.direction,wind.strength)
+	brash.tick(step)
+	if perk_id != "bullet_time":
+		input.slowmo_ready = brash.is_full()
 	_dive_tick()
 	_wind_tip()
 	if dog != null:
@@ -555,12 +564,17 @@ func _advance_screech_hold(delta: float) -> void:
 	# cannot make an otherwise stationary gull walk out of its call.
 	player.aim = player.position
 	if player.screech_held:
+		brash.screech_tick(delta)
+		if not is_instance_valid(screech_audio) or not screech_audio.playing:
+			screech_audio = Audio.play("screech_long" if rng.randf() < 0.6 else "screech_short",rng.randf_range(0.94,1.06),-6.0)
 		return
 	peck_hold_elapsed += delta
 	if peck_hold_elapsed >= SCREECH_HOLD_TIME and player.start_screech():
-		screech_audio = Audio.play("gull_call",1.0,-8.0)
+		screech_audio = Audio.play("screech_long",1.0,-6.0)
+		brash.fire()
 
 func _stop_screech(recover: bool = true) -> void:
+	brash.screech_ended()
 	if is_instance_valid(player):
 		player.stop_screech(recover)
 	if is_instance_valid(screech_audio):
@@ -596,6 +610,8 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 			dive_hit = true
 			dive_stats.dive_snatches += 1
 		player.digestion.collect(target.food_id,{"risky":risky,"upwind":player.upwind,"handover":handover})
+		if target.last_theft_direct:
+			brash.add(float(Config.tuning.brash.snatch)+(float(Config.tuning.brash.handover) if handover else 0.0))
 		effects.snatch_contact(contact_at,gull.velocity,handover)
 		Audio.play("snatch",1+score.tier*0.08)
 		if handover:
@@ -615,6 +631,7 @@ func _award(value: int, risky: bool, upwind: bool, mugged: bool, handover: bool 
 
 func _stunned() -> void:
 	training_clean_snatch = false
+	brash.add(float(Config.tuning.brash.stun))
 	score.points = maxi(0,score.points-5)
 	var dropped: Dictionary = player.digestion.drop_current()
 	if not dropped.is_empty():
@@ -718,6 +735,7 @@ func _mugging() -> void:
 				effects.snatch_contact(pilot.gull.position,player.velocity,false)
 				Audio.play("snatch",1+score.tier*0.08)
 				player.digestion.collect(pilot.carried_food_id,{"value":value,"upwind":player.upwind,"mugged":true,"mugged_from":pilot.gull.rival_name})
+				brash.add(float(Config.tuning.brash.mug))
 				return
 
 ## Rivals mug anyone holding food: other rivals in their grace window, or the player's unswallowed snack.

@@ -27,6 +27,8 @@ func _ready() -> void:
 	for cue: String in ["bag_thump", "bin_rattle", "stash_release", "release_accent", "empty_tap"]:
 		streams[cue] = _stash_stream(cue)
 	streams["gull_call"] = GULL_CALL
+	for cue: String in ["screech_long", "screech_short", "gang_call"]:
+		streams[cue] = load("res://assets/audio/%s.ogg" % cue)
 	music = AudioStreamPlayer.new()
 	music.bus = "Music"
 	music.playback_type = AudioServer.PLAYBACK_TYPE_STREAM

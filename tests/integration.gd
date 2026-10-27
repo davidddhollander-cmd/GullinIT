@@ -1293,6 +1293,43 @@ func screech_checks() -> void:
 	Input.action_release("aim_right")
 	check(not gull.screech_held and not game.peck_hold_pending, "aimed movement cancels the held screech")
 	game._unhandled_input(release)
+	# Brashness: screeching fills the meter, faster from a high perch; a full meter fires Gang Call.
+	var brash: BeachBrash = game.brash
+	brash.meter = 0.0
+	gull.land()
+	gull.position = Vector2(160, gull.ground_y())
+	gull.velocity = Vector2.ZERO
+	game._unhandled_input(press)
+	game._advance_screech_hold(BeachGame.SCREECH_HOLD_TIME)
+	game._advance_screech_hold(1.0)
+	var sand_fill: float = brash.meter
+	check(is_equal_approx(sand_fill, float(Config.tuning.brash.screech_per_sec)), "screeching on the sand fills brashness at the base rate")
+	check(is_instance_valid(game.screech_audio) and game.screech_audio.stream == Audio.streams["screech_long"], "held screech plays the long gull cry")
+	gull.position.y -= 50.0
+	game._advance_screech_hold(1.0)
+	check(brash.meter - sand_fill > sand_fill * 2.0, "screeching from a high perch fills brashness faster")
+	game._unhandled_input(release)
+	brash.add(float(Config.tuning.brash.stun))
+	check(brash.meter < sand_fill * 2.0, "a stun knocks brashness down")
+	gull.position = Vector2(160, gull.ground_y())
+	var holders: Array[BeachTarget] = []
+	for target: BeachTarget in game.spawner.targets:
+		if game.snatchable(target) and absf(target.position.x - game.camera_x) < 170.0:
+			holders.append(target)
+	brash.meter = 1.0
+	game._unhandled_input(press)
+	game._advance_screech_hold(BeachGame.SCREECH_HOLD_TIME)
+	check(brash.allies.size() == int(game.player.species_stats().power.allies) and brash.meter == 0.0, "screeching on a full meter fires Gang Call")
+	brash.add(0.5)
+	check(brash.meter == 0.0, "brashness does not refill while the gang is out")
+	game._unhandled_input(release)
+	brash.tick(0.55)
+	await snapshot("gang-call")
+	brash.tick(float(game.player.species_stats().power.swoop_time) * 3.0)
+	if not holders.is_empty():
+		check(not holders[0].food, "the gang knocks food out of the nearest beachgoer's hands")
+	brash.tick(0.1)
+	check(brash.allies.is_empty(), "the gang flies off and is cleaned up")
 	main.clear_game()
 	await settle()
 
