@@ -137,6 +137,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	brash.game = self
 	add_child(brash)
 	player.setup_perches(level.props)
+	player.add_sign_perches(beach.sign_layouts())
 	_wire_sand(player)
 	player.gull_stunned.connect(_stunned)
 	player.ground_crashed.connect(_crashed)

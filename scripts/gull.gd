@@ -102,19 +102,27 @@ func setup_perches(props: Array) -> void:
 	for prop: Dictionary in props:
 		var base: float = float(prop.get("y",160))
 		match str(prop.type):
-			"kiosk", "hotdog_stand":
-				perch_surfaces.append({"x":float(prop.x),"y":base-43.0,"half_width":23.0,"pole":false,"prop_type":str(prop.type)})
+			"kiosk", "hotdog_stand", "fish_chips_stand":
+				# Perch on top of the roof sign (the sign node sits 11 px above the prop base).
+				var sign_rect: Rect2 = preload("res://scripts/stand_sign.gd").local_bounds(str(prop.type))
+				perch_surfaces.append({"x":float(prop.x),"y":base-11.0+sign_rect.position.y+1.0,"half_width":sign_rect.size.x*0.5-2.0,"pole":false,"prop_type":str(prop.type)})
 			"tower":
 				perch_surfaces.append({"x":float(prop.x),"y":base-58.0,"half_width":16.0,"pole":false,"prop_type":str(prop.type)})
 			"beach_lamp":
 				var lamp: Dictionary = Config.sprites.beach_lamp
 				var lamp_scale: float = float(lamp.get("visual_scale",1.0))
-				perch_surfaces.append({"x":float(prop.x)+float(lamp.get("perch_offset_x",0.0))*lamp_scale,"y":base-float(lamp.frame_h)*lamp_scale+float(lamp.get("perch_inset_y",2.0))*lamp_scale,"half_width":3.0,"pole":true,"prop_type":str(prop.type)})
+				perch_surfaces.append({"x":float(prop.x)+float(lamp.get("perch_offset_x",0.0))*lamp_scale,"y":base-float(lamp.frame_h)*lamp_scale+float(lamp.get("perch_inset_y",2.0))*lamp_scale,"half_width":float(lamp.get("perch_half_width",7.0)),"pole":true,"prop_type":str(prop.type)})
 			BeachBackdrop.WHEELIE_BIN_TYPE:
 				var definition: Dictionary = Config.sprites.wheelie_bin
 				var height: float = float(definition.frame_h) * float(definition.get("visual_scale",1.0))
 				var bin_scale: float = float(definition.get("visual_scale",1.0))
 				perch_surfaces.append({"x":float(prop.x),"y":base-height+BeachBackdrop.WHEELIE_BIN_LID_INSET*bin_scale,"half_width":BeachBackdrop.WHEELIE_BIN_HALF_WIDTH*bin_scale,"pole":false,"prop_type":str(prop.type)})
+
+## Direction signposts: perch on the top arrow board.
+func add_sign_perches(signs: Array[Dictionary]) -> void:
+	for sign: Dictionary in signs:
+		var board: Rect2 = sign.rect
+		perch_surfaces.append({"x":board.get_center().x,"y":board.position.y,"half_width":board.size.x*0.5,"pole":false,"prop_type":"beach_sign"})
 
 func is_supported_by(prop_type: String, at_x: float) -> bool:
 	return state == State.GROUNDED and not support.is_empty() and str(support.get("prop_type","")) == prop_type and absf(float(support.get("x",INF))-at_x) < 0.1

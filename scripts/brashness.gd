@@ -114,6 +114,7 @@ func tick(delta: float) -> void:
 				dust_left = float(tuning().dust_time)
 			_impact(ally,gull)
 	_dust(delta)
+	queue_redraw()
 	for ally: Dictionary in allies.filter(func(a: Dictionary) -> bool: return a.t >= swoop*2.0):
 		ally.gull.queue_free()
 		allies.erase(ally)
@@ -122,7 +123,7 @@ func tick(delta: float) -> void:
 func _impact(ally: Dictionary, gull: BeachGull) -> void:
 	var t: Dictionary = tuning()
 	var fx: BeachEffects = game.effects
-	var knocked: bool = is_instance_valid(ally.target) and ally.target.knock_food(gull)
+	var knocked: bool = is_instance_valid(ally.target) and ally.target.knock_food(gull,float(t.food_lift))
 	fx.feather_burst(ally.hit,gull.velocity,int(t.hit_feathers))
 	fx.sand_puff(Vector2(ally.hit.x,float(Config.tuning.world.ground)))
 	if bool(Config.tuning.juice.shake) and GameState.options.shake:
@@ -144,6 +145,19 @@ func _dust(delta: float) -> void:
 	for target: BeachTarget in game.spawner.targets:
 		if is_instance_valid(target) and target.panic.state == CrowdPanic.State.PANIC:
 			game.effects.sand_puff(target.position,true)
+
+## Gang shadows race across the sand toward their targets before each gull appears
+## (once visible, each gull draws its own shadow).
+func _draw() -> void:
+	var sand: float = float(Config.tuning.world.ground)
+	var lead: float = float(tuning().shadow_lead)
+	for ally: Dictionary in allies:
+		if ally.t < -lead or ally.t >= 0.0:
+			continue
+		var near: float = 1.0+ally.t/lead
+		draw_set_transform(Vector2(lerpf(ally.start.x,ally.hit.x,0.4*near),sand),0,Vector2(1,0.25))
+		draw_circle(Vector2.ZERO,lerpf(16,9,near),Color(0.09,0.18,0.22,lerpf(0.06,0.24,near)))
+		draw_set_transform(Vector2.ZERO)
 
 func clear() -> void:
 	if not panic_started:

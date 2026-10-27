@@ -197,7 +197,7 @@ func take(gull: BeachGull) -> bool:
 	departed.emit(self)
 	return true
 
-func knock_food(gull: BeachGull) -> bool:
+func knock_food(gull: BeachGull, _lift: float = 1.0) -> bool:
 	# A nearby miss scares live prey, but never creates a dropped snack.
 	if phase==Phase.SCUTTLE and activity!=Activity.ESCAPE and gull.can_collect_food(food_id):
 		threat_position = gull.position

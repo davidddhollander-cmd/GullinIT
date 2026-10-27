@@ -809,7 +809,7 @@ func take(gull: BeachGull) -> bool:
 	_finish_theft(gull,risky)
 	return true
 
-func knock_food(gull: BeachGull) -> bool:
+func knock_food(gull: BeachGull, lift: float = 1.0) -> bool:
 	if kind == "sunbather" or not food or leaving or (info.twist == "shield" and defense > 0):
 		return false
 	food = false
@@ -819,7 +819,7 @@ func knock_food(gull: BeachGull) -> bool:
 	drop_pickup_time = 0.0
 	recover = float(Config.tuning.world.recover_time)
 	alert = 1.0
-	var impulse: Vector2 = gull.velocity.normalized()*float(Config.tuning.world.drop_impulse_side)+Vector2(0,-float(Config.tuning.world.drop_impulse_up))
+	var impulse: Vector2 = gull.velocity.normalized()*float(Config.tuning.world.drop_impulse_side)+Vector2(0,-float(Config.tuning.world.drop_impulse_up)*lift)
 	food_knocked.emit(self,food_id,food_position(),impulse)
 	bench_visit.interrupt(self)
 	update_art_pose(false)

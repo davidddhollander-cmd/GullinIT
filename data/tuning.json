@@ -294,7 +294,7 @@
   "brash": {
     "snatch": 0.15, "handover": 0.08, "mug": 0.2, "stun": -0.25,
     "screech_per_sec": 0.06, "vantage_per_px": 0.03, "vantage_max": 3.5,
-    "hit_shake": 5, "hit_stop": 0.08, "hit_feathers": 10, "dust_time": 1.0, "dust_gap": 0.15
+    "hit_shake": 5, "hit_stop": 0.08, "hit_feathers": 10, "dust_time": 1.0, "dust_gap": 0.15, "food_lift": 1.8, "shadow_lead": 0.6
   },
   "panic": {
     "panic_radius": 170, "look_up_time": 0.5, "lead_time": 0.5, "panic_time": 4.0,
