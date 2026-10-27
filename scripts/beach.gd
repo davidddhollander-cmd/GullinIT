@@ -291,7 +291,17 @@ func _sign_destinations(zone: Dictionary, final_center: float = -1.0) -> Array[D
 	elif promenade<width:
 		label = "PROMENADE"
 		destination = promenade
-	# Beach-only maps retain their useful local zone names as the second finger.
+	# Beach-only maps retain their useful local zone names as the second finger;
+	# a zone named after the snack it holds points on to the next zone instead.
+	if not result.is_empty() and label == str(result[0].label):
+		var next: Dictionary = {}
+		for other: Dictionary in sign_zones():
+			if is_equal_approx(float(other.from),float(zone.to)):
+				next = other
+		if next.is_empty():
+			return result
+		label = str(next.name)
+		destination = (float(next.from)+float(next.to))*0.5
 	result.append({"label":label,"target_x":destination})
 	return result
 

@@ -2461,6 +2461,11 @@ func generated_layout_checks() -> void:
 			var board: Rect2 = sign.rect
 			var zone: Dictionary = sign.zone
 			check(board.position.x >= float(zone.from) and board.end.x <= float(zone.to) and board.end.x <= world_width,"level %d sign %s inside zone/world" % [number,sign.name])
+			var labels: Array[String] = []
+			for arrow: Dictionary in sign.arrows:
+				if str(arrow.label) not in labels:
+					labels.append(str(arrow.label))
+			check(labels.size() == sign.arrows.size(),"level %d sign %s has no repeated arrow labels" % [number,sign.name])
 			for sprite: AnimatedSprite2D in game.beach.prop_sprites:
 				var texture: Texture2D = sprite.sprite_frames.get_frame_texture(sprite.animation,sprite.frame)
 				var dimensions: Vector2 = texture.get_size()*sprite.scale.abs()
