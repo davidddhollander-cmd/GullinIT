@@ -1,6 +1,6 @@
 # 041 — Shopper look_up + panic_run art
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: none
