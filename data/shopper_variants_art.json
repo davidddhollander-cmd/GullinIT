@@ -1,6 +1,6 @@
 {
   "shopper_mullet": {
-    "file": "res://assets/sprites/shopper-mullet-walk-v2-bite-v1.png",
+    "file": "res://assets/sprites/shopper-mullet-walk-v2-bite-panic-v1.png",
     "frame_w": 128,
     "frame_h": 128,
     "visual_scale": 0.5,
@@ -89,6 +89,26 @@
         ],
         "fps": 5,
         "loop": false
+      },
+      "look_up": {
+        "frames": [
+          40,
+          41
+        ],
+        "fps": 6,
+        "loop": false
+      },
+      "panic_run": {
+        "frames": [
+          42,
+          43,
+          44,
+          45,
+          46,
+          47
+        ],
+        "fps": 12,
+        "loop": true
       }
     },
     "food_anchors": {
@@ -225,11 +245,47 @@
           14.0,
           -22.0
         ]
+      ],
+      "look_up": [
+        [
+          15.5,
+          -23.0
+        ],
+        [
+          15.5,
+          -23.0
+        ]
+      ],
+      "panic_run": [
+        [
+          15.5,
+          -23.0
+        ],
+        [
+          16.5,
+          -22.5
+        ],
+        [
+          14.0,
+          -23.5
+        ],
+        [
+          15.5,
+          -22.5
+        ],
+        [
+          14.5,
+          -23.0
+        ],
+        [
+          15.5,
+          -23.0
+        ]
       ]
     }
   },
   "shopper_sundress": {
-    "file": "res://assets/sprites/shopper-sundress-walk-v2-bite-v1.png",
+    "file": "res://assets/sprites/shopper-sundress-walk-v2-bite-panic-v1.png",
     "frame_w": 128,
     "frame_h": 128,
     "visual_scale": 0.5,
@@ -318,6 +374,26 @@
         ],
         "fps": 5,
         "loop": false
+      },
+      "look_up": {
+        "frames": [
+          40,
+          41
+        ],
+        "fps": 6,
+        "loop": false
+      },
+      "panic_run": {
+        "frames": [
+          42,
+          43,
+          44,
+          45,
+          46,
+          47
+        ],
+        "fps": 12,
+        "loop": true
       }
     },
     "food_anchors": {
@@ -453,6 +529,42 @@
         [
           15.0,
           -22.0
+        ]
+      ],
+      "look_up": [
+        [
+          14.0,
+          -23.0
+        ],
+        [
+          14.0,
+          -23.0
+        ]
+      ],
+      "panic_run": [
+        [
+          16.5,
+          -23.0
+        ],
+        [
+          14.0,
+          -23.5
+        ],
+        [
+          14.5,
+          -23.0
+        ],
+        [
+          15.0,
+          -22.0
+        ],
+        [
+          14.5,
+          -23.5
+        ],
+        [
+          14.5,
+          -23.5
         ]
       ]
     }

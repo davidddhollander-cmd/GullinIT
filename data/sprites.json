@@ -1267,7 +1267,7 @@
     }
   },
   "kiosk_customer": {
-    "file": "res://assets/sprites/shopper-diner-style-v2-bite-v1.png",
+    "file": "res://assets/sprites/shopper-diner-style-v2-bite-panic-v1.png",
     "frame_w": 128.0,
     "frame_h": 128.0,
     "visual_scale": 0.5,
@@ -1374,54 +1374,74 @@
       },
       "bite": {
         "frames": [
-          38,
-          39,
-          40
+          38.0,
+          39.0,
+          40.0
         ],
-        "fps": 5,
+        "fps": 5.0,
         "loop": false
       },
       "sit_down": {
         "frames": [
-          40,
-          41,
-          42,
-          44
+          40.0,
+          41.0,
+          42.0,
+          44.0
         ],
-        "fps": 8,
+        "fps": 8.0,
         "loop": false,
         "file": "res://assets/sprites/shopper-yellow-bench-v1.png"
       },
       "seated_idle": {
         "frames": [
-          44
+          44.0
         ],
-        "fps": 8,
+        "fps": 8.0,
         "loop": true,
         "file": "res://assets/sprites/shopper-yellow-bench-v1.png"
       },
       "seated_eat": {
         "frames": [
-          44,
-          45,
-          46,
-          47,
-          44
+          44.0,
+          45.0,
+          46.0,
+          47.0,
+          44.0
         ],
-        "fps": 8,
+        "fps": 8.0,
         "loop": true,
         "file": "res://assets/sprites/shopper-yellow-bench-v1.png"
       },
       "stand_up": {
         "frames": [
-          44,
-          42,
-          41,
-          40
+          44.0,
+          42.0,
+          41.0,
+          40.0
         ],
-        "fps": 8,
+        "fps": 8.0,
         "loop": false,
         "file": "res://assets/sprites/shopper-yellow-bench-v1.png"
+      },
+      "look_up": {
+        "frames": [
+          48,
+          49
+        ],
+        "fps": 6,
+        "loop": false
+      },
+      "panic_run": {
+        "frames": [
+          50,
+          51,
+          52,
+          53,
+          54,
+          55
+        ],
+        "fps": 12,
+        "loop": true
       }
     },
     "food_anchors": {
@@ -1621,6 +1641,42 @@
         [
           11.8414918414918,
           -18.9871794871795
+        ]
+      ],
+      "look_up": [
+        [
+          10.0,
+          -23.0
+        ],
+        [
+          10.0,
+          -23.0
+        ]
+      ],
+      "panic_run": [
+        [
+          14.0,
+          -23.0
+        ],
+        [
+          11.0,
+          -23.5
+        ],
+        [
+          10.0,
+          -23.5
+        ],
+        [
+          15.0,
+          -22.0
+        ],
+        [
+          8.5,
+          -23.5
+        ],
+        [
+          10.0,
+          -23.0
         ]
       ]
     }
@@ -2755,7 +2811,7 @@
     }
   },
   "shopper_mullet": {
-    "file": "res://assets/sprites/shopper-mullet-walk-v2-bite-v1.png",
+    "file": "res://assets/sprites/shopper-mullet-walk-v2-bite-panic-v1.png",
     "frame_w": 128.0,
     "frame_h": 128.0,
     "visual_scale": 0.5,
@@ -2838,54 +2894,74 @@
       },
       "bite": {
         "frames": [
-          26,
-          27,
-          28
+          26.0,
+          27.0,
+          28.0
         ],
-        "fps": 5,
+        "fps": 5.0,
         "loop": false
       },
       "sit_down": {
         "frames": [
-          32,
-          33,
-          34,
-          36
+          32.0,
+          33.0,
+          34.0,
+          36.0
         ],
-        "fps": 8,
+        "fps": 8.0,
         "loop": false,
         "file": "res://assets/sprites/shopper-mullet-bench-v1.png"
       },
       "seated_idle": {
         "frames": [
-          36
+          36.0
         ],
-        "fps": 8,
+        "fps": 8.0,
         "loop": true,
         "file": "res://assets/sprites/shopper-mullet-bench-v1.png"
       },
       "seated_eat": {
         "frames": [
-          36,
-          37,
-          38,
-          39,
-          36
+          36.0,
+          37.0,
+          38.0,
+          39.0,
+          36.0
         ],
-        "fps": 8,
+        "fps": 8.0,
         "loop": true,
         "file": "res://assets/sprites/shopper-mullet-bench-v1.png"
       },
       "stand_up": {
         "frames": [
-          36,
-          34,
-          33,
-          32
+          36.0,
+          34.0,
+          33.0,
+          32.0
         ],
-        "fps": 8,
+        "fps": 8.0,
         "loop": false,
         "file": "res://assets/sprites/shopper-mullet-bench-v1.png"
+      },
+      "look_up": {
+        "frames": [
+          40,
+          41
+        ],
+        "fps": 6,
+        "loop": false
+      },
+      "panic_run": {
+        "frames": [
+          42,
+          43,
+          44,
+          45,
+          46,
+          47
+        ],
+        "fps": 12,
+        "loop": true
       }
     },
     "food_anchors": {
@@ -3086,11 +3162,47 @@
           15.2763819095477,
           -21.4070351758794
         ]
+      ],
+      "look_up": [
+        [
+          15.5,
+          -23.0
+        ],
+        [
+          15.5,
+          -23.0
+        ]
+      ],
+      "panic_run": [
+        [
+          15.5,
+          -23.0
+        ],
+        [
+          16.5,
+          -22.5
+        ],
+        [
+          14.0,
+          -23.5
+        ],
+        [
+          15.5,
+          -22.5
+        ],
+        [
+          14.5,
+          -23.0
+        ],
+        [
+          15.5,
+          -23.0
+        ]
       ]
     }
   },
   "shopper_sundress": {
-    "file": "res://assets/sprites/shopper-sundress-walk-v2-bite-v1.png",
+    "file": "res://assets/sprites/shopper-sundress-walk-v2-bite-panic-v1.png",
     "frame_w": 128.0,
     "frame_h": 128.0,
     "visual_scale": 0.5,
@@ -3173,54 +3285,74 @@
       },
       "bite": {
         "frames": [
-          26,
-          27,
-          28
+          26.0,
+          27.0,
+          28.0
         ],
-        "fps": 5,
+        "fps": 5.0,
         "loop": false
       },
       "sit_down": {
         "frames": [
-          32,
-          33,
-          34,
-          36
+          32.0,
+          33.0,
+          34.0,
+          36.0
         ],
-        "fps": 8,
+        "fps": 8.0,
         "loop": false,
         "file": "res://assets/sprites/shopper-sundress-bench-v1.png"
       },
       "seated_idle": {
         "frames": [
-          36
+          36.0
         ],
-        "fps": 8,
+        "fps": 8.0,
         "loop": true,
         "file": "res://assets/sprites/shopper-sundress-bench-v1.png"
       },
       "seated_eat": {
         "frames": [
-          36,
-          37,
-          38,
-          39,
-          36
+          36.0,
+          37.0,
+          38.0,
+          39.0,
+          36.0
         ],
-        "fps": 8,
+        "fps": 8.0,
         "loop": true,
         "file": "res://assets/sprites/shopper-sundress-bench-v1.png"
       },
       "stand_up": {
         "frames": [
-          36,
-          34,
-          33,
-          32
+          36.0,
+          34.0,
+          33.0,
+          32.0
         ],
-        "fps": 8,
+        "fps": 8.0,
         "loop": false,
         "file": "res://assets/sprites/shopper-sundress-bench-v1.png"
+      },
+      "look_up": {
+        "frames": [
+          40,
+          41
+        ],
+        "fps": 6,
+        "loop": false
+      },
+      "panic_run": {
+        "frames": [
+          42,
+          43,
+          44,
+          45,
+          46,
+          47
+        ],
+        "fps": 12,
+        "loop": true
       }
     },
     "food_anchors": {
@@ -3420,6 +3552,42 @@
         [
           13.3009708737864,
           -19.8058252427184
+        ]
+      ],
+      "look_up": [
+        [
+          14.0,
+          -23.0
+        ],
+        [
+          14.0,
+          -23.0
+        ]
+      ],
+      "panic_run": [
+        [
+          16.5,
+          -23.0
+        ],
+        [
+          14.0,
+          -23.5
+        ],
+        [
+          14.5,
+          -23.0
+        ],
+        [
+          15.0,
+          -22.0
+        ],
+        [
+          14.5,
+          -23.5
+        ],
+        [
+          14.5,
+          -23.5
         ]
       ]
     }
