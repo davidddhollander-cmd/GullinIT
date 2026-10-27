@@ -102,6 +102,15 @@ func snatch_contact(at: Vector2,motion: Vector2,bonus: bool = false) -> void:
 		_texture_particle("snatch_fleck",texture,at+normal*side*2.0,heading*(12.0+float(index)*4.0)+normal*side*(18.0+float(index)*4.0)+Vector2.UP*8.0,life+0.04*float(index),angle,side*4.0,0.62 if bonus else 0.52,45.0)
 	queue_redraw()
 
+## Expanding rings from a screeching beak.
+func sound_wave(at: Vector2) -> void:
+	if not bool(Config.tuning.juice.particles):
+		return
+	for i: int in 3:
+		var life: float = 0.45+0.12*i
+		particles.append({"ring":true,"at":at,"v":Vector2.ZERO,"gravity":0.0,"life":life,"duration":life,"delay":0.1*i,"color":Color("fff4da")})
+	queue_redraw()
+
 func sand_puff(at: Vector2, taking_off: bool = false) -> void:
 	if not bool(Config.tuning.juice.particles) or at.x >= float(Config.tuning.world.promenade_start):
 		return
@@ -218,6 +227,13 @@ func _draw() -> void:
 			draw_set_transform(Vector2(roundf(item.at.x),roundf(item.at.y)),float(item.angle),Vector2.ONE*scale)
 			draw_texture_rect(item.texture,Rect2(-size*0.5,size),false,tint)
 			draw_set_transform(Vector2.ZERO)
+			continue
+		if item.get("ring",false):
+			var age: float = float(item.duration)-float(item.life)-float(item.delay)
+			if age > 0.0:
+				var ring_color: Color = item.color
+				ring_color.a = clampf(float(item.life)/float(item.duration),0.0,1.0)
+				draw_arc(item.at,4.0+age*70.0,0,TAU,20,ring_color,1.0)
 			continue
 		var color: Color = item.get("color",Color("fff4da"))
 		if item.has("duration"):

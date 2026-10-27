@@ -9,6 +9,9 @@ var meter: float = 0.0
 var allies: Array[Dictionary] = []
 var vantage_shown: bool = false
 var panic_started: bool = false
+var dust_left: float = 0.0
+var dust_clock: float = 0.0
+var hits: int = 0
 
 func tuning() -> Dictionary:
 	return Config.tuning.brash
@@ -22,7 +25,12 @@ func is_full() -> bool:
 func add(amount: float) -> void:
 	if power().is_empty() or not allies.is_empty():
 		return
+	var was_full: bool = meter >= 1.0
 	meter = clampf(meter+amount,0.0,1.0)
+	if meter >= 1.0 and not was_full:
+		# Ready sting: a sharp call and a pop over the gull.
+		Audio.play("gull_call",1.35,-4.0)
+		game.effects.message(game.player.position-Vector2(0,22),"READY!",BeachUI.GOLD)
 
 ## Pixels above the sand multiply the screech fill: a lamp pole or stand roof is the loudest stage.
 func vantage_mult() -> float:
@@ -47,7 +55,12 @@ func fire() -> bool:
 	var p: Dictionary = power()
 	game.effects.message(game.player.position-Vector2(0,24),str(p.name)+"!",BeachUI.GOLD)
 	Audio.play("gang_call",1.0,-2.0)
+	game.effects.sound_wave(game.player.beak())
 	CrowdPanic.warn(game.spawner.targets,game.player.position.x)
+	for target: BeachTarget in game.spawner.targets:
+		if is_instance_valid(target) and target.panic.state == CrowdPanic.State.LOOK_UP:
+			game.effects.message(target.position-Vector2(0,48),"!",BeachUI.GOLD,0.6,6.0)
+	hits = 0
 	panic_started = false
 	var lead: float = float(CrowdPanic.settings().lead_time)
 	var targets: Array[BeachTarget] = []
@@ -78,6 +91,8 @@ func tick(delta: float) -> void:
 		var gull: BeachGull = ally.gull
 		if ally.t < 0.0:
 			continue
+		if not gull.visible:
+			Audio.play("gust",1.7,-6.0)
 		gull.visible = true
 		var before: Vector2 = gull.position
 		var plunge: bool = ally.t < swoop
@@ -96,11 +111,39 @@ func tick(delta: float) -> void:
 			if not panic_started:
 				panic_started = true
 				CrowdPanic.stampede(game.spawner.targets,game.player.position.x)
-			if is_instance_valid(ally.target) and ally.target.knock_food(gull):
-				Audio.play("snatch",1.2,-4.0)
+				dust_left = float(tuning().dust_time)
+			_impact(ally,gull)
+	_dust(delta)
 	for ally: Dictionary in allies.filter(func(a: Dictionary) -> bool: return a.t >= swoop*2.0):
 		ally.gull.queue_free()
 		allies.erase(ally)
+
+## Each gang hit lands harder than the last: feathers, sand, a screen punch and a rising cry.
+func _impact(ally: Dictionary, gull: BeachGull) -> void:
+	var t: Dictionary = tuning()
+	var fx: BeachEffects = game.effects
+	var knocked: bool = is_instance_valid(ally.target) and ally.target.knock_food(gull)
+	fx.feather_burst(ally.hit,gull.velocity,int(t.hit_feathers))
+	fx.sand_puff(Vector2(ally.hit.x,float(Config.tuning.world.ground)))
+	if bool(Config.tuning.juice.shake) and GameState.options.shake:
+		fx.shake = maxf(fx.shake,float(t.hit_shake))
+	if bool(Config.tuning.juice.hitstop):
+		fx.freeze = maxf(fx.freeze,float(t.hit_stop))
+	Audio.play("gull_hit_%d" % (hits%3+1),1.0+0.1*hits,-3.0 if knocked else -7.0)
+	hits += 1
+
+## Panicked runners kick up sand for the first second of the stampede.
+func _dust(delta: float) -> void:
+	if dust_left <= 0.0:
+		return
+	dust_left -= delta
+	dust_clock -= delta
+	if dust_clock > 0.0:
+		return
+	dust_clock = float(tuning().dust_gap)
+	for target: BeachTarget in game.spawner.targets:
+		if is_instance_valid(target) and target.panic.state == CrowdPanic.State.PANIC:
+			game.effects.sand_puff(target.position,true)
 
 func clear() -> void:
 	if not panic_started:
