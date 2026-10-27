@@ -5,6 +5,9 @@ extends RefCounted
 static var _food_anchors: Dictionary = {}
 
 static func update(target: BeachTarget, moving: bool) -> void:
+	if CrowdPanic.present(target):
+		align_food(target)
+		return
 	var pose: StringName = &"idle"
 	if target.mum_swat_time > 0 or target.reaction.swat_timer >= 0:
 		pose = &"swat"

@@ -8,6 +8,7 @@ var game: BeachGame
 var meter: float = 0.0
 var allies: Array[Dictionary] = []
 var vantage_shown: bool = false
+var panic_started: bool = false
 
 func tuning() -> Dictionary:
 	return Config.tuning.brash
@@ -46,6 +47,9 @@ func fire() -> bool:
 	var p: Dictionary = power()
 	game.effects.message(game.player.position-Vector2(0,24),str(p.name)+"!",BeachUI.GOLD)
 	Audio.play("gang_call",1.0,-2.0)
+	CrowdPanic.warn(game.spawner.targets,game.player.position.x)
+	panic_started = false
+	var lead: float = float(CrowdPanic.settings().lead_time)
 	var targets: Array[BeachTarget] = []
 	for target: BeachTarget in game.spawner.targets:
 		if game.snatchable(target) and absf(target.position.x-game.camera_x) < 170.0:
@@ -63,7 +67,7 @@ func fire() -> bool:
 		game.add_child(gull)
 		var start: Vector2 = Vector2(hit.x-side*120.0,-20.0)
 		gull.position = start
-		allies.append({"gull":gull,"target":target,"start":start,"hit":hit,"end":Vector2(hit.x+side*140.0,-30.0),"t":-float(p.stagger)*i,"knocked":false})
+		allies.append({"gull":gull,"target":target,"start":start,"hit":hit,"end":Vector2(hit.x+side*140.0,-30.0),"t":-lead-float(p.stagger)*i,"knocked":false})
 	return true
 
 ## Each ally follows two quadratic curves: a plunge from offscreen to the food, then a climb back out.
@@ -89,6 +93,9 @@ func tick(delta: float) -> void:
 		gull.sprite.rotation = clampf(gull.velocity.angle() if gull.facing > 0 else gull.velocity.angle()-PI,-1.2,1.2) if plunge and u > 0.45 else 0.0
 		if not plunge and not ally.knocked:
 			ally.knocked = true
+			if not panic_started:
+				panic_started = true
+				CrowdPanic.stampede(game.spawner.targets,game.player.position.x)
 			if is_instance_valid(ally.target) and ally.target.knock_food(gull):
 				Audio.play("snatch",1.2,-4.0)
 	for ally: Dictionary in allies.filter(func(a: Dictionary) -> bool: return a.t >= swoop*2.0):
@@ -96,6 +103,8 @@ func tick(delta: float) -> void:
 		allies.erase(ally)
 
 func clear() -> void:
+	if not panic_started:
+		CrowdPanic.calm(game.spawner.targets)
 	for ally: Dictionary in allies:
 		ally.gull.queue_free()
 	allies.clear()

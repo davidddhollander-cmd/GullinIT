@@ -92,6 +92,7 @@ var lifeguard_whistle_time: float = 0.0
 var reaction: AdultReaction = AdultReaction.new()
 var routine: BeachRoutine = BeachRoutine.new()
 var bench_visit: BenchVisit = BenchVisit.new()
+var panic: CrowdPanic = CrowdPanic.new()
 enum DinerMeal { DINING, SEEK, RETURN }
 var diner_meal: DinerMeal = DinerMeal.DINING
 var diner_home: float = 0.0
@@ -172,7 +173,14 @@ func update_art_pose(moving: bool = false) -> void:
 	if kind == "picnic_family":
 		MumArt.update(self,moving)
 		return
+	if kind == "sunbather":
+		# Their other poses come from the sleep and reaction code.
+		CrowdPanic.present(self)
+		return
 	if kind != "toddler":
+		return
+	if CrowdPanic.present(self):
+		ToddlerArt.align_food(self)
 		return
 	sprite.flip_h = facing < 0
 	var pose: StringName = &"walk" if moving else (&"eat" if food else &"idle")
@@ -313,6 +321,8 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	var moved: bool = false
 	recover = maxf(0.0, recover - delta)
 	defense = maxf(0.0, defense - delta)
+	if panic.tick(self,delta,gulls):
+		return
 	if bench_visit.tick(self,delta,gulls):
 		return
 	if service_locked:

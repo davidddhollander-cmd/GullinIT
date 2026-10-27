@@ -2,6 +2,8 @@ class_name LifeguardArt
 extends RefCounted
 
 static func update(target: BeachTarget,moving: bool) -> void:
+	if CrowdPanic.present(target):
+		return
 	var pose: StringName = &"walk" if moving else &"idle"
 	if target.action_pose_time > 0:
 		pose = &"swat"

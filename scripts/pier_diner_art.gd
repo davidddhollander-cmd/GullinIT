@@ -22,6 +22,9 @@ static func frames(appearance: String = "pier_diner") -> SpriteFrames:
 	return combined
 
 static func update(target: BeachTarget, moving: bool = false) -> void:
+	if CrowdPanic.present(target):
+		align_food(target)
+		return
 	var pose: StringName = &"idle"
 	if target.action_pose_time > 0:
 		pose = &"swat"

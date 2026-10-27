@@ -1,6 +1,6 @@
 # 040 — Gang Call crowd panic (behaviour, existing poses)
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -39,5 +39,32 @@ David's playtest of the herring Gang Call power: "it works well but the reaction
 - [ ] `./tools/validate.ps1`: 0 new failures (known: the pier-diner fish check in rendered mode, and the play copy's demo lock)
 
 ## Report
+
+Branch `sonnet/040-gang-call-crowd-panic`, built in a worktree off `main` (19fd1b2) so the play copy was left alone.
+
+**Files changed**
+- `scripts/crowd_panic.gd` (new): `CrowdPanic` state machine per person (`NONE → LOOK_UP → PANIC → RETURN`), held as `BeachTarget.panic`. Static `warn / stampede / calm` for the crowd, `resolve / present` for poses.
+- `scripts/brashness.gd`: `fire()` warns the crowd (player x ± `panic_radius`) and delays every ally by `lead_time`; the first `knocked` moment calls `stampede`; `clear()` calms a crowd whose gang never struck.
+- `scripts/target.gd`: `panic` member; `panic.tick` runs ahead of the bench/service/reaction code; toddler and sunbather pose hooks in `update_art_pose`.
+- `scripts/{beachgoer,shopper,lifeguard,mum,pier_diner}_art.gd`: one `CrowdPanic.present` line each, then the family's own `align_food`.
+- `scripts/stall_service.gd`: new `abort(person)` (wraps the existing `_finish(stand,false)` path).
+- `scripts/spawner.gd`: panicking people keep their current lane offset (no lane switching).
+- `data/tuning.json`: `panic` block.
+- `tests/integration.gd`: `crowd_panic_checks()`.
+
+**Tests:** headless `tests/integration.tscn`: 14213 checks, 0 failures (baseline on main 14170 checks, 0 failures, so +43). The two console messages (`!is_inside_tree()` and the `off_lead_dog` script error in `level5_checks`) are identical on unmodified main. Rendered `-Capture` mode not run.
+
+**Decisions**
+- Tunables: `panic_radius` 170, `look_up_time` 0.5, `lead_time` 0.5, `panic_time` 4.0, `panic_speed_mult` 4.0 (a multiple of the person's walk speed, 36 px/s, so about 144 px of running). I added one extra, `return_speed_mult` 2.5 (22.5 px/s), so the walk back takes about 6 s rather than 16 s at plain walk speed. Change it if "come back after 4 s" should mean a faster return.
+- `look_up_time` is the minimum hold. Everyone stays in `look_up` until the first gull hit (1.2 s after firing with the herring numbers), and the stampede is held back if the hit ever comes sooner than `look_up_time`.
+- Panic direction is fixed at the first hit (away from the player's x then) and does not flip if the player flies past.
+- Pose chains: `look_up → surprise → alert`; `panic_run → run → chase → walk` (walk plays at 3x). Sheets with drawn `_left` clips (mum, sunbather, old man) use them instead of flipping. Toddler: `look_up → cry`, `panic_run → cry_run`. Task 041's sheets are picked up automatically.
+- Panic start clears the chase, swat, warning, shield and bite state. Food in hand is untouched and stays snatchable.
+- Seated shoppers stand up via `bench_visit.interrupt`, and panic starts when they are on their feet. A shopper or family mid-order has the order cancelled by `StallService.abort`; any food already placed on the counter is withdrawn (same as the existing interrupt), and the shopper re-queues after the panic.
+- Bounds: everyone 20..width-20; pier diners from `pier_start`; sunbathers within the beach range. A person blocked by a bound keeps the run animation against it.
+- A theft during the walk back hands control to the normal reaction.
+- Stall vendors and the seafood vendor are not `BeachTarget`s in `spawner.targets`, so they are unaffected by construction. Leaving and loose (stall portion) targets are skipped.
+
+**Not done:** no rendered capture or in-game eyeball pass; the new art (task 041) is out of scope. The mum's family trip and the toddler's parent-follow simply pause during panic and carry on afterwards.
 
 ## Review notes

@@ -267,6 +267,9 @@ func apply_spacing(delta: float) -> void:
 		if target.service_locked or target.bench_visit.anchored():
 			placed[target] = desired
 			continue
+		if target.panic.state != CrowdPanic.State.NONE:
+			placed[target] = visual_offsets.get(target,Vector2.ZERO)
+			continue
 		desired = benches.clear_walking_offset(target.position,desired)
 		var hold: Dictionary = lane_holds.get(target,{})
 		hold.t = float(hold.get("t",0.0))-delta
