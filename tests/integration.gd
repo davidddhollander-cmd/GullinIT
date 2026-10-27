@@ -109,6 +109,7 @@ func run() -> void:
 	GameState.progress["1"] = {"training_step":5,"training_complete":true}
 	await input_checks()
 	await screech_checks()
+	await crowd_panic_checks()
 	await mechanics_checks()
 	await peck_checks()
 	await grounded_toddler_peck_checks()
@@ -485,6 +486,119 @@ func click_at(point: Vector2) -> void:
 		event.position = point
 		event.pressed = pressed
 		get_viewport().push_input(event,true)
+
+func crowd_step(game: BeachGame, frames: int) -> void:
+	for frame: int in frames:
+		game.brash.tick(1.0/60)
+		for target: BeachTarget in game.spawner.targets:
+			target.tick(1.0/60,[])
+
+func crowd_panic_checks() -> void:
+	var settings: Dictionary = Config.tuning.panic
+	for key: String in ["panic_radius","look_up_time","lead_time","panic_time","panic_speed_mult"]:
+		check(settings.has(key),"tuning.panic defines " + key)
+	var sheet: SpriteFrames = SpriteFrames.new()
+	sheet.add_animation(&"alert")
+	check(CrowdPanic.resolve(sheet,CrowdPanic.LOOK_UP_CLIPS,1.0).clip == &"alert","look_up falls back to alert when the sheet has neither look_up nor surprise")
+	sheet.add_animation(&"surprise")
+	check(CrowdPanic.resolve(sheet,CrowdPanic.LOOK_UP_CLIPS,1.0).clip == &"surprise","look_up falls back to surprise on a sheet without look_up")
+	sheet.add_animation(&"look_up")
+	check(CrowdPanic.resolve(sheet,CrowdPanic.LOOK_UP_CLIPS,1.0).clip == &"look_up","a sheet with look_up is used without code changes")
+	var legs: SpriteFrames = SpriteFrames.new()
+	legs.add_animation(&"walk")
+	check(CrowdPanic.resolve(legs,CrowdPanic.PANIC_CLIPS,1.0).clip == &"walk","panic_run falls back to walk when the sheet has no run or chase")
+	legs.add_animation(&"chase")
+	check(CrowdPanic.resolve(legs,CrowdPanic.PANIC_CLIPS,1.0).clip == &"chase","panic_run prefers chase over walk")
+	legs.add_animation(&"run")
+	legs.add_animation(&"run_left")
+	check(CrowdPanic.resolve(legs,CrowdPanic.PANIC_CLIPS,1.0).clip == &"run","panic_run prefers run over chase")
+	var left: Dictionary = CrowdPanic.resolve(legs,CrowdPanic.PANIC_CLIPS,-1.0)
+	check(left.clip == &"run_left" and not left.flip,"a drawn _left clip is used instead of flipping")
+	main.start_level(1)
+	var game: BeachGame = main.game
+	game.set_physics_process(false)
+	game.intro = 0.0
+	game.running = true
+	var gull: BeachGull = game.player
+	gull.land()
+	gull.position = Vector2(160,gull.ground_y())
+	gull.velocity = Vector2.ZERO
+	var right: BeachTarget = game.spawner.create("kiosk_customer",210)
+	var near_left: BeachTarget = game.spawner.create("kiosk_customer",110)
+	var far: BeachTarget = game.spawner.create("kiosk_customer",520)
+	var sleeper: BeachTarget = game.spawner.create("sunbather",150)
+	var toddler: BeachTarget = game.spawner.create("toddler",190)
+	for person: BeachTarget in [right,near_left,far]:
+		person.food = true
+		person.food_sprite.show()
+	var panickers: Array[BeachTarget] = [right,near_left,sleeper,toddler]
+	var home_x: Dictionary = {}
+	for person: BeachTarget in panickers:
+		home_x[person] = person.position.x
+	game.brash.meter = 1.0
+	check(game.brash.fire(),"Gang Call fires for the crowd test")
+	var lead: float = float(settings.lead_time)
+	check(game.brash.allies[0].t <= -lead + 0.001,"the first dive waits for lead_time")
+	for person: BeachTarget in panickers:
+		check(person.panic.state == CrowdPanic.State.LOOK_UP,person.kind + " in range starts looking up when Gang Call fires")
+	check(far.panic.state == CrowdPanic.State.NONE,"someone beyond panic_radius is not warned")
+	check(sleeper.sleep_state == BeachTarget.SleepState.AWAKE,"a sleeping sunbather wakes up for the warning")
+	crowd_step(game,1)
+	check(right.sprite.animation in [&"look_up",&"surprise",&"alert"],"the warning shows the look-up pose or its fallback")
+	check(toddler.sprite.animation in [&"look_up",&"cry"],"the toddler cries while looking up")
+	check(not game.brash.allies[0].gull.visible,"no gull has dived while the crowd looks up")
+	crowd_step(game,int((lead-0.1)*60.0))
+	check(right.panic.state == CrowdPanic.State.LOOK_UP and not game.brash.allies[0].gull.visible,"the crowd is still looking up just before the first dive")
+	crowd_step(game,12)
+	check(game.brash.allies[0].gull.visible and right.panic.state == CrowdPanic.State.LOOK_UP,"the dive starts only after the look-up beat")
+	var swoop: float = float(game.player.species_stats().power.swoop_time)
+	var wait_frames: int = 0
+	while right.panic.state == CrowdPanic.State.LOOK_UP and wait_frames < 300:
+		crowd_step(game,1)
+		wait_frames += 1
+	check(game.brash.panic_started,"the first gull hit triggers the stampede")
+	for person: BeachTarget in panickers:
+		check(person.panic.state == CrowdPanic.State.PANIC,person.kind + " panics on the first hit")
+	check(right.panic.direction > 0.0 and near_left.panic.direction < 0.0,"panic runs directly away from the player")
+	check(toddler.sprite.animation == &"cry_run","the panicking toddler uses cry_run")
+	var right_before: float = right.position.x
+	var left_before: float = near_left.position.x
+	var panic_frames: int = 0
+	var clean: bool = true
+	while right.panic.state == CrowdPanic.State.PANIC and panic_frames < 600:
+		if panic_frames == 30:
+			check(right.position.x > right_before and near_left.position.x < left_before,"panickers move away from the player")
+			near_left.reaction.mode = "chase"
+		crowd_step(game,1)
+		panic_frames += 1
+		for person: BeachTarget in panickers:
+			clean = clean and person.reaction.mode.is_empty() and person.reaction.swat_timer < 0.0 and person.defense <= 0.0
+	check(clean,"no chase, swat or warning happens while panicking")
+	check(absf(float(panic_frames)/60.0-float(settings.panic_time)) < 0.1,"the panic lasts panic_time")
+	check(right.panic.state == CrowdPanic.State.RETURN,"panickers walk back after panic_time")
+	# The routine takes over the frame they arrive, so check the spot where each one finished.
+	var arrived: Dictionary = {}
+	var return_frames: int = 0
+	while arrived.size() < panickers.size() and return_frames < 3000:
+		crowd_step(game,1)
+		return_frames += 1
+		for person: BeachTarget in panickers:
+			if person.panic.state == CrowdPanic.State.NONE and not arrived.has(person):
+				arrived[person] = absf(person.position.x-float(home_x[person]))
+	for person: BeachTarget in panickers:
+		check(arrived.has(person) and float(arrived[person]) < 1.0,person.kind + " is back at the pre-panic spot and resumes its routine")
+	check(far.position.x > 400.0,"the distant beachgoer carried on")
+	# Pier diners are held to the pier when the player scares them off its end.
+	gull.position = Vector2(1000,gull.ground_y())
+	var diner: BeachTarget = game.spawner.create("pier_diner",970)
+	game.brash.meter = 1.0
+	game.brash.fire()
+	crowd_step(game,int((lead+swoop)*60.0)+5)
+	check(diner.panic.state == CrowdPanic.State.PANIC and diner.panic.direction < 0.0,"the pier diner runs away from the player")
+	crowd_step(game,int(float(settings.panic_time)*60.0)-10)
+	check(diner.position.x >= float(Config.tuning.world.pier_start)-0.01,"a panicking pier diner stays on the pier")
+	main.clear_game()
+	await settle()
 
 func mechanics_checks() -> void:
 	main.start_level(1)

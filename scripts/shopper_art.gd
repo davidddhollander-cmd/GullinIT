@@ -16,6 +16,9 @@ static func update(target: BeachTarget,moving: bool) -> void:
 		target.sprite.set_frame_and_progress(mini(count-1,int(visit.progress()*count)),0.0)
 		BeachgoerArt.align_food(target)
 		return
+	if CrowdPanic.present(target):
+		BeachgoerArt.align_food(target)
+		return
 	if target.shopper_appearance == "old_man":
 		_update_old_man(target,moving)
 		return

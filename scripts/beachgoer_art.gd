@@ -5,6 +5,9 @@ static func update(target: BeachTarget, moving: bool) -> void:
 	if target.kind == "kiosk_customer":
 		ShopperArt.update(target,moving)
 		return
+	if CrowdPanic.present(target):
+		align_food(target)
+		return
 	var pose: StringName = &"walk" if moving else &"idle"
 	if not target.leaving:
 		if target.reaction.swat_timer >= 0 or target.reaction.mode in ["warning","follow"]:

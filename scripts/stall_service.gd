@@ -111,6 +111,16 @@ func tick(delta: float) -> void:
 		elif portion.dropped_pending and bool(portion.dropped_item.get("recovered",false)):
 			portion.dropped_pending = false
 
+## Cancels any order this person is part of (a panic, for example); the counter portion is withdrawn.
+func abort(person: BeachTarget) -> void:
+	for stand: FoodStall in requests.keys():
+		var request: Dictionary = requests[stand]
+		var involved: bool = request.owner == person
+		for order: Dictionary in request.orders:
+			involved = involved or order.buyer == person
+		if involved:
+			_finish(stand,false)
+
 func _is_active(portion: BeachTarget) -> bool:
 	for request: Dictionary in requests.values():
 		if request.portion == portion:
