@@ -324,6 +324,8 @@ func _draw_perks(offset: Vector2) -> void:
 		if ready:
 			draw_rect(METER_RECT,BeachUI.CREAM,false,1.0)
 			draw_string(HUD_FONT,METER_RECT.position+Vector2(6,6),"SLOW",HORIZONTAL_ALIGNMENT_LEFT,-1,6,BeachUI.INK)
+	elif not game.brash.power().is_empty():
+		_draw_brash()
 	var target: BeachTarget = game.keen_target()
 	if target != null:
 		var at: Vector2 = target.food_position()-offset
@@ -331,6 +333,16 @@ func _draw_perks(offset: Vector2) -> void:
 			var tip: Vector2 = Vector2(at.x,maxf(at.y-target.food_radius().y-3+sin(Time.get_ticks_msec()*0.008)*1.5,TOP_BAR_HEIGHT+5))
 			draw_colored_polygon(PackedVector2Array([tip,tip+Vector2(-4,-5),tip+Vector2(4,-5)]),BeachUI.GOLD)
 			draw_polyline(PackedVector2Array([tip,tip+Vector2(-4,-5),tip+Vector2(4,-5),tip]),BeachUI.INK,1.0)
+
+## Brashness meter in the top bar; it pulses with the power's name when full.
+func _draw_brash() -> void:
+	var full: bool = game.brash.is_full()
+	var pulse: bool = full and int(Time.get_ticks_msec()/250)%2 == 0
+	draw_rect(METER_RECT,BeachUI.INK)
+	draw_rect(METER_RECT.grow(-1),Color("5a3a4a"))
+	draw_rect(Rect2(METER_RECT.position+Vector2.ONE,Vector2(34*game.brash.meter,6)),BeachUI.CREAM if pulse else (BeachUI.GOLD if full else Color("ef725c")))
+	draw_rect(METER_RECT,BeachUI.CREAM if full else Color("397a85"),false,1.0)
+	draw_string(HUD_FONT,METER_RECT.position+Vector2(4,6),"CALL!" if full else "BRASH",HORIZONTAL_ALIGNMENT_LEFT,-1,6,BeachUI.INK if full else BeachUI.CREAM)
 
 func goal_status() -> Dictionary:
 	if game.casual:
@@ -524,7 +536,7 @@ func _draw_touch_buttons() -> void:
 		var slow_box: Rect2 = GullInput.SLOWMO_BUTTON
 		draw_rect(slow_box,Color(0.78,0.6,0.1,0.6))
 		draw_rect(slow_box,Color(1.0,0.96,0.85,0.8),false,1.0)
-		draw_string(font,Vector2(slow_box.position.x+5,slow_box.position.y+14),"SLOW",HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color(1.0,0.96,0.85))
+		draw_string(font,Vector2(slow_box.position.x+5,slow_box.position.y+14),"SLOW" if game.perk_id == "bullet_time" else "CALL",HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color(1.0,0.96,0.85))
 	for kind: String in GullInput.TOUCH_BUTTONS:
 		var box: Rect2 = GullInput.TOUCH_BUTTONS[kind]
 		var held: bool = (kind == "flap" and game.input.touch_climb)
