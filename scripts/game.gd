@@ -64,6 +64,13 @@ var peck_hold_pending: bool = false
 var peck_hold_elapsed: float = 0.0
 var screech_audio: AudioStreamPlayer
 var brash: BeachBrash = BeachBrash.new()
+var peck_hold_touch: bool = false
+# Level 2's first-play herring lesson: perch, screech, Gang Call, grab. The level clock is paused meanwhile.
+var screech_lesson: bool = false
+var screech_step: int = 0
+var screech_clock: float = 0.0
+var screech_snacks: int = 0
+const SCREECH_STEPS: int = 4
 
 func setup(definition: Dictionary, is_casual: bool, force_training: bool = false) -> void:
 	level = definition
@@ -136,6 +143,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	player.position = Vector2(Config.tuning.world.start_x,Config.tuning.world.start_y)
 	brash.game = self
 	add_child(brash)
+	screech_lesson = level.has("screech_lesson") and not training and player.species == "herring" and not bool(GameState.entry(int(level.id)).get("screech_lesson_complete",false))
 	player.setup_perches(level.props)
 	player.add_sign_perches(beach.sign_layouts())
 	_wire_sand(player)
@@ -387,7 +395,8 @@ func _physics_process(delta: float) -> void:
 		return
 	var step: float = delta * (float(Config.tuning.juice.slow_scale) if effects.slow > 0 else 1.0)
 	spawner.reset_spacing()
-	elapsed += step
+	if not screech_lesson:
+		elapsed += step
 	wind.tick(step)
 	score.tick(step)
 	input.update_player(player,camera_x)
@@ -397,7 +406,10 @@ func _physics_process(delta: float) -> void:
 		player.dive(wind.direction)
 	if input.touch_peck:
 		input.touch_peck = false
-		_peck()
+		peck_hold_touch = _peck_pressed()
+	if peck_hold_touch and not input.peck_held:
+		peck_hold_touch = false
+		_peck_released()
 	if input.touch_slowmo:
 		input.touch_slowmo = false
 		start_slowmo()
@@ -463,6 +475,8 @@ func _physics_process(delta: float) -> void:
 	overlay.queue_redraw()
 	if training:
 		_training_tick(step)
+	elif screech_lesson:
+		_screech_lesson_tick(step)
 	elif (casual and score.items >= int(Config.tuning.score.casual_items)) or (not casual and elapsed >= float(level.time_limit)):
 		finish()
 
@@ -519,22 +533,34 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("slowmo") and not event.is_echo():
 		start_slowmo()
 	if running and event.is_action_pressed("peck") and not event.is_echo():
-		if event is InputEventKey and _can_screech():
-			peck_hold_pending = true
-			peck_hold_elapsed = 0.0
+		if event is InputEventKey or event is InputEventJoypadButton:
+			_peck_pressed()
 		else:
 			_peck()
-	elif event is InputEventKey and event.is_action_released("peck") and peck_hold_pending:
-		peck_hold_pending = false
-		if player.screech_held:
-			_stop_screech()
-		elif running:
-			_peck()
+	elif (event is InputEventKey or event is InputEventJoypadButton) and event.is_action_released("peck") and peck_hold_pending and not peck_hold_touch:
+		_peck_released()
 	if event.is_action_pressed("debug"):
 		debug = not debug
 	if event.is_action_pressed("reload"):
 		if not Config.reload_data():
 			effects.message(player.position,"RELOAD FAILED - CHECK JSON")
+
+## A peck press that may become a screech hold; returns true when it is waiting to find out.
+func _peck_pressed() -> bool:
+	if _can_screech():
+		peck_hold_pending = true
+		peck_hold_elapsed = 0.0
+		player.aim = player.position
+		return true
+	_peck()
+	return false
+
+func _peck_released() -> void:
+	peck_hold_pending = false
+	if player.screech_held:
+		_stop_screech()
+	elif running:
+		_peck()
 
 func _peck() -> void:
 	if player.state == BeachGull.State.STRIKE:
@@ -549,7 +575,7 @@ func _peck() -> void:
 			player.show_ground_peck()
 
 func _can_screech() -> bool:
-	return player != null and player.species == "herring" and player.detailed_art and player.state == BeachGull.State.GROUNDED and not player.climb and absf(player.velocity.x) <= 1.0 and Input.get_vector("aim_left","aim_right","aim_up","aim_down").length() <= 0.15
+	return player != null and player.species == "herring" and player.detailed_art and player.state == BeachGull.State.GROUNDED and not player.climb and absf(player.velocity.x) <= 1.0 and Input.get_vector("aim_left","aim_right","aim_up","aim_down").length() <= 0.15 and (input == null or input.touch_stick().length() <= 0.15)
 
 func _advance_screech_hold(delta: float) -> void:
 	if not peck_hold_pending:
@@ -587,6 +613,7 @@ func set_paused(value: bool) -> void:
 	if value:
 		end_slowmo()
 		peck_hold_pending = false
+		peck_hold_touch = false
 		_stop_screech(false)
 	set_physics_process(not value)
 	set_process_unhandled_input(not value)
@@ -930,4 +957,93 @@ func training_target() -> Vector2:
 				return target.food_position()
 			if lesson == 3 and target.kind == "sunbather":
 				return target.stash_position()
+	return Vector2(-1000,-1000)
+
+# --- Level 2 screech lesson (first herring play) -------------------------------------------
+
+func lesson_active() -> bool:
+	return training or screech_lesson
+
+func screech_settings() -> Dictionary:
+	return level.get("screech_lesson",{})
+
+## The ice-cream stand's roof-sign perch that step 1 asks for: the stand nearest the start.
+func lesson_perch() -> Dictionary:
+	var best: Dictionary = {}
+	for surface: Dictionary in player.perch_surfaces:
+		if str(surface.get("prop_type","")) == "kiosk" and (best.is_empty() or float(surface.x) < float(best.x)):
+			best = surface
+	return best
+
+func _screech_advance() -> void:
+	screech_step += 1
+	screech_clock = 0.0
+	screech_snacks = player.digestion.snacks.size()
+	track("lesson_complete", {"lesson": 100+screech_step, "seconds": snappedf(elapsed, 0.1)})
+	if screech_step == 1:
+		brash.meter = maxf(brash.meter,float(screech_settings().get("start_meter",0.6)))
+	if screech_step >= SCREECH_STEPS:
+		end_screech_lesson(true)
+	else:
+		effects.message(player.position-Vector2(0,24),"NICE!",BeachUI.GOLD)
+
+## Finish (or skip) the lesson: save it, empty the meter and let the level clock run.
+func end_screech_lesson(completed: bool) -> void:
+	if not screech_lesson:
+		return
+	screech_lesson = false
+	brash.meter = 0.0
+	GameState.complete_screech_lesson()
+	if completed:
+		effects.message(player.position-Vector2(0,24),"LESSON DONE",BeachUI.GOLD)
+
+func _screech_lesson_tick(delta: float) -> void:
+	screech_clock += delta
+	# The shoppers by the stand keep their ice creams until the gang arrives.
+	if screech_step < 3:
+		for target: BeachTarget in spawner.targets:
+			if target.kind == "kiosk_customer" and not target.food and not target.dropped_pending and not target.leaving:
+				target.food = true
+				target.food_sprite.show()
+				target.respawn = 0.0
+	match screech_step:
+		0:
+			var perch: Dictionary = lesson_perch()
+			if not perch.is_empty() and player.is_supported_by("kiosk",float(perch.x)):
+				_screech_advance()
+		1:
+			if brash.is_full():
+				_screech_advance()
+		2:
+			if not brash.allies.is_empty():
+				_screech_advance()
+			elif not brash.is_full():
+				screech_step = 1
+		3:
+			var snacks: int = player.digestion.snacks.size()
+			if snacks > screech_snacks or screech_clock >= float(screech_settings().get("grab_timeout",8.0)):
+				_screech_advance()
+			screech_snacks = snacks
+
+func screech_lesson_text() -> String:
+	var peck_key: String = "X" if input.gamepad else "E"
+	var call_key: String = "RB" if input.gamepad else "Q"
+	if input.touch_visible:
+		peck_key = "PECK"
+		call_key = "CALL"
+	match screech_step:
+		0: return "LAND ON THE ICE CREAM SIGN\nHIGH PERCHES ARE LOUDER"
+		1: return "HOLD %s TO SCREECH\nHIGH PERCHES FILL BRASH FASTER" % peck_key
+		2: return "BRASH FULL! SCREECH AGAIN\nOR %s TO CALL THE GANG" % call_key
+	return "GRAB THE DROPPED FOOD!\nTHEY'LL BE BACK SOON"
+
+func screech_lesson_target() -> Vector2:
+	if screech_step == 0:
+		var perch: Dictionary = lesson_perch()
+		if not perch.is_empty():
+			return Vector2(float(perch.x),BeachGull.perch_y(perch,float(perch.x))-8.0)
+	elif screech_step == 3:
+		for item: Dictionary in stash_raids.items:
+			if item.get("owner") != null and not bool(item.get("recovered",false)):
+				return item.position
 	return Vector2(-1000,-1000)

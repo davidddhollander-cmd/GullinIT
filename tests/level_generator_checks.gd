@@ -80,10 +80,13 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 		check.call(stand_count==1 and kiosk_x>float(family_positions["family_1"]),"family has a kiosk further along the beach")
 		check.call(level.rivals.is_empty(),"training beach has no rival")
 	elif number == 2:
-		check.call(types.count("picnic_family")==2 and types.count("toddler")==2 and types.count("sunbather")==1 and types.count("kiosk_customer")==2,"family beach has two picnic groups, one sunbather and two shoppers")
+		check.call(types.count("picnic_family")==1 and types.count("toddler")==2 and types.count("sunbather")==1 and types.count("kiosk_customer")==3,"family beach has one mum with two toddlers, one sunbather and three shoppers")
 		check.call(not types.has("dog_owner") and not types.has("pier_diner"),"family beach excludes promenade and pier actors")
-		check.call(float(family_positions["family_2"])-float(family_positions["family_1"])>100.0,"family groups have separate stations")
-		check.call(stand_count==2 and kiosk_x>float(family_positions["family_2"])+200.0,"family beach has a mid kiosk and a far-end kiosk")
+		var left_stand: float = INF
+		for prop: Dictionary in level.props:
+			if prop.type == "kiosk":
+				left_stand = minf(left_stand,float(prop.x))
+		check.call(stand_count==2 and left_stand<float(family_positions["family_1"])-100.0 and kiosk_x>float(family_positions["family_1"])+300.0,"family beach has an ice-cream stand near the start and a far-end kiosk")
 		check.call(int(level.world.promenade_start)==int(level.world.width) and int(level.world.pier_start)==int(level.world.width),"family beach remains all sand")
 	elif number == 4:
 		check.call(types==["sunbather","sunbather","sunbather","kiosk_customer","kiosk_customer","off_lead_dog"],"dog day is a sunbathers strip with two shoppers and exactly one off-lead dog")

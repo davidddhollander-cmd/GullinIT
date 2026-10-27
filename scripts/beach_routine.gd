@@ -23,7 +23,9 @@ func setup(owner: BeachTarget, level: Dictionary, spawn: Dictionary) -> void:
 	var promenade: float = float(Config.tuning.world.promenade_start)
 	if int(level.id) == 2:
 		# Preserve the authored teaching areas, including the isolated snack kiosk.
-		if str(spawn.get("station","")) == "ice_cream":
+		if spawn.has("bounds"):
+			bounds = Vector2(float(spawn.bounds[0]),float(spawn.bounds[1]))
+		elif str(spawn.get("station","")) == "ice_cream":
 			bounds.x = 795.0
 		else:
 			bounds = Vector2(420.0,570.0)

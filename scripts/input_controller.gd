@@ -9,6 +9,8 @@ var touch_last_msec: int = -1000000
 var touch_climb: bool = false
 var touch_dive: bool = false
 var touch_peck: bool = false
+var peck_held: bool = false ## the PECK button is down; a hold screeches
+var peck_finger: int = -1
 var touch_slowmo: bool = false
 var slowmo_ready: bool = false ## set by the game; the touch button only exists while true
 var aim_finger: int = -1
@@ -94,6 +96,8 @@ func _input(event: InputEvent) -> void:
 				touch_slowmo = true
 			elif button == "peck":
 				touch_peck = true
+				peck_held = true
+				peck_finger = event.index
 			elif button == "flap":
 				climb_fingers[event.index] = true
 			elif button == "dive":
@@ -105,6 +109,9 @@ func _input(event: InputEvent) -> void:
 				touch_active = true
 		else:
 			climb_fingers.erase(event.index)
+			if event.index == peck_finger:
+				peck_held = false
+				peck_finger = -1
 			if event.index == aim_finger:
 				aim_finger = -1
 		touch_climb = not climb_fingers.is_empty()
@@ -175,6 +182,8 @@ func _assist_aim(gull: BeachGull) -> void:
 
 func clear_touch() -> void:
 	touch_peck = false
+	peck_held = false
+	peck_finger = -1
 	touch_slowmo = false
 	touch_climb = false
 	touch_dive = false

@@ -302,10 +302,12 @@ func _stat_rows(parent: Control, card: Dictionary, owned: bool) -> void:
 			pip.color = (BeachUI.GOLD if owned else Color("6b858b")) if lit else Color(0.0,0.0,0.0,0.3)
 			line.add_child(pip)
 
-func pause() -> void:
+func pause(skippable: bool = false) -> void:
 	clear("TAKING A BREATHER", "YOUR LUNCH CAN WAIT.")
 	var resume: Button = BeachUI.button(content,"RESUME",func() -> void: choose("resume"))
 	resume.grab_focus()
+	if skippable:
+		BeachUI.button(content,"SKIP LESSON",func() -> void: choose("skip_lesson"))
 	BeachUI.button(content,"RESTART",func() -> void: choose("restart"))
 	var pair: HBoxContainer = HBoxContainer.new()
 	content.add_child(pair)
