@@ -118,8 +118,12 @@ func _navigate(action: String, payload: Variant = null) -> void:
 				game.set_paused(true)
 				screen = "pause"
 				menus.show()
-				menus.pause()
+				menus.pause(game.screech_lesson)
 				Audio.duck_music(true)
+		"skip_lesson":
+			if is_instance_valid(game):
+				game.end_screech_lesson(false)
+			_navigate("resume")
 		"resume":
 			if is_instance_valid(game):
 				game.input.touch_visible = DisplayServer.is_touchscreen_available() or bool(GameState.options.touch)

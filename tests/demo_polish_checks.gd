@@ -80,7 +80,7 @@ static func _demo_lock_checks(suite: Node, check: Callable) -> void:
 	suite.layout(suite.main.menus)
 	suite.menu_font_grid(suite.main.menus)
 	await suite.snapshot("demo-complete")
-	GameState.progress["2"] = {"stars": 1, "best": 300}
+	GameState.progress["2"] = {"stars": 1, "best": 300, "screech_lesson_complete": true}
 	suite.main.menus.results(Config.levels[1], passed)
 	board = suite.main.menus.get_child(0) as ResultBoard
 	board.finish_tally()

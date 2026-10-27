@@ -90,6 +90,12 @@ func complete_training() -> void:
 	progress["1"] = previous
 	save_progress()
 
+func complete_screech_lesson() -> void:
+	var previous: Dictionary = entry(2)
+	previous.screech_lesson_complete = true
+	progress["2"] = previous
+	save_progress()
+
 # True (and +1 Feather) only the first time a quest is completed.
 func complete_quest(level_id: int, quest_id: String) -> bool:
 	var previous: Dictionary = entry(level_id)

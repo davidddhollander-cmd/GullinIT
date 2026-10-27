@@ -75,6 +75,7 @@ static func _text_rect(game: BeachGame, item: Dictionary) -> Rect2:
 
 static func _play(main: Node, level: int) -> BeachGame:
 	main.start_level(level)
+	main.game.screech_lesson = false # ordinary runs; the level 2 lesson has its own checks
 	main.game.dismiss_intro()
 	# Drop the random slot so a rolled ice cream quest cannot add Feathers.
 	if level > 1 and main.game.quests.quests.size() > 2:
@@ -149,6 +150,7 @@ static func run_game(suite: Node, check: Callable) -> void:
 	# --- quest UI: in-run checklist, level card, result board ---
 	main.start_level(2)
 	game = main.game
+	game.screech_lesson = false
 	game.dismiss_intro()
 	game.overlay._process(0.0)
 	var rows: Array[Label] = game.overlay.quest_labels

@@ -207,15 +207,18 @@ func _process(delta: float) -> void:
 	time_label.modulate.a = 0.35 if warning and Time.get_ticks_msec()%500 < 200 else 1.0
 	wind_label.text = "CALM" if absf(game.player.wind_force) < 0.01 else "%s %d%%" % ["WIND >" if game.player.wind_force > 0 else "< WIND",roundi(absf(game.player.wind_force)*100)]
 	intro_panel.visible = game.intro > 0
-	training_panel.visible = game.training and game.running and game.intro <= 0
+	training_panel.visible = game.lesson_active() and game.running and game.intro <= 0
 	if game.training:
 		lesson_label.text = "LESSON %d/%d" % [mini(game.lesson + 1, BeachGame.TRAINING_LESSONS), BeachGame.TRAINING_LESSONS]
 		lesson_prompt.text = game.training_text()
+	elif game.screech_lesson:
+		lesson_label.text = "LESSON %d/%d" % [mini(game.screech_step + 1, BeachGame.SCREECH_STEPS), BeachGame.SCREECH_STEPS]
+		lesson_prompt.text = game.screech_lesson_text()
 	pause_button.visible = game.running
 	sync_quests()
 	if rival_score_labels.size() != game.pilots.size():
 		sync_rival_scores()
-	rival_score_panel.visible = not game.training and game.running and game.intro <= 0.0
+	rival_score_panel.visible = not game.lesson_active() and game.running and game.intro <= 0.0
 	for i: int in rival_score_labels.size():
 		var pilot: RivalPilot = game.pilots[i]
 		rival_score_labels[i].text = "%03d" % pilot.score
@@ -230,7 +233,7 @@ func sync_quests() -> void:
 	quest_panel.visible = quest_box.visible
 	# Replays of the training day keep the lesson panel on top, so the list sits below it.
 	# training_panel's rect is relative to training_center, which starts below the top bar.
-	quest_panel.position.y = TOP_BAR_HEIGHT + training_panel.get_rect().end.y + 1.0 if game.training else TOP_BAR_HEIGHT + 1.0
+	quest_panel.position.y = TOP_BAR_HEIGHT + training_panel.get_rect().end.y + 1.0 if game.lesson_active() else TOP_BAR_HEIGHT + 1.0
 	for i: int in mini(quest_labels.size(),game.quests.quests.size()):
 		var quest: Dictionary = game.quests.quests[i]
 		var count: int = int(quest.count)
@@ -280,7 +283,7 @@ func show_score_announcement(food_id: String, earned: int) -> void:
 	# Training text occupies the normal top-center slot, so shift the transient
 	# callout below it rather than covering the current instruction.
 	var row: Control = score_announcement.get_parent() as Control
-	row.offset_top = training_callout_top() if game.training else SCORE_CALLOUT_TOP
+	row.offset_top = training_callout_top() if game.lesson_active() else SCORE_CALLOUT_TOP
 	row.offset_bottom = row.offset_top + 24.0
 	score_announcement.modulate.a = 1.0
 	score_announcement.scale = Vector2(0.72,0.72)
@@ -349,6 +352,9 @@ func _draw_brash() -> void:
 	draw_rect(Rect2(METER_RECT.position+Vector2.ONE,Vector2(34*game.brash.meter,6)),BeachUI.CREAM if pulse else (BeachUI.GOLD if full else Color("ef725c")))
 	draw_rect(METER_RECT,BeachUI.CREAM if full else Color("397a85"),false,1.0)
 	draw_string(HUD_FONT,METER_RECT.position+Vector2(4,6),"CALL!" if full else "BRASH",HORIZONTAL_ALIGNMENT_LEFT,-1,6,BeachUI.INK if full else BeachUI.CREAM)
+	# Lesson steps 2 and 3 point at the bar: a pulsing gold outline.
+	if game.screech_lesson and game.screech_step in [1,2] and int(Time.get_ticks_msec()/300)%2 == 0:
+		draw_rect(METER_RECT.grow(2),BeachUI.GOLD,false,1.0)
 
 func goal_status() -> Dictionary:
 	if game.casual:
@@ -375,6 +381,11 @@ func _draw() -> void:
 			if training_target.x >= 4 and training_target.x <= 316 and training_target.y >= 28 and training_target.y <= 165:
 				draw_arc(training_target,12,0,TAU,24,BeachUI.GOLD,2)
 				draw_arc(training_target,16,0,TAU,24,Color(1.0,0.95,0.7,0.55),1)
+		elif game.screech_lesson:
+			var lesson_target: Vector2 = game.screech_lesson_target() - offset
+			if lesson_target.x >= 4 and lesson_target.x <= 316 and lesson_target.y >= 28 and lesson_target.y <= 165:
+				draw_arc(lesson_target,12,0,TAU,24,BeachUI.GOLD,2)
+				draw_arc(lesson_target,16,0,TAU,24,Color(1.0,0.95,0.7,0.55),1)
 		var hint: Dictionary = context_hint()
 		if not hint.is_empty():
 			var hint_box: Rect2 = hint_rect(str(hint.text))
@@ -493,7 +504,7 @@ func context_hint() -> Dictionary:
 	var flap: String = input_word("flap")
 	# During lessons the panel already gives the ground and peck instruction;
 	# repeating it in a second box only competes with the lesson.
-	if game.training and game.player.state == BeachGull.State.GROUNDED:
+	if game.lesson_active() and game.player.state == BeachGull.State.GROUNDED:
 		return {}
 	if game.player.state == BeachGull.State.GROUNDED:
 		if game.stash_raids.nearby_toddler() != null:
@@ -515,7 +526,7 @@ func context_hint() -> Dictionary:
 # and above the zone signs, so the hint never crosses world labels.
 func hint_rect(text: String) -> Rect2:
 	var width: float = ceilf(font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x) + 6.0
-	var y: float = training_panel.get_global_rect().end.y + 2.0 if game.training else SCORE_CALLOUT_TOP + 26.0
+	var y: float = training_panel.get_global_rect().end.y + 2.0 if game.lesson_active() else SCORE_CALLOUT_TOP + 26.0
 	return Rect2(4.0,roundf(y),width,11.0)
 
 func touch_buttons_visible() -> bool:

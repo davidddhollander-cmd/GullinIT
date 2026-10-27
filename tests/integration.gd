@@ -107,8 +107,12 @@ func run() -> void:
 	preload("res://tests/training_checks.gd").run(self,Callable(self,"check"))
 	# Legacy mechanics exercise an ordinary run after training has been completed.
 	GameState.progress["1"] = {"training_step":5,"training_complete":true}
+	GameState.progress["2"] = {"screech_lesson_complete":true} # ordinary level 2 runs; the lesson has its own checks
 	await input_checks()
 	await screech_checks()
+	await preload("res://tests/screech_lesson_checks.gd").run(self,Callable(self,"check"))
+	GameState.progress["1"] = {"training_step":5,"training_complete":true}
+	GameState.progress["2"] = {"screech_lesson_complete":true}
 	await stand_perch_checks()
 	await crowd_panic_checks()
 	await mechanics_checks()
@@ -1048,13 +1052,21 @@ func sunbather_pickup_checks() -> void:
 	await settle()
 
 func add_test_sibling(game: BeachGame) -> void:
-	# Exercise sibling support without adding crowds to the playable roster.
+	# Level 2's mum already has two toddlers; only add one for a mum short of siblings.
 	for mum: BeachTarget in game.spawner.targets:
-		if mum.kind == "picnic_family" and mum.family_id == "family_1":
+		if mum.kind == "picnic_family" and mum.family_id == "family_1" and mum.family_children.size() < 2:
 			var child: BeachTarget = game.spawner.create("toddler",mum.position.x+44,{"family_id":"family_1"})
 			child.family_parent = mum
 			mum.family_children.append(child)
 			return
+
+# Level 2's stand sits left of its family; these fixtures need the stand on the family's right, so move the family left of it.
+func place_family_left_of_stand(mum: BeachTarget, kids: Array[BeachTarget]) -> void:
+	mum.position.x = 100.0
+	mum.patrol_home = 100.0
+	for i: int in kids.size():
+		kids[i].position.x = 100.0 + (-40.0 if i % 2 == 0 else 40.0) * float(i / 2 + 1)
+		kids[i].patrol_home = kids[i].position.x
 
 func family_food_foundation_checks() -> void:
 	var original_insist_chance: float = float(Config.tuning.world.family_ice_cream_chance)
@@ -1075,6 +1087,8 @@ func family_food_foundation_checks() -> void:
 			other_mum = target
 		elif target.family_id == "family_1" and target.kind == "toddler":
 			siblings.append(target)
+	if other_mum == null:
+		other_mum = game.spawner.create("picnic_family",800,{"family_id":"family_2"})
 	check(is_instance_valid(mum) and is_instance_valid(other_mum) and siblings.size() == 2,"level data links two siblings to an explicit mum")
 	check(siblings[0].family_parent == mum and siblings[1].family_parent == mum,"siblings share their designated supply")
 	check(mum.supply_crisps == 1 and mum.supply_cookies == 2 and mum.food_id == "crisps_bag","mum has two total crisp bags including held bag plus two-cookie reserve")
@@ -1160,7 +1174,8 @@ func family_trip_checks() -> void:
 			mum = target
 		elif target.family_id == "family_1" and target.kind == "toddler":
 			siblings.append(target)
-	check(mum.family_kiosk_x >= 500 and siblings.size() == 2,"two-child mum receives the mid beach stand position and both siblings")
+	place_family_left_of_stand(mum,siblings)
+	check(mum.family_kiosk_x >= mum.position.x + 100 and siblings.size() == 2,"two-child mum receives the nearest stand position and both siblings")
 	# Preserve one sibling's existing food while the empty sibling triggers shopping.
 	siblings[0].food = false
 	siblings[0].food_sprite.hide()
@@ -1274,6 +1289,14 @@ func family_trip_checks() -> void:
 			one_mum = target
 		elif target.family_id == "family_1" and target.kind == "toddler":
 			one_child = target
+	# Level 2's mum has two toddlers; drop one to exercise the single-child lifecycle.
+	var extra: BeachTarget = one_mum.family_children.pop_back() if one_mum.family_children.size() > 1 else null
+	if extra != null and extra == one_child:
+		one_child = one_mum.family_children[0]
+	if extra != null:
+		game.spawner.targets.erase(extra)
+		extra.queue_free()
+	place_family_left_of_stand(one_mum,[one_child])
 	check(is_instance_valid(one_mum) and is_instance_valid(one_child) and one_mum.family_children.size() == 1,"one-child family links without orphaning")
 	one_mum.food = false
 	one_mum.supply_crisps = 0

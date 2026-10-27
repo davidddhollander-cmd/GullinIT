@@ -3,7 +3,7 @@ extends RefCounted
 const PEOPLE_KINDS: Array[String] = ["kiosk_customer", "sunbather", "pier_diner"]
 const EXPECTED_CASTS: Array[Dictionary] = [
 	{"shoppers":["kiosk_customer"], "sunbathers":["female_blue"], "diners":[]},
-	{"shoppers":["kiosk_customer", "shopper_sundress"], "sunbathers":["male_red"], "diners":[]},
+	{"shoppers":["kiosk_customer", "shopper_sundress", "shopper_mullet"], "sunbathers":["male_red"], "diners":[]},
 	{"shoppers":["shopper_mullet", "old_man", "kiosk_customer"], "sunbathers":["female_red"], "diners":["pier_diner"]},
 	{"shoppers":["kiosk_customer", "shopper_sundress"], "sunbathers":["male_blue", "female_blue", "male_red"], "diners":[]},
 	{"shoppers":["shopper_mullet", "old_man"], "sunbathers":[], "diners":["pier_diner", "pier_diner_b"]},

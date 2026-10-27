@@ -1,6 +1,6 @@
 # 043 — Level 2: screech, brashness and Gang Call lesson + layout rework
 
-Status: inbox
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -57,4 +57,21 @@ Players don't know screeching, the brashness meter or Gang Call exist. Teach the
 
 ## Report
 
+**Files changed:** `data/levels/level_02.json` (layout, zones, `screech_lesson` tunables), `scripts/game.gd` (lesson state machine, hold-to-screech for gamepad/touch, clock pause), `scripts/overlay.gd` (lesson panel/ring/BRASH pulse reuse), `scripts/input_controller.gd` (`peck_held`), `scripts/beach_routine.gd` (optional spawn `bounds`), `scripts/menus.gd` + `scripts/main.gd` (pause-menu SKIP LESSON), `scripts/autoload/game_state.gd` (`complete_screech_lesson`), tests (`tests/screech_lesson_checks.gd` new; `integration.gd`, `cast_variety_checks.gd`, `level_generator_checks.gd`, `demo_polish_checks.gd` adapted to the new layout).
+
+**Tests:** rendered `tests/integration.tscn` (`--capture`) and headless: 14438 checks, 0 failures. The pre-existing level5 `off_lead_dog` SCRIPT ERROR still prints. Captures: `test-output/level2-start-lesson-1.png`, `test-output/level2-lesson-2-screech.png`.
+
+**Decisions:**
+- Layout: near ice-cream stand at x 240 (queue side right, customer_x 290); two holding customers at 290/335 (new optional spawn field `bounds` [270,350] keeps them by the stand); family = mum 455 with toddlers 410/500; sunbather at x 700; far kiosk unchanged at 905 with one shopper (mullet look, so every look stays unique). Dropped the mid shopper and the second family. Zones renamed ICE CREAM / FAMILY BAY / SUNBATHERS / SNACK KIOSK. Parasol 182 -> 150, bin 470 -> 560.
+- The mum's stand trip now goes to the near stand (first kiosk in props). The family/toddler code already handled two toddlers (gather/follow slots, cry, help); fixtures that assumed the stand on the family's right now relocate the family left of the stand.
+- Lesson: runs when level data has `screech_lesson`, species is herring and `GameState.entry(2).screech_lesson_complete` is unset. Four steps as specified; `start_meter` 0.6 and `grab_timeout` 8 live in level_02.json. The level clock is frozen while it runs. Customers by the stand are re-handed food through step 3 so Gang Call always has holders; if the meter drops below full in step 3 the lesson steps back to step 2. Skip: level 1 training has no skip path, so I added a "SKIP LESSON" pause-menu button while the lesson is active (saves the flag).
+- Hold-to-screech: gamepad X reuses the peck action; touch uses a new `GullInput.peck_held`; `_peck_pressed/_peck_released` are shared by all inputs. A moving touch stick cancels a touch screech.
+- Existing tests that start level 2 set `progress["2"].screech_lesson_complete` so ordinary runs are unaffected.
+
+**Not done:** no arrow on the BRASH bar (pulsing gold outline only; the lesson panel overlaps the space below it). Real gamepad/touch hardware untested (simulated events only).
+
+**Branch:** `sonnet/043-level-2-screech-lesson`
+
 ## Review notes
+
+Reviewer (Claude Opus): approved. Fixed one exploit: steps 1-3 refill the shoppers' ice creams on a frozen clock, so quest events are now ignored during the lesson (no farming l2_ice and its Feather) and ending the lesson resets practice points. Added checks for both; quest_checks skip the lesson for ordinary runs. Headless: 14441 checks, 0 failures. Follow-up noted: the left signpost shows ICE CREAM on both arrows.
