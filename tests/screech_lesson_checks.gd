@@ -154,7 +154,11 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	host.main.clear_game()
 	await host.settle()
 	game = _fresh_level_2(host, false)
+	game._quest_event("swallowed",{"food":"ice_cream","direct":true})
+	check.call(int(game.quests.quests[0].progress) == 0, "quest progress is ignored during the screech lesson")
+	game.score.points = 120
 	game.end_screech_lesson(false)
+	check.call(game.score.points == 0, "ending the lesson resets practice points")
 	check.call(not game.screech_lesson and bool(GameState.entry(2).get("screech_lesson_complete", false)), "skipping the lesson saves it as done")
 	host.main.clear_game()
 	await host.settle()

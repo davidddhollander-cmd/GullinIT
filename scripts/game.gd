@@ -692,7 +692,8 @@ func _scrap_collected(at: Vector2, food_id: String) -> void:
 		_training_advance()
 
 func _quest_event(event: String, data: Dictionary = {}) -> void:
-	if running:
+	# The screech lesson refills the shoppers' ice creams on a frozen clock: no quest progress there.
+	if running and not screech_lesson:
 		quests.record(event,data)
 
 func _quest_completed(quest: Dictionary) -> void:
@@ -993,6 +994,13 @@ func end_screech_lesson(completed: bool) -> void:
 		return
 	screech_lesson = false
 	brash.meter = 0.0
+	# Practice snacks don't count: the real run starts from zero with the clock.
+	score.points = 0
+	score.items = 0
+	score.tier = 0
+	score.window = 0.0
+	for key: String in score.bonuses:
+		score.bonuses[key] = 0
 	GameState.complete_screech_lesson()
 	if completed:
 		effects.message(player.position-Vector2(0,24),"LESSON DONE",BeachUI.GOLD)

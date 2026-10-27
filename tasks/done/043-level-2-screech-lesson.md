@@ -1,6 +1,6 @@
 # 043 — Level 2: screech, brashness and Gang Call lesson + layout rework
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -73,3 +73,5 @@ Players don't know screeching, the brashness meter or Gang Call exist. Teach the
 **Branch:** `sonnet/043-level-2-screech-lesson`
 
 ## Review notes
+
+Reviewer (Claude Opus): approved. Fixed one exploit: steps 1-3 refill the shoppers' ice creams on a frozen clock, so quest events are now ignored during the lesson (no farming l2_ice and its Feather) and ending the lesson resets practice points. Added checks for both; quest_checks skip the lesson for ordinary runs. Headless: 14441 checks, 0 failures. Follow-up noted: the left signpost shows ICE CREAM on both arrows.
