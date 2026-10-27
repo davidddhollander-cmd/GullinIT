@@ -103,9 +103,10 @@ func setup_perches(props: Array) -> void:
 		var base: float = float(prop.get("y",160))
 		match str(prop.type):
 			"kiosk", "hotdog_stand", "fish_chips_stand":
-				# Perch on top of the roof sign (the sign node sits 11 px above the prop base).
-				var sign_rect: Rect2 = preload("res://scripts/stand_sign.gd").local_bounds(str(prop.type))
-				perch_surfaces.append({"x":float(prop.x),"y":base-11.0+sign_rect.position.y+1.0,"half_width":sign_rect.size.x*0.5-2.0,"pole":false,"prop_type":str(prop.type)})
+				# Walk along the visible outline of the roof sign and roof, column by column.
+				var profile: PackedFloat32Array = stand_profile(str(prop.type))
+				var half: float = profile.size()*0.5
+				perch_surfaces.append({"x":float(prop.x),"y":base-profile[int(half)],"half_width":half-1.0,"pole":false,"prop_type":str(prop.type),"base":base,"profile":profile})
 			"tower":
 				perch_surfaces.append({"x":float(prop.x),"y":base-58.0,"half_width":16.0,"pole":false,"prop_type":str(prop.type)})
 			"beach_lamp":
@@ -117,6 +118,51 @@ func setup_perches(props: Array) -> void:
 				var height: float = float(definition.frame_h) * float(definition.get("visual_scale",1.0))
 				var bin_scale: float = float(definition.get("visual_scale",1.0))
 				perch_surfaces.append({"x":float(prop.x),"y":base-height+BeachBackdrop.WHEELIE_BIN_LID_INSET*bin_scale,"half_width":BeachBackdrop.WHEELIE_BIN_HALF_WIDTH*bin_scale,"pole":false,"prop_type":str(prop.type)})
+
+## Height above the prop base of the topmost opaque pixel of a stand's roof sign and roof,
+## one entry per 1 px column centred on the prop (0 where there is nothing to stand on).
+static var stand_profiles: Dictionary = {}
+static func stand_profile(type: String) -> PackedFloat32Array:
+	if stand_profiles.has(type):
+		return stand_profiles[type]
+	var sign_script: GDScript = preload("res://scripts/stand_sign.gd")
+	var sign_rect: Rect2 = sign_script.local_bounds(type)
+	var sign_image: Image = sign_script.texture_for(type).get_image()
+	var stall: Dictionary = Config.sprites[type]
+	var stall_image: Image = (load(str(stall.file)) as Texture2D).get_image()
+	var stall_scale: float = float(stall.get("visual_scale",1.0))
+	var width: int = ceili(sign_rect.size.x)
+	var profile := PackedFloat32Array()
+	profile.resize(width)
+	for column: int in width:
+		var local_x: float = float(column)-width*0.5+0.5
+		var height: float = 0.0
+		# Roof sign: drawn 11 px above the base, scaled to the sign width.
+		var sign_scale: float = sign_rect.size.x/sign_image.get_width()
+		var sx: int = int((local_x-sign_rect.position.x)/sign_scale)
+		if sx >= 0 and sx < sign_image.get_width():
+			for sy: int in sign_image.get_height():
+				if sign_image.get_pixel(sx,sy).a > 0.5:
+					height = 11.0-(sign_rect.position.y+sy*sign_scale)
+					break
+		# Stall roof: bottom-centred frame 0.
+		var fx: int = int(local_x/stall_scale+float(stall.frame_w)*0.5)
+		if fx >= 0 and fx < int(stall.frame_w):
+			for fy: int in int(stall.frame_h):
+				if stall_image.get_pixel(fx,fy).a > 0.5:
+					height = maxf(height,(float(stall.frame_h)-fy)*stall_scale)
+					break
+		profile[column] = roundf(height)
+	stand_profiles[type] = profile
+	return profile
+
+## Surface height at a world x: stands follow their outline, other perches are flat.
+static func perch_y(surface: Dictionary, at_x: float) -> float:
+	if not surface.has("profile"):
+		return float(surface.y)
+	var profile: PackedFloat32Array = surface.profile
+	var column: int = clampi(int(floor(at_x-float(surface.x)+profile.size()*0.5)),0,profile.size()-1)
+	return float(surface.base)-profile[column]
 
 ## Direction signposts: perch on the top arrow board.
 func add_sign_perches(signs: Array[Dictionary]) -> void:
@@ -132,11 +178,12 @@ func landing_perch() -> Dictionary:
 		return {}
 	var nearest: Dictionary = {}
 	for surface: Dictionary in perch_surfaces:
-		if position.y+float(Config.tuning.flight.feet_offset) > float(surface.y)+0.1:
+		var top: float = perch_y(surface,aim.x)
+		if position.y+float(Config.tuning.flight.feet_offset) > top+0.1:
 			continue
-		if absf(aim.x-float(surface.x)) > float(surface.half_width)+3.0 or aim.y < float(surface.y)-10.0:
+		if absf(aim.x-float(surface.x)) > float(surface.half_width)+3.0 or aim.y < top-10.0:
 			continue
-		if nearest.is_empty() or float(surface.y)<float(nearest.y):
+		if nearest.is_empty() or top<perch_y(nearest,aim.x):
 			nearest = surface
 	return nearest
 
@@ -150,7 +197,7 @@ func resolve_perches(before: Vector2, started: State) -> void:
 	for surface: Dictionary in perch_surfaces:
 		if surface == departing_perch:
 			continue
-		var t: float = (float(surface.y)-before.y-offset.y)/(position.y-before.y)
+		var t: float = (perch_y(surface,position.x)-before.y-offset.y)/(position.y-before.y)
 		if t < 0 or t > 1:
 			continue
 		var hit_x: float = lerpf(before.x,position.x,t)+offset.x
@@ -161,7 +208,7 @@ func resolve_perches(before: Vector2, started: State) -> void:
 		return
 	# Resolve the first crossed top even when a fast frame passes several surfaces.
 	position.x = clampf(lerpf(before.x,position.x,first_t),float(first.x)-float(first.half_width),float(first.x)+float(first.half_width))
-	position.y = float(first.y)-float(Config.tuning.flight.feet_offset)
+	position.y = perch_y(first,position.x)-float(Config.tuning.flight.feet_offset)
 	if velocity.length()<=float(Config.tuning.flight.landing_speed):
 		support = first
 		if bool(first.pole):
@@ -266,7 +313,7 @@ func stop_screech(recover: bool = true) -> void:
 
 func ground_y() -> float:
 	if not support.is_empty():
-		return float(support.y)-float(Config.tuning.flight.feet_offset)
+		return perch_y(support,position.x)-float(Config.tuning.flight.feet_offset)
 	return float(Config.tuning.world.ground) - float(Config.tuning.flight.feet_offset)
 
 func landing_aim() -> bool:
@@ -380,7 +427,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 				velocity.y = 0
 				walk_phase += absf(velocity.x) * delta * 0.55
 			elif descending:
-				var landing_y: float = float(perch_target.y)-float(f.feet_offset) if not perch_target.is_empty() else ground_y()
+				var landing_y: float = perch_y(perch_target,aim.x)-float(f.feet_offset) if not perch_target.is_empty() else ground_y()
 				var sink_speed: float = minf(float(f.landing_speed),float(f.landing_touchdown_speed) + maxf(0,landing_y-position.y)*float(f.landing_slowdown))
 				velocity.y = move_toward(velocity.y,sink_speed,float(f.landing_acceleration)*delta)
 			else:
@@ -400,6 +447,8 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			if on_ground and not support.is_empty() and absf(position.x-float(support.x))>float(support.half_width):
 				support = {}
 				state = State.GLIDE
+			elif on_ground and not support.is_empty():
+				position.y = ground_y()
 			if position.y >= ground_y():
 				land()
 			if absf(velocity.x) > 1:
@@ -771,7 +820,8 @@ func tick_tumble(delta: float) -> void:
 func _draw() -> void:
 	var target_perch: Dictionary = landing_perch()
 	if not target_perch.is_empty():
-		var spot: Vector2 = Vector2(clampf(aim.x,float(target_perch.x)-float(target_perch.half_width),float(target_perch.x)+float(target_perch.half_width)),float(target_perch.y))-position
+		var spot_x: float = clampf(aim.x,float(target_perch.x)-float(target_perch.half_width),float(target_perch.x)+float(target_perch.half_width))
+		var spot: Vector2 = Vector2(spot_x,perch_y(target_perch,spot_x))-position
 		if bool(target_perch.pole):
 			spot.x = float(target_perch.x)-position.x
 		draw_line(spot-Vector2(3,0),spot+Vector2(3,0),Color("fff4da"),1.0)

@@ -109,6 +109,7 @@ func run() -> void:
 	GameState.progress["1"] = {"training_step":5,"training_complete":true}
 	await input_checks()
 	await screech_checks()
+	await stand_perch_checks()
 	await crowd_panic_checks()
 	await mechanics_checks()
 	await peck_checks()
@@ -1356,6 +1357,34 @@ func input_checks() -> void:
 		start_touch.pressed = pressed
 		get_viewport().push_input(start_touch,true)
 	check(main.game.running and not main.game.input.touch_climb and not main.game.input.touch_dive and not main.game.input.touch_peck,"touch start activates button without carrying gameplay input")
+	main.clear_game()
+	await settle()
+
+## Stand perches follow the visible outline of the roof sign, not its image box.
+func stand_perch_checks() -> void:
+	var profile: PackedFloat32Array = BeachGull.stand_profile("kiosk")
+	print("PROFILE kiosk ",Array(profile))
+	var flat: float = profile[int(profile.size()*0.5)]
+	check(profile.size() == 64 and flat == 54.0, "kiosk sign top is 54 px above the base in the middle")
+	check(Array(profile).max() == 60.0 and profile.find(60.0) < 16, "the ice-cream cone pokes 6 px higher on the left of the sign")
+	print("PROFILE fish_chips_stand ",Array(BeachGull.stand_profile("fish_chips_stand")))
+	main.start_level(1)
+	var game: BeachGame = main.game
+	game.set_physics_process(false)
+	var stand: Dictionary = {}
+	for surface: Dictionary in game.player.perch_surfaces:
+		if surface.prop_type == "kiosk":
+			stand = surface
+	check(not stand.is_empty(), "level 1 ice-cream stand is a perch")
+	if not stand.is_empty():
+		var gull: BeachGull = game.player
+		gull.support = stand
+		gull.state = BeachGull.State.GROUNDED
+		gull.position = Vector2(float(stand.x)+10.0, gull.ground_y())
+		var feet: float = gull.position.y+float(Config.tuning.flight.feet_offset)
+		check(is_equal_approx(feet, float(stand.base)-54.0), "a gull on the stand stands on the visible sign top")
+		gull.position.x = float(stand.x)-28.0
+		check(gull.ground_y()+float(Config.tuning.flight.feet_offset) < feet-3.0, "walking onto the cone raises the gull with the outline")
 	main.clear_game()
 	await settle()
 
