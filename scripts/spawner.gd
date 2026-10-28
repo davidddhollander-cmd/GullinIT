@@ -6,6 +6,7 @@ var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var parent: Node2D
 var level: Dictionary
 var kiosk_timer: float = 0.0
+var camera_x: float = NAN ## set by the game each frame; NAN (tests) means "no camera, spawn where asked"
 var replacements: Array[Dictionary] = []
 var visual_offsets: Dictionary = {}
 var previous_x: Dictionary = {}
@@ -326,9 +327,9 @@ func tick(delta: float, elapsed: float) -> void:
 		replacements[i].delay -= delta
 		if replacements[i].delay <= 0:
 			var later: bool = rng.randf() < clampf(elapsed/float(level.time_limit),0.0,1.0)
-			var x: float = float(Config.tuning.world.width)-20 if later else 20
+			var x: float = _off_screen(float(Config.tuning.world.width)-20 if later else 20.0)
 			var target: BeachTarget = create(replacements[i].type,x)
-			target.facing = -1 if later else 1
+			target.facing = 1 if x < _camera_x() else -1
 			replacements.remove_at(i)
 	if int(level.id) >= 4:
 		kiosk_timer -= delta
@@ -346,8 +347,28 @@ func tick(delta: float, elapsed: float) -> void:
 				for existing: BeachTarget in targets:
 					if absf(existing.position.x-arrival_x) < float(Config.layout_rules.arrival_clearance):
 						return
-				var customer: BeachTarget = create("kiosk_customer",arrival_x,{"food_id":"hotdog" if stand.type == "hotdog_stand" else "ice_cream","patrol_radius":float(Config.layout_rules.patrol_radius)})
+					if existing.kind == "kiosk_customer" and not existing.food and absf(existing.position.x-arrival_x) < SCREEN_MARGIN*2.0:
+						return # someone is already on their way to buy
+				# Arrivals walk in from the side of the screen to the serving window; they never pop out of the stand.
+				var customer: BeachTarget = create("kiosk_customer",_off_screen(arrival_x),{"food_id":"hotdog" if stand.type == "hotdog_stand" else "ice_cream","patrol_radius":float(Config.layout_rules.patrol_radius)})
 				customer.food = false
 				customer.food_sprite.hide()
 				customer.respawn = 0.0
-				customer.facing = -1 if rng.randf() < 0.5 else 1
+				customer.facing = signf(arrival_x-customer.position.x) if not is_zero_approx(arrival_x-customer.position.x) else (-1 if rng.randf() < 0.5 else 1)
+
+const SCREEN_MARGIN: float = 176.0 ## half the 320 px view plus room for a sprite
+
+func _camera_x() -> float:
+	return camera_x if not is_nan(camera_x) else 0.0
+
+## New people start just past the screen edge nearest `x` instead of appearing in view.
+func _off_screen(x: float) -> float:
+	if is_nan(camera_x) or absf(x-camera_x) >= SCREEN_MARGIN:
+		return x
+	var width: float = float(Config.tuning.world.width)
+	var sides: Array[float] = [_camera_x()-SCREEN_MARGIN,_camera_x()+SCREEN_MARGIN]
+	sides.sort_custom(func(a: float, b: float) -> bool: return absf(a-x) < absf(b-x))
+	for edge: float in sides:
+		if edge > 4.0 and edge < width-4.0:
+			return edge
+	return x

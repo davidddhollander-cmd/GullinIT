@@ -463,6 +463,7 @@ func _physics_process(delta: float) -> void:
 	_mugging()
 	_rival_mugging()
 	_near_misses()
+	spawner.camera_x = camera_x
 	spawner.tick(step,elapsed)
 	spawner.apply_spacing(step)
 	camera_x = lerpf(camera_x,clampf(player.position.x,160,float(Config.tuning.world.width)-160),1-pow(1-float(Config.tuning.world.camera_lerp),step*60))
