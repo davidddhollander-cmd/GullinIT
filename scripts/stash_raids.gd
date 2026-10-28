@@ -284,6 +284,8 @@ func tick(delta: float) -> void:
 			items.remove_at(index)
 			if is_instance_valid(item.get("owner")):
 				item.owner.reaction.theft(item.owner,taker)
+			if pilot == null and taker.state == BeachGull.State.GROUNDED:
+				taker.show_ground_peck(float(Config.tuning.world.pickup_pose_time)) # head-down pick-up for any floor item
 			if pilot != null:
 				pilot.ate_ground(str(item.food_id))
 			elif item.has("snack"):
