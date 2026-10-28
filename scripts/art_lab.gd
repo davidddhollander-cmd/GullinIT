@@ -31,6 +31,7 @@ var dir: float = 1.0
 var dive_timer: float = 0.0
 var ground_timer: float = 0.0
 var sides: Array[Dictionary] = [] ## [current, proposed]: {node, gull, item}
+var reference_side: Dictionary = {} ## optional unmodified cast reference, fixed between the A/B pair at 1x
 var backdrop: BeachBackdrop
 var camera: Camera2D
 var stage: Node2D
@@ -38,6 +39,7 @@ var title_label: Label
 var desc_label: Label
 var flags_label: Label
 var side_labels: Array[Label] = []
+var reference_label: Label
 var capturing: bool = false
 
 func _ready() -> void:
@@ -95,8 +97,9 @@ func _build_hud() -> void:
 	title_label = _label(layer, Vector2(2, 1), 316, HORIZONTAL_ALIGNMENT_LEFT)
 	flags_label = _label(layer, Vector2(0, 1), 318, HORIZONTAL_ALIGNMENT_RIGHT)
 	desc_label = _label(layer, Vector2(2, 11), 316, HORIZONTAL_ALIGNMENT_LEFT)
-	for x: float in [0.0, 160.0]:
-		side_labels.append(_label(layer, Vector2(x, 22), 160, HORIZONTAL_ALIGNMENT_CENTER))
+	for x: float in [40.0, 200.0]:
+		side_labels.append(_label(layer, Vector2(x, 22), 80, HORIZONTAL_ALIGNMENT_CENTER))
+	reference_label = _label(layer, Vector2(120, 22), 80, HORIZONTAL_ALIGNMENT_CENTER)
 	_label(layer, Vector2(2, 161), 316, HORIZONTAL_ALIGNMENT_LEFT).text = "1-9/ARROWS PICK  Z ZOOM  B BLIND  F FILTER"
 	_label(layer, Vector2(2, 170), 316, HORIZONTAL_ALIGNMENT_LEFT).text = "I INT-SCALE  P PAUSE  . STEP  C CAPTURE  ESC QUIT"
 
@@ -129,6 +132,9 @@ func _select(i: int) -> void:
 	if motion != "in_beak":
 		species = [str(Config.sprites[str(entry.current)].get("species", "")), "lab_%d" % index]
 	sides = [_make(str(entry.current), species[0], gulls, motion), _make(candidate_ids[index], species[1], gulls, motion)]
+	reference_side = {}
+	if entry.has("reference") and not gulls:
+		reference_side = _make(str(entry.reference), "", false, motion)
 	var flies: bool = motion in ["fly_across", "dive", "in_beak"]
 	pair_x = TRAVEL_MIN + 40.0 if flies else REST_X
 	dir = 1.0
@@ -159,7 +165,7 @@ func _make(id: String, species: String, gull_path: bool, motion: String) -> Dict
 		if comparisons[index].has("size"): # foods are drawn at their foods.json size in px, not a visual_scale
 			sprite.scale = Vector2(comparisons[index].size[0], comparisons[index].size[1]) / Vector2(float(def.frame_w), float(def.frame_h))
 		var names: PackedStringArray = sprite.sprite_frames.get_animation_names()
-		var wanted: String = "walk" if motion == "walk_across" else "idle"
+		var wanted: String = str(comparisons[index].get("animation", "walk" if motion == "walk_across" else "idle"))
 		if motion == "static" or not sprite.sprite_frames.has_animation(wanted):
 			sprite.animation = names[0]
 			sprite.stop()
@@ -196,7 +202,17 @@ func _advance(d: float) -> void:
 			for side: Dictionary in sides:
 				if side.node is AnimatedSprite2D:
 					(side.node as AnimatedSprite2D).flip_h = (dir < 0.0) != bool((side.node as AnimatedSprite2D).get_meta(&"source_left", false))
+			if reference_side.get("node") is AnimatedSprite2D:
+				(reference_side.node as AnimatedSprite2D).flip_h = (dir < 0.0) != bool((reference_side.node as AnimatedSprite2D).get_meta(&"source_left", false))
+	_repeat_named_animation()
 	_place()
+
+func _repeat_named_animation() -> void:
+	if not comparisons[index].has("animation"):
+		return
+	for side: Dictionary in sides + ([reference_side] if not reference_side.is_empty() else []):
+		if side.get("node") is AnimatedSprite2D and not (side.node as AnimatedSprite2D).is_playing():
+			(side.node as AnimatedSprite2D).play(str(comparisons[index].animation))
 
 ## Both sides get the same commands, so identical art stays frame-for-frame identical.
 func _fly(d: float, diving: bool) -> void:
@@ -241,6 +257,10 @@ func _place() -> void:
 			if side.item != null:
 				var item: AnimatedSprite2D = side.item
 				item.position = (side.gull as BeachGull).beak() + Vector2(0.0, float(item.get_meta(&"half_height", 4.0)) * 0.4)
+	if not reference_side.is_empty():
+		var reference: AnimatedSprite2D = reference_side.node
+		reference.visible = zoom == 1
+		reference.position = Vector2(pair_x, GROUND - float(reference.get_meta(&"half_height", 8.0)))
 	var follow_y: float = 90.0
 	if zoom > 1:
 		var sum: float = 0.0
@@ -274,6 +294,7 @@ func _refresh_hud() -> void:
 	for slot: int in 2:
 		# Slot 0 is the left half; unswapped it holds the current art.
 		side_labels[slot].text = "" if blind else names[slot if not swapped else 1 - slot]
+	reference_label.text = "REFERENCE" if comparisons[index].has("reference") and zoom == 1 else ""
 
 func _apply_filter() -> void:
 	var mode: CanvasItem.TextureFilter = CanvasItem.TEXTURE_FILTER_LINEAR if smooth else CanvasItem.TEXTURE_FILTER_NEAREST
@@ -281,6 +302,8 @@ func _apply_filter() -> void:
 		for node: Variant in [side.node, side.item]:
 			if node != null:
 				_filter_tree(node, mode)
+	if not reference_side.is_empty():
+		_filter_tree(reference_side.node, mode)
 
 func _filter_tree(node: Node, mode: CanvasItem.TextureFilter) -> void:
 	if node is CanvasItem:
