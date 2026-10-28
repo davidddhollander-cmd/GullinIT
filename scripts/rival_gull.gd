@@ -371,6 +371,16 @@ func mug(attacker: Vector2 = Vector2.INF) -> int:
 	gull.stun(Config.tuning.rival.mug_stun,attacker)
 	return value
 
+## A dive peck from the player with no food to take: the rival drops what it was doing and tumbles.
+func bump(attacker: Vector2) -> void:
+	leave = 0
+	chase_prey = null
+	work = {}
+	eat_timer = 0.0
+	cooldown = relax_time()
+	mode = Mode.RECOVER
+	gull.stun(float(Config.tuning.rival.peck_stun),attacker)
+
 # --- Ground skills -------------------------------------------------------------------------------
 
 func weight(skill: String) -> float:

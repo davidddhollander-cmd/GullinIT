@@ -754,8 +754,18 @@ func _mugging() -> void:
 	if player.state != BeachGull.State.STRIKE:
 		return
 	for pilot: RivalPilot in pilots:
-		if pilot.carry_window > 0 and player.can_collect_food(pilot.carried_food_id) and BeachCollisions.segment_hits(player.previous_beak,player.sweep_beak,pilot.gull.position,Vector2(float(Config.tuning.rival.mug_hit[0]),float(Config.tuning.rival.mug_hit[1]))):
+		var carrying: bool = pilot.carry_window > 0 and player.can_collect_food(pilot.carried_food_id)
+		var airborne: bool = pilot.gull.state not in [BeachGull.State.GROUNDED,BeachGull.State.STUNNED] and pilot.gull.invulnerable <= 0.0
+		if (carrying or airborne) and BeachCollisions.segment_hits(player.previous_beak,player.sweep_beak,pilot.gull.position,Vector2(float(Config.tuning.rival.mug_hit[0]),float(Config.tuning.rival.mug_hit[1]))):
 			if BeachBoss.blocks_mug(self,pilot,player):
+				return
+			if not carrying:
+				# A dive peck into a rival with nothing to steal still sends it tumbling.
+				pilot.bump(player.position)
+				effects.snatch_contact(pilot.gull.position,player.velocity,false)
+				effects.message(pilot.gull.position-Vector2(0,20),"BONK!",BeachUI.GOLD)
+				Audio.play("snatch",1+score.tier*0.08)
+				brash.add(float(Config.tuning.brash.bump))
 				return
 			var value: int = pilot.mug(player.position)
 			if value > 0:

@@ -273,6 +273,7 @@
     "edge_margin": 40,
     "leave_time": 4,
     "mug_stun": 1,
+    "peck_stun": 0.8,
     "mug_chance": 0.35,
     "mug_range": 90,
     "mug_hit": [24, 18],
@@ -297,7 +298,7 @@
     "sniff_min": 1.5, "sniff_max": 3.0, "rest_min": 0.5, "rest_max": 1.2
   },
   "brash": {
-    "snatch": 0.15, "handover": 0.08, "mug": 0.2, "stun": -0.25,
+    "snatch": 0.15, "handover": 0.08, "mug": 0.2, "bump": 0.1, "stun": -0.25,
     "screech_per_sec": 0.06, "vantage_per_px": 0.03, "vantage_max": 3.5,
     "hit_shake": 5, "hit_stop": 0.08, "hit_feathers": 50, "hit_feathers_per_hit": 4, "hit_crumbs": 24, "dust_time": 1.0, "dust_gap": 0.15, "food_lift": 2.8, "shadow_lead": 0.7
   },
