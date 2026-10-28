@@ -41,6 +41,7 @@ var side_labels: Array[Label] = []
 var capturing: bool = false
 
 func _ready() -> void:
+	integer_scale = get_window().content_scale_stretch == Window.CONTENT_SCALE_STRETCH_INTEGER # follows project.godot
 	var data: Dictionary = Config.read_json("res://data/art_lab.json")
 	comparisons = data.get("comparisons", [])
 	if comparisons.is_empty():

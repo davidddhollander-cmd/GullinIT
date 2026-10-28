@@ -21,12 +21,12 @@ func _ready() -> void:
 	var lamp: AnimatedSprite2D = background.prop_sprites[0]
 	lamp.scale = Vector2.ONE * TitleFlyby.LAMP_SCALE
 	lamp.position.y = TitleFlyby.LAMP_BASE_Y - 90.0 * TitleFlyby.LAMP_SCALE * 0.5
-	# Sandcastle in the foreground, in front of and below the sunbathers: smaller and smoothed so the downscale is less blocky.
+	# Sandcastle in the foreground, in front of and below the sunbathers: a little smaller, drawn with sharp pixels like everything else.
 	var castle: AnimatedSprite2D = background.prop_sprites[4]
 	var castle_half: float = 175.0 - castle.position.y
 	castle.scale *= 0.7
 	castle.position.y = 175.0 - castle_half * 0.7
-	castle.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	castle.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	castle.z_index = 4
 	background.prop_sprites[1].z_index = 1 # hut behind the red parasol (props are listed in setup order)
 	for spec: Array in [[false,true,244.0,0.0],[true,false,282.0,10.0]]:

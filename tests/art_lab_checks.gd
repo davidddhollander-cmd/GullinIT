@@ -59,7 +59,7 @@ static func run(host: Node, check: Callable) -> void:
 	_key(lab, KEY_F)
 	check.call(left.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST, "F restores sharp filtering")
 	_key(lab, KEY_I)
-	check.call(host.get_window().content_scale_stretch == Window.CONTENT_SCALE_STRETCH_INTEGER, "I switches the lab window to integer scaling")
+	check.call(host.get_window().content_scale_stretch != stretch, "I toggles the lab window's scale mode")
 	_key(lab, KEY_I)
 	check.call(host.get_window().content_scale_stretch == stretch, "I switches back")
 	_key(lab, KEY_B)

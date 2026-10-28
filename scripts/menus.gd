@@ -40,7 +40,7 @@ func title() -> void:
 	content.get_child(1).add_theme_color_override("font_color",Color("ef725c"))
 	var logo: TextureRect = TextureRect.new()
 	logo.texture = load("res://assets/sprites/title-logo.png")
-	logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	logo.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	logo.stretch_mode = TextureRect.STRETCH_SCALE
 	logo.size = Vector2(175,26)
