@@ -50,8 +50,13 @@ func menu_font_grid(node: Node) -> void:
 			check(minimum.x <= child.size.x + 0.1 and minimum.y <= child.size.y + 0.1,"menu text fits control: "+child.text+" "+str(minimum)+" in "+str(child.size))
 		menu_font_grid(child)
 
+func pin_base_reactions() -> void:
+	Config.tuning.world.reaction_mult = 1.0
+	Config.default_world.reaction_mult = 1.0
+
 func run() -> void:
 	GameState.unlock_all = false
+	pin_base_reactions() # timing checks assume base reactions; slow_adult_checks covers the global multiplier
 	capture = OS.get_cmdline_user_args().has("--capture")
 	DirAccess.make_dir_recursive_absolute("res://test-output")
 	GameState.save_path = "res://test-output/integration-save.json"
@@ -203,6 +208,7 @@ func run() -> void:
 	GameState.load_progress()
 	check(GameState.entry(1).casual_time==45 and GameState.entry(1).best==400,"save round trip separates casual and arcade")
 	check(Config.reload_data(),"JSON reload")
+	pin_base_reactions()
 	for i: int in range(1,7):
 		main.start_level(i)
 		var game: BeachGame = main.game

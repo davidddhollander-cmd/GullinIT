@@ -645,10 +645,9 @@ func sync_carry() -> void:
 	var offset := Vector2(float(anchor[0]) * (-1.0 if facing < 0 else 1.0), float(anchor[1])) * body_scale
 	var definition: Dictionary = Config.foods[carry_food]
 	carry_item.texture = Config.frames(definition.sprite).get_frame_texture(&"idle", 0)
-	# Full-size food, half of it hidden in the beak: show only the half that sticks out in front.
+	# Whole food sprite; the upper-beak overlay (drawn above it) hides the part inside the beak.
 	var food_size: Vector2 = carry_item.texture.get_size()
-	carry_item.region_enabled = true
-	carry_item.region_rect = Rect2(Vector2(0.0 if facing < 0 else food_size.x*0.5, 0.0), Vector2(food_size.x*0.5, food_size.y))
+	carry_item.region_enabled = false
 	carry_item.scale = Vector2(float(definition.size[0]), float(definition.size[1])) / food_size
 	carry_item.position = sprite.position + (offset * Vector2(sprite.scale.x / maxf(art_scale, 0.001), sprite.scale.y / maxf(art_scale, 0.001))).rotated(sprite.rotation)
 	carry_item.rotation = sprite.rotation
@@ -660,8 +659,7 @@ func sync_carry() -> void:
 		carry_glint.position = carry_item.position
 		carry_glint.rotation = carry_item.rotation
 		carry_glint.scale = carry_item.scale
-		carry_glint.region_enabled = true
-		carry_glint.region_rect = carry_item.region_rect
+		carry_glint.region_enabled = false
 
 func wind_lift() -> float:
 	return clampf(absf(wind_force) / float(Config.tuning.wind.lift_ref), 0.0, 1.5)

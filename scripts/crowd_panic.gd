@@ -116,6 +116,7 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 				if owner.kind == "sunbather":
 					SunbatherArt.reaction_pose(owner,&"stand",0.0)
 				owner.update_art_pose(false)
+				_resume_chase(owner,gulls)
 				return false
 			owner.facing = signf(gap)
 			owner.position.x = move_toward(owner.position.x,home,walk*float(settings().return_speed_mult)*delta)
@@ -123,6 +124,15 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 	owner.update_art_pose(moving)
 	owner.queue_redraw()
 	return true
+
+## Back at their spot, people go after the nearest player gull (the ordinary chase) instead of idling.
+func _resume_chase(owner: BeachTarget, gulls: Array[BeachGull]) -> void:
+	var best: BeachGull
+	for gull: BeachGull in gulls:
+		if is_instance_valid(gull) and not gull.rival and (best == null or absf(gull.position.x-owner.position.x) < absf(best.position.x-owner.position.x)):
+			best = gull
+	if best != null:
+		owner.reaction.theft(owner,best)
 
 ## First clip from the chain the sheet has. Sheets with drawn "_left" clips use them instead of flipping.
 static func resolve(frames: SpriteFrames, chain: Array[StringName], facing: float) -> Dictionary:

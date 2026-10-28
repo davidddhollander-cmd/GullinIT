@@ -302,7 +302,10 @@ func _draw_digestion(offset: Vector2) -> void:
 	var belly: GullDigestion = game.player.digestion
 	if belly.snacks.is_empty() and belly.rest <= 0:
 		return
-	var point: Vector2 = game.player.position-offset+Vector2(-25,15)
+	# Beside the gull (right, or left near the screen edge) so it never covers what is below.
+	var point: Vector2 = game.player.position-offset+Vector2(18,-8)
+	if point.x > 268:
+		point.x -= 86
 	point.x = clampf(point.x,2,268)
 	point.y = clampf(point.y,32,155)
 	draw_rect(Rect2(point,Vector2(50,15)),Color("183b4e"))
