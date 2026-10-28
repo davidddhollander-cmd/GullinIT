@@ -1,6 +1,6 @@
 # 045 — Even pixels at every window size; sharp title and loading screen
 
-Status: done (awaiting David)
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 044, and David's OK in the Art Lab (keys `I` and `F`)
