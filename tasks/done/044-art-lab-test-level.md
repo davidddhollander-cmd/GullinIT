@@ -1,6 +1,6 @@
 # 044 — Art Lab: a test level for judging art changes by eye
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
