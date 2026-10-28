@@ -1,6 +1,6 @@
 # 048 — Pier diner A candidate on the same pixel grid as diner B
 
-Status: done (awaiting David)
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: 044
