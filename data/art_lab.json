@@ -4,8 +4,54 @@
       "title": "HERRING GULL SELF-TEST",
       "description": "Current herring gull vs itself: both sides must match.",
       "current": "gull_herring",
-      "candidate": {"clone": "gull_herring"},
+      "candidate": {
+        "clone": "gull_herring"
+      },
       "motion": "dive"
+    },
+    {
+      "title": "SHOPPER WALK SELF-TEST",
+      "description": "Mullet shopper walking: current vs itself.",
+      "current": "shopper_mullet",
+      "candidate": {
+        "clone": "shopper_mullet"
+      },
+      "motion": "walk_across"
+    },
+    {
+      "title": "SUNDRESS WALK SELF-TEST",
+      "description": "Sundress shopper walking: current vs itself.",
+      "current": "shopper_sundress",
+      "candidate": {
+        "clone": "shopper_sundress"
+      },
+      "motion": "walk_across"
+    },
+    {
+      "title": "FOOD ON SAND SELF-TEST",
+      "description": "Hotdog lying on the sand: current vs itself.",
+      "current": "food_hotdog",
+      "candidate": {
+        "clone": "food_hotdog"
+      },
+      "motion": "on_sand",
+      "size": [
+        8,
+        4
+      ]
+    },
+    {
+      "title": "FOOD IN BEAK SELF-TEST",
+      "description": "Fried fish carried by a flying herring gull.",
+      "current": "food_fried_fish",
+      "candidate": {
+        "clone": "food_fried_fish"
+      },
+      "motion": "in_beak",
+      "size": [
+        9,
+        5
+      ]
     }
   ]
 }

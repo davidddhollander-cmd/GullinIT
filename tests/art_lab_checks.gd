@@ -73,8 +73,14 @@ static func run(host: Node, check: Callable) -> void:
 	_key(lab, KEY_PERIOD)
 	lab._process(0.0)
 	check.call(lab.paused and not is_equal_approx(lab.pair_x, before), ". advances exactly one frame while paused")
+	var count: int = lab.comparisons.size()
 	_key(lab, KEY_RIGHT)
-	check.call(lab.index == 0, "arrows wrap with a single comparison")
+	check.call(lab.index == 1 % count, "right arrow picks the next comparison")
+	_key(lab, KEY_LEFT)
+	_key(lab, KEY_LEFT)
+	check.call(lab.index == count - 1, "left arrow wraps to the last comparison")
+	_key(lab, KEY_1)
+	check.call(lab.index == 0, "1 picks the first comparison")
 
 	# Every motion runs, so future entries are not first exercised in front of David.
 	for motion: String in MOTIONS:

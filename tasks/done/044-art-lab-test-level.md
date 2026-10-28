@@ -48,7 +48,7 @@ Branch `sonnet/044-art-lab-test-level`; see `git log` for the last commit.
 - `export_presets.cfg`: both presets now exclude `scenes/art_lab.tscn`, `scripts/art_lab.gd`, `data/art_lab.json`.
 - `tests/art_lab_checks.gd` (+ one line in `tests/integration.gd`).
 
-**Tests:** `tests/integration.tscn` headless: 14488 checks, 0 failures. One pre-existing script error remains, `tests/level5_checks.gd:16` (`Config.targets` has no `off_lead_dog`); it is level data this task does not touch.
+**Tests:** `tests/integration.tscn` headless: 14490 checks, 0 failures. One pre-existing script error remains, `tests/level5_checks.gd:16` (`Config.targets` has no `off_lead_dog`); it is level data this task does not touch.
 
 **Captures:** `test-output/art_lab/herring-gull-self-test_{1x,4x}_{a,b,c}.png` (three moments, both zoom levels; `-- --capture` makes them, or press C in the lab). Both gulls match in all of them.
 
@@ -60,6 +60,8 @@ Branch `sonnet/044-art-lab-test-level`; see `git log` for the last commit.
 - B shuffles sides and hides CURRENT/PROPOSED; pressing again reveals the labels on the shuffled sides. I toggles `Window.content_scale_stretch` at runtime only; `project.godot` is untouched.
 - The backdrop has no props and uses default-world signs, so a "PROMENADE" sign scrolls by.
 
-**Not done / limits:** only the self-test entry exists (no real candidates yet, by design). The `in_beak` and `walk_across` motions are exercised by the tests but not yet looked at by eye. Web export itself was not run (no templates here); exclusion is checked in `export_presets.cfg`.
+**Follow-up (David asked for more to look at):** added four self-tests (current vs itself): mullet shopper walk, sundress shopper walk, hotdog on sand, fried fish in a gull's beak. Comparisons may carry `"size": [w, h]` (px, as in `data/foods.json`) for sprites that have no `visual_scale`. `-- --capture` now saves every comparison. All five were checked in screenshots: both sides match.
+
+**Not done / limits:** no real candidates yet, by design. Self-tests only prove both sides render identically. Web export itself was not run (no templates here); exclusion is checked in `export_presets.cfg`.
 
 ## Review notes

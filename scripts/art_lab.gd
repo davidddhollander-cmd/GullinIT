@@ -155,6 +155,8 @@ func _make(id: String, species: String, gull_path: bool, motion: String) -> Dict
 		var sprite: AnimatedSprite2D = AnimatedSprite2D.new()
 		sprite.sprite_frames = Config.frames(id)
 		sprite.scale = Vector2.ONE * float(def.get("visual_scale", 1.0))
+		if comparisons[index].has("size"): # foods are drawn at their foods.json size in px, not a visual_scale
+			sprite.scale = Vector2(comparisons[index].size[0], comparisons[index].size[1]) / Vector2(float(def.frame_w), float(def.frame_h))
 		var names: PackedStringArray = sprite.sprite_frames.get_animation_names()
 		var wanted: String = "walk" if motion == "walk_across" else "idle"
 		if motion == "static" or not sprite.sprite_frames.has_animation(wanted):
@@ -163,6 +165,7 @@ func _make(id: String, species: String, gull_path: bool, motion: String) -> Dict
 		else:
 			sprite.play(wanted)
 		sprite.set_meta(&"half_height", float(def.frame_h) * sprite.scale.y * 0.5)
+		sprite.set_meta(&"source_left", bool(def.get("animations", {}).get("walk", {}).get("source_left", false)))
 		stage.add_child(sprite)
 		if motion == "in_beak":
 			sprite.z_index = 1
@@ -191,7 +194,7 @@ func _advance(d: float) -> void:
 				dir = -dir
 			for side: Dictionary in sides:
 				if side.node is AnimatedSprite2D:
-					(side.node as AnimatedSprite2D).flip_h = dir < 0.0
+					(side.node as AnimatedSprite2D).flip_h = (dir < 0.0) != bool((side.node as AnimatedSprite2D).get_meta(&"source_left", false))
 	_place()
 
 ## Both sides get the same commands, so identical art stays frame-for-frame identical.
@@ -344,9 +347,11 @@ func capture_all(tag: String = "") -> void:
 	camera.zoom = Vector2.ONE * zoom
 	capturing = false
 
-## `godot scenes/art_lab.tscn -- --capture`: saves a few moments of the first comparison, then exits.
+## `godot scenes/art_lab.tscn -- --capture`: saves a few moments of every comparison, then exits.
 func _capture_run() -> void:
-	for tag: String in ["_a", "_b", "_c"]:
-		await get_tree().create_timer(1.1).timeout
-		await capture_all(tag)
+	for i: int in comparisons.size():
+		_select(i)
+		for tag: String in ["_a", "_b", "_c"]:
+			await get_tree().create_timer(1.1).timeout
+			await capture_all(tag)
 	get_tree().quit()
