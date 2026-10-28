@@ -16,6 +16,7 @@ const FONT: Font = preload("res://assets/fonts/gull_pixel.fnt")
 const GOLD: Color = Color("ffd76a")
 
 var comparisons: Array = []
+var current_ids: Array[String] = []
 var candidate_ids: Array[String] = []
 var index: int = 0
 var motion: String = "static" ## effective motion of the selected comparison
@@ -48,6 +49,7 @@ func _ready() -> void:
 		push_error("Art Lab: data/art_lab.json has no comparisons. %s" % Config.last_error)
 		return
 	for i: int in comparisons.size():
+		current_ids.append(_register_side(i, comparisons[i].current, true))
 		candidate_ids.append(_register(i, comparisons[i]))
 	backdrop = BeachBackdrop.new()
 	add_child(backdrop)
@@ -64,13 +66,20 @@ func _ready() -> void:
 
 ## A candidate is an sprites.json-shaped entry; `clone` copies a live entry first so a self-test stays short.
 func _register(i: int, entry: Dictionary) -> String:
-	var candidate: Dictionary = (entry.candidate as Dictionary).duplicate(true)
+	return _register_side(i, entry.candidate, false, _is_gull(current_ids[i]))
+
+## A side can name live art or provide an sprites.json-shaped definition. Inline current definitions
+## let the lab compare prepared source composites without adding anything to live sprite metadata.
+func _register_side(i: int, value: Variant, current: bool, gull: bool = false) -> String:
+	if value is String:
+		return str(value)
+	var candidate: Dictionary = (value as Dictionary).duplicate(true)
 	var def: Dictionary = {}
 	if candidate.has("clone"):
 		def = (Config.sprites[str(candidate.clone)] as Dictionary).duplicate(true)
 	candidate.erase("clone")
 	def.merge(candidate, true)
-	var id: String = ("gull_lab_%d" if _is_gull(str(entry.current)) else "lab_%d") % i
+	var id: String = ("lab_current_%d" if current else ("gull_lab_%d" if gull else "lab_%d")) % i
 	Config.sprites[id] = def
 	Config.frames_cache.erase(id)
 	return id
@@ -121,14 +130,14 @@ func _select(i: int) -> void:
 		child.free()
 	var entry: Dictionary = comparisons[index]
 	motion = str(entry.get("motion", "static"))
-	var gulls: bool = _is_gull(str(entry.current)) or motion == "in_beak"
+	var gulls: bool = _is_gull(current_ids[index]) or motion == "in_beak"
 	if not MOTIONS.has(motion) or (motion in ["fly_across", "dive"] and not gulls):
 		push_error("Art Lab: motion '%s' needs a gull sprite (comparison %d); showing it static" % [motion, index])
 		motion = "static"
 	var species: Array[String] = ["herring", "herring"] # in_beak: the gull is always the herring, only the food changes
 	if motion != "in_beak":
-		species = [str(Config.sprites[str(entry.current)].get("species", "")), "lab_%d" % index]
-	sides = [_make(str(entry.current), species[0], gulls, motion), _make(candidate_ids[index], species[1], gulls, motion)]
+		species = [str(Config.sprites[current_ids[index]].get("species", "")), "lab_%d" % index]
+	sides = [_make(current_ids[index], species[0], gulls, motion), _make(candidate_ids[index], species[1], gulls, motion)]
 	var flies: bool = motion in ["fly_across", "dive", "in_beak"]
 	pair_x = TRAVEL_MIN + 40.0 if flies else REST_X
 	dir = 1.0
@@ -166,6 +175,8 @@ func _make(id: String, species: String, gull_path: bool, motion: String) -> Dict
 		else:
 			sprite.play(wanted)
 		sprite.set_meta(&"half_height", float(def.frame_h) * sprite.scale.y * 0.5)
+		if def.has("sprite_offset_y"):
+			sprite.set_meta(&"root_offset_y", float(def.sprite_offset_y))
 		sprite.set_meta(&"source_left", bool(def.get("animations", {}).get("walk", {}).get("source_left", false)))
 		stage.add_child(sprite)
 		if motion == "in_beak":
@@ -235,7 +246,8 @@ func _place() -> void:
 		var x: float = pair_x + _lane(i)
 		if side.gull == null:
 			var node: AnimatedSprite2D = side.node
-			node.position = Vector2(x, GROUND - float(node.get_meta(&"half_height", 8.0)))
+			var y: float = GROUND + float(node.get_meta(&"root_offset_y")) if node.has_meta(&"root_offset_y") else GROUND - float(node.get_meta(&"half_height"))
+			node.position = Vector2(x, y)
 		else:
 			(side.gull as BeachGull).position.x = x
 			if side.item != null:
@@ -350,7 +362,8 @@ func capture_all(tag: String = "") -> void:
 
 ## `godot scenes/art_lab.tscn -- --capture`: saves a few moments of every comparison, then exits.
 func _capture_run() -> void:
-	for i: int in comparisons.size():
+	var first: int = 5 if OS.get_cmdline_user_args().has("--grid-fixes-only") else 0
+	for i: int in range(first, comparisons.size()):
 		_select(i)
 		for tag: String in ["_a", "_b", "_c"]:
 			await get_tree().create_timer(1.1).timeout

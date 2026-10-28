@@ -4,6 +4,17 @@ extends RefCounted
 const MOTIONS: Array[String] = ["fly_across", "dive", "walk_across", "idle", "on_sand", "in_beak", "static"]
 const LAB_FILES: Array[String] = ["scenes/art_lab.tscn", "scripts/art_lab.gd", "data/art_lab.json"]
 
+static func _image(path: String) -> Image:
+	return (load(path) as Texture2D).get_image()
+
+static func _hard_alpha(image: Image) -> bool:
+	for y: int in image.get_height():
+		for x: int in image.get_width():
+			var alpha: float = image.get_pixel(x, y).a
+			if alpha > 0.0 and alpha < 1.0:
+				return false
+	return true
+
 static func _key(lab: Node, keycode: Key) -> void:
 	var event: InputEventKey = InputEventKey.new()
 	event.keycode = keycode
@@ -16,12 +27,44 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(not entries.is_empty(), "art lab data has comparisons")
 	var shaped: bool = true
 	for entry: Dictionary in entries:
-		shaped = shaped and entry.has_all(["title", "description", "current", "candidate", "motion"]) and MOTIONS.has(str(entry.motion)) and Config.sprites.has(str(entry.current))
+		var current_valid: bool = (entry.current is String and Config.sprites.has(str(entry.current))) or (entry.current is Dictionary and ((entry.current as Dictionary).has("animations") or (entry.current as Dictionary).has("clone")))
+		shaped = shaped and entry.has_all(["title", "description", "current", "candidate", "motion"]) and MOTIONS.has(str(entry.motion)) and current_valid
 		shaped = shaped and ((entry.candidate as Dictionary).has("animations") or (entry.candidate as Dictionary).has("clone"))
 	check.call(shaped, "every art lab comparison has a title, description, live current sprite, candidate and known motion")
 	check.call(entries[0].current == "gull_herring" and entries[0].candidate.get("clone", "") == "gull_herring", "first art lab entry is the herring gull self-test")
 	var live_ids: Array = Config.read_json("res://data/sprites.json").keys()
 	check.call(not live_ids.any(func(id: String) -> bool: return id.begins_with("lab_") or id.begins_with("gull_lab_")), "lab candidates are never registered in data/sprites.json")
+
+	var grid_fixes: Array = entries.filter(func(entry: Dictionary) -> bool: return str(entry.title).begins_with("GRID FIX"))
+	check.call(grid_fixes.size() == 9, "task 049 provides nine separate art-grid comparisons")
+	var expected_sizes: Dictionary = {
+		"old-man-cast-grid-candidate-v1.png": Vector2i(1024, 2048),
+		"crabs-pair-candidate-v1.png": Vector2i(144, 40),
+		"stand-signs-candidate-v1.png": Vector2i(128, 100),
+		"wheelie-bin-candidate-v1.png": Vector2i(22, 30),
+		"feathers-candidate-v1.png": Vector2i(56, 14),
+		"title-logo-candidate-v1.png": Vector2i(350, 52),
+		"loading-backdrop-candidate-v1.png": Vector2i(640, 360),
+		"score-digits-candidate-v1.png": Vector2i(337, 66),
+		"beach-sign-composed-candidate-v1.png": Vector2i(34, 44),
+	}
+	var candidates_valid: bool = true
+	for file: String in expected_sizes:
+		var image: Image = _image("res://assets/sprites/" + file)
+		candidates_valid = candidates_valid and image != null and image.get_size() == expected_sizes[file] and _hard_alpha(image)
+	check.call(candidates_valid, "all nine art-grid candidates have expected dimensions and hard alpha")
+	var old_man: Image = _image("res://assets/sprites/old-man-cast-grid-candidate-v1.png")
+	var old_man_aligned: bool = true
+	var first_pose: Rect2i = old_man.get_region(Rect2i(0, 0, 128, 128)).get_used_rect()
+	for row: int in 16:
+		for column: int in 8:
+			var cell: Image = old_man.get_region(Rect2i(column * 128, row * 128, 128, 128))
+			var used: Rect2i = cell.get_used_rect()
+			if used.has_area():
+				old_man_aligned = old_man_aligned and used.end.y == 116
+	check.call(old_man_aligned and first_pose.size.y == 74, "old-man poses use the cast sole row and upright poses display at 37px")
+	var live_json: String = FileAccess.get_file_as_string("res://data/sprites.json")
+	check.call(not expected_sizes.keys().any(func(file: String) -> bool: return live_json.contains(file)), "task 049 candidates remain Art Lab-only")
 
 	var presets: String = FileAccess.get_file_as_string("res://export_presets.cfg")
 	var excluded: int = 0
@@ -87,12 +130,15 @@ static func run(host: Node, check: Callable) -> void:
 		var flying: bool = motion in ["fly_across", "dive"]
 		var fake: Dictionary = {"title": "T", "description": "D", "current": "gull_herring" if flying else "crab_red", "candidate": {"clone": "gull_herring" if flying else "crab_blue"}, "motion": motion}
 		lab.comparisons = [fake]
+		lab.current_ids.assign([lab._register_side(0, fake.current, true)])
 		lab.candidate_ids.assign([lab._register(0, fake)])
 		lab._select(0)
 		for frame: int in 30:
 			lab._advance(1.0 / 60.0)
 		check.call(lab.sides[0].node != null and lab.sides[1].node != null, "art lab motion '%s' builds both sides" % motion)
-	for id: String in ["gull_lab_0", "lab_0"]:
+	for id: String in Config.sprites.keys():
+		if not (id.begins_with("gull_lab_") or id.begins_with("lab_")):
+			continue
 		Config.sprites.erase(id)
 		Config.frames_cache.erase(id)
 	lab.queue_free()

@@ -52,6 +52,79 @@
         9,
         5
       ]
+    },
+    {
+      "title": "GRID FIX 1 OLD MAN",
+      "description": "CAST GRID, 37PX TALL, STANDARD SOLE ROW.",
+      "current": {
+        "clone": "old_man",
+        "animations": {"idle": {"frames": [0, 4, 6, 16, 20, 32, 36, 40, 44, 48, 52, 56, 64, 72, 80, 88, 96, 104, 112, 120], "fps": 4, "loop": true}}
+      },
+      "candidate": {
+        "clone": "old_man",
+        "file": "res://assets/sprites/old-man-cast-grid-candidate-v1.png",
+        "visual_scale": 0.5,
+        "art_height": 37,
+        "sprite_offset_y": -26,
+        "animations": {"idle": {"frames": [0, 4, 6, 16, 20, 32, 36, 40, 44, 48, 52, 56, 64, 72, 80, 88, 96, 104, 112, 120], "fps": 4, "loop": true}}
+      },
+      "motion": "idle"
+    },
+    {
+      "title": "GRID FIX 2 CRABS",
+      "description": "RED AND BLUE AT MATCHED REAL SIZE.",
+      "current": {"file": "res://assets/sprites/crabs-pair-current-v1.png", "frame_w": 48, "frame_h": 80, "visual_scale": 0.25, "animations": {"idle": {"frames": [0, 1, 2, 3, 4, 5], "fps": 8, "loop": true}}},
+      "candidate": {"file": "res://assets/sprites/crabs-pair-candidate-v1.png", "frame_w": 24, "frame_h": 40, "visual_scale": 0.5, "animations": {"idle": {"frames": [0, 1, 2, 3, 4, 5], "fps": 8, "loop": true}}},
+      "motion": "idle"
+    },
+    {
+      "title": "GRID FIX 3 ROOF SIGNS",
+      "description": "THREE STALL SIGNS AT MATCHED SIZE.",
+      "current": {"file": "res://assets/sprites/stand-signs-current-v1.png", "frame_w": 256, "frame_h": 200, "visual_scale": 0.25, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}},
+      "candidate": {"file": "res://assets/sprites/stand-signs-candidate-v1.png", "frame_w": 128, "frame_h": 100, "visual_scale": 0.5, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}},
+      "motion": "static"
+    },
+    {
+      "title": "GRID FIX 4 WHEELIE BIN",
+      "description": "1:1 CHUNKY PROP WITH LIMITED COLOURS.",
+      "current": "wheelie_bin",
+      "candidate": {"clone": "wheelie_bin", "file": "res://assets/sprites/wheelie-bin-candidate-v1.png", "frame_w": 22, "frame_h": 30, "visual_scale": 1.0},
+      "motion": "static"
+    },
+    {
+      "title": "GRID FIX 5 FEATHERS",
+      "description": "FOUR FEATHERS AT MATCHED REAL SIZE.",
+      "current": {"file": "res://assets/sprites/feathers-current-v1.png", "frame_w": 28, "frame_h": 28, "visual_scale": 0.25, "animations": {"idle": {"frames": [0, 1, 2, 3], "fps": 4, "loop": true}}},
+      "candidate": {"file": "res://assets/sprites/feathers-candidate-v1.png", "frame_w": 14, "frame_h": 14, "visual_scale": 0.5, "animations": {"idle": {"frames": [0, 1, 2, 3], "fps": 4, "loop": true}}},
+      "motion": "idle"
+    },
+    {
+      "title": "GRID FIX 6 TITLE LOGO",
+      "description": "TITLE AT MATCHED SIZE WITH CRISP EDGES.",
+      "current": {"file": "res://assets/sprites/title-logo.png", "frame_w": 525, "frame_h": 78, "visual_scale": 0.2857142857, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}},
+      "candidate": {"file": "res://assets/sprites/title-logo-candidate-v1.png", "frame_w": 350, "frame_h": 52, "visual_scale": 0.4285714286, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}},
+      "motion": "static"
+    },
+    {
+      "title": "GRID FIX 7 LOADING BACKDROP",
+      "description": "LOADING ART AT MATCHED SIZE, NEAREST GRID.",
+      "current": {"file": "res://assets/sprites/loading-backdrop-v2.png", "frame_w": 1672, "frame_h": 941, "visual_scale": 0.0956937799, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}},
+      "candidate": {"file": "res://assets/sprites/loading-backdrop-candidate-v1.png", "frame_w": 640, "frame_h": 360, "visual_scale": 0.25, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}},
+      "motion": "static"
+    },
+    {
+      "title": "GRID FIX 8 SCORE DIGITS",
+      "description": "BOTH SCORE STYLES, SAME SIZE, CRISP PIXELS.",
+      "current": {"file": "res://assets/sprites/score-digits-current-v1.png", "frame_w": 1685, "frame_h": 332, "visual_scale": 0.09, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}},
+      "candidate": {"file": "res://assets/sprites/score-digits-candidate-v1.png", "frame_w": 337, "frame_h": 66, "visual_scale": 0.45, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}},
+      "motion": "static"
+    },
+    {
+      "title": "GRID FIX 9 BEACH SIGN",
+      "description": "1:1 MODULAR ENDS, MIDDLE, ARROW AND POST.",
+      "current": "beach_sign",
+      "candidate": {"file": "res://assets/sprites/beach-sign-composed-candidate-v1.png", "frame_w": 34, "frame_h": 44, "visual_scale": 1.0, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}},
+      "motion": "static"
     }
   ]
 }
