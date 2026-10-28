@@ -608,6 +608,8 @@ func held_food_id() -> String:
 func sync_carry() -> void:
 	carry_food = held_food_id() if is_instance_valid(sprite) else ""
 	var active: bool = not carry_food.is_empty() and not carry_for(art_id).is_empty() and Config.foods.has(carry_food)
+	if art_event == &"peck" and art_event_left > 0.0 and state == State.GROUNDED:
+		active = false # the head-down pick-up/peck pose shows first; the food appears in the beak after it
 	if not is_instance_valid(carry_body):
 		return
 	if not active:
