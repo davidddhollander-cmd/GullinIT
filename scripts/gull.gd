@@ -238,7 +238,7 @@ func _ready() -> void:
 		carry_marker.draw.connect(func() -> void:
 			if carry_item.visible and Config.foods.has(carry_food):
 				var pickup: Array = Config.foods[carry_food].pickup_radius
-				PickupShine.draw_target_corners(carry_marker,carry_item.position,Vector2(pickup[0],pickup[1])+Vector2(3,3))
+				PickupShine.draw_target_corners(carry_marker,carry_item.position,Vector2(pickup[0],pickup[1])+Vector2(3,3),true)
 		)
 		add_child(carry_marker)
 		rival_badge = ColorRect.new()
