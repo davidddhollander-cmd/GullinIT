@@ -642,3 +642,5 @@ func ate_ground(food_id: String) -> void:
 	carried_food_id = food_id
 	took_food(int(Config.foods[food_id].points))
 	game.effects.message(gull.position,"MINE!",Color("ffc65c"))
+	if gull.state == BeachGull.State.GROUNDED:
+		gull.show_ground_peck()

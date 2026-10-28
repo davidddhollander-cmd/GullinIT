@@ -53,6 +53,10 @@ func menu_font_grid(node: Node) -> void:
 func pin_base_reactions() -> void:
 	Config.tuning.world.reaction_mult = 1.0
 	Config.default_world.reaction_mult = 1.0
+	# Sunbather wake fixtures tick fixed times: base rise, no lying-down shoo (covered in slow_adult_checks).
+	for world: Dictionary in [Config.tuning.world, Config.default_world]:
+		world.sunbather_rise_time = 0.7
+		world.sunbather_shoo_time = 0.0
 
 func run() -> void:
 	GameState.unlock_all = false

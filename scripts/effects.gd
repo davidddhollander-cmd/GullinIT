@@ -121,7 +121,7 @@ func sand_puff(at: Vector2, taking_off: bool = false) -> void:
 func feather_burst(at: Vector2, impulse: Vector2, amount: int) -> void:
 	if not bool(Config.tuning.juice.particles):
 		return
-	for i: int in mini(amount,24):
+	for i: int in mini(amount,40):
 		var life: float = feather_rng.randf_range(0.8,1.35)
 		particles.append({
 			"feather":true,"at":at+Vector2(feather_rng.randf_range(-4,4),feather_rng.randf_range(-4,4)),

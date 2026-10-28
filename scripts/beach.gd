@@ -72,9 +72,10 @@ func setup(entries: Array, zone_entries: Array = [], world_settings: Dictionary 
 	Config.reloaded.connect(_refresh)
 
 func _apply_prop_art(sprite: AnimatedSprite2D, entry: Dictionary) -> void:
-	# Keep ordinary scenery above rear-lane crabs. Palms and shacks also
-	# occlude front-lane crabs, while adults and flying gulls retain their depth.
-	sprite.z_index = 2 if entry.type in ["beach_palm","beach_hut"] else 1
+	# Keep ordinary scenery above rear-lane crabs. Shacks also occlude front-lane crabs.
+	# Palms are backdrop (base y 148, level with the rear lane): everyone and every crab
+	# draws in front, so a palm never hides or blocks them.
+	sprite.z_index = 2 if entry.type == "beach_hut" else (0 if entry.type == "beach_palm" else 1)
 	if entry.type in ["kiosk","hotdog_stand","fish_chips_stand"]:
 		sprite.z_index = FoodStall.DRAW_DEPTH
 	var definition: Dictionary = Config.sprites[entry.type]

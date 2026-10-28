@@ -54,6 +54,7 @@ func look_up(owner: BeachTarget) -> void:
 		owner.sleep_state = BeachTarget.SleepState.AWAKE
 		owner.stash_standing = true
 		owner.rise_remaining = 0.0
+		owner.shoo_left = 0.0
 	if owner.kind == "pier_diner" and owner.diner_meal == BeachTarget.DinerMeal.SEEK:
 		owner.diner_meal = BeachTarget.DinerMeal.DINING
 	# Existing interrupt paths: a bench visit stands up, a stall order is cancelled.

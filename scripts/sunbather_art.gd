@@ -20,9 +20,20 @@ static func pose(target: BeachTarget, name: StringName, frame: int) -> void:
 	target.sprite.stop()
 	target.sprite.animation = directional_name
 	target.sprite.frame = clampi(frame, 0, target.sprite.sprite_frames.get_frame_count(directional_name) - 1)
-	target.sprite.flip_h = target.facing < 0 and directional_name == name and name not in [&"rest", &"rise", &"pickup"]
+	target.sprite.flip_h = target.facing < 0 and directional_name == name and name not in [&"rest", &"rise", &"pickup", &"lie_shoo"]
 	target.sprite.position = Vector2(0, -26)
 	target.sprite.rotation = 0.0
+
+static func shoo_time() -> float:
+	return float(Config.tuning.world.sunbather_shoo_time) ## lying-down wave at a pecking gull, before getting up
+
+## Lying-down shoo. Uses the `lie_shoo` clip once the art exists (task 053); until then the resting pose shakes.
+static func shoo_pose(target: BeachTarget, phase: float) -> void:
+	if target.sprite.sprite_frames.has_animation(&"lie_shoo"):
+		pose(target, &"lie_shoo", int(phase * float(target.sprite.sprite_frames.get_frame_count(&"lie_shoo"))))
+		return
+	pose(target, &"rest", 0)
+	target.sprite.position.x += 1.0 if int(phase * 8.0) % 2 == 0 else -1.0
 
 static func reaction_pose(target: BeachTarget, reaction: StringName, phase: float, run_frame: int = 0) -> void:
 	match reaction:

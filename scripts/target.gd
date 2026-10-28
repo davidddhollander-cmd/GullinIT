@@ -100,12 +100,15 @@ enum SleepState { SLEEPING, WAKING, AWAKE }
 var sleep_state: SleepState = SleepState.SLEEPING
 var sleep_pecks: int = 0
 var rise_remaining: float = 0.0
+var shoo_left: float = 0.0
 const STEP_ON_RADIUS: float = 18.0
 
 func register_bag_peck() -> void:
 	if sleep_state != SleepState.SLEEPING:
 		return
 	sleep_pecks += 1
+	if sleep_pecks >= 2:
+		shoo_left = SunbatherArt.shoo_time() # wave the gull away from the bag, still lying down
 	if sleep_pecks >= int(Config.tuning.world.sunbather_sleep_pecks):
 		sleep_state = SleepState.WAKING
 		rise_remaining = float(Config.tuning.world.sunbather_rise_time)*reaction_delay
@@ -124,7 +127,11 @@ func _tick_sleep(delta: float, gulls: Array[BeachGull] = []) -> bool:
 	# Neither proximity nor first-burst theft can bypass the four protected hits.
 	alert = 0.0
 	defense = 0.0
-	if sleep_state == SleepState.SLEEPING:
+	if shoo_left > 0.0:
+		# Lying-down shoo comes first; the rise (if woken) starts once the wave is over.
+		shoo_left = maxf(0.0,shoo_left-delta)
+		SunbatherArt.shoo_pose(self,1.0-shoo_left/SunbatherArt.shoo_time())
+	elif sleep_state == SleepState.SLEEPING:
 		SunbatherArt.pose(self,&"rest",0)
 	else:
 		rise_remaining = maxf(0.0,rise_remaining-delta)

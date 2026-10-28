@@ -20,3 +20,17 @@ static func run_checks(root: Node, check: Callable) -> void:
 	for t: BeachTarget in [regular,old_man,sundress]:
 		t.free()
 	Config.tuning.world.reaction_mult = base
+	# Lying-down shoo: from the second bag peck, still asleep, then the rise.
+	var shoo_base: float = float(Config.tuning.world.sunbather_shoo_time)
+	Config.tuning.world.sunbather_shoo_time = 0.7
+	var sleeper := BeachTarget.new()
+	root.add_child(sleeper)
+	sleeper.setup("sunbather",300.0,RandomNumberGenerator.new(),1.0,{})
+	sleeper.register_bag_peck()
+	check.call(sleeper.shoo_left == 0.0,"first bag peck does not trigger a shoo")
+	sleeper.register_bag_peck()
+	check.call(sleeper.shoo_left > 0.0 and sleeper.sleep_state == BeachTarget.SleepState.SLEEPING,"second bag peck makes the sleeper shoo while lying down")
+	sleeper.tick(0.8,[])
+	check.call(sleeper.shoo_left == 0.0 and sleeper.sleep_state == BeachTarget.SleepState.SLEEPING,"shoo ends back at rest")
+	sleeper.free()
+	Config.tuning.world.sunbather_shoo_time = shoo_base

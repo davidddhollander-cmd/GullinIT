@@ -124,7 +124,9 @@ func _impact(ally: Dictionary, gull: BeachGull) -> void:
 	var t: Dictionary = tuning()
 	var fx: BeachEffects = game.effects
 	var knocked: bool = is_instance_valid(ally.target) and ally.target.knock_food(gull,float(t.food_lift))
-	fx.feather_burst(ally.hit,gull.velocity,int(t.hit_feathers))
+	fx.feather_burst(ally.hit,gull.velocity,int(t.hit_feathers)+hits*int(t.hit_feathers_per_hit))
+	if knocked:
+		fx.food_crumble(ally.hit,gull.velocity,int(t.hit_crumbs)) # on top of the knock's own crumble
 	fx.sand_puff(Vector2(ally.hit.x,float(Config.tuning.world.ground)))
 	if bool(Config.tuning.juice.shake) and GameState.options.shake:
 		fx.shake = maxf(fx.shake,float(t.hit_shake))

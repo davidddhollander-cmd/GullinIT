@@ -688,6 +688,7 @@ func _crashed() -> void:
 
 func _scrap_collected(at: Vector2, food_id: String) -> void:
 	player.digestion.collect(food_id,{"scrap":true})
+	player.show_ground_peck() # quick head-down pick-up pose
 	if training and lesson == 1 and player.state == BeachGull.State.GROUNDED:
 		_training_advance()
 
@@ -753,7 +754,7 @@ func _mugging() -> void:
 	if player.state != BeachGull.State.STRIKE:
 		return
 	for pilot: RivalPilot in pilots:
-		if pilot.carry_window > 0 and player.can_collect_food(pilot.carried_food_id) and BeachCollisions.segment_hits(player.previous_beak,player.sweep_beak,pilot.gull.position,Vector2(14,10)):
+		if pilot.carry_window > 0 and player.can_collect_food(pilot.carried_food_id) and BeachCollisions.segment_hits(player.previous_beak,player.sweep_beak,pilot.gull.position,Vector2(float(Config.tuning.rival.mug_hit[0]),float(Config.tuning.rival.mug_hit[1]))):
 			if BeachBoss.blocks_mug(self,pilot,player):
 				return
 			var value: int = pilot.mug(player.position)
