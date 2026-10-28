@@ -71,6 +71,7 @@ var carry_body: AnimatedSprite2D ## generated beak-carry frames, shown instead o
 var carry_item: Sprite2D
 var carry_glint: Sprite2D
 var mug_cue: bool = false ## rivals: player is in mug range, so the held food shines
+var carry_marker: Node2D ## rivals: gold target corners round the held food, same marker as a stall handover
 var carry_beak: AnimatedSprite2D ## generated upper-beak overlay, drawn over the food
 static var carry_frames_cache: Dictionary = {}
 static var carry_art: Dictionary = {} ## `carry` blocks from data/gull_art.json, by art id
@@ -232,6 +233,14 @@ func _ready() -> void:
 		node.visible = false
 		add_child(node)
 	if rival:
+		carry_marker = Node2D.new()
+		carry_marker.visible = false
+		carry_marker.draw.connect(func() -> void:
+			if carry_item.visible and Config.foods.has(carry_food):
+				var pickup: Array = Config.foods[carry_food].pickup_radius
+				PickupShine.draw_target_corners(carry_marker,carry_item.position,Vector2(pickup[0],pickup[1])+Vector2(3,3))
+		)
+		add_child(carry_marker)
 		rival_badge = ColorRect.new()
 		rival_badge.position = Vector2(-22,-30)
 		rival_badge.size = Vector2(44,10)
@@ -617,6 +626,8 @@ func sync_carry() -> void:
 		carry_item.visible = false
 		carry_glint.visible = false
 		carry_beak.visible = false
+		if is_instance_valid(carry_marker):
+			carry_marker.visible = false
 		if is_instance_valid(sprite) and detailed_art and sprite.sprite_frames != null:
 			sprite.visible = true
 		return
@@ -659,6 +670,9 @@ func sync_carry() -> void:
 	carry_item.visible = true
 	carry_glint.texture = PickupShine.overlay(carry_item.texture, Time.get_ticks_msec() / 1000.0, float(get_instance_id() % 7)) if mug_cue else null
 	carry_glint.visible = carry_glint.texture != null
+	if is_instance_valid(carry_marker):
+		carry_marker.visible = true
+		carry_marker.queue_redraw()
 	if carry_glint.visible:
 		carry_glint.position = carry_item.position
 		carry_glint.rotation = carry_item.rotation

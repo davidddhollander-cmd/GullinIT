@@ -49,10 +49,4 @@ func _draw() -> void:
 	if not food:
 		return
 	# Bright corners identify the complete, deliberately held snatch window.
-	var radius := food_radius()+Vector2(3,3)
-	var gold := Color("ffd166")
-	for x: float in [-1.0,1.0]:
-		for y: float in [-1.0,1.0]:
-			var corner := Vector2(x*radius.x,y*radius.y).round()
-			draw_line(corner,corner-Vector2(x*3,0),gold,1,false)
-			draw_line(corner,corner-Vector2(0,y*3),gold,1,false)
+	PickupShine.draw_target_corners(self,Vector2.ZERO,food_radius()+Vector2(3,3))

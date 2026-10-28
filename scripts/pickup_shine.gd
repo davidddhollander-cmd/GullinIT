@@ -54,3 +54,12 @@ static func frame(texture: Texture2D, step_index: int) -> Texture2D:
 	var result: Texture2D = ImageTexture.create_from_image(lit) if count > 0 else null
 	frames[key] = result
 	return result
+
+## Gold corner brackets marking a food that can be snatched (stall handover, mug-able rival food).
+static func draw_target_corners(canvas: CanvasItem, center: Vector2, radius: Vector2) -> void:
+	var gold := Color("ffd166")
+	for x: float in [-1.0,1.0]:
+		for y: float in [-1.0,1.0]:
+			var corner: Vector2 = (center+Vector2(x*radius.x,y*radius.y)).round()
+			canvas.draw_line(corner,corner-Vector2(x*3,0),gold,1,false)
+			canvas.draw_line(corner,corner-Vector2(0,y*3),gold,1,false)
