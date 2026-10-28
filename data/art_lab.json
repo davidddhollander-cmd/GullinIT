@@ -120,6 +120,74 @@
       "reference": "pier_diner_b_reactions",
       "motion": "idle",
       "animation": "surprise"
+    },
+    {
+      "title": "TOUCHUP B IDLE",
+      "description": "CURRENT VS LINE TOUCH-UP, SHOPPER BESIDE.",
+      "current": "pier_diner_b",
+      "candidate": {
+        "clone": "pier_diner_b",
+        "file": "res://assets/sprites/pier-diner-b-base-touchup-v1.png",
+        "frame_w": 128,
+        "frame_h": 128,
+        "visual_scale": 0.5,
+        "art_height": 40,
+        "sprite_offset_y": -26
+      },
+      "reference": "shopper_mullet",
+      "motion": "idle",
+      "animation": "idle"
+    },
+    {
+      "title": "TOUCHUP B WALK",
+      "description": "CURRENT VS LINE TOUCH-UP, SHOPPER BESIDE.",
+      "current": "pier_diner_b_motion",
+      "candidate": {
+        "clone": "pier_diner_b_motion",
+        "file": "res://assets/sprites/pier-diner-b-motion-touchup-v1.png",
+        "frame_w": 128,
+        "frame_h": 128,
+        "visual_scale": 0.5,
+        "art_height": 40,
+        "sprite_offset_y": -26
+      },
+      "reference": "shopper_mullet",
+      "motion": "walk_across",
+      "animation": "walk"
+    },
+    {
+      "title": "TOUCHUP A IDLE",
+      "description": "CURRENT VS LINE TOUCH-UP, SHOPPER BESIDE.",
+      "current": "pier_diner",
+      "candidate": {
+        "clone": "pier_diner",
+        "file": "res://assets/sprites/pier-diner-a-base-touchup-v1.png",
+        "frame_w": 128,
+        "frame_h": 128,
+        "visual_scale": 0.5,
+        "art_height": 40,
+        "sprite_offset_y": -26
+      },
+      "reference": "shopper_mullet",
+      "motion": "idle",
+      "animation": "idle"
+    },
+    {
+      "title": "TOUCHUP A WALK",
+      "description": "CURRENT VS LINE TOUCH-UP, SHOPPER BESIDE.",
+      "current": "pier_diner_motion",
+      "candidate": {
+        "clone": "pier_diner_motion",
+        "file": "res://assets/sprites/pier-diner-a-motion-touchup-v1.png",
+        "frame_w": 128,
+        "frame_h": 128,
+        "visual_scale": 0.5,
+        "art_height": 40,
+        "sprite_offset_y": -26
+      },
+      "reference": "shopper_mullet",
+      "motion": "walk_across",
+      "animation": "walk"
     }
   ]
 }
