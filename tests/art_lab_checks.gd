@@ -18,6 +18,7 @@ static func run(host: Node, check: Callable) -> void:
 	for entry: Dictionary in entries:
 		shaped = shaped and entry.has_all(["title", "description", "current", "candidate", "motion"]) and MOTIONS.has(str(entry.motion)) and Config.sprites.has(str(entry.current))
 		shaped = shaped and ((entry.candidate as Dictionary).has("animations") or (entry.candidate as Dictionary).has("clone"))
+		shaped = shaped and (not entry.has("reference") or Config.sprites.has(str(entry.reference)))
 	check.call(shaped, "every art lab comparison has a title, description, live current sprite, candidate and known motion")
 	check.call(entries[0].current == "gull_herring" and entries[0].candidate.get("clone", "") == "gull_herring", "first art lab entry is the herring gull self-test")
 	var live_ids: Array = Config.read_json("res://data/sprites.json").keys()
@@ -81,6 +82,37 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(lab.index == count - 1, "left arrow wraps to the last comparison")
 	_key(lab, KEY_1)
 	check.call(lab.index == 0, "1 picks the first comparison")
+	var diner_entry_index: int = -1
+	for i: int in entries.size():
+		if entries[i].has("reference"):
+			diner_entry_index = i
+			break
+	check.call(diner_entry_index >= 0, "art lab accepts a cast reference beside an A/B pair")
+	if diner_entry_index >= 0:
+		lab._select(diner_entry_index)
+		check.call(not lab.reference_side.is_empty() and lab.reference_side.node is AnimatedSprite2D, "cast reference builds as a third sprite")
+	var diner_candidates: Array = entries.filter(func(entry: Dictionary) -> bool: return str(entry.title).begins_with("DINER A "))
+	check.call(diner_candidates.size() == 4, "diner A has idle, walk, swat and reaction candidate comparisons")
+	var expected_sheets: Dictionary = {
+		"pier-diner-a-base-candidate-v1.png": 12,
+		"pier-diner-a-motion-candidate-v1.png": 14,
+		"pier-diner-a-reactions-candidate-v1.png": 12,
+	}
+	for file: String in expected_sheets:
+		var image: Image = Image.load_from_file("res://assets/sprites/" + file)
+		check.call(image != null and image.get_size() == Vector2i(1024, 256), "%s is an 8x2 atlas of 128px cells" % file)
+		var hard_alpha: bool = true
+		var aligned: bool = true
+		for frame: int in int(expected_sheets[file]):
+			var cell: Image = image.get_region(Rect2i(frame % 8 * 128, frame / 8 * 128, 128, 128))
+			var bounds: Rect2i = cell.get_used_rect()
+			aligned = aligned and bounds.has_area() and bounds.end.y == 116
+			for y: int in cell.get_height():
+				for x: int in cell.get_width():
+					var alpha: float = cell.get_pixel(x, y).a
+					hard_alpha = hard_alpha and (is_zero_approx(alpha) or is_equal_approx(alpha, 1.0))
+		check.call(hard_alpha, "%s uses hard alpha only" % file)
+		check.call(aligned, "%s keeps every pose on one-based sole row 116" % file)
 
 	# Every motion runs, so future entries are not first exercised in front of David.
 	for motion: String in MOTIONS:
