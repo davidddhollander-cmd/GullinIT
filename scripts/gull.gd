@@ -291,9 +291,9 @@ func apply_species_stats() -> void:
 	stun_mult = float(s.get("stun",1.0))
 	shoves = bool(s.get("shove",false))
 
-func show_ground_peck() -> void:
+func show_ground_peck(time: float = 0.14) -> void:
 	art_event = &"peck"
-	art_event_left = 0.14
+	art_event_left = time
 
 func start_screech() -> bool:
 	if not detailed_art or state != State.GROUNDED or not sprite.sprite_frames.has_animation(&"screech"):
@@ -410,6 +410,8 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 				coasting = false
 			var side: float = signf(aim.x - position.x) if absf(aim.x - position.x) > float(f.aim_deadzone) else 0.0
 			var max_speed: float = float(f.ground_speed) if on_ground else float(f.max_speed) * speed_factor * species_speed()
+			if on_ground and not rival and art_event == &"peck" and art_event_left > 0.0:
+				max_speed *= float(Config.tuning.world.pickup_slow) # the gull slows to pick the morsel up
 			if coasting and not on_ground:
 				coast_speed = move_toward(coast_speed,0,float(f.coast_drag)*delta)
 				max_speed = coast_speed
