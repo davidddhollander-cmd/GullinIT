@@ -440,8 +440,10 @@ func _physics_process(delta: float) -> void:
 		for pilot: RivalPilot in pilots:
 			rival_gulls.append(pilot.gull)
 		dog.tick(step,player,rival_gulls)
+		dog.z_index = spawner.depth_z(dog.position,2)
 	for teen: WatergunTeen in teens:
 		teen.tick(step,gulls)
+		teen.z_index = spawner.depth_z(teen.position,2) # mid-lane band, same depth rule as the NPCs
 	_rival_taunt(step)
 	if player.state != BeachGull.State.STUNNED:
 		player.digestion.tick(step,player.state == BeachGull.State.GROUNDED)
