@@ -195,10 +195,10 @@
       "current": "fish_chips_stand",
       "candidate": {
         "clone": "fish_chips_stand",
-        "file": "res://assets/sprites/pier-restaurant-props-v1/two-counter-restaurant-v1.png",
+        "file": "res://assets/sprites/pier-restaurant-props-v1/beach-hole-restaurant-v2.png",
         "frame_w": 132,
         "frame_h": 88,
-        "visual_scale": 1.0
+        "visual_scale": 1
       },
       "motion": "static",
       "current_override": {

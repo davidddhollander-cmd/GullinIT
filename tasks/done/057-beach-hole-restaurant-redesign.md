@@ -1,6 +1,6 @@
-# 057 — "The Beach Hole" restaurant: 70s tropical redesign
+﻿# 057 — "The Beach Hole" restaurant: 70s tropical redesign
 
-Status: inbox
+Status: merged (two fixes pending in task 059)
 Author: Claude
 Assignee: Codex
 Depends on: none (the `PIER RESTAURANT` Art Lab entry from the pier-restaurant-props-v1 review already exists in `data/art_lab.json`)
@@ -34,14 +34,58 @@ David reviewed `two-counter-restaurant-v1.png` (coral-and-cream striped awning, 
 Canvas size, tallest and widest extents, colour count (and which colours are new), isolated single pixel count and share (v1: 198 of 6,226 = 3.2%; target no worse), sign panel rectangle, counter anchors.
 
 ## Done when (acceptance)
-- [ ] `beach-hole-restaurant-v2.png` exists: hard alpha, about 132x88, two service windows, empty interior, blank sign panel of at least 92x12
-- [ ] `manifest.json` has `sign_panel` and both counter anchors
-- [ ] Prompt (with the sharpness spec) and untouched source saved
-- [ ] Art Lab `PIER RESTAURANT` shows v2 beside the three live stands; 1x capture in the Report; preview with "THE BEACH HOLE" on the sign
-- [ ] Report lists the measurements above
-- [ ] `./tools/validate.ps1`: 0 new failures
-- [ ] Status `done (awaiting David)`
+- [x] `beach-hole-restaurant-v2.png` exists: hard alpha, about 132x88, two service windows, empty interior, blank sign panel of at least 92x12
+- [x] `manifest.json` has `sign_panel` and both counter anchors
+- [x] Prompt (with the sharpness spec) and untouched source saved
+- [x] Art Lab `PIER RESTAURANT` shows v2 beside the three live stands; 1x capture in the Report; preview with "THE BEACH HOLE" on the sign
+- [x] Report lists the measurements above
+- [x] `./tools/validate.ps1`: 0 new failures
+- [x] Status `done (awaiting David)`
 
 ## Report
+
+### Result
+
+Completed the generated-art redesign as a distinct low, wide 1970s tropical restaurant. The runtime sprite keeps two empty service windows and counter ledges, with no vendor, food, people or text baked in. The sign remains blank in the runtime asset; the separate preview renders **THE BEACH HOLE** through Godot with GullPixel.
+
+### Files changed
+
+- Added the three untouched image-generator outputs under `assets/reference/pier-restaurant-props-v1/` and documented the exact prompts in `PROMPTS.md`.
+- Added `assets/sprites/pier-restaurant-props-v1/beach-hole-restaurant-v2.png`, its lossless Godot import, and the manifest metadata.
+- Added `tools/prepare_beach_hole_restaurant_v2.gd` for block-majority palette reduction and lone-pixel cleanup.
+- Added `tools/beach_hole_preview.gd` / `.tscn` to reproduce the GullPixel sign overlay.
+- Updated `data/art_lab.json` so `PIER RESTAURANT` uses v2.
+- Added `assets/previews/task-057-pier-restaurant-art-lab-1x.png` and `assets/previews/beach-hole-restaurant-v2-name-preview.png`.
+- Included the prerequisite unmerged pier-restaurant-props-v1 asset set and preparation script so this branch is self-contained from `main`.
+
+### Measurements
+
+- Canvas: **132 × 88 px**; opaque extents: **130 × 86 px**, bbox `(1,1)–(130,86)`; bottom-centre origin `(66,87)`.
+- Visible colours: **15** total.
+- New colours beyond the 16-colour union, all eight allowed additions: `(232,79,24)`, `(247,137,32)`, `(229,174,51)`, `(117,137,61)`, `(48,105,70)`, `(92,55,32)`, `(193,109,39)`, `(245,216,128)`.
+- Opaque pixels: **10,272**.
+- Isolated non-outline single pixels after cleanup: **2 / 10,272 = 0.02%**, better than v1's 198 / 6,226 = 3.2%.
+- Blank sign panel: **`[19, 7, 94, 15]`**, exceeding 92 × 12.
+- Service counter anchors: **`[[50,67],[101,67]]`**.
+- Import: lossless (`compress/mode=0`), nearest project filtering, mipmaps disabled.
+
+### Decisions
+
+- Used three generated passes. Attempt 1 established the design; attempt 2 widened the sign; attempt 3 was selected because its uninterrupted cream panel survives reduction above the required 92 × 12.
+- The untouched selected source is block-majority sampled into the existing 132 × 88 contract with independent X/Y sampling, palette mapping and lone-pixel cleanup. No part of the building was drawn in code.
+- The preview title uses Godot/GullPixel at the font's measured 80 × 8 size and is not baked into the runtime sprite.
+
+### Verification
+
+- `godot --headless --path . --script res://tools/prepare_beach_hole_restaurant_v2.gd`: exit **0**.
+- `./tools/validate.ps1`: exit **0**.
+- Direct integration log: **14,573 checks, 0 failures**. The pre-existing post-summary `off_lead_dog` dictionary script error and existing image-load warnings remain baseline-only; no new task failure.
+- Live Godot Art Lab capture: `assets/previews/task-057-pier-restaurant-art-lab-1x.png`.
+- GullPixel overlay preview: `assets/previews/beach-hole-restaurant-v2-name-preview.png`.
+
+### Branch
+
+- Branch: `codex/057-beach-hole-restaurant-redesign`
+- Last commit: branch tip completion commit (local; GitHub push attempted after commit)
 
 ## Review notes

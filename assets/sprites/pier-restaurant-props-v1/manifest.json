@@ -1,4 +1,4 @@
-{
+﻿{
   "palette": {
     "source": "existing pier, food-stand, and beach-chair runtime sprites",
     "visible_color_count": 16
@@ -76,6 +76,34 @@
       "origin": [
         30,
         33
+      ]
+    },
+    "beach_hole_restaurant_v2": {
+      "file": "res://assets/sprites/pier-restaurant-props-v1/beach-hole-restaurant-v2.png",
+      "size": [
+        132,
+        88
+      ],
+      "origin": [
+        66,
+        87
+      ],
+      "service_counter_anchors": [
+        [
+          50,
+          67
+        ],
+        [
+          101,
+          67
+        ]
+      ],
+      "service_windows": 2,
+      "sign_panel": [
+        19,
+        7,
+        94,
+        15
       ]
     }
   }

@@ -1,6 +1,6 @@
-# 056 — Restaurant table, chairs and pier fence regenerated, sharp
+﻿# 056 — Restaurant table, chairs and pier fence regenerated, sharp
 
-Status: done (awaiting David)
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: none (the Art Lab entries from the pier-restaurant-props-v1 review are already in `data/art_lab.json`)
