@@ -5,6 +5,7 @@ signal collected(position: Vector2, food_id: String, scrap: bool)
 signal bag_collected
 signal bin_opened(bin_type: String)
 signal bin_emptied(bin_type: String)
+const BIN_SPILL_SPREAD: float = 90.0
 var game: BeachGame
 var items: Array[Dictionary] = []
 var raids: Dictionary = {}
@@ -186,7 +187,7 @@ func _peck_bin(bin: Dictionary) -> bool:
 			var is_food: bool = Config.foods.has(kind)
 			bin.scatter_index = int(bin.scatter_index)+1
 			var direction: float = -1.0 if i%2 == 0 else 1.0
-			var item: Dictionary = {"owner":null,"source":"bin","food_id":kind if is_food else "","garbage":not is_food,"garbage_kind":kind,"position":content_position+Vector2(0,6),"velocity":Vector2(direction*rng.randf_range(35,65),-rng.randf_range(65,95)),"grounded":false,"age":0.0}
+			var item: Dictionary = {"owner":null,"source":"bin","bin_x":float(bin.x),"food_id":kind if is_food else "","garbage":not is_food,"garbage_kind":kind,"position":content_position+Vector2(0,6),"velocity":Vector2(direction*rng.randf_range(35,65),-rng.randf_range(65,95)),"grounded":false,"age":0.0}
 			if not is_food:
 				var rest_limit: float = 0.52 if kind == "wrapper" else 0.34
 				item.rotation = visual_rng.randf_range(-0.18,0.18)
@@ -259,8 +260,10 @@ func tick(delta: float) -> void:
 				if is_garbage:
 					item.rotation = float(item.get("rest_angle",clampf(float(item.get("rotation",0.0)),-0.4,0.4)))
 					item.angular_velocity = 0.0
-		# Sand sources cannot throw food onto the paved promenade.
-		if item.get("source","") == "bin" or (item.get("owner") is BeachTarget and item.owner.kind == "sunbather"):
+		# Sand sources cannot throw food onto the paved promenade; bins already on the promenade or pier spill beside themselves.
+		if item.get("source","") == "bin" and float(item.get("bin_x",0.0)) > float(t.beach_scatter_max_x):
+			item.position.x = clampf(float(item.position.x),float(item.bin_x)-BIN_SPILL_SPREAD,float(item.bin_x)+BIN_SPILL_SPREAD)
+		elif item.get("source","") == "bin" or (item.get("owner") is BeachTarget and item.owner.kind == "sunbather"):
 			item.position.x = clampf(float(item.position.x),float(t.beach_min_x),float(t.beach_scatter_max_x))
 		if is_garbage:
 			continue
