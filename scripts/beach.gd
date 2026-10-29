@@ -30,10 +30,17 @@ var bin_release_bounce: Array[bool] = []
 var bin_full: Array[bool] = []
 var bin_glints: Array[Sprite2D] = []
 var font: Font = preload("res://assets/fonts/gull_pixel.fnt")
+## Generated sky/sun/sea (BeachBackgroundArt). Art Lab only until David approves it; set before setup().
+var use_background_art: bool = false
+var background_art: BeachBackgroundArt
 
 func setup(entries: Array, zone_entries: Array = [], world_settings: Dictionary = {}) -> void:
 	zones = zone_entries.duplicate(true)
 	world = world_settings.duplicate(true)
+	if use_background_art:
+		background_art = BeachBackgroundArt.new(sunset)
+		add_child(background_art)
+		background_art.update(camera_x,time)
 	for entry: Dictionary in entries:
 		props.append(entry)
 		bin_wobble.append(0.0)
@@ -141,6 +148,8 @@ func set_bin_full(x: float, full: bool) -> void:
 
 func tick(delta: float) -> void:
 	time += delta
+	if background_art != null:
+		background_art.update(camera_x,time)
 	_update_palm_wind()
 	for i: int in props.size():
 		if is_instance_valid(bin_glints[i]):
@@ -166,18 +175,20 @@ func tick(delta: float) -> void:
 
 func _draw() -> void:
 	var left: float = camera_x - 160
-	draw_rect(Rect2(left-4,0,328,96), Color("edb98b") if sunset else Color("a9d7d2"))
-	draw_rect(Rect2(left-4,65,328,31), Color("f4cf9f") if sunset else Color("c8e4ce"))
-	draw_circle(Vector2(left+250,43), 18, Color("fff1bb"))
-	for i: int in range(8):
-		var cx: float = fposmod(i * 87.0 - camera_x * 0.1 + time * (1 + strength * 2) * wind_dir, 380) + left - 30
-		draw_rect(Rect2(cx,25+(i%3)*12,29,5),Color("edf1d6"))
-		draw_rect(Rect2(cx+7,21+(i%3)*12,16,5),Color("edf1d6"))
-	draw_rect(Rect2(left-4,94,328,36),Color("408fa8"))
-	draw_rect(Rect2(left-4,103,328,29),Color("56b7ae"))
-	for i: int in range(35):
-		var wx: float = fposmod(i * 31 - camera_x * 0.3 + time * 4, 360) + left - 20
-		draw_rect(Rect2(wx,98+(i%5)*6,8+(i%3)*5,1),Color("b7dfce"))
+	# With background art on, it draws the sky, sun and sea behind this node instead.
+	if background_art == null:
+		draw_rect(Rect2(left-4,0,328,96), Color("edb98b") if sunset else Color("a9d7d2"))
+		draw_rect(Rect2(left-4,65,328,31), Color("f4cf9f") if sunset else Color("c8e4ce"))
+		draw_circle(Vector2(left+250,43), 18, Color("fff1bb"))
+		for i: int in range(8):
+			var cx: float = fposmod(i * 87.0 - camera_x * 0.1 + time * (1 + strength * 2) * wind_dir, 380) + left - 30
+			draw_rect(Rect2(cx,25+(i%3)*12,29,5),Color("edf1d6"))
+			draw_rect(Rect2(cx+7,21+(i%3)*12,16,5),Color("edf1d6"))
+		draw_rect(Rect2(left-4,94,328,36),Color("408fa8"))
+		draw_rect(Rect2(left-4,103,328,29),Color("56b7ae"))
+		for i: int in range(35):
+			var wx: float = fposmod(i * 31 - camera_x * 0.3 + time * 4, 360) + left - 20
+			draw_rect(Rect2(wx,98+(i%5)*6,8+(i%3)*5,1),Color("b7dfce"))
 	var width: float = float(world.get("width",Config.tuning.world.width))
 	var promenade: float = float(world.get("promenade_start",Config.tuning.world.promenade_start))
 	var pier: float = float(world.get("pier_start",Config.tuning.world.pier_start))
