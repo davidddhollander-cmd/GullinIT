@@ -1,6 +1,6 @@
 # 055 — Beach ground textures: shoreline, sand, promenade and pier
 
-Status: inbox
+Status: doing
 Author: Claude
 Assignee: Codex
 Depends on: none (background-v2 sky/sun/sea is already on `main`)
