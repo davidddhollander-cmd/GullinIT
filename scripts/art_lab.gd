@@ -26,6 +26,8 @@ var smooth: bool = false
 var integer_scale: bool = false
 var paused: bool = false
 var step_once: bool = false
+var new_sky: bool = false ## G: generated sky/sun/sea (BeachBackgroundArt) instead of the live drawn one
+var dusk: bool = false ## D: the title screen's sunset version of the backdrop
 var pair_x: float = REST_X
 var dir: float = 1.0
 var dive_timer: float = 0.0
@@ -51,9 +53,7 @@ func _ready() -> void:
 		return
 	for i: int in comparisons.size():
 		candidate_ids.append(_register(i, comparisons[i]))
-	backdrop = BeachBackdrop.new()
-	add_child(backdrop)
-	backdrop.setup([])
+	_build_backdrop()
 	stage = Node2D.new()
 	stage.y_sort_enabled = true
 	add_child(stage)
@@ -63,6 +63,18 @@ func _ready() -> void:
 	_select(0)
 	if OS.get_cmdline_user_args().has("--capture"):
 		_capture_run()
+
+## The backdrop reads its sky and sunset settings in setup(), so toggling them rebuilds it.
+func _build_backdrop() -> void:
+	if backdrop != null:
+		backdrop.free()
+	backdrop = BeachBackdrop.new()
+	backdrop.use_background_art = new_sky
+	backdrop.sunset = dusk
+	backdrop.camera_x = camera.position.x if camera != null else 160.0
+	add_child(backdrop)
+	move_child(backdrop, 0)
+	backdrop.setup([])
 
 ## A candidate is an sprites.json-shaped entry; `clone` copies a live entry first so a self-test stays short.
 func _register(i: int, entry: Dictionary) -> String:
@@ -101,7 +113,7 @@ func _build_hud() -> void:
 		side_labels.append(_label(layer, Vector2(x, 22), 80, HORIZONTAL_ALIGNMENT_CENTER))
 	reference_label = _label(layer, Vector2(120, 22), 80, HORIZONTAL_ALIGNMENT_CENTER)
 	_label(layer, Vector2(2, 161), 316, HORIZONTAL_ALIGNMENT_LEFT).text = "1-9/ARROWS PICK  Z ZOOM  B BLIND  F FILTER"
-	_label(layer, Vector2(2, 170), 316, HORIZONTAL_ALIGNMENT_LEFT).text = "I INT-SCALE  P PAUSE  . STEP  C CAPTURE  ESC QUIT"
+	_label(layer, Vector2(2, 170), 316, HORIZONTAL_ALIGNMENT_LEFT).text = "I INT  P PAUSE  . STEP  C CAPTURE  G SKY  D DUSK"
 
 func _label(parent: Node, at: Vector2, width: float, align: HorizontalAlignment) -> Label:
 	var label: Label = Label.new()
@@ -288,6 +300,10 @@ func _refresh_hud() -> void:
 		flags.append("BLIND")
 	if paused:
 		flags.append("PAUSED")
+	if new_sky:
+		flags.append("NEW SKY")
+	if dusk:
+		flags.append("DUSK")
 	flags_label.text = " ".join(flags)
 	flags_label.add_theme_color_override("font_color", GOLD if blind else Color("fff4da"))
 	var names: Array[String] = ["CURRENT", "PROPOSED"]
@@ -337,6 +353,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_I:
 			integer_scale = not integer_scale
 			get_window().content_scale_stretch = Window.CONTENT_SCALE_STRETCH_INTEGER if integer_scale else Window.CONTENT_SCALE_STRETCH_FRACTIONAL
+		KEY_G:
+			new_sky = not new_sky
+			_build_backdrop()
+		KEY_D:
+			dusk = not dusk
+			_build_backdrop()
 		KEY_P:
 			paused = not paused
 		KEY_PERIOD:
