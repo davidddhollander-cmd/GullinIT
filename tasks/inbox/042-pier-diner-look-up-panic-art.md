@@ -3,7 +3,7 @@
 Status: inbox
 Author: Claude
 Assignee: Codex
-Depends on: 041
+Depends on: 041, 054
 Created: 2026-10-27
 
 ## Goal
@@ -21,8 +21,18 @@ Give both pier diners the same two Gang Call crowd reactions as the shoppers in 
 3. Keep the untouched source artwork and prompts in `assets/reference/pier-diner-panic-v1/`. Put a preview in `assets/previews/` showing both diners in both poses at in-game size, next to a shopper doing the same pose from 041.
 4. No gameplay changes. AGENTS.md applies: generated art only. Code may crop, align and pack, but must not draw bodies, faces or limbs, not even as placeholders.
 
+## Cast art standard (measured 2026-10-28 from the shoppers and diner B)
+Every new or reworked person sheet must meet this, and the Report states the measured numbers:
+- 128x128 cells drawn at exactly `visual_scale` 0.5 (no other scale, no 400 px cells).
+- Tallest standing pose about 40 px on screen (cap to shoe, cane or hand-held props excluded). The old man is the one exception: 36-38 px.
+- Hard alpha only: no semi-transparent pixels.
+- Flat-colour runs of 1.0-1.6 screen px (finer or chunkier than the shoppers will look wrong next to them).
+- Navy-black outline, the same colour family as the shoppers (about RGB 0-8, 0-8, 13-25).
+- Feet on source row 116 (`sole`), `sprite_offset_y` -26, in every frame of every clip.
+- Check it in the Art Lab next to a shopper before marking the task done.
+
 ## Out of scope
-- Other characters (sunbather, mum/parent, lifeguard, market cleaner, old man).
+- Other characters (sunbather, mum/parent, lifeguard, market cleaner). The old man gets the same two clips in task 051.
 - The panic behaviour (task 040).
 
 ## Done when (acceptance)

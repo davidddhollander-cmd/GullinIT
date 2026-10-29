@@ -87,6 +87,11 @@ func _register(i: int, entry: Dictionary) -> String:
 	var id: String = ("gull_lab_%d" if _is_gull(str(entry.current)) else "lab_%d") % i
 	Config.sprites[id] = def
 	Config.frames_cache.erase(id)
+	if entry.has("current_override"): # the current side as a composite file, e.g. several live props in one row
+		var current_def: Dictionary = (Config.sprites[str(entry.current)] as Dictionary).duplicate(true)
+		current_def.merge(entry.current_override, true)
+		Config.sprites["lab_current_%d" % i] = current_def
+		Config.frames_cache.erase("lab_current_%d" % i)
 	return id
 
 static func _is_gull(id: String) -> bool:
@@ -143,7 +148,8 @@ func _select(i: int) -> void:
 	var species: Array[String] = ["herring", "herring"] # in_beak: the gull is always the herring, only the food changes
 	if motion != "in_beak":
 		species = [str(Config.sprites[str(entry.current)].get("species", "")), "lab_%d" % index]
-	sides = [_make(str(entry.current), species[0], gulls, motion), _make(candidate_ids[index], species[1], gulls, motion)]
+	var current_id: String = "lab_current_%d" % index if entry.has("current_override") else str(entry.current)
+	sides = [_make(current_id, species[0], gulls, motion), _make(candidate_ids[index], species[1], gulls, motion)]
 	reference_side = {}
 	if entry.has("reference") and not gulls:
 		reference_side = _make(str(entry.reference), "", false, motion)

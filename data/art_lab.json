@@ -188,6 +188,52 @@
       "reference": "shopper_mullet",
       "motion": "walk_across",
       "animation": "walk"
+    },
+    {
+      "title": "PIER RESTAURANT",
+      "description": "NEW RESTAURANT BESIDE ALL THREE LIVE STANDS, 1:1.",
+      "current": "fish_chips_stand",
+      "candidate": {
+        "clone": "fish_chips_stand",
+        "file": "res://assets/sprites/pier-restaurant-props-v1/two-counter-restaurant-v1.png",
+        "frame_w": 132,
+        "frame_h": 88,
+        "visual_scale": 1.0
+      },
+      "motion": "static",
+      "current_override": {
+        "file": "res://assets/sprites/pier-restaurant-props-v1/existing-stands-row-v1.png",
+        "frame_w": 160,
+        "frame_h": 56
+      }
+    },
+    {
+      "title": "RESTAURANT TABLE",
+      "description": "NEW TABLE AND TWO CHAIRS VS BEACH CHAIR, SHOPPER FOR SCALE.",
+      "current": "beach_chair",
+      "candidate": {
+        "clone": "beach_chair",
+        "file": "res://assets/sprites/pier-restaurant-props-v1/restaurant-table-chairs-v1.png",
+        "frame_w": 60,
+        "frame_h": 34,
+        "visual_scale": 1.0
+      },
+      "reference": "shopper_mullet",
+      "motion": "static"
+    },
+    {
+      "title": "PIER WIRE FENCE",
+      "description": "NEW REPEATABLE FENCE. NO LIVE FENCE, PIER SHOWN FOR SCALE.",
+      "current": "pier",
+      "candidate": {
+        "clone": "pier",
+        "file": "res://assets/sprites/pier-restaurant-props-v1/pier-wire-fence-v1.png",
+        "frame_w": 72,
+        "frame_h": 24,
+        "visual_scale": 1.0
+      },
+      "reference": "shopper_mullet",
+      "motion": "static"
     }
   ]
 }
