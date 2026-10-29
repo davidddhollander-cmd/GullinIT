@@ -1,0 +1,181 @@
+{
+  "name": "Screeches McCrumbs",
+  "lesson_button": "Got it",
+  "keys": {
+    "keyboard": {
+      "flap": "Space",
+      "dive": "Shift",
+      "peck": "E",
+      "steer": "the mouse or WASD",
+      "call": "Q"
+    },
+    "gamepad": {
+      "flap": "A",
+      "dive": "B",
+      "peck": "X",
+      "steer": "the left stick",
+      "call": "RB"
+    },
+    "touch": {
+      "flap": "FLAP",
+      "dive": "DIVE",
+      "peck": "PECK",
+      "steer": "your thumb",
+      "call": "CALL"
+    }
+  },
+  "toasts": [
+    "Nice one!",
+    "Sharp work!",
+    "Blimey! You did it!",
+    "Not bad!",
+    "That's my bird!"
+  ],
+  "live": {
+    "crash": {
+      "default": "Pull up, you daft gull! Hold {flap}!",
+      "realistic": "Pull up, you daft gull! Tap {flap} fast!"
+    },
+    "peck_now": {
+      "default": "Now! Tap {peck}!",
+      "casual": "Auto peck is on. Fly into it!"
+    },
+    "clean": "Grand! Aim up and climb!",
+    "wheelie_low": "Too low, gullster. Land on the lid.",
+    "full_stomach": "Finish your snack first, greedy guts.",
+    "crash_toast": "Ouch! Dust yourself off."
+  },
+  "training": {
+    "opening": {
+      "mood": "neutral",
+      "text": "Welcome to the beach, young gullster. If you want to survive and thrive, you got to learn quick. Follow the **golden ring** and I'll make a fine thief out of you yet.",
+      "button": "Let's gull it"
+    },
+    "closing": {
+      "mood": "proud",
+      "text": "Not bad, gullster. Not bad at all. You can swoop, raid bins, bump rivals and mug them blind. Now get out there and fleece that beach.",
+      "first_time_text": "Not bad, gullster. Not bad at all. You can swoop, raid bins, bump rivals and mug them blind. Here's a feather for your trouble. Now get out there and fleece that beach.",
+      "button": "To the beach!"
+    },
+    "lessons": [
+      {
+        "mood": "neutral",
+        "lay": {
+          "default": "This is the open sand. Nothing here worth nicking, so first things first: get airborne. Gulls fly by flapping and steering.",
+          "realistic": "This is the open sand. Nothing here worth nicking, so first things first: get airborne. You picked Realistic, so every wingbeat is a separate tap."
+        },
+        "how": {
+          "default": "Hold {flap} to flap and climb. Steer with {steer} to head right. Fly through the golden ring.",
+          "realistic": "Tap {flap} over and over to climb, about four or five taps a second. Steer with {steer} to head right. Fly through the golden ring."
+        },
+        "strip": {
+          "default": "Hold {flap} to take off, then steer right",
+          "realistic": "Tap {flap} to take off, then steer right"
+        },
+        "strip_steer": "Steer right with {steer} to the ring"
+      },
+      {
+        "mood": "neutral",
+        "lay": "What goes up must come down, mate. Stop flapping and you glide, and gliding means sinking. Golden crumbs on the sand are free grub.",
+        "how": {
+          "default": "Let go of {flap}, aim down and land. Then walk over a golden crumb to eat it.",
+          "realistic": "Stop tapping {flap}, aim down and land. Then walk over a golden crumb to eat it."
+        },
+        "strip": {
+          "default": "Let go of {flap}, aim down and land",
+          "realistic": "Stop tapping {flap}, aim down and land"
+        }
+      },
+      {
+        "mood": "amused",
+        "lay": "See the fella at the ice cream stand? He's holding lunch, and lunch is yours. Gulls steal with a swoop: dive from above, snatch, then climb out before you hit the sand.",
+        "how": {
+          "default": "Climb above him. Hold {dive} to dive and tap {peck} when your beak reaches the cone. Then aim up and climb away.",
+          "casual": "Climb above him and hold {dive} to dive. Casual mode does the pecking, so just fly your beak into the cone. Then aim up and climb away."
+        },
+        "strip": {
+          "default": "Dive with {dive}, tap {peck} at the snack",
+          "casual": "Dive with {dive}, your beak pecks for you"
+        }
+      },
+      {
+        "mood": "amused",
+        "lay": "That sunbather is fast asleep and the picnic bag beside them is unguarded. Rude. Bags hold food, but you have to land and peck them open.",
+        "how": "Land next to the bag. Tap {peck} three times to burst it open, then walk over the food that spills out.",
+        "strip": "Land by the bag and tap {peck} three times"
+      },
+      {
+        "mood": "neutral",
+        "lay": "Bins are a proper buffet. Peck one open and everything inside spills onto the sand. Scraps are grub. Wrappers are rubbish, so leave them.",
+        "how": "Land beside the bin and tap {peck} {n} times. Then eat the scraps and ignore the wrappers.",
+        "strip": "Land by the bin and tap {peck} {n} times"
+      },
+      {
+        "mood": "amused",
+        "lay": "Posh wheelie bins have lids you can't open from the sand, but the grub inside is much better. The green one at the end of the beach is full.",
+        "how": "Fly up and land on top of the lid. Tap {peck} {n} times from up there to burst it open.",
+        "strip": "Land on the wheelie bin lid, tap {peck} {n} times"
+      },
+      {
+        "mood": "neutral",
+        "lay": "No golden ring this time. You pick the target. Anyone holding food is fair game: the ice cream fella, the picnic family, whoever.",
+        "how": {
+          "default": "Dive with {dive}, tap {peck} at the snack, then aim up and climb. Mind the sand.",
+          "casual": "Dive with {dive} and fly into the snack. Your beak pecks for you. Then aim up and climb. Mind the sand."
+        },
+        "strip": {
+          "default": "Dive at any snack, peck it, then climb away",
+          "casual": "Dive at any snack, then climb away"
+        }
+      },
+      {
+        "mood": "amused",
+        "lay": "Time to meet the competition. This dummy is a rival gull, flying round with an empty beak. Nothing to steal, but you can still ruin its day. A dive straight into a flying gull bumps it and sends it tumbling.",
+        "how": "Climb above the dummy. Dive with {dive} and fly right into it. A bonk means it worked.",
+        "strip": "Dive with {dive} into the dummy gull"
+      },
+      {
+        "mood": "amused",
+        "lay": "Now the dummy has nicked a snack. A rival carrying food can be mugged, and that's the best steal in the game. Careful though: rivals can mug you too while you're holding food.",
+        "how": "Dive with {dive} and fly straight through the dummy. The snack changes beaks, and it's yours.",
+        "strip": "Dive with {dive} straight through the dummy"
+      }
+    ]
+  },
+  "screech": {
+    "closing": {
+      "mood": "proud",
+      "text": "That's the Gang Call, gullster. Fill the Brash meter, call the gang, nick the lot. Anything you grabbed in training doesn't count, so make the real ones count. The clock starts now.",
+      "button": "Let's go!"
+    },
+    "strips": [
+      {
+        "default": "Land on the ice cream sign",
+        "realistic": "Land on the ice cream sign, stop tapping {flap}"
+      },
+      "Hold {peck} to screech. Higher is louder",
+      "Brash is full! Screech again or press {call}",
+      "Grab the dropped food before they return"
+    ],
+    "lessons": [
+      {
+        "mood": "neutral",
+        "lay": "Level two, gullster, and a new trick. A screech is a gull's best weapon, and it's louder from up high. That ice cream stand has a sign on its roof, and that's your stage.",
+        "how": {
+          "default": "Fly above the ice cream sign, let go of {flap} and drop onto it.",
+          "realistic": "Fly above the ice cream sign, stop tapping {flap} and drop onto it."
+        }
+      },
+      {
+        "mood": "amused",
+        "lay": "Screeching builds your Brash meter, the bar at the top of the screen. Bold moves fill it too: snatches, mugs and bumps. Get stunned and it drains, so stay cocky. The higher the perch, the faster it fills.",
+        "how": "Hold {peck} to screech until the meter is full and says READY."
+      },
+      {
+        "mood": "amused",
+        "lay": "Now for the best trick in the book: the Gang Call. Three of your mates swoop in and knock food out of everyone's hands, and the whole crowd bolts.",
+        "how": "Screech again, or press {call}, to call the gang. Then grab the food they knock loose before the crowd comes back."
+      }
+    ]
+  }
+}

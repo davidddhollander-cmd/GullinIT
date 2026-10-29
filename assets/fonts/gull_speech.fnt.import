@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://b20dunbgahdiu"
+path="res://.godot/imported/gull_speech.fnt-fe04948e0b10cb6064e6484c5b80db53.fontdata"
+
+[deps]
+
+source_file="res://assets/fonts/gull_speech.fnt"
+dest_files=["res://.godot/imported/gull_speech.fnt-fe04948e0b10cb6064e6484c5b80db53.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2

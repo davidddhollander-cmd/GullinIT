@@ -59,6 +59,7 @@ func pin_base_reactions() -> void:
 		world.sunbather_shoo_time = 0.0
 
 func run() -> void:
+	BeachGame.trainer_cards = false # lesson-logic tests drive lessons without dismissing pop-ups; trainer_checks.gd covers the cards
 	GameState.unlock_all = false
 	pin_base_reactions() # timing checks assume base reactions; slow_adult_checks covers the global multiplier
 	capture = OS.get_cmdline_user_args().has("--capture")
@@ -120,6 +121,7 @@ func run() -> void:
 	await input_checks()
 	await screech_checks()
 	await preload("res://tests/screech_lesson_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/trainer_checks.gd").run(self,Callable(self,"check"))
 	GameState.progress["1"] = {"training_step":5,"training_complete":true}
 	GameState.progress["2"] = {"screech_lesson_complete":true}
 	await stand_perch_checks()

@@ -14,7 +14,7 @@ static func run(host: Node, check: Callable) -> void:
 	game.overlay.start_button.pressed.emit()
 	check.call(game.running and game.input.enabled,"tutorial start button enables controls")
 	check.call(game.training and not game.casual and game.lesson == 0 and game.player.state == BeachGull.State.GROUNDED,"first visit starts grounded training without a timer")
-	check.call(game.training_text().contains("SPACE") or game.training_text().contains("FLAP"),"first lesson explains takeoff: "+game.training_text())
+	check.call(game.training_text().contains("Space") or game.training_text().contains("FLAP"),"first lesson explains takeoff: "+game.training_text())
 	check.call(game.training_target().x > game.player.position.x,"first lesson points into open sky: "+str(game.training_target())+" / "+str(game.player.position))
 	game._training_tick(0.1)
 	check.call(game.lesson == 0,"training does not advance without takeoff and steering")
@@ -31,14 +31,14 @@ static func run(host: Node, check: Callable) -> void:
 	for frame: int in range(90):
 		game._physics_process(1.0/60)
 	check.call(game.player.position.y < 110 and game.lesson == 0,"vertical takeoff waits for steering")
-	check.call(game.training_text().contains("STEER RIGHT"),"takeoff updates the tip with the remaining steering action")
+	check.call(game.training_text().contains("Steer right"),"takeoff updates the tip with the remaining steering action")
 	game.input.touch_climb = false
 	game.input.stick_pos = Vector2(124,96)
 	for frame: int in range(40):
 		game._physics_process(1.0/60)
 	check.call(game.lesson == 1 and int(GameState.entry(1).get("training_step",0)) == 1,"takeoff and steer saves lesson checkpoint")
 	game.overlay._process(0)
-	check.call(game.overlay.lesson_label.text.contains("LESSON 2/%d" % BeachGame.TRAINING_LESSONS) and game.overlay.lesson_prompt.text.contains("CRUMB"),"landing tip replaces first tip after takeoff then steering")
+	check.call(game.overlay.lesson_label.text.contains("LESSON 2/%d" % BeachGame.TRAINING_LESSONS) and game.overlay.lesson_prompt.text.contains("aim down"),"landing tip replaces first tip after takeoff then steering")
 	game.player.state = BeachGull.State.GLIDE
 	game._scrap_collected(Vector2(60,156),"crumbs")
 	check.call(game.lesson == 1,"airborne crumb pickup does not satisfy landing lesson")
@@ -83,7 +83,7 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(game.lesson == 3,"bin scrap cannot satisfy picnic bag lesson")
 	game.stash_raids.bag_collected.emit()
 	check.call(game.lesson == 4,"bag food collection advances to bin lesson")
-	check.call(game.training_text().contains("BIN"),"bin lesson explains the new action")
+	check.call(game.training_text().contains("bin"),"bin lesson explains the new action")
 	game._scrap_collected(Vector2.ZERO,"crumbs")
 	check.call(game.lesson == 4,"ordinary scraps cannot skip the bin lesson")
 	game.player.state = BeachGull.State.GROUNDED
@@ -97,12 +97,12 @@ static func run(host: Node, check: Callable) -> void:
 	# Wheelie bin lesson: pecking from the sand does nothing; the lid unlocks better trash.
 	var wheelie: Dictionary = game.training_bin(true)
 	check.call(not wheelie.is_empty() and float(wheelie.x) > 756.0 and float(wheelie.x) < float(game.level.world.width) - 12.0,"training wheelie bin stands right of the stand by the screen edge: "+str(wheelie.get("x")))
-	check.call(game.lesson == BeachGame.WHEELIE_LESSON and game.training_text().contains("WHEELIE"),"wheelie lesson follows the ordinary bin lesson")
+	check.call(game.lesson == BeachGame.WHEELIE_LESSON and game.training_text().contains("wheelie"),"wheelie lesson follows the ordinary bin lesson")
 	check.call(game.training_target().y < float(Config.tuning.world.ground) - 25.0,"wheelie lesson ring marks the raised lid")
 	game.player.support = {}
 	game.player.state = BeachGull.State.GROUNDED
 	game.player.position = Vector2(float(wheelie.x) - 10.0,game.player.ground_y())
-	check.call(game.training_text().contains("TOO LOW"),"standing beside the wheelie bin explains the lid rule")
+	check.call(game.training_text().contains("Too low"),"standing beside the wheelie bin explains the lid rule")
 	for tap: int in range(int(Config.tuning.world.bin_pecks)):
 		game.stash_raids.peck_cooldown = 0
 		game._peck()
@@ -151,7 +151,7 @@ static func run(host: Node, check: Callable) -> void:
 	var dummy: RivalPilot = game.training_dummy()
 	check.call(dummy != null and dummy.dummy and game.pilots.size() == 1 and dummy.carry_window <= 0.0,"bump lesson spawns one empty-beaked dummy gull")
 	game.overlay._process(0)
-	check.call(game.overlay.lesson_label.text.contains("LESSON 8/9") and game.training_text().contains("BONK") and game.training_target() == dummy.gull.position,"bump lesson names the action and rings the dummy")
+	check.call(game.overlay.lesson_label.text.contains("LESSON 8/9") and game.training_text().contains("dummy gull") and game.training_target() == dummy.gull.position,"bump lesson names the action and rings the dummy")
 	# The dummy only patrols its lap: it never hunts, dives, steals or mugs.
 	for frame: int in range(240):
 		dummy.tick(1.0/60,[customer],{},game.wind)
@@ -168,7 +168,9 @@ static func run(host: Node, check: Callable) -> void:
 	game.player.state = BeachGull.State.STRIKE
 	game._mugging()
 	check.call(game.lesson == BeachGame.MUG_LESSON and dummy.gull.state == BeachGull.State.STUNNED and int(GameState.entry(1).get("training_step",0)) == BeachGame.MUG_LESSON,"dive into the empty-beaked dummy bumps it and advances to the mug lesson")
-	check.call(game.training_text().contains("MUG") and dummy.dummy_food == BeachGame.DUMMY_FOOD,"mug lesson arms the dummy with food")
+	game.player.digestion.snacks.clear()
+	game.player.digestion.rest = 0.0
+	check.call(game.training_text().contains("through the dummy") and dummy.dummy_food == BeachGame.DUMMY_FOOD,"mug lesson arms the dummy with food")
 	# The mug window stays open only while the dummy is flying again.
 	dummy.tick(1.0/60,[],{},game.wind)
 	check.call(dummy.carry_window <= 0.0 or dummy.gull.state != BeachGull.State.STUNNED,"a tumbling dummy is not muggable yet")
@@ -211,7 +213,7 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(game.training and game.lesson == 0 and not game.casual,"normal Training Day selection replays lessons on a completed save")
 	game.overlay.start_button.pressed.emit()
 	game.overlay._process(0)
-	check.call(game.overlay.training_panel.visible and game.overlay.lesson_prompt.text.contains("TAKE OFF"),"first tip is visible when replaying through the level card")
+	check.call(game.overlay.training_panel.visible and game.overlay.lesson_prompt.text.contains("take off"),"first tip is visible when replaying through the level card")
 	Input.action_press("climb")
 	Input.action_press("aim_up")
 	for frame: int in range(50):
@@ -223,7 +225,7 @@ static func run(host: Node, check: Callable) -> void:
 		game._physics_process(1.0/60)
 	Input.action_release("aim_right")
 	game.overlay._process(0)
-	check.call(game.lesson == 1 and game.overlay.training_panel.visible and game.overlay.lesson_prompt.text.contains("CRUMB"),"second tip appears after takeoff and steering on a completed save")
+	check.call(game.lesson == 1 and game.overlay.training_panel.visible and game.overlay.lesson_prompt.text.contains("aim down"),"second tip appears after takeoff and steering on a completed save")
 	check.call(GameState.entry(1) == completed_entry,"replaying tips preserves completed progress and existing records")
 	host.main._navigate("restart")
 	check.call(host.main.game.training and host.main.game.lesson == 0,"restarting a replay keeps tutorial tips enabled")
