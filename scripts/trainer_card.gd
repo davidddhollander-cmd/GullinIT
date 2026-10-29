@@ -118,6 +118,11 @@ func open(entry: Dictionary) -> void:
 	lay_label.text = markup(str(entry.get("lay","")))
 	how_label.text = markup(str(entry.get("how","")))
 	how_label.visible = not str(entry.get("how","")).is_empty()
+	# Where each paragraph's copy lives, for the debug text editor (F3).
+	lay_label.set_meta("text_source",str(entry.get("lay_source","")))
+	lay_label.set_meta("text_template",str(entry.get("lay_template","")))
+	how_label.set_meta("text_source",str(entry.get("how_source","")))
+	how_label.set_meta("text_template",str(entry.get("how_template","")))
 	counter_label.text = str(entry.get("counter",""))
 	button.text = str(entry.get("button","GOT IT")).to_upper()
 	talk_left = clampf((str(entry.get("lay","")).length()+str(entry.get("how","")).length())*0.02,0.8,2.6)
