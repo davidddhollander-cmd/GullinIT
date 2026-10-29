@@ -2,10 +2,13 @@ extends Node
 const GULL_CALL: AudioStream = preload("res://assets/audio/263786__steaq__seagull-single-call.ogg")
 var streams: Dictionary = {}
 var music: AudioStreamPlayer
-# Looping soundtrack: the title theme on menus, the beach loop during levels.
+# Looping soundtrack: title theme on the title screen, reggae lounge on Training Day,
+# then levels alternate synthpop / beach (see tools/compose_music.py).
 const MUSIC_TRACKS: Dictionary = {
 	"title": "res://assets/audio/music/title_theme.ogg",
+	"lounge": "res://assets/audio/music/lounge_loop.ogg",
 	"beach": "res://assets/audio/music/beach_loop.ogg",
+	"synth": "res://assets/audio/music/synth_loop.ogg",
 }
 const MUSIC_DB: float = -3.0
 const MUSIC_DUCK_DB: float = -14.0

@@ -166,7 +166,7 @@ func start_level(id: int, force_training: bool = false) -> void:
 	game.setup(Config.levels[id-1],casual,force_training)
 	game.level_finished.connect(_finished)
 	game.pause_requested.connect(func() -> void: _navigate("pause"))
-	Audio.play_music("beach")
+	Audio.play_music("lounge" if id == 1 else ("synth" if id % 2 == 0 else "beach"))
 
 func clear_game() -> void:
 	if is_instance_valid(game):
