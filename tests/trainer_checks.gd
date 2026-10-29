@@ -56,10 +56,10 @@ static func _copy_checks(check: Callable) -> void:
 				if text.contains("{") or text.contains("}"):
 					unresolved += 1
 			for text: String in texts:
-				worst_card = maxi(worst_card,_lines(text,TrainerCard.BUBBLE_WIDTH-16.0))
+				worst_card = maxi(worst_card,_lines(text,TrainerCard.TEXT_WIDTH))
 			for pair: String in pairs:
 				var parts: PackedStringArray = pair.split("\n")
-				worst_card = maxi(worst_card,_lines(parts[0],TrainerCard.BUBBLE_WIDTH-16.0) + _lines(parts[1],TrainerCard.BUBBLE_WIDTH-16.0))
+				worst_card = maxi(worst_card,_lines(parts[0],TrainerCard.TEXT_WIDTH) + _lines(parts[1],TrainerCard.TEXT_WIDTH))
 			for strip: String in strips:
 				worst_strip = maxi(worst_strip,_lines(strip,176.0))
 	GameState.options.erase("control_mode")

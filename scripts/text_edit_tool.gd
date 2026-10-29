@@ -108,7 +108,16 @@ func target_at(point: Vector2) -> Control:
 			best_area = rect.get_area()
 	return best
 
+## The game reuses some nodes for other text (the trainer card shows every lesson in the same labels).
+## An edit only counts while the node still shows what the editor last put there.
+func prune_stale() -> void:
+	for id: int in edits.keys():
+		var entry: Dictionary = edits[id]
+		if not is_instance_valid(entry.node) or text_of(entry.node) != str(entry.applied):
+			edits.erase(id)
+
 func select(target: Control) -> void:
+	prune_stale()
 	selected = target
 	if window == null:
 		return
@@ -150,8 +159,9 @@ func apply_edit(value: String) -> void:
 		return
 	var id: int = selected.get_instance_id()
 	if not edits.has(id):
-		edits[id] = {"node": selected, "original": text_of(selected)}
+		edits[id] = {"node": selected, "original": text_of(selected), "applied": text_of(selected)}
 	selected.set("text",stored(selected,value))
+	edits[id].applied = text_of(selected)
 	if text_of(selected) == str(edits[id].original):
 		edits.erase(id)
 	_update_status()
@@ -202,6 +212,7 @@ func context_line() -> String:
 	return " | ".join(parts)
 
 func report() -> String:
+	prune_stale()
 	var lines: PackedStringArray = ["TEXT EDITS (%d)" % edits.size(),context_line(),""]
 	var number: int = 1
 	for id: int in edits.keys():
@@ -223,6 +234,8 @@ func report() -> String:
 	return "\n".join(lines)
 
 func copy_report() -> void:
+	prune_stale()
+	_update_status()
 	DisplayServer.clipboard_set(report())
 	var file: FileAccess = FileAccess.open("user://text_edits.txt",FileAccess.WRITE)
 	if file != null:
