@@ -3,8 +3,8 @@
   "lesson_button": "Got it",
   "keys": {
     "keyboard": {
-      "flap": "Space",
-      "dive": "Shift",
+      "flap": "Space or left click",
+      "dive": "Shift or right click",
       "peck": "E",
       "steer": "the mouse or WASD",
       "call": "Q"
