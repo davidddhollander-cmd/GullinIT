@@ -10,6 +10,23 @@ static func segment_hits(from: Vector2, to: Vector2, point: Vector2, radius: Vec
 	var nearest: Vector2 = Geometry2D.get_closest_point_to_segment(Vector2.ZERO,scaled_from,scaled_to)
 	return nearest.length_squared() <= 1.0
 
+## Returns the first visible gull crossed by a swept projectile segment.
+## The shared gull list contains both the player and rivals; choosing by travel
+## progress instead of array order keeps the nearest body as the single hit.
+static func first_gull_hit(from: Vector2, to: Vector2, gulls: Array[BeachGull], radius: Vector2) -> BeachGull:
+	var travel: Vector2 = to-from
+	var length_squared: float = travel.length_squared()
+	var first: BeachGull
+	var first_progress: float = INF
+	for gull: BeachGull in gulls:
+		if not is_instance_valid(gull) or not gull.visible or not segment_hits(from,to,gull.position,radius):
+			continue
+		var progress: float = 0.0 if length_squared <= 0.0001 else clampf((gull.position-from).dot(travel)/length_squared,0.0,1.0)
+		if progress < first_progress:
+			first = gull
+			first_progress = progress
+	return first
+
 static func resolve(gull: BeachGull, targets: Array[BeachTarget], props: Array[Dictionary]) -> void:
 	# A crash or defensive hit wins the frame; its penalty cannot be followed by
 	# a food award from the strike segment that led into the stun.
