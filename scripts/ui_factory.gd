@@ -6,6 +6,8 @@ const GOLD: Color = Color("ffc65c")
 const CORAL: Color = Color("ef725c")
 const FONT_NATIVE: int = 8
 const FONT_DISPLAY: int = 16
+const BACK_WIDTH: float = 59.0
+const BACK_HEIGHT: float = 13.0
 
 static func theme() -> Theme:
 	var result: Theme = Theme.new()
@@ -47,6 +49,21 @@ static func label(parent: Node, value: String, size: int = FONT_NATIVE, color: C
 	node.add_theme_color_override("font_color",color)
 	node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(node)
+	return node
+
+## A smaller button for BACK and similar exits: 59 x 13, centred in its row or column. The theme's 6 px
+## top and bottom padding would hold a button at 20 px, so its styles are copied with slimmer padding.
+static func back_button(parent: Node, value: String, action: Callable, width: float = BACK_WIDTH) -> Button:
+	var node: Button = button(parent,value,action,width)
+	node.custom_minimum_size.y = BACK_HEIGHT
+	node.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	node.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var base: Theme = theme()
+	for state: String in ["normal","hover","pressed","focus","disabled"]:
+		var box: StyleBoxFlat = base.get_stylebox(state,"Button").duplicate() as StyleBoxFlat
+		box.content_margin_top = (BACK_HEIGHT - float(FONT_NATIVE)) * 0.5
+		box.content_margin_bottom = (BACK_HEIGHT - float(FONT_NATIVE)) * 0.5
+		node.add_theme_stylebox_override(state,box)
 	return node
 
 static func button(parent: Node, value: String, action: Callable, width: float = 0) -> Button:

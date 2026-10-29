@@ -114,7 +114,7 @@ func level_select(casual: bool) -> void:
 	var action_width: int = 86 if with_feedback else 100
 	if with_feedback:
 		BeachUI.button(actions,"FEEDBACK",func() -> void: choose("feedback"),action_width)
-	BeachUI.button(actions,"< BACK",func() -> void: choose("title"),action_width)
+	BeachUI.back_button(actions,"< BACK",func() -> void: choose("title"))
 
 func gull_picker() -> void:
 	clear("PICK YOUR GULL")
@@ -179,7 +179,7 @@ func gull_picker() -> void:
 	var bottom: HBoxContainer = HBoxContainer.new()
 	bottom.alignment = BoxContainer.ALIGNMENT_CENTER
 	content.add_child(bottom)
-	BeachUI.button(bottom,"< BACK",func() -> void: choose("title"),70)
+	BeachUI.back_button(bottom,"< BACK",func() -> void: choose("title"))
 	_perk_picker(bottom)
 
 const CONTROL_MODE_TEXT: Array[String] = ["TAP EVERY WINGBEAT","HOLD TO FLAP","AUTO PECK IN DIVES"]
@@ -289,7 +289,7 @@ func shop(bought: bool = false) -> void:
 	var spacer: Control = Control.new()
 	spacer.size_flags_vertical = SIZE_EXPAND_FILL
 	right.add_child(spacer)
-	var back: Button = BeachUI.button(right,"< BACK",func() -> void: choose("title"),122)
+	var back: Button = BeachUI.back_button(right,"< BACK",func() -> void: choose("title"))
 	(first if first != null else back).grab_focus()
 
 func _shop_item(parent: Control, id: String, item_name: String, blurb: String, price: int, width: int, stacked: bool) -> Button:
@@ -393,7 +393,7 @@ func options(from_pause: bool) -> void:
 		toggle.size_flags_horizontal = SIZE_EXPAND_FILL
 	if not OS.has_feature("mobile"):
 		BeachUI.button(content,"FULLSCREEN / F11",func() -> void: choose("fullscreen"))
-	BeachUI.button(content,"SAVE / BACK",func() -> void:
+	BeachUI.back_button(content,"SAVE / BACK",func() -> void:
 		GameState.save_progress()
 		choose(back_action)).grab_focus()
 
