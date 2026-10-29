@@ -145,7 +145,7 @@
   "screech": {
     "closing": {
       "mood": "proud",
-      "text": "That's the Gang Call, gullster. Fill the Brash meter, call the gang, nick the lot. Anything you grabbed in training doesn't count, so make the real ones count. The clock starts now.",
+      "text": "That's the Gang Call, gullster. Fill the Brash meter, call the gang, nick the lot.\n\nAnything you grabbed in training doesn't count, so make the real ones count. The clock starts now.",
       "button": "Let's go!"
     },
     "strips": [
@@ -173,7 +173,7 @@
       },
       {
         "mood": "amused",
-        "lay": "Now for the best trick in the book: the Gang Call. Three of your mates swoop in and knock food out of everyone's hands, and the whole crowd bolts.",
+        "lay": "Now for the best trick in the book: call the cavalry and see them runnin for cover!!",
         "how": "Screech again, or press {call}, to call the gang. Then grab the food they knock loose before the crowd comes back."
       }
     ]
