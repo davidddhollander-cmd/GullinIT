@@ -127,7 +127,8 @@ func _navigate(action: String, payload: Variant = null) -> void:
 				game.set_paused(true)
 				screen = "pause"
 				menus.show()
-				menus.pause(game.screech_lesson)
+				# Level 2's screech and Gang Call lesson plays once per save; the pause menu replays it for a herring gull.
+				menus.pause(game.screech_lesson,not game.screech_lesson and int(game.level.id) == 2 and game.player.species == "herring" and game.level.has("screech_lesson"))
 				Audio.duck_music(true)
 		"skip_lesson":
 			if is_instance_valid(game):
