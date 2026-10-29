@@ -23,6 +23,8 @@ const SIGN_TOP: int = 84
 const SIGN_HEIGHT: int = 17
 const SignArt = preload("res://scripts/beach_sign_art.gd")
 const StandSignArt = preload("res://scripts/stand_sign.gd")
+const SHORELINE_ART: Texture2D = preload("res://assets/sprites/beach-ground-v1/shoreline-320x20.png")
+const SAND_ART: Texture2D = preload("res://assets/sprites/beach-ground-v1/sand-320x40.png")
 var bin_wobble: Array[float] = []
 var bin_wobble_duration: Array[float] = []
 var bin_wobble_strength: Array[float] = []
@@ -192,14 +194,20 @@ func _draw() -> void:
 	var width: float = float(world.get("width",Config.tuning.world.width))
 	var promenade: float = float(world.get("promenade_start",Config.tuning.world.promenade_start))
 	var pier: float = float(world.get("pier_start",Config.tuning.world.pier_start))
-	draw_rect(Rect2(0,130,width,50),Color("e8c58e"))
-	draw_rect(Rect2(0,130,width,3),Color("fff1cc"))
+	if background_art == null:
+		draw_rect(Rect2(0,130,width,50),Color("e8c58e"))
+		draw_rect(Rect2(0,130,width,3),Color("fff1cc"))
+	else:
+		# Generated ground (task 055): 320 px tiles from world x 0, under the promenade and pier.
+		for x: int in range(0,int(width),320):
+			draw_texture(SHORELINE_ART,Vector2(x,120))
+			draw_texture(SAND_ART,Vector2(x,140))
 	draw_rect(Rect2(promenade,151,pier-promenade,14),Color("c18e68"))
 	for x: int in range(int(promenade),int(pier),16):
 		draw_line(Vector2(x,151),Vector2(x,165),Color("a57b5c"))
 	draw_rect(Rect2(pier,158,width-pier,5),Color("9b6650"))
 	draw_rect(Rect2(pier,157,width-pier,2),Color("efb984"))
-	for i: int in range(int(width/6)):
+	for i: int in range(int(width/6) if background_art == null else 0):
 		var x: float = fposmod(i*71.0,width)
 		var y: float = 137+(i*13)%42
 		draw_rect(Rect2(x,y,2,1),Color("d4ad78"))
