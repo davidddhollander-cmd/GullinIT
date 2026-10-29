@@ -1,12 +1,8 @@
 class_name TitleFlyby
 extends Node2D
-## Title backdrop life: a player gull glides across and now and then lands on the lamp pole;
+## Title backdrop life: a player gull glides across;
 ## rival swoops at a sunbather; other gulls land on the sand and stroll; distant calls.
 const SWOOP_TIME: float = 3.2
-const LAMP_X: float = 212.0 ## beach_lamp prop, placed by main.gd
-const LAMP_BASE_Y: float = 146.0
-const LAMP_SCALE: float = 0.9 ## the 24x90 lamp sprite shrunk a touch for the title
-const LAMP_PERCH: Vector2 = Vector2(LAMP_X + 3.0 * LAMP_SCALE, LAMP_BASE_Y - 88.0 * LAMP_SCALE) ## feet spot on the lamp head
 const FEET_TO_SPRITE: Vector2 = Vector2(2.5, -4.5) ## sprite centre relative to the feet, facing right
 const GLIDE_SPEED: float = 22.0
 const WALK_SPEED: float = 9.0
@@ -18,13 +14,7 @@ var clock: float = 0.0
 var next_swoop: float = 6.0
 var swoop: float = -1.0
 var swoop_x: float = 270.0
-# Player glider: glide -> land (on the lamp) -> perch -> leave -> glide.
 var px: float = -30.0
-var mode: String = "glide"
-var mode_time: float = 0.0
-var mode_from: Vector2 = Vector2.ZERO
-var perch_hold: float = 6.0
-var next_perch: float = 12.0
 var next_call: float = 5.0
 var walkers: Array[Dictionary] = []
 
@@ -70,45 +60,10 @@ func _glide_y() -> float:
 	return 42.0 + sin(clock * 1.6) * 5.0
 
 func _tick_player(delta: float) -> void:
-	mode_time += delta
-	match mode:
-		"glide":
-			px += delta * GLIDE_SPEED
-			if px > 350.0:
-				px = -30.0
-			player.position = Vector2(px,_glide_y())
-			# Heading for the lamp with a few seconds of runway: come in to land.
-			if clock >= next_perch and px > 130.0 and px < 160.0:
-				mode = "land"
-				mode_time = 0.0
-				mode_from = player.position
-		"land":
-			var t: float = clampf(mode_time / 2.6,0.0,1.0)
-			var target: Vector2 = _rest_position(LAMP_PERCH,1.0)
-			var eased: float = t * t * (3.0 - 2.0 * t)
-			player.position = mode_from.lerp(target,eased)
-			player.play(&"glide" if t < 0.9 else &"idle")
-			if t >= 1.0:
-				mode = "perch"
-				mode_time = 0.0
-				perch_hold = randf_range(5.0,8.0)
-				px = LAMP_PERCH.x
-		"perch":
-			player.play(&"idle")
-			player.position = _rest_position(LAMP_PERCH,1.0)
-			if mode_time >= perch_hold:
-				mode = "leave"
-				mode_time = 0.0
-				mode_from = player.position
-				player.play(&"glide")
-		"leave":
-			var t: float = clampf(mode_time / 1.6,0.0,1.0)
-			px += delta * GLIDE_SPEED
-			var rise: float = t * t * (3.0 - 2.0 * t)
-			player.position = Vector2(px,lerpf(mode_from.y,_glide_y(),rise) - sin(t * PI) * 6.0)
-			if t >= 1.0:
-				mode = "glide"
-				next_perch = clock + randf_range(14.0,24.0)
+	px += delta * GLIDE_SPEED
+	if px > 350.0:
+		px = -30.0
+	player.position = Vector2(px,_glide_y())
 
 func _tick_swoop(delta: float) -> void:
 	if swoop >= 0.0:

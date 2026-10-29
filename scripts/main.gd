@@ -15,23 +15,19 @@ func _ready() -> void:
 	add_child(background)
 	background.sunset = true
 	# Only x >= ~207 shows beside the menu panel. Hut, castle and palm sit further back (y 142-148);
-	# sunbathers and towels draw above every prop (z 3), so parasol poles stay behind them.
+	# sunbathers and towels draw above every prop (z 3).
 	background.setup([
-		{"type":"beach_lamp","x":TitleFlyby.LAMP_X,"y":TitleFlyby.LAMP_BASE_Y},{"type":"beach_hut","x":240,"y":148},{"type":"beach_parasol","x":244,"y":152},
-		{"type":"beach_parasol_blue","x":282,"y":162},{"type":"beach_castle","x":310,"y":175},{"type":"beach_palm","x":172,"y":142}
+		{"type":"beach_hut","x":240,"y":148},{"type":"beach_castle","x":310,"y":175},{"type":"beach_palm","x":172,"y":142}
 	])
-	var lamp: AnimatedSprite2D = background.prop_sprites[0]
-	lamp.scale = Vector2.ONE * TitleFlyby.LAMP_SCALE
-	lamp.position.y = TitleFlyby.LAMP_BASE_Y - 90.0 * TitleFlyby.LAMP_SCALE * 0.5
 	# Sandcastle in the foreground, in front of and below the sunbathers: a little smaller, drawn with sharp pixels like everything else.
-	var castle: AnimatedSprite2D = background.prop_sprites[4]
+	var castle: AnimatedSprite2D = background.prop_sprites[1]
 	var castle_half: float = 175.0 - castle.position.y
 	castle.scale *= 0.7
 	castle.position.y = 175.0 - castle_half * 0.7
 	castle.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	castle.z_index = 4
-	background.prop_sprites[1].z_index = 1 # hut behind the red parasol (props are listed in setup order)
-	for spec: Array in [[false,true,244.0,0.0],[true,false,282.0,10.0]]:
+	# [blue, female, x, y offset, mirrored]
+	for spec: Array in [[false,true,244.0,0.0,false],[true,false,282.0,10.0,true]]:
 		var towel := SunbatherTowel.new()
 		towel.blue = spec[0]
 		towel.female = spec[1]
@@ -41,6 +37,7 @@ func _ready() -> void:
 		var sunbather: AnimatedSprite2D = AnimatedSprite2D.new()
 		sunbather.sprite_frames = SunbatherArt.frames(spec[0],spec[1])
 		sunbather.play(&"rest")
+		sunbather.flip_h = spec[4]
 		sunbather.scale = Vector2.ONE * AdultPixelArt.DISPLAY_SCALE
 		sunbather.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		sunbather.position = Vector2(spec[2],126.0 + spec[3])
