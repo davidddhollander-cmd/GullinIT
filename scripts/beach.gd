@@ -33,8 +33,8 @@ var bin_release_bounce: Array[bool] = []
 var bin_full: Array[bool] = []
 var bin_glints: Array[Sprite2D] = []
 var font: Font = preload("res://assets/fonts/gull_pixel.fnt")
-## Generated sky/sun/sea (BeachBackgroundArt). Art Lab only until David approves it; set before setup().
-var use_background_art: bool = false
+## Generated sky/sun/sea (BeachBackgroundArt) and ground. Off draws the old flat sky and sand; set before setup().
+var use_background_art: bool = true
 var background_art: BeachBackgroundArt
 
 func setup(entries: Array, zone_entries: Array = [], world_settings: Dictionary = {}) -> void:
