@@ -181,11 +181,14 @@ static func run(host: Node, check: Callable) -> void:
 	game.player.state = BeachGull.State.GLIDE
 	game._mugging()
 	check.call(game.lesson == BeachGame.MUG_LESSON,"gliding past the dummy's snack does not mug it")
+	var feathers_before: int = GameState.feathers()
 	game.player.state = BeachGull.State.STRIKE
 	game._mugging()
 	var entry: Dictionary = GameState.entry(1)
 	check.call(game.player.digestion.snacks.size() == 1 and dummy.dummy_food.is_empty(),"mug lesson takes the dummy's snack")
 	check.call(game.lesson == BeachGame.TRAINING_LESSONS and not game.running and results.size() == 1,"mugging the dummy finishes training exactly once")
+	check.call(GameState.feathers() == feathers_before + 1 and int(results[0].get("feathers_earned",0)) == 1,"first completion pays one Feather")
+	check.call(not GameState.complete_training() and GameState.feathers() == feathers_before + 1,"completing the course again pays no Feather")
 	check.call(bool(entry.get("training_complete",false)) and int(entry.get("training_step",0)) == BeachGame.TRAINING_LESSONS and GameState.unlocked(2),"completion persists checkpoint and unlocks family beach: "+str(entry))
 	check.call(not entry.has("best") and not entry.has("stars") and not entry.has("casual_time") and (results.size() == 1 and results[0].stars == 0),"training completion grants no stars or practice record")
 	host.main.start_level(1)

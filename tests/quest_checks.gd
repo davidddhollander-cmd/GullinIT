@@ -25,8 +25,7 @@ static func run(check: Callable) -> void:
 			check.call(Config.foods.has(food), "level %d random food exists: %s" % [id, food])
 	var l1: BeachQuests = BeachQuests.new()
 	l1.setup(_level(1), rng)
-	check.call(l1.quests.size() == 2 and l1.quests[0].id == "l1_bin" and l1.quests[1].id == "l1_bite", "level 1 has two quests and no random slot")
-	check.call(bool(_level(1).get("quests_on_replay_only", false)), "level 1 quests flagged replay-only")
+	check.call(l1.quests.is_empty() and not _level(1).has("quests") and not _level(1).has("random_quest"), "Training Day has no quests")
 	var l3: BeachQuests = BeachQuests.new()
 	l3.setup(_level(3), rng)
 	check.call(l3.quests.size() == 3 and l3.quests[0].id == "l3_mug_gary" and l3.quests[2].id == "l3_random", "level 3 has two quests plus random")
@@ -138,9 +137,12 @@ static func run_game(suite: Node, check: Callable) -> void:
 	game = main.game
 	game.dismiss_intro()
 	var feathers: int = GameState.feathers()
-	check.call(game.training and game.quests.quests.size() == 2, "level 1 lesson replay via the menu has two quests")
+	check.call(game.training and game.quests.quests.is_empty(), "level 1 lesson replay via the menu has no quests")
 	game.stash_raids.bin_emptied.emit("bin")
-	check.call(game.quests.quests[0].done and GameState.feathers() == feathers + 1, "bin_emptied in a replay completes l1_bin and pays a Feather")
+	check.call(GameState.feathers() == feathers, "bin_emptied on Training Day pays nothing")
+	game.quests.setup({"quests": [{"id": "t_bin", "text": "BIN", "event": "bin_emptied", "filter": {}, "count": 1, "bonus": 0}]}, game.rng)
+	game.stash_raids.bin_emptied.emit("bin")
+	check.call(game.quests.quests[0].done and GameState.feathers() == feathers + 1, "bin_emptied still completes a quest that listens for it")
 	game = _play(main, 2)
 	var toddler: BeachTarget = BeachTarget.new()
 	toddler.kind = "toddler"
@@ -273,6 +275,9 @@ static func run_game(suite: Node, check: Callable) -> void:
 	main._navigate("start", 1)
 	game = main.game
 	game.dismiss_intro()
+	# Training Day has no quests of its own: give the run one that listens for the bite.
+	var bite_quest: Dictionary = {"quests": [{"id": "t_bite", "text": "BITE", "event": "mid_air_bite", "filter": {}, "count": 1, "bonus": 0}]}
+	game.quests.setup(bite_quest, game.rng)
 	var bite_target: Callable = func() -> BeachTarget:
 		var c: BeachTarget = game.spawner.create("kiosk_customer", 300.0)
 		c.food = true
@@ -317,17 +322,17 @@ static func run_game(suite: Node, check: Callable) -> void:
 	biter.biting = float(Config.tuning.bite.duration)
 	game.player.state = BeachGull.State.STRIKE
 	biter.take(game.player)
-	check.call(game.quests.quests[1].done, "direct strike during the bite window completes l1_bite")
+	check.call(game.quests.quests[0].done, "direct strike during the bite window completes a mid-air bite quest")
 	var late: BeachTarget = bite_target.call()
 	late.bite_wait = 5.0
 	late.take(game.player)
-	check.call(not game.quests.quests[1].progress > 0 and not game.quests.quests[1].done or game.quests.quests[1].done, "")
+	check.call(not game.quests.quests[0].progress > 0 and not game.quests.quests[0].done or game.quests.quests[0].done, "")
 	late.free()
 	game = _play(main, 1)
-	game.quests.setup(Config.levels[0], game.rng)
+	game.quests.setup(bite_quest, game.rng)
 	var off: BeachTarget = bite_target.call()
 	off.take(game.player)
-	check.call(not game.quests.quests[1].done, "snatch outside the bite window does not complete l1_bite")
+	check.call(not game.quests.quests[0].done, "snatch outside the bite window does not complete a mid-air bite quest")
 	main.clear_game()
 	GameState.save_path = saved_path
 	GameState.progress = saved_progress

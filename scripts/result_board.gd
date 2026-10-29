@@ -71,6 +71,11 @@ func _build_training() -> void:
 	var note: Label = BeachUI.label(self,note_text,BeachUI.FONT_NATIVE,GOLD if GameState.save_error.is_empty() else Color("ef725c"))
 	_place(note,98,292,12)
 	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var earned: int = int(result.get("feathers_earned",0))
+	if earned > 0:
+		var feather_note: Label = BeachUI.label(self,"+%d FEATHER  /  FEATHERS %d" % [earned,GameState.feathers()],BeachUI.FONT_NATIVE,CREAM)
+		_place(feather_note,112,292,12)
+		feather_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var actions: HBoxContainer = HBoxContainer.new()
 	actions.position = Vector2(39,140)
 	actions.size = Vector2(242,16)

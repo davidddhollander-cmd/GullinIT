@@ -25,6 +25,8 @@ The first-level opening panel waits for the **LET'S GULL IT** button. Mouse, tou
 
 The Dummy (`RivalPilot.dummy`) is not in `level.rivals`, so there is no rival score panel. It only patrols between the ends of its `range`, never hunts, dives, mugs or catches dropped food, and appears when lesson 7 begins (or on resume at lesson 7 or 8). Its art is the plain herring gull until the X-eyed variant arrives.
 
+Training Day has no quests. The first time the course is completed pays one Feather (never again on a replay), shown on the Training Complete board.
+
 The lesson index is saved after each success. Restart resumes an unfinished course; Train Again starts at lesson zero. Course completion has its own saved flag, unlocks level two, and does not fabricate stars or a Practice time. The normal Training Day level card always opens the lessons: unfinished courses resume their checkpoint, while completed courses show REPLAY LESSONS and start at lesson zero. Replaying a completed course leaves existing records intact. The other levels use the selected Arcade/Practice mode.
 
 Training replenishes the customer snack every five seconds (abandoned knocked food is removed before restoration) and refills an empty bag only once no loose food remains owned by it. These assistance rules run only during the course. All ordinary level food remains governed by the existing finite stock and replacement rules.
