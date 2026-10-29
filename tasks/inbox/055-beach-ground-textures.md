@@ -5,6 +5,17 @@ Author: Claude
 Assignee: Codex
 Depends on: none (background-v2 sky/sun/sea is already on `main`)
 Created: 2026-10-29
+Visual direction: **approved by David, 2026-10-29**
+
+## Approved implementation clarifications
+- The generated source plates remain the authority for the ground's visual forms. The prep script may crop, quantise, extract, reposition, wrap and repeat plate-derived bands and marks to meet the exact runtime grid, including plank and post spacing. It must not invent decorative ground forms with vector primitives or programmatic pixel painting.
+- The roughly 18-level sand-luminance limit applies to the new close-neighbour `SAND_LIGHT` and `SAND_SHADE` colours. The existing `fff1cc` highlight and `d4ad78` shade are approved exceptions for sparse shell, pebble and legacy-compatible marks; they still count toward density caps.
+- Seam validation is deterministic: every stamp that reaches either horizontal edge is wrap-placed on the opposite edge, the script asserts that no tracked stamp is clipped, and the 3x repeated tile-check must show no visual seam. Flat band colours must continue across the wrap; columns 0 and 319 need not be identical.
+- Freeze the exact RGB palette near the top of the prep script before producing the final files. All source-derived colours snap to that list, with the existing per-file and 20-colour shared caps unchanged.
+- Preview matrix and filenames are fixed as follows. Each after image has a matching old-ground before image at both sizes:
+  - Beach: `beach-ground-v1-composite-320x180.png`, `beach-ground-v1-composite-1280x720.png`, `beach-ground-v1-before-composite-320x180.png`, `beach-ground-v1-before-composite-1280x720.png`.
+  - Promenade: `beach-ground-v1-promenade-320x180.png`, `beach-ground-v1-promenade-1280x720.png`, `beach-ground-v1-before-promenade-320x180.png`, `beach-ground-v1-before-promenade-1280x720.png`. Show a promenade-focused screen immediately before the pier, with the pier edge at or just beyond the right edge.
+  - Pier join: `beach-ground-v1-pier-320x180.png`, `beach-ground-v1-pier-1280x720.png`, `beach-ground-v1-before-pier-320x180.png`, `beach-ground-v1-before-pier-1280x720.png`. Centre the promenade-to-pier join at world x 920.
 
 ## What David will see if this works
 The sea no longer ends in a flat pale stripe on a flat yellow rectangle. A **gentle shoreline** sits where the new sea meets the sand: a stepped foam edge, a little shallow water, then a band of darker wet sand that dries out into the beach. The **sand** gains one level of detail beyond flat colour: a few pebbles, shell flecks, faint ripple marks and footprint dimples. The **promenade boardwalk and the pier** get plank grain, nail heads, plank joints and, on the pier, support posts standing in the sand beneath the deck.
