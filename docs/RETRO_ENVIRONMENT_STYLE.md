@@ -24,3 +24,7 @@ The green wheelie bin renders at 0.8 scale (22.4 x 30.4 game pixels), with neare
 ## Promenade readability — 20 October 2026
 
 The new ImageGen lamp uses a 24 × 90 pixel frame, a long metal shaft and a compact curved lantern. `assets/reference/tall-lamp-v1` preserves its full source and prompt; `tools/prepare_tall_lamp.gd` reduces it into the shared palette and measures the top perch. The environment mapper preserves this replacement. Ground crumbs render at 5 × 3 pixels with a brighter top and dark underside. A missed snatch emits a golden crumb spray and a short trail as the existing dropped food falls; these cosmetic particles follow the particles setting.
+
+## Beach ground v1 — 29 October 2026
+
+The generated ground set lives in `assets/sprites/beach-ground-v1`: shoreline 320 × 20 at screen rows 120–139, sand 320 × 40 at rows 140–179, promenade 320 × 14 at rows 151–164, and pier 320 × 22 at rows 157–178. All repeat every 320 pixels at native 1×, use binary alpha, no dithering or pure white, and share a fixed 18-colour maximum palette (the delivered set uses 16). Sand detail is capped at 8% overall and 3% through the actor ground-line quiet zone; wood detail is capped at 10%, and shoreline foam lacing at 25%. Preserve the unchanged generated plates in `assets/reference/beach-ground-v1` and regenerate tiles and review composites with `tools/prepare_beach_ground_v1.py`.
