@@ -10,6 +10,9 @@ var extractor := Extractor.new()
 var groups: Dictionary = {}
 var food_anchors: Dictionary = {}
 var cells: Dictionary = {}
+## Sunbather sources carry 2-3 px outlines at atlas scale; peel them to the 1 px ring touching the fill.
+var thin_outline := false
+const OUTLINE_PEEL := 2
 
 func _read(path: String) -> Image:
 	var image := Image.load_from_file(ProjectSettings.globalize_path(path))
@@ -38,8 +41,39 @@ func _cut(source: Image, region: Rect2i, height: int = 80) -> Image:
 	part.resize(width,height,Image.INTERPOLATE_NEAREST)
 	var result := Image.create(CELL,CELL,false,Image.FORMAT_RGBA8)
 	result.fill(Color.TRANSPARENT)
-	result.blit_rect(part,Rect2i(0,0,width,height),Vector2i((CELL-width)/2,SOLE-height))
+	if thin_outline:
+		_peel_outline(part)
+		# Keep the thinned soles on the shared baseline.
+		var used := part.get_used_rect()
+		result.blit_rect(part,used,Vector2i((CELL-width)/2+used.position.x,SOLE-used.size.y))
+	else:
+		result.blit_rect(part,Rect2i(0,0,width,height),Vector2i((CELL-width)/2,SOLE-height))
 	return result
+
+static func _dark(c: Color) -> bool:
+	return c.a > 0.0 and maxf(c.r,maxf(c.g,c.b)) < 0.3
+
+func _peel_outline(part: Image) -> void:
+	var w := part.get_width()
+	var h := part.get_height()
+	for _pass: int in OUTLINE_PEEL:
+		var drop: Array[Vector2i] = []
+		for y: int in h:
+			for x: int in w:
+				if not _dark(part.get_pixel(x,y)):
+					continue
+				var exposed := false
+				var touches_fill := false
+				for d: Vector2i in [Vector2i.LEFT,Vector2i.RIGHT,Vector2i.UP,Vector2i.DOWN]:
+					var n := Vector2i(x,y)+d
+					if n.x < 0 or n.y < 0 or n.x >= w or n.y >= h or part.get_pixelv(n).a == 0.0:
+						exposed = true
+					elif not _dark(part.get_pixelv(n)):
+						touches_fill = true
+				if exposed and not touches_fill:
+					drop.append(Vector2i(x,y))
+		for p: Vector2i in drop:
+			part.set_pixelv(p,Color.TRANSPARENT)
 
 func _actor_spans(source: Image, y0: int, y1: int, count: int) -> Array[Vector2i]:
 	var width := source.get_width()
@@ -97,6 +131,7 @@ func _row(path: String, row: int, rows: int, heights: Array = [80,80,80,80,80,80
 
 func _setup(mum: bool, female: bool) -> void:
 	var id: String = "mum" if mum else ("female" if female else "male")
+	thin_outline = not mum
 	groups.idle = [_read(PILOT + id + "-idle.png")]
 	for row: int in 4:
 		groups[["walk","walk_left","chase","chase_left"][row]] = _row(SOURCE + id + "-locomotion.png",row,4)
@@ -109,7 +144,8 @@ func _setup(mum: bool, female: bool) -> void:
 		groups.utility = _row(SOURCE + "mum-utility.png",3,4)
 	else:
 		var review := "res://assets/previews/sunbather-%s-retro-review-v1.png" % id
-		groups.utility = _row(review,0,3,[36,58,80,80],[0,435,785,1110,1445])
+		# The female's lying feet reach x=448; the male's second pose starts at 442.
+		groups.utility = _row(review,0,3,[36,58,80,80],[0,450 if female else 435,785,1110,1445])
 		groups.block = _row(review,2,3,[80,80,80,80])
 		if female:
 			groups.rise = _row(OLD_SOURCE+"female-motion.png",2,4,[36,50,58,66,72,80],[0,348,610,842,1065,1328,1536])
