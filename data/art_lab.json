@@ -213,7 +213,7 @@
       "current": "beach_chair",
       "candidate": {
         "clone": "beach_chair",
-        "file": "res://assets/sprites/pier-restaurant-props-v1/restaurant-table-chairs-v1.png",
+        "file": "res://assets/sprites/pier-restaurant-props-v1/restaurant-table-chairs-v2.png",
         "frame_w": 60,
         "frame_h": 34,
         "visual_scale": 1.0
@@ -223,12 +223,12 @@
     },
     {
       "title": "PIER WIRE FENCE",
-      "description": "NEW REPEATABLE FENCE. NO LIVE FENCE, PIER SHOWN FOR SCALE.",
+      "description": "NEW REPEATABLE FENCE, TWO TILES SIDE BY SIDE. PIER SHOWN FOR SCALE.",
       "current": "pier",
       "candidate": {
         "clone": "pier",
-        "file": "res://assets/sprites/pier-restaurant-props-v1/pier-wire-fence-v1.png",
-        "frame_w": 72,
+        "file": "res://assets/previews/pier-wire-fence-v2-repeat-1x.png",
+        "frame_w": 144,
         "frame_h": 24,
         "visual_scale": 1.0
       },

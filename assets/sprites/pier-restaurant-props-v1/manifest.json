@@ -11,21 +11,72 @@
   "assets": {
     "pier_wire_fence": {
       "file": "res://assets/sprites/pier-restaurant-props-v1/pier-wire-fence-v1.png",
-      "size": [72, 24],
-      "origin": [36, 23],
+      "size": [
+        72,
+        24
+      ],
+      "origin": [
+        36,
+        23
+      ],
       "repeatable": true
     },
     "two_counter_restaurant": {
       "file": "res://assets/sprites/pier-restaurant-props-v1/two-counter-restaurant-v1.png",
-      "size": [132, 88],
-      "origin": [66, 87],
-      "service_counter_anchors": [[40, 53], [92, 53]],
+      "size": [
+        132,
+        88
+      ],
+      "origin": [
+        66,
+        87
+      ],
+      "service_counter_anchors": [
+        [
+          40,
+          53
+        ],
+        [
+          92,
+          53
+        ]
+      ],
       "service_windows": 2
     },
     "restaurant_table_chairs": {
       "file": "res://assets/sprites/pier-restaurant-props-v1/restaurant-table-chairs-v1.png",
-      "size": [60, 34],
-      "origin": [30, 33]
+      "size": [
+        60,
+        34
+      ],
+      "origin": [
+        30,
+        33
+      ]
+    },
+    "pier_wire_fence_v2": {
+      "file": "res://assets/sprites/pier-restaurant-props-v1/pier-wire-fence-v2.png",
+      "size": [
+        72,
+        24
+      ],
+      "origin": [
+        36,
+        23
+      ],
+      "repeatable": true,
+      "repeat_preview": "res://assets/previews/pier-wire-fence-v2-repeat-1x.png"
+    },
+    "restaurant_table_chairs_v2": {
+      "file": "res://assets/sprites/pier-restaurant-props-v1/restaurant-table-chairs-v2.png",
+      "size": [
+        60,
+        34
+      ],
+      "origin": [
+        30,
+        33
+      ]
     }
   }
 }

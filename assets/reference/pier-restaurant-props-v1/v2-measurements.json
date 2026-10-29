@@ -1,0 +1,92 @@
+{
+  "beach_chair": {
+    "canvas": [
+      24,
+      23
+    ],
+    "color_count": 9,
+    "extent": [
+      24,
+      18
+    ],
+    "isolated_non_outline_pixels": 56,
+    "isolated_share_percent": 20.6,
+    "largest_flat_color_area": 18,
+    "opaque_pixels": 272
+  },
+  "fence_v1": {
+    "canvas": [
+      72,
+      24
+    ],
+    "color_count": 13,
+    "extent": [
+      66,
+      10
+    ],
+    "isolated_non_outline_pixels": 44,
+    "isolated_share_percent": 18.7,
+    "largest_flat_color_area": 16,
+    "opaque_pixels": 235
+  },
+  "fence_v2": {
+    "canvas": [
+      72,
+      24
+    ],
+    "color_count": 4,
+    "extent": [
+      72,
+      22
+    ],
+    "isolated_non_outline_pixels": 4,
+    "isolated_share_percent": 0.6,
+    "largest_flat_color_area": 464,
+    "opaque_pixels": 655
+  },
+  "fish_chips_stand": {
+    "canvas": [
+      52,
+      56
+    ],
+    "color_count": 14,
+    "extent": [
+      44,
+      42
+    ],
+    "isolated_non_outline_pixels": 61,
+    "isolated_share_percent": 4.3,
+    "largest_flat_color_area": 188,
+    "opaque_pixels": 1435
+  },
+  "table_v1": {
+    "canvas": [
+      60,
+      34
+    ],
+    "color_count": 11,
+    "extent": [
+      42,
+      19
+    ],
+    "isolated_non_outline_pixels": 76,
+    "isolated_share_percent": 15.7,
+    "largest_flat_color_area": 37,
+    "opaque_pixels": 483
+  },
+  "table_v2": {
+    "canvas": [
+      60,
+      34
+    ],
+    "color_count": 9,
+    "extent": [
+      58,
+      28
+    ],
+    "isolated_non_outline_pixels": 1,
+    "isolated_share_percent": 0.1,
+    "largest_flat_color_area": 124,
+    "opaque_pixels": 1016
+  }
+}
