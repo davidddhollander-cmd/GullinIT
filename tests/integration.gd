@@ -1490,6 +1490,8 @@ func screech_checks() -> void:
 	var sand_fill: float = brash.meter
 	check(is_equal_approx(sand_fill, float(Config.tuning.brash.screech_per_sec)), "screeching on the sand fills brashness at the base rate")
 	check(is_instance_valid(game.screech_audio) and game.screech_audio.stream == Audio.streams["screech_long"], "held screech plays the long gull cry")
+	for cue: String in ["score", "ui_confirm", "ui_back", "ui_error", "level_end", "level_end_fail"]:
+		check(Audio.streams.get(cue) is AudioStreamOggVorbis, "Kenney %s cue loads as an Ogg stream" % cue)
 	gull.position.y -= 50.0
 	game._advance_screech_hold(1.0)
 	check(brash.meter - sand_fill > sand_fill * 2.0, "screeching from a high perch fills brashness faster")

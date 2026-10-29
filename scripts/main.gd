@@ -97,8 +97,12 @@ func _navigate(action: String, payload: Variant = null) -> void:
 		"buy":
 			var id: String = str(payload)
 			var price: int = int(Config.perks.perks[id].price) if Config.perks.perks.has(id) else (int(Config.species.species[id].price) if Config.species.species.has(id) else -1)
-			if price > 0 and screen == "shop" and GameState.buy(id,price):
-				menus.shop(true)
+			if price > 0 and screen == "shop":
+				if GameState.buy(id,price):
+					Audio.play("ui_confirm",1.0,-4.0)
+					menus.shop(true)
+				else:
+					Audio.play("ui_error",1.0,-4.0)
 		"select":
 			clear_game()
 			screen = "select"

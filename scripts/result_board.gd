@@ -446,9 +446,11 @@ func _start_reaction() -> void:
 	if passed:
 		gull.play(&"fly")
 		reaction_player = Audio.play_result_reaction(true, maxi(1, int(result.stars)))
+		Audio.play("level_end",1.0,-8.0)
 	else:
 		gull.play(&"idle")
 		reaction_player = Audio.play_result_reaction(false, 0)
+		Audio.play("level_end_fail",1.0,-8.0)
 
 func _idle_gull(delta: float) -> void:
 	reaction_time += delta
