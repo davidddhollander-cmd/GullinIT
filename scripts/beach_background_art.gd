@@ -24,6 +24,7 @@ const SUN_DUSK_POS: Vector2 = Vector2(233, 76)
 var sky: Sprite2D
 var sun: Sprite2D
 var sea: AnimatedSprite2D
+var birds: BackgroundBirds
 var top_color: Color = SKY_COLOR
 
 func _init(sunset: bool) -> void:
@@ -39,6 +40,8 @@ func _init(sunset: bool) -> void:
 	sea.centered = false
 	sea.position = Vector2(0, HORIZON_Y)
 	add_child(sea)
+	birds = BackgroundBirds.new(sunset)
+	add_child(birds)
 	if sunset:
 		var dusk := ShaderMaterial.new()
 		dusk.shader = preload("res://assets/shaders/dusk_tint.gdshader")
@@ -63,6 +66,7 @@ func _sprite(file: String, at: Vector2) -> Sprite2D:
 func update(camera_x: float, time: float) -> void:
 	position.x = roundf(camera_x) - 160.0
 	sea.frame = int(time / SEA_FRAME_TIME) % SEA_FRAMES
+	birds.update(time)
 
 func _draw() -> void:
 	# The sky plate is 80 px tall; flat sky fills the strip above it.
