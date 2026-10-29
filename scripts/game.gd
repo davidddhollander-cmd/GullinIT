@@ -247,7 +247,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 			_training_dummy_setup()
 		if trainer_cards:
 			var opening: Dictionary = Config.trainer.training.opening
-			open_trainer({"mood": opening.mood, "lay": TrainerScript.line(opening.text, input), "button": opening.button}, dismiss_intro)
+			open_trainer({"mood": opening.mood, "lay": TrainerScript.line(opening.text, input), "lay_source": "training.opening.text", "lay_template": opening.text, "button": opening.button}, dismiss_intro)
 	Config.reloaded.connect(_reload)
 
 func _twist() -> String:
@@ -944,7 +944,8 @@ func _training_advance() -> void:
 		if trainer_cards:
 			var closing: Dictionary = Config.trainer.training.closing
 			var first_time: bool = not bool(GameState.entry(1).get("training_complete", false))
-			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing.first_time_text if first_time else closing.text, input), "button": closing.button}, finish)
+			var closing_key: String = "first_time_text" if first_time else "text"
+			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing[closing_key], input), "lay_source": "training.closing." + closing_key, "lay_template": closing[closing_key], "button": closing.button}, finish)
 		else:
 			finish()
 	elif trainer_cards:
@@ -975,7 +976,8 @@ func _toast() -> String:
 func _trainer_entry(set_name: String, index: int) -> Dictionary:
 	var data: Dictionary = Config.trainer[set_name].lessons[index]
 	var total: int = TRAINING_LESSONS if set_name == "training" else SCREECH_STEPS
-	return {"mood": data.mood, "lay": TrainerScript.line(data.lay, input), "how": TrainerScript.line(data.how, input), "button": Config.trainer.lesson_button, "counter": "Lesson %d/%d" % [index+1, total]}
+	var source: String = "%s.lessons[%d]" % [set_name, index]
+	return {"mood": data.mood, "lay": TrainerScript.line(data.lay, input), "how": TrainerScript.line(data.how, input), "lay_source": source + ".lay", "how_source": source + ".how", "lay_template": TrainerScript.pick(data.lay), "how_template": TrainerScript.pick(data.how), "button": Config.trainer.lesson_button, "counter": "Lesson %d/%d" % [index+1, total]}
 
 func open_trainer(entry: Dictionary, then: Callable = Callable()) -> void:
 	trainer_open = true
@@ -1129,7 +1131,7 @@ func _screech_advance() -> void:
 	if screech_step >= SCREECH_STEPS:
 		if trainer_cards:
 			var closing: Dictionary = Config.trainer.screech.closing
-			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing.text, input), "button": closing.button}, end_screech_lesson.bind(true))
+			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing.text, input), "lay_source": "screech.closing.text", "lay_template": closing.text, "button": closing.button}, end_screech_lesson.bind(true))
 		else:
 			end_screech_lesson(true)
 	else:

@@ -122,6 +122,7 @@ func run() -> void:
 	await screech_checks()
 	await preload("res://tests/screech_lesson_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/trainer_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/text_edit_tool_checks.gd").run(self,Callable(self,"check"))
 	GameState.progress["1"] = {"training_step":5,"training_complete":true}
 	GameState.progress["2"] = {"screech_lesson_complete":true}
 	await stand_perch_checks()

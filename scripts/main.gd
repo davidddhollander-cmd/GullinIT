@@ -9,6 +9,8 @@ var quitting: bool = false
 
 func _ready() -> void:
 	GullInput.register_actions()
+	if OS.is_debug_build():
+		add_child(TextEditTool.new()) # F3: edit any on-screen text and copy the changes
 	background = BeachBackdrop.new()
 	add_child(background)
 	background.sunset = true
