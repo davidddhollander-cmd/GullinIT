@@ -68,6 +68,7 @@ static func run(host: Node, check: Callable) -> void:
 	_key(lab, KEY_D)
 	var art: BeachBackgroundArt = lab.backdrop.background_art
 	check.call(art != null and lab.backdrop.sunset and art.sky.material != null and art.sea.modulate == BeachBackgroundArt.SEA_DUSK, "G shows the generated sky and D its dusk version")
+	check.call(art.sun.position.y < BeachBackgroundArt.HORIZON_Y and art.sun.position.y + art.sun.texture.get_height() > BeachBackgroundArt.HORIZON_Y and art.sun.modulate == BeachBackgroundArt.SUN_DUSK, "the dusk sun sits on the horizon, partly under the sea")
 	lab._advance(1.0)
 	check.call(art.sea.frame == int(1.0 / BeachBackgroundArt.SEA_FRAME_TIME) % BeachBackgroundArt.SEA_FRAMES, "the generated sea follows the beach clock")
 	_key(lab, KEY_G)
