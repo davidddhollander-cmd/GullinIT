@@ -183,34 +183,36 @@ static func _has_button(host: Node, text: String) -> bool:
 			return true
 	return false
 
-## The level select GANG CALL button replays the Level 2 lesson on a save that has already finished it.
+## A finished Level 2 lesson is replayed from Level 2's pause menu (herring gull only).
 static func _replay_flow(host: Node, check: Callable) -> void:
 	BeachGame.trainer_cards = true
 	GameState.options.gull = "herring"
 	GameState.progress = {"1": {"training_step": BeachGame.TRAINING_LESSONS, "training_complete": true}, "2": {"screech_lesson_complete": true, "stars": 1}}
-	var saved_url: Variant = GameState.demo.get("feedback_url","")
-	GameState.demo["feedback_url"] = ""
 	host.main.start_level(2)
 	check.call(not host.main.game.screech_lesson and not host.main.game.trainer_open,"a finished Level 2 lesson is skipped on an ordinary play")
 	host.main._navigate("select")
-	check.call(_has_button(host,"GANG CALL") and _has_button(host,"TRAIN AGAIN"),"level select offers GANG CALL beside TRAIN AGAIN")
+	check.call(not _has_button(host,"GANG CALL") and not _has_button(host,"TRAIN AGAIN"),"level select has no lesson buttons")
 	await host.settle()
 	host.layout(host.main.menus)
-	GameState.demo["feedback_url"] = "https://example.test/feedback"
-	host.main._navigate("select")
-	check.call(_has_button(host,"GANG CALL") and _has_button(host,"TRAIN") and _has_button(host,"FEEDBACK") and _has_button(host,"< BACK"),"all four action buttons fit when feedback is on")
+	host.main.start_level(2)
+	host.main._navigate("pause")
+	check.call(_has_button(host,"REPLAY LESSON") and not _has_button(host,"SKIP LESSON"),"Level 2's pause menu offers REPLAY LESSON once the lesson is done")
 	await host.settle()
 	host.layout(host.main.menus)
-	GameState.demo["feedback_url"] = saved_url
 	host.main._navigate("screech_lesson")
 	var game: BeachGame = host.main.game
 	game.set_physics_process(false)
-	check.call(host.main.current_level == 2 and game.screech_lesson and game.screech_step == 0,"GANG CALL replays the lesson even though the save finished it")
+	check.call(host.main.current_level == 2 and game.screech_lesson and game.screech_step == 0,"REPLAY LESSON restarts Level 2 with the lesson")
 	host.main._navigate("restart")
 	check.call(host.main.game.screech_lesson,"restarting a replayed lesson keeps the lesson")
+	host.main._navigate("pause")
+	check.call(_has_button(host,"SKIP LESSON") and not _has_button(host,"REPLAY LESSON"),"while the lesson runs the pause menu offers SKIP LESSON instead")
+	host.main.start_level(2)
+	host.main.game.player.species = "kittiwake"
+	host.main._navigate("pause")
+	check.call(not _has_button(host,"REPLAY LESSON"),"no replay for a gull that cannot screech")
+	host.main.start_level(3)
+	host.main._navigate("pause")
+	check.call(not _has_button(host,"REPLAY LESSON"),"no replay outside Level 2")
 	host.main.clear_game()
 	GameState.progress = {}
-	host.main._navigate("select")
-	check.call(not _has_button(host,"GANG CALL"),"no replay button while Level 2 is locked")
-	GameState.progress = {}
-	host.main.clear_game()
