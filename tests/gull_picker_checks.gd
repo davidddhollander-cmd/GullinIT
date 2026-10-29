@@ -128,7 +128,7 @@ static func run(suite: Node, check: Callable) -> void:
 	await suite.settle()
 	for id: String in ["great-black-backed", "kittiwake"]:
 		var card: Button = main.menus.find_child("Card_" + id, true, false)
-		check.call(card.disabled and (card.find_child("Status", true, false) as Label).text == "UNLOCK: 6 FEATHERS", id + " shows UNLOCK: 6 FEATHERS and is not pickable")
+		check.call(card.disabled and (card.find_child("Status", true, false) as Label).text == "6 FEATHERS", id + " shows its 6 FEATHERS price and is not pickable")
 	check.call(not (main.menus.find_child("Card_herring", true, false) as Button).disabled, "the free herring gull stays pickable")
 	suite.layout(main.menus)
 	suite.menu_font_grid(main.menus)

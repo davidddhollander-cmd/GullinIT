@@ -147,17 +147,17 @@ func gull_picker() -> void:
 		box.offset_top = 3
 		box.offset_bottom = -3
 		var stage: Control = Control.new()
-		stage.custom_minimum_size = Vector2(0,22)
+		stage.custom_minimum_size = Vector2(0,14)
 		stage.clip_contents = true
 		stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		box.add_child(stage)
 		var art_id: String = "gull_" + id.replace("-","_")
 		var bird: AnimatedSprite2D = AnimatedSprite2D.new()
 		bird.sprite_frames = Config.frames(art_id)
-		bird.scale = Vector2.ONE * float(Config.sprites[art_id].visual_scale) * 1.5
+		bird.scale = Vector2.ONE * float(Config.sprites[art_id].visual_scale) * 1.0
 		bird.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		bird.modulate = Color.WHITE if owned else Color(0.5,0.55,0.6)
-		bird.position = Vector2(50,12) # the frames carry the bird left of centre
+		bird.position = Vector2(50,8) # the frames carry the bird left of centre
 		bird.play(&"glide")
 		stage.add_child(bird)
 		var name_label: Label = BeachUI.label(box,str(info.name),BeachUI.FONT_NATIVE,BeachUI.GOLD if owned else Color("6b858b"))
@@ -168,13 +168,16 @@ func gull_picker() -> void:
 		blurb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		blurb.size_flags_vertical = SIZE_EXPAND_FILL
 		_stat_rows(box,info.get("card",{}),owned)
-		var status: Label = BeachUI.label(box,"UNLOCKED" if owned else "UNLOCK: %d FEATHERS" % int(info.price),BeachUI.FONT_NATIVE,BeachUI.CREAM if owned else BeachUI.CORAL)
+		var status: Label = BeachUI.label(box,"UNLOCKED" if owned else "%d FEATHERS" % int(info.price),BeachUI.FONT_NATIVE,BeachUI.CREAM if owned else BeachUI.CORAL)
 		status.name = "Status"
 		status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		if id == chosen:
 			card.grab_focus()
-	_control_mode_slider()
+	var modes: VBoxContainer = VBoxContainer.new()
+	modes.add_theme_constant_override("separation",0)
+	content.add_child(modes)
+	_control_mode_slider(modes)
 	var bottom: HBoxContainer = HBoxContainer.new()
 	bottom.alignment = BoxContainer.ALIGNMENT_CENTER
 	content.add_child(bottom)
@@ -182,18 +185,14 @@ func gull_picker() -> void:
 	_perk_picker(bottom)
 
 const CONTROL_MODE_TEXT: Array[String] = ["TAP EVERY WINGBEAT","HOLD TO FLAP","AUTO PECK IN DIVES"]
+const SMALL_FONT: Font = preload("res://assets/fonts/gull_hud.fnt")
 
-# REALISTIC . NORMAL . CASUAL slider beside the title (the cards need the full height); every change saves at once.
-func _control_mode_slider() -> void:
-	var title: Control = content.get_child(0) as Control
-	var header: HBoxContainer = HBoxContainer.new()
-	content.add_child(header)
-	content.move_child(header,0)
-	title.reparent(header)
-	var box: VBoxContainer = VBoxContainer.new()
-	box.size_flags_horizontal = SIZE_EXPAND_FILL
-	box.add_theme_constant_override("separation",0)
-	header.add_child(box)
+# REALISTIC . NORMAL . CASUAL slider under the cards: a 6 px heading, then the slider with its mode beside it. Every change saves at once.
+func _control_mode_slider(parent: Control) -> void:
+	var heading: Label = BeachUI.label(parent,"CONTROL DIFFICULTY LEVEL",6,BeachUI.CREAM)
+	heading.add_theme_font_override("font",SMALL_FONT)
+	heading.add_theme_font_size_override("font_size",6)
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var slider: HSlider = HSlider.new()
 	slider.name = "ControlModeSlider"
 	slider.min_value = 0
@@ -201,17 +200,23 @@ func _control_mode_slider() -> void:
 	slider.step = 1
 	slider.tick_count = 3
 	slider.ticks_on_borders = true
-	slider.custom_minimum_size.y = 9
+	slider.custom_minimum_size = Vector2(90,7)
 	slider.value = GameState.CONTROL_MODES.find(GameState.control_mode())
 	slider.tooltip_text = "REALISTIC / NORMAL / CASUAL"
-	# The stock 16 px grabber would grow the header and squash the gull cards.
+	# The stock 16 px grabber would grow the row and squash the gull cards.
 	var knob: Image = Image.create(5,7,false,Image.FORMAT_RGBA8)
 	knob.fill(BeachUI.GOLD)
 	for icon: String in ["grabber","grabber_highlight","grabber_disabled"]:
 		slider.add_theme_icon_override(icon,ImageTexture.create_from_image(knob))
-	box.add_child(slider)
-	var detail: Label = BeachUI.label(box,"",BeachUI.FONT_NATIVE,Color("a9d7d2"))
-	detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var row: HBoxContainer = HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation",6)
+	parent.add_child(row)
+	row.add_child(slider)
+	var detail: Label = BeachUI.label(row,"",6,Color("a9d7d2"))
+	detail.add_theme_font_override("font",SMALL_FONT)
+	detail.add_theme_font_size_override("font_size",6)
+	detail.custom_minimum_size.x = 110
 	var refresh: Callable = func() -> void:
 		var at: int = int(slider.value)
 		detail.text = "%s: %s" % [GameState.CONTROL_MODES[at].to_upper(),CONTROL_MODE_TEXT[at]]
