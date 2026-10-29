@@ -7,6 +7,7 @@ var touch_active: bool = false ## touch is the aim source until real mouse motio
 var touch_down: Dictionary = {} ## every finger currently on screen
 var touch_last_msec: int = -1000000
 var touch_climb: bool = false
+var flap_tap: bool = false ## a flap press latched in _input, handed to the gull by update_player
 var touch_dive: bool = false
 var touch_peck: bool = false
 var peck_held: bool = false ## the PECK button is down; a hold screeches
@@ -87,6 +88,8 @@ func _input(event: InputEvent) -> void:
 		touch_active = false
 	if not enabled:
 		return
+	if event.is_action_pressed("climb") and not event.is_echo():
+		flap_tap = true
 	if event is InputEventScreenTouch:
 		gamepad = false
 		touch_visible = true
@@ -100,6 +103,7 @@ func _input(event: InputEvent) -> void:
 				peck_finger = event.index
 			elif button == "flap":
 				climb_fingers[event.index] = true
+				flap_tap = true
 			elif button == "dive":
 				touch_dive = true
 			elif event.position.y > 28 and aim_finger < 0:
@@ -150,6 +154,8 @@ func update_player(gull: BeachGull, camera_x: float) -> void:
 	else:
 		gull.aim = get_viewport().get_mouse_position() + Vector2(camera_x-160,0)
 	gull.climb = Input.is_action_pressed("climb") or touch_climb
+	gull.flap_tap_pending = gull.flap_tap_pending or flap_tap
+	flap_tap = false
 
 # Shared by the gamepad stick and the touch stick.
 func _aim_with_stick(gull: BeachGull, stick: Vector2) -> void:
@@ -186,6 +192,7 @@ func clear_touch() -> void:
 	peck_finger = -1
 	touch_slowmo = false
 	touch_climb = false
+	flap_tap = false
 	touch_dive = false
 	aim_finger = -1
 	climb_fingers.clear()

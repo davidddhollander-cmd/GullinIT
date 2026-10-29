@@ -42,6 +42,9 @@
     "assist_strength": 0.5,
     "mouse_ignore_after_touch": 0.5
   },
+  "control_modes": {
+    "realistic_tap_interval": 0.15
+  },
   "flight": {
     "acceleration": 400,
     "max_speed": 140,

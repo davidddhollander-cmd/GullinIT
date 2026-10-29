@@ -149,6 +149,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	player = BeachGull.new()
 	player.species = str(level.get("player_species",GameState.chosen_gull()))
 	player.apply_species_stats()
+	player.control_mode = GameState.control_mode()
 	player.digestion_enabled = true
 	_apply_perk()
 	player.digestion.swallowed.connect(_swallowed)
