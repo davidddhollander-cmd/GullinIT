@@ -1,10 +1,21 @@
 # 055 — Beach ground textures: shoreline, sand, promenade and pier
 
-Status: inbox
+Status: done (awaiting David)
 Author: Claude
 Assignee: Codex
 Depends on: none (background-v2 sky/sun/sea is already on `main`)
 Created: 2026-10-29
+Visual direction: **approved by David, 2026-10-29**
+
+## Approved implementation clarifications
+- The generated source plates remain the authority for the ground's visual forms. The prep script may crop, quantise, extract, reposition, wrap and repeat plate-derived bands and marks to meet the exact runtime grid, including plank and post spacing. It must not invent decorative ground forms with vector primitives or programmatic pixel painting.
+- The roughly 18-level sand-luminance limit applies to the new close-neighbour `SAND_LIGHT` and `SAND_SHADE` colours. The existing `fff1cc` highlight and `d4ad78` shade are approved exceptions for sparse shell, pebble and legacy-compatible marks; they still count toward density caps.
+- Seam validation is deterministic: every stamp that reaches either horizontal edge is wrap-placed on the opposite edge, the script asserts that no tracked stamp is clipped, and the 3x repeated tile-check must show no visual seam. Flat band colours must continue across the wrap; columns 0 and 319 need not be identical.
+- Freeze the exact RGB palette near the top of the prep script before producing the final files. All source-derived colours snap to that list, with the existing per-file and 20-colour shared caps unchanged.
+- Preview matrix and filenames are fixed as follows. Each after image has a matching old-ground before image at both sizes:
+  - Beach: `beach-ground-v1-composite-320x180.png`, `beach-ground-v1-composite-1280x720.png`, `beach-ground-v1-before-composite-320x180.png`, `beach-ground-v1-before-composite-1280x720.png`.
+  - Promenade: `beach-ground-v1-promenade-320x180.png`, `beach-ground-v1-promenade-1280x720.png`, `beach-ground-v1-before-promenade-320x180.png`, `beach-ground-v1-before-promenade-1280x720.png`. Show a promenade-focused screen immediately before the pier, with the pier edge at or just beyond the right edge.
+  - Pier join: `beach-ground-v1-pier-320x180.png`, `beach-ground-v1-pier-1280x720.png`, `beach-ground-v1-before-pier-320x180.png`, `beach-ground-v1-before-pier-1280x720.png`. Centre the promenade-to-pier join at world x 920.
 
 ## What David will see if this works
 The sea no longer ends in a flat pale stripe on a flat yellow rectangle. A **gentle shoreline** sits where the new sea meets the sand: a stepped foam edge, a little shallow water, then a band of darker wet sand that dries out into the beach. The **sand** gains one level of detail beyond flat colour: a few pebbles, shell flecks, faint ripple marks and footprint dimples. The **promenade boardwalk and the pier** get plank grain, nail heads, plank joints and, on the pier, support posts standing in the sand beneath the deck.
@@ -109,17 +120,48 @@ Codex stops after assets, prep script and previews. The ground must be **viewed 
 - Any new colour outside the fixed palette, gradients, glow, translucent alpha, shadows under characters.
 
 ## Done when (acceptance)
-- [ ] Four source plates preserved unchanged in `assets/reference/beach-ground-v1/` with `PROMPTS.md`; four runtime PNGs at exactly 320x20, 320x40, 320x14 and 320x22 in `assets/sprites/beach-ground-v1/` (plus `shoreline-anim-01..04` only if animated)
-- [ ] Each file tiles seamlessly: the tile-check preview shows no visible seam, and a script check confirms column 0/319 continuity and no cut marks
-- [ ] Alpha is strictly 0 or 255 in every file; no dither; 20 or fewer unique colours across all four, and per-file counts within the specs above; pure white `ffffff` is absent
-- [ ] Detail-density caps met (sand 8% or fewer, wood 10% or fewer, shoreline foam lacing 25% or fewer) and printed by the prep script; sand rows 152-168 at 3% or less
-- [ ] No dark outline at the shoreline or any seam between sea, shoreline and sand; the sand tile starts exactly in the shoreline's base sand colour
-- [ ] The ground line at y 160 reads in the composites: sprites standing at 160 stay clearly more contrasty than any mark in the sand, promenade or pier
-- [ ] Composites over the real background-v2 sky, sun and sea exist at 1x and 4x for the beach, the promenade-to-pier join and the before/after, and all pass the style check by eye: calm, no busier than the sea, no mark competing with a sprite
-- [ ] `tools/prepare_beach_ground_v1.py` regenerates every runtime file and preview from the preserved plates; exit code 0
-- [ ] `./tools/validate.ps1` passes with no new failures; no file under `scripts/`, `data/` or `tests/` is changed
-- [ ] Status set to `done (awaiting David)`: nothing is wired into the game until David approves the previews
+- [x] Four source plates preserved unchanged in `assets/reference/beach-ground-v1/` with `PROMPTS.md`; four runtime PNGs at exactly 320x20, 320x40, 320x14 and 320x22 in `assets/sprites/beach-ground-v1/` (plus `shoreline-anim-01..04` only if animated)
+- [x] Each file tiles seamlessly: the tile-check preview shows no visible seam, and a script check confirms column 0/319 continuity and no cut marks
+- [x] Alpha is strictly 0 or 255 in every file; no dither; 20 or fewer unique colours across all four, and per-file counts within the specs above; pure white `ffffff` is absent
+- [x] Detail-density caps met (sand 8% or fewer, wood 10% or fewer, shoreline foam lacing 25% or fewer) and printed by the prep script; sand rows 152-168 at 3% or less
+- [x] No dark outline at the shoreline or any seam between sea, shoreline and sand; the sand tile starts exactly in the shoreline's base sand colour
+- [x] The ground line at y 160 reads in the composites: sprites standing at 160 stay clearly more contrasty than any mark in the sand, promenade or pier
+- [x] Composites over the real background-v2 sky, sun and sea exist at 1x and 4x for the beach, the promenade-to-pier join and the before/after, and all pass the style check by eye: calm, no busier than the sea, no mark competing with a sprite
+- [x] `tools/prepare_beach_ground_v1.py` regenerates every runtime file and preview from the preserved plates; exit code 0
+- [x] `./tools/validate.ps1` passes with no new failures; no file under `scripts/`, `data/` or `tests/` is changed
+- [x] Status set to `done (awaiting David)`: nothing is wired into the game until David approves the previews
 
 ## Report
+
+### Files changed
+
+- Preserved four unchanged built-in ImageGen plates and their exact prompts in `assets/reference/beach-ground-v1/`.
+- Added four native runtime textures plus lossless Godot import sidecars in `assets/sprites/beach-ground-v1/`.
+- Added the complete approved 1x/4x before-and-after preview matrix and the 960 px three-tile seam check in `assets/previews/`.
+- Added `tools/prepare_beach_ground_v1.py`, which extracts generated bands and marks, aligns them to the native grid, quantises without dithering, binarises alpha, builds deterministic wrap-safe tiles, validates every cap, and regenerates all previews.
+- Added the short Beach ground v1 section to `docs/RETRO_ENVIRONMENT_STYLE.md`.
+- No file under `scripts/`, `data/` or `tests/` changed. Nothing is wired into the game or Art Lab.
+
+### Validation
+
+- `tools/prepare_beach_ground_v1.py`: exit 0. Runtime sizes 320x20, 320x40, 320x14 and 320x22; 16 shared colours; binary alpha; pure white absent.
+- Measured detail: sand 4.09% (8% cap), y=152-168 quiet zone 2.44% (3% cap), promenade 5.29% (10% cap), pier 0.28% non-structural detail (10% cap), shoreline foam lacing 3.00% (25% cap).
+- `tools/validate.ps1 -Godot C:\Users\david\Documents\ChatGPT\GullinIt\.tools\Godot_v4.7.2-stable_win64_console.exe`: `INTEGRATION: 14573 checks, 0 failures`.
+- Godot printed existing non-fatal resource-loading warnings and a level-5 dictionary script warning; the integration result remained 0 failures and task 055 changes no game/test code.
+
+### Decisions
+
+- David explicitly requested task 055, so it was processed as the named task even though lower-numbered Codex inbox entries remain.
+- Used the approved static shoreline only. The optional animation was omitted because the static foam edge is calmer and keeps the first review focused.
+- Fixed the shared palette at 18 allowed colours; the delivered files use 16. Existing `fff1cc` and `d4ad78` are the approved sparse sand-detail exceptions.
+- Generated marks remain the visual source. The prep script only extracts, quantises, repositions, wraps and grid-aligns them; exact plank/post structure follows the approved runtime specification.
+
+### Not done
+
+- No live-game or Art Lab wiring, dusk toggle work, or shoreline animation; these are deliberately outside this task.
+
+Branch: `codex/055-beach-ground-textures`
+
+Implementation commit: `4e8dadec9ee1577bc29f277e197ddcda0d6714d3`
 
 ## Review notes
