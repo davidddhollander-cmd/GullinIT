@@ -205,15 +205,16 @@ def detail_count(image: Image.Image, base: tuple[int, int, int, int], rows: rang
 def prepare_sand() -> Image.Image:
     source = Image.open(SOURCE / "sand-source.png").convert("RGBA")
     reduced = centered_crop(source, 8.0).resize((320, 40), Image.Resampling.NEAREST)
-    reduced = quantize_fixed(reduced, [COLORS[name] for name in ("SAND", "SAND_HIGHLIGHT", "SAND_LEGACY_SHADE", "SAND_LIGHT", "SAND_SHADE")])
-    stamps = components(reduced, COLORS["SAND"], 10, 8, 3)
+    # Shade marks only: pale and white specks fold into the base, and single-pixel dots are dropped, so the sand reads calm, not grainy.
+    reduced = quantize_fixed(reduced, [COLORS[name] for name in ("SAND", "SAND_LEGACY_SHADE", "SAND_SHADE")])
+    stamps = [stamp for stamp in components(reduced, COLORS["SAND"], 10, 8, 3) if stamp.width >= 2]
     if len(stamps) < 8:
         raise RuntimeError(f"Sand source yielded only {len(stamps)} usable marks")
     output = Image.new("RGBA", (320, 40), COLORS["SAND"])
     rng = random.Random(551)
     occupied: list[tuple[int, int, int, int]] = []
     attempts = 0
-    target_detail = 520
+    target_detail = 180
     while detail_count(output, COLORS["SAND"]) < target_detail and attempts < 4000:
         attempts += 1
         stamp = rng.choice(stamps)
