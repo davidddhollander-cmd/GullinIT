@@ -1,0 +1,5 @@
+Use case: precise-object-edit
+Asset type: extraction source for the Round 1 pixel-art character concept board
+Primary request: Preserve the complete six Screeches McCrumbs character drawings and the three A/B/C labels exactly as shown in the input: identical anatomy, poses, expressions, scar, feather beard, captain's hat on B, neckerchief on C, colors, outlines, pixel clusters, scale, spacing, and layout. Change only the empty canvas behind them.
+Background edit: Fill every empty/background pixel with one perfectly uniform, fully opaque chroma-key green #00FF00. Use exactly one flat green with no variation. Remove every vignette, haze, glow, shadow, texture, gradient, and transparency from the background.
+Constraints: Do not alter, redraw, crop, soften, antialias, relight, recolor, move, or resize any gull or label. No green may appear inside the characters. Keep the board 1536x1024 and keep all six drawings clear of the edges. No added objects or text.

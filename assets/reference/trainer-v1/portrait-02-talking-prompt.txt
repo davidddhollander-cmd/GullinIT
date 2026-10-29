@@ -1,0 +1,7 @@
+Use case: precise-object-edit
+Asset type: production source for cell 2 of a five-cell pixel-art dialogue portrait atlas
+Primary request: Edit the supplied neutral Screeches McCrumbs portrait to create the matching talking frame. Change ONLY the bill and lower jaw: open the bill naturally by lowering the lower mandible enough to read clearly at small game scale. Keep the short brown cigar held at the same far corner of the bill, at the same angle and in the same screen position, with the jaws opening around it. No smoke or detached particles.
+Identity and invariants: Preserve every other pixel-level design decision as closely as possible: identical left-facing head angle, eye line, visible scarred left eye, stern brow, expression, hat position, crown feathers, enlarged layered feather beard, neck, shoulder silhouette, colors, outline, shading, scale, framing, and uniform green background. The neutral and talking portraits must not jitter when alternated. Do not move or resize the head, eye, hat, beard, cigar, neck, or shoulders.
+Style/medium: Preserve the exact chunky hand-pixelled style, dark navy outline, square pixel clusters, 3–4 flat shading tones, and hard edges of the input. No antialiasing, gradients, blur, repainting, or extra detail.
+Scene/backdrop: Preserve the perfectly uniform fully opaque chroma-key green #00FF00 background.
+Constraints: Bill points LEFT. Only bill and jaw differ from cell 1. Keep all artwork inside the square with generous margins. No text, watermark, smoke, glow, or new objects.

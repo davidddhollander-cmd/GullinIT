@@ -1,0 +1,7 @@
+Use case: identity-preserve
+Asset type: production source for cell 4 of a five-cell pixel-art dialogue portrait atlas
+Primary request: Create the impressed-and-proud expression from the supplied neutral Screeches McCrumbs portrait. Preserve his exact identity, left-facing profile, anatomy, scale, and pixel-art rendering. Lift the head and chest only subtly, soften the heavy brow, open the visible eye a touch with a quietly impressed gleam, and set the closed bill in a dignified proud line around the cigar. He should read as a gruff old trainer giving sincere approval, not smiling broadly.
+Identity and invariants: Keep the battered captain's hat, visible left-eye scar, cloudy eye, larger layered feather beard, crown feathers, short brown cigar, neck, shoulder silhouette, colors, outlines, shading, framing, eye line, and shoulder baseline as close as possible to the neutral source. Cigar remains at the same bill corner with no smoke.
+Style/medium: Preserve the exact chunky hand-pixelled style, dark navy outline, visible square pixels, compact clusters, and 3–4 flat shading tones. No antialiasing, gradients, blur, soft painting, or added texture.
+Scene/backdrop: Preserve the perfectly uniform fully opaque chroma-key green #00FF00 background.
+Constraints: Bill points LEFT. Keep all artwork inside the square with generous margins. No text, watermark, detached particles, or added objects.
