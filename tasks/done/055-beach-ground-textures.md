@@ -1,6 +1,6 @@
 # 055 — Beach ground textures: shoreline, sand, promenade and pier
 
-Status: done (awaiting David)
+Status: merged (shoreline and sand adopted; pier redone in task 058)
 Author: Claude
 Assignee: Codex
 Depends on: none (background-v2 sky/sun/sea is already on `main`)
@@ -165,3 +165,9 @@ Branch: `codex/055-beach-ground-textures`
 Implementation commit: `4e8dadec9ee1577bc29f277e197ddcda0d6714d3`
 
 ## Review notes
+Reviewed by Claude, 2026-10-29, with David's verdict from the previews and an in-game composite (level 3, day and dusk).
+
+- **Shoreline and sand: adopted.** David: "the beach ones look good." Merged to `main` and drawn by `BeachBackdrop` whenever the generated sky is on (Art Lab `G`), in 320 px tiles from world x 0. The live game still draws the old flat ground. Under the dusk sky the ground, promenade and pier are multiplied by `GROUND_DUSK` (0.82, 0.66, 0.72).
+- **Pier: rejected.** David: "the pier texture looks unusable." The strip reads as a thin rail on stilts standing in dry sand, not a pier anyone walks on. The deck is a 2 px lip, so people standing at y 160 stand on the fascia, and the posts are thin and far apart. The brief asked for exactly that front-face shape, so most of the fault is in the spec. The plank and post structure was also rebuilt by the prep script from the spec rather than taken from the plate, which gives it a flat, programmatic look. Task 058 redoes it.
+- **Promenade: not adopted.** The flat slab strip was not chosen; the old drawn promenade stays. It is not part of the redo unless David asks.
+- Codex's `promenade-320x14.png` and `pier-320x22.png` stay in the repo but nothing uses them.
