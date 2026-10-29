@@ -26,3 +26,24 @@ The identity pilot was reused as the strict character reference for:
 All sheets request complete right-facing figures, consistent scale and outfit,
 transparent gutters, no food, no scenery, and no water projectile. Left-facing
 animation is supplied through runtime mirroring.
+
+## Water effects
+
+Built-in image generation was also used for three effects-only source sheets,
+using the game-scale teenager preview as the style reference. All prompts asked
+for genuine transparency, hard binary alpha, chunky square pixels, no blur or
+glow, and the water palette `#e8fbff` over `#6ec6f0`.
+
+- `water-stream-source.png`: one row of four right-pointing pulse frames,
+  progressing through pressure bead, stretched stream, trailing separation and
+  compact recovery; no character, gun, scenery, text or frame borders.
+- `water-muzzle-source.png`: one row of three tiny right-pointing spray-puff
+  frames—pressure pop, widest short cone and separated bead; explicitly water,
+  not fire or smoke, with no character or gun.
+- `water-splash-source.png`: one row of five centred impact frames—contact,
+  rising crown, widest burst, falling droplets and collapsing beads—with no
+  puddle or ground-specific base so the same animation works in air and on sand.
+
+`tools/prepare_watergun_vfx.py` splits the generated rows, thresholds alpha,
+reduces with nearest-neighbour sampling and maps visible pixels to the approved
+two-colour palette. The full generated sources above remain unchanged.

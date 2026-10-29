@@ -4708,6 +4708,30 @@
       }
     }
   },
+  "water_stream": {
+    "file": "res://assets/sprites/watergun-teen-v1/water-stream-v1.png",
+    "frame_w": 20,
+    "frame_h": 12,
+    "animations": {
+      "travel": {"frames": [0, 1, 2, 3], "fps": 18, "loop": true}
+    }
+  },
+  "water_muzzle": {
+    "file": "res://assets/sprites/watergun-teen-v1/water-muzzle-v1.png",
+    "frame_w": 16,
+    "frame_h": 12,
+    "animations": {
+      "burst": {"frames": [0, 1, 2], "fps": 20, "loop": false}
+    }
+  },
+  "water_splash": {
+    "file": "res://assets/sprites/watergun-teen-v1/water-splash-v1.png",
+    "frame_w": 24,
+    "frame_h": 24,
+    "animations": {
+      "impact": {"frames": [0, 1, 2, 3, 4], "fps": 14, "loop": false}
+    }
+  },
   "old_man": {
     "file": "res://assets/sprites/retro-old-man-stick-32bit.png",
     "frame_w": 128,

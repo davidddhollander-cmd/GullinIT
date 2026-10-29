@@ -7,6 +7,7 @@ var max_range: float = 150.0
 var travelled: float = 0.0
 var radius: Vector2 = Vector2(10.0,7.0)
 var landed: bool = false ## true when the shot ended by touching the sand or running out of range
+var stream: AnimatedSprite2D
 
 func setup(from: Vector2, shot_velocity: Vector2, range_px: float, hit_radius: Vector2) -> void:
 	position = from
@@ -14,6 +15,13 @@ func setup(from: Vector2, shot_velocity: Vector2, range_px: float, hit_radius: V
 	max_range = range_px
 	radius = hit_radius
 	z_index = 5
+	stream = AnimatedSprite2D.new()
+	stream.name = "WaterStream"
+	stream.sprite_frames = Config.frames("water_stream")
+	stream.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	stream.rotation = velocity.angle()
+	stream.play(&"travel")
+	add_child(stream)
 
 ## Advances the shot. Returns the gull it hit, or null. `landed` is set when the shot is spent.
 func tick(delta: float, gulls: Array[BeachGull]) -> BeachGull:
@@ -33,13 +41,4 @@ func tick(delta: float, gulls: Array[BeachGull]) -> BeachGull:
 		return hit
 	if travelled >= max_range or position.x < 0.0 or position.x > float(Config.tuning.world.width):
 		landed = true
-	queue_redraw()
 	return null
-
-func _draw() -> void:
-	var direction: Vector2 = velocity.normalized()
-	for i: int in 6:
-		var at: Vector2 = -direction*float(i)*3.0
-		var drop: Color = Color("e8fbff") if i%2 == 0 else Color("6ec6f0")
-		drop.a = 1.0-float(i)*0.14
-		draw_rect(Rect2(Vector2(roundf(at.x),roundf(at.y)),Vector2(2,2) if i < 4 else Vector2(1,1)),drop)

@@ -133,23 +133,33 @@ func feather_burst(at: Vector2, impulse: Vector2, amount: int) -> void:
 		})
 	queue_redraw()
 
-## Placeholder droplets until the generated splash and muzzle-flash art is connected.
-func water_splash(at: Vector2) -> void:
-	if not bool(Config.tuning.juice.particles):
-		return
-	for i: int in 7:
-		var fan: float = float(i)/6.0*2.0-1.0
-		var life: float = 0.34+float(i%3)*0.06
-		particles.append({"at":at+Vector2(fan*2.0,0),"v":Vector2(fan*38.0,-34.0-float(i%3)*10.0),"life":life,"duration":life,"color":Color("e8fbff") if i%2 == 0 else Color("6ec6f0"),"size":Vector2(2,2),"gravity":170.0})
-	queue_redraw()
+func _water_animation(sprite_id: String, clip: StringName, at: Vector2, angle: float = 0.0) -> AnimatedSprite2D:
+	var sprite := AnimatedSprite2D.new()
+	sprite.name = sprite_id.to_pascal_case()
+	sprite.sprite_frames = Config.frames(sprite_id)
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	sprite.position = Vector2(roundf(at.x),roundf(at.y))
+	sprite.rotation = angle
+	sprite.z_index = 1
+	add_child(sprite)
+	sprite.animation_finished.connect(sprite.queue_free,CONNECT_ONE_SHOT)
+	sprite.play(clip)
+	return sprite
 
-func water_muzzle(at: Vector2, direction: Vector2) -> void:
+func water_splash(at: Vector2) -> AnimatedSprite2D:
 	if not bool(Config.tuning.juice.particles):
-		return
-	for i: int in 3:
-		var life: float = 0.14+float(i)*0.03
-		particles.append({"at":at,"v":direction*(60.0+float(i)*20.0)+Vector2(0,float(i-1)*8.0),"life":life,"duration":life,"color":Color("e8fbff"),"size":Vector2(2,2),"gravity":0.0})
-	queue_redraw()
+		return null
+	return _water_animation("water_splash",&"impact",at)
+
+func water_muzzle(at: Vector2, direction: Vector2) -> AnimatedSprite2D:
+	if not bool(Config.tuning.juice.particles):
+		return null
+	var heading: Vector2 = direction.normalized() if direction.length_squared() > 0.001 else Vector2.RIGHT
+	var mirror_left: bool = heading.x < 0.0
+	var angle: float = wrapf(heading.angle()+PI,-PI,PI) if mirror_left else heading.angle()
+	var sprite: AnimatedSprite2D = _water_animation("water_muzzle",&"burst",at,angle)
+	sprite.flip_h = mirror_left
+	return sprite
 
 func release_burst(at: Vector2, from_bin: bool = false) -> void:
 	if not bool(Config.tuning.juice.particles):

@@ -139,6 +139,7 @@ func run() -> void:
 	await preload("res://tests/off_lead_dog_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/water_shot_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/watergun_teen_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/watergun_vfx_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/level5_checks.gd").run(self,main,Callable(self,"check"))
 	await preload("res://tests/boss_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/gull_picker_checks.gd").run(self,Callable(self,"check"))
