@@ -1,0 +1,39 @@
+{
+  "watergun_teen": {
+    "file": "res://assets/sprites/watergun-teen-v1/watergun-teen-v1.png",
+    "shooting_file": "res://assets/sprites/watergun-teen-v1/watergun-teen-shooting-v1.png",
+    "frame_w": 128,
+    "frame_h": 128,
+    "visual_scale": 0.5,
+    "art_height": 40,
+    "sprite_offset_y": -26,
+    "source_faces_right": true,
+    "animations": {
+      "idle": {"frames": [0, 1, 2, 3], "fps": 3, "loop": true},
+      "walk": {"frames": [4, 5, 6, 7, 8, 9], "fps": 8, "loop": true},
+      "run": {"frames": [10, 11, 12, 13, 14, 15], "fps": 10, "loop": true},
+      "alert": {"frames": [16], "fps": 2, "loop": true},
+      "warning": {"frames": [17], "fps": 2, "loop": true},
+      "angry": {"frames": [18, 19, 20], "fps": 4, "loop": false},
+      "windup": {"frames": [21, 22], "fps": 4, "loop": true},
+      "swat": {"frames": [23, 24, 25, 26, 27, 28], "fps": 10, "loop": false},
+      "surprise": {"frames": [29, 30, 31, 32, 33, 34], "fps": 14, "loop": false},
+      "fist_shake": {"frames": [35, 36, 37, 38, 39, 40], "fps": 7, "loop": false},
+      "sit_down": {"frames": [41, 42, 43, 44], "fps": 8, "loop": false},
+      "seated_idle": {"frames": [45, 46, 47, 48], "fps": 3, "loop": true},
+      "stand_up": {"frames": [49, 50, 51, 52], "fps": 8, "loop": false},
+      "shoot_high": {"frames": [53, 54, 55], "fps": 10, "loop": false, "aim_y": -0.5},
+      "shoot_level": {"frames": [56, 57, 58], "fps": 10, "loop": false, "aim_y": 0.0},
+      "shoot_low": {"frames": [59, 60, 61], "fps": 10, "loop": false, "aim_y": 0.5}
+    },
+    "shooting": {
+      "mirror_for_left": true,
+      "fire_frame_offset": 1,
+      "muzzle_anchors_source_px": {
+        "shoot_high": [[96, 48], [97, 46], [96, 48]],
+        "shoot_level": [[99, 64], [100, 64], [99, 64]],
+        "shoot_low": [[96, 78], [97, 80], [96, 78]]
+      }
+    }
+  }
+}
