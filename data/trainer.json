@@ -62,7 +62,7 @@
         "mood": "neutral",
         "lay": {
           "default": "This is the open sand. Nothing here worth nicking, so first things first: get airborne. Gulls fly by flapping and steering.",
-          "realistic": "This is the open sand. First things first: get airborne.\n\nYou picked Realistic mode, so every wingbeat is a separate tap."
+          "realistic": "First things first: get airborne.\n\nYou picked Realistic mode, so every wingbeat is a separate tap."
         },
         "how": {
           "default": "Hold {flap} to flap and climb. Steer with {steer} to head right. Fly through the golden ring.",
