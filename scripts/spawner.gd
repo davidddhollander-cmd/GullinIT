@@ -14,7 +14,7 @@ var bag_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var benches: BenchRegistry = BenchRegistry.new()
 var lane_holds: Dictionary = {} # target -> {"y": held lane offset, "t": seconds left}
 var depth_props: Array[Rect2] = [] # x-extent and base y (as position.y) of ground props
-const DEPTH_PROP_TYPES: Array[String] = ["bin","wheelie_bin","beach_bench","beach_chair_blue","beach_castle","beach_rocks","kiosk","hotdog_stand","fish_chips_stand"]
+const DEPTH_PROP_TYPES: Array[String] = ["bin","wheelie_bin","beach_bench","beach_chair_blue","beach_castle","beach_rocks","kiosk","hotdog_stand","fish_chips_stand","beach_hut","beach_lamp","beach_parasol","beach_parasol_blue"]
 const SUNBATHER_LOOKS: Array[String] = ["male_red","male_blue","female_red","female_blue"]
 const BEHIND_PROP_Z: int = 0 # below ordinary scenery (z 1); crabs in the rear lane share it
 const LANE_GRACE: float = 0.5 # seconds a held lane may stay blocked before the walker changes lane
@@ -316,11 +316,15 @@ func apply_spacing(delta: float) -> void:
 		target.position += next_offset
 		# The nearer feet cover the farther feet when paths briefly cross.
 		target.z_index = 1 if next_offset.y < -4.0 else (3 if next_offset.y > 4.0 else 2)
-		# Y-sort against ground props: feet above the prop's base pass behind it, level or below pass in front.
-		for prop: Rect2 in depth_props:
-			if absf(target.position.x-(prop.position.x+prop.size.x*0.5)) < prop.size.x*0.5+6.0:
-				target.z_index = BEHIND_PROP_Z if target.position.y < prop.position.y-4.0 else maxi(target.z_index,3)
-				break
+		target.z_index = depth_z(target.position,target.z_index)
+
+## Y-sort against ground props for any character standing on the sand (the depth rule in AGENTS.md):
+## feet above a prop's base pass behind it, level or below pass in front. Otherwise keeps `lane_z`.
+func depth_z(feet: Vector2, lane_z: int) -> int:
+	for prop: Rect2 in depth_props:
+		if absf(feet.x-(prop.position.x+prop.size.x*0.5)) < prop.size.x*0.5+6.0:
+			return BEHIND_PROP_Z if feet.y < prop.position.y-4.0 else maxi(lane_z,3)
+	return lane_z
 
 func tick(delta: float, elapsed: float) -> void:
 	for i: int in range(replacements.size()-1,-1,-1):

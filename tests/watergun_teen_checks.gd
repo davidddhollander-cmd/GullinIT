@@ -57,6 +57,12 @@ static func run(suite: Node, check: Callable) -> void:
 	var frames: SpriteFrames = teen.sprite.sprite_frames
 	check.call(frames.has_animation(&"shoot_high") and frames.has_animation(&"shoot_level") and frames.has_animation(&"shoot_low") and frames.has_animation(&"run") and frames.has_animation(&"alert"),"teenager frames carry the pursue and shoot clips")
 	check.call(is_equal_approx(teen.sprite.scale.x,float(Config.sprites.watergun_teen.visual_scale)) and is_equal_approx(teen.position.y,float(Config.tuning.world.ground)),"teenager is drawn at its configured scale on the sand line")
+	# Depth rule (AGENTS.md): feet level with or below a prop's base draw in front of it, feet above draw behind.
+	var bench: Dictionary = Config.levels[3].props.filter(func(prop: Dictionary) -> bool: return prop.type == "beach_bench")[0]
+	var base_y: float = float(bench.get("y",160))
+	var bench_z: int = game.beach.prop_sprites[Config.levels[3].props.find(bench)].z_index
+	check.call(game.spawner.depth_z(Vector2(float(bench.x),base_y+8.0),2) > bench_z,"a teenager in front of a bench draws over it")
+	check.call(game.spawner.depth_z(Vector2(float(bench.x),base_y-8.0),2) < bench_z,"a teenager behind a bench draws under it")
 	var spots: Array[int] = [0]
 	var shots_seen: Array[int] = [0]
 	var hits: Array[int] = [0]
