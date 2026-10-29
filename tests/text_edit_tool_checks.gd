@@ -59,6 +59,12 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(tool.edits.size() == 2 and tool.report().contains("TEXT EDITS (2)"),"several edits are reported together")
 	tool.revert_all()
 	check.call(tool.edits.is_empty() and label.text == "Hello" and button.text == "Go","revert all restores every element")
+	# A node the game reuses for other text (the trainer card's labels) must not keep a stale edit.
+	tool.select(label)
+	tool.apply_edit("Mine")
+	label.text = "The game wrote this"
+	check.call(not tool.report().contains("OLD: Hello") and tool.edits.is_empty(),"an edit is dropped once the game puts other text in the node")
+	label.text = "Hello"
 	# The trainer card tags its paragraphs with where their copy lives.
 	var card: TrainerCard = TrainerCard.new()
 	holder.add_child(card)
