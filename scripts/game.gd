@@ -704,6 +704,7 @@ func _rival_drops_carry(rival: BeachGull, attacker: Vector2) -> void:
 
 # The player's own stun handler already reacts (RUDE.), so only rivals get a callout.
 func _water_hit(gull: BeachGull, teen: WatergunTeen) -> void:
+	effects.water_soak(gull.position,teen.position)
 	if not gull.rival:
 		return
 	effects.message(gull.position-Vector2(0,20),"SOAKED!",Color("6ec6f0"))

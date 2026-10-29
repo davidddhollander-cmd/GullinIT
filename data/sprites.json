@@ -4676,9 +4676,9 @@
     "file": "res://assets/sprites/watergun-teen-v1/watergun-teen-v1.png",
     "frame_w": 128,
     "frame_h": 128,
-    "visual_scale": 0.5,
-    "art_height": 40,
-    "sprite_offset_y": -26,
+    "visual_scale": 0.3,
+    "art_height": 24,
+    "sprite_offset_y": -16,
     "source_faces_right": true,
     "animations": {
       "idle": {"frames": [0, 1, 2, 3], "fps": 3, "loop": true},

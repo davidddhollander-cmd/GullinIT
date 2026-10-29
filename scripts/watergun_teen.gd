@@ -220,7 +220,7 @@ func _tick_shots(delta: float, gulls: Array[BeachGull]) -> void:
 			continue
 		if victim != null:
 			victim.stun(float(_t().hit_stun),position)
-		splashed.emit(shot.position)
+		splashed.emit(victim.position if victim != null else shot.position)
 		if victim != null and victim.state == BeachGull.State.STUNNED:
 			hit.emit(victim)
 		shots.remove_at(i)

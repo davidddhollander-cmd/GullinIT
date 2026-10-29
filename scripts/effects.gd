@@ -149,7 +149,19 @@ func _water_animation(sprite_id: String, clip: StringName, at: Vector2, angle: f
 func water_splash(at: Vector2) -> AnimatedSprite2D:
 	if not bool(Config.tuning.juice.particles):
 		return null
-	return _water_animation("water_splash",&"impact",at)
+	# The crown is drawn at the bottom of its frame: lift it so the base sits on `at`.
+	return _water_animation("water_splash",&"impact",at-Vector2(0,10))
+
+## Body hit: droplets thrown out and up off the gull (the splash sprite plays at the same spot), so a soak reads as contact.
+func water_soak(at: Vector2, from: Vector2) -> void:
+	if not bool(Config.tuning.juice.particles):
+		return
+	var away: float = signf(at.x-from.x) if absf(at.x-from.x) > 1.0 else 1.0
+	for i: int in 14:
+		var fan: float = float(i)/13.0*2.0-1.0
+		var life: float = 0.45+float(i%4)*0.07
+		particles.append({"at":at+Vector2(fan*3,-2),"v":Vector2(away*(18.0+float(i%3)*14.0)+fan*34,-48-float(i%4)*14),"life":life,"duration":life,"color":Color("fff4da") if i%3==0 else Color("6ec6f0"),"size":Vector2(2,2) if i%3!=1 else Vector2(1,2),"gravity":170.0,"crumb":true})
+	queue_redraw()
 
 func water_muzzle(at: Vector2, direction: Vector2) -> AnimatedSprite2D:
 	if not bool(Config.tuning.juice.particles):

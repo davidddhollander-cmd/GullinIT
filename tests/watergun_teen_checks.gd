@@ -56,7 +56,7 @@ static func run(suite: Node, check: Callable) -> void:
 	var rival: BeachGull = game.pilots[0].gull
 	var frames: SpriteFrames = teen.sprite.sprite_frames
 	check.call(frames.has_animation(&"shoot_high") and frames.has_animation(&"shoot_level") and frames.has_animation(&"shoot_low") and frames.has_animation(&"run") and frames.has_animation(&"alert"),"teenager frames carry the pursue and shoot clips")
-	check.call(is_equal_approx(teen.sprite.scale.x,0.5) and is_equal_approx(teen.position.y,float(Config.tuning.world.ground)),"teenager is drawn at 0.5 scale on the sand line")
+	check.call(is_equal_approx(teen.sprite.scale.x,float(Config.sprites.watergun_teen.visual_scale)) and is_equal_approx(teen.position.y,float(Config.tuning.world.ground)),"teenager is drawn at its configured scale on the sand line")
 	var spots: Array[int] = [0]
 	var shots_seen: Array[int] = [0]
 	var hits: Array[int] = [0]
@@ -139,7 +139,7 @@ static func run(suite: Node, check: Callable) -> void:
 	_run(teen,game,0.15)
 	check.call(teen.state == WatergunTeen.State.FIRE and teen.sprite.frame == int(Config.sprites.watergun_teen.shooting.fire_frame_offset) and shots_seen[0] == 1 and teen.shots.size() == 1,"one shot spawns on the fire frame")
 	var anchor: Array = Config.sprites.watergun_teen.shooting.muzzle_anchors_source_px.shoot_level[1]
-	var expected: Vector2 = teen.position+Vector2(teen.facing*(float(anchor[0])-64.0)*0.5,float(Config.sprites.watergun_teen.sprite_offset_y)+(float(anchor[1])-64.0)*0.5)
+	var expected: Vector2 = teen.position+Vector2(teen.facing*(float(anchor[0])-64.0)*float(Config.sprites.watergun_teen.visual_scale),float(Config.sprites.watergun_teen.sprite_offset_y)+(float(anchor[1])-64.0)*float(Config.sprites.watergun_teen.visual_scale))
 	check.call(fired_at[0].distance_to(expected) < 0.01,"the shot starts at the fire frame's muzzle anchor")
 	_run(teen,game,float(t.muzzle_time)+0.01)
 	check.call(teen.state == WatergunTeen.State.RECOVER and teen.sprite.frame == 2,"he recovers on the last shoot frame")
