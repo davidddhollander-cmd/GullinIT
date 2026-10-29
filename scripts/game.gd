@@ -82,7 +82,7 @@ var screech_clock: float = 0.0
 var screech_snacks: int = 0
 const SCREECH_STEPS: int = 4
 
-func setup(definition: Dictionary, is_casual: bool, force_training: bool = false) -> void:
+func setup(definition: Dictionary, is_casual: bool, force_training: bool = false, force_screech: bool = false) -> void:
 	level = definition
 	Config.apply_level_world(level)
 	training = bool(level.get("tutorial",false)) and (force_training or not bool(GameState.entry(1).get("training_complete",false)))
@@ -169,7 +169,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	player.position = Vector2(Config.tuning.world.start_x,Config.tuning.world.start_y)
 	brash.game = self
 	add_child(brash)
-	screech_lesson = level.has("screech_lesson") and not training and player.species == "herring" and not bool(GameState.entry(int(level.id)).get("screech_lesson_complete",false))
+	screech_lesson = level.has("screech_lesson") and not training and player.species == "herring" and (force_screech or not bool(GameState.entry(int(level.id)).get("screech_lesson_complete",false)))
 	player.setup_perches(level.props)
 	player.add_sign_perches(beach.sign_layouts())
 	_wire_sand(player)
