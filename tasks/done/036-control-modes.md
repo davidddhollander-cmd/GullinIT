@@ -1,6 +1,6 @@
 # 036 — Control modes: Realistic / Normal / Casual
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet (game code)
 Depends on: none
