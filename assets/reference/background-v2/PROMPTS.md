@@ -17,3 +17,7 @@ Use case: stylized-concept. Asset type: new source plate for a layered animated 
 ## Runtime preparation adjustments
 
 The prepared cloud clusters are shifted upward, leaving eight clear sky pixels above the sea surface. The runtime sun uses one flat cream-gold color with binary alpha to stay clean at 34 x 34 pixels. The sea is deliberately simple: 320 x 40 frames at native scale, flat colour bands sampled from the sea-source-v2 palette, about twenty sparse fading dashes and five horizon shoals that independently grow, brighten, fragment, recede and disappear on staggered phases. The plate's texture is not copied; it stays as the colour and style reference. The runtime loop has sixteen frames at 150 ms each. Generated sources remain unchanged.
+
+## Dusk (runtime only)
+
+Dusk adds no generated art. `assets/shaders/dusk_tint.gdshader` repaints the sky plate as seven flat bands keyed on screen row (violet, mauve, rose, salmon, orange, gold, pale gold); lit cloud pixels become a warm cream-peach and shaded undersides a cooler mauve. The sun is the day sprite modulated deep orange and moved to y 76 so the sea covers its lower half. A few flat gold dashes under it form a sparse glint. The sea is modulated toward indigo.
