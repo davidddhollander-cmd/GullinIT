@@ -68,6 +68,10 @@ static func run(host: Node, check: Callable) -> void:
 	_key(lab, KEY_D)
 	var art: BeachBackgroundArt = lab.backdrop.background_art
 	check.call(art != null and lab.backdrop.sunset and art.sky.material != null and art.sea.modulate == BeachBackgroundArt.SEA_DUSK, "G shows the generated sky and D its dusk version")
+	art.birds.update(20.0)
+	var flock_before: PackedVector2Array = art.birds.pixels
+	art.birds.update(24.0)
+	check.call(not flock_before.is_empty() and not art.birds.pixels.is_empty() and flock_before != art.birds.pixels, "background birds fly across the generated sky with the clock")
 	lab._advance(1.0)
 	check.call(art.sea.frame == int(1.0 / BeachBackgroundArt.SEA_FRAME_TIME) % BeachBackgroundArt.SEA_FRAMES, "the generated sea follows the beach clock")
 	_key(lab, KEY_G)
