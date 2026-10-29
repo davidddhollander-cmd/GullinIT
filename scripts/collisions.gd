@@ -66,6 +66,6 @@ static func resolve(gull: BeachGull, targets: Array[BeachTarget], props: Array[D
 			gull.peck_near_target = target
 	# Keep a grazing contact provisional until the active window ends. A clean
 	# contact later in the same peck takes precedence over the knockdown.
-	if striking and (gull.peck_time <= 0.0 or gull.state != BeachGull.State.STRIKE) and is_instance_valid(gull.peck_near_target):
+	if striking and (not gull.peck_window_open() or gull.state != BeachGull.State.STRIKE) and is_instance_valid(gull.peck_near_target):
 		gull.peck_near_target.knock_food(gull)
 		gull.consume_peck()

@@ -168,3 +168,14 @@ func shop_open() -> bool:
 func chosen_gull() -> String:
 	var id: String = str(options.get("gull", "herring"))
 	return id if Config.species.species.has(id) and gull_owned(id) else "herring"
+
+const CONTROL_MODES: Array[String] = ["realistic","normal","casual"]
+
+## How hard flying and snatching are: realistic taps every wingbeat, casual pecks dives for you.
+func control_mode() -> String:
+	var id: String = str(options.get("control_mode","normal"))
+	return id if id in CONTROL_MODES else "normal"
+
+func set_control_mode(id: String) -> void:
+	options.control_mode = id if id in CONTROL_MODES else "normal"
+	save_progress()

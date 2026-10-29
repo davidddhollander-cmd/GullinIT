@@ -64,6 +64,10 @@ var wind_force: float = 0.0
 var stroke_cooldown: float = 0.0
 var stroke_left: float = 0.0
 var stroke_started: bool = false
+var control_mode: String = "normal" ## player only: "realistic" taps every wingbeat, "casual" pecks dives for you
+var flap_tap_pending: bool = false ## realistic: a flap press latched from input, consumed by the next tick
+var tap_cooldown: float = 0.0
+var flap_anim_left: float = 0.0
 var sprite: AnimatedSprite2D
 var carry_source: Callable ## rivals: returns the held food id ("" when empty); the player reads its own belly
 var carry_food: String = ""
@@ -366,14 +370,23 @@ func dive(wind_dir: int) -> void:
 	dive_started.emit()
 
 func attempt_peck() -> bool:
-	if state != State.STRIKE or peck_used:
+	if state != State.STRIKE or peck_used or auto_peck():
 		return false
 	peck_used = true
 	peck_time = float(Config.tuning.dive.peck_window)
 	peck_started.emit()
 	return true
 
+func auto_peck() -> bool:
+	return control_mode == "casual" and not rival
+
+## Casual treats the whole strike as one peck window that ends on the first take or knock.
+func peck_window_open() -> bool:
+	return peck_time > 0.0 or (auto_peck() and not peck_used)
+
 func consume_peck() -> void:
+	if auto_peck():
+		peck_used = true
 	peck_time = 0.0
 	peck_sweep_active = false
 	peck_near_target = null
@@ -384,7 +397,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 	var d: Dictionary = Config.tuning.dive
 	var w: Dictionary = Config.tuning.wind
 	var started_state: State = state
-	peck_sweep_active = started_state == State.STRIKE and peck_time > 0.0
+	peck_sweep_active = started_state == State.STRIKE and peck_window_open()
 	peck_time = maxf(0.0,peck_time-delta)
 	var before: Vector2 = position
 	if not departing_perch.is_empty() and (position.y>float(departing_perch.y)+12.0 or absf(position.x-float(departing_perch.x))>float(departing_perch.half_width)+12.0):
@@ -398,6 +411,18 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 	stroke_started = false
 	if state != State.GLIDE:
 		stroke_left = 0.0
+	var tapped: bool = false
+	if control_mode == "realistic" and not rival:
+		# Each latched press is one wingbeat; `climb` is true for that tick only.
+		tap_cooldown = maxf(0.0,tap_cooldown-delta)
+		flap_anim_left = maxf(0.0,flap_anim_left-delta)
+		tapped = flap_tap_pending and tap_cooldown <= 0.0
+		flap_tap_pending = false
+		climb = tapped
+		if tapped:
+			tap_cooldown = float(Config.tuning.control_modes.realistic_tap_interval)
+			flap_anim_left = float(f.stroke_interval)
+			stroke_cooldown = 0.0
 	invulnerable = maxf(0.0, invulnerable - delta)
 	sprite.modulate.a = 0.5 if invulnerable > 0.0 and int(invulnerable * 12) % 2 == 0 else 1.0
 	sprite.rotation = 0.0
@@ -464,9 +489,10 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 				land()
 			if absf(velocity.x) > 1:
 				facing = signf(velocity.x)
-			sprite.play(&"climb" if climb else &"glide")
-			sprite.speed_scale = climb_loop_time() / float(f.stroke_interval) if climb else 1.0
-			if stroke_started:
+			var flapping: bool = climb or flap_anim_left > 0.0
+			sprite.play(&"climb" if flapping else &"glide")
+			sprite.speed_scale = climb_loop_time() / float(f.stroke_interval) if flapping else 1.0
+			if stroke_started or tapped:
 				sprite.frame = 0
 		State.WINDUP:
 			velocity.y = minf(velocity.y + float(f.gravity)*delta,float(f.max_descent))
@@ -638,7 +664,7 @@ func sync_carry() -> void:
 		local = 7 # idle pose
 		if absf(velocity.x) > 1:
 			local = int(walk_phase / TAU * 8) % 8
-	elif climb:
+	elif climb or flap_anim_left > 0.0:
 		clip = &"fly"
 		local = sprite.frame % 4 if sprite.animation == &"climb" else int(Time.get_ticks_msec() / 100) % 4
 	if carry_body.sprite_frames == null or carry_body.get_meta(&"art_id", "") != art_id:
@@ -686,8 +712,11 @@ func wind_lift() -> float:
 func tailwind(heading: float) -> float:
 	return clampf(heading * wind_force / float(Config.tuning.wind.lift_ref), -1.5, 1.5)
 
+func flap_tap() -> void:
+	flap_tap_pending = true
+
 func wingbeat(delta: float) -> float:
-	## Held flap repeats a short downstroke at a fixed cadence; returns its average upward acceleration this tick.
+	## Held flap repeats a short downstroke at a fixed cadence (realistic: one per tap); returns its average upward acceleration this tick.
 	var f: Dictionary = Config.tuning.flight
 	if climb and stroke_cooldown <= 0.0 and stroke_left <= 0.0:
 		stroke_left = float(f.stroke_duration)

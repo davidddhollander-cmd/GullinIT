@@ -418,9 +418,11 @@ func _draw() -> void:
 			draw_line(pos-game.player.direction*25,pos-game.player.direction*13,BeachUI.CREAM,1)
 		if game.player.state == BeachGull.State.STRIKE:
 			var beak: Vector2 = game.player.beak()-offset
-			var peck_color: Color = BeachUI.GOLD if game.player.peck_time > 0 else (Color("ef725c") if game.player.peck_used else BeachUI.CREAM)
+			var peck_color: Color = BeachUI.GOLD if game.player.peck_window_open() else (Color("ef725c") if game.player.peck_used else BeachUI.CREAM)
 			draw_arc(beak,6,0,TAU,12,peck_color,2)
-			if game.player.peck_time > 0:
+			if game.player.auto_peck():
+				draw_string(font,beak+Vector2(-18,-10),"AUTO PECK",HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.GOLD)
+			elif game.player.peck_time > 0:
 				draw_line(beak-Vector2(7,10),beak-Vector2(7-14*game.player.peck_time/float(Config.tuning.dive.peck_window),10),peck_color,2)
 	if touch_buttons_visible():
 		_draw_touch_buttons()
@@ -514,10 +516,12 @@ func context_hint() -> Dictionary:
 			return {"text":"TAP %s AT TODDLER" % peck}
 		if game.stash_raids.has_nearby_source():
 			return {"text":"TAP %s TO SEARCH" % peck}
-		return {"text":"WALK FOR SCRAPS / HOLD %s TO FLY" % flap}
+		return {"text":"WALK FOR SCRAPS / %s %s TO FLY" % ["TAP" if game.player.control_mode == "realistic" else "HOLD",flap]}
 	if game.player.state == BeachGull.State.STRIKE:
 		if game.player.crash_warning():
 			return {"text":"PULL UP! CRASH AHEAD","danger":true}
+		if game.player.auto_peck():
+			return {"text":"AUTO PECK"}
 		if not game.player.peck_used:
 			return {} if game.training else {"text":"TAP %s AT THE SNACK" % peck}
 		return {"text":"PECK ACTIVE" if game.player.peck_time > 0 else "PECK SPENT - DIVE AGAIN"}

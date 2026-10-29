@@ -174,11 +174,51 @@ func gull_picker() -> void:
 		status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		if id == chosen:
 			card.grab_focus()
+	_control_mode_slider()
 	var bottom: HBoxContainer = HBoxContainer.new()
 	bottom.alignment = BoxContainer.ALIGNMENT_CENTER
 	content.add_child(bottom)
 	BeachUI.button(bottom,"< BACK",func() -> void: choose("title"),70)
 	_perk_picker(bottom)
+
+const CONTROL_MODE_TEXT: Array[String] = ["TAP EVERY WINGBEAT","HOLD TO FLAP","AUTO PECK IN DIVES"]
+
+# REALISTIC . NORMAL . CASUAL slider beside the title (the cards need the full height); every change saves at once.
+func _control_mode_slider() -> void:
+	var title: Control = content.get_child(0) as Control
+	var header: HBoxContainer = HBoxContainer.new()
+	content.add_child(header)
+	content.move_child(header,0)
+	title.reparent(header)
+	var box: VBoxContainer = VBoxContainer.new()
+	box.size_flags_horizontal = SIZE_EXPAND_FILL
+	box.add_theme_constant_override("separation",0)
+	header.add_child(box)
+	var slider: HSlider = HSlider.new()
+	slider.name = "ControlModeSlider"
+	slider.min_value = 0
+	slider.max_value = 2
+	slider.step = 1
+	slider.tick_count = 3
+	slider.ticks_on_borders = true
+	slider.custom_minimum_size.y = 9
+	slider.value = GameState.CONTROL_MODES.find(GameState.control_mode())
+	slider.tooltip_text = "REALISTIC / NORMAL / CASUAL"
+	# The stock 16 px grabber would grow the header and squash the gull cards.
+	var knob: Image = Image.create(5,7,false,Image.FORMAT_RGBA8)
+	knob.fill(BeachUI.GOLD)
+	for icon: String in ["grabber","grabber_highlight","grabber_disabled"]:
+		slider.add_theme_icon_override(icon,ImageTexture.create_from_image(knob))
+	box.add_child(slider)
+	var detail: Label = BeachUI.label(box,"",BeachUI.FONT_NATIVE,Color("a9d7d2"))
+	detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var refresh: Callable = func() -> void:
+		var at: int = int(slider.value)
+		detail.text = "%s: %s" % [GameState.CONTROL_MODES[at].to_upper(),CONTROL_MODE_TEXT[at]]
+	slider.value_changed.connect(func(value: float) -> void:
+		GameState.set_control_mode(GameState.CONTROL_MODES[int(value)])
+		refresh.call())
+	refresh.call()
 
 # One owned perk may be equipped: a single button that cycles NONE and the owned perks.
 func _perk_picker(parent: Control) -> void:
