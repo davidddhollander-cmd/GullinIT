@@ -20,7 +20,10 @@ static func pose(target: BeachTarget, name: StringName, frame: int) -> void:
 	target.sprite.stop()
 	target.sprite.animation = directional_name
 	target.sprite.frame = clampi(frame, 0, target.sprite.sprite_frames.get_frame_count(directional_name) - 1)
-	target.sprite.flip_h = target.facing < 0 and directional_name == name and name not in [&"rest", &"rise", &"pickup", &"lie_shoo"]
+	if name in [&"rest", &"rise", &"pickup", &"lie_shoo"]:
+		target.sprite.flip_h = target.sunbather_mirror
+	else:
+		target.sprite.flip_h = target.facing < 0 and directional_name == name
 	target.sprite.position = Vector2(0, -26)
 	target.sprite.rotation = 0.0
 

@@ -69,6 +69,7 @@ var bag_squish_strength: float = 0.12
 var bag_release_bounce: bool = false
 var sunbather_blue: bool = false
 var sunbather_female: bool = false
+var sunbather_mirror: bool = false # lies with feet on the left; bag and Zzz move to the head side
 var sunbather_run_time: float = 0.0
 var seeking_parent: bool = false
 var handover_timer: float = 0.0
@@ -147,7 +148,7 @@ func sleep_letters() -> Dictionary:
 	if kind != "sunbather" or sleep_state != SleepState.SLEEPING:
 		return {}
 	var phase: float = fposmod(art_time+stash_home_x*0.013,2.4)/2.4
-	return {"position":Vector2(-22+phase*5,-27-phase*10).round(),"alpha":sin(PI*phase)}
+	return {"position":Vector2((8.0 if sunbather_mirror else -22.0)+phase*5,-27-phase*10).round(),"alpha":sin(PI*phase)}
 
 func art_height() -> float:
 	if kind == "sunbather":
@@ -158,7 +159,7 @@ func art_height() -> float:
 	return float(entry.get("art_height",float(entry.frame_h) * float(entry.get("visual_scale",1.0))))
 
 func stash_position() -> Vector2:
-	return Vector2(clampf(stash_home_x-30,16,float(Config.tuning.world.width)-16),float(Config.tuning.world.ground)-9)
+	return Vector2(clampf(stash_home_x+(30.0 if sunbather_mirror else -30.0),16,float(Config.tuning.world.width)-16),float(Config.tuning.world.ground)-9)
 
 func peck_bag(progress: float = 0.0, released: bool = false) -> void:
 	bag_squish_duration = 0.30 if released else BAG_SQUISH_TIME
@@ -241,6 +242,7 @@ func setup(type: String, x: float, random: RandomNumberGenerator, mult: float, s
 		sunbather_blue = int(x/100.0)%2 == 1
 		var appearance: String = str(spawn.get("appearance",""))
 		sunbather_female = appearance.begins_with("female")
+		sunbather_mirror = bool(spawn.get("mirror",int(x/80.0)%2 == 1))
 		if not appearance.is_empty():
 			sunbather_blue = appearance.ends_with("blue")
 	sprite = AnimatedSprite2D.new()
