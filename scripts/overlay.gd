@@ -187,11 +187,13 @@ func setup(owner_game: BeachGame) -> void:
 		if game.level.has("objective"):
 			BeachUI.label(intro,str(game.level.objective))
 		var seconds: int = int(game.level.time_limit)
-		BeachUI.label(intro,"15 SNATCHES. NO TIMER." if game.casual else "SCORE %d IN %d:%02d TO PASS" % [int(game.level.stars[0]),seconds/60,seconds%60])
+		BeachUI.label(intro,"15 SNATCHES. NO TIMER." if game.casual else "SCORE %d IN %d:%02d
+TO PASS TO THE NEXT LEVEL" % [int(game.level.stars[0]),seconds/60,seconds%60])
 		if not game.quests.quests.is_empty():
-			BeachUI.label(intro,"QUESTS",8,BeachUI.GOLD)
+			# Quests sit in the small HUD font so a long list stays clear of the pass mark.
+			_small(BeachUI.label(intro,"QUESTS",8,BeachUI.GOLD))
 			for quest: Dictionary in game.quests.quests:
-				BeachUI.label(intro,"- %s  +%d" % [quest.text,int(quest.bonus)],8,Color("80bcb8"))
+				_small(BeachUI.label(intro,"- %s  +%d" % [quest.text,int(quest.bonus)],8,Color("80bcb8")))
 	trainer_intro = BeachGame.trainer_cards and game.training
 	if trainer_intro:
 		intro_panel.hide()
@@ -206,6 +208,11 @@ func setup(owner_game: BeachGame) -> void:
 	add_child(trainer_card)
 	if trainer_intro:
 		start_button = trainer_card.button
+
+func _small(label: Label) -> Label:
+	label.add_theme_font_override("font",HUD_FONT)
+	label.add_theme_font_size_override("font_size",TOP_BAR_FONT_SIZE)
+	return label
 
 func _process(delta: float) -> void:
 	var counting: bool = shown_score < game.score.points
