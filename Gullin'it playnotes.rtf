@@ -1,0 +1,54 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Calibri;}}
+{\colortbl;\red0\green0\blue0;\red0\green128\blue0;\red0\green90\blue200;\red200\green40\blue40;}
+\f0\fs22
+{\b\fs28 Gullin'it playnotes}\par
+\par
+{\cf2 Green = fixed and merged.}  {\cf3 Blue = task queued (tasks/inbox).}  {\cf4 Red = no task yet.}\par
+\par
+- UI scores on right hand need to be higher on the screen, taking up to much space\par
+{\cf2     -> Task 018 (merged): rival score panel moved to the top-right corner and made compact.}\par
+- Dog chasing across wider range\par
+{\cf2     -> Task 019 (merged) leashed the dog; Task 024 (merged) then widened his territory to about half the beach.}\par
+- Gull carrying food in beek needs slightly different sprite, now its' just the same foot sprite pasted on top\par
+{\cf2     -> Tasks 029 + 031 (merged): proper beak-carry frames for every gull.}\par
+\par
+-levels all have the same population and set'up - need more variation\par
+{\cf2     -> Task 023 (merged): own layout and cast per level. Tasks 032 + 034 (merged): old man added, cast rotated so levels don't repeat people.}\par
+- Flying and diving physics needs tweaking: building a bit of velocity before the dive, and than the peck itself slows down the gull\par
+{\cf4     -> No task yet. Needs a playtest session with you to tune the feel.}\par
+- Pixel art consistency still a problem - need a strict art consistency audit on coarseness of pixels and outlines. Some characters hit the mark, others not.\par
+{\cf2     -> Partly: Task 033 (second pier diner) and Task 035 (seafood vendor placeholder replaced), old man scaled down 40%.}\par
+{\cf4     -> The full art audit has no task yet (big Codex job).}\par
+- Character behaviour and animations still need tweaking and improving\par
+{\cf2     -> Partly: Tasks 025, 026, 032 (merged).}\par
+{\cf2     -> Task 037 (merged): old man and old lady slower.}\par
+\par
+\par
+{\b New playnotes 24 Oct:}\par
+\par
+- characters switching lanes too chaotic, once they lane switched they should stay there for a few seconds so there's no chaotic switching with larger groups of characters.\par
+{\cf2     -> Task 025 (merged), then sticky lanes at walking pace (commits 968fa83, 5221374).}\par
+- In second lane characters still walk over rather than behind the green bins - check and create a clearer rule for object placement\par
+{\cf2     -> Task 025 (merged): depth rule so people walk behind bins.}\par
+- in level 5, theres also objects overlapping, palm tree and bench on the right side.\par
+{\cf2     -> Task 027 (merged).}\par
+- the dog should have a wider chase territory and keep chasing even if gull goes higher, he should be a continuous threat but avoidable\par
+{\cf2     -> Task 024 (merged): covers about half the beach, tracks higher gulls, leaps higher.}\par
+- there's almost nobody going to sit down on the benches - either the mechanic doesn't work, or the characters are not getting there. Fix this. I would also suggest each level starts with at least one bench occupied.\par
+{\cf2     -> Task 026 (merged): benches fixed, every level starts with a bench occupied.}\par
+- overall, there are too many characters clustering together after a while - I suggest we start with reducing the number of characters per level, and secondly think about an idle or wander pattern for characters that have their food stolen, so they don't immediately go to the stands\par
+{\cf2     -> Task 027 (merged): smaller casts. Task 026 (merged): wander after theft. Crowd cap at 9 people (commit b2c879a).}\par
+- there's no artwork for grill or fish n' ship stand - delegate to codex\par
+{\cf2     -> Tasks 028 + 030 (merged): fish & chips stand, sign and vendor, wired into the diner levels.}\par
+\par
+{\b Playnotes 25Oct}\par
+- Dog doesn't catch rival gulls?\par
+{\cf2     -> Task 038 (merged): dog chases rivals too; a caught rival drops its food.}\par
+- Old man too fast, reaction times slower. Same for old lady in dress\par
+{\cf2     -> Task 037 (merged): both walk ~25% slower and react ~1.5x slower.}\par
+- Overall characters too quick on reaction as well. See how to improve this.\par
+{\cf4     -> Parked on purpose: 037 only does the old man and old lady for now.}\par
+- Should be clearer when you can mug a rival gull - the food in their beak is not clear enough\par
+{\cf2     -> Task 039 (merged): a rival's food shines when you're in mug range. Task 036's remade beak sprites were too coarse and are removed; gulls carry the original food sprites.}\par
+}

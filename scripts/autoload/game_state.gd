@@ -6,7 +6,7 @@ var _anon_id: String = ""
 var save_path: String = "user://save.json"
 var save_error: String = ""
 # Playtest build: every level is selectable. Set to false to restore normal progression.
-var unlock_all: bool = false
+var unlock_all: bool = true
 # Demo build settings from data/demo.json: levels after last_level are always
 # locked (even with unlock_all), and feedback_url powers the feedback buttons.
 var demo: Dictionary = {"enabled": false, "last_level": 6, "feedback_url": ""}

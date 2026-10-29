@@ -1,0 +1,1047 @@
+[
+ {
+  "id": "gull_herring",
+  "file": "assets/sprites/gull-herring-diner-style.png",
+  "group": "gull",
+  "scale": 0.375,
+  "frame_w": 256,
+  "frame_h": 256,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "gull_herring_carry",
+  "file": "assets/sprites/gull-herring-carry-v1.png",
+  "group": "gull",
+  "scale": 0.375,
+  "frame_w": 256,
+  "frame_h": 256,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "gull_herring_carry_beak",
+  "file": "assets/sprites/gull-herring-carry-v1-upper-beak.png",
+  "group": "gull",
+  "scale": 0.375,
+  "frame_w": 256,
+  "frame_h": 256,
+  "outline": false,
+  "lineup": false
+ },
+ {
+  "id": "gull_kittiwake",
+  "file": "assets/sprites/gull-kittiwake-diner-style.png",
+  "group": "gull",
+  "scale": 0.375,
+  "frame_w": 256,
+  "frame_h": 256,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "gull_kittiwake_carry",
+  "file": "assets/sprites/gull-kittiwake-carry-v1.png",
+  "group": "gull",
+  "scale": 0.375,
+  "frame_w": 256,
+  "frame_h": 256,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "gull_kittiwake_carry_beak",
+  "file": "assets/sprites/gull-kittiwake-carry-v1-upper-beak.png",
+  "group": "gull",
+  "scale": 0.375,
+  "frame_w": 256,
+  "frame_h": 256,
+  "outline": false,
+  "lineup": false
+ },
+ {
+  "id": "gull_great_black_backed",
+  "file": "assets/sprites/gull-great-black-backed-diner-style.png",
+  "group": "gull",
+  "scale": 0.375,
+  "frame_w": 256,
+  "frame_h": 256,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "gull_great_black_backed_carry",
+  "file": "assets/sprites/gull-great-black-backed-carry-v1.png",
+  "group": "gull",
+  "scale": 0.375,
+  "frame_w": 256,
+  "frame_h": 256,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "gull_great_black_backed_carry_beak",
+  "file": "assets/sprites/gull-great-black-backed-carry-v1-upper-beak.png",
+  "group": "gull",
+  "scale": 0.375,
+  "frame_w": 256,
+  "frame_h": 256,
+  "outline": false,
+  "lineup": false
+ },
+ {
+  "id": "rival_gull_carry",
+  "file": "assets/sprites/gull-rival-tint-base-carry-v1.png",
+  "group": "gull",
+  "scale": 0.375,
+  "frame_w": 256,
+  "frame_h": 256,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "rival_gull_carry_beak",
+  "file": "assets/sprites/gull-rival-tint-base-carry-v1-upper-beak.png",
+  "group": "gull",
+  "scale": 0.375,
+  "frame_w": 256,
+  "frame_h": 256,
+  "outline": false,
+  "lineup": false
+ },
+ {
+  "id": "gull_screech",
+  "file": "assets/sprites/gull-herring-screech-v1.png",
+  "group": "gull",
+  "scale": 0.375,
+  "frame_w": 256,
+  "frame_h": 256,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "kiosk_customer",
+  "file": "assets/sprites/shopper-diner-style-v2-bite-panic-v1.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 128.0,
+  "frame_h": 128.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "shopper_mullet",
+  "file": "assets/sprites/shopper-mullet-walk-v2-bite-panic-v1.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 128.0,
+  "frame_h": 128.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "shopper_sundress",
+  "file": "assets/sprites/shopper-sundress-walk-v2-bite-panic-v1.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 128.0,
+  "frame_h": 128.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "old_man",
+  "file": "assets/sprites/retro-old-man-stick-32bit.png",
+  "group": "people",
+  "scale": 0.3,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "crab_red",
+  "file": "assets/sprites/crab-red-v2.png",
+  "group": "animals",
+  "scale": 0.25,
+  "frame_w": 48,
+  "frame_h": 40,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "crab_blue",
+  "file": "assets/sprites/crab-blue-v2.png",
+  "group": "animals",
+  "scale": 0.25,
+  "frame_w": 48,
+  "frame_h": 40,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "toddler",
+  "file": "assets/sprites/toddler-diner-style.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 64.0,
+  "frame_h": 64.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "dog",
+  "file": "assets/sprites/dog-owner-pixel-v1.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 192,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "lifeguard",
+  "file": "assets/sprites/lifeguard-diner-style.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 128.0,
+  "frame_h": 128.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "market_cleaner",
+  "file": "assets/stage2/market-cleaner/market-cleaner-v1.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 128.0,
+  "frame_h": 128.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "off_lead_dog",
+  "file": "assets/sprites/off-lead-dog-pixel-v1.png",
+  "group": "animals",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 96,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "bench_yellow",
+  "file": "assets/sprites/shopper-yellow-bench-v1.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "bench_mullet",
+  "file": "assets/sprites/shopper-mullet-bench-v1.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "bench_sundress",
+  "file": "assets/sprites/shopper-sundress-bench-v1.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "sunbather_male_red",
+  "file": "assets/sprites/retro-sunbather-male-red-32bit.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "sunbather_male_blue",
+  "file": "assets/sprites/retro-sunbather-male-blue-32bit.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "sunbather_female_red",
+  "file": "assets/sprites/retro-sunbather-female-red-32bit.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "sunbather_female_blue",
+  "file": "assets/sprites/retro-sunbather-female-blue-32bit.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "mum_picnic",
+  "file": "assets/sprites/retro-mum-32bit.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "toddler_polished",
+  "file": "assets/sprites/toddler_polished.png",
+  "group": "unused",
+  "scale": 0.075,
+  "frame_w": 362,
+  "frame_h": 362,
+  "outline": true,
+  "lineup": true,
+  "note": "only in data/toddler_art.json, which Config never loads"
+ },
+ {
+  "id": "shopper_walk_mullet_v2",
+  "file": "assets/sprites/shopper-mullet-walk-v2.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": false
+ },
+ {
+  "id": "shopper_walk_sundress_v2",
+  "file": "assets/sprites/shopper-sundress-walk-v2.png",
+  "group": "people",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": false
+ },
+ {
+  "id": "vendor_ice_cream_file",
+  "file": "assets/sprites/vendor-ice-cream-full-body-v3.png",
+  "group": "vendors",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "vendor_ice_cream_base_atlas",
+  "file": "assets/sprites/vendor-ice-cream-full-body-v2.png",
+  "group": "vendors",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": false
+ },
+ {
+  "id": "vendor_hotdog_file",
+  "file": "assets/sprites/vendor-hotdog-full-body-v3.png",
+  "group": "vendors",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "vendor_hotdog_base_atlas",
+  "file": "assets/sprites/vendor-hotdog-full-body-v2.png",
+  "group": "vendors",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": false
+ },
+ {
+  "id": "vendor_vendor_fish_chips_file",
+  "file": "assets/sprites/vendor-fish-chips-full-body-v1.png",
+  "group": "vendors",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "vendor_vendor_fish_chips_base_atlas",
+  "file": "assets/sprites/vendor-fish-chips-full-body-v1-base.png",
+  "group": "vendors",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": false
+ },
+ {
+  "id": "pier_diner",
+  "file": "assets/sprites/pier-diner-retro-clean.png",
+  "group": "diner",
+  "scale": 0.11,
+  "frame_w": 400.0,
+  "frame_h": 400.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "pier_diner_motion",
+  "file": "assets/sprites/pier-diner-motion-v2.png",
+  "group": "diner",
+  "scale": 0.11,
+  "frame_w": 400.0,
+  "frame_h": 400.0,
+  "outline": true,
+  "lineup": false
+ },
+ {
+  "id": "pier_diner_reactions",
+  "file": "assets/sprites/pier-diner-reactions-v1.png",
+  "group": "diner",
+  "scale": 0.11,
+  "frame_w": 400.0,
+  "frame_h": 400.0,
+  "outline": true,
+  "lineup": false
+ },
+ {
+  "id": "pier_diner_b",
+  "file": "assets/sprites/pier-diner-b-base-v1.png",
+  "group": "diner",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "pier_diner_b_motion",
+  "file": "assets/sprites/pier-diner-b-motion-v1.png",
+  "group": "diner",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": false
+ },
+ {
+  "id": "pier_diner_b_reactions",
+  "file": "assets/sprites/pier-diner-b-reactions-v1.png",
+  "group": "diner",
+  "scale": 0.5,
+  "frame_w": 128,
+  "frame_h": 128,
+  "outline": true,
+  "lineup": false
+ },
+ {
+  "id": "food_crumbs",
+  "file": "assets/sprites/food_bites.png",
+  "group": "food",
+  "scale": 0.0093,
+  "region": [
+   98.0,
+   153.0,
+   275.0,
+   216.0
+  ],
+  "outline": true,
+  "lineup": true,
+  "note": "non-uniform scale"
+ },
+ {
+  "id": "food_single_chip",
+  "file": "assets/sprites/food_bites.png",
+  "group": "food",
+  "scale": 0.0082,
+  "region": [
+   541.0,
+   114.0,
+   266.0,
+   245.0
+  ],
+  "outline": true,
+  "lineup": true,
+  "note": "non-uniform scale"
+ },
+ {
+  "id": "food_crisps_box",
+  "file": "assets/sprites/food_bites.png",
+  "group": "food",
+  "scale": 0.0182,
+  "region": [
+   936.0,
+   78.0,
+   349.0,
+   329.0
+  ],
+  "outline": true,
+  "lineup": true,
+  "note": "non-uniform scale"
+ },
+ {
+  "id": "food_ice_cream",
+  "file": "assets/sprites/food_bites.png",
+  "group": "food",
+  "scale": 0.0191,
+  "region": [
+   1462.0,
+   51.0,
+   199.0,
+   366.0
+  ],
+  "outline": true,
+  "lineup": true,
+  "note": "non-uniform scale"
+ },
+ {
+  "id": "food_crisps_bag",
+  "file": "assets/sprites/food_bites.png",
+  "group": "food",
+  "scale": 0.019,
+  "region": [
+   58.0,
+   482.0,
+   328.0,
+   369.0
+  ],
+  "outline": true,
+  "lineup": true,
+  "note": "non-uniform scale"
+ },
+ {
+  "id": "food_hotdog",
+  "file": "assets/sprites/food_bites.png",
+  "group": "food",
+  "scale": 0.0141,
+  "region": [
+   490.0,
+   522.0,
+   363.0,
+   283.0
+  ],
+  "outline": true,
+  "lineup": true,
+  "note": "non-uniform scale"
+ },
+ {
+  "id": "food_fried_fish",
+  "file": "assets/sprites/food_bites.png",
+  "group": "food",
+  "scale": 0.018,
+  "region": [
+   925.0,
+   520.0,
+   396.0,
+   278.0
+  ],
+  "outline": true,
+  "lineup": true,
+  "note": "non-uniform scale"
+ },
+ {
+  "id": "food_half_eaten_doughnut",
+  "file": "assets/sprites/retro-food-half-eaten-doughnut-32bit.png",
+  "group": "food",
+  "scale": 0.5,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "food_half_eaten_sandwich",
+  "file": "assets/sprites/retro-food-half-eaten-sandwich-32bit.png",
+  "group": "food",
+  "scale": 0.5,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "food_half_eaten_pizza",
+  "file": "assets/sprites/retro-food-half-eaten-pizza-32bit.png",
+  "group": "food",
+  "scale": 0.5,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "legacy_chips",
+  "file": "assets/sprites/chips.png",
+  "group": "unused",
+  "scale": 1.0,
+  "outline": true,
+  "lineup": true,
+  "note": "8x8 placeholder in sprites.json; no food or target uses it"
+ },
+ {
+  "id": "legacy_cone",
+  "file": "assets/sprites/cone.png",
+  "group": "unused",
+  "scale": 1.0,
+  "outline": true,
+  "lineup": true,
+  "note": "8x8 placeholder in sprites.json; no food or target uses it"
+ },
+ {
+  "id": "legacy_fish_chips",
+  "file": "assets/sprites/fish_chips.png",
+  "group": "unused",
+  "scale": 1.0,
+  "outline": true,
+  "lineup": true,
+  "note": "8x8 placeholder in sprites.json; no food or target uses it"
+ },
+ {
+  "id": "legacy_hot_dog",
+  "file": "assets/sprites/hot_dog.png",
+  "group": "unused",
+  "scale": 1.0,
+  "outline": true,
+  "lineup": true,
+  "note": "8x8 placeholder in sprites.json; no food or target uses it"
+ },
+ {
+  "id": "legacy_ice_cream",
+  "file": "assets/sprites/ice_cream.png",
+  "group": "unused",
+  "scale": 1.0,
+  "outline": true,
+  "lineup": true,
+  "note": "8x8 placeholder in sprites.json; no food or target uses it"
+ },
+ {
+  "id": "legacy_sandwich",
+  "file": "assets/sprites/sandwich.png",
+  "group": "unused",
+  "scale": 1.0,
+  "outline": true,
+  "lineup": true,
+  "note": "8x8 placeholder in sprites.json; no food or target uses it"
+ },
+ {
+  "id": "legacy_seafood",
+  "file": "assets/sprites/seafood.png",
+  "group": "unused",
+  "scale": 1.0,
+  "outline": true,
+  "lineup": true,
+  "note": "8x8 placeholder in sprites.json; no food or target uses it"
+ },
+ {
+  "id": "umbrella",
+  "file": "assets/sprites/retro-umbrella-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 38.0,
+  "frame_h": 42.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "bin",
+  "file": "assets/sprites/retro-bin-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 16.0,
+  "frame_h": 22.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "wheelie_bin",
+  "file": "assets/sprites/retro-wheelie-bin-green-32bit.png",
+  "group": "props",
+  "scale": 0.8,
+  "frame_w": 28.0,
+  "frame_h": 38.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "kiosk",
+  "file": "assets/sprites/retro-kiosk-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 52.0,
+  "frame_h": 56.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "tower",
+  "file": "assets/sprites/retro-tower-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 56.0,
+  "frame_h": 70.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "pier",
+  "file": "assets/sprites/pier.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 64.0,
+  "frame_h": 40.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "hotdog_stand",
+  "file": "assets/sprites/retro-hotdog-stand-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 52.0,
+  "frame_h": 56.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "fish_chips_stand",
+  "file": "assets/sprites/retro-fish-chips-stand-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 52.0,
+  "frame_h": 56.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "beach_parasol",
+  "file": "assets/sprites/retro-beach-parasol-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 40.0,
+  "frame_h": 42.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "beach_parasol_blue",
+  "file": "assets/sprites/retro-beach-parasol-blue-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 40.0,
+  "frame_h": 42.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "beach_chair",
+  "file": "assets/sprites/retro-beach-chair-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 24.0,
+  "frame_h": 23.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "beach_chair_blue",
+  "file": "assets/sprites/retro-beach-chair-blue-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 24.0,
+  "frame_h": 23.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "beach_bench",
+  "file": "assets/sprites/retro-beach-bench-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 42.0,
+  "frame_h": 22.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "beach_palm",
+  "file": "assets/sprites/retro-beach-palm-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 44.0,
+  "frame_h": 62.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "beach_sign",
+  "file": "assets/sprites/retro-beach-sign-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 34.0,
+  "frame_h": 44.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "beach_castle",
+  "file": "assets/sprites/retro-beach-castle-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 30.0,
+  "frame_h": 22.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "beach_rocks",
+  "file": "assets/sprites/retro-beach-rocks-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 44.0,
+  "frame_h": 18.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "beach_boards",
+  "file": "assets/sprites/retro-beach-boards-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 32.0,
+  "frame_h": 44.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "beach_hut",
+  "file": "assets/sprites/retro-beach-hut-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 40.0,
+  "frame_h": 52.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "beach_lamp",
+  "file": "assets/sprites/retro-beach-lamp-tall-v1.png",
+  "group": "props",
+  "scale": 1.0,
+  "frame_w": 24.0,
+  "frame_h": 90.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "vfx-crumb-flecks-v1",
+  "file": "assets/sprites/vfx-crumb-flecks-v1.png",
+  "group": "vfx",
+  "scale": 1.0,
+  "outline": false,
+  "lineup": true
+ },
+ {
+  "id": "vfx-dust-puff-v1",
+  "file": "assets/sprites/vfx-dust-puff-v1.png",
+  "group": "vfx",
+  "scale": 1.0,
+  "outline": false,
+  "lineup": true
+ },
+ {
+  "id": "vfx-impact-wedge-v1",
+  "file": "assets/sprites/vfx-impact-wedge-v1.png",
+  "group": "vfx",
+  "scale": 1.0,
+  "outline": false,
+  "lineup": true
+ },
+ {
+  "id": "vfx-peck-star-v1",
+  "file": "assets/sprites/vfx-peck-star-v1.png",
+  "group": "vfx",
+  "scale": 1.0,
+  "outline": false,
+  "lineup": true
+ },
+ {
+  "id": "vfx-snatch-slash-v1",
+  "file": "assets/sprites/vfx-snatch-slash-v1.png",
+  "group": "vfx",
+  "scale": 1.0,
+  "outline": false,
+  "lineup": true
+ },
+ {
+  "id": "vfx-speed-streak-v1",
+  "file": "assets/sprites/vfx-speed-streak-v1.png",
+  "group": "vfx",
+  "scale": 1.0,
+  "outline": false,
+  "lineup": true
+ },
+ {
+  "id": "feather-down-v1",
+  "file": "assets/sprites/feather-down-v1.png",
+  "group": "vfx",
+  "scale": 0.25,
+  "outline": false,
+  "lineup": true,
+  "note": "28 px drawn 5-9 px and rotated"
+ },
+ {
+  "id": "feather-gray-v1",
+  "file": "assets/sprites/feather-gray-v1.png",
+  "group": "vfx",
+  "scale": 0.25,
+  "outline": false,
+  "lineup": true,
+  "note": "28 px drawn 5-9 px and rotated"
+ },
+ {
+  "id": "feather-tip-v1",
+  "file": "assets/sprites/feather-tip-v1.png",
+  "group": "vfx",
+  "scale": 0.25,
+  "outline": false,
+  "lineup": true,
+  "note": "28 px drawn 5-9 px and rotated"
+ },
+ {
+  "id": "feather-fluff-v1",
+  "file": "assets/sprites/feather-fluff-v1.png",
+  "group": "vfx",
+  "scale": 0.25,
+  "outline": false,
+  "lineup": true,
+  "note": "28 px drawn 5-9 px and rotated"
+ },
+ {
+  "id": "stand-sign-hot-dogs-runtime-v2",
+  "file": "assets/sprites/stand-sign-hot-dogs-runtime-v2.png",
+  "group": "signs",
+  "scale": 0.25,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "stand-sign-ice-cream-runtime-v2",
+  "file": "assets/sprites/stand-sign-ice-cream-runtime-v2.png",
+  "group": "signs",
+  "scale": 0.25,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "stand-sign-fish-chips-runtime-v1",
+  "file": "assets/sprites/stand-sign-fish-chips-runtime-v1.png",
+  "group": "signs",
+  "scale": 0.25,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "beach_sign_arrow",
+  "file": "assets/sprites/beach-sign-arrow-v4.png",
+  "group": "signs",
+  "scale": 0.4,
+  "outline": true,
+  "lineup": true,
+  "note": "stretched to board width x 8 px"
+ },
+ {
+  "id": "beach_sign_arrow_left",
+  "file": "assets/sprites/beach-sign-arrow-left-v4.png",
+  "group": "signs",
+  "scale": 0.4,
+  "outline": true,
+  "lineup": false
+ },
+ {
+  "id": "beach_sign_post",
+  "file": "assets/sprites/beach-sign-post-v1.png",
+  "group": "signs",
+  "scale": 0.75,
+  "outline": false,
+  "lineup": true,
+  "note": "4 px wide drawn 3 px wide"
+ },
+ {
+  "id": "retro-picnic-bag-coral-32bit",
+  "file": "assets/sprites/retro-picnic-bag-coral-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "retro-picnic-bag-teal-32bit",
+  "file": "assets/sprites/retro-picnic-bag-teal-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "retro-picnic-bag-woven-32bit",
+  "file": "assets/sprites/retro-picnic-bag-woven-32bit.png",
+  "group": "props",
+  "scale": 1.0,
+  "outline": true,
+  "lineup": true
+ },
+ {
+  "id": "beach-arcade-font-sprite-sheet-v2",
+  "file": "assets/beach-arcade-font-sprite-sheet-v2.png",
+  "group": "fonts",
+  "scale": 1.0,
+  "outline": false,
+  "lineup": false,
+  "note": "font page: source checks only"
+ },
+ {
+  "id": "beach-arcade-font-sprite-sheet-v3",
+  "file": "assets/beach-arcade-font-sprite-sheet-v3.png",
+  "group": "fonts",
+  "scale": 1.0,
+  "outline": false,
+  "lineup": false,
+  "note": "font page: source checks only"
+ },
+ {
+  "id": "title_logo",
+  "file": "assets/sprites/title-logo.png",
+  "group": "ui",
+  "scale": 0.3333,
+  "outline": false,
+  "lineup": true
+ },
+ {
+  "id": "loading_backdrop",
+  "file": "assets/sprites/loading-backdrop-v2.png",
+  "group": "ui",
+  "scale": 0.1914,
+  "outline": false,
+  "lineup": false
+ }
+]

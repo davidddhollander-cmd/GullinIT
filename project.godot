@@ -1,23 +1,30 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
 config_version=5
 
 [application]
+
 config/name="Gullin' It"
 config/version="0.1.0-demo"
 run/main_scene="res://scenes/loading.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/icon="res://assets/icon.svg"
 boot_splash/bg_color=Color(0.663, 0.843, 0.824, 1)
 boot_splash/stretch_mode=4
-boot_splash/use_filter=true
 boot_splash/image="res://assets/sprites/loading-backdrop-v2.png"
+config/icon="res://assets/icon.svg"
 
 [audio]
 
-# Web builds default to browser "Sample" playback, which cannot play the
-# procedurally generated SFX; use Godot's own mixer like desktop does.
 general/default_playback_type.web=0
 
 [autoload]
+
 Config="*res://scripts/autoload/config.gd"
 GameState="*res://scripts/autoload/game_state.gd"
 Audio="*res://scripts/autoload/audio.gd"
@@ -25,6 +32,7 @@ Analytics="*res://scripts/autoload/analytics.gd"
 MCPBridge="*res://addons/godot_mcp/mcp_bridge.gd"
 
 [display]
+
 window/size/viewport_width=320
 window/size/viewport_height=180
 window/size/window_width_override=1280
@@ -33,9 +41,11 @@ window/stretch/mode="canvas_items"
 window/stretch/scale_mode="integer"
 
 [input_devices]
+
 pointing/emulate_mouse_from_touch=false
 
 [rendering]
+
 textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
