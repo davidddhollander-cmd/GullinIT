@@ -83,12 +83,17 @@ func save_training_step(step: int) -> void:
 	progress["1"] = previous
 	save_progress()
 
-func complete_training() -> void:
+# True (and +1 Feather) only the first time the course is completed.
+func complete_training() -> bool:
 	var previous: Dictionary = entry(1)
+	var first: bool = not bool(previous.get("training_complete", false))
 	previous.training_step = BeachGame.TRAINING_LESSONS
 	previous.training_complete = true
 	progress["1"] = previous
+	if first:
+		wallet.feathers = feathers() + 1
 	save_progress()
+	return first
 
 func complete_screech_lesson() -> void:
 	var previous: Dictionary = entry(2)

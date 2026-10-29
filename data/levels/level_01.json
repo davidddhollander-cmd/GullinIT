@@ -7,11 +7,6 @@
   "time_limit": 105,
   "wind": {"dir": 0, "strength": 0, "gusts": false, "flip": false},
   "awareness_mult": 0.7,
-  "quests_on_replay_only": true,
-  "quests": [
-    {"id": "l1_bin", "text": "EMPTY THE BIN", "event": "bin_emptied", "filter": {}, "count": 1, "bonus": 30},
-    {"id": "l1_bite", "text": "SNATCH A MID-AIR BITE", "event": "mid_air_bite", "filter": {}, "count": 1, "bonus": 40}
-  ],
   "stars": [100, 200, 300],
   "rivals": [],
   "training_dummy": {"name": "Dummy", "species": "herring", "speed": 0.5, "accuracy_px": 0, "mug_chance": 0, "dummy": true, "range": [110, 520]},
