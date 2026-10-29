@@ -1,6 +1,7 @@
 class_name TrainerCard
 extends Control
-## Screeches McCrumbs' pop-up: portrait, speech bubble, one button. BeachGame freezes the world while it is open.
+## Screeches McCrumbs' pop-up: one frame holding the speech on the left and his portrait on the right with
+## his name underneath, plus one button. BeachGame freezes the world while it is open.
 ## open() takes {mood, lay, how, button, counter}; the "how" paragraph is gold and **x** inside text is gold too.
 
 signal dismissed
@@ -10,16 +11,21 @@ const SPEECH: Font = preload("res://assets/fonts/gull_speech.fnt")
 const CELL: int = 256
 const PORTRAIT: int = 72
 const SPEECH_SIZE: int = 10
-const BUBBLE_WIDTH: float = 226.0
+const FRAME_WIDTH: float = 306.0
+const FRAME_MARGIN: float = 8.0
+const GAP: float = 6.0
+const TEXT_WIDTH: float = FRAME_WIDTH - FRAME_MARGIN * 2.0 - PORTRAIT - GAP
 const MOODS: Dictionary = {"neutral":0,"talking":1,"amused":2,"proud":3,"wince":4}
 const TALK_STEP: float = 0.14
 static var portraits: Array[ImageTexture] = []
 
+var frame: PanelContainer
 var button: Button
 var portrait: TextureRect
 var lay_label: RichTextLabel
 var how_label: RichTextLabel
 var counter_label: Label
+var name_label: Label
 var mood_cell: int = 0
 var talk_left: float = 0.0
 var talk_clock: float = 0.0
@@ -47,29 +53,25 @@ func _init() -> void:
 	center.mouse_filter = MOUSE_FILTER_IGNORE
 	add_child(center)
 	BeachUI.full(center)
-	var row: HBoxContainer = HBoxContainer.new()
-	row.add_theme_constant_override("separation",6)
-	row.mouse_filter = MOUSE_FILTER_IGNORE
-	center.add_child(row)
-	var bubble: PanelContainer = BeachUI.panel(row,Color(0.094,0.23,0.30,0.97))
-	bubble.custom_minimum_size = Vector2(BUBBLE_WIDTH,0)
-	bubble.mouse_filter = MOUSE_FILTER_IGNORE
-	var style: StyleBoxFlat = bubble.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
-	style.content_margin_left = 8
-	style.content_margin_right = 8
+	frame = BeachUI.panel(center,Color(0.094,0.23,0.30,0.97))
+	frame.custom_minimum_size = Vector2(FRAME_WIDTH,0)
+	frame.mouse_filter = MOUSE_FILTER_IGNORE
+	var style: StyleBoxFlat = frame.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
+	style.content_margin_left = FRAME_MARGIN
+	style.content_margin_right = FRAME_MARGIN
 	style.content_margin_top = 6
 	style.content_margin_bottom = 6
-	bubble.add_theme_stylebox_override("panel",style)
+	frame.add_theme_stylebox_override("panel",style)
+	var body: HBoxContainer = HBoxContainer.new()
+	body.add_theme_constant_override("separation",int(GAP))
+	body.mouse_filter = MOUSE_FILTER_IGNORE
+	frame.add_child(body)
 	var column: VBoxContainer = VBoxContainer.new()
 	column.add_theme_constant_override("separation",4)
+	column.custom_minimum_size = Vector2(TEXT_WIDTH,0)
 	column.mouse_filter = MOUSE_FILTER_IGNORE
-	bubble.add_child(column)
-	var header: HBoxContainer = HBoxContainer.new()
-	header.mouse_filter = MOUSE_FILTER_IGNORE
-	column.add_child(header)
-	var name_label: Label = _speech_label(header,str(Config.trainer.name),BeachUI.GOLD)
-	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	counter_label = _speech_label(header,"",Color("80bcb8"))
+	body.add_child(column)
+	counter_label = _speech_label(column,"",Color("80bcb8"))
 	counter_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	lay_label = _paragraph(column,BeachUI.CREAM)
 	how_label = _paragraph(column,BeachUI.GOLD)
@@ -78,12 +80,21 @@ func _init() -> void:
 	footer.mouse_filter = MOUSE_FILTER_IGNORE
 	column.add_child(footer)
 	button = BeachUI.button(footer,"GOT IT",dismiss)
+	# Head on the right, his name centred underneath it.
+	var face: VBoxContainer = VBoxContainer.new()
+	face.add_theme_constant_override("separation",2)
+	face.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	face.mouse_filter = MOUSE_FILTER_IGNORE
+	body.add_child(face)
 	portrait = TextureRect.new()
 	portrait.custom_minimum_size = Vector2(PORTRAIT,PORTRAIT)
-	portrait.size_flags_vertical = Control.SIZE_SHRINK_END
 	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	portrait.mouse_filter = MOUSE_FILTER_IGNORE
-	row.add_child(portrait)
+	face.add_child(portrait)
+	name_label = _speech_label(face,str(Config.trainer.name),BeachUI.GOLD)
+	name_label.custom_minimum_size = Vector2(PORTRAIT,0)
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	set_process(false)
 
 func _speech_label(parent: Node, value: String, color: Color) -> Label:
@@ -99,7 +110,7 @@ func _paragraph(parent: Node, color: Color) -> RichTextLabel:
 	label.scroll_active = false
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.mouse_filter = MOUSE_FILTER_IGNORE
-	label.custom_minimum_size = Vector2(BUBBLE_WIDTH-16.0,0)
+	label.custom_minimum_size = Vector2(TEXT_WIDTH,0)
 	label.add_theme_font_override("normal_font",SPEECH)
 	label.add_theme_font_size_override("normal_font_size",SPEECH_SIZE)
 	label.add_theme_color_override("default_color",color)
@@ -124,6 +135,7 @@ func open(entry: Dictionary) -> void:
 	how_label.set_meta("text_source",str(entry.get("how_source","")))
 	how_label.set_meta("text_template",str(entry.get("how_template","")))
 	counter_label.text = str(entry.get("counter",""))
+	counter_label.visible = not counter_label.text.is_empty()
 	button.text = str(entry.get("button","GOT IT")).to_upper()
 	talk_left = clampf((str(entry.get("lay","")).length()+str(entry.get("how","")).length())*0.02,0.8,2.6)
 	talk_clock = 0.0

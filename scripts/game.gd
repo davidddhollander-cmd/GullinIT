@@ -42,7 +42,7 @@ const SECOND_SWOOP_LESSON: int = 6
 const BUMP_LESSON: int = 7 ## dive into the empty-beaked dummy gull
 const MUG_LESSON: int = 8 ## the dummy now carries food: dive through it
 const DUMMY_FOOD: String = "crisps_bag"
-const TRAINER_DELAY: float = 0.9 ## seconds between a lesson's toast and the next pop-up
+const TRAINER_DELAY: float = 1.6 ## seconds between a lesson's toast and the next pop-up
 ## Screeches McCrumbs' pop-ups. Off in the lesson-logic tests, which drive lessons without dismissing cards.
 static var trainer_cards: bool = true
 var trainer_open: bool = false
