@@ -47,14 +47,14 @@ static func run(host: Node, check: Callable) -> void:
 						visits += 1
 					phases[t] = phase
 			print("BENCH SIM level %d: %d visits in 120 s" % [id,visits])
-			# Level 6 has the slow old man and sundress shopper (task 037), so it sees fewer visits.
-			check.call(visits >= (1 if id == 6 else 2),"level %d sees enough bench visits in 120 s (%d)" % [id,visits])
+			# Level 7 has the slow old man and sundress shopper (task 037), so it sees fewer visits.
+			check.call(visits >= (1 if id in [6,7] else 2),"level %d sees enough bench visits in 120 s (%d)" % [id,visits])
 		game.queue_free()
 	# Theft victim wanders away, does not queue within 10 s, shops again later.
-	var game := new_game(host,6)
+	var game := new_game(host,7)
 	var victim: BeachTarget = game.spawner.create("kiosk_customer",700.0,{"appearance":"shopper_mullet","food_id":"hotdog"})
 	game.stalls.bind(victim)
-	check.call(victim != null,"level 6 has a free holding shopper")
+	check.call(victim != null,"level 7 has a free holding shopper")
 	if victim != null:
 		var gull := BeachGull.new()
 		host.add_child(gull)

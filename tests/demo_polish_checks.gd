@@ -44,7 +44,7 @@ static func _demo_lock_checks(suite: Node, check: Callable) -> void:
 	check.call(bool(GameState.demo.enabled) and int(GameState.demo.last_level) == 4, "data/demo.json enables the four-level demo")
 	GameState.demo = {"enabled": true, "last_level": 3, "feedback_url": ""}
 	GameState.unlock_all = true
-	check.call(GameState.unlocked(3) and not GameState.unlocked(4) and not GameState.unlocked(5) and not GameState.unlocked(6), "demo locks levels 4-6 even with unlock_all")
+	check.call(GameState.unlocked(3) and not GameState.unlocked(4) and not GameState.unlocked(5) and not GameState.unlocked(6) and not GameState.unlocked(7), "demo locks levels 4-7 even with unlock_all")
 	check.call(GameState.last_playable_level() == 3 and GameState.demo_locked(4) and not GameState.demo_locked(3), "demo reports level 3 as the final playable level")
 	suite.main._navigate("start", 4)
 	check.call(not is_instance_valid(suite.main.game) or int(suite.main.game.level.id) != 4, "navigation cannot start a demo-locked level")
@@ -56,7 +56,7 @@ static func _demo_lock_checks(suite: Node, check: Callable) -> void:
 		if "FULL GAME" in button.text:
 			full_game += 1
 			check.call(button.disabled, "full-game level card is disabled: " + button.text.replace("\n", " "))
-	check.call(full_game == 3, "level select marks three full-game levels (found %d)" % full_game)
+	check.call(full_game == 4, "level select marks four full-game levels (found %d)" % full_game)
 	check.call(not "FEEDBACK" in _captions(suite.main.menus), "no feedback button without a feedback URL")
 	suite.layout(suite.main.menus)
 	suite.menu_font_grid(suite.main.menus)

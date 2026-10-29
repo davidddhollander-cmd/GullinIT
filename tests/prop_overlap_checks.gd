@@ -59,7 +59,7 @@ static func overlaps(props: Array) -> Array[String]:
 	return found
 
 static func run(check: Callable) -> void:
-	for number: int in range(1, 7):
+	for number: int in range(1, 8):
 		var level: Dictionary = Config.read_json("res://data/levels/level_%02d.json" % number)
 		var bad: Array[String] = overlaps(level.props)
 		check.call(bad.is_empty(), "level %d props do not overlap %s" % [number, str(bad)])

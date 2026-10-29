@@ -7,6 +7,7 @@ const EXPECTED_CASTS: Array[Dictionary] = [
 	{"shoppers":["shopper_mullet", "old_man", "kiosk_customer"], "sunbathers":["female_red"], "diners":["pier_diner"]},
 	{"shoppers":["kiosk_customer", "shopper_sundress"], "sunbathers":["male_blue", "female_blue", "male_red"], "diners":[]},
 	{"shoppers":["shopper_mullet", "old_man"], "sunbathers":[], "diners":["pier_diner", "pier_diner_b"]},
+	{"shoppers":["kiosk_customer", "old_man", "shopper_sundress"], "sunbathers":["female_red", "male_blue"], "diners":["pier_diner"]},
 	{"shoppers":["kiosk_customer", "old_man", "shopper_sundress"], "sunbathers":["female_red"], "diners":["pier_diner", "pier_diner_b"]},
 ]
 
@@ -51,7 +52,7 @@ static func run(harness: Node, check: Callable) -> void:
 	var holder := Node2D.new()
 	harness.add_child(holder)
 	var old_man_levels: int = 0
-	for id: int in range(1,7):
+	for id: int in range(1,8):
 		var definition: Dictionary = Config.levels[id-1].duplicate(true)
 		var spawner := BeachSpawner.new()
 		spawner.setup(holder,definition)
@@ -65,7 +66,7 @@ static func run(harness: Node, check: Callable) -> void:
 		check.call(_same_looks(_looks(spawner,"sunbather"),expected_cast.sunbathers),"level %d sunbather cast matches the rotation" % id)
 		check.call(_same_looks(_looks(spawner,"pier_diner"),expected_cast.diners),"level %d diner cast matches the rotation" % id)
 		check.call(_all_distinct(_all_people_looks(spawner)),"level %d opens without two people sharing a look" % id)
-		if id in [5,6]:
+		if id in [5,7]:
 			check.call(_same_looks(_looks(spawner,"pier_diner"),PierDinerArt.APPEARANCES),"level %d opens with one of each diner look" % id)
 		if "old_man" in _looks(spawner,"kiosk_customer"):
 			old_man_levels += 1

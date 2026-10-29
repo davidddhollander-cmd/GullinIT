@@ -173,6 +173,40 @@
   ],
   "6": [
    {
+    "name": "GALE",
+    "score": 1790
+   },
+   {
+    "name": "PIPER",
+    "score": 1560
+   },
+   {
+    "name": "DRIZZLE",
+    "score": 1410
+   },
+   {
+    "name": "SQUALLY",
+    "score": 1270
+   },
+   {
+    "name": "SPRAT",
+    "score": 1060
+   },
+   {
+    "name": "MIZZLE",
+    "score": 900
+   },
+   {
+    "name": "SKUA",
+    "score": 730
+   },
+   {
+    "name": "DAMP",
+    "score": 560
+   }
+  ],
+  "7": [
+   {
     "name": "PIPER",
     "score": 2015
    },

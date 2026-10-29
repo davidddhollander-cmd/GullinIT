@@ -13,7 +13,7 @@ static func _park_all(gulls: Array[BeachGull]) -> void:
 		_ready_gull(gulls[index],Vector2(300.0+index*24.0,120.0))
 
 static func run(suite: Node, check: Callable) -> void:
-	suite.main.start_level(6)
+	suite.main.start_level(7)
 	var game: BeachGame = suite.main.game
 	game.set_physics_process(false)
 	game.running = true

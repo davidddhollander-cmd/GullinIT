@@ -295,6 +295,8 @@ func tick(delta: float) -> void:
 				game.effects.snatch_contact(item.position,taker.velocity,false)
 				Audio.play("snatch",1+game.score.tier*0.08)
 				game.player.digestion.collect(item.food_id,item.snack)
+				if item.get("source","") == "abandoned":
+					game._quest_event("abandoned_looted")
 			else:
 				collected.emit(item.position,item.food_id,item.get("source","") == "bin")
 				if is_instance_valid(item.get("owner")) and item.owner.kind == "sunbather":

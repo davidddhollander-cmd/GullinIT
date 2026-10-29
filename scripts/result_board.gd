@@ -141,7 +141,7 @@ func _build() -> void:
 	actions.size = Vector2(236, 14)
 	actions.add_theme_constant_override("separation", 3)
 	add_child(actions)
-	if passed and int(level.id) < 6 and GameState.unlocked(int(level.id) + 1):
+	if passed and int(level.id) < Config.levels.size() and GameState.unlocked(int(level.id) + 1):
 		_add_button(actions, "NEXT >", "start", int(level.id) + 1)
 	elif demo_finished() and not GameState.feedback_url().is_empty():
 		_add_button(actions, "FEEDBACK", "feedback")
@@ -315,7 +315,7 @@ func open_score_rules(button_text: String) -> ScoreRulesCard:
 
 # The last demo level was cleared: the next level exists but belongs to the full game.
 func demo_finished() -> bool:
-	return passed and not bool(result.get("training", false)) and GameState.demo_locked(int(level.id) + 1) and int(level.id) < 6
+	return passed and not bool(result.get("training", false)) and GameState.demo_locked(int(level.id) + 1) and int(level.id) < Config.levels.size()
 
 func _add_count_row(caption: String, value: int, y: float, format: String = "%d", color: Color = CREAM) -> void:
 	var x := LEFT_PANEL.position.x + 6

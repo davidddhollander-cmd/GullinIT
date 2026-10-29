@@ -84,18 +84,18 @@ static func simulate(host: Node, main: Node, level: int, seconds: float) -> Dict
 	report.hud_rows = game.overlay.rival_score_labels.size()
 	report.hud_rect = game.overlay.rival_score_panel.get_global_rect()
 	report.quest_rect = game.overlay.quest_panel.get_global_rect()
-	if level == 5 or level == 6:
+	if level == 5 or level == 7:
 		game.overlay.queue_redraw()
-		await host.snapshot("rival-score-meter" if level == 6 else "rival-score-meter-l5")
+		await host.snapshot("rival-score-meter" if level == 7 else "rival-score-meter-l5")
 	return report
 
 static func run(host: Node, main: Node, check: Callable) -> void:
 	await simulate(host, main, 5, 6.0)  # capture only
-	for level: int in [3,4,6]:
+	for level: int in [3,4,7]:
 		var r: Dictionary = await simulate(host, main, level, 90.0)
 		print("RIVAL SIM level %d: %s" % [level,str(r)])
-		var need_thefts: int = 2 if level == 6 else 1
-		check.call(r.pilots == (3 if level == 6 else 1),"level %d rival count" % level)
+		var need_thefts: int = 2 if level == 7 else 1
+		check.call(r.pilots == (3 if level == 7 else 1),"level %d rival count" % level)
 		check.call(r.hud_visible and r.hud_rows == r.pilots,"level %d shows one right-side score row per rival" % level)
 		check.call((r.hud_rect as Rect2).end.x <= 316.0 and (r.hud_rect as Rect2).size.x <= 84.0 and (r.hud_rect as Rect2).position.y >= 17.0 and not (r.hud_rect as Rect2).intersects(r.quest_rect) and (r.hud_rect as Rect2).position.y >= 29.0,"level %d rival score meter scoreboard sits top-right under the quest strip" % level)
 		for i: int in r.pilots:
@@ -106,8 +106,8 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 		check.call(r.held_picks == 0,"level %d loose-only rivals never target held food" % level)
 		check.call(r.edge_max <= 1.5,"level %d rival never lingers at the edge (%.2f s)" % [level,r.edge_max])
 		check.call(r.out_of_bounds == 0,"level %d rivals stay inside the beach" % level)
-		if level == 6:
-			check.call(r.shared_target > 0,"level 6 rivals race for the same food (%d shared frames)" % r.shared_target)
+		if level == 7:
+			check.call(r.shared_target > 0,"level 7 rivals race for the same food (%d shared frames)" % r.shared_target)
 		check.call(r.cooldown_dives == 0,"level %d rival waits out the cooldown after a theft" % level)
 		check.call(r.escape_short == 0,"level %d rival leaves the scene of a theft" % level)
 
@@ -393,7 +393,7 @@ static func ground_checks(host: Node, main: Node, check: Callable) -> void:
 	var wrappers: int = game.stash_raids.items.filter(func(item: Dictionary) -> bool: return bool(item.get("garbage", false))).size()
 	check.call(wrappers >= 1 and gary.score <= 15, "rival leaves garbage on the sand")
 	# Wheelie bin: top landing.
-	game = await fresh(host, main, 6)
+	game = await fresh(host, main, 7)
 	var wheelie_x: float = float(game.level.props.filter(func(prop: Dictionary) -> bool: return prop.type == "wheelie_bin")[0].x)
 	gary = isolate(game, {"scraps": 1.0, "bins": 1.0}, wheelie_x - 40.0)
 	var lid_seen: Array[bool] = [false]

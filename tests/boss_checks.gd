@@ -1,9 +1,9 @@
 extends RefCounted
-## Level 6 boss: Bev's size, shove and rear-only mugging, the sunset, and the win/lose verdict.
+## Level 7 boss: Bev's size, shove and rear-only mugging, the sunset, and the win/lose verdict.
 const DT: float = 1.0 / 60.0
 
 static func _fresh(suite: Node) -> BeachGame:
-	suite.main.start_level(6)
+	suite.main.start_level(7)
 	var game: BeachGame = suite.main.game
 	game.set_physics_process(false)
 	game.running = true
@@ -50,10 +50,10 @@ static func _player_mug(suite: Node, game: BeachGame, pilot: RivalPilot, side: f
 	suite.eat_pending(game)
 
 static func run(suite: Node, check: Callable) -> void:
-	var level: Dictionary = Config.levels[5]
-	check.call(level.name == "Sunset Showdown" and bool(level.get("boss", false)) and int(level.time_limit) == 150 and level.wind.flip == true, "level 6 is the hand-built Sunset Showdown boss with a flipping wind")
-	check.call(level.rivals.size() == 3 and level.world.width == 1280 and not level.spawns.any(func(s: Dictionary) -> bool: return s.type == "market_cleaner"), "level 6 has Gary, Chip, Bev and no stage 2 market cleaner")
-	check.call(str(level.objective) == "OUT-EAT THE GANG", "level 6 states the objective")
+	var level: Dictionary = Config.levels[6]
+	check.call(level.name == "Sunset Showdown" and bool(level.get("boss", false)) and int(level.time_limit) == 150 and level.wind.flip == true, "level 7 is the hand-built Sunset Showdown boss with a flipping wind")
+	check.call(level.rivals.size() == 3 and level.world.width == 1280 and not level.spawns.any(func(s: Dictionary) -> bool: return s.type == "market_cleaner"), "level 7 has Gary, Chip, Bev and no stage 2 market cleaner")
+	check.call(str(level.objective) == "OUT-EAT THE GANG", "level 7 states the objective")
 	var game: BeachGame = _fresh(suite)
 	var bev: RivalPilot = _bev(game)
 	var gary: RivalPilot = _pilot(game, "Gary")
@@ -161,7 +161,7 @@ static func _scenes(suite: Node, game: BeachGame) -> void:
 	game.elapsed = 0.0
 
 static func _finish(suite: Node, rivals: Array, points: int) -> Dictionary:
-	suite.main.start_level(6)
+	suite.main.start_level(7)
 	var game: BeachGame = suite.main.game
 	game.set_physics_process(false)
 	game.running = true

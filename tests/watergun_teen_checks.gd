@@ -40,9 +40,9 @@ static func _run(teen: WatergunTeen, game: BeachGame, seconds: float) -> void:
 
 static func run(suite: Node, check: Callable) -> void:
 	var t: Dictionary = Config.tuning.watergun_teen
-	for number: int in [1, 2, 3]:
+	for number: int in [1, 2, 3, 6]:
 		check.call(not Config.levels[number-1].has("watergun_teens"),"level %d has no water-gun teenager" % number)
-	for number: int in [4, 5, 6]:
+	for number: int in [4, 5, 7]:
 		var placed: Array = Config.levels[number-1].get("watergun_teens",[])
 		check.call(placed.size() == 1,"level %d places one water-gun teenager" % number)
 		var other: BeachGame = _fresh(suite,number)

@@ -2,7 +2,7 @@ extends RefCounted
 
 static func run(check: Callable) -> void:
 	var signatures: Dictionary = {}
-	for number: int in range(1,7):
+	for number: int in range(1,8):
 		var source: Dictionary = Config.read_json("res://data/levels/level_%02d.json" % number)
 		var original: String = JSON.stringify(source)
 		for variation: int in 20:
@@ -14,6 +14,8 @@ static func run(check: Callable) -> void:
 			_check_palms(check,level)
 			if number <= 5:
 				_check_opening_level(check,source,level,number)
+			elif number == 6:
+				_check_squall_level(check,source,level)
 			elif bool(source.get("authored",false)):
 				_check_boss_level(check,source,level)
 			else:
@@ -21,7 +23,7 @@ static func run(check: Callable) -> void:
 			if variation == 0:
 				signatures[JSON.stringify(level.props)] = true
 		check.call(JSON.stringify(source)==original,"generator leaves authored recipe intact")
-	check.call(signatures.size()==6,"all six levels have distinct scenery arrangements")
+	check.call(signatures.size()==7,"all seven levels have distinct scenery arrangements")
 
 static func _check_palms(check: Callable, level: Dictionary) -> void:
 	var palms: Array[float] = []
@@ -102,6 +104,18 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 		check.call(not types.has("dog_owner") and not types.has("market_cleaner") and not types.has("lifeguard"),"boardwalk leaves later hazards for later levels")
 		check.call(float(level.spawns[0].x)<float(level.world.promenade_start) and float(level.spawns[1].x)>float(level.world.promenade_start) and float(level.spawns[4].x)>float(level.world.pier_start),"boardwalk actors occupy their zones")
 		check.call(stand_count==2 and bool(level.rivals_after_snatch),"boardwalk includes both stands and delayed Gary")
+
+static func _check_squall_level(check: Callable, source: Dictionary, level: Dictionary) -> void:
+	var types: Array[String] = []
+	for spawn: Dictionary in level.spawns:
+		types.append(str(spawn.type))
+		check.call(float(spawn.x)>20 and float(spawn.x)<float(level.world.width)-20,"squall actor remains inside map")
+	check.call(level.props.size()==source.props.size() and level.zones==source.zones and level.world==source.world,"squall level stays hand-built")
+	check.call(types.count("sunbather")==2 and types.count("picnic_family")==1 and types.count("kiosk_customer")==3 and types.count("pier_diner")==1 and types.count("off_lead_dog")==1 and not level.has("watergun_teens"),"squall cast: sunbathers, picnic family, kiosk customers, one diner, one dog, no teen")
+	check.call(int(level.world.width)==1280 and int(level.world.pier_start)==int(level.world.width) and int(level.world.promenade_start)==760 and level.rivals.size()==2,"squall is a wide beach with a short promenade, no pier, and Gary and Chip")
+	for a: int in level.spawns.size():
+		for b: int in range(a+1,level.spawns.size()):
+			check.call(absf(float(level.spawns[a].x)-float(level.spawns[b].x))>=35.0,"squall characters start separated")
 
 static func _check_boss_level(check: Callable, source: Dictionary, level: Dictionary) -> void:
 	check.call(level.spawns.size()==source.spawns.size() and level.props.size()==source.props.size() and level.zones==source.zones and level.world==source.world,"boss level stays hand-built")

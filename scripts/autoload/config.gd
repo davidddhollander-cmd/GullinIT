@@ -42,7 +42,7 @@ func reload_data() -> bool:
 		next[key] = read_json("res://data/%s.json" % key)
 	var next_levels: Array[Dictionary] = []
 	var next_layout: Dictionary = read_json("res://data/level_layout.json")
-	for i: int in range(1, 7):
+	for i: int in range(1, 8):
 		next_levels.append(read_json("res://data/levels/level_%02d.json" % i))
 	if not last_error.is_empty():
 		return false

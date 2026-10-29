@@ -2,7 +2,7 @@ class_name CrowdPanic
 extends RefCounted
 ## Gang Call crowd reaction: look up at the warning, run from the player when the first gull hits,
 ## then walk back to the spot they left. While active it overrides every other reaction.
-enum State { NONE, LOOK_UP, PANIC, RETURN }
+enum State { NONE, LOOK_UP, PANIC, RETURN, SHELTER }
 const LOOK_UP_CLIPS: Array[StringName] = [&"look_up",&"surprise",&"alert"]
 const PANIC_CLIPS: Array[StringName] = [&"panic_run",&"run",&"chase",&"walk"]
 const TODDLER_LOOK_UP_CLIPS: Array[StringName] = [&"look_up",&"cry"]
@@ -15,6 +15,8 @@ var stampede_pending: bool = false
 var home: float = 0.0
 var direction: float = 1.0
 var bounds: Vector2 = Vector2.ZERO
+var destination: float = 0.0 ## squall shelter spot
+var running: bool = false ## still on the way to the shelter
 
 static func settings() -> Dictionary:
 	return Config.tuning.panic
@@ -65,6 +67,22 @@ func look_up(owner: BeachTarget) -> void:
 	owner.toddler_run_speed = 0.0
 	owner.queue_redraw()
 
+## Squall: run for cover at `at` and wait there looking up, until release_shelter walks them home.
+func shelter(owner: BeachTarget, at: float) -> void:
+	if state == State.SHELTER:
+		return
+	state = State.NONE
+	look_up(owner)
+	if state == State.NONE:
+		return # loose food or someone already leaving
+	state = State.SHELTER
+	destination = at
+	running = true
+
+func release_shelter() -> void:
+	if state == State.SHELTER:
+		state = State.RETURN
+
 ## Panic outranks theft chases, swats and warnings; food in hand is left alone.
 func _clear_reaction(owner: BeachTarget) -> void:
 	owner.reaction.mode = ""
@@ -109,6 +127,13 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 			moving = true
 			if timer <= 0.0:
 				state = State.RETURN
+		State.SHELTER:
+			var run_gap: float = destination-owner.position.x
+			running = absf(run_gap) > 0.5
+			if running:
+				owner.facing = signf(run_gap)
+				owner.position.x = move_toward(owner.position.x,destination,walk*float(settings().get("shelter_speed_mult",3.0))*delta)
+			moving = running
 		State.RETURN:
 			var gap: float = home-owner.position.x
 			if absf(gap) <= 0.25:
@@ -151,9 +176,9 @@ static func present(target: BeachTarget) -> bool:
 		return false
 	var toddler: bool = target.kind == "toddler"
 	var chain: Array[StringName]
-	if current == State.PANIC:
+	if current == State.PANIC or (current == State.SHELTER and target.panic.running):
 		chain = TODDLER_PANIC_CLIPS if toddler else PANIC_CLIPS
-	elif current == State.LOOK_UP:
+	elif current == State.LOOK_UP or current == State.SHELTER:
 		chain = TODDLER_LOOK_UP_CLIPS if toddler else LOOK_UP_CLIPS
 	else:
 		chain = [&"walk"]
