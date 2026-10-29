@@ -4,7 +4,7 @@ The first four levels use authored JSON layouts with deterministic +/-3 position
 
 | Level | Geometry | Cast and rhythm |
 | --- | --- | --- |
-| Training Day | 800 units of sand; open flight area, customer, bag, family | Four actors, calm air, slower customer and longer warnings. Six action-driven lessons on the first visit. |
+| Training Day | 800 units of sand; open flight area, customer, bag, family | Four actors, calm air, slower customer and longer warnings. Nine action-driven lessons on the first visit. |
 | Family Picnic | 1040 units of sand; quiet sunbathers, separated families, kiosk | Seven actors; gentle steady breeze; family restocking creates moving opportunities. No rival, dog, or pier. |
 | Boardwalk Bustle | 1280 units; promenade begins at 430, pier at 920 | Sunbather, two customers, dog owner, pier diner. Gary arrives after the first swallowed non-scrap snack. No vendor or lifeguard. |
 | Dog Day Afternoon | 1280 units; Boardwalk Bustle's promenade/pier layout, wind gusts, Gary from the start | The Boardwalk cast plus an off-lead terrier (`scripts/off_lead_dog.gd`, tuning in `data/tuning.json` under `off_lead_dog`) roaming the quiet beach x=250-410. It barks (0.4 s windup), chases at 95 px/s, leaps at low fliers and stuns on a bite. A gull more than 40 px above the sand is safe. A chase of 1.5 s or more that ends without a catch is an OUTRUN. |
@@ -20,6 +20,10 @@ The first-level opening panel waits for the **LET'S GULL IT** button. Mouse, tou
 4. Peck a sunbather bag and collect a snack from it. Bin crumbs and unrelated food do not advance this lesson.
 5. Land by the highlighted bin and tap peck four times to release scraps and litter. Ordinary crumb collection does not complete this lesson. The practice bin is restocked when this lesson begins.
 6. Choose another held snack and repeat the clean swoop and escape without a target highlight.
+7. **Bump** (HUD lesson 8/9): a Dummy gull (`training_dummy` in `level_01.json`) flies a slow lap with an empty beak. Dive into it. A dive into an airborne rival with nothing to steal bumps it ("BONK!"), which completes the lesson.
+8. **Mug** (HUD lesson 9/9): the Dummy now carries a snack (`BeachGame.DUMMY_FOOD`) once it has recovered from the bump. Dive through it to mug the snack. If the player's stomach is full the tip says to finish the snack first. Mugging completes the course.
+
+The Dummy (`RivalPilot.dummy`) is not in `level.rivals`, so there is no rival score panel. It only patrols between the ends of its `range`, never hunts, dives, mugs or catches dropped food, and appears when lesson 7 begins (or on resume at lesson 7 or 8). Its art is the plain herring gull until the X-eyed variant arrives.
 
 The lesson index is saved after each success. Restart resumes an unfinished course; Train Again starts at lesson zero. Course completion has its own saved flag, unlocks level two, and does not fabricate stars or a Practice time. The normal Training Day level card always opens the lessons: unfinished courses resume their checkpoint, while completed courses show REPLAY LESSONS and start at lesson zero. Replaying a completed course leaves existing records intact. The other levels use the selected Arcade/Practice mode.
 
