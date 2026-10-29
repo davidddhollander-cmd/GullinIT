@@ -75,6 +75,10 @@ func create(kind: String, x: float, spawn: Dictionary = {}) -> BeachTarget:
 	if kind in ["kiosk_customer","sunbather","pier_diner"] and not spawn.has("appearance"):
 		spawn = spawn.duplicate()
 		spawn.appearance = _least_used_look(kind)
+	if kind == "sunbather" and not spawn.has("mirror"):
+		# Alternate which way sunbathers lie, in spawn order.
+		spawn = spawn.duplicate()
+		spawn.mirror = targets.filter(func(t: BeachTarget) -> bool: return t.kind == "sunbather").size() % 2 == 1
 	target.setup(kind,x,rng,level.awareness_mult,spawn)
 	target.routine.setup(target,level,spawn)
 	target.bench_visit.registry = benches

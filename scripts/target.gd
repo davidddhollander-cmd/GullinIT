@@ -242,7 +242,7 @@ func setup(type: String, x: float, random: RandomNumberGenerator, mult: float, s
 		sunbather_blue = int(x/100.0)%2 == 1
 		var appearance: String = str(spawn.get("appearance",""))
 		sunbather_female = appearance.begins_with("female")
-		sunbather_mirror = bool(spawn.get("mirror",int(x/80.0)%2 == 1))
+		sunbather_mirror = bool(spawn.get("mirror",false))
 		if not appearance.is_empty():
 			sunbather_blue = appearance.ends_with("blue")
 	sprite = AnimatedSprite2D.new()
