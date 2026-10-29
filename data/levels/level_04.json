@@ -23,6 +23,7 @@
     {"name": "PROMENADE", "from": 430, "to": 920},
     {"name": "PIER DINING", "from": 920, "to": 1280}
   ],
+  "watergun_teens": [{"x": 640, "home": [600, 740]}],
   "spawns": [
     {"type": "sunbather", "x": 150, "appearance": "male_blue", "station": "sun_0", "patrol_radius": 0},
     {"type": "sunbather", "x": 265, "appearance": "female_blue", "station": "sun_2", "patrol_radius": 0},

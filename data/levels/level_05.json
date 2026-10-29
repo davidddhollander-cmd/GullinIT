@@ -24,6 +24,7 @@
     {"name": "PROMENADE", "from": 430, "to": 920},
     {"name": "PIER DINING", "from": 920, "to": 1280}
   ],
+  "watergun_teens": [{"x": 830, "home": [790, 900]}],
   "spawns": [
     {"type": "kiosk_customer", "x": 555, "food_id": "hotdog", "appearance": "shopper_mullet", "station": "hotdogs", "patrol_radius": 14},
     {"type": "kiosk_customer", "x": 680, "food_id": "hotdog", "appearance": "old_man", "station": "hotdogs", "patrol_radius": 12},

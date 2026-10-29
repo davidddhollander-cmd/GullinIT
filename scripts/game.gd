@@ -19,6 +19,7 @@ var spawner: BeachSpawner = BeachSpawner.new()
 var stalls: StallService = StallService.new()
 var crabs: CrabPopulation
 var dog: OffLeadDog
+var teens: Array[WatergunTeen] = []
 var beach: BeachBackdrop
 var scraps: BeachScraps
 var stash_raids: BeachStashRaids
@@ -124,6 +125,21 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 					_quest_event("dog_outrun")
 				)
 				break
+	for spawn: Dictionary in level.get("watergun_teens",[]):
+		var teen: WatergunTeen = WatergunTeen.new()
+		actors.add_child(teen)
+		teen.setup(float(spawn.x),spawn.home,int(level.seed)+7+teens.size())
+		teen.spotted.connect(func(_gull: BeachGull) -> void:
+			effects.message(teen.position-Vector2(0,34),"HEY!",BeachUI.GOLD)
+			Audio.play("click")
+		)
+		teen.fired.connect(func(shot: BeachWaterShot, direction: Vector2) -> void:
+			effects.water_muzzle(shot.position,direction)
+			Audio.play("click")
+		)
+		teen.splashed.connect(func(at: Vector2) -> void: effects.water_splash(at))
+		teen.hit.connect(func(gull: BeachGull) -> void: _water_hit(gull,teen))
+		teens.append(teen)
 	stalls.setup(beach,spawner)
 	stalls.portion_created.connect(_wire_target)
 	crabs = CrabPopulation.new()
@@ -424,6 +440,8 @@ func _physics_process(delta: float) -> void:
 		for pilot: RivalPilot in pilots:
 			rival_gulls.append(pilot.gull)
 		dog.tick(step,player,rival_gulls)
+	for teen: WatergunTeen in teens:
+		teen.tick(step,gulls)
 	_rival_taunt(step)
 	if player.state != BeachGull.State.STUNNED:
 		player.digestion.tick(step,player.state == BeachGull.State.GROUNDED)
@@ -625,6 +643,8 @@ func set_paused(value: bool) -> void:
 		target.sprite.speed_scale = 0 if value else 1
 	if dog != null:
 		dog.paused = value
+	for teen: WatergunTeen in teens:
+		teen.paused = value
 
 func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 	if gull == player:
@@ -671,11 +691,23 @@ func _stunned() -> void:
 
 func _dog_caught_rival(rival: BeachGull) -> void:
 	effects.message(dog.position-Vector2(0,24),"GOTCHA!",Color("ef725c"))
+	_rival_drops_carry(rival,dog.position)
+
+# A rival hit mid-carry loses its snack to the sand, like a mugging.
+func _rival_drops_carry(rival: BeachGull, attacker: Vector2) -> void:
 	for pilot: RivalPilot in pilots:
 		if pilot.gull == rival:
 			var food_id: String = pilot.carried_food_id
-			if pilot.mug(dog.position) > 0:
+			if pilot.mug(attacker) > 0:
 				stash_raids.items.append({"owner":null,"source":"dropped","food_id":food_id,"position":rival.position-Vector2(0,10),"velocity":Vector2(-rival.facing*35,-55),"grounded":false,"age":0.0})
+
+# The player's own stun handler already reacts (RUDE.), so only rivals get a callout.
+func _water_hit(gull: BeachGull, teen: WatergunTeen) -> void:
+	if not gull.rival:
+		return
+	effects.message(gull.position-Vector2(0,20),"SOAKED!",Color("6ec6f0"))
+	Audio.play("stun")
+	_rival_drops_carry(gull,teen.position)
 
 func _crashed() -> void:
 	crashes += 1
