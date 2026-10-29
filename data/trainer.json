@@ -48,7 +48,7 @@
   "training": {
     "opening": {
       "mood": "neutral",
-      "text": "Welcome to the beach, young gullster. If you want to survive and thrive, you got to learn quick. Follow the **golden ring** and I'll make a fine thief out of you yet.",
+      "text": "Welcome to the beach, young gullster.\nIf you want to survive 'n thrive, you got to learn quick. Follow the **golden ring**.\n\nMight make a fine thief out of you yet.",
       "button": "Let's gull it"
     },
     "closing": {
@@ -62,7 +62,7 @@
         "mood": "neutral",
         "lay": {
           "default": "This is the open sand. Nothing here worth nicking, so first things first: get airborne. Gulls fly by flapping and steering.",
-          "realistic": "This is the open sand. Nothing here worth nicking, so first things first: get airborne. You picked Realistic, so every wingbeat is a separate tap."
+          "realistic": "This is the open sand. First things first: get airborne.\n\nYou picked Realistic mode, so every wingbeat is a separate tap."
         },
         "how": {
           "default": "Hold {flap} to flap and climb. Steer with {steer} to head right. Fly through the golden ring.",
@@ -88,9 +88,9 @@
       },
       {
         "mood": "amused",
-        "lay": "See the fella at the ice cream stand? He's holding lunch, and lunch is yours. Gulls steal with a swoop: dive from above, snatch, then climb out before you hit the sand.",
+        "lay": "Now let's get you a proper challenge.\nSee the fella with the ice cream? That's yours. A real gull steals with a swoop: dive from above, snatch, then climb up quick sticks! Timing is everything...",
         "how": {
-          "default": "Climb above him. Hold {dive} to dive and tap {peck} when your beak reaches the cone. Then aim up and climb away.",
+          "default": "Climb above your target. Hold {dive} to dive and then tap {peck} right when your beak reaches the delicious target.",
           "casual": "Climb above him and hold {dive} to dive. Casual mode does the pecking, so just fly your beak into the cone. Then aim up and climb away."
         },
         "strip": {
@@ -100,14 +100,14 @@
       },
       {
         "mood": "amused",
-        "lay": "That sunbather is fast asleep and the picnic bag beside them is unguarded. Rude. Bags hold food, but you have to land and peck them open.",
+        "lay": "Now for something simple. That sunbather is fast asleep and the picnic bag beside them is unguarded. Human bags hold food...",
         "how": "Land next to the bag. Tap {peck} three times to burst it open, then walk over the food that spills out.",
         "strip": "Land by the bag and tap {peck} three times"
       },
       {
         "mood": "neutral",
         "lay": "Bins are a proper buffet. Peck one open and everything inside spills onto the sand. Scraps are grub. Wrappers are rubbish, so leave them.",
-        "how": "Land beside the bin and tap {peck} {n} times. Then eat the scraps and ignore the wrappers.",
+        "how": "Land beside the bin and tap {peck} {n} times.",
         "strip": "Land by the bin and tap {peck} {n} times"
       },
       {
@@ -118,7 +118,7 @@
       },
       {
         "mood": "neutral",
-        "lay": "No golden ring this time. You pick the target. Anyone holding food is fair game: the ice cream fella, the picnic family, whoever.",
+        "lay": "Time to practice your dive one more time gullster. No golden ring. You pick the target. Anyone holding food is fair game.",
         "how": {
           "default": "Dive with {dive}, tap {peck} at the snack, then aim up and climb. Mind the sand.",
           "casual": "Dive with {dive} and fly into the snack. Your beak pecks for you. Then aim up and climb. Mind the sand."
@@ -130,7 +130,7 @@
       },
       {
         "mood": "amused",
-        "lay": "Time to meet the competition. This dummy is a rival gull, flying round with an empty beak. Nothing to steal, but you can still ruin its day. A dive straight into a flying gull bumps it and sends it tumbling.",
+        "lay": "Time to meet the competition. This dummy is a rival gull, flying round with an empty beak. Nothing to steal, but you better show who's boss.\n\nGive him a little push for me will ya?",
         "how": "Climb above the dummy. Dive with {dive} and fly right into it. A bonk means it worked.",
         "strip": "Dive with {dive} into the dummy gull"
       },
