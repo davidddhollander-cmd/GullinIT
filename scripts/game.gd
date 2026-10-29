@@ -42,6 +42,12 @@ const SECOND_SWOOP_LESSON: int = 6
 const BUMP_LESSON: int = 7 ## dive into the empty-beaked dummy gull
 const MUG_LESSON: int = 8 ## the dummy now carries food: dive through it
 const DUMMY_FOOD: String = "crisps_bag"
+const TRAINER_DELAY: float = 0.9 ## seconds between a lesson's toast and the next pop-up
+## Screeches McCrumbs' pop-ups. Off in the lesson-logic tests, which drive lessons without dismissing cards.
+static var trainer_cards: bool = true
+var trainer_open: bool = false
+var trainer_queue: Dictionary = {}
+var trainer_then: Callable = Callable()
 var training_took_off: bool = false
 var training_clean_snatch: bool = false
 var training_raid_started: bool = false
@@ -229,6 +235,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	overlay.setup(self)
 	intro = Config.tuning.world.intro_time
 	intro_dismissed_elapsed = -1.0
+	if overlay.trainer_card != null:
+		overlay.trainer_card.dismissed.connect(_on_trainer_dismissed)
 	if training:
 		player.position = Vector2(70,player.ground_y())
 		player.state = BeachGull.State.GROUNDED
@@ -237,6 +245,9 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 			player.state = BeachGull.State.GLIDE
 		if lesson >= BUMP_LESSON:
 			_training_dummy_setup()
+		if trainer_cards:
+			var opening: Dictionary = Config.trainer.training.opening
+			open_trainer({"mood": opening.mood, "lay": TrainerScript.line(opening.text, input), "button": opening.button}, dismiss_intro)
 	Config.reloaded.connect(_reload)
 
 func _twist() -> String:
@@ -403,6 +414,8 @@ func _slowmo_tick() -> void:
 
 func _physics_process(delta: float) -> void:
 	_slowmo_tick()
+	if trainer_open:
+		return
 	if intro > 0 and int(level.id) != 1:
 		intro -= delta
 		if intro <= 0:
@@ -412,6 +425,13 @@ func _physics_process(delta: float) -> void:
 	if not running:
 		overlay.queue_redraw()
 		return
+	if not trainer_queue.is_empty():
+		trainer_queue.delay -= delta
+		if trainer_queue.delay <= 0.0:
+			var queued: Dictionary = trainer_queue
+			trainer_queue = {}
+			open_trainer(queued.entry, queued.then)
+			return
 	effects.tick(delta)
 	if effects.freeze > 0:
 		return
@@ -547,8 +567,14 @@ func dismiss_intro() -> void:
 	running = true
 	input.enabled = true
 	overlay.intro_panel.hide()
+	if trainer_cards and training:
+		open_trainer(_trainer_entry("training", lesson))
+	elif trainer_cards and screech_lesson:
+		open_trainer(_trainer_entry("screech", 0))
 
 func _unhandled_input(event: InputEvent) -> void:
+	if trainer_open:
+		return
 	if intro > 0:
 		if int(level.id) != 1 and event.is_pressed() and not event is InputEventMouseMotion:
 			dismiss_intro()
@@ -644,7 +670,7 @@ func set_paused(value: bool) -> void:
 		_stop_screech(false)
 	set_physics_process(not value)
 	set_process_unhandled_input(not value)
-	input.enabled = not value and running and intro <= 0
+	input.enabled = not value and running and intro <= 0 and not trainer_open
 	input.clear_touch()
 	for gull: BeachGull in gulls:
 		gull.sprite.speed_scale = 0 if value else 1
@@ -724,7 +750,7 @@ func _crashed() -> void:
 	training_clean_snatch = false
 	score.points = ceili(score.points * 0.5)
 	score.stunned()
-	effects.message(player.position-Vector2(0,20),"TRY AGAIN - LESSON SAVED" if training else "CRASH! POINTS LOST",Color("ef725c"))
+	effects.message(player.position-Vector2(0,20),str(Config.trainer.live.crash_toast) if training else "CRASH! POINTS LOST",Color("ef725c"))
 	effects.impact(player.position,true)
 	Audio.play("stun")
 
@@ -911,11 +937,18 @@ func _training_advance() -> void:
 	track("lesson_complete", {"lesson": lesson, "seconds": snappedf(elapsed - lesson_started, 0.1)})
 	lesson_started = elapsed
 	GameState.save_training_step(lesson)
-	effects.message(player.position-Vector2(0,24),"LESSON COMPLETE",BeachUI.GOLD)
+	effects.message(player.position-Vector2(0,24),_toast(),BeachUI.GOLD)
 	if lesson >= BUMP_LESSON and lesson < TRAINING_LESSONS:
 		_training_dummy_setup()
 	if lesson >= TRAINING_LESSONS:
-		finish()
+		if trainer_cards:
+			var closing: Dictionary = Config.trainer.training.closing
+			var first_time: bool = not bool(GameState.entry(1).get("training_complete", false))
+			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing.first_time_text if first_time else closing.text, input), "button": closing.button}, finish)
+		else:
+			finish()
+	elif trainer_cards:
+		_queue_trainer(_trainer_entry("training", lesson))
 
 ## The sparring gull for the bump and mug lessons. Spawned once, empty-beaked; the mug lesson hands it food.
 func _training_dummy_setup() -> void:
@@ -931,6 +964,51 @@ func training_dummy() -> RivalPilot:
 		if pilot.dummy:
 			return pilot
 	return null
+
+# --- Screeches McCrumbs' pop-ups -----------------------------------------------------------------
+
+func _toast() -> String:
+	var toasts: Array = Config.trainer.toasts
+	return str(toasts[(lesson+screech_step)%toasts.size()])
+
+## A lesson card from data/trainer.json: set is "training" or "screech", index the lesson or step.
+func _trainer_entry(set_name: String, index: int) -> Dictionary:
+	var data: Dictionary = Config.trainer[set_name].lessons[index]
+	var total: int = TRAINING_LESSONS if set_name == "training" else SCREECH_STEPS
+	return {"mood": data.mood, "lay": TrainerScript.line(data.lay, input), "how": TrainerScript.line(data.how, input), "button": Config.trainer.lesson_button, "counter": "Lesson %d/%d" % [index+1, total]}
+
+func open_trainer(entry: Dictionary, then: Callable = Callable()) -> void:
+	trainer_open = true
+	trainer_then = then
+	peck_hold_pending = false
+	peck_hold_touch = false
+	_stop_screech(false)
+	input.enabled = false
+	input.clear_touch()
+	_freeze_actors(true)
+	overlay.trainer_card.open(entry)
+
+## Shows the card after a short beat so the lesson-done toast is seen first.
+func _queue_trainer(entry: Dictionary, then: Callable = Callable()) -> void:
+	trainer_queue = {"entry": entry, "delay": TRAINER_DELAY, "then": then}
+
+func _on_trainer_dismissed() -> void:
+	trainer_open = false
+	_freeze_actors(false)
+	input.clear_touch()
+	input.enabled = running and intro <= 0
+	var then: Callable = trainer_then
+	trainer_then = Callable()
+	if then.is_valid():
+		then.call()
+
+func _freeze_actors(value: bool) -> void:
+	for gull: BeachGull in gulls:
+		gull.sprite.speed_scale = 0 if value else 1
+	for target: BeachTarget in spawner.targets:
+		target.sprite.speed_scale = 0 if value else 1
+	if dog != null:
+		dog.paused = value
 
 func _training_tick(delta: float) -> void:
 	if lesson == 0:
@@ -967,48 +1045,28 @@ func _training_tick(delta: float) -> void:
 			target.food = true
 			target.food_sprite.show()
 
+## The short reminder on the strip while a lesson runs; the pop-up card does the explaining.
 func training_text() -> String:
-	var flap: String = "A" if input.gamepad else "SPACE / LEFT CLICK"
-	var dive_key: String = "B" if input.gamepad else "SHIFT / RIGHT CLICK"
-	var peck_key: String = "X" if input.gamepad else "E"
-	if input.touch_visible:
-		flap = "FLAP"
-		dive_key = "DIVE"
-		peck_key = "PECK"
+	var live: Dictionary = Config.trainer.live
 	if player.crash_warning():
-		return "PULL UP! AIM UP TO AVOID A CRASH\nHOLD %s TO RECOVER" % flap
-	match lesson:
-		0:
-			if training_took_off:
-				return "STEER RIGHT: %s\nFLY TOWARD THE GOLDEN RING" % ("DRAG THUMB" if input.touch_visible else ("LEFT STICK" if input.gamepad else "MOUSE / WASD"))
-			return "HOLD %s TO TAKE OFF\nTHEN STEER RIGHT TOWARD THE RING" % flap
-		1: return "RELEASE FLAP. AIM DOWN TO LAND\nWALK OVER A GOLDEN CRUMB"
-		2:
-			if training_clean_snatch:
-				return "SNACK TAKEN! AIM UP AND CLIMB"
-			if player.state == BeachGull.State.STRIKE and not player.peck_used:
-				return "NOW! TAP %s AT THE SNACK" % peck_key
-			return "DIVE: %s\nTAP %s AT THE SNACK. THEN AIM UP" % [dive_key,peck_key]
-		3: return "LAND BESIDE THE PICNIC BAG\nTAP %s THREE TIMES. COLLECT FOOD" % peck_key
-		4: return "LAND BY THE BIN. TAP %s %d TIMES\nSCRAPS ARE FOOD. WRAPPERS ARE NOT" % [peck_key,int(Config.tuning.world.bin_pecks)]
-		5:
-			var wheelie: Dictionary = training_bin(true)
-			if player.state == BeachGull.State.GROUNDED and not wheelie.is_empty() and player.support.is_empty() and absf(player.position.x-float(wheelie.x)) < 28.0:
-				return "TOO LOW! FLY UP AND LAND\nON TOP OF THE LID"
-			return "FLY UP AND LAND ON THE WHEELIE BIN\nTAP %s %d TIMES. POSH TRASH INSIDE!" % [peck_key,int(Config.tuning.world.bin_pecks)]
-		6:
-			if training_clean_snatch:
-				return "GOT IT! NOW CLIMB BACK UP HIGH"
-			if player.state == BeachGull.State.STRIKE and not player.peck_used:
-				return "NOW! TAP %s AT THE SNACK" % peck_key
-			return "DIVE AT ANYONE'S SNACK. PECK IT\nTHEN CLIMB BACK UP HIGH"
-		BUMP_LESSON: return "DIVE: %s\nHIT THE EMPTY-BEAKED GULL. BONK!" % dive_key
-		MUG_LESSON:
-			var dummy: RivalPilot = training_dummy()
-			if dummy != null and not player.can_collect_food(DUMMY_FOOD):
-				return "FINISH YOUR SNACK FIRST\nTHEN MUG THE GULL"
-			return "DIVE: %s\nHIT THE GULL WITH FOOD. MUG IT!" % dive_key
-	return "TRAINING COMPLETE!"
+		return TrainerScript.line(live.crash, input)
+	var data: Dictionary = Config.trainer.training.lessons[mini(lesson, TRAINING_LESSONS-1)]
+	if lesson == 0 and training_took_off:
+		return TrainerScript.line(data.strip_steer, input)
+	if lesson in [2, SECOND_SWOOP_LESSON]:
+		if training_clean_snatch:
+			return TrainerScript.line(live.clean, input)
+		if player.state == BeachGull.State.STRIKE and not player.peck_used:
+			return TrainerScript.line(live.peck_now, input)
+	if lesson == WHEELIE_LESSON:
+		var wheelie: Dictionary = training_bin(true)
+		if player.state == BeachGull.State.GROUNDED and not wheelie.is_empty() and player.support.is_empty() and absf(player.position.x-float(wheelie.x)) < 28.0:
+			return TrainerScript.line(live.wheelie_low, input)
+	if lesson == MUG_LESSON:
+		var dummy: RivalPilot = training_dummy()
+		if dummy != null and not player.can_collect_food(DUMMY_FOOD):
+			return TrainerScript.line(live.full_stomach, input)
+	return TrainerScript.line(data.strip, input)
 
 # The bin used by the bin lessons: the ordinary sand bin, or the wheelie bin.
 func training_bin(wheelie: bool) -> Dictionary:
@@ -1069,9 +1127,15 @@ func _screech_advance() -> void:
 	if screech_step == 1:
 		brash.meter = maxf(brash.meter,float(screech_settings().get("start_meter",0.6)))
 	if screech_step >= SCREECH_STEPS:
-		end_screech_lesson(true)
+		if trainer_cards:
+			var closing: Dictionary = Config.trainer.screech.closing
+			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing.text, input), "button": closing.button}, end_screech_lesson.bind(true))
+		else:
+			end_screech_lesson(true)
 	else:
-		effects.message(player.position-Vector2(0,24),"NICE!",BeachUI.GOLD)
+		effects.message(player.position-Vector2(0,24), _toast(), BeachUI.GOLD)
+		if trainer_cards and screech_step in [1, 2]:
+			_queue_trainer(_trainer_entry("screech", screech_step))
 
 ## Finish (or skip) the lesson: save it, empty the meter and let the level clock run.
 func end_screech_lesson(completed: bool) -> void:
@@ -1119,16 +1183,7 @@ func _screech_lesson_tick(delta: float) -> void:
 			screech_snacks = snacks
 
 func screech_lesson_text() -> String:
-	var peck_key: String = "X" if input.gamepad else "E"
-	var call_key: String = "RB" if input.gamepad else "Q"
-	if input.touch_visible:
-		peck_key = "PECK"
-		call_key = "CALL"
-	match screech_step:
-		0: return "LAND ON THE ICE CREAM SIGN\nHIGH PERCHES ARE LOUDER"
-		1: return "HOLD %s TO SCREECH\nHIGH PERCHES FILL BRASH FASTER" % peck_key
-		2: return "BRASH FULL! SCREECH AGAIN\nOR %s TO CALL THE GANG" % call_key
-	return "GRAB THE DROPPED FOOD!\nTHEY'LL BE BACK SOON"
+	return TrainerScript.line(Config.trainer.screech.strips[mini(screech_step, SCREECH_STEPS-1)], input)
 
 func screech_lesson_target() -> Vector2:
 	if screech_step == 0:

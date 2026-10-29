@@ -51,7 +51,7 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	# Keys switch with the input device.
 	game.input.gamepad = false
 	game.input.touch_visible = false
-	check.call(game.screech_lesson_text().contains("SIGN"), "step 1 asks for the roof sign: " + game.screech_lesson_text())
+	check.call(game.screech_lesson_text().contains("sign"), "step 1 asks for the roof sign: " + game.screech_lesson_text())
 	game.overlay._process(0.0)
 	game.overlay.queue_redraw()
 	await host.snapshot("level2-start-lesson-1")
@@ -80,12 +80,12 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	game.overlay.queue_redraw()
 	await host.snapshot("level2-lesson-2-screech")
 	game.input.gamepad = false
-	check.call(game.screech_lesson_text().contains("HOLD E TO SCREECH") and game.screech_lesson_text().contains("BRASH"), "step 2 names the keyboard peck key")
+	check.call(game.screech_lesson_text().contains("Hold E to screech") and game.screech_lesson_text().contains("Higher"), "step 2 names the keyboard peck key")
 	game.input.gamepad = true
-	check.call(game.screech_lesson_text().contains("HOLD X "), "step 2 names the gamepad peck button")
+	check.call(game.screech_lesson_text().contains("Hold X "), "step 2 names the gamepad peck button")
 	game.input.gamepad = false
 	game.input.touch_visible = true
-	check.call(game.screech_lesson_text().contains("HOLD PECK "), "step 2 names the touch PECK button")
+	check.call(game.screech_lesson_text().contains("Hold PECK "), "step 2 names the touch PECK button")
 	game.input.touch_visible = false
 	# Screeching from the perch really fills it (a high perch, so quickly).
 	game.peck_hold_pending = true
@@ -101,7 +101,7 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	game._screech_lesson_tick(0.016)
 	check.call(game.screech_step == 2, "a full meter finishes step 2")
 	game.input.gamepad = false
-	check.call(game.screech_lesson_text().contains("Q") and game.screech_lesson_text().contains("GANG"), "step 3 mentions Q and the gang")
+	check.call(game.screech_lesson_text().contains("press Q"), "step 3 mentions Q and the gang")
 	game.input.touch_visible = true
 	check.call(game.screech_lesson_text().contains("CALL"), "step 3 mentions the touch CALL button")
 	game.input.touch_visible = false
@@ -117,7 +117,7 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	game._screech_lesson_tick(0.016)
 	check.call(game.screech_step == 3, "firing Gang Call finishes step 3")
 	game.overlay._process(0.0)
-	check.call(game.overlay.training_panel.visible and game.overlay.lesson_prompt.text.contains("GRAB"), "the lesson panel shows the grab step")
+	check.call(game.overlay.training_panel.visible and game.overlay.lesson_prompt.text.contains("Grab"), "the lesson panel shows the grab step")
 	# Let the gang land.
 	for frame: int in 120:
 		game.brash.tick(1.0 / 60)

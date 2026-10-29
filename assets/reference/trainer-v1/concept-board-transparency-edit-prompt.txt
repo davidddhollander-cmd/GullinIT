@@ -1,0 +1,6 @@
+Use case: background-extraction
+Asset type: corrected Round 1 pixel-art character concept board
+Primary request: Preserve the six Screeches McCrumbs character drawings exactly as generated—the three full-body gulls and their three matching busts, including anatomy, poses, scar, feather beard, captain's hat on B, neckerchief on C, colors, outlines, shading, and layout. Change only the presentation background and column labels.
+Background edit: Remove the entire dark navy/black vignette, glow, haze, and every backdrop pixel. Replace it with genuine transparent alpha across all empty space. There must be no aura or shadow around any character.
+Labels: Render exactly three clear single capital labels outside the character artwork: "A" above the left column, "B" above the center column, and "C" above the right column. Use compact blocky pixel lettering in solid dark navy #183B4E, with no glow, shadow, badge, circle, or panel.
+Constraints: Keep every character pixel and the six-character layout unchanged. Preserve crisp square pixels and hard edges. Actual transparent background; no semi-transparent edge haze; no added fragments; no other text.

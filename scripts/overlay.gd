@@ -7,6 +7,8 @@ var time_label: Label
 var wind_label: Label
 var intro_panel: PanelContainer
 var start_button: Button
+var trainer_card: TrainerCard
+var trainer_intro: bool = false ## Training Day opens with the trainer card instead of the intro panel
 var training_panel: PanelContainer
 var lesson_label: Label
 var lesson_prompt: Label
@@ -164,7 +166,9 @@ func setup(owner_game: BeachGame) -> void:
 	lesson_label.mouse_filter = MOUSE_FILTER_IGNORE
 	lesson_prompt.mouse_filter = MOUSE_FILTER_IGNORE
 	lesson_prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lesson_prompt.custom_minimum_size = Vector2(176,12)
+	lesson_prompt.add_theme_font_override("font", TrainerCard.SPEECH)
+	lesson_prompt.add_theme_font_size_override("font_size", TrainerCard.SPEECH_SIZE)
+	lesson_prompt.custom_minimum_size = Vector2(176, 10)
 	var center: CenterContainer = CenterContainer.new()
 	add_child(center)
 	BeachUI.full(center)
@@ -188,12 +192,20 @@ func setup(owner_game: BeachGame) -> void:
 			BeachUI.label(intro,"QUESTS",8,BeachUI.GOLD)
 			for quest: Dictionary in game.quests.quests:
 				BeachUI.label(intro,"- %s  +%d" % [quest.text,int(quest.bonus)],8,Color("80bcb8"))
-	if int(game.level.id) == 1:
+	trainer_intro = BeachGame.trainer_cards and game.training
+	if trainer_intro:
+		intro_panel.hide()
+	elif int(game.level.id) == 1:
 		intro_panel.mouse_filter = MOUSE_FILTER_STOP
 		start_button = BeachUI.button(intro,"LET'S GULL IT",game.dismiss_intro)
 		start_button.grab_focus()
 	else:
 		BeachUI.label(intro,"ANY BUTTON TO GO",8,BeachUI.GOLD)
+	# Last child, so the pop-up draws over everything. Its button is the Training Day start button.
+	trainer_card = TrainerCard.new()
+	add_child(trainer_card)
+	if trainer_intro:
+		start_button = trainer_card.button
 
 func _process(delta: float) -> void:
 	var counting: bool = shown_score < game.score.points
@@ -206,8 +218,8 @@ func _process(delta: float) -> void:
 	time_label.add_theme_color_override("font_color",Color("ef725c") if warning else BeachUI.CREAM)
 	time_label.modulate.a = 0.35 if warning and Time.get_ticks_msec()%500 < 200 else 1.0
 	wind_label.text = "CALM" if absf(game.player.wind_force) < 0.01 else "%s %d%%" % ["WIND >" if game.player.wind_force > 0 else "< WIND",roundi(absf(game.player.wind_force)*100)]
-	intro_panel.visible = game.intro > 0
-	training_panel.visible = game.lesson_active() and game.running and game.intro <= 0
+	intro_panel.visible = game.intro > 0 and not trainer_intro
+	training_panel.visible = game.lesson_active() and game.running and game.intro <= 0 and not game.trainer_open
 	if game.training:
 		lesson_label.text = "LESSON %d/%d" % [mini(game.lesson + 1, BeachGame.TRAINING_LESSONS), BeachGame.TRAINING_LESSONS]
 		lesson_prompt.text = game.training_text()
