@@ -89,3 +89,5 @@ Completed the generated-art redesign as a distinct low, wide 1970s tropical rest
 - Last commit: branch tip completion commit (local; GitHub push attempted after commit)
 
 ## Review notes
+
+Merged 2026-10-29 (f99a2dc). David accepted the design but it needs cleaning. Task 059 covers the cleanup, the name-preview fix and the off-centre counter anchors.

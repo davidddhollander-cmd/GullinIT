@@ -99,3 +99,5 @@ Branch: `codex/056-restaurant-table-chairs-regenerate`
 
 Last commit: task completion commit on this branch.
 ## Review notes
+
+Merged 2026-10-29 (ffee029). David's verdicts: **pier fence v2 rejected** (dropped, no redo); **table and chairs v2 possible but needs to be sharper** (task 060). Review found a doubled 2-3 px navy outline under the seats and post, stray pixels, and two non-identical chairs.
