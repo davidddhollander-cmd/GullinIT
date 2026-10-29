@@ -175,6 +175,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	_wire_sand(player)
 	player.gull_stunned.connect(_stunned)
 	player.ground_crashed.connect(_crashed)
+	score.combo_changed.connect(func(tier: int) -> void: Audio.play("score",1.0+tier*0.06,-4.0))
 	player.dive_started.connect(func() -> void:
 		Audio.play("dive")
 		_dive_began()

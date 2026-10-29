@@ -55,6 +55,8 @@ static func button(parent: Node, value: String, action: Callable, width: float =
 	node.custom_minimum_size = Vector2(width,21)
 	node.pressed.connect(func() -> void:
 		Audio.play("gull_call", 1.0, -8.0)
+		if value.begins_with("<"):
+			Audio.play("ui_back", 1.0, -4.0)
 		action.call())
 	parent.add_child(node)
 	return node
