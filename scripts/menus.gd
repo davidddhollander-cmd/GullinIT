@@ -111,9 +111,14 @@ func level_select(casual: bool) -> void:
 	var actions: HBoxContainer = HBoxContainer.new()
 	content.add_child(actions)
 	var with_feedback: bool = not GameState.feedback_url().is_empty()
-	var action_width: int = 86 if with_feedback else 100
+	# The Level 2 screech and Gang Call lesson plays once per save; this replays it for a herring gull.
+	var lesson_replay: bool = GameState.unlocked(2) and GameState.chosen_gull() == "herring" and Config.levels[1].has("screech_lesson")
+	var action_count: int = 1 + int(trained) + int(lesson_replay) + int(with_feedback)
+	var action_width: int = 100 if action_count <= 2 else (86 if action_count == 3 else 0)
 	if trained:
-		BeachUI.button(actions,"TRAIN AGAIN",func() -> void: choose("train_again"),action_width)
+		BeachUI.button(actions,"TRAIN AGAIN" if action_count < 4 else "TRAIN",func() -> void: choose("train_again"),action_width)
+	if lesson_replay:
+		BeachUI.button(actions,"GANG CALL",func() -> void: choose("screech_lesson"),action_width)
 	if with_feedback:
 		BeachUI.button(actions,"FEEDBACK",func() -> void: choose("feedback"),action_width)
 	BeachUI.button(actions,"< BACK",func() -> void: choose("title"),action_width)

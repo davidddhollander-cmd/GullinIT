@@ -3,6 +3,11 @@ extends RefCounted
 ## The editor window itself needs a real display, so these drive the same functions the window calls.
 
 static func run(host: Node, check: Callable) -> void:
+	# Keep real menu text out from under the sample elements, which sit in the top-left corner.
+	var menus_were_visible: bool = false
+	if host.get("main") != null and is_instance_valid(host.main.menus):
+		menus_were_visible = host.main.menus.visible
+		host.main.menus.hide()
 	var holder: Control = Control.new()
 	host.add_child(holder)
 	var label: Label = Label.new()
@@ -74,6 +79,8 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(tool.targets.has(card.lay_label) and tool.targets.has(card.how_label),"an open trainer card's paragraphs are selectable")
 	tool.free()
 	holder.free()
+	if menus_were_visible:
+		host.main.menus.show()
 
 static func get_paused(host: Node) -> bool:
 	return host.get_tree().paused

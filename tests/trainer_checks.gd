@@ -18,6 +18,7 @@ static func run(host: Node, check: Callable) -> void:
 	_copy_checks(check)
 	await _training_flow(host,check)
 	await _screech_flow(host,check)
+	await _replay_flow(host,check)
 	BeachGame.trainer_cards = false
 	GameState.options.erase("control_mode")
 	GameState.progress = {}
@@ -174,4 +175,42 @@ static func _screech_flow(host: Node, check: Callable) -> void:
 	check.call(game.trainer_open and card.lay_label.get_parsed_text().contains("clock starts now") and card.button.text == "LET'S GO!","the closing card tells the player the clock starts")
 	card.button.pressed.emit()
 	check.call(not game.screech_lesson and not game.trainer_open and bool(GameState.entry(2).get("screech_lesson_complete",false)),"dismissing the closing card ends the lesson")
+	host.main.clear_game()
+
+static func _has_button(host: Node, text: String) -> bool:
+	for button: Button in host.main.menus.find_children("*","Button",true,false):
+		if button.text == text:
+			return true
+	return false
+
+## The level select GANG CALL button replays the Level 2 lesson on a save that has already finished it.
+static func _replay_flow(host: Node, check: Callable) -> void:
+	BeachGame.trainer_cards = true
+	GameState.options.gull = "herring"
+	GameState.progress = {"1": {"training_step": BeachGame.TRAINING_LESSONS, "training_complete": true}, "2": {"screech_lesson_complete": true, "stars": 1}}
+	var saved_url: Variant = GameState.demo.get("feedback_url","")
+	GameState.demo["feedback_url"] = ""
+	host.main.start_level(2)
+	check.call(not host.main.game.screech_lesson and not host.main.game.trainer_open,"a finished Level 2 lesson is skipped on an ordinary play")
+	host.main._navigate("select")
+	check.call(_has_button(host,"GANG CALL") and _has_button(host,"TRAIN AGAIN"),"level select offers GANG CALL beside TRAIN AGAIN")
+	await host.settle()
+	host.layout(host.main.menus)
+	GameState.demo["feedback_url"] = "https://example.test/feedback"
+	host.main._navigate("select")
+	check.call(_has_button(host,"GANG CALL") and _has_button(host,"TRAIN") and _has_button(host,"FEEDBACK") and _has_button(host,"< BACK"),"all four action buttons fit when feedback is on")
+	await host.settle()
+	host.layout(host.main.menus)
+	GameState.demo["feedback_url"] = saved_url
+	host.main._navigate("screech_lesson")
+	var game: BeachGame = host.main.game
+	game.set_physics_process(false)
+	check.call(host.main.current_level == 2 and game.screech_lesson and game.screech_step == 0,"GANG CALL replays the lesson even though the save finished it")
+	host.main._navigate("restart")
+	check.call(host.main.game.screech_lesson,"restarting a replayed lesson keeps the lesson")
+	host.main.clear_game()
+	GameState.progress = {}
+	host.main._navigate("select")
+	check.call(not _has_button(host,"GANG CALL"),"no replay button while Level 2 is locked")
+	GameState.progress = {}
 	host.main.clear_game()

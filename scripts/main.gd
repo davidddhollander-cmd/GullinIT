@@ -116,9 +116,12 @@ func _navigate(action: String, payload: Variant = null) -> void:
 				start_level(int(payload),replay_training)
 		"train_again":
 			start_level(1, true)
+		"screech_lesson":
+			start_level(2, false, true)
 		"restart":
 			var replaying_training: bool = is_instance_valid(game) and game.training and bool(GameState.entry(1).get("training_complete", false))
-			start_level(current_level, replaying_training)
+			var replaying_screech: bool = is_instance_valid(game) and game.screech_lesson and bool(GameState.entry(current_level).get("screech_lesson_complete",false))
+			start_level(current_level, replaying_training, replaying_screech)
 		"pause":
 			if is_instance_valid(game):
 				game.set_paused(true)
@@ -160,7 +163,7 @@ func _quit() -> void:
 	await get_tree().create_timer(0.1).timeout
 	get_tree().quit()
 
-func start_level(id: int, force_training: bool = false) -> void:
+func start_level(id: int, force_training: bool = false, force_screech: bool = false) -> void:
 	clear_game()
 	current_level = id
 	screen = "game"
@@ -169,7 +172,7 @@ func start_level(id: int, force_training: bool = false) -> void:
 	game = BeachGame.new()
 	game.name = "Game"
 	add_child(game)
-	game.setup(Config.levels[id-1],casual,force_training)
+	game.setup(Config.levels[id-1],casual,force_training,force_screech)
 	game.level_finished.connect(_finished)
 	game.pause_requested.connect(func() -> void: _navigate("pause"))
 	Audio.play_music("lounge" if id == 1 else ("synth" if id % 2 == 0 else "beach"))
