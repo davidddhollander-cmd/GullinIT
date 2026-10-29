@@ -35,10 +35,13 @@ var lesson: int = 0
 var quests: BeachQuests = BeachQuests.new()
 var feathers_earned: int = 0
 var mugged_rivals: Dictionary = {}
-const TRAINING_LESSONS: int = 7
+const TRAINING_LESSONS: int = 9
 const BIN_LESSON: int = 4
 const WHEELIE_LESSON: int = 5
-const FINAL_LESSON: int = 6
+const SECOND_SWOOP_LESSON: int = 6
+const BUMP_LESSON: int = 7 ## dive into the empty-beaked dummy gull
+const MUG_LESSON: int = 8 ## the dummy now carries food: dive through it
+const DUMMY_FOOD: String = "crisps_bag"
 var training_took_off: bool = false
 var training_clean_snatch: bool = false
 var training_raid_started: bool = false
@@ -232,6 +235,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		if lesson >= 2:
 			player.position = Vector2(180,70)
 			player.state = BeachGull.State.GLIDE
+		if lesson >= BUMP_LESSON:
+			_training_dummy_setup()
 	Config.reloaded.connect(_reload)
 
 func _twist() -> String:
@@ -803,6 +808,8 @@ func _mugging() -> void:
 				effects.message(pilot.gull.position-Vector2(0,20),"BONK!",BeachUI.GOLD)
 				Audio.play("snatch",1+score.tier*0.08)
 				brash.add(float(Config.tuning.brash.bump))
+				if training and lesson == BUMP_LESSON and pilot.dummy:
+					_training_advance()
 				return
 			var value: int = pilot.mug(player.position)
 			if value > 0:
@@ -813,6 +820,8 @@ func _mugging() -> void:
 				Audio.play("snatch",1+score.tier*0.08)
 				player.digestion.collect(pilot.carried_food_id,{"value":value,"upwind":player.upwind,"mugged":true,"mugged_from":pilot.gull.rival_name})
 				brash.add(float(Config.tuning.brash.mug))
+				if training and lesson == MUG_LESSON and pilot.dummy:
+					_training_advance()
 				return
 
 ## Rivals mug anyone holding food: other rivals in their grace window, or the player's unswallowed snack.
@@ -887,7 +896,7 @@ func finish() -> void:
 	level_finished.emit(result)
 
 func _training_snatch(_target: BeachTarget) -> void:
-	if lesson in [2,FINAL_LESSON]:
+	if lesson in [2,SECOND_SWOOP_LESSON]:
 		training_clean_snatch = true
 
 func _training_advance() -> void:
@@ -902,8 +911,25 @@ func _training_advance() -> void:
 	lesson_started = elapsed
 	GameState.save_training_step(lesson)
 	effects.message(player.position-Vector2(0,24),"LESSON COMPLETE",BeachUI.GOLD)
+	if lesson >= BUMP_LESSON and lesson < TRAINING_LESSONS:
+		_training_dummy_setup()
 	if lesson >= TRAINING_LESSONS:
 		finish()
+
+## The sparring gull for the bump and mug lessons. Spawned once, empty-beaked; the mug lesson hands it food.
+func _training_dummy_setup() -> void:
+	if training_dummy() == null and level.has("training_dummy"):
+		pending_rivals = [level.training_dummy.duplicate(true)]
+		_release_rivals()
+	var dummy: RivalPilot = training_dummy()
+	if dummy != null and lesson == MUG_LESSON:
+		dummy.dummy_food = DUMMY_FOOD
+
+func training_dummy() -> RivalPilot:
+	for pilot: RivalPilot in pilots:
+		if pilot.dummy:
+			return pilot
+	return null
 
 func _training_tick(delta: float) -> void:
 	if lesson == 0:
@@ -912,7 +938,7 @@ func _training_tick(delta: float) -> void:
 			training_took_off = true
 		if training_took_off and player.state == BeachGull.State.GLIDE and player.position.x > float(level.world.start_x) + 30:
 			_training_advance()
-	elif lesson in [2,FINAL_LESSON] and training_clean_snatch and player.position.y < 100 and player.velocity.y <= 0 and player.state in [BeachGull.State.GLIDE,BeachGull.State.STRIKE]:
+	elif lesson in [2,SECOND_SWOOP_LESSON] and training_clean_snatch and player.position.y < 100 and player.velocity.y <= 0 and player.state in [BeachGull.State.GLIDE,BeachGull.State.STRIKE]:
 		_training_advance()
 	# Lessons cannot run out of food. Restore only after all loose food clears,
 	# so a missed peck never duplicates an item still lying on the beach.
@@ -975,6 +1001,12 @@ func training_text() -> String:
 			if player.state == BeachGull.State.STRIKE and not player.peck_used:
 				return "NOW! TAP %s AT THE SNACK" % peck_key
 			return "DIVE AT ANYONE'S SNACK. PECK IT\nTHEN CLIMB BACK UP HIGH"
+		BUMP_LESSON: return "DIVE: %s\nHIT THE EMPTY-BEAKED GULL. BONK!" % dive_key
+		MUG_LESSON:
+			var dummy: RivalPilot = training_dummy()
+			if dummy != null and not player.can_collect_food(DUMMY_FOOD):
+				return "FINISH YOUR SNACK FIRST\nTHEN MUG THE GULL"
+			return "DIVE: %s\nHIT THE GULL WITH FOOD. MUG IT!" % dive_key
 	return "TRAINING COMPLETE!"
 
 # The bin used by the bin lessons: the ordinary sand bin, or the wheelie bin.
@@ -1000,6 +1032,10 @@ func training_target() -> Vector2:
 				nearest = Vector2(float(crumb.x),156)
 				distance = absf(nearest.x-player.position.x)
 		return nearest
+	if lesson in [BUMP_LESSON,MUG_LESSON]:
+		var dummy: RivalPilot = training_dummy()
+		if dummy != null:
+			return dummy.gull.position
 	if lesson in [2,3]:
 		for target: BeachTarget in spawner.targets:
 			if lesson == 2 and target.kind == "kiosk_customer":

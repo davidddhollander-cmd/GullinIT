@@ -175,7 +175,7 @@ func setup(owner_game: BeachGame) -> void:
 	intro_panel.add_child(intro)
 	BeachUI.label(intro,"TRAINING DAY" if game.training else "%02d / %s" % [game.level.id,game.level.name.to_upper()],8,BeachUI.GOLD)
 	if game.training:
-		BeachUI.label(intro,"SEVEN SHORT LESSONS. TAKE YOUR TIME.")
+		BeachUI.label(intro,"NINE SHORT LESSONS. TAKE YOUR TIME.")
 		BeachUI.label(intro,"NO TIMER. NO SCORE. NO MANNERS.",8,Color("80bcb8"))
 		BeachUI.label(intro,"FOLLOW THE GOLDEN RING.",8,BeachUI.GOLD)
 	else:

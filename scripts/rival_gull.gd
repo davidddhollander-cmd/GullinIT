@@ -44,6 +44,10 @@ var ground_rest: float = 0.0
 var avoid: Array[Dictionary] = [] ## {ref, time}: jobs to keep away from for a while (they went nowhere)
 var mug_timer: float = 0.0
 var mugs: int = 0
+## Training Day dummy: patrols back and forth, never hunts, dives or mugs, and only carries food when armed.
+var dummy: bool = false
+var dummy_food: String = ""
+var dummy_range: Vector2 = Vector2(110.0,520.0)
 # Counters for tests and tuning.
 var dives: int = 0
 var thefts: int = 0
@@ -63,6 +67,10 @@ func setup(actor: BeachGull, profile: Dictionary, random: RandomNumberGenerator)
 	rng = random
 	gull.speed_factor = profile.speed
 	gull.rival_name = str(profile.name)
+	dummy = bool(profile.get("dummy",false))
+	if dummy:
+		var span: Array = profile.get("range",[dummy_range.x,dummy_range.y])
+		dummy_range = Vector2(float(span[0]),float(span[1]))
 	gull.loose_only = bool(profile.get("loose_only",false))
 	gull.species = str(profile.get("species","great-black-backed"))
 	gull.body_scale = float(profile.get("scale",1.0))
@@ -96,6 +104,9 @@ func tick(delta: float, targets: Array[BeachTarget], claims: Dictionary, wind: B
 			avoid.remove_at(i)
 	if threat.x >= 0.0:
 		threat_x = threat.x
+	if dummy:
+		dummy_step(delta, wind)
+		return
 	if leave > 0:
 		mode = Mode.ESCAPE
 		leave -= delta
@@ -119,6 +130,23 @@ func tick(delta: float, targets: Array[BeachTarget], claims: Dictionary, wind: B
 	gull.tick(delta, wind.direction, wind.strength)
 	if mode == Mode.DIVE and gull.state in [BeachGull.State.GLIDE, BeachGull.State.GROUNDED, BeachGull.State.STUNNED]:
 		finish_dive()
+
+## Flies a slow, predictable lap between the ends of `dummy_range`. Armed with food, the mug window stays open.
+func dummy_step(delta: float, wind: BeachWind) -> void:
+	if not dummy_food.is_empty() and gull.state != BeachGull.State.STUNNED:
+		carried_food_id = dummy_food
+		carried = int(Config.foods[dummy_food].points)
+		carry_window = 1.0
+	if mode == Mode.RECOVER:
+		recover()
+	else:
+		mode = Mode.PATROL
+		waypoint_age += delta
+		if waypoint < 0.0 or absf(gull.position.x - waypoint) < 25.0:
+			waypoint = dummy_range.y if gull.position.x < (dummy_range.x + dummy_range.y) * 0.5 else dummy_range.x
+		gull.aim = Vector2(waypoint, cruise())
+		gull.climb = gull.state in [BeachGull.State.GLIDE, BeachGull.State.GROUNDED] and needs_height()
+	gull.tick(delta, wind.direction, wind.strength)
 
 func hunt(delta: float, targets: Array[BeachTarget], claims: Dictionary, wind: BeachWind) -> void:
 	retarget_timer -= delta
@@ -360,6 +388,7 @@ func mug(attacker: Vector2 = Vector2.INF) -> int:
 		return 0
 	var value: int = carried
 	carried = 0
+	dummy_food = ""
 	score = maxi(0, score - value)
 	carry_window = 0
 	leave = 0
@@ -643,7 +672,7 @@ func eat_crumb_underfoot() -> void:
 			return
 
 func accepts_item(item: Dictionary) -> bool:
-	if game == null or leave > 0.0 or eat_timer > 0.0 or gull.state == BeachGull.State.STUNNED or bool(item.get("garbage",false)) or str(item.get("food_id","")).is_empty():
+	if game == null or dummy or leave > 0.0 or eat_timer > 0.0 or gull.state == BeachGull.State.STUNNED or bool(item.get("garbage",false)) or str(item.get("food_id","")).is_empty():
 		return false
 	return weight("scraps" if bool(item.grounded) else "catch") > 0.0 and gull.can_collect_food(str(item.food_id))
 

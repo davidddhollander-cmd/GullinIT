@@ -118,7 +118,8 @@ static func run(host: Node, check: Callable) -> void:
 	for tap: int in range(int(Config.tuning.world.bin_pecks)):
 		game.stash_raids.peck_cooldown = 0
 		game._peck()
-		check.call(game.lesson == (BeachGame.FINAL_LESSON if tap == int(Config.tuning.world.bin_pecks)-1 else BeachGame.WHEELIE_LESSON),"wheelie lesson waits for the full lid peck sequence")
+		check.call(game.lesson == (BeachGame.SECOND_SWOOP_LESSON if tap == int(Config.tuning.world.bin_pecks)-1 else BeachGame.WHEELIE_LESSON),"wheelie lesson waits for the full lid peck sequence")
+	check.call(game.training_dummy() == null and game.pilots.is_empty(),"no dummy gull appears before the bump lesson")
 	var wheelie_food: int = 0
 	for item: Dictionary in game.stash_raids.items:
 		if not bool(item.get("garbage",false)):
@@ -146,8 +147,45 @@ static func run(host: Node, check: Callable) -> void:
 	game.player.velocity.y = -20
 	game._training_snatch(customer)
 	game._training_tick(0.1)
+	check.call(game.lesson == BeachGame.BUMP_LESSON and game.running and results.is_empty(),"second clean swoop leads on to the bump lesson")
+	var dummy: RivalPilot = game.training_dummy()
+	check.call(dummy != null and dummy.dummy and game.pilots.size() == 1 and dummy.carry_window <= 0.0,"bump lesson spawns one empty-beaked dummy gull")
+	game.overlay._process(0)
+	check.call(game.overlay.lesson_label.text.contains("LESSON 8/9") and game.training_text().contains("BONK") and game.training_target() == dummy.gull.position,"bump lesson names the action and rings the dummy")
+	# The dummy only patrols its lap: it never hunts, dives, steals or mugs.
+	for frame: int in range(240):
+		dummy.tick(1.0/60,[customer],{},game.wind)
+	check.call(dummy.dives == 0 and dummy.thefts == 0 and dummy.mode == RivalPilot.Mode.PATROL and dummy.gull.position.x > 80.0 and dummy.gull.position.x < 560.0,"dummy gull patrols without hunting or diving: "+str(dummy.gull.position))
+	var hit_from: Vector2 = Vector2(200,56)
+	dummy.gull.state = BeachGull.State.GLIDE
+	dummy.gull.invulnerable = 0.0
+	dummy.gull.position = hit_from
+	game.player.state = BeachGull.State.GLIDE
+	game.player.previous_beak = hit_from - Vector2(0,10)
+	game.player.sweep_beak = hit_from + Vector2(0,10)
+	game._mugging()
+	check.call(game.lesson == BeachGame.BUMP_LESSON,"flying through the dummy without diving does not bump it")
+	game.player.state = BeachGull.State.STRIKE
+	game._mugging()
+	check.call(game.lesson == BeachGame.MUG_LESSON and dummy.gull.state == BeachGull.State.STUNNED and int(GameState.entry(1).get("training_step",0)) == BeachGame.MUG_LESSON,"dive into the empty-beaked dummy bumps it and advances to the mug lesson")
+	check.call(game.training_text().contains("MUG") and dummy.dummy_food == BeachGame.DUMMY_FOOD,"mug lesson arms the dummy with food")
+	# The mug window stays open only while the dummy is flying again.
+	dummy.tick(1.0/60,[],{},game.wind)
+	check.call(dummy.carry_window <= 0.0 or dummy.gull.state != BeachGull.State.STUNNED,"a tumbling dummy is not muggable yet")
+	dummy.gull.state = BeachGull.State.GLIDE
+	dummy.tick(1.0/60,[],{},game.wind)
+	check.call(dummy.carry_window > 0.0 and dummy.carried > 0 and dummy.gull.carry_source.call() == BeachGame.DUMMY_FOOD,"recovered dummy visibly carries a muggable snack")
+	game.player.digestion.snacks.clear()
+	game.player.digestion.rest = 0.0
+	dummy.gull.position = hit_from
+	game.player.state = BeachGull.State.GLIDE
+	game._mugging()
+	check.call(game.lesson == BeachGame.MUG_LESSON,"gliding past the dummy's snack does not mug it")
+	game.player.state = BeachGull.State.STRIKE
+	game._mugging()
 	var entry: Dictionary = GameState.entry(1)
-	check.call(game.lesson == BeachGame.TRAINING_LESSONS and not game.running and results.size() == 1,"final clean swoop finishes training exactly once")
+	check.call(game.player.digestion.snacks.size() == 1 and dummy.dummy_food.is_empty(),"mug lesson takes the dummy's snack")
+	check.call(game.lesson == BeachGame.TRAINING_LESSONS and not game.running and results.size() == 1,"mugging the dummy finishes training exactly once")
 	check.call(bool(entry.get("training_complete",false)) and int(entry.get("training_step",0)) == BeachGame.TRAINING_LESSONS and GameState.unlocked(2),"completion persists checkpoint and unlocks family beach: "+str(entry))
 	check.call(not entry.has("best") and not entry.has("stars") and not entry.has("casual_time") and (results.size() == 1 and results[0].stars == 0),"training completion grants no stars or practice record")
 	host.main.start_level(1)
@@ -186,6 +224,17 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(GameState.entry(1) == completed_entry,"replaying tips preserves completed progress and existing records")
 	host.main._navigate("restart")
 	check.call(host.main.game.training and host.main.game.lesson == 0,"restarting a replay keeps tutorial tips enabled")
+	# A save stopped at the bump or mug lesson resumes with the dummy gull already flying.
+	GameState.progress = {"1":{"training_step":BeachGame.BUMP_LESSON}}
+	host.main.start_level(1)
+	game = host.main.game
+	game.set_physics_process(false)
+	check.call(game.training and game.lesson == BeachGame.BUMP_LESSON and game.training_dummy() != null and game.training_dummy().dummy_food.is_empty(),"retry at the bump lesson resumes with an empty-beaked dummy")
+	GameState.progress = {"1":{"training_step":BeachGame.MUG_LESSON}}
+	host.main.start_level(1)
+	game = host.main.game
+	game.set_physics_process(false)
+	check.call(game.lesson == BeachGame.MUG_LESSON and game.training_dummy() != null and game.training_dummy().dummy_food == BeachGame.DUMMY_FOOD,"retry at the mug lesson resumes with the dummy carrying food")
 	host.main.start_level(3)
 	game = host.main.game
 	game.set_physics_process(false)
