@@ -1,17 +1,23 @@
 shader_type canvas_item;
-// Recolours the daytime sky plate as a flat stepped sunset: violet at the top, gold at the horizon.
-// Bands key on screen row; sky, lit cloud and shaded cloud pixels are told apart by red value.
+// Recolours the daytime sky plate as a sunset: violet at the top, warm gold at the horizon.
+// The colour blends between key rows one pixel row at a time, so there are no hard band lines.
+// Sky, lit cloud and shaded cloud pixels are told apart by red value.
 uniform float plate_top = 14.0; // screen row of the plate's first pixel
 uniform float plate_height = 80.0;
 
 vec3 band_color(float row) {
-	// Top to bottom: violet, mauve, rose, salmon, orange, gold, pale gold. Keep SKY_DUSK_TOP in sync.
-	vec3 bands[7] = vec3[7](
+	// Key colours and their screen rows: violet, mauve, rose, salmon, orange, gold. Keep SKY_DUSK_TOP = the first.
+	float rows[6] = float[6](14.0, 30.0, 46.0, 62.0, 78.0, 93.0);
+	vec3 keys[6] = vec3[6](
 		vec3(88.0, 66.0, 128.0), vec3(136.0, 86.0, 140.0), vec3(190.0, 104.0, 132.0),
-		vec3(232.0, 134.0, 112.0), vec3(246.0, 164.0, 86.0), vec3(252.0, 196.0, 100.0),
-		vec3(255.0, 224.0, 140.0));
-	int index = int(row >= 18.0) + int(row >= 34.0) + int(row >= 48.0) + int(row >= 61.0) + int(row >= 74.0) + int(row >= 86.0);
-	return bands[index] / 255.0;
+		vec3(226.0, 128.0, 110.0), vec3(236.0, 150.0, 90.0), vec3(240.0, 168.0, 98.0));
+	vec3 color = keys[0];
+	for (int i = 0; i < 5; i++) {
+		if (row >= rows[i]) {
+			color = mix(keys[i], keys[i + 1], clamp((row - rows[i]) / (rows[i + 1] - rows[i]), 0.0, 1.0));
+		}
+	}
+	return color / 255.0;
 }
 
 void fragment() {
