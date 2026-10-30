@@ -194,7 +194,11 @@ func gull_picker() -> void:
 		blurb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		blurb.size_flags_vertical = SIZE_EXPAND_FILL
 		_stat_rows(box,info.get("card",{}),owned)
-		var status: Label = BeachUI.label(box,"UNLOCKED" if owned else "%d FEATHERS" % int(info.price),BeachUI.FONT_NATIVE,BeachUI.CREAM if owned else BeachUI.CORAL)
+		# Only the herring has a power so far; the others get theirs later (docs/BRASHNESS_BACKLOG.md).
+		var special: Label = _small_label(box,"SPECIAL: " + str(info.get("power",{}).get("name","SOON")),BeachUI.GOLD if owned else Color("6b858b"))
+		special.name = "Special"
+		special.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var status: Label = _small_label(box,"UNLOCKED" if owned else "%d FEATHERS" % int(info.price),BeachUI.CREAM if owned else BeachUI.CORAL)
 		status.name = "Status"
 		status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -362,16 +366,22 @@ func _stat_rows(parent: Control, card: Dictionary, owned: bool) -> void:
 		line.alignment = BoxContainer.ALIGNMENT_CENTER
 		line.add_theme_constant_override("separation",1)
 		parent.add_child(line)
-		var caption: Label = BeachUI.label(line,stat.to_upper(),BeachUI.FONT_NATIVE,Color("a9d7d2") if owned else Color("6b858b"))
-		caption.custom_minimum_size.x = 36
+		var caption: Label = _small_label(line,stat.to_upper(),Color("a9d7d2") if owned else Color("6b858b"))
+		caption.custom_minimum_size.x = 26
 		for i: int in 5:
 			var pip: ColorRect = ColorRect.new()
 			pip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			pip.custom_minimum_size = Vector2(5,5)
+			pip.custom_minimum_size = Vector2(3,3)
 			pip.size_flags_vertical = SIZE_SHRINK_CENTER
 			var lit: bool = i < int(card.get(stat,0))
 			pip.color = (BeachUI.GOLD if owned else Color("6b858b")) if lit else Color(0.0,0.0,0.0,0.3)
 			line.add_child(pip)
+
+func _small_label(parent: Control, text: String, color: Color) -> Label:
+	var node: Label = BeachUI.label(parent,text,6,color)
+	node.add_theme_font_override("font",SMALL_FONT)
+	node.add_theme_font_size_override("font_size",6)
+	return node
 
 func pause(skippable: bool = false, can_replay: bool = false) -> void:
 	clear("TAKING A BREATHER", "YOUR LUNCH CAN WAIT.")
