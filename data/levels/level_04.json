@@ -1,15 +1,15 @@
 {
   "id": 4,
   "crabs": {"enabled": true},
-  "name": "Dog Day Afternoon",
+  "name": "Water Fight",
   "seed": 7104,
   "time_limit": 135,
   "wind": {"dir": 1, "strength": 0.5, "gusts": true, "flip": false},
   "awareness_mult": 1.24,
-  "twist": {"id": "off_lead_dog"},
+  "twist": {"id": "watergun_teen_intro", "tip": {"id": "teen", "text": "WATER GUN TEEN: FLY HIGH, STAY DRY!"}},
   "quests": [
     {"id": "l4_counter", "text": "PULL OFF A COUNTER", "event": "swallowed", "filter": {"handover": true}, "count": 1, "bonus": 50},
-    {"id": "l4_outrun", "text": "OUTRUN THE DOG", "event": "dog_outrun", "filter": {}, "count": 3, "bonus": 60}
+    {"id": "l4_soak", "text": "GET A RIVAL SOAKED", "event": "rival_soaked", "filter": {}, "count": 1, "bonus": 60}
   ],
   "random_quest": {"count": [3, 5], "bonus": 40},
   "random_foods": ["hotdog", "fried_fish", "ice_cream", "half_eaten_doughnut", "half_eaten_pizza"],
@@ -29,8 +29,7 @@
     {"type": "sunbather", "x": 265, "appearance": "female_blue", "station": "sun_2", "patrol_radius": 0},
     {"type": "sunbather", "x": 310, "appearance": "male_red", "station": "sun_3", "patrol_radius": 0},
     {"type": "kiosk_customer", "x": 545, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "ice_cream", "patrol_radius": 12},
-    {"type": "kiosk_customer", "x": 1190, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "hotdogs", "patrol_radius": 12},
-    {"type": "off_lead_dog", "x": 375, "home": [345, 420]}
+    {"type": "kiosk_customer", "x": 1190, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "hotdogs", "patrol_radius": 12}
   ],
   "props": [
     {"type": "beach_palm", "x": 30, "y": 148},

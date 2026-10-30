@@ -1,5 +1,5 @@
 extends RefCounted
-## Drives the Level 4 terrier directly: set positions, tick, read state. No full run needed.
+## Drives the Level 3 terrier (the second of its two dogs) directly: set positions, tick, read state. No full run needed.
 const DT: float = 1.0 / 60.0
 
 static func _fresh(suite: Node, level: int) -> BeachGame:
@@ -36,30 +36,35 @@ static func _reset(dog: OffLeadDog, x: float) -> void:
 static func run(suite: Node, check: Callable) -> void:
 	var t: Dictionary = Config.tuning.off_lead_dog
 	var width: float = float(Config.tuning.world.width)
-	# Level 4 data: hand-built, named, one dog, only in this level.
-	var level: Dictionary = Config.levels[3]
-	check.call(level.name == "Dog Day Afternoon" and int(level.map_version) >= 3 and level.has("world") and level.has("zones"), "level 4 is the hand-built Dog Day Afternoon")
-	var dog_spawns: int = 0
+	# Level 3 data: two off-lead dogs with separate homes; levels 5-7 keep one.
+	var level: Dictionary = Config.levels[2]
+	check.call(level.name == "Boardwalk Bustle" and int(level.map_version) >= 3 and level.has("world") and level.has("zones"), "level 3 is the hand-built Boardwalk Bustle")
+	var homes: Array = []
 	for spawn: Dictionary in level.spawns:
-		dog_spawns += int(spawn.type == "off_lead_dog")
-	check.call(dog_spawns == 1 and level.twist.id == "off_lead_dog", "level 4 has one off-lead dog spawn and its twist")
-	check.call(level.quests.size() == 2 and level.quests[0].id == "l4_counter" and level.quests[1].id == "l4_outrun" and int(level.quests[1].count) == 3 and level.has("random_quest"), "level 4 quests are counter, outrun x3 plus random")
-	for number: int in [1, 2, 3]:
+		if spawn.type == "off_lead_dog":
+			homes.append(spawn.home)
+	check.call(homes.size() == 2 and level.twist.id == "off_lead_dogs" and float(homes[0][1]) < float(homes[1][0]), "level 3 has two off-lead dog spawns with separate homes and the dog twist")
+	check.call(level.quests.size() == 2 and level.quests[0].id == "l3_outrun" and int(level.quests[0].count) == 3 and level.has("random_quest"), "level 3 quests are outrun x3, crab plus random")
+	check.call(Config.levels[3].quests[0].id == "l4_counter" and not Config.levels[3].spawns.any(func(spawn: Dictionary) -> bool: return spawn.type == "off_lead_dog"), "level 4 has no dog and keeps its counter quest")
+	for number: int in [1, 2, 4]:
 		var other: BeachGame = _fresh(suite, number)
-		check.call(other.dog == null, "level %d has no off-lead dog" % number)
+		check.call(other.dogs.is_empty(), "level %d has no off-lead dog" % number)
 		suite.main.clear_game()
 	var five: BeachGame = _fresh(suite, 5)
-	check.call(five.dog != null, "level 5 has an off-lead dog by the family")
+	check.call(five.dogs.size() == 1, "level 5 has an off-lead dog by the family")
 	suite.main.clear_game()
 	var six: BeachGame = _fresh(suite, 6)
-	check.call(six.dog != null, "level 6 has an off-lead dog")
+	check.call(six.dogs.size() == 1, "level 6 has an off-lead dog")
 	suite.main.clear_game()
 	var seven: BeachGame = _fresh(suite, 7)
-	check.call(seven.dog != null, "level 7 has an off-lead dog")
+	check.call(seven.dogs.size() == 1, "level 7 has an off-lead dog")
 	suite.main.clear_game()
-	var game: BeachGame = _fresh(suite, 4)
-	var dog: OffLeadDog = game.dog
-	check.call(dog != null and game.spawner.targets.size() == level.spawns.size() - 1, "dog is its own actor, not a target")
+	var game: BeachGame = _fresh(suite, 3)
+	check.call(game.dogs.size() == 2 and game.dogs[0] != game.dogs[1] and game.dogs[0].home != game.dogs[1].home and game.dogs[0].home.y < game.dogs[1].home.x, "level 3 spawns two independent dogs with their own homes")
+	var dog: OffLeadDog = game.dogs[1]
+	check.call(game.spawner.targets.size() == level.spawns.size() - 2, "dogs are their own actors, not targets")
+	game.dogs[0].state = OffLeadDog.State.CHASE
+	check.call(dog.state != OffLeadDog.State.CHASE, "one dog's state does not drive the other")
 	var barks: Array[int] = [0]
 	var outruns: Array[int] = [0]
 	var catches: Array[int] = [0]
@@ -275,19 +280,14 @@ static func run(suite: Node, check: Callable) -> void:
 	_run(dog, game, 1.0)
 	check.call(dog.state == OffLeadDog.State.WANDER and barks[0] >= 1, "gull outside the leash zone does not start a chase")
 
-	var outrun_quest: Dictionary = game.quests.quests[1]
-	check.call(outrun_quest.done and int(outrun_quest.progress) == 3 and outruns[0] >= 1, "each escaped chase fires dog_outrun once; three complete l4_outrun")
-	# A handover swallow completes l4_counter.
-	game._swallowed({"id": "hotdog", "handover": false})
-	check.call(not game.quests.quests[0].done, "plain swallow does not complete l4_counter")
-	game._swallowed({"id": "hotdog", "handover": true})
-	check.call(game.quests.quests[0].done, "counter handover completes l4_counter")
+	var outrun_quest: Dictionary = game.quests.quests[0]
+	check.call(outrun_quest.done and int(outrun_quest.progress) == 3 and outruns[0] >= 1, "each escaped chase fires dog_outrun once; three complete l3_outrun")
 
 	# Rivals: the dog chases the nearest low gull, catches it, and the rival drops its food.
 	suite.main.clear_game()
 	await suite.settle()
-	game = _fresh(suite, 4)
-	dog = game.dog
+	game = _fresh(suite, 3)
+	dog = game.dogs[1]
 	game.pending_rivals = Config.levels[2].rivals.duplicate(true)
 	game._release_rivals()
 	var pilot: RivalPilot = game.pilots[0]
@@ -321,8 +321,8 @@ static func run(suite: Node, check: Callable) -> void:
 	# Rendered review shots (no-op without --capture).
 	suite.main.clear_game()
 	await suite.settle()
-	game = _fresh(suite, 4)
-	dog = game.dog
+	game = _fresh(suite, 3)
+	dog = game.dogs[1]
 	_reset(dog, 250.0)
 	dog.state = OffLeadDog.State.CHASE
 	dog.chase_time = 0.5

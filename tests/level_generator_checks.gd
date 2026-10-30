@@ -91,19 +91,17 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 		check.call(stand_count==2 and left_stand<float(family_positions["family_1"])-100.0 and kiosk_x>float(family_positions["family_1"])+300.0,"family beach has an ice-cream stand near the start and a far-end kiosk")
 		check.call(int(level.world.promenade_start)==int(level.world.width) and int(level.world.pier_start)==int(level.world.width),"family beach remains all sand")
 	elif number == 4:
-		check.call(types==["sunbather","sunbather","sunbather","kiosk_customer","kiosk_customer","off_lead_dog"],"dog day is a sunbathers strip with two shoppers and exactly one off-lead dog")
-		var dog_spawn: Dictionary = level.spawns[5]
-		check.call(float(dog_spawn.home[0])>=float(level.world.start_x)+150.0 and float(dog_spawn.home[1])<float(level.world.promenade_start) and float(dog_spawn.x)>=float(dog_spawn.home[0]) and float(dog_spawn.x)<=float(dog_spawn.home[1]),"dog home zone is open sand away from the start")
-		check.call(stand_count==2 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1,"dog day keeps both stands and Gary from the start")
+		check.call(types==["sunbather","sunbather","sunbather","kiosk_customer","kiosk_customer"],"water fight is a sunbathers strip with two shoppers and no dog")
+		check.call(stand_count==2 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1 and level.watergun_teens.size()==1,"water fight keeps both stands, Gary from the start and the teen")
 	elif number == 5:
 		check.call(types==["kiosk_customer","kiosk_customer","pier_diner","pier_diner","toddler","picnic_family","off_lead_dog"],"three's a crowd has two shoppers, both pier diners and one mum with one toddler, plus a dog by the family")
 		check.call(family_positions.size()==1 and children.size()==1,"level 5 adds exactly one linked family pair")
 		check.call(stand_count==1 and kiosk_x<0.0 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==2,"three's a crowd has a single grill (no kiosk) and two rivals")
 	else:
-		check.call(types==["sunbather","kiosk_customer","kiosk_customer","kiosk_customer","pier_diner"],"boardwalk is a busy promenade of three shoppers and a diner, no families")
+		check.call(types==["sunbather","kiosk_customer","kiosk_customer","kiosk_customer","pier_diner","off_lead_dog","off_lead_dog"],"boardwalk is a busy promenade of three shoppers and a diner, plus two off-lead dogs, no families")
 		check.call(not types.has("dog_owner") and not types.has("market_cleaner") and not types.has("lifeguard"),"boardwalk leaves later hazards for later levels")
-		check.call(float(level.spawns[0].x)<float(level.world.promenade_start) and float(level.spawns[1].x)>float(level.world.promenade_start) and float(level.spawns[4].x)>float(level.world.pier_start),"boardwalk actors occupy their zones")
-		check.call(stand_count==2 and bool(level.rivals_after_snatch),"boardwalk includes both stands and delayed Gary")
+		check.call(float(level.spawns[0].x)<float(level.world.promenade_start) and float(level.spawns[1].x)>float(level.world.promenade_start) and float(level.spawns[4].x)>float(level.world.pier_start) and float(level.spawns[5].x)<float(level.world.promenade_start),"boardwalk actors occupy their zones")
+		check.call(stand_count==2 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1,"boardwalk includes both stands and Gary from the start")
 
 static func _check_squall_level(check: Callable, source: Dictionary, level: Dictionary) -> void:
 	var types: Array[String] = []

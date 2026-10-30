@@ -240,7 +240,7 @@ static func run(host: Node, check: Callable) -> void:
 	game = host.main.game
 	game.set_physics_process(false)
 	check.call(game.lesson == BeachGame.MUG_LESSON and game.training_dummy() != null and game.training_dummy().dummy_food == BeachGame.DUMMY_FOOD,"retry at the mug lesson resumes with the dummy carrying food")
-	host.main.start_level(3)
+	host.main.start_level(2)
 	game = host.main.game
 	game.set_physics_process(false)
 	check.call(game.pilots.is_empty() and game.pending_rivals.size() == 1,"Gary waits offscreen until the first swallowed snack")

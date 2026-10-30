@@ -18,7 +18,7 @@ var score: BeachScore = BeachScore.new()
 var spawner: BeachSpawner = BeachSpawner.new()
 var stalls: StallService = StallService.new()
 var crabs: CrabPopulation
-var dog: OffLeadDog
+var dogs: Array[OffLeadDog] = [] ## one per off_lead_dog spawn
 var teens: Array[WatergunTeen] = []
 var beach: BeachBackdrop
 var scraps: BeachScraps
@@ -114,27 +114,27 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	add_child(actors)
 	spawner.target_created.connect(_wire_target)
 	spawner.setup(actors,level)
-	if level.spawns.any(func(spawn: Dictionary) -> bool: return spawn.type == "off_lead_dog"):
-		for spawn: Dictionary in level.spawns:
-			if spawn.type == "off_lead_dog":
-				dog = OffLeadDog.new()
-				actors.add_child(dog)
-				dog.setup(float(spawn.x),spawn.home,int(level.seed)+5)
-				dog.barked.connect(func() -> void:
-					effects.message(dog.position-Vector2(0,24),"WOOF!",BeachUI.GOLD)
-					Audio.play("click")
-				)
-				dog.caught.connect(func() -> void:
-					effects.message(dog.position-Vector2(0,24),"GOTCHA!",Color("ef725c"))
-					_quest_event("dog_caught")
-				)
-				dog.rival_caught.connect(_dog_caught_rival)
-				dog.outrun.connect(func() -> void:
-					effects.message(player.position-Vector2(0,18),"OUTRUN!",BeachUI.GOLD)
-					Audio.play("snatch")
-					_quest_event("dog_outrun")
-				)
-				break
+	for spawn: Dictionary in level.spawns:
+		if spawn.type != "off_lead_dog":
+			continue
+		var dog: OffLeadDog = OffLeadDog.new()
+		actors.add_child(dog)
+		dog.setup(float(spawn.x),spawn.home,int(level.seed)+5+dogs.size())
+		dog.barked.connect(func() -> void:
+			effects.message(dog.position-Vector2(0,24),"WOOF!",BeachUI.GOLD)
+			Audio.play("click")
+		)
+		dog.caught.connect(func() -> void:
+			effects.message(dog.position-Vector2(0,24),"GOTCHA!",Color("ef725c"))
+			_quest_event("dog_caught")
+		)
+		dog.rival_caught.connect(_dog_caught_rival.bind(dog))
+		dog.outrun.connect(func() -> void:
+			effects.message(player.position-Vector2(0,18),"OUTRUN!",BeachUI.GOLD)
+			Audio.play("snatch")
+			_quest_event("dog_outrun")
+		)
+		dogs.append(dog)
 	for spawn: Dictionary in level.get("watergun_teens",[]):
 		var teen: WatergunTeen = WatergunTeen.new()
 		actors.add_child(teen)
@@ -266,6 +266,15 @@ func _wind_tip() -> void:
 	GameState.save_progress()
 	# Fixed mid-screen band: clear of the top bar, hint and goal box.
 	effects.message(Vector2(camera_x,84.0),"FLY INTO THE WIND = UPWIND +%d%%" % roundi(float(Config.tuning.score.upwind)*100.0),BeachUI.GOLD,float(Config.tuning.juice.tip_time),0.0)
+
+# One-time intro toast for a twist that carries `tip` {id, text} in its level data (dogs, water-gun teen).
+func _twist_tip() -> void:
+	var tip: Dictionary = level.get("twist",{}).get("tip",{})
+	if tip.is_empty() or str(tip.id) in GameState.options.tips or player.state == BeachGull.State.GROUNDED:
+		return
+	GameState.options.tips.append(str(tip.id))
+	GameState.save_progress()
+	effects.message(Vector2(camera_x,84.0),str(tip.text),BeachUI.GOLD,float(Config.tuning.juice.tip_time),0.0)
 
 # Shows a released rival's taunt after a delay, never while the score banner is up, below the rival so the tag stays clear.
 func _rival_taunt(step: float) -> void:
@@ -468,12 +477,14 @@ func _physics_process(delta: float) -> void:
 		input.slowmo_ready = brash.is_full()
 	_dive_tick()
 	_wind_tip()
-	if dog != null:
+	_twist_tip()
+	if not dogs.is_empty():
 		var rival_gulls: Array[BeachGull] = []
 		for pilot: RivalPilot in pilots:
 			rival_gulls.append(pilot.gull)
-		dog.tick(step,player,rival_gulls)
-		dog.z_index = spawner.depth_z(dog.position,2)
+		for dog: OffLeadDog in dogs:
+			dog.tick(step,player,rival_gulls)
+			dog.z_index = spawner.depth_z(dog.position,2)
 	for teen: WatergunTeen in teens:
 		teen.tick(step,gulls)
 		teen.z_index = spawner.depth_z(teen.position,2) # mid-lane band, same depth rule as the NPCs
@@ -683,7 +694,7 @@ func set_paused(value: bool) -> void:
 		gull.sprite.speed_scale = 0 if value else 1
 	for target: BeachTarget in spawner.targets:
 		target.sprite.speed_scale = 0 if value else 1
-	if dog != null:
+	for dog: OffLeadDog in dogs:
 		dog.paused = value
 	for teen: WatergunTeen in teens:
 		teen.paused = value
@@ -733,7 +744,7 @@ func _stunned() -> void:
 	effects.impact(player.position,true)
 	Audio.play("stun")
 
-func _dog_caught_rival(rival: BeachGull) -> void:
+func _dog_caught_rival(rival: BeachGull, dog: OffLeadDog) -> void:
 	effects.message(dog.position-Vector2(0,24),"GOTCHA!",Color("ef725c"))
 	_rival_drops_carry(rival,dog.position)
 
@@ -750,6 +761,7 @@ func _water_hit(gull: BeachGull, teen: WatergunTeen) -> void:
 	effects.water_soak(gull.position,teen.position)
 	if not gull.rival:
 		return
+	_quest_event("rival_soaked")
 	effects.message(gull.position-Vector2(0,20),"SOAKED!",Color("6ec6f0"))
 	Audio.play("stun")
 	_rival_drops_carry(gull,teen.position)
@@ -1018,7 +1030,7 @@ func _freeze_actors(value: bool) -> void:
 		gull.sprite.speed_scale = 0 if value else 1
 	for target: BeachTarget in spawner.targets:
 		target.sprite.speed_scale = 0 if value else 1
-	if dog != null:
+	for dog: OffLeadDog in dogs:
 		dog.paused = value
 
 func _training_tick(delta: float) -> void:
