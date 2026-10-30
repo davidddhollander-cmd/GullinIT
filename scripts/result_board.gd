@@ -217,8 +217,57 @@ func _build_scores_panel() -> void:
 	if bool(result.casual):
 		set_high_scores(board, "NOT RANKED")
 	else:
-		var best: int = maxi(int(GameState.entry(int(level.id)).get("best", 0)), int(result.score))
-		set_high_scores(ranked_view(board, {"name": "YOU", "score": best, "me": true}))
+		set_high_scores(ranked_view(board, {"name": "YOU", "score": _best(), "me": true}))
+		if OnlineScores.active() and not OnlineScores.player_name().is_empty():
+			OnlineScores.submit(int(level.id), _best(), _show_online)
+
+func _best() -> int:
+	return maxi(int(GameState.entry(int(level.id)).get("best", 0)), int(result.score))
+
+# The real board replaces the seeded one once Talo answers; offline keeps the seeds.
+func _show_online(entries: Array) -> void:
+	if not entries.is_empty():
+		set_high_scores(entries, "GLOBAL TOP 5")
+
+# First ranked run with Talo on: the score rows give way to a name field. Enter saves the
+# name and posts this run's best; an empty name keeps the board local this time.
+func _ask_name() -> void:
+	_show_rows(false)
+	(scores_panel.get_node("Header") as Label).text = "YOUR NAME?"
+	var field := LineEdit.new()
+	field.name = "NameField"
+	field.max_length = OnlineScores.NAME_LENGTH
+	field.placeholder_text = "GULL"
+	field.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	field.add_theme_font_size_override("font_size", BeachUI.FONT_NATIVE)
+	field.position = Vector2(RIGHT_PANEL.position.x + 20, 86)
+	field.size = Vector2(RIGHT_PANEL.size.x - 40, 14)
+	scores_panel.add_child(field)
+	var tip := BeachUI.label(scores_panel, "ENTER TO SAVE", BeachUI.FONT_NATIVE, SEA)
+	tip.position = Vector2(RIGHT_PANEL.position.x, 106)
+	tip.size = Vector2(RIGHT_PANEL.size.x, 10)
+	tip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	field.text_changed.connect(func(text: String) -> void:
+		var clean := OnlineScores.clean_name(text)
+		if clean != text:
+			field.text = clean
+			field.caret_column = clean.length())
+	field.text_submitted.connect(func(text: String) -> void:
+		field.queue_free()
+		tip.queue_free()
+		_show_rows(true)
+		(scores_panel.get_node("Header") as Label).text = "HIGH SCORES"
+		if not buttons.is_empty():
+			buttons[0].grab_focus()
+		if not OnlineScores.clean_name(text).is_empty():
+			OnlineScores.set_player_name(text)
+			OnlineScores.submit(int(level.id), _best(), _show_online))
+	field.grab_focus()
+
+func _show_rows(shown: bool) -> void:
+	for row: Dictionary in score_rows:
+		for label: Label in row.values():
+			label.visible = shown
 
 # Starter entries from data/leaderboards.json, highest first. Online scores will
 # replace these; until then they give each level a field to measure against.
@@ -296,6 +345,8 @@ func _reveal_scores() -> void:
 		create_tween().tween_property(scores_panel, "modulate:a", 1.0, 0.25)
 	else:
 		scores_panel.modulate.a = 1.0
+	if OnlineScores.active() and OnlineScores.player_name().is_empty() and not bool(result.casual) and not scores_panel.has_node("NameField"):
+		_ask_name()
 
 # A small "?" badge beside TOTAL opens the score rules.
 func _add_rules_link() -> void:

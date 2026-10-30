@@ -29,6 +29,7 @@ Config="*res://scripts/autoload/config.gd"
 GameState="*res://scripts/autoload/game_state.gd"
 Audio="*res://scripts/autoload/audio.gd"
 Analytics="*res://scripts/autoload/analytics.gd"
+OnlineScores="*res://scripts/autoload/online_scores.gd"
 MCPBridge="*res://addons/godot_mcp/mcp_bridge.gd"
 
 [display]
