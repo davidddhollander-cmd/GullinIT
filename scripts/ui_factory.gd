@@ -114,6 +114,9 @@ static func wood_panel(parent: Control) -> PanelContainer:
 	box.texture_margin_right = 13
 	box.texture_margin_top = 12
 	box.texture_margin_bottom = 12
+	# Repeat the plank edges instead of stretching them, so the grain stays one pixel sharp.
+	box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE
+	box.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE
 	box.content_margin_left = 16
 	box.content_margin_right = 16
 	box.content_margin_top = 15
