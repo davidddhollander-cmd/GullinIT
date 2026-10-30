@@ -36,7 +36,7 @@ func frame() -> Image:
 
 func _capture() -> void:
 	var rear_image: Image = await frame()
-	rear_image.save_png("res://assets/previews/stall-rear-lane-fixed.png")
+	rear_image.save_png("res://assets/archive/previews/stall-rear-lane-fixed.png")
 	for walker: BeachTarget in rear_walkers:
 		walker.hide()
 	var baseline: Image = await frame()

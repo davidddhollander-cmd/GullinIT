@@ -79,5 +79,5 @@ func _draw() -> void:
 func _capture() -> void:
 	for index: int in 5:
 		await get_tree().process_frame
-	assert(get_viewport().get_texture().get_image().save_png("res://assets/previews/diner-walk-v2.png") == OK)
+	assert(get_viewport().get_texture().get_image().save_png("res://assets/archive/previews/diner-walk-v2.png") == OK)
 	get_tree().quit()

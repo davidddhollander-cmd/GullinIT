@@ -3,8 +3,8 @@
 Generated 29 October 2026 with the built-in image generator. The two supplied
 project images were style and colour references only:
 
-- `assets/previews/background-v2-composite-320x120.png`
-- `assets/previews/beach-signs-level3-1280-v3.png`
+- `assets/archive/previews/background-v2-composite-320x120.png`
+- `assets/archive/previews/beach-signs-level3-1280-v3.png`
 
 The four `*-source.png` files in this folder are the complete, unchanged
 generator outputs. `tools/prepare_beach_ground_v1.py` crops and quantises them,

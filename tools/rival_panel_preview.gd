@@ -30,11 +30,11 @@ func capture() -> void:
 		colours.append(pilot.gull.rival_tint)
 	var rect: Rect2 = game.overlay.rival_score_panel.get_global_rect()
 	assert(rect.end.x <= 320 and rect.end.y < 124,"Panel must remain inside HUD safe area")
-	get_viewport().get_texture().get_image().save_png("res://assets/previews/rival-score-panel-small-v3.png")
+	get_viewport().get_texture().get_image().save_png("res://assets/archive/previews/rival-score-panel-small-v3.png")
 	get_window().size = Vector2i(640,360)
 	for frame: int in 4:
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png("res://assets/previews/rival-score-panel-phone-small-v3.png")
+	get_viewport().get_texture().get_image().save_png("res://assets/archive/previews/rival-score-panel-phone-small-v3.png")
 	print("Rival panel: unique colours, safe bounds and desktop/phone renders passed")
 	get_tree().quit()

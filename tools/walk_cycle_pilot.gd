@@ -20,7 +20,7 @@ func _ready() -> void:
 	get_window().content_scale_size = Vector2i(320,300)
 	get_window().size = Vector2i(640,600)
 	get_window().content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
-	rig_metadata = JSON.parse_string(FileAccess.get_file_as_string("res://assets/pilots/shopper-walk-v1/rig.json"))
+	rig_metadata = JSON.parse_string(FileAccess.get_file_as_string("res://assets/archive/pilots/shopper-walk-v1/rig.json"))
 	for row: int in 3:
 		var motion := Motion.new()
 		motion.stride = float(rig_metadata.stride_pixels)
@@ -145,7 +145,7 @@ func capture() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
-	review.get_texture().get_image().save_png("res://assets/pilots/shopper-walk-v1/rig-poses.png")
+	review.get_texture().get_image().save_png("res://assets/archive/pilots/shopper-walk-v1/rig-poses.png")
 	for audio_player: Node in Audio.get_children():
 		if audio_player is AudioStreamPlayer:
 			audio_player.stop()

@@ -64,7 +64,7 @@
       "current": "pier_diner",
       "candidate": {
         "clone": "pier_diner",
-        "file": "res://assets/sprites/pier-diner-a-base-candidate-v1.png",
+        "file": "res://assets/lab/pier-diner-a-base-candidate-v1.png",
         "frame_w": 128,
         "frame_h": 128,
         "visual_scale": 0.5,
@@ -82,7 +82,7 @@
       "current": "pier_diner_motion",
       "candidate": {
         "clone": "pier_diner_motion",
-        "file": "res://assets/sprites/pier-diner-a-motion-candidate-v1.png",
+        "file": "res://assets/lab/pier-diner-a-motion-candidate-v1.png",
         "frame_w": 128,
         "frame_h": 128,
         "visual_scale": 0.5,
@@ -100,7 +100,7 @@
       "current": "pier_diner",
       "candidate": {
         "clone": "pier_diner",
-        "file": "res://assets/sprites/pier-diner-a-base-candidate-v1.png",
+        "file": "res://assets/lab/pier-diner-a-base-candidate-v1.png",
         "frame_w": 128,
         "frame_h": 128,
         "visual_scale": 0.5,
@@ -118,7 +118,7 @@
       "current": "pier_diner_reactions",
       "candidate": {
         "clone": "pier_diner_reactions",
-        "file": "res://assets/sprites/pier-diner-a-reactions-candidate-v1.png",
+        "file": "res://assets/lab/pier-diner-a-reactions-candidate-v1.png",
         "frame_w": 128,
         "frame_h": 128,
         "visual_scale": 0.5,
@@ -136,7 +136,7 @@
       "current": "pier_diner_b",
       "candidate": {
         "clone": "pier_diner_b",
-        "file": "res://assets/sprites/pier-diner-b-base-touchup-v1.png",
+        "file": "res://assets/lab/pier-diner-b-base-touchup-v1.png",
         "frame_w": 128,
         "frame_h": 128,
         "visual_scale": 0.5,
@@ -154,7 +154,7 @@
       "current": "pier_diner_b_motion",
       "candidate": {
         "clone": "pier_diner_b_motion",
-        "file": "res://assets/sprites/pier-diner-b-motion-touchup-v1.png",
+        "file": "res://assets/lab/pier-diner-b-motion-touchup-v1.png",
         "frame_w": 128,
         "frame_h": 128,
         "visual_scale": 0.5,
@@ -172,7 +172,7 @@
       "current": "pier_diner",
       "candidate": {
         "clone": "pier_diner",
-        "file": "res://assets/sprites/pier-diner-a-base-touchup-v1.png",
+        "file": "res://assets/lab/pier-diner-a-base-touchup-v1.png",
         "frame_w": 128,
         "frame_h": 128,
         "visual_scale": 0.5,
@@ -190,7 +190,7 @@
       "current": "pier_diner_motion",
       "candidate": {
         "clone": "pier_diner_motion",
-        "file": "res://assets/sprites/pier-diner-a-motion-touchup-v1.png",
+        "file": "res://assets/lab/pier-diner-a-motion-touchup-v1.png",
         "frame_w": 128,
         "frame_h": 128,
         "visual_scale": 0.5,
@@ -208,14 +208,14 @@
       "current": "fish_chips_stand",
       "candidate": {
         "clone": "fish_chips_stand",
-        "file": "res://assets/sprites/pier-restaurant-props-v1/beach-hole-restaurant-v2.png",
+        "file": "res://assets/lab/pier-restaurant-props-v1/beach-hole-restaurant-v2.png",
         "frame_w": 132,
         "frame_h": 88,
         "visual_scale": 1
       },
       "motion": "static",
       "current_override": {
-        "file": "res://assets/sprites/pier-restaurant-props-v1/existing-stands-row-v1.png",
+        "file": "res://assets/lab/pier-restaurant-props-v1/existing-stands-row-v1.png",
         "frame_w": 160,
         "frame_h": 56
       },
@@ -227,7 +227,7 @@
       "current": "beach_chair",
       "candidate": {
         "clone": "beach_chair",
-        "file": "res://assets/sprites/pier-restaurant-props-v1/restaurant-table-chairs-v2.png",
+        "file": "res://assets/lab/pier-restaurant-props-v1/restaurant-table-chairs-v2.png",
         "frame_w": 60,
         "frame_h": 34,
         "visual_scale": 1.0
@@ -242,7 +242,7 @@
       "current": "pier",
       "candidate": {
         "clone": "pier",
-        "file": "res://assets/previews/pier-wire-fence-v2-repeat-1x.png",
+        "file": "res://assets/lab/pier-wire-fence-v2-repeat-1x.png",
         "frame_w": 144,
         "frame_h": 24,
         "visual_scale": 1.0
@@ -257,16 +257,16 @@
       "current": "food_half_eaten_pizza",
       "candidate": {
         "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 17,
-        "frame_h": 15,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 33,
+        "frame_h": 29,
         "regions": [
           {
             "region": [
               2,
               2,
-              17,
-              15
+              33,
+              29
             ],
             "offset": [
               0,
@@ -277,10 +277,9 @@
       },
       "motion": "on_sand",
       "size": [
-        8.5,
-        7.5
-      ],
-      "category": "food"
+        8.25,
+        7.25
+      ]
     },
     {
       "title": "FOOD 02 PIZZA SLICE PEPPERONI",
@@ -288,16 +287,16 @@
       "current": "food_half_eaten_pizza",
       "candidate": {
         "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 16,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 32,
+        "frame_h": 28,
         "regions": [
           {
             "region": [
-              21,
+              37,
               2,
-              16,
-              14
+              32,
+              28
             ],
             "offset": [
               0,
@@ -310,8 +309,7 @@
       "size": [
         8.0,
         7.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 03 PIZZA SLICE MUSHROOM",
@@ -319,16 +317,16 @@
       "current": "food_half_eaten_pizza",
       "candidate": {
         "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 15,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 30,
+        "frame_h": 28,
         "regions": [
           {
             "region": [
-              39,
+              71,
               2,
-              15,
-              14
+              30,
+              28
             ],
             "offset": [
               0,
@@ -341,8 +339,7 @@
       "size": [
         7.5,
         7.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 04 PIZZA SLICE VEGGIE",
@@ -350,16 +347,16 @@
       "current": "food_half_eaten_pizza",
       "candidate": {
         "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 16,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 32,
+        "frame_h": 28,
         "regions": [
           {
             "region": [
-              56,
+              103,
               2,
-              16,
-              14
+              32,
+              28
             ],
             "offset": [
               0,
@@ -372,8 +369,7 @@
       "size": [
         8.0,
         7.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 05 PIZZA SLICE HAWAIIAN",
@@ -381,16 +377,16 @@
       "current": "food_half_eaten_pizza",
       "candidate": {
         "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 16,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 33,
+        "frame_h": 29,
         "regions": [
           {
             "region": [
-              74,
+              137,
               2,
-              16,
-              14
+              33,
+              29
             ],
             "offset": [
               0,
@@ -401,10 +397,9 @@
       },
       "motion": "on_sand",
       "size": [
-        8.0,
-        7.0
-      ],
-      "category": "food"
+        8.25,
+        7.25
+      ]
     },
     {
       "title": "FOOD 06 PIZZA SLICE WHITE",
@@ -412,16 +407,16 @@
       "current": "food_half_eaten_pizza",
       "candidate": {
         "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 16,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 31,
+        "frame_h": 29,
         "regions": [
           {
             "region": [
-              92,
+              172,
               2,
-              16,
-              14
+              31,
+              29
             ],
             "offset": [
               0,
@@ -432,10 +427,9 @@
       },
       "motion": "on_sand",
       "size": [
-        8.0,
-        7.0
-      ],
-      "category": "food"
+        7.75,
+        7.25
+      ]
     },
     {
       "title": "FOOD 07 PIZZA SLICE HAM CORN",
@@ -443,16 +437,16 @@
       "current": "food_half_eaten_pizza",
       "candidate": {
         "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 16,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 32,
+        "frame_h": 28,
         "regions": [
           {
             "region": [
-              110,
+              205,
               2,
-              16,
-              14
+              32,
+              28
             ],
             "offset": [
               0,
@@ -465,8 +459,7 @@
       "size": [
         8.0,
         7.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 08 PIZZA SLICE ROCKET",
@@ -474,16 +467,16 @@
       "current": "food_half_eaten_pizza",
       "candidate": {
         "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 17,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 33,
+        "frame_h": 28,
         "regions": [
           {
             "region": [
-              128,
+              239,
               2,
-              17,
-              14
+              33,
+              28
             ],
             "offset": [
               0,
@@ -494,10 +487,9 @@
       },
       "motion": "on_sand",
       "size": [
-        8.5,
+        8.25,
         7.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 09 PIZZA SLICE BASIL",
@@ -505,16 +497,16 @@
       "current": "food_half_eaten_pizza",
       "candidate": {
         "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 17,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 34,
+        "frame_h": 28,
         "regions": [
           {
             "region": [
-              147,
+              274,
               2,
-              17,
-              14
+              34,
+              28
             ],
             "offset": [
               0,
@@ -527,8 +519,7 @@
       "size": [
         8.5,
         7.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 10 PIZZA BOX",
@@ -536,15 +527,795 @@
       "current": "food_half_eaten_pizza",
       "candidate": {
         "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 55,
+        "frame_h": 59,
+        "regions": [
+          {
+            "region": [
+              310,
+              2,
+              55,
+              59
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        13.75,
+        14.75
+      ]
+    },
+    {
+      "title": "FOOD 11 PIZZA BASIL",
+      "description": "NEW ART VS LIVE PIZZA",
+      "current": "food_half_eaten_pizza",
+      "candidate": {
+        "clone": "food_half_eaten_pizza",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 39,
+        "frame_h": 32,
+        "regions": [
+          {
+            "region": [
+              367,
+              2,
+              39,
+              32
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        9.75,
+        8.0
+      ]
+    },
+    {
+      "title": "FOOD 12 PIZZA PEPPERONI",
+      "description": "NEW ART VS LIVE PIZZA",
+      "current": "food_half_eaten_pizza",
+      "candidate": {
+        "clone": "food_half_eaten_pizza",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 39,
+        "frame_h": 32,
+        "regions": [
+          {
+            "region": [
+              408,
+              2,
+              39,
+              32
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        9.75,
+        8.0
+      ]
+    },
+    {
+      "title": "FOOD 13 PIZZA MUSHROOM",
+      "description": "NEW ART VS LIVE PIZZA",
+      "current": "food_half_eaten_pizza",
+      "candidate": {
+        "clone": "food_half_eaten_pizza",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 38,
+        "frame_h": 32,
+        "regions": [
+          {
+            "region": [
+              449,
+              2,
+              38,
+              32
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        9.5,
+        8.0
+      ]
+    },
+    {
+      "title": "FOOD 14 PIZZA VEGGIE",
+      "description": "NEW ART VS LIVE PIZZA",
+      "current": "food_half_eaten_pizza",
+      "candidate": {
+        "clone": "food_half_eaten_pizza",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 38,
+        "frame_h": 32,
+        "regions": [
+          {
+            "region": [
+              489,
+              2,
+              38,
+              32
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        9.5,
+        8.0
+      ]
+    },
+    {
+      "title": "FOOD 15 PIZZA HAWAIIAN",
+      "description": "NEW ART VS LIVE PIZZA",
+      "current": "food_half_eaten_pizza",
+      "candidate": {
+        "clone": "food_half_eaten_pizza",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 38,
+        "frame_h": 32,
+        "regions": [
+          {
+            "region": [
+              529,
+              2,
+              38,
+              32
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        9.5,
+        8.0
+      ]
+    },
+    {
+      "title": "FOOD 16 PIZZA ROCKET",
+      "description": "NEW ART VS LIVE PIZZA",
+      "current": "food_half_eaten_pizza",
+      "candidate": {
+        "clone": "food_half_eaten_pizza",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 39,
+        "frame_h": 32,
+        "regions": [
+          {
+            "region": [
+              569,
+              2,
+              39,
+              32
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        9.75,
+        8.0
+      ]
+    },
+    {
+      "title": "FOOD 17 PIZZA MARGHERITA",
+      "description": "NEW ART VS LIVE PIZZA",
+      "current": "food_half_eaten_pizza",
+      "candidate": {
+        "clone": "food_half_eaten_pizza",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 38,
+        "frame_h": 32,
+        "regions": [
+          {
+            "region": [
+              610,
+              2,
+              38,
+              32
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        9.5,
+        8.0
+      ]
+    },
+    {
+      "title": "FOOD 18 DOUGHNUT PINK SPRINKLES",
+      "description": "NEW ART VS LIVE DOUGHNUT",
+      "current": "food_half_eaten_doughnut",
+      "candidate": {
+        "clone": "food_half_eaten_doughnut",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 26,
+        "frame_h": 24,
+        "regions": [
+          {
+            "region": [
+              650,
+              2,
+              26,
+              24
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        6.5,
+        6.0
+      ]
+    },
+    {
+      "title": "FOOD 19 DOUGHNUT CHOC SPRINKLES",
+      "description": "NEW ART VS LIVE DOUGHNUT",
+      "current": "food_half_eaten_doughnut",
+      "candidate": {
+        "clone": "food_half_eaten_doughnut",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 26,
+        "frame_h": 24,
+        "regions": [
+          {
+            "region": [
+              678,
+              2,
+              26,
+              24
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        6.5,
+        6.0
+      ]
+    },
+    {
+      "title": "FOOD 20 DOUGHNUT WHITE SPRINKLES",
+      "description": "NEW ART VS LIVE DOUGHNUT",
+      "current": "food_half_eaten_doughnut",
+      "candidate": {
+        "clone": "food_half_eaten_doughnut",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 26,
+        "frame_h": 24,
+        "regions": [
+          {
+            "region": [
+              706,
+              2,
+              26,
+              24
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        6.5,
+        6.0
+      ]
+    },
+    {
+      "title": "FOOD 21 DOUGHNUT PLAIN",
+      "description": "NEW ART VS LIVE DOUGHNUT",
+      "current": "food_half_eaten_doughnut",
+      "candidate": {
+        "clone": "food_half_eaten_doughnut",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
         "frame_w": 27,
+        "frame_h": 24,
+        "regions": [
+          {
+            "region": [
+              734,
+              2,
+              27,
+              24
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        6.75,
+        6.0
+      ]
+    },
+    {
+      "title": "FOOD 22 DOUGHNUT CHOC DRIZZLE",
+      "description": "NEW ART VS LIVE DOUGHNUT",
+      "current": "food_half_eaten_doughnut",
+      "candidate": {
+        "clone": "food_half_eaten_doughnut",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 27,
+        "frame_h": 24,
+        "regions": [
+          {
+            "region": [
+              763,
+              2,
+              27,
+              24
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        6.75,
+        6.0
+      ]
+    },
+    {
+      "title": "FOOD 23 DOUGHNUT PINK DRIZZLE",
+      "description": "NEW ART VS LIVE DOUGHNUT",
+      "current": "food_half_eaten_doughnut",
+      "candidate": {
+        "clone": "food_half_eaten_doughnut",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 27,
+        "frame_h": 24,
+        "regions": [
+          {
+            "region": [
+              792,
+              2,
+              27,
+              24
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        6.75,
+        6.0
+      ]
+    },
+    {
+      "title": "FOOD 24 DOUGHNUT SUGAR",
+      "description": "NEW ART VS LIVE DOUGHNUT",
+      "current": "food_half_eaten_doughnut",
+      "candidate": {
+        "clone": "food_half_eaten_doughnut",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 28,
+        "frame_h": 24,
+        "regions": [
+          {
+            "region": [
+              821,
+              2,
+              28,
+              24
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        7.0,
+        6.0
+      ]
+    },
+    {
+      "title": "FOOD 25 DOUGHNUT CHOC NUTS",
+      "description": "NEW ART VS LIVE DOUGHNUT",
+      "current": "food_half_eaten_doughnut",
+      "candidate": {
+        "clone": "food_half_eaten_doughnut",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 29,
+        "frame_h": 24,
+        "regions": [
+          {
+            "region": [
+              851,
+              2,
+              29,
+              24
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        7.25,
+        6.0
+      ]
+    },
+    {
+      "title": "FOOD 26 DOUGHNUT BERRY",
+      "description": "NEW ART VS LIVE DOUGHNUT",
+      "current": "food_half_eaten_doughnut",
+      "candidate": {
+        "clone": "food_half_eaten_doughnut",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 30,
+        "frame_h": 24,
+        "regions": [
+          {
+            "region": [
+              882,
+              2,
+              30,
+              24
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        7.5,
+        6.0
+      ]
+    },
+    {
+      "title": "FOOD 27 DOUGHNUT BOX",
+      "description": "NEW ITEM. SIZE REF: DOUGHNUT",
+      "current": "food_half_eaten_doughnut",
+      "candidate": {
+        "clone": "food_half_eaten_doughnut",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 61,
+        "frame_h": 45,
+        "regions": [
+          {
+            "region": [
+              914,
+              2,
+              61,
+              45
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        15.25,
+        11.25
+      ]
+    },
+    {
+      "title": "FOOD 28 CONE VANILLA",
+      "description": "NEW ART VS LIVE ICE CREAM",
+      "current": "food_ice_cream",
+      "candidate": {
+        "clone": "food_ice_cream",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 16,
+        "frame_h": 33,
+        "regions": [
+          {
+            "region": [
+              977,
+              2,
+              16,
+              33
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        4.0,
+        8.25
+      ]
+    },
+    {
+      "title": "FOOD 29 CONE CHOCOLATE",
+      "description": "NEW ART VS LIVE ICE CREAM",
+      "current": "food_ice_cream",
+      "candidate": {
+        "clone": "food_ice_cream",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 16,
+        "frame_h": 33,
+        "regions": [
+          {
+            "region": [
+              995,
+              2,
+              16,
+              33
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        4.0,
+        8.25
+      ]
+    },
+    {
+      "title": "FOOD 30 CONE STRAWBERRY",
+      "description": "NEW ART VS LIVE ICE CREAM",
+      "current": "food_ice_cream",
+      "candidate": {
+        "clone": "food_ice_cream",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 16,
+        "frame_h": 33,
+        "regions": [
+          {
+            "region": [
+              2,
+              63,
+              16,
+              33
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        4.0,
+        8.25
+      ]
+    },
+    {
+      "title": "FOOD 31 CONE MINT",
+      "description": "NEW ART VS LIVE ICE CREAM",
+      "current": "food_ice_cream",
+      "candidate": {
+        "clone": "food_ice_cream",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 16,
+        "frame_h": 33,
+        "regions": [
+          {
+            "region": [
+              20,
+              63,
+              16,
+              33
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        4.0,
+        8.25
+      ]
+    },
+    {
+      "title": "FOOD 32 CONE STRAWBERRY SWIRL",
+      "description": "NEW ART VS LIVE ICE CREAM",
+      "current": "food_ice_cream",
+      "candidate": {
+        "clone": "food_ice_cream",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 16,
+        "frame_h": 33,
+        "regions": [
+          {
+            "region": [
+              38,
+              63,
+              16,
+              33
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        4.0,
+        8.25
+      ]
+    },
+    {
+      "title": "FOOD 33 CONE CHOC VANILLA SWIRL",
+      "description": "NEW ART VS LIVE ICE CREAM",
+      "current": "food_ice_cream",
+      "candidate": {
+        "clone": "food_ice_cream",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 17,
+        "frame_h": 34,
+        "regions": [
+          {
+            "region": [
+              56,
+              63,
+              17,
+              34
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        4.25,
+        8.5
+      ]
+    },
+    {
+      "title": "FOOD 34 CONE CHOC STRAWB SCOOPS",
+      "description": "NEW ART VS LIVE ICE CREAM",
+      "current": "food_ice_cream",
+      "candidate": {
+        "clone": "food_ice_cream",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 16,
+        "frame_h": 31,
+        "regions": [
+          {
+            "region": [
+              75,
+              63,
+              16,
+              31
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        4.0,
+        7.75
+      ]
+    },
+    {
+      "title": "FOOD 35 CONE VANILLA MINT SCOOPS",
+      "description": "NEW ART VS LIVE ICE CREAM",
+      "current": "food_ice_cream",
+      "candidate": {
+        "clone": "food_ice_cream",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 17,
+        "frame_h": 32,
+        "regions": [
+          {
+            "region": [
+              93,
+              63,
+              17,
+              32
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        4.25,
+        8.0
+      ]
+    },
+    {
+      "title": "FOOD 36 LOLLY CHOC NUT",
+      "description": "NEW ART VS LIVE ICE CREAM",
+      "current": "food_ice_cream",
+      "candidate": {
+        "clone": "food_ice_cream",
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 18,
         "frame_h": 30,
         "regions": [
           {
             "region": [
-              166,
-              2,
-              27,
+              112,
+              63,
+              18,
               30
             ],
             "offset": [
@@ -556,816 +1327,9 @@
       },
       "motion": "on_sand",
       "size": [
-        13.5,
-        15.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 11 PIZZA BASIL",
-      "description": "NEW ART VS LIVE PIZZA",
-      "current": "food_half_eaten_pizza",
-      "candidate": {
-        "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 20,
-        "frame_h": 16,
-        "regions": [
-          {
-            "region": [
-              195,
-              2,
-              20,
-              16
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        10.0,
-        8.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 12 PIZZA PEPPERONI",
-      "description": "NEW ART VS LIVE PIZZA",
-      "current": "food_half_eaten_pizza",
-      "candidate": {
-        "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 20,
-        "frame_h": 16,
-        "regions": [
-          {
-            "region": [
-              217,
-              2,
-              20,
-              16
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        10.0,
-        8.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 13 PIZZA MUSHROOM",
-      "description": "NEW ART VS LIVE PIZZA",
-      "current": "food_half_eaten_pizza",
-      "candidate": {
-        "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 19,
-        "frame_h": 16,
-        "regions": [
-          {
-            "region": [
-              239,
-              2,
-              19,
-              16
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        9.5,
-        8.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 14 PIZZA VEGGIE",
-      "description": "NEW ART VS LIVE PIZZA",
-      "current": "food_half_eaten_pizza",
-      "candidate": {
-        "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 19,
-        "frame_h": 16,
-        "regions": [
-          {
-            "region": [
-              260,
-              2,
-              19,
-              16
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        9.5,
-        8.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 15 PIZZA HAWAIIAN",
-      "description": "NEW ART VS LIVE PIZZA",
-      "current": "food_half_eaten_pizza",
-      "candidate": {
-        "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 19,
-        "frame_h": 16,
-        "regions": [
-          {
-            "region": [
-              281,
-              2,
-              19,
-              16
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        9.5,
-        8.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 16 PIZZA ROCKET",
-      "description": "NEW ART VS LIVE PIZZA",
-      "current": "food_half_eaten_pizza",
-      "candidate": {
-        "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 20,
-        "frame_h": 16,
-        "regions": [
-          {
-            "region": [
-              302,
-              2,
-              20,
-              16
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        10.0,
-        8.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 17 PIZZA MARGHERITA",
-      "description": "NEW ART VS LIVE PIZZA",
-      "current": "food_half_eaten_pizza",
-      "candidate": {
-        "clone": "food_half_eaten_pizza",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 19,
-        "frame_h": 16,
-        "regions": [
-          {
-            "region": [
-              324,
-              2,
-              19,
-              16
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        9.5,
-        8.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 18 DOUGHNUT PINK SPRINKLES",
-      "description": "NEW ART VS LIVE DOUGHNUT",
-      "current": "food_half_eaten_doughnut",
-      "candidate": {
-        "clone": "food_half_eaten_doughnut",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 13,
-        "frame_h": 12,
-        "regions": [
-          {
-            "region": [
-              345,
-              2,
-              13,
-              12
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        6.5,
-        6.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 19 DOUGHNUT CHOC SPRINKLES",
-      "description": "NEW ART VS LIVE DOUGHNUT",
-      "current": "food_half_eaten_doughnut",
-      "candidate": {
-        "clone": "food_half_eaten_doughnut",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 13,
-        "frame_h": 12,
-        "regions": [
-          {
-            "region": [
-              360,
-              2,
-              13,
-              12
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        6.5,
-        6.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 20 DOUGHNUT WHITE SPRINKLES",
-      "description": "NEW ART VS LIVE DOUGHNUT",
-      "current": "food_half_eaten_doughnut",
-      "candidate": {
-        "clone": "food_half_eaten_doughnut",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 13,
-        "frame_h": 12,
-        "regions": [
-          {
-            "region": [
-              375,
-              2,
-              13,
-              12
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        6.5,
-        6.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 21 DOUGHNUT PLAIN",
-      "description": "NEW ART VS LIVE DOUGHNUT",
-      "current": "food_half_eaten_doughnut",
-      "candidate": {
-        "clone": "food_half_eaten_doughnut",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 13,
-        "frame_h": 12,
-        "regions": [
-          {
-            "region": [
-              390,
-              2,
-              13,
-              12
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        6.5,
-        6.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 22 DOUGHNUT CHOC DRIZZLE",
-      "description": "NEW ART VS LIVE DOUGHNUT",
-      "current": "food_half_eaten_doughnut",
-      "candidate": {
-        "clone": "food_half_eaten_doughnut",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 14,
-        "frame_h": 12,
-        "regions": [
-          {
-            "region": [
-              405,
-              2,
-              14,
-              12
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        7.0,
-        6.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 23 DOUGHNUT PINK DRIZZLE",
-      "description": "NEW ART VS LIVE DOUGHNUT",
-      "current": "food_half_eaten_doughnut",
-      "candidate": {
-        "clone": "food_half_eaten_doughnut",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 14,
-        "frame_h": 12,
-        "regions": [
-          {
-            "region": [
-              421,
-              2,
-              14,
-              12
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        7.0,
-        6.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 24 DOUGHNUT SUGAR",
-      "description": "NEW ART VS LIVE DOUGHNUT",
-      "current": "food_half_eaten_doughnut",
-      "candidate": {
-        "clone": "food_half_eaten_doughnut",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 14,
-        "frame_h": 12,
-        "regions": [
-          {
-            "region": [
-              437,
-              2,
-              14,
-              12
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        7.0,
-        6.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 25 DOUGHNUT CHOC NUTS",
-      "description": "NEW ART VS LIVE DOUGHNUT",
-      "current": "food_half_eaten_doughnut",
-      "candidate": {
-        "clone": "food_half_eaten_doughnut",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 14,
-        "frame_h": 12,
-        "regions": [
-          {
-            "region": [
-              453,
-              2,
-              14,
-              12
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        7.0,
-        6.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 26 DOUGHNUT BERRY",
-      "description": "NEW ART VS LIVE DOUGHNUT",
-      "current": "food_half_eaten_doughnut",
-      "candidate": {
-        "clone": "food_half_eaten_doughnut",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 15,
-        "frame_h": 12,
-        "regions": [
-          {
-            "region": [
-              2,
-              34,
-              15,
-              12
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        7.5,
-        6.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 27 DOUGHNUT BOX",
-      "description": "NEW ITEM. SIZE REF: DOUGHNUT",
-      "current": "food_half_eaten_doughnut",
-      "candidate": {
-        "clone": "food_half_eaten_doughnut",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 31,
-        "frame_h": 22,
-        "regions": [
-          {
-            "region": [
-              19,
-              34,
-              31,
-              22
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        15.5,
-        11.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 28 CONE VANILLA",
-      "description": "NEW ART VS LIVE ICE CREAM",
-      "current": "food_ice_cream",
-      "candidate": {
-        "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 8,
-        "frame_h": 16,
-        "regions": [
-          {
-            "region": [
-              52,
-              34,
-              8,
-              16
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        4.0,
-        8.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 29 CONE CHOCOLATE",
-      "description": "NEW ART VS LIVE ICE CREAM",
-      "current": "food_ice_cream",
-      "candidate": {
-        "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 8,
-        "frame_h": 16,
-        "regions": [
-          {
-            "region": [
-              62,
-              34,
-              8,
-              16
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        4.0,
-        8.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 30 CONE STRAWBERRY",
-      "description": "NEW ART VS LIVE ICE CREAM",
-      "current": "food_ice_cream",
-      "candidate": {
-        "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 8,
-        "frame_h": 16,
-        "regions": [
-          {
-            "region": [
-              72,
-              34,
-              8,
-              16
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        4.0,
-        8.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 31 CONE MINT",
-      "description": "NEW ART VS LIVE ICE CREAM",
-      "current": "food_ice_cream",
-      "candidate": {
-        "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 8,
-        "frame_h": 16,
-        "regions": [
-          {
-            "region": [
-              82,
-              34,
-              8,
-              16
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        4.0,
-        8.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 32 CONE STRAWBERRY SWIRL",
-      "description": "NEW ART VS LIVE ICE CREAM",
-      "current": "food_ice_cream",
-      "candidate": {
-        "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 8,
-        "frame_h": 16,
-        "regions": [
-          {
-            "region": [
-              92,
-              34,
-              8,
-              16
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        4.0,
-        8.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 33 CONE CHOC VANILLA SWIRL",
-      "description": "NEW ART VS LIVE ICE CREAM",
-      "current": "food_ice_cream",
-      "candidate": {
-        "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 8,
-        "frame_h": 17,
-        "regions": [
-          {
-            "region": [
-              102,
-              34,
-              8,
-              17
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        4.0,
-        8.5
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 34 CONE CHOC STRAWB SCOOPS",
-      "description": "NEW ART VS LIVE ICE CREAM",
-      "current": "food_ice_cream",
-      "candidate": {
-        "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 8,
-        "frame_h": 15,
-        "regions": [
-          {
-            "region": [
-              112,
-              34,
-              8,
-              15
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        4.0,
-        7.5
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 35 CONE VANILLA MINT SCOOPS",
-      "description": "NEW ART VS LIVE ICE CREAM",
-      "current": "food_ice_cream",
-      "candidate": {
-        "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 9,
-        "frame_h": 16,
-        "regions": [
-          {
-            "region": [
-              122,
-              34,
-              9,
-              16
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
-        4.5,
-        8.0
-      ],
-      "category": "food"
-    },
-    {
-      "title": "FOOD 36 LOLLY CHOC NUT",
-      "description": "NEW ART VS LIVE ICE CREAM",
-      "current": "food_ice_cream",
-      "candidate": {
-        "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 9,
-        "frame_h": 15,
-        "regions": [
-          {
-            "region": [
-              133,
-              34,
-              9,
-              15
-            ],
-            "offset": [
-              0,
-              0
-            ]
-          }
-        ]
-      },
-      "motion": "on_sand",
-      "size": [
         4.5,
         7.5
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 37 LOLLY CHOCOLATE",
@@ -1373,16 +1337,16 @@
       "current": "food_ice_cream",
       "candidate": {
         "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 7,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 14,
+        "frame_h": 29,
         "regions": [
           {
             "region": [
-              144,
-              34,
-              7,
-              14
+              132,
+              63,
+              14,
+              29
             ],
             "offset": [
               0,
@@ -1394,9 +1358,8 @@
       "motion": "on_sand",
       "size": [
         3.5,
-        7.0
-      ],
-      "category": "food"
+        7.25
+      ]
     },
     {
       "title": "FOOD 38 LOLLY STRAWBERRY",
@@ -1404,16 +1367,16 @@
       "current": "food_ice_cream",
       "candidate": {
         "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 7,
-        "frame_h": 15,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 14,
+        "frame_h": 31,
         "regions": [
           {
             "region": [
-              153,
-              34,
-              7,
-              15
+              148,
+              63,
+              14,
+              31
             ],
             "offset": [
               0,
@@ -1425,9 +1388,8 @@
       "motion": "on_sand",
       "size": [
         3.5,
-        7.5
-      ],
-      "category": "food"
+        7.75
+      ]
     },
     {
       "title": "FOOD 39 LOLLY ORANGE",
@@ -1435,16 +1397,16 @@
       "current": "food_ice_cream",
       "candidate": {
         "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 7,
-        "frame_h": 15,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 14,
+        "frame_h": 30,
         "regions": [
           {
             "region": [
-              162,
-              34,
-              7,
-              15
+              164,
+              63,
+              14,
+              30
             ],
             "offset": [
               0,
@@ -1457,8 +1419,7 @@
       "size": [
         3.5,
         7.5
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 40 LOLLY ROCKET",
@@ -1466,16 +1427,16 @@
       "current": "food_ice_cream",
       "candidate": {
         "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 7,
-        "frame_h": 16,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 13,
+        "frame_h": 31,
         "regions": [
           {
             "region": [
-              171,
-              34,
-              7,
-              16
+              180,
+              63,
+              13,
+              31
             ],
             "offset": [
               0,
@@ -1486,10 +1447,9 @@
       },
       "motion": "on_sand",
       "size": [
-        3.5,
-        8.0
-      ],
-      "category": "food"
+        3.25,
+        7.75
+      ]
     },
     {
       "title": "FOOD 41 LOLLY CHOCOLATE 2",
@@ -1497,16 +1457,16 @@
       "current": "food_ice_cream",
       "candidate": {
         "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 7,
-        "frame_h": 15,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 15,
+        "frame_h": 31,
         "regions": [
           {
             "region": [
-              180,
-              34,
-              7,
-              15
+              195,
+              63,
+              15,
+              31
             ],
             "offset": [
               0,
@@ -1517,10 +1477,9 @@
       },
       "motion": "on_sand",
       "size": [
-        3.5,
-        7.5
-      ],
-      "category": "food"
+        3.75,
+        7.75
+      ]
     },
     {
       "title": "FOOD 42 ICE CREAM CART",
@@ -1528,16 +1487,16 @@
       "current": "food_ice_cream",
       "candidate": {
         "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 26,
-        "frame_h": 23,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 53,
+        "frame_h": 45,
         "regions": [
           {
             "region": [
-              189,
-              34,
-              26,
-              23
+              212,
+              63,
+              53,
+              45
             ],
             "offset": [
               0,
@@ -1548,10 +1507,9 @@
       },
       "motion": "on_sand",
       "size": [
-        13.0,
-        11.5
-      ],
-      "category": "food"
+        13.25,
+        11.25
+      ]
     },
     {
       "title": "FOOD 43 ICE CREAM SIGN",
@@ -1559,16 +1517,16 @@
       "current": "food_ice_cream",
       "candidate": {
         "clone": "food_ice_cream",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 16,
-        "frame_h": 19,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 33,
+        "frame_h": 38,
         "regions": [
           {
             "region": [
-              217,
-              34,
-              16,
-              19
+              267,
+              63,
+              33,
+              38
             ],
             "offset": [
               0,
@@ -1579,10 +1537,9 @@
       },
       "motion": "on_sand",
       "size": [
-        8.0,
+        8.25,
         9.5
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 44 FRIES CHECK CUP",
@@ -1590,16 +1547,16 @@
       "current": "food_crisps_bag",
       "candidate": {
         "clone": "food_crisps_bag",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 11,
-        "frame_h": 13,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 23,
+        "frame_h": 27,
         "regions": [
           {
             "region": [
-              235,
-              34,
-              11,
-              13
+              302,
+              63,
+              23,
+              27
             ],
             "offset": [
               0,
@@ -1610,10 +1567,9 @@
       },
       "motion": "on_sand",
       "size": [
-        5.5,
-        6.5
-      ],
-      "category": "food"
+        5.75,
+        6.75
+      ]
     },
     {
       "title": "FOOD 45 FRIES WHITE CONE",
@@ -1621,16 +1577,16 @@
       "current": "food_crisps_bag",
       "candidate": {
         "clone": "food_crisps_bag",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 10,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 21,
+        "frame_h": 28,
         "regions": [
           {
             "region": [
-              248,
-              34,
-              10,
-              14
+              327,
+              63,
+              21,
+              28
             ],
             "offset": [
               0,
@@ -1641,10 +1597,9 @@
       },
       "motion": "on_sand",
       "size": [
-        5.0,
+        5.25,
         7.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 46 FRIES BLUE CONE",
@@ -1652,16 +1607,16 @@
       "current": "food_crisps_bag",
       "candidate": {
         "clone": "food_crisps_bag",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 10,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 20,
+        "frame_h": 28,
         "regions": [
           {
             "region": [
-              260,
-              34,
-              10,
-              14
+              350,
+              63,
+              20,
+              28
             ],
             "offset": [
               0,
@@ -1674,8 +1629,7 @@
       "size": [
         5.0,
         7.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 47 FRIES PAPER CONE",
@@ -1683,16 +1637,16 @@
       "current": "food_crisps_bag",
       "candidate": {
         "clone": "food_crisps_bag",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 12,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 23,
+        "frame_h": 28,
         "regions": [
           {
             "region": [
-              272,
-              34,
-              12,
-              14
+              372,
+              63,
+              23,
+              28
             ],
             "offset": [
               0,
@@ -1703,10 +1657,9 @@
       },
       "motion": "on_sand",
       "size": [
-        6.0,
+        5.75,
         7.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 48 ONION RING BUCKET",
@@ -1714,16 +1667,16 @@
       "current": "food_crisps_bag",
       "candidate": {
         "clone": "food_crisps_bag",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 10,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 21,
+        "frame_h": 28,
         "regions": [
           {
             "region": [
-              286,
-              34,
-              10,
-              14
+              397,
+              63,
+              21,
+              28
             ],
             "offset": [
               0,
@@ -1734,10 +1687,9 @@
       },
       "motion": "on_sand",
       "size": [
-        5.0,
+        5.25,
         7.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 49 NUGGET BUCKET",
@@ -1745,16 +1697,16 @@
       "current": "food_crisps_bag",
       "candidate": {
         "clone": "food_crisps_bag",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 12,
-        "frame_h": 15,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 25,
+        "frame_h": 29,
         "regions": [
           {
             "region": [
-              298,
-              34,
-              12,
-              15
+              420,
+              63,
+              25,
+              29
             ],
             "offset": [
               0,
@@ -1765,10 +1717,9 @@
       },
       "motion": "on_sand",
       "size": [
-        6.0,
-        7.5
-      ],
-      "category": "food"
+        6.25,
+        7.25
+      ]
     },
     {
       "title": "FOOD 50 POPCORN BUCKET",
@@ -1776,16 +1727,16 @@
       "current": "food_crisps_bag",
       "candidate": {
         "clone": "food_crisps_bag",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 11,
-        "frame_h": 13,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 22,
+        "frame_h": 26,
         "regions": [
           {
             "region": [
-              312,
-              34,
-              11,
-              13
+              447,
+              63,
+              22,
+              26
             ],
             "offset": [
               0,
@@ -1798,8 +1749,7 @@
       "size": [
         5.5,
         6.5
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 51 FISH AND CHIPS TRAY",
@@ -1807,16 +1757,16 @@
       "current": "food_fried_fish",
       "candidate": {
         "clone": "food_fried_fish",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 27,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 55,
+        "frame_h": 29,
         "regions": [
           {
             "region": [
-              325,
-              34,
-              27,
-              14
+              471,
+              63,
+              55,
+              29
             ],
             "offset": [
               0,
@@ -1827,10 +1777,9 @@
       },
       "motion": "on_sand",
       "size": [
-        13.5,
-        7.0
-      ],
-      "category": "food"
+        13.75,
+        7.25
+      ]
     },
     {
       "title": "FOOD 52 CHIPS AND DIP TRAY",
@@ -1838,16 +1787,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 20,
-        "frame_h": 12,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 39,
+        "frame_h": 25,
         "regions": [
           {
             "region": [
-              354,
-              34,
-              20,
-              12
+              528,
+              63,
+              39,
+              25
             ],
             "offset": [
               0,
@@ -1858,10 +1807,9 @@
       },
       "motion": "on_sand",
       "size": [
-        10.0,
-        6.0
-      ],
-      "category": "food"
+        9.75,
+        6.25
+      ]
     },
     {
       "title": "FOOD 53 ONION RING TRAY",
@@ -1869,16 +1817,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 19,
-        "frame_h": 12,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 37,
+        "frame_h": 24,
         "regions": [
           {
             "region": [
-              376,
-              34,
-              19,
-              12
+              569,
+              63,
+              37,
+              24
             ],
             "offset": [
               0,
@@ -1889,10 +1837,9 @@
       },
       "motion": "on_sand",
       "size": [
-        9.5,
+        9.25,
         6.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 54 ONION RING TRAY SMALL",
@@ -1900,16 +1847,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 16,
-        "frame_h": 10,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 33,
+        "frame_h": 20,
         "regions": [
           {
             "region": [
-              397,
-              34,
-              16,
-              10
+              608,
+              63,
+              33,
+              20
             ],
             "offset": [
               0,
@@ -1920,10 +1867,9 @@
       },
       "motion": "on_sand",
       "size": [
-        8.0,
+        8.25,
         5.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 55 HOT DOG MUSTARD",
@@ -1931,16 +1877,16 @@
       "current": "food_hotdog",
       "candidate": {
         "clone": "food_hotdog",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 16,
-        "frame_h": 12,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 32,
+        "frame_h": 25,
         "regions": [
           {
             "region": [
-              415,
-              34,
-              16,
-              12
+              643,
+              63,
+              32,
+              25
             ],
             "offset": [
               0,
@@ -1952,9 +1898,8 @@
       "motion": "on_sand",
       "size": [
         8.0,
-        6.0
-      ],
-      "category": "food"
+        6.25
+      ]
     },
     {
       "title": "FOOD 56 HOT DOG RELISH",
@@ -1962,16 +1907,16 @@
       "current": "food_hotdog",
       "candidate": {
         "clone": "food_hotdog",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 16,
-        "frame_h": 13,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 32,
+        "frame_h": 25,
         "regions": [
           {
             "region": [
-              433,
-              34,
-              16,
-              13
+              677,
+              63,
+              32,
+              25
             ],
             "offset": [
               0,
@@ -1983,9 +1928,8 @@
       "motion": "on_sand",
       "size": [
         8.0,
-        6.5
-      ],
-      "category": "food"
+        6.25
+      ]
     },
     {
       "title": "FOOD 57 HOT DOG KETCHUP MUSTARD",
@@ -1993,16 +1937,16 @@
       "current": "food_hotdog",
       "candidate": {
         "clone": "food_hotdog",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 16,
-        "frame_h": 13,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 32,
+        "frame_h": 25,
         "regions": [
           {
             "region": [
-              451,
-              34,
-              16,
-              13
+              711,
+              63,
+              32,
+              25
             ],
             "offset": [
               0,
@@ -2014,9 +1958,8 @@
       "motion": "on_sand",
       "size": [
         8.0,
-        6.5
-      ],
-      "category": "food"
+        6.25
+      ]
     },
     {
       "title": "FOOD 58 HOT DOG LOADED",
@@ -2024,16 +1967,16 @@
       "current": "food_hotdog",
       "candidate": {
         "clone": "food_hotdog",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 17,
-        "frame_h": 13,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 34,
+        "frame_h": 25,
         "regions": [
           {
             "region": [
-              2,
-              59,
-              17,
-              13
+              745,
+              63,
+              34,
+              25
             ],
             "offset": [
               0,
@@ -2045,9 +1988,8 @@
       "motion": "on_sand",
       "size": [
         8.5,
-        6.5
-      ],
-      "category": "food"
+        6.25
+      ]
     },
     {
       "title": "FOOD 59 BURGER 1",
@@ -2055,16 +1997,16 @@
       "current": "food_half_eaten_sandwich",
       "candidate": {
         "clone": "food_half_eaten_sandwich",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 14,
-        "frame_h": 13,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 28,
+        "frame_h": 26,
         "regions": [
           {
             "region": [
-              21,
-              59,
-              14,
-              13
+              781,
+              63,
+              28,
+              26
             ],
             "offset": [
               0,
@@ -2077,8 +2019,7 @@
       "size": [
         7.0,
         6.5
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 60 BURGER 2",
@@ -2086,16 +2027,16 @@
       "current": "food_half_eaten_sandwich",
       "candidate": {
         "clone": "food_half_eaten_sandwich",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 14,
-        "frame_h": 13,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 28,
+        "frame_h": 26,
         "regions": [
           {
             "region": [
-              37,
-              59,
-              14,
-              13
+              811,
+              63,
+              28,
+              26
             ],
             "offset": [
               0,
@@ -2108,8 +2049,7 @@
       "size": [
         7.0,
         6.5
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 61 BURGER 3",
@@ -2117,16 +2057,16 @@
       "current": "food_half_eaten_sandwich",
       "candidate": {
         "clone": "food_half_eaten_sandwich",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 14,
-        "frame_h": 13,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 28,
+        "frame_h": 25,
         "regions": [
           {
             "region": [
-              53,
-              59,
-              14,
-              13
+              841,
+              63,
+              28,
+              25
             ],
             "offset": [
               0,
@@ -2138,9 +2078,8 @@
       "motion": "on_sand",
       "size": [
         7.0,
-        6.5
-      ],
-      "category": "food"
+        6.25
+      ]
     },
     {
       "title": "FOOD 62 WRAP",
@@ -2148,16 +2087,16 @@
       "current": "food_half_eaten_sandwich",
       "candidate": {
         "clone": "food_half_eaten_sandwich",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 18,
-        "frame_h": 13,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 35,
+        "frame_h": 26,
         "regions": [
           {
             "region": [
-              69,
-              59,
-              18,
-              13
+              871,
+              63,
+              35,
+              26
             ],
             "offset": [
               0,
@@ -2168,10 +2107,9 @@
       },
       "motion": "on_sand",
       "size": [
-        9.0,
+        8.75,
         6.5
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 63 SUB HAM SALAD",
@@ -2179,16 +2117,16 @@
       "current": "food_half_eaten_sandwich",
       "candidate": {
         "clone": "food_half_eaten_sandwich",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 20,
-        "frame_h": 13,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 39,
+        "frame_h": 25,
         "regions": [
           {
             "region": [
-              89,
-              59,
-              20,
-              13
+              908,
+              63,
+              39,
+              25
             ],
             "offset": [
               0,
@@ -2199,10 +2137,9 @@
       },
       "motion": "on_sand",
       "size": [
-        10.0,
-        6.5
-      ],
-      "category": "food"
+        9.75,
+        6.25
+      ]
     },
     {
       "title": "FOOD 64 PANINI",
@@ -2210,16 +2147,16 @@
       "current": "food_half_eaten_sandwich",
       "candidate": {
         "clone": "food_half_eaten_sandwich",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 21,
-        "frame_h": 13,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 42,
+        "frame_h": 26,
         "regions": [
           {
             "region": [
-              111,
-              59,
-              21,
-              13
+              949,
+              63,
+              42,
+              26
             ],
             "offset": [
               0,
@@ -2232,8 +2169,7 @@
       "size": [
         10.5,
         6.5
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 65 CAN RED",
@@ -2241,16 +2177,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 8,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 15,
+        "frame_h": 28,
         "regions": [
           {
             "region": [
-              134,
-              59,
-              8,
-              14
+              993,
+              63,
+              15,
+              28
             ],
             "offset": [
               0,
@@ -2261,10 +2197,9 @@
       },
       "motion": "on_sand",
       "size": [
-        4.0,
+        3.75,
         7.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 66 CAN BLUE",
@@ -2272,16 +2207,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 8,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 15,
+        "frame_h": 28,
         "regions": [
           {
             "region": [
-              144,
-              59,
-              8,
-              14
+              2,
+              110,
+              15,
+              28
             ],
             "offset": [
               0,
@@ -2292,10 +2227,9 @@
       },
       "motion": "on_sand",
       "size": [
-        4.0,
+        3.75,
         7.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 67 CAN GREEN",
@@ -2303,16 +2237,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 8,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 16,
+        "frame_h": 28,
         "regions": [
           {
             "region": [
-              154,
-              59,
-              8,
-              14
+              19,
+              110,
+              16,
+              28
             ],
             "offset": [
               0,
@@ -2325,8 +2259,7 @@
       "size": [
         4.0,
         7.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 68 CAN ORANGE",
@@ -2334,16 +2267,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 8,
-        "frame_h": 14,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 15,
+        "frame_h": 28,
         "regions": [
           {
             "region": [
-              164,
-              59,
-              8,
-              14
+              37,
+              110,
+              15,
+              28
             ],
             "offset": [
               0,
@@ -2354,10 +2287,9 @@
       },
       "motion": "on_sand",
       "size": [
-        4.0,
+        3.75,
         7.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 69 BOTTLE KETCHUP",
@@ -2365,16 +2297,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 6,
-        "frame_h": 16,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 13,
+        "frame_h": 32,
         "regions": [
           {
             "region": [
-              174,
-              59,
-              6,
-              16
+              54,
+              110,
+              13,
+              32
             ],
             "offset": [
               0,
@@ -2385,10 +2317,9 @@
       },
       "motion": "on_sand",
       "size": [
-        3.0,
+        3.25,
         8.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 70 BOTTLE MUSTARD",
@@ -2396,16 +2327,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 6,
-        "frame_h": 16,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 13,
+        "frame_h": 31,
         "regions": [
           {
             "region": [
-              182,
-              59,
-              6,
-              16
+              69,
+              110,
+              13,
+              31
             ],
             "offset": [
               0,
@@ -2416,10 +2347,9 @@
       },
       "motion": "on_sand",
       "size": [
-        3.0,
-        8.0
-      ],
-      "category": "food"
+        3.25,
+        7.75
+      ]
     },
     {
       "title": "FOOD 71 BOTTLE MAYO",
@@ -2427,16 +2357,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 6,
-        "frame_h": 15,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 13,
+        "frame_h": 30,
         "regions": [
           {
             "region": [
-              190,
-              59,
-              6,
-              15
+              84,
+              110,
+              13,
+              30
             ],
             "offset": [
               0,
@@ -2447,10 +2377,9 @@
       },
       "motion": "on_sand",
       "size": [
-        3.0,
+        3.25,
         7.5
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 72 COFFEE CUP",
@@ -2458,16 +2387,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 9,
-        "frame_h": 15,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 19,
+        "frame_h": 30,
         "regions": [
           {
             "region": [
-              198,
-              59,
-              9,
-              15
+              99,
+              110,
+              19,
+              30
             ],
             "offset": [
               0,
@@ -2478,10 +2407,9 @@
       },
       "motion": "on_sand",
       "size": [
-        4.5,
+        4.75,
         7.5
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 73 COLA GLASS",
@@ -2489,16 +2417,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 8,
-        "frame_h": 16,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 17,
+        "frame_h": 31,
         "regions": [
           {
             "region": [
-              209,
-              59,
-              8,
-              16
+              120,
+              110,
+              17,
+              31
             ],
             "offset": [
               0,
@@ -2509,10 +2437,9 @@
       },
       "motion": "on_sand",
       "size": [
-        4.0,
-        8.0
-      ],
-      "category": "food"
+        4.25,
+        7.75
+      ]
     },
     {
       "title": "FOOD 74 MILKSHAKE",
@@ -2520,16 +2447,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 8,
-        "frame_h": 18,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 17,
+        "frame_h": 36,
         "regions": [
           {
             "region": [
-              219,
-              59,
-              8,
-              18
+              139,
+              110,
+              17,
+              36
             ],
             "offset": [
               0,
@@ -2540,10 +2467,9 @@
       },
       "motion": "on_sand",
       "size": [
-        4.0,
+        4.25,
         9.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 75 ORANGE JUICE",
@@ -2551,16 +2477,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 8,
-        "frame_h": 15,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 16,
+        "frame_h": 30,
         "regions": [
           {
             "region": [
-              229,
-              59,
-              8,
-              15
+              158,
+              110,
+              16,
+              30
             ],
             "offset": [
               0,
@@ -2573,8 +2499,7 @@
       "size": [
         4.0,
         7.5
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 76 WATER BOTTLE",
@@ -2582,16 +2507,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 6,
-        "frame_h": 17,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 12,
+        "frame_h": 33,
         "regions": [
           {
             "region": [
-              239,
-              59,
-              6,
-              17
+              176,
+              110,
+              12,
+              33
             ],
             "offset": [
               0,
@@ -2603,9 +2528,8 @@
       "motion": "on_sand",
       "size": [
         3.0,
-        8.5
-      ],
-      "category": "food"
+        8.25
+      ]
     },
     {
       "title": "FOOD 77 COCONUT DRINK",
@@ -2613,16 +2537,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 17,
-        "frame_h": 17,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 35,
+        "frame_h": 34,
         "regions": [
           {
             "region": [
-              247,
-              59,
-              17,
-              17
+              190,
+              110,
+              35,
+              34
             ],
             "offset": [
               0,
@@ -2633,10 +2557,9 @@
       },
       "motion": "on_sand",
       "size": [
-        8.5,
+        8.75,
         8.5
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 78 SALT SHAKER",
@@ -2644,16 +2567,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 5,
-        "frame_h": 10,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 11,
+        "frame_h": 20,
         "regions": [
           {
             "region": [
-              266,
-              59,
-              5,
-              10
+              227,
+              110,
+              11,
+              20
             ],
             "offset": [
               0,
@@ -2664,10 +2587,9 @@
       },
       "motion": "on_sand",
       "size": [
-        2.5,
+        2.75,
         5.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 79 PEPPER SHAKER",
@@ -2675,16 +2597,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 5,
-        "frame_h": 10,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 11,
+        "frame_h": 19,
         "regions": [
           {
             "region": [
-              273,
-              59,
-              5,
-              10
+              240,
+              110,
+              11,
+              19
             ],
             "offset": [
               0,
@@ -2695,10 +2617,9 @@
       },
       "motion": "on_sand",
       "size": [
-        2.5,
-        5.0
-      ],
-      "category": "food"
+        2.75,
+        4.75
+      ]
     },
     {
       "title": "FOOD 80 NAPKIN DISPENSER",
@@ -2706,16 +2627,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 11,
-        "frame_h": 15,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 23,
+        "frame_h": 30,
         "regions": [
           {
             "region": [
-              280,
-              59,
-              11,
-              15
+              253,
+              110,
+              23,
+              30
             ],
             "offset": [
               0,
@@ -2726,10 +2647,9 @@
       },
       "motion": "on_sand",
       "size": [
-        5.5,
+        5.75,
         7.5
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "FOOD 81 CUTLERY CRATE",
@@ -2737,16 +2657,16 @@
       "current": "food_crisps_box",
       "candidate": {
         "clone": "food_crisps_box",
-        "file": "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png",
-        "frame_w": 19,
-        "frame_h": 18,
+        "file": "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png",
+        "frame_w": 38,
+        "frame_h": 36,
         "regions": [
           {
             "region": [
-              293,
-              59,
-              19,
-              18
+              278,
+              110,
+              38,
+              36
             ],
             "offset": [
               0,
@@ -2759,8 +2679,7 @@
       "size": [
         9.5,
         9.0
-      ],
-      "category": "food"
+      ]
     },
     {
       "title": "BG PROP BUCKET AND SPADE",
@@ -2768,10 +2687,10 @@
       "current": "beach_castle",
       "candidate": {
         "clone": "beach_castle",
-        "file": "res://assets/previews/beach-props-v1/bucket-and-spade-v1.png",
-        "frame_w": 20,
-        "frame_h": 16,
-        "visual_scale": 1.0
+        "file": "res://assets/lab/beach-props-v1/bucket-and-spade-v1.png",
+        "frame_w": 80,
+        "frame_h": 64,
+        "visual_scale": 0.25
       },
       "reference": "shopper_mullet",
       "motion": "static",
@@ -2783,10 +2702,10 @@
       "current": "beach_castle",
       "candidate": {
         "clone": "beach_castle",
-        "file": "res://assets/previews/beach-props-v1/beach-ball-v1.png",
-        "frame_w": 12,
-        "frame_h": 12,
-        "visual_scale": 1.0
+        "file": "res://assets/lab/beach-props-v1/beach-ball-v1.png",
+        "frame_w": 48,
+        "frame_h": 46,
+        "visual_scale": 0.25
       },
       "reference": "shopper_mullet",
       "motion": "static",
@@ -2798,10 +2717,10 @@
       "current": "beach_chair",
       "candidate": {
         "clone": "beach_chair",
-        "file": "res://assets/previews/beach-props-v1/lifebuoy-hung-v1.png",
-        "frame_w": 16,
-        "frame_h": 23,
-        "visual_scale": 1.0
+        "file": "res://assets/lab/beach-props-v1/lifebuoy-hung-v1.png",
+        "frame_w": 64,
+        "frame_h": 93,
+        "visual_scale": 0.25
       },
       "reference": "shopper_mullet",
       "motion": "static",
@@ -2813,10 +2732,10 @@
       "current": "beach_chair",
       "candidate": {
         "clone": "beach_chair",
-        "file": "res://assets/previews/beach-props-v1/lifebuoy-flat-v1.png",
-        "frame_w": 26,
-        "frame_h": 16,
-        "visual_scale": 1.0
+        "file": "res://assets/lab/beach-props-v1/lifebuoy-flat-v1.png",
+        "frame_w": 104,
+        "frame_h": 65,
+        "visual_scale": 0.25
       },
       "reference": "shopper_mullet",
       "motion": "static",
@@ -2828,10 +2747,10 @@
       "current": "beach_rocks",
       "candidate": {
         "clone": "beach_rocks",
-        "file": "res://assets/previews/beach-props-v1/shells-v1.png",
-        "frame_w": 18,
-        "frame_h": 15,
-        "visual_scale": 1.0
+        "file": "res://assets/lab/beach-props-v1/shells-v1.png",
+        "frame_w": 72,
+        "frame_h": 59,
+        "visual_scale": 0.25
       },
       "reference": "shopper_mullet",
       "motion": "static",
@@ -2843,10 +2762,10 @@
       "current": "beach_rocks",
       "candidate": {
         "clone": "beach_rocks",
-        "file": "res://assets/previews/beach-props-v1/jet-ski-v1.png",
-        "frame_w": 44,
-        "frame_h": 24,
-        "visual_scale": 1.0
+        "file": "res://assets/lab/beach-props-v1/jet-ski-v1.png",
+        "frame_w": 176,
+        "frame_h": 97,
+        "visual_scale": 0.25
       },
       "reference": "shopper_mullet",
       "motion": "static",

@@ -2,7 +2,7 @@ extends SceneTree
 ## Crop the preserved ImageGen source into tiny palette-limited runtime VFX.
 
 const SOURCE_PATH: String = "res://assets/reference/peck-snatch-vfx-v1/source.png"
-const REVIEW_PATH: String = "res://assets/previews/peck-snatch-vfx-v1.png"
+const REVIEW_PATH: String = "res://assets/archive/previews/peck-snatch-vfx-v1.png"
 const ALPHA_CUTOFF: float = 0.72
 const PALETTE: Array[Color] = [
 	Color("183b4e"), Color("fff4da"), Color("f3c443"),

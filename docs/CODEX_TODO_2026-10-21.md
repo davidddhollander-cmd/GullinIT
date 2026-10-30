@@ -1,6 +1,6 @@
 # Codex to-do — 21 October 2026
 
-Status, 22 October: all three changes are implemented. Smaller signs were approved; vendor turn/preparation poses and order bubbles are complete; catchable red/blue crabs now use the supplied sheet. See `docs/CRABS.md` and `assets/previews/crab-cycle-v1.gif`. Crab checks: 73/73 pass. Full integration: 15,910 checks with only the previously reproduced level-6 rival escape-distance failure.
+Status, 22 October: all three changes are implemented. Smaller signs were approved; vendor turn/preparation poses and order bubbles are complete; catchable red/blue crabs now use the supplied sheet. See `docs/CRABS.md` and `assets/archive/previews/crab-cycle-v1.gif`. Crab checks: 73/73 pass. Full integration: 15,910 checks with only the previously reproduced level-6 rival escape-distance failure.
 
 Three tasks, in this order. Follow `AGENTS.md` throughout: characters (vendors, crabs) must use image-generator or user-supplied artwork, never code-drawn bodies; check for a matching `godot-prompter:*` skill before implementing a system. After each task, run `tests/integration.tscn` headless and review the relevant preview captures.
 

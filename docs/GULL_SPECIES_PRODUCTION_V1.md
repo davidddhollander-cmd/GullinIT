@@ -16,10 +16,10 @@ Natural species markings stay intact for player and rivals. Role/name badges ide
 
 Review files:
 
-- `assets/previews/gull-species-production-v1.png` — species, movement and actual game sizes.
-- `assets/previews/gull-species-production-v1.gif` — walking and wingbeat preview.
-- `assets/previews/gull-herring-frames-v1.png`, `gull-kittiwake-frames-v1.png`, `gull-great-black-backed-frames-v1.png` — all drawn poses.
-- `assets/previews/gull-species-game-lineup-v1.png` — assigned player and rivals in the game (also captured in `test-output/`).
+- `assets/archive/previews/gull-species-production-v1.png` — species, movement and actual game sizes.
+- `assets/archive/previews/gull-species-production-v1.gif` — walking and wingbeat preview.
+- `assets/archive/previews/gull-herring-frames-v1.png`, `gull-kittiwake-frames-v1.png`, `gull-great-black-backed-frames-v1.png` — all drawn poses.
+- `assets/archive/previews/gull-species-game-lineup-v1.png` — assigned player and rivals in the game (also captured in `test-output/`).
 
 Preparation rejects incomplete actors, removes detached fragments and validates atlas margins. Integration checks cover clean isolation, approved sizes, feet/bill anchors, both movement directions, species in both player/rival roles, wingbeats, rotated dives, snatch, pull-up, landing, ground peck, stun, faster kittiwake flight, authored rival assignments and label clearance. The existing high toddler-snack fixture is positioned relative to the new bill height so it still tests food outside vertical reach. Run `tools/validate.ps1 -Capture` for the full gameplay suite, including rival simulations.
 

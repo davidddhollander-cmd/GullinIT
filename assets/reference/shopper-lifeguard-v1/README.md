@@ -10,6 +10,6 @@ New source sheets were generated with the built-in image-generation tool on 19 O
 
 `shopper-pilot-0.png` through `shopper-pilot-2.png` are deterministic 128-pixel source-cell preparations, not independent generations. The shopper was checked beside the approved diner and mum before extending the animation sheets.
 
-Lifeguard idle, lookout, patrol, whistle and pointing come from the pre-existing `assets/previews/lifeguard-pixel-review-v1.png` and `lifeguard-motion-review-v1.png`. These remain intact. The new sheets supply only missing movement/action coverage.
+Lifeguard idle, lookout, patrol, whistle and pointing come from the pre-existing `assets/archive/previews/lifeguard-pixel-review-v1.png` and `lifeguard-motion-review-v1.png`. These remain intact. The new sheets supply only missing movement/action coverage.
 
-Production assets: `assets/sprites/shopper-diner-style.png` and `assets/sprites/lifeguard-diner-style.png`. Mapping/preparation details and validation are documented in `docs/SHOPPER_LIFEGUARD_PRODUCTION_V1.md`.
+Production assets: `assets/archive/sprites/shopper-diner-style.png` and `assets/sprites/lifeguard-diner-style.png`. Mapping/preparation details and validation are documented in `docs/SHOPPER_LIFEGUARD_PRODUCTION_V1.md`.

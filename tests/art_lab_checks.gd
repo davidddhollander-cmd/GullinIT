@@ -126,7 +126,7 @@ static func run(host: Node, check: Callable) -> void:
 		"pier-diner-a-reactions-candidate-v1.png": 12,
 	}
 	for file: String in expected_sheets:
-		var image: Image = Image.load_from_file("res://assets/sprites/" + file)
+		var image: Image = Image.load_from_file(("res://assets/lab/" if FileAccess.file_exists("res://assets/lab/" + file) else "res://assets/sprites/") + file)
 		check.call(image != null and image.get_size() == Vector2i(1024, 256), "%s is an 8x2 atlas of 128px cells" % file)
 		var hard_alpha: bool = true
 		var aligned: bool = true

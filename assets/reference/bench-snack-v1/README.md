@@ -14,4 +14,4 @@ Run preparation with Godot headless, then editor import. Source preservation and
 
 Production atlases: `assets/sprites/shopper-{yellow,mullet,sundress}-bench-v1.png`. Production animation time is manually sampled from `BenchVisit`, including eating and both transitions; AnimatedSprite playback is paused for these clips.
 
-Visual review: `assets/previews/bench-snack-v1.gif` is 640x280 at actual game scale; `bench-snack-v1.png` is a 2x rendered view; `bench-snack-contact-sheet-v1.png` shows approach, sit, rest, theft/stand, chase and departure. The yellow-only proof has its own PNG/GIF. Captures use production target, registry, visit, crowd-spacing and art paths.
+Visual review: `assets/archive/previews/bench-snack-v1.gif` is 640x280 at actual game scale; `bench-snack-v1.png` is a 2x rendered view; `bench-snack-contact-sheet-v1.png` shows approach, sit, rest, theft/stand, chase and departure. The yellow-only proof has its own PNG/GIF. Captures use production target, registry, visit, crowd-spacing and art paths.

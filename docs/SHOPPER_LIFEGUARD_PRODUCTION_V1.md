@@ -4,7 +4,7 @@ Both characters now use the approved diner-led rendering treatment. Shopper iden
 
 ## Art and source reuse
 
-- `assets/sprites/shopper-diner-style.png`: 1024 × 512, 26 mapped frame slots covering idle, six-frame walk, six-frame chase, alert, warning, empty-hand theft reaction, swat windup and swat contact/recovery.
+- `assets/archive/sprites/shopper-diner-style.png`: 1024 × 512, 26 mapped frame slots covering idle, six-frame walk, six-frame chase, alert, warning, empty-hand theft reaction, swat windup and swat contact/recovery.
 - `assets/sprites/lifeguard-diner-style.png`: 1024 × 512, 32 mapped frame slots covering idle/blink, lookout, alert, patrol, whistle preparation, whistle/wave, pointing, angry, six-frame run, swat and windup.
 
 Both use 128 × 128 source cells, 80-pixel standing figures, half-scale display, 40 logical-pixel height, source sole baseline 116 and sprite offset -26. Genuine binary alpha, nearest sampling and no mipmaps replace painted downsampling/cutout for the shopper. Isolated connected figures and transparent gutters prevent adjacent-frame contamination. The old runtime source images are retained as archives.
@@ -25,7 +25,7 @@ Both new swat sequences distinguish preparation from contact. Shared swat timers
 
 Run Godot with `--headless --path . --script tools/prepare_lifeguard.gd`, then `tools/prepare_shopper.gd`, then run `tools/map_staff_art.py` with Python. The prepared manifests are `data/lifeguard_art.json` and `data/shopper_art.json`; the mapper updates only their registry entries. The older beachgoer mapping tool now preserves the new shopper manifest when rebuilding the dog-owner entry.
 
-`assets/previews/shopper-lifeguard-production-v1.png` shows actual runtime art and separate food. `shopper-style-pilot-v1.png` retains the initial style check. `tools/staff_production_preview.tscn` reproduces the final comparison. Gameplay captures are retained in `assets/previews/shopper-lifeguard-production-v1/`.
+`assets/archive/previews/shopper-lifeguard-production-v1.png` shows actual runtime art and separate food. `shopper-style-pilot-v1.png` retains the initial style check. `tools/staff_production_preview.tscn` reproduces the final comparison. Gameplay captures are retained in `assets/previews/shopper-lifeguard-production-v1/`.
 
 Validation uses `tools/validate.ps1 -Capture` with the existing whole-game suite plus `tests/staff_art_checks.gd`. It covers alpha, atlas bounds, gutters, isolated silhouettes, foot baselines, distinct advancing travel/action frames, scale/filter settings, real whistle event/pose synchronization and cooldown, close left-facing whistle, planted whistle feet, no interruption of contact, nearby alerts, chase/windup/contact timing, mirrored snacks and swept food theft. The rendered run and gameplay error log are `test-output/staff-production-validation.log` and `test-output/capture-errors.log`.
 

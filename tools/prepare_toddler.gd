@@ -28,5 +28,5 @@ func _initialize() -> void:
 	assert(sheet.save_png("res://assets/sprites/toddler-diner-style.png") == OK)
 	var preview := sheet.duplicate() as Image
 	preview.resize(1024,1024,Image.INTERPOLATE_NEAREST)
-	assert(preview.save_png("res://assets/previews/toddler-diner-style-sheet-v1.png") == OK)
+	assert(preview.save_png("res://assets/archive/previews/toddler-diner-style-sheet-v1.png") == OK)
 	quit()

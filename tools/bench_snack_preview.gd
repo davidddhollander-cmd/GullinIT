@@ -60,7 +60,7 @@ func run() -> void:
 		var picture := get_viewport().get_texture().get_image()
 		picture.save_png("res://test-output/bench-frames/%03d.png" % frame)
 		if frame == 80:
-			picture.save_png("res://assets/previews/bench-snack-yellow-proof-v1.png" if count == 1 else "res://assets/previews/bench-snack-v1.png")
+			picture.save_png("res://assets/archive/previews/bench-snack-yellow-proof-v1.png" if count == 1 else "res://assets/archive/previews/bench-snack-v1.png")
 	print("Bench preview captured 220 production simulation frames")
 	get_tree().quit()
 

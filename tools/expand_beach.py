@@ -33,7 +33,7 @@ def apply():
         'beach_lamp': ([909,390,67,214], .27),
     }
     for name,(region,scale) in crops.items():
-        sprites[name] = dict(file='res://assets/sprites/beach-props.png',
+        sprites[name] = dict(file='res://assets/archive/sprites/beach-props.png',
             frame_w=region[2], frame_h=region[3], visual_scale=scale,
             regions=[dict(region=region,offset=[0,0])],
             animations={'idle':dict(frames=[0],fps=1,loop=True)})
