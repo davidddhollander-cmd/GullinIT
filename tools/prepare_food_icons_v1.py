@@ -217,6 +217,7 @@ def main() -> None:
 				"regions": [{"region": [px, py, w, h], "offset": [0, 0]}]},
 			"motion": "on_sand",
 			"size": size,
+			"category": "food",
 		})
 		manifest.append({"n": n, "name": name, "live": live, "live_match": match, "cell": [w, h], "shown": size, "region": [px, py, w, h]})
 	lab["comparisons"] = comparisons
