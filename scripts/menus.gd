@@ -55,9 +55,16 @@ func hint(parent: Control, text: String) -> void:
 const GLINT: Shader = preload("res://assets/shaders/title_glint.gdshader")
 
 func title() -> void:
-	clear("GULLIN' IT", "The No. 1 Seagull Simulator", true)
-	var heading: Label = content.get_child(0) as Label
-	content.get_child(1).add_theme_color_override("font_color",Color("ef725c"))
+	for child: Node in get_children():
+		remove_child(child)
+		child.queue_free()
+	# Logo and tagline float over the beach; only the buttons sit in a small wood box below them.
+	var center: CenterContainer = CenterContainer.new()
+	add_child(center)
+	BeachUI.full(center)
+	var column: VBoxContainer = VBoxContainer.new()
+	column.add_theme_constant_override("separation",4)
+	center.add_child(column)
 	var logo: TextureRect = TextureRect.new()
 	logo.texture = load("res://assets/sprites/title-logo.png")
 	logo.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -69,32 +76,33 @@ func title() -> void:
 	logo.material.shader = GLINT
 	var slot: Control = Control.new()
 	slot.custom_minimum_size = Vector2(175,29)
+	slot.size_flags_horizontal = SIZE_SHRINK_CENTER
 	slot.add_child(logo)
-	content.add_child(slot)
-	content.move_child(slot,0)
-	content.remove_child(heading)
-	heading.queue_free()
+	column.add_child(slot)
 	var tween: Tween = logo.create_tween().set_loops()
 	tween.tween_property(logo,"position:y",3.0,1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(logo,"position:y",0.0,1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	var gap: Control = Control.new()
-	gap.custom_minimum_size.y = 2
-	content.add_child(gap)
-	var row: HBoxContainer = HBoxContainer.new()
-	content.add_child(row)
-	var buttons: VBoxContainer = VBoxContainer.new()
-	row.add_child(buttons)
-	BeachUI.button(buttons,"ARCADE  >",func() -> void: choose("arcade"),115).grab_focus()
-	BeachUI.button(buttons,"CASUAL  /  PRACTICE",func() -> void: choose("casual"),115)
-	var coming: Button = BeachUI.button(buttons,"VS / COOP - LATER",func() -> void: pass,115)
+	var tagline: Label = BeachUI.label(column,"The No. 1 Seagull Simulator",BeachUI.FONT_NATIVE,BeachUI.GOLD)
+	tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# The bitmap font ignores outlines; a 1 px ink shadow lifts the gold off the sunset sky.
+	tagline.add_theme_color_override("font_shadow_color",BeachUI.INK)
+	tagline.add_theme_constant_override("shadow_offset_x",1)
+	tagline.add_theme_constant_override("shadow_offset_y",1)
+	var panel: PanelContainer = BeachUI.wood_panel(column)
+	panel.size_flags_horizontal = SIZE_SHRINK_CENTER
+	content = VBoxContainer.new()
+	content.custom_minimum_size.x = 104
+	panel.add_child(content)
+	_small_button(content,"ARCADE  >",func() -> void: choose("arcade")).grab_focus()
+	_small_button(content,"CASUAL  /  PRACTICE",func() -> void: choose("casual"))
+	var coming: Button = _small_button(content,"VS / COOP - LATER",func() -> void: pass)
 	coming.name = "ComingSoonButton"
 	coming.disabled = true
-	coming.custom_minimum_size.y = 15
 	var small: HBoxContainer = HBoxContainer.new()
-	buttons.add_child(small)
-	BeachUI.button(small,"OPTIONS",func() -> void: choose("options"))
+	content.add_child(small)
+	_small_button(small,"OPTIONS",func() -> void: choose("options"))
 	if not OS.has_feature("web"):
-		BeachUI.button(small,"QUIT",func() -> void: choose("quit"))
+		_small_button(small,"QUIT",func() -> void: choose("quit"))
 
 func level_select(casual: bool) -> void:
 	var trained: bool = bool(GameState.entry(1).get("training_complete", false))
