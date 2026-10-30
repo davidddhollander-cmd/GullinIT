@@ -480,6 +480,10 @@ func finish_tally() -> void:
 	else:
 		stars_label.text = "*".repeat(int(result.stars)) + "-".repeat(3 - int(result.stars))
 		_light_stars(int(result.stars))
+		# Screeches' verdict lands with the stars; boss levels keep their own title.
+		if not result.has("boss"):
+			var lines: Array = Config.quips.result_titles[clampi(int(result.stars), 0, 3)]
+			title_label.text = str(lines.pick_random())
 	hint_label.text = _record_text()
 	if not GameState.save_error.is_empty():
 		hint_label.add_theme_color_override("font_color", Color("ef725c"))

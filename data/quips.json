@@ -7,6 +7,12 @@
     "NO RECEIPT.",
     "FRESH TAKEAWAY!"
   ],
+  "result_titles": [
+    ["PATHETIC!", "CALL THAT A RAID?", "MY NAN STEALS MORE!"],
+    ["SCRAPED BY!", "ADEQUATE. BARELY.", "IT'LL DO. JUST."],
+    ["NOW WE'RE GULLIN'!", "PROPER CHEEKY!", "NOT BAD GULLSTER!"],
+    ["ABSOLUTE MENACE!", "BEACH BANDIT!", "GULLIN' IT!"]
+  ],
   "rivals": [
     "Best seagull simulator. I am a seagull. - Gary",
     "The food is free if you are fast enough. - Chip",
