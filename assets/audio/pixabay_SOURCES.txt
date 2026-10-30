@@ -1,0 +1,9 @@
+Pixabay sound sources (Pixabay Content License: free for commercial use, no attribution
+required, NOT CC0; do not redistribute these files on their own). Trimmed/levelled with
+ffmpeg on 2026-10-30.
+
+thunder_1.ogg  <- pwlpl-loud-thunder-sound-effect-359272.mp3   (first 6.5 s, 1.5 s fade, -16 LUFS)
+thunder_2.ogg  <- soundmarker33-thunder-clap-512544.mp3        (0.55-6.55 s, 1.5 s fade, -16 LUFS)
+rain_loop.ogg  <- dragon-studio-heavy-wind-and-rain-515265.mp3 (1-28 s, -6 dB, 2 s crossfade seam)
+
+Pages: https://pixabay.com/sound-effects/ (search the numeric IDs above).

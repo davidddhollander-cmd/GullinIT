@@ -27,5 +27,8 @@ Stars 600 / 950 / 1250 are an initial guess.
 ## Save migration
 Save version 2 inserts Squall as level 6. `GameState.migrate_progress` moves an old version-1 level 6 record (the boss: best, stars, quests; `l6_random` becomes `l7_random`) to level 7 and drops key `6`. `GameState.unlocked` also opens any level that already has stars or a casual time, so a beaten boss stays open even though Squall is unplayed; level 6 itself opens from level 5 as before. `stage1_complete` and feathers are untouched. The demo `last_level` default is now 7; `data/demo.json` is unchanged.
 
+## Rain, lightning and sound
+`BeachRain` draws two layers of streaks (far: short/dim/slow, near: long/bright with a 1 px head) with per-drop speed, length and brightness, and half-scale `water_splash` crowns where near drops land on the sand. Lightning strikes when the squall begins and every `lightning_every` seconds after: a double flash, a 0.3 s bolt, and `thunder_1`/`thunder_2` alternating on the flash. `BeachSquall` fades the looping `rain_loop.ogg` with the squall's intensity on the SFX bus (Stream playback). The three sounds are Pixabay downloads (Pixabay Content License, not CC0): see `assets/audio/pixabay_SOURCES.txt`.
+
 ## Art requests (for Codex)
 Squall reuses walk/run/`panic_run`/`look_up`. Nothing is faked in code. Wanted later: a hunched "running for cover" pose with a coat or towel over the head, and a held-umbrella sprite for the sheltering adults (currently shown under the prop umbrellas, huts and benches).

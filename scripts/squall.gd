@@ -19,6 +19,8 @@ var shelter_load: Dictionary = {} ## shelter x -> people sent there
 var rain: BeachRain
 var rival_scraps: Dictionary = {} ## rival pilot -> its own scraps weight
 var next_strike: float = INF ## elapsed time of the next lightning strike during the squall
+var downpour: AudioStreamPlayer ## wind-and-rain bed, faded with the squall's intensity
+const DOWNPOUR_DB: float = -10.0
 
 func setup(owner_game: BeachGame) -> void:
 	game = owner_game
@@ -28,6 +30,13 @@ func setup(owner_game: BeachGame) -> void:
 	rain.z_index = 6
 	rain.drops = int(cfg.rain_drops)
 	game.add_child(rain)
+	var loop: AudioStreamOggVorbis = load("res://assets/audio/rain_loop.ogg")
+	loop.loop = true
+	downpour = AudioStreamPlayer.new()
+	downpour.stream = loop
+	downpour.bus = "SFX"
+	downpour.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
+	game.add_child(downpour)
 
 func phase_at(seconds: float) -> Phase:
 	if seconds < float(cfg.calm):
@@ -61,6 +70,13 @@ func tick(delta: float) -> void:
 	game.beach.modulate = Color.WHITE.lerp(dark, intensity)
 	game.actors.modulate = Color.WHITE.lerp(dark, intensity * 0.5)
 	rain.tick(delta, intensity, game.wind.direction * (4.0 + 8.0 * game.wind.strength), game.camera_x)
+	var audible: bool = intensity > 0.01 and bool(Config.tuning.juice.audio)
+	if audible != downpour.playing:
+		if audible:
+			downpour.play()
+		else:
+			downpour.stop()
+	downpour.volume_db = DOWNPOUR_DB + linear_to_db(maxf(intensity, 0.001))
 
 ## Strength follows the squall; gusts (and one direction flip in its second half) only blow during it.
 func _wind() -> void:

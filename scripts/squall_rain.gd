@@ -16,7 +16,7 @@ var rain: Array[Dictionary] = []
 var splashes: Array[Dictionary] = [] ## {x (world), y, t}
 var splash_frames: SpriteFrames
 var strike_age: float = -1.0 ## seconds since the last lightning strike, -1 when none is showing
-var thundered: bool = true
+var strikes: int = 0
 var bolt: PackedVector2Array
 var rng := RandomNumberGenerator.new()
 
@@ -36,7 +36,9 @@ func _ready() -> void:
 
 func strike() -> void:
 	strike_age = 0.0
-	thundered = false
+	strikes += 1
+	# The crack lands on the flash; the two recordings alternate, each slightly re-pitched.
+	Audio.play("thunder_%d" % (1 + strikes % 2), rng.randf_range(0.9, 1.05), -2.0)
 	bolt = PackedVector2Array()
 	var at := Vector2(rng.randf_range(40.0, 280.0), -2.0)
 	bolt.append(at)
@@ -67,9 +69,6 @@ func tick(delta: float, amount: float, wind_slant: float, camera_x: float) -> vo
 			splashes.remove_at(i)
 	if strike_age >= 0.0:
 		strike_age += delta
-		if not thundered and strike_age >= 0.45:
-			thundered = true
-			Audio.play("gust", 0.5, -2.0)
 		if strike_age > 0.6:
 			strike_age = -1.0
 	visible = amount > 0.01 or strike_age >= 0.0 or not splashes.is_empty()
