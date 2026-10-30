@@ -9,9 +9,9 @@
   "twist": {"id": "gary_intro"},
   "quests": [
     {"id": "l2_ice", "text": "3 CLEAN ICE CREAMS", "event": "swallowed", "filter": {"food": "ice_cream", "direct": true}, "count": 3, "bonus": 50},
-    {"id": "l2_cry", "text": "MAKE A TODDLER CRY", "event": "toddler_cried", "filter": {}, "count": 1, "bonus": 30}
+    {"id": "l2_cry", "text": "MAKE A TODDLER CRY", "event": "toddler_cried", "filter": {}, "count": 1, "bonus": 30},
+    {"id": "l2_bump_gary", "text": "BUMP GARY TWICE", "event": "rival_bumped", "filter": {"name": "Gary"}, "count": 2, "bonus": 40}
   ],
-  "random_quest": {"count": [3, 5], "bonus": 40},
   "random_foods": ["ice_cream", "crisps_bag", "half_eaten_doughnut", "half_eaten_sandwich"],
   "stars": [150, 400, 550],
   "rivals": [{"name": "Gary", "species": "great-black-backed", "speed": 0.65, "accuracy_px": 22, "mug_chance": 0.15, "loose_only": true, "taunt": "GARY: OI! THAT'S MY LUNCH!", "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}}],

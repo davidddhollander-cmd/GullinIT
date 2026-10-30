@@ -870,6 +870,7 @@ func _mugging() -> void:
 				effects.message(pilot.gull.position-Vector2(0,20),"BONK!",BeachUI.GOLD)
 				Audio.play("snatch",1+score.tier*0.08)
 				brash.add(float(Config.tuning.brash.bump))
+				_quest_event("rival_bumped",{"name":pilot.gull.rival_name})
 				if training and lesson == BUMP_LESSON and pilot.dummy:
 					_training_advance()
 				return
