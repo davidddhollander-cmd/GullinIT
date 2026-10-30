@@ -144,6 +144,7 @@ func run() -> void:
 	await preload("res://tests/vfx_polish_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/art_lab_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/bin_leftover_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/food_variety_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/wheelie_bin_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/score_rules_checks.gd").run(self,Callable(self,"check"))
 	preload("res://tests/quest_checks.gd").run(Callable(self,"check"))
@@ -2312,8 +2313,9 @@ func food_checks() -> void:
 	var categories: Dictionary = {"small":0,"medium":0,"large":0}
 	for id: String in Config.foods:
 		var definition: Dictionary = Config.foods[id]
-		check(int(definition.points) == int(expected_points.get(id,-1)),"food has its balanced base value: "+id)
-		categories[definition.category] += 1
+		check(int(definition.points) == int(expected_points.get(Config.food_family(id),-1)),"food has its balanced base value: "+id)
+		if Config.food_family(id) == id: # pizza slices and ice cream flavours are looks of their family's food
+			categories[definition.category] += 1
 		var frame: AtlasTexture = Config.frames(definition.sprite).get_frame_texture(&"idle",0) as AtlasTexture
 		check(frame != null and Rect2(Vector2.ZERO,frame.atlas.get_size()).encloses(frame.region),"food artwork is inside atlas: "+id)
 		check(Vector2(definition.size[0],definition.size[1]) == Vector2(definition.pickup_radius[0],definition.pickup_radius[1])*2,"pickup size matches food artwork: "+id)

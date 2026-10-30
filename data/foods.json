@@ -158,5 +158,150 @@
     "size": [8, 8],
     "pickup_radius": [4, 4],
     "ground": true
+  },
+  "pizza_slice_cheese": {
+    "name": "Cheese pizza",
+    "family": "half_eaten_pizza",
+    "category": "small",
+    "points": 20,
+    "sprite": "food_pizza_slice_cheese",
+    "size": [8.5, 7.5],
+    "pickup_radius": [4.25, 3.75],
+    "ground": true
+  },
+  "pizza_slice_pepperoni": {
+    "name": "Pepperoni pizza",
+    "family": "half_eaten_pizza",
+    "category": "small",
+    "points": 20,
+    "sprite": "food_pizza_slice_pepperoni",
+    "size": [8.0, 7.0],
+    "pickup_radius": [4.0, 3.5],
+    "ground": true
+  },
+  "pizza_slice_mushroom": {
+    "name": "Mushroom pizza",
+    "family": "half_eaten_pizza",
+    "category": "small",
+    "points": 20,
+    "sprite": "food_pizza_slice_mushroom",
+    "size": [7.5, 7.0],
+    "pickup_radius": [3.75, 3.5],
+    "ground": true
+  },
+  "pizza_slice_veggie": {
+    "name": "Veggie pizza",
+    "family": "half_eaten_pizza",
+    "category": "small",
+    "points": 20,
+    "sprite": "food_pizza_slice_veggie",
+    "size": [8.0, 7.0],
+    "pickup_radius": [4.0, 3.5],
+    "ground": true
+  },
+  "pizza_slice_hawaiian": {
+    "name": "Hawaiian pizza",
+    "family": "half_eaten_pizza",
+    "category": "small",
+    "points": 20,
+    "sprite": "food_pizza_slice_hawaiian",
+    "size": [8.0, 7.0],
+    "pickup_radius": [4.0, 3.5],
+    "ground": true
+  },
+  "pizza_slice_white": {
+    "name": "White pizza",
+    "family": "half_eaten_pizza",
+    "category": "small",
+    "points": 20,
+    "sprite": "food_pizza_slice_white",
+    "size": [8.0, 7.0],
+    "pickup_radius": [4.0, 3.5],
+    "ground": true
+  },
+  "pizza_slice_ham_corn": {
+    "name": "Ham corn pizza",
+    "family": "half_eaten_pizza",
+    "category": "small",
+    "points": 20,
+    "sprite": "food_pizza_slice_ham_corn",
+    "size": [8.0, 7.0],
+    "pickup_radius": [4.0, 3.5],
+    "ground": true
+  },
+  "pizza_slice_rocket": {
+    "name": "Rocket pizza",
+    "family": "half_eaten_pizza",
+    "category": "small",
+    "points": 20,
+    "sprite": "food_pizza_slice_rocket",
+    "size": [8.5, 7.0],
+    "pickup_radius": [4.25, 3.5],
+    "ground": true
+  },
+  "pizza_slice_basil": {
+    "name": "Basil pizza",
+    "family": "half_eaten_pizza",
+    "category": "small",
+    "points": 20,
+    "sprite": "food_pizza_slice_basil",
+    "size": [8.5, 7.0],
+    "pickup_radius": [4.25, 3.5],
+    "ground": true
+  },
+  "ice_cream_vanilla": {
+    "reclaim_chance": 0.0,
+    "name": "Vanilla ice cream",
+    "family": "ice_cream",
+    "category": "medium",
+    "points": 25,
+    "sprite": "food_ice_cream_vanilla",
+    "size": [4.0, 8.0],
+    "pickup_radius": [2.0, 4.0],
+    "ground": false
+  },
+  "ice_cream_chocolate": {
+    "reclaim_chance": 0.0,
+    "name": "Chocolate ice cream",
+    "family": "ice_cream",
+    "category": "medium",
+    "points": 25,
+    "sprite": "food_ice_cream_chocolate",
+    "size": [4.0, 8.0],
+    "pickup_radius": [2.0, 4.0],
+    "ground": false
+  },
+  "ice_cream_strawberry": {
+    "reclaim_chance": 0.0,
+    "name": "Strawberry ice cream",
+    "family": "ice_cream",
+    "category": "medium",
+    "points": 25,
+    "sprite": "food_ice_cream_strawberry",
+    "size": [4.0, 8.0],
+    "pickup_radius": [2.0, 4.0],
+    "ground": false
+  },
+  "ice_cream_mint": {
+    "reclaim_chance": 0.0,
+    "name": "Mint ice cream",
+    "family": "ice_cream",
+    "category": "medium",
+    "points": 25,
+    "sprite": "food_ice_cream_mint",
+    "size": [4.0, 8.0],
+    "pickup_radius": [2.0, 4.0],
+    "ground": false
+  },
+  "ice_cream_swirl": {
+    "reclaim_chance": 0.0,
+    "name": "Swirl ice cream",
+    "family": "ice_cream",
+    "category": "medium",
+    "points": 25,
+    "sprite": "food_ice_cream_swirl",
+    "size": [4.0, 8.5],
+    "pickup_radius": [2.0, 4.25],
+    "ground": false
   }
 }

@@ -35,7 +35,7 @@ static func run(suite: Node, check: Callable) -> void:
 		if bool(item.garbage):
 			rubbish += 1
 		else:
-			counts[item.food_id] = int(counts.get(item.food_id, 0))+1
+			counts[Config.food_family(item.food_id)] = int(counts.get(Config.food_family(item.food_id), 0))+1
 	check.call(rubbish == 4 and int(counts.get("crumbs", 0)) == 2, "bin retains two crumbs and four inert litter objects")
 	for id: String in LEFTOVERS:
 		check.call(int(counts.get(id, 0)) == 1, "each full bin contains one " + id)
@@ -57,7 +57,7 @@ static func run(suite: Node, check: Callable) -> void:
 	for id: String in LEFTOVERS:
 		var selected: Dictionary = {}
 		for drop: Dictionary in drops:
-			if drop.food_id == id:
+			if Config.food_family(drop.food_id) == id:
 				selected = drop.duplicate(true)
 		if selected.is_empty():
 			continue

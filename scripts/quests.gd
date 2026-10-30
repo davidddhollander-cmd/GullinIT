@@ -27,7 +27,8 @@ func record(event: String, data: Dictionary = {}) -> Array[Dictionary]:
 			continue
 		var matches: bool = true
 		for key: String in quest.filter:
-			if not data.has(key) or data[key] != quest.filter[key]:
+			# A "food" filter names a family, so any ice cream flavour or pizza slice counts.
+			if not data.has(key) or (Config.food_family(str(data[key])) != Config.food_family(str(quest.filter[key])) if key == "food" else data[key] != quest.filter[key]):
 				matches = false
 		if not matches:
 			continue

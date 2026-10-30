@@ -41,7 +41,7 @@ func request_family(buyer: BeachTarget) -> bool:
 	var orders: Array[Dictionary] = []
 	for child: BeachTarget in buyer.family_children:
 		if is_instance_valid(child) and not child.food and not child.dropped_pending:
-			orders.append({"buyer":child,"id":"ice_cream" if child.wants_ice_cream else "crisps_bag","reserve":false})
+			orders.append({"buyer":child,"id":spawner.next_flavour() if child.wants_ice_cream else "crisps_bag","reserve":false})
 	var total: int = buyer.supply_crisps+(1 if buyer.food and buyer.food_id=="crisps_bag" else 0)
 	# A dropped, still-owned bag is stock too; recovering it must not make three.
 	if buyer.dropped_pending and buyer.food_id=="crisps_bag":

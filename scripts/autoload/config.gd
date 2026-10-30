@@ -52,7 +52,7 @@ func reload_data() -> bool:
 			return false
 	for id: String in next.foods:
 		var food: Dictionary = next.foods[id]
-		if not food.get("category", "") in ["small","medium","large"] or int(food.get("points",0)) <= 0 or not next.sprites.has(food.get("sprite","")):
+		if not food.get("category", "") in ["small","medium","large"] or int(food.get("points",0)) <= 0 or not next.sprites.has(food.get("sprite","")) or not next.foods.has(food.get("family",id)):
 			last_error = "Invalid food definition: " + id
 			return false
 	for id: String in next.targets:
@@ -76,6 +76,20 @@ func reload_data() -> bool:
 	frames_cache.clear()
 	reloaded.emit()
 	return true
+
+## Look-alike foods share a "family" in foods.json (the base food's id); a food without one is its own family.
+func food_family(id: String) -> String:
+	return str(foods.get(id,{}).get("family",id))
+
+## The base food first, then every food that names it as family.
+func family_members(family: String) -> Array[String]:
+	var members: Array[String] = []
+	if foods.has(family):
+		members.append(family)
+	for id: String in foods:
+		if id != family and food_family(id) == family:
+			members.append(id)
+	return members
 
 func frames(sprite_id: String) -> SpriteFrames:
 	if frames_cache.has(sprite_id):

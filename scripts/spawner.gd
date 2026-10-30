@@ -12,10 +12,13 @@ var replacements: Array[Dictionary] = []
 var visual_offsets: Dictionary = {}
 var previous_x: Dictionary = {}
 var bag_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var flavour_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var last_flavour: int = -1 ## index into the ice-cream family of the previous customer's flavour
 var benches: BenchRegistry = BenchRegistry.new()
 var lane_holds: Dictionary = {} # target -> {"y": held lane offset, "t": seconds left}
 var depth_props: Array[Rect2] = [] # x-extent and base y (as position.y) of ground props
 const DEPTH_PROP_TYPES: Array[String] = ["bin","wheelie_bin","beach_bench","beach_chair_blue","beach_castle","beach_rocks","kiosk","hotdog_stand","fish_chips_stand","beach_hut","beach_lamp","beach_parasol","beach_parasol_blue"]
+const ICE_CREAM: String = "ice_cream" ## food family the ice-cream stand sells
 const SUNBATHER_LOOKS: Array[String] = ["male_red","male_blue","female_red","female_blue"]
 const BEHIND_PROP_Z: int = 0 # below ordinary scenery (z 1); crabs in the rear lane share it
 const LANE_GRACE: float = 0.5 # seconds a held lane may stay blocked before the walker changes lane
@@ -26,6 +29,7 @@ func setup(owner_node: Node2D, definition: Dictionary) -> void:
 	level = definition
 	rng.seed = int(level.seed)
 	bag_rng.seed = int(level.seed) + 97
+	flavour_rng.seed = int(level.seed) + 131
 	benches.setup(level.props)
 	depth_props.clear()
 	for prop: Dictionary in level.props:
@@ -36,6 +40,7 @@ func setup(owner_node: Node2D, definition: Dictionary) -> void:
 		if spawn.type == "off_lead_dog":
 			continue # BeachGame owns the dog; it is not a BeachTarget.
 		var target: BeachTarget = create(spawn.type,spawn.x,spawn)
+		assign_flavour(target)
 		# Authored buyers beside a stall begin with its visible purchase. The
 		# distant training/strolling snacks still represent earlier purchases.
 		if str(spawn.type)=="kiosk_customer" and str(spawn.get("station","")) in ["ice_cream","hotdogs"]:
@@ -90,6 +95,21 @@ func create(kind: String, x: float, spawn: Dictionary = {}) -> BeachTarget:
 	targets.append(target)
 	target_created.emit(target)
 	return target
+
+## Random ice cream from the family in foods.json, never the same as the previous pick.
+func next_flavour() -> String:
+	var pool: Array[String] = Config.family_members(ICE_CREAM)
+	var pick: int = flavour_rng.randi_range(0,pool.size()-1)
+	if last_flavour >= 0 and pool.size() > 1:
+		pick = (last_flavour+flavour_rng.randi_range(1,pool.size()-1))%pool.size()
+	last_flavour = pick
+	return pool[pick]
+
+## A newly made person holding plain ice cream gets a random flavour instead.
+func assign_flavour(target: BeachTarget) -> void:
+	if target.food_id == ICE_CREAM:
+		target.food_id = next_flavour()
+		target.refresh_art()
 
 # Look for this kind that the fewest people on the beach already wear; ties take list order.
 func _least_used_look(kind: String) -> String:
@@ -343,6 +363,7 @@ func tick(delta: float, elapsed: float) -> void:
 			var later: bool = rng.randf() < clampf(elapsed/float(level.time_limit),0.0,1.0)
 			var x: float = _off_screen(float(Config.tuning.world.width)-20 if later else 20.0)
 			var target: BeachTarget = create(replacements[i].type,x)
+			assign_flavour(target)
 			target.facing = 1 if x < _camera_x() else -1
 			replacements.remove_at(i)
 	if int(level.id) >= 4:
@@ -365,6 +386,7 @@ func tick(delta: float, elapsed: float) -> void:
 						return # someone is already on their way to buy
 				# Arrivals walk in from the side of the screen to the serving window; they never pop out of the stand.
 				var customer: BeachTarget = create("kiosk_customer",_off_screen(arrival_x),{"food_id":"hotdog" if stand.type == "hotdog_stand" else "ice_cream","patrol_radius":float(Config.layout_rules.patrol_radius)})
+				assign_flavour(customer)
 				customer.food = false
 				customer.food_sprite.hide()
 				customer.respawn = 0.0
