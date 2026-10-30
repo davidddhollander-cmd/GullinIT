@@ -173,7 +173,7 @@ func start_level(id: int, force_training: bool = false, force_screech: bool = fa
 	game.setup(Config.levels[id-1],casual,force_training,force_screech)
 	game.level_finished.connect(_finished)
 	game.pause_requested.connect(func() -> void: _navigate("pause"))
-	Audio.play_music("lounge" if id == 1 else ("synth" if id % 2 == 0 else "beach"))
+	Audio.play_music("lounge" if id == 1 else Audio.LEVEL_MUSIC[(id - 2) % Audio.LEVEL_MUSIC.size()])
 
 func clear_game() -> void:
 	if is_instance_valid(game):

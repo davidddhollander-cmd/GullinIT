@@ -334,7 +334,119 @@ def synth():
     }, target_rms_db=-15)
 
 
+# --- "Sunset Drive": cruising outrun synthpop, E minor, 112 bpm ---------------
+
+def cowbell():
+    sig = sum(square(f, 0.2, bright=0.4, a=0.001, d=0.05, s=0.2, r=0.04) for f in (587, 845))
+    return fft_filter(sig, 500, 3500) * np.exp(-np.arange(len(sig)) / SR / 0.07)
+
+
+def drive():
+    tr = Track(bpm=112, bars=32, seed=112)
+    rng = tr.rng
+    prog = [([52, 55, 59], 40), ([52, 55, 60], 36), ([50, 55, 59], 43), ([50, 54, 57], 38)]
+    k = kick(0.9)
+    for bar in range(32):
+        b0 = bar * 4
+        notes, root = prog[bar % 4]
+        for beat in range(4):
+            tr.add("kick", k, b0 + beat, 0, 0.95, jitter=0.001)
+            # galloping bass: 8th + two 16ths per beat
+            for off, dur in ((0, .5), (.5, .25), (.75, .25)):
+                tr.add("bass", saw(hz(root), dur * tr.spb * 0.8, bright=0.45, a=0.002, d=0.06, s=0.45, r=0.03),
+                       b0 + beat + off, 0, 0.5, jitter=0.001)
+        for beat in (1, 3):
+            tr.add("snare", snare(rng, 170, 0.16), b0 + beat, 0, 0.75, jitter=0.001)
+        for e in range(8):
+            tr.add("hats", hat(rng, 0.09 if e % 2 else 0.03), b0 + e * .5, 0.3, 0.12 if e % 2 else 0.07, jitter=0.002)
+        if bar % 8 == 7:  # descending tom fill
+            for i, off in enumerate((2, 2.5, 3, 3.25, 3.5, 3.75)):
+                tr.add("snare", snare(rng, 180 - i * 18, 0.12), b0 + off, -0.3 + i * 0.12, 0.35)
+        for det, pan in ((-10, -0.7), (0, 0), (10, 0.7)):
+            chord(saw, [m + 12 for m in notes], b0, tr, "pad", 0, [pan] * 3, 0.3, seconds=4 * tr.spb, bright=0.5,
+                  detune=det, a=0.5, d=1.5, s=0.85, r=0.6)
+        arp = [notes[0] + 12, notes[2] + 12, notes[1] + 24, notes[2] + 12]
+        for e in range(8):
+            tr.add("arp", square(hz(arp[e % 4]), 0.35 * tr.spb, bright=0.6, a=0.003, d=0.1, s=0.3, r=0.05),
+                   b0 + e * .5, 0, 0.2, jitter=0.0)
+        if bar >= 24:  # bell counter-line on the last pass
+            for beat in (0, 2):
+                tr.add("bell", steel_pan(hz(notes[beat // 2 + 1] + 24), 1.5 * tr.spb), b0 + beat + .5, 0.4, 0.12)
+    lead_a = seq("B4:1 E5:1 G5:1 F#5:.5 E5:.5 | G5:2 E5:1 C5:1 | D5:1 G5:1 B5:1 A5:.5 G5:.5 | A5:2 F#5:1 D5:1 | "
+                 "B4:1 E5:1 G5:1 B5:1 | C6:1.5 B5:.5 G5:1 E5:1 | D5:.5 G5:.5 B5:1 D6:1 B5:1 | A5:3 r:1")
+    lead_b = seq("E6:.5 D6:.5 B5:1 G5:.5 B5:.5 E6:1 | E6:.5 D6:.5 C6:1 G5:1 E5:1 | D6:.5 B5:.5 G5:1 B5:.5 D6:.5 G6:1 | "
+                 "F#6:1.5 E6:.5 D6:1 A5:1 | B5:.5 E6:.5 G6:1 F#6:.5 E6:.5 D6:1 | C6:1 E6:1 G6:1 E6:1 | "
+                 "D6:.5 B5:.5 G5:.5 B5:.5 D6:1 F#6:1 | E6:2 r:2")
+    for start, phrase, octave in ((32, lead_a, 0), (64, lead_b, -12), (96, lead_a, 0)):
+        for beat, dur, m in phrase:
+            tr.add("lead", lead(hz(m + octave), dur * tr.spb * 0.95), start + beat, -0.1, 0.5)
+    tr.master(os.path.join(OUT, "drive_loop.ogg"), {
+        "snare": lambda b: tr.reverb(b, 1.8, 0.7, tone=6500, gate=0.3),
+        "pad": lambda b: tr.reverb(b, 3.0, 0.4),
+        "arp": lambda b: tr.reverb(tr.delay(b, 0.75, 0.4, 0.3), 1.8, 0.25),
+        "bell": lambda b: tr.reverb(tr.delay(b, 1.5, 0.4, 0.3), 2.5, 0.4),
+        "lead": lambda b: tr.reverb(tr.delay(b, 0.75, 0.3, 0.25), 2.2, 0.35),
+    }, target_rms_db=-15)
+
+
+# --- "Pier Pressure": punchy synth-brass pop, B minor, 132 bpm --------------
+
+def pier():
+    tr = Track(bpm=132, bars=32, seed=132)
+    rng = tr.rng
+    prog = [([54, 59, 62], 35), ([55, 59, 62], 31), ([54, 57, 62], 38), ([52, 57, 61], 33)]
+    bass16 = [(0, 0), (2, 12), (3, 0), (6, 12), (8, 0), (10, 12), (11, 0), (14, 12)]
+    k, bell = kick(1.0), cowbell()
+    for bar in range(32):
+        b0 = bar * 4
+        notes, root = prog[bar % 4]
+        for beat in range(4):
+            tr.add("kick", k, b0 + beat, 0, 1.0, jitter=0.001)
+            tr.add("perc", bell, b0 + beat + .5, 0.35, 0.12 if bar % 2 else 0.08, jitter=0.002)
+        for beat in (1, 3):
+            tr.add("snare", snare(rng, 210, 0.09), b0 + beat, 0, 0.5, jitter=0.001)
+            tr.add("snare", clap(rng), b0 + beat, -0.1, 0.5, jitter=0.002)
+        for s in range(16):
+            tr.add("hats", hat(rng, 0.1 if s % 4 == 2 else 0.022), b0 + s * .25, 0.3,
+                   (0.08, 0.06, 0.13, 0.06)[s % 4], jitter=0.002)
+        for s, step in bass16:
+            tr.add("bass", saw(hz(root + 12 + step), 0.22 * tr.spb, bright=0.6, a=0.002, d=0.05, s=0.5, r=0.02),
+                   b0 + s * .25, 0, 0.55, jitter=0.001)
+        if bar < 8 or bar >= 24:  # synth-brass stabs, pushed ahead of the beat
+            for off in (0, .75, 2.5, 3.5):
+                for det, pan in ((-12, -0.5), (12, 0.5)):
+                    chord(saw, [m + 12 for m in notes], b0 + off, tr, "brass", 0, [pan] * 3, 0.3,
+                          seconds=0.3 * tr.spb, bright=0.9, detune=det, a=0.015, d=0.12, s=0.6, r=0.08)
+        else:  # quieter pad under the lead
+            chord(saw, notes, b0, tr, "pad", 0, [0, -0.4, 0.4], 0.22, seconds=4 * tr.spb, bright=0.5,
+                  a=0.2, d=1.0, s=0.8, r=0.3)
+        if bar % 8 == 7:  # snare roll build
+            for s in range(8, 16):
+                tr.add("snare", snare(rng, 200, 0.06), b0 + s * .25, 0, 0.15 + 0.04 * (s - 8))
+    lead_a = seq("F#5:.5 F#5:.5 F#5:.5 E5:.5 D5:.5 E5:.5 F#5:1 | B5:.5 A5:.5 G5:.5 F#5:.5 E5:1 D5:1 | "
+                 "F#5:.5 A5:.5 D6:1 C#6:.5 D6:.5 A5:1 | E5:.5 F#5:.5 E5:.5 C#5:.5 A4:2 | "
+                 "F#5:.5 F#5:.5 F#5:.5 E5:.5 D5:.5 E5:.5 F#5:.5 B5:.5 | D6:1 B5:.5 G5:.5 B5:1 D6:1 | "
+                 "C#6:.5 D6:.5 E6:.5 D6:.5 A5:1 F#5:1 | E5:1 C#5:1 E5:2")
+    lead_b = seq("B5:.75 B5:.25 r:.5 B5:.5 D6:.5 C#6:.5 B5:1 | G5:.75 G5:.25 r:.5 G5:.5 B5:.5 A5:.5 G5:1 | "
+                 "F#5:.5 A5:.5 D6:.5 F#6:.5 E6:1 D6:1 | C#6:.5 E6:.5 C#6:.5 A5:.5 E6:2 | "
+                 "B5:.75 B5:.25 r:.5 B5:.5 D6:.5 E6:.5 F#6:1 | G6:.5 F#6:.5 E6:.5 D6:.5 B5:1 G5:1 | "
+                 "A5:.5 D6:.5 F#6:.5 E6:.5 D6:.5 C#6:.5 D6:1 | C#6:1 E6:1 A5:2")
+    for start, phrase, double in ((32, lead_a, False), (64, lead_b, False), (96, lead_b, True)):
+        for beat, dur, m in phrase:
+            tr.add("lead", square(hz(m), dur * tr.spb * 0.85, bright=1.2, a=0.005, d=0.15, s=0.7, r=0.08),
+                   start + beat, -0.15, 0.45)
+            if double:
+                tr.add("lead", lead(hz(m - 12), dur * tr.spb * 0.85), start + beat, 0.15, 0.3)
+    tr.master(os.path.join(OUT, "pier_loop.ogg"), {
+        "snare": lambda b: tr.reverb(b, 1.2, 0.5, tone=7000, gate=0.2),
+        "brass": lambda b: tr.reverb(b, 1.5, 0.3),
+        "pad": lambda b: tr.reverb(b, 2.0, 0.35),
+        "perc": lambda b: tr.reverb(b, 0.8, 0.15),
+        "lead": lambda b: tr.reverb(tr.delay(b, 0.75, 0.3, 0.22), 1.6, 0.25),
+    }, target_rms_db=-15)
+
+
 if __name__ == "__main__":
-    songs = {"lounge": lounge, "synth": synth}
+    songs = {"lounge": lounge, "synth": synth, "drive": drive, "pier": pier}
     for name in sys.argv[1:] or songs:
         songs[name]()
