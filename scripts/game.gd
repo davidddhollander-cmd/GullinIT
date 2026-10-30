@@ -48,6 +48,9 @@ static var trainer_cards: bool = true
 var trainer_open: bool = false
 var trainer_queue: Dictionary = {}
 var trainer_then: Callable = Callable()
+## The first swoop freezes just before the beak reaches the snack until the player presses peck.
+var peck_pause: bool = false
+var peck_pause_armed: bool = true
 var training_took_off: bool = false
 var training_clean_snatch: bool = false
 var training_raid_started: bool = false
@@ -430,6 +433,10 @@ func _physics_process(delta: float) -> void:
 	_slowmo_tick()
 	if trainer_open:
 		return
+	if peck_pause:
+		if input.touch_peck:
+			_end_peck_pause()
+		return
 	if intro > 0 and int(level.id) != 1:
 		intro -= delta
 		if intro <= 0:
@@ -593,6 +600,8 @@ func dismiss_intro() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if trainer_open:
 		return
+	if peck_pause and event.is_action_pressed("peck") and not event.is_echo():
+		_end_peck_pause() # the same press then pecks, below
 	if intro > 0:
 		if int(level.id) != 1 and event.is_pressed() and not event is InputEventMouseMotion:
 			dismiss_intro()
@@ -1033,7 +1042,32 @@ func _freeze_actors(value: bool) -> void:
 	for dog: OffLeadDog in dogs:
 		dog.paused = value
 
+## The first swoop is the hardest moment in the game, and the peck window is 0.12 s. Freeze just before the
+## beak reaches the snack so the player sees when to press peck. Once per dive, and not in Casual, where the
+## beak pecks by itself.
+func _peck_pause_check() -> void:
+	if not trainer_cards or lesson != 2 or trainer_open or player.auto_peck():
+		return
+	if player.state != BeachGull.State.STRIKE:
+		peck_pause_armed = true
+		return
+	if not peck_pause_armed or peck_pause or player.peck_used or player.peck_time > 0.0:
+		return
+	var reach: float = player.dive_speed * float(Config.tuning.dive.peck_window) * 0.5 + 6.0
+	for target: BeachTarget in spawner.targets:
+		if target.kind == "kiosk_customer" and target.food and not target.leaving and player.beak().distance_to(target.food_position()) <= reach:
+			peck_pause = true
+			peck_pause_armed = false
+			input.clear_touch()
+			_freeze_actors(true)
+			return
+
+func _end_peck_pause() -> void:
+	peck_pause = false
+	_freeze_actors(false)
+
 func _training_tick(delta: float) -> void:
+	_peck_pause_check()
 	if lesson == 0:
 		# Remember takeoff even when the player releases flap before steering.
 		if player.state == BeachGull.State.GLIDE and player.position.y < 110:

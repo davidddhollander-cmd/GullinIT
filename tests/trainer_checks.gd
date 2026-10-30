@@ -19,6 +19,7 @@ static func run(host: Node, check: Callable) -> void:
 	await _training_flow(host,check)
 	await _screech_flow(host,check)
 	await _replay_flow(host,check)
+	await _peck_pause_flow(host,check)
 	BeachGame.trainer_cards = false
 	GameState.options.erase("control_mode")
 	GameState.progress = {}
@@ -214,5 +215,82 @@ static func _replay_flow(host: Node, check: Callable) -> void:
 	host.main.start_level(3)
 	host.main._navigate("pause")
 	check.call(not _has_button(host,"REPLAY LESSON"),"no replay outside Level 2")
+	host.main.clear_game()
+	GameState.progress = {}
+
+static func _set_strike(game: BeachGame, customer: BeachTarget, close: bool) -> void:
+	game.player.state = BeachGull.State.STRIKE
+	game.player.peck_used = false
+	game.player.peck_time = 0.0
+	game.player.dive_speed = 260.0
+	game.player.position = customer.food_position() + Vector2(0,-70)
+	if close:
+		game.player.position += customer.food_position() - game.player.beak()
+
+## Lesson 3 freezes just before the beak reaches the snack so the player sees when to press peck.
+static func _peck_pause_flow(host: Node, check: Callable) -> void:
+	BeachGame.trainer_cards = true
+	GameState.options.control_mode = "normal"
+	GameState.progress = {}
+	host.main.start_level(1)
+	var game: BeachGame = host.main.game
+	game.set_physics_process(false)
+	game.overlay.start_button.pressed.emit()
+	game.overlay.trainer_card.button.pressed.emit()
+	game.lesson = 2
+	game.player.control_mode = "normal"
+	var customer: BeachTarget
+	for target: BeachTarget in game.spawner.targets:
+		if target.kind == "kiosk_customer":
+			customer = target
+	_set_strike(game,customer,false)
+	game._training_tick(0.016)
+	check.call(not game.peck_pause,"a dive that is still far from the snack is not paused")
+	_set_strike(game,customer,true)
+	game._training_tick(0.016)
+	check.call(game.peck_pause and game.running,"the dive freezes when the beak is within peck reach of the snack")
+	var frozen_at: Vector2 = game.player.position
+	game._physics_process(0.5)
+	check.call(game.player.position == frozen_at and game.peck_pause,"the world stays frozen until peck is pressed")
+	game.overlay.queue_redraw()
+	await host.snapshot("trainer-peck-prompt")
+	var press: InputEventKey = InputEventKey.new()
+	press.physical_keycode = KEY_E
+	press.pressed = true
+	game._unhandled_input(press)
+	check.call(not game.peck_pause and game.player.peck_used and game.player.peck_time > 0.0,"pressing peck resumes the dive and starts the peck in the same press")
+	game._training_tick(0.016)
+	check.call(not game.peck_pause,"a dive pauses only once")
+	game.player.state = BeachGull.State.GLIDE
+	game._training_tick(0.016)
+	_set_strike(game,customer,true)
+	game._training_tick(0.016)
+	check.call(game.peck_pause,"the next dive pauses again")
+	game.input.touch_peck = true
+	game._physics_process(1.0 / 60.0)
+	check.call(not game.peck_pause,"the touch PECK button also resumes")
+	game.input.touch_peck = false
+	# Casual mode pecks by itself, so there is nothing to time.
+	game.player.state = BeachGull.State.GLIDE
+	game._training_tick(0.016)
+	game.player.control_mode = "casual"
+	_set_strike(game,customer,true)
+	game._training_tick(0.016)
+	check.call(not game.peck_pause,"Casual mode never pauses for the peck")
+	game.player.control_mode = "normal"
+	# Only the first swoop lesson pauses.
+	game.player.state = BeachGull.State.GLIDE
+	game._training_tick(0.016)
+	game.lesson = BeachGame.SECOND_SWOOP_LESSON
+	_set_strike(game,customer,true)
+	game._training_tick(0.016)
+	check.call(not game.peck_pause,"the second swoop lesson does not pause")
+	BeachGame.trainer_cards = false
+	game.lesson = 2
+	game.player.state = BeachGull.State.GLIDE
+	game._training_tick(0.016)
+	_set_strike(game,customer,true)
+	game._training_tick(0.016)
+	check.call(not game.peck_pause,"with pop-ups off nothing pauses")
 	host.main.clear_game()
 	GameState.progress = {}
