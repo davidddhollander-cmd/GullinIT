@@ -18,6 +18,7 @@ var twists: Dictionary = {} ## target -> its own twist, restored when the squall
 var shelter_load: Dictionary = {} ## shelter x -> people sent there
 var rain: BeachRain
 var rival_scraps: Dictionary = {} ## rival pilot -> its own scraps weight
+var next_strike: float = INF ## elapsed time of the next lightning strike during the squall
 
 func setup(owner_game: BeachGame) -> void:
 	game = owner_game
@@ -49,6 +50,8 @@ func tick(delta: float) -> void:
 	var storming: bool = phase == Phase.SQUALL
 	intensity = move_toward(intensity, 1.0 if storming else 0.0, delta / maxf(0.01, float(cfg.ramp) if storming else float(cfg.ease)))
 	_wind()
+	if storming and seconds >= next_strike:
+		_strike(seconds)
 	if storming:
 		for target: BeachTarget in game.spawner.targets:
 			if is_instance_valid(target) and not handled.has(target):
@@ -76,7 +79,13 @@ func _wind() -> void:
 	if wind.phase < 0.0:
 		wind.strength = wind.base
 
+func _strike(seconds: float) -> void:
+	rain.strike()
+	var gap: Array = cfg.get("lightning_every", [6.0, 12.0])
+	next_strike = seconds + rain.rng.randf_range(float(gap[0]), float(gap[1]))
+
 func _begin() -> void:
+	_strike(game.elapsed)
 	if not game.pending_rivals.is_empty():
 		game._release_rivals()
 	for pilot: RivalPilot in game.pilots:
