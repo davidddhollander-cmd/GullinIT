@@ -58,13 +58,12 @@ func title() -> void:
 	for child: Node in get_children():
 		remove_child(child)
 		child.queue_free()
-	# Logo and tagline float over the beach; only the buttons sit in a small wood box below them.
-	var center: CenterContainer = CenterContainer.new()
-	add_child(center)
-	BeachUI.full(center)
+	# Logo and tagline float centred over the beach; the buttons sit in a small wood box on the left.
+	var margin: MarginContainer = BeachUI.margin(self,6)
 	var column: VBoxContainer = VBoxContainer.new()
+	column.alignment = BoxContainer.ALIGNMENT_CENTER
 	column.add_theme_constant_override("separation",4)
-	center.add_child(column)
+	margin.add_child(column)
 	var logo: TextureRect = TextureRect.new()
 	logo.texture = load("res://assets/sprites/title-logo.png")
 	logo.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -89,7 +88,7 @@ func title() -> void:
 	tagline.add_theme_constant_override("shadow_offset_x",1)
 	tagline.add_theme_constant_override("shadow_offset_y",1)
 	var panel: PanelContainer = BeachUI.wood_panel(column)
-	panel.size_flags_horizontal = SIZE_SHRINK_CENTER
+	panel.size_flags_horizontal = SIZE_SHRINK_BEGIN
 	content = VBoxContainer.new()
 	content.custom_minimum_size.x = 104
 	panel.add_child(content)
