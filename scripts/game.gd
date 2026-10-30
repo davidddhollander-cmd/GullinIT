@@ -744,7 +744,9 @@ func _award(value: int, risky: bool, upwind: bool, mugged: bool, handover: bool 
 func _stunned() -> void:
 	training_clean_snatch = false
 	brash.add(float(Config.tuning.brash.stun))
+	var before: int = score.points
 	score.points = maxi(0,score.points-5)
+	score.lost += before-score.points
 	var dropped: Dictionary = player.digestion.drop_current()
 	if not dropped.is_empty():
 		stash_raids.items.append({"owner":null,"source":"dropped","food_id":dropped.id,"snack":dropped,"position":player.beak(),"velocity":Vector2(-player.facing*35,-55),"grounded":false,"age":0.0})
@@ -778,7 +780,9 @@ func _water_hit(gull: BeachGull, teen: WatergunTeen) -> void:
 func _crashed() -> void:
 	crashes += 1
 	training_clean_snatch = false
+	var before: int = score.points
 	score.points = ceili(score.points * 0.5)
+	score.lost += before-score.points
 	score.stunned()
 	effects.message(player.position-Vector2(0,20),str(Config.trainer.live.crash_toast) if training else "CRASH! POINTS LOST",Color("ef725c"))
 	effects.impact(player.position,true)
@@ -801,6 +805,8 @@ func _quest_completed(quest: Dictionary) -> void:
 	Audio.play("snatch")
 	if GameState.complete_quest(int(level.id),str(quest.id)):
 		feathers_earned += 1
+		quest.feather = true
+		effects.message(player.position-Vector2(0,32),"+1 FEATHER",BeachUI.CREAM)
 
 func _swallowed(snack: Dictionary) -> void:
 	_quest_event("swallowed",{"food":snack.id,"direct":not snack.get("scrap",false) and not snack.get("mugged",false),"mugged_from":snack.get("mugged_from",""),"handover":snack.get("handover",false)})
@@ -931,7 +937,7 @@ func finish() -> void:
 	input.enabled = false
 	input.clear_touch()
 	var result: Dictionary = score.result(level,casual,elapsed)
-	result.quests = quests.quests.map(func(quest: Dictionary) -> Dictionary: return {"text":quest.text,"done":quest.done,"progress":quest.progress,"count":quest.count,"bonus":quest.bonus})
+	result.quests = quests.quests.map(func(quest: Dictionary) -> Dictionary: return {"text":quest.text,"done":quest.done,"progress":quest.progress,"count":quest.count,"bonus":quest.bonus,"feather":quest.get("feather",false)})
 	result.quest_bonus = quests.bonus_points()
 	result.base = int(result.base) - int(result.quest_bonus)
 	result.feathers_earned = feathers_earned

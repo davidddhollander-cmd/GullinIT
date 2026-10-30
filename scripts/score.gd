@@ -6,6 +6,7 @@ var items: int = 0
 var tier: int = 0
 var window: float = 0.0
 var stuns: int = 0
+var lost: int = 0 ## points taken away by stuns and crashes
 var bonuses: Dictionary = {"Risky": 0, "Upwind": 0, "Mugged": 0, "Handover": 0}
 
 func tick(delta: float) -> void:
@@ -44,4 +45,4 @@ func result(level: Dictionary, casual: bool, elapsed: float) -> Dictionary:
 		for threshold: int in level.stars:
 			if total >= threshold:
 				stars += 1
-	return {"score":total,"base":points,"clean":0 if casual else clean,"stars":stars,"items":items,"stuns":stuns,"bonuses":bonuses.duplicate(),"elapsed":elapsed,"casual":casual}
+	return {"score":total,"base":points,"clean":0 if casual else clean,"stars":stars,"items":items,"stuns":stuns,"lost":lost,"bonuses":bonuses.duplicate(),"elapsed":elapsed,"casual":casual}

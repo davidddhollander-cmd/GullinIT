@@ -1,0 +1,8 @@
+Use case: stylized-concept.
+Asset type: single small retro pixel-art STAR icon for a game's high-score counter.
+Primary request: one friendly, bold FIVE-POINT GOLDEN STAR score symbol, upright top point, centered, immediately recognizable beside a numeric score. Design as an actual crisp early-1990s 16-bit console HUD sprite at 32 x 32 logical pixels, enlarged with nearest-neighbor square pixels for this image. No face, eyes, lettering or numbers.
+Style: chunky cartoon retro pixel art matching a playful 2D game. Broad angular stair-stepped silhouette, thick 1-2 logical pixel dark navy/charcoal outline, warm honey-gold main fill, small pale yellow highlight on upper-left edges, darker ochre shading on lower-right edges. Limited 5-6 color palette, large clean flat pixel clusters, no continuous gradients. Compact, balanced shape; five clearly distinct points and notches. It should read instantly at 16-32 pixels tall.
+Composition: exactly ONE star, fully visible, square canvas, centered with generous equal transparent padding approximately 15 percent on all sides, no border or container.
+Background: actual fully transparent alpha around the star and within all negative spaces. No backdrop, checkerboard, floor or cast shadow.
+Avoid: sparkles, extra stars, glow halo, streaks, decorative particles, text, frame, button, metallic photorealism, smooth vector curves, anti-aliasing or blur. All visible edges should use square chunky pixels.
+Output is a clean game asset for the high-score HUD.

@@ -30,8 +30,9 @@ var reaction_started: bool = false
 var captions: Array[Label] = []
 var scores_panel: Control
 var score_rows: Array[Dictionary] = []
-var star_slots: Array[Label] = []
-const STAR_DIM := Color("7d4a28")
+var star_slots: Array[TextureRect] = []
+var subtitle: Label
+const STAR_DIM := Color(0.36, 0.2, 0.11) ## unearned stars: the gold star darkened into the plank
 const LEADERBOARD_PATH := "res://data/leaderboards.json"
 static var _seed_boards: Dictionary = {}
 
@@ -94,14 +95,21 @@ func _build() -> void:
 	title_label = BeachUI.label(self, ("BEACH BOSS!" if bool(result.won) else "OUT-EATEN!") if result.has("boss") else ("LUNCH IS SERVED!" if passed else "STILL HUNGRY?"), BeachUI.FONT_DISPLAY, CREAM)
 	_place(title_label, 38, 292, 17)
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var subtitle := BeachUI.label(self, str(level.name).to_upper() + ("  /  DEMO COMPLETE - THANKS!" if demo_finished() else ""), BeachUI.FONT_NATIVE, GOLD if demo_finished() else SEA)
+	subtitle = BeachUI.label(self, str(level.name).to_upper() + ("  /  DEMO COMPLETE - THANKS!" if demo_finished() else ""), BeachUI.FONT_NATIVE, GOLD if demo_finished() else SEA)
 	_place(subtitle, 55, 292, 9)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 	# Left panel: the run scoreboard, captions left and values right-aligned. Quests sit
 	# between the clean bonus and the snatch/stun counts; the total ends the panel.
-	_add_count_row("EARNED POINTS", int(result.base), 66)
-	_add_count_row("CLEAN BONUS", int(result.clean), 75, "+%d")
+	# A stunned run has no clean bonus; that row shows what the stuns and crashes cost instead,
+	# with EARNED POINTS counted before the losses so the column still adds up to TOTAL.
+	var lost := int(result.get("lost", 0))
+	if int(result.stuns) > 0:
+		_add_count_row("EARNED POINTS", int(result.base) + lost, 66)
+		_add_count_row("LOST TO HITS", lost, 75, "-%d", Color("ef725c"))
+	else:
+		_add_count_row("EARNED POINTS", int(result.base), 66)
+		_add_count_row("CLEAN BONUS", int(result.clean), 75, "+%d")
 	var y := 84.0
 	for quest: Dictionary in result.get("quests", []):
 		_add_quest_row(quest, y)
@@ -125,11 +133,14 @@ func _build() -> void:
 	stars_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stars_label.visible = false
 	for i: int in 3:
-		var star := BeachUI.label(self, "*", BeachUI.FONT_DISPLAY, STAR_DIM)
-		star.position = Vector2(136 + i * 16, 18)
-		star.size = Vector2(16, 17)
+		var star := TextureRect.new()
+		star.texture = BeachUI.STAR_ICON
+		star.modulate = STAR_DIM
+		star.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		star.position = Vector2(136 + i * 16, 17)
+		star.size = Vector2(16, 16)
 		star.pivot_offset = star.size * 0.5
-		star.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		add_child(star)
 		star.visible = not bool(result.casual)
 		star_slots.append(star)
 	hint_label = BeachUI.label(self, "CLICK / TAP / CONFIRM TO TALLY", BeachUI.FONT_NATIVE, Color("f9d98b"))
@@ -269,12 +280,12 @@ func _light_stars(count: int) -> void:
 		if i >= count:
 			continue
 		if not is_inside_tree():
-			star.add_theme_color_override("font_color", GOLD)
+			star.modulate = Color.WHITE
 			continue
 		var tween := create_tween()
 		tween.tween_interval(i * 0.14)
 		tween.tween_callback(func() -> void:
-			star.add_theme_color_override("font_color", GOLD)
+			star.modulate = Color.WHITE
 			star.scale = Vector2.ONE * 1.6)
 		tween.tween_property(star, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
@@ -342,20 +353,28 @@ func _add_quest_row(quest: Dictionary, y: float) -> void:
 	var value_text := ""
 	if done:
 		value_text = "+%d" % int(quest.get("bonus", 0))
-	elif count > 1:
+	else:
 		value_text = "%d/%d" % [int(quest.get("progress", 0)), count]
 	var color := GOLD if done else CREAM
 	var name_label := _quest_label("", color)
 	name_label.position = Vector2(x, y)
 	name_label.size = Vector2(width, 9)
 	var font := QUEST_FONT
-	var room := width - (font.get_string_size(" +%d" % 999, HORIZONTAL_ALIGNMENT_LEFT, -1, QUEST_FONT_SIZE).x if done or count > 1 else 0.0)
+	var feather := bool(quest.get("feather", false))
+	var room := width - font.get_string_size(" +%d" % 999, HORIZONTAL_ALIGNMENT_LEFT, -1, QUEST_FONT_SIZE).x - (12.0 if feather else 0.0)
 	var caption := "%s %s" % [">" if done else "-", quest.text]
 	while caption.length() > 3 and font.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, QUEST_FONT_SIZE).x > room:
 		caption = caption.left(caption.length() - 1)
 	name_label.text = caption
 	name_label.size.x = room
 	captions.append(name_label)
+	if feather:
+		# First completion paid a Feather: its icon sits between the name and the bonus.
+		var icon := TextureRect.new()
+		icon.texture = BeachUI.FEATHER_ICON
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		icon.position = Vector2(x + room + 1.0, y)
+		add_child(icon)
 	var label := _quest_label("" if done else value_text, color)
 	label.position = Vector2(x, y)
 	label.size = Vector2(width, 9)
@@ -421,12 +440,25 @@ func finish_tally() -> void:
 	hint_label.text = _record_text()
 	if not GameState.save_error.is_empty():
 		hint_label.add_theme_color_override("font_color", Color("ef725c"))
+	elif not bool(result.casual):
+		BeachUI.feather_icon(hint_label)
+	var target := _target_text()
+	if not target.is_empty() and not demo_finished():
+		subtitle.text += "  /  " + target
 	for button: Button in buttons:
 		button.disabled = false
 	if not buttons.is_empty():
 		buttons[0].grab_focus()
 	_reveal_scores()
 	_start_reaction()
+
+# How far the run fell short of the next star; empty for Practice, boss levels and full marks.
+func _target_text() -> String:
+	var stars := int(result.stars)
+	if bool(result.casual) or result.has("boss") or stars >= level.stars.size():
+		return ""
+	var short := int(level.stars[stars]) - int(result.score)
+	return "%d MORE TO PASS" % short if stars == 0 else "%d MORE FOR STAR %d" % [short, stars + 1]
 
 func _record_text() -> String:
 	var record: Dictionary = GameState.entry(int(level.id))

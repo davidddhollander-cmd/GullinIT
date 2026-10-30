@@ -264,20 +264,27 @@ func _process(delta: float) -> void:
 	if you_score_label != null:
 		you_score_label.text = "%03d" % game.score.points
 		var status: Dictionary = goal_status()
-		goal_label.text = "%s %d" % [str(status.title),int(status.goal)] if not game.casual else "%d/%d" % [int(status.progress),int(status.goal)]
+		if game.casual:
+			goal_label.text = "%d/%d" % [int(status.progress),int(status.goal)]
+		elif bool(status.done):
+			goal_label.text = "ALL STARS!"
+		else:
+			goal_label.text = "%s %d" % [str(status.title),int(status.goal)]
 
 # One row per quest, laid out horizontally: "- text" until done, green "> text" after; counted quests add n/N.
+# Quests finished on an earlier run are dimmed: they still pay points but no Feather.
 func sync_quests() -> void:
 	quest_box.visible = not quest_labels.is_empty() and game.intro <= 0.0
 	quest_panel.visible = quest_box.visible
 	# Replays of the training day keep the lesson panel on top, so the list sits below it.
 	# training_panel's rect is relative to training_center, which starts below the top bar.
 	quest_panel.position.y = TOP_BAR_HEIGHT + training_panel.get_rect().end.y + 1.0 if game.lesson_active() else TOP_BAR_HEIGHT + 1.0
+	var paid: Array = GameState.entry(int(game.level.id)).get("quests", [])
 	for i: int in mini(quest_labels.size(),game.quests.quests.size()):
 		var quest: Dictionary = game.quests.quests[i]
 		var count: int = int(quest.count)
 		quest_labels[i].text = "%s %s%s" % [">" if quest.done else "-",quest.text,"" if count <= 1 else " %d/%d" % [int(quest.progress),count]]
-		quest_labels[i].add_theme_color_override("font_color",Color("7fdc6a") if quest.done else BeachUI.CREAM)
+		quest_labels[i].add_theme_color_override("font_color",Color("7fdc6a") if quest.done else (Color("80bcb8") if str(quest.id) in paid else BeachUI.CREAM))
 
 func sync_rival_scores() -> void:
 	if not is_instance_valid(rival_score_list) or game == null:
@@ -400,11 +407,12 @@ func _draw_brash() -> void:
 
 func goal_status() -> Dictionary:
 	if game.casual:
-		return {"title":"PRACTICE","progress":game.score.items,"goal":int(Config.tuning.score.casual_items)}
+		return {"title":"PRACTICE","progress":game.score.items,"goal":int(Config.tuning.score.casual_items),"done":false}
 	var index: int = 0
 	while index < game.level.stars.size()-1 and game.score.points >= int(game.level.stars[index]):
 		index += 1
-	return {"title":"1 STAR" if index == 0 else "%d STARS" % (index+1),"progress":game.score.points,"goal":int(game.level.stars[index])}
+	# The first star is the pass mark, so the HUD names it that way.
+	return {"title":"PASS" if index == 0 else "%d STARS" % (index+1),"progress":game.score.points,"goal":int(game.level.stars[index]),"done":game.score.points >= int(game.level.stars.back())}
 
 func _draw() -> void:
 	if game == null:

@@ -1,0 +1,35 @@
+{
+  "source_size": [
+    1254,
+    1254
+  ],
+  "source_bounds": {
+    "x": 150,
+    "y": 160,
+    "width": 955,
+    "height": 922
+  },
+  "outputs": [
+    {
+      "file": "score-star-retro-16.png",
+      "width": 16,
+      "height": 16,
+      "opaque_pixels": 89,
+      "hard_alpha": true
+    },
+    {
+      "file": "score-star-retro-32.png",
+      "width": 32,
+      "height": 32,
+      "opaque_pixels": 378,
+      "hard_alpha": true
+    },
+    {
+      "file": "score-star-retro-64.png",
+      "width": 64,
+      "height": 64,
+      "opaque_pixels": 1590,
+      "hard_alpha": true
+    }
+  ]
+}

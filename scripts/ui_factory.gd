@@ -12,6 +12,9 @@ const BACK_HEIGHT: float = 13.0
 # detail reaches the screen, so the frame is drawn finer than the 320x180 grid.
 const WOOD_FRAME_HIRES: Texture2D = preload("res://assets/ui/wood-frame.png")
 const WOOD_FRAME_SCALE: int = 2
+const PIXEL_FONT: Font = preload("res://assets/fonts/gull_pixel.fnt")
+const FEATHER_ICON: Texture2D = preload("res://assets/sprites/feather-icon-v1.png")
+const STAR_ICON: Texture2D = preload("res://assets/sprites/score-star-retro-16.png")
 static var _wood_frame: ImageTexture
 
 static func wood_frame() -> ImageTexture:
@@ -66,6 +69,22 @@ static func label(parent: Node, value: String, size: int = FONT_NATIVE, color: C
 
 ## A smaller button for BACK and similar exits: 59 x 13, centred in its row or column. The theme's 6 px
 ## top and bottom padding would hold a button at 20 px, so its styles are copied with slimmer padding.
+## A Feather icon just left of an 8 px label's text, whatever its alignment.
+## Call it after the text is final; the icon does not follow later changes.
+static func feather_icon(label: Label) -> TextureRect:
+	var icon: TextureRect = TextureRect.new()
+	icon.texture = FEATHER_ICON
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var text_width: float = PIXEL_FONT.get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,FONT_NATIVE).x
+	var start: float = 0.0
+	if label.horizontal_alignment == HORIZONTAL_ALIGNMENT_CENTER:
+		start = (label.size.x - text_width) * 0.5
+	elif label.horizontal_alignment == HORIZONTAL_ALIGNMENT_RIGHT:
+		start = label.size.x - text_width
+	icon.position = Vector2(floorf(start) - 12.0,floorf((label.size.y - 10.0) * 0.5))
+	label.add_child(icon)
+	return icon
+
 static func back_button(parent: Node, value: String, action: Callable, width: float = BACK_WIDTH) -> Button:
 	var node: Button = button(parent,value,action,width)
 	node.custom_minimum_size.y = BACK_HEIGHT

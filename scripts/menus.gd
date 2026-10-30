@@ -115,6 +115,7 @@ func level_select(casual: bool) -> void:
 	feathers.position = Vector2(188,20)
 	feathers.size = Vector2(108,9)
 	feathers.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	BeachUI.feather_icon(feathers)
 	# Seven cards: three on the first row (Training Day's REPLAY LESSONS card is wide), four on the second.
 	var grid: VBoxContainer = VBoxContainer.new()
 	grid.size_flags_vertical = SIZE_EXPAND_FILL
@@ -301,6 +302,7 @@ func shop(bought: bool = false) -> void:
 	feathers.position = Vector2(188,20)
 	feathers.size = Vector2(108,9)
 	feathers.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	BeachUI.feather_icon(feathers)
 	var columns: HBoxContainer = HBoxContainer.new()
 	columns.size_flags_vertical = SIZE_EXPAND_FILL
 	columns.add_theme_constant_override("separation",4)
