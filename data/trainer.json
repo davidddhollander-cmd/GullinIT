@@ -190,7 +190,7 @@
       {
         "mood": "neutral",
         "counter": "Last lesson",
-        "lay": "One last lesson, gullster, and it's the big one: the perfect steal. Any gull can nick a snack off the sand. A true professional takes it straight off the counter.\n\nPerch on top of the ice cream stand and wait for a customer. And mind the pups down there. They're off the lead and they'd love a gull for lunch.",
+        "lay": "One last lesson, gullster, and it's the big one: the perfect steal. Any gull can nick a snack off the sand. A true professional takes it straight off the counter.",
         "how": {
           "default": "Fly above the ice cream stand, let go of {flap} and drop onto the roof. Stay above the dogs.",
           "realistic": "Fly above the ice cream stand, stop tapping {flap} and drop onto the roof. Stay above the dogs."
@@ -199,7 +199,7 @@
       {
         "mood": "amused",
         "counter": "Last lesson",
-        "lay": "Listen close. There's only a small window for a spotless theft. The moment the ice cream lands on the counter, a yellow target pops up. Hit it before the customer grabs it.",
+        "lay": "Listen close. There's only a small window for a spotless theft. The moment the ice cream lands on the counter, that's your cue...",
         "how": {
           "default": "When the yellow target shows, aim at it, dive with {dive} and tap {peck} as your beak reaches the food.",
           "casual": "When the yellow target shows, aim at it and dive with {dive}. Your beak does the pecking."
