@@ -1,5 +1,5 @@
 extends Node2D
-## Real level 6: a pier diner is served at the fish & chips stand (prepare, counter).
+## Real level 7: a pier diner is served at the fish & chips stand (prepare, counter).
 const Checks = preload("res://tests/pier_diner_meal_checks.gd")
 var game: BeachGame
 
@@ -9,7 +9,7 @@ func _ready() -> void:
 	Config.tuning.juice.audio = false
 	game = BeachGame.new()
 	add_child(game)
-	var level: Dictionary = Config.levels[5].duplicate(true)
+	var level: Dictionary = Config.levels[6].duplicate(true)
 	level.rivals = []
 	level.crabs = {"enabled":false}
 	game.setup(level,false)

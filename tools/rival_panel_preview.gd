@@ -6,7 +6,7 @@ func _ready() -> void:
 	Audio.music.stop()
 	game = BeachGame.new()
 	add_child(game)
-	game.setup(Config.levels[5].duplicate(true),false)
+	game.setup(Config.levels[6].duplicate(true),false)
 	game.set_physics_process(false)
 	game.running = true
 	game.intro = 0
