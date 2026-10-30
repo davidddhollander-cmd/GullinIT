@@ -92,7 +92,7 @@ func _build_training() -> void:
 	open_score_rules("GOT IT")
 
 func _build() -> void:
-	title_label = BeachUI.label(self, ("BEACH BOSS!" if bool(result.won) else "OUT-EATEN!") if result.has("boss") else ("LUNCH IS SERVED!" if passed else "STILL HUNGRY?"), BeachUI.FONT_DISPLAY, CREAM)
+	title_label = BeachUI.label(self, ("BEACH BOSS!" if bool(result.won) else "OUT-EATEN!") if result.has("boss") else "", BeachUI.FONT_DISPLAY, CREAM)
 	_place(title_label, 38, 292, 17)
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle = BeachUI.label(self, str(level.name).to_upper() + ("  /  DEMO COMPLETE - THANKS!" if demo_finished() else ""), BeachUI.FONT_NATIVE, GOLD if demo_finished() else SEA)
