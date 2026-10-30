@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dn5dwxva8s2wk"
-path="res://.godot/imported/bucket-and-spade-v1.png-472a8a3ae666b92b7adefa7112dfa5b3.ctex"
+path="res://.godot/imported/bucket-and-spade-v1.png-0cc7c5039aee239e02f8d3994258a87b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/lab/beach-props-v1/bucket-and-spade-v1.png"
-dest_files=["res://.godot/imported/bucket-and-spade-v1.png-472a8a3ae666b92b7adefa7112dfa5b3.ctex"]
+source_file="res://assets/sprites/beach-props-v1/bucket-and-spade-v1.png"
+dest_files=["res://.godot/imported/bucket-and-spade-v1.png-0cc7c5039aee239e02f8d3994258a87b.ctex"]
 
 [params]
 

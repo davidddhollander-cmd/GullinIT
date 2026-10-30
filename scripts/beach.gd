@@ -13,6 +13,7 @@ var world: Dictionary = {}
 var prop_sprites: Array[AnimatedSprite2D] = []
 var stalls: Array[FoodStall] = []
 var palm_materials: Array[ShaderMaterial] = []
+const BACKDROP_PROPS: Array[String] = ["beach_palm","beach_ball","beach_bucket","beach_lifebuoy_flat","beach_lifebuoy_hung","beach_shells","beach_jet_ski"]
 const BIN_WOBBLE_TIME: float = 0.26
 const BIN_WOBBLE_ANGLE: float = 0.095
 const WHEELIE_BIN_TYPE: String = "wheelie_bin"
@@ -83,9 +84,9 @@ func setup(entries: Array, zone_entries: Array = [], world_settings: Dictionary 
 
 func _apply_prop_art(sprite: AnimatedSprite2D, entry: Dictionary) -> void:
 	# Keep ordinary scenery above rear-lane crabs. Shacks also occlude front-lane crabs.
-	# Palms are backdrop (base y 148, level with the rear lane): everyone and every crab
-	# draws in front, so a palm never hides or blocks them.
-	sprite.z_index = 2 if entry.type == "beach_hut" else (0 if entry.type == "beach_palm" else 1)
+	# Palms and the beach toys are backdrop (base y ~148, level with the rear lane): everyone and
+	# every crab draws in front, so they never hide or block anything.
+	sprite.z_index = 2 if entry.type == "beach_hut" else (0 if entry.type in BACKDROP_PROPS else 1)
 	if entry.type in ["kiosk","hotdog_stand","fish_chips_stand"]:
 		sprite.z_index = FoodStall.DRAW_DEPTH
 	var definition: Dictionary = Config.sprites[entry.type]

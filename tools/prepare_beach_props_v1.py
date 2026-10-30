@@ -16,7 +16,7 @@ import prepare_food_icons_v1 as food  # reduce_item, label
 
 ROOT = Path(__file__).resolve().parent.parent
 SHEET = ROOT / "assets" / "reference" / "beach-props-sheet-v1" / "source.png"
-OUT_DIR = ROOT / "assets" / "lab" / "beach-props-v1"  # imported by Godot, excluded from exports; promote to assets/sprites when accepted
+OUT_DIR = ROOT / "assets" / "sprites" / "beach-props-v1"  # wired into levels 2 and 3 (data/sprites.json beach_* ids)
 LAB = ROOT / "data" / "art_lab.json"
 ALPHA_MIN = 100  # the sheet's opaque pixels sit at 249-254, its halo at 1-3
 GRID = 6  # the sheet is a 6x6 grid of props
@@ -75,7 +75,7 @@ def main() -> None:
 			"title": f"BG PROP {name}",
 			"description": f"NEW BACKGROUND PROP. {why}: " + live.replace("beach_", "").replace("_", " ").upper(),
 			"current": live,
-			"candidate": {"clone": live, "file": f"res://assets/lab/beach-props-v1/{slug}-v1.png", "frame_w": w, "frame_h": h, "visual_scale": 1 / ART_SCALE},
+			"candidate": {"clone": live, "file": f"res://assets/sprites/beach-props-v1/{slug}-v1.png", "frame_w": w, "frame_h": h, "visual_scale": 1 / ART_SCALE},
 			"reference": "shopper_mullet",
 			"motion": "static",
 			"category": "bgprops",

@@ -2536,6 +2536,48 @@
       }
     }
   },
+  "beach_ball": {
+    "file": "res://assets/sprites/beach-props-v1/beach-ball-v1.png",
+    "frame_w": 48,
+    "frame_h": 46,
+    "visual_scale": 0.25,
+    "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}
+  },
+  "beach_bucket": {
+    "file": "res://assets/sprites/beach-props-v1/bucket-and-spade-v1.png",
+    "frame_w": 80,
+    "frame_h": 64,
+    "visual_scale": 0.25,
+    "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}
+  },
+  "beach_lifebuoy_flat": {
+    "file": "res://assets/sprites/beach-props-v1/lifebuoy-flat-v1.png",
+    "frame_w": 104,
+    "frame_h": 65,
+    "visual_scale": 0.25,
+    "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}
+  },
+  "beach_lifebuoy_hung": {
+    "file": "res://assets/sprites/beach-props-v1/lifebuoy-hung-v1.png",
+    "frame_w": 64,
+    "frame_h": 93,
+    "visual_scale": 0.25,
+    "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}
+  },
+  "beach_shells": {
+    "file": "res://assets/sprites/beach-props-v1/shells-v1.png",
+    "frame_w": 72,
+    "frame_h": 59,
+    "visual_scale": 0.25,
+    "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}
+  },
+  "beach_jet_ski": {
+    "file": "res://assets/sprites/beach-props-v1/jet-ski-v1.png",
+    "frame_w": 176,
+    "frame_h": 97,
+    "visual_scale": 0.25,
+    "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}
+  },
   "beach_castle": {
     "file": "res://assets/sprites/retro-beach-castle-32bit.png",
     "frame_w": 30.0,

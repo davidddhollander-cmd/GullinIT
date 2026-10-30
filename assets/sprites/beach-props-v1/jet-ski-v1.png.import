@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cwmb3v8kks5ur"
-path="res://.godot/imported/jet-ski-v1.png-9133e05dad43befe582c260716304f2f.ctex"
+path="res://.godot/imported/jet-ski-v1.png-9a345b87562dd68908c0f93e46239229.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/lab/beach-props-v1/jet-ski-v1.png"
-dest_files=["res://.godot/imported/jet-ski-v1.png-9133e05dad43befe582c260716304f2f.ctex"]
+source_file="res://assets/sprites/beach-props-v1/jet-ski-v1.png"
+dest_files=["res://.godot/imported/jet-ski-v1.png-9a345b87562dd68908c0f93e46239229.ctex"]
 
 [params]
 

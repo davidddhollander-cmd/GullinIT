@@ -33,6 +33,11 @@
   "props": [
     {"type": "beach_palm", "x": 125, "y": 148},
     {"type": "beach_palm", "x": 1130, "y": 148},
+    {"type": "beach_shells", "x": 95, "y": 152},
+    {"type": "beach_ball", "x": 175, "y": 150},
+    {"type": "beach_bucket", "x": 285, "y": 149},
+    {"type": "beach_jet_ski", "x": 355, "y": 148},
+    {"type": "beach_lifebuoy_hung", "x": 1085, "y": 146},
     {"type": "beach_parasol_blue", "x": 235, "y": 143},
     {"type": "bin", "x": 400},
     {"type": "beach_lamp", "x": 465, "y": 151},

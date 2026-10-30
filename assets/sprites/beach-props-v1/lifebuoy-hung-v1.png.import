@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://djwjn6ydx0y52"
-path="res://.godot/imported/beach-ball-v1.png-7ac2aa9542ef0396e79fad07b843339e.ctex"
+uid="uid://rslfnf7amimr"
+path="res://.godot/imported/lifebuoy-hung-v1.png-f0358c52dd676b2ccc0cdc33bb39ccac.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/lab/beach-props-v1/beach-ball-v1.png"
-dest_files=["res://.godot/imported/beach-ball-v1.png-7ac2aa9542ef0396e79fad07b843339e.ctex"]
+source_file="res://assets/sprites/beach-props-v1/lifebuoy-hung-v1.png"
+dest_files=["res://.godot/imported/lifebuoy-hung-v1.png-f0358c52dd676b2ccc0cdc33bb39ccac.ctex"]
 
 [params]
 
