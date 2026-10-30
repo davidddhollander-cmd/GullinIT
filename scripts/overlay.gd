@@ -214,7 +214,27 @@ func _small(label: Label) -> Label:
 	label.add_theme_font_size_override("font_size",TOP_BAR_FONT_SIZE)
 	return label
 
+## Lesson 3 freezes just before the beak reaches the snack: a pulsing prompt well above the dive shows when to peck.
+func _draw_peck_prompt(offset: Vector2) -> void:
+	var text: String = "PRESS %s" % str(Config.trainer.keys[TrainerScript.device(game.input)].peck).to_upper()
+	var box: Vector2 = Vector2(float(text.length()) * 6.0 + 14.0,19.0)
+	var anchor: Vector2 = game.player.position - offset
+	var top: float = clampf(anchor.y - 54.0,TOP_BAR_HEIGHT + 6.0,148.0)
+	var left: float = clampf(anchor.x - box.x * 0.5,4.0,316.0 - box.x)
+	var pulse: float = 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.012)
+	var tint: Color = BeachUI.GOLD.lerp(BeachUI.CREAM,pulse)
+	draw_rect(Rect2(left - 1.0,top - 1.0,box.x + 2.0,box.y + 2.0),tint)
+	draw_rect(Rect2(left,top,box.x,box.y),BeachUI.INK)
+	var tip: Vector2 = Vector2(clampf(anchor.x,left + 6.0,left + box.x - 6.0),top + box.y + 6.0)
+	draw_colored_polygon(PackedVector2Array([Vector2(tip.x - 4.0,top + box.y),Vector2(tip.x + 4.0,top + box.y),tip]),tint)
+	var scale: float = 1.0 + 0.3 * pulse
+	draw_set_transform(Vector2(left + box.x * 0.5,top + box.y * 0.5),0.0,Vector2(scale,scale))
+	draw_string(font,Vector2(-float(text.length()) * 3.0,4.0),text,HORIZONTAL_ALIGNMENT_LEFT,-1,8,tint)
+	draw_set_transform(Vector2.ZERO,0.0,Vector2.ONE)
+
 func _process(delta: float) -> void:
+	if game.peck_pause:
+		queue_redraw()
 	var counting: bool = shown_score < game.score.points
 	shown_score = move_toward(shown_score,game.score.points,maxf(20.0,(game.score.points-shown_score)*4.0)*delta) if counting else float(game.score.points)
 	score_label.text = "%04d  X%s" % [roundi(shown_score),str(Config.tuning.score.tiers[game.score.tier])]
@@ -396,6 +416,8 @@ func _draw() -> void:
 	_draw_digestion(offset)
 	if game.running:
 		_draw_perks(offset)
+	if game.peck_pause:
+		_draw_peck_prompt(offset)
 	var aim: Vector2 = game.player.aim-offset
 	if game.running:
 		if game.training:
