@@ -6,6 +6,7 @@ var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var parent: Node2D
 var level: Dictionary
 var kiosk_timer: float = 0.0
+var arrivals_blocked: bool = false ## squall: nobody new walks on while the beach is clearing out
 var camera_x: float = NAN ## set by the game each frame; NAN (tests) means "no camera, spawn where asked"
 var replacements: Array[Dictionary] = []
 var visual_offsets: Dictionary = {}
@@ -182,6 +183,9 @@ func _ground_lane_family(target: BeachTarget) -> bool:
 	return target.kind in ["picnic_family","toddler"]
 
 func _family_offset(target: BeachTarget, placed: Dictionary) -> Vector2:
+	if target.panic.state != CrowdPanic.State.NONE:
+		# Running for cover (or off the map, where no gap exists): keep the current offset instead of snapping to a far gap.
+		return Vector2(visual_offsets.get(target,Vector2.ZERO)) if target.position.x >= 12.0 and target.position.x <= float(Config.tuning.world.width)-12.0 else Vector2.ZERO
 	# Families own the ground lane. Choose the closest horizontal gap, including
 	# during handovers/service; these offsets never change simulation positions.
 	var desired_x: float = target.position.x
@@ -331,6 +335,8 @@ func depth_z(feet: Vector2, lane_z: int) -> int:
 	return lane_z
 
 func tick(delta: float, elapsed: float) -> void:
+	if arrivals_blocked:
+		return
 	for i: int in range(replacements.size()-1,-1,-1):
 		replacements[i].delay -= delta
 		if replacements[i].delay <= 0:

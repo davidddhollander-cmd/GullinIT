@@ -23,6 +23,8 @@ var cooldown_sniff: bool = false
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var sprite: AnimatedSprite2D
 var prey: BeachGull ## current chase target, re-picked only while the dog is idle
+var flee_to: float = NAN ## squall: run to this x (off the map) and stay there
+var homecoming: bool = false ## flee_to is the way back; wander again on arrival
 
 func setup(x: float, home_range: Array, seed_value: int) -> void:
 	var art: Dictionary = Config.sprites.off_lead_dog
@@ -85,6 +87,15 @@ func _pick_prey(player: BeachGull, rivals: Array[BeachGull]) -> BeachGull:
 
 func tick(delta: float, player: BeachGull, rivals: Array[BeachGull] = []) -> void:
 	var t: Dictionary = _t()
+	if not is_nan(flee_to):
+		_face(flee_to)
+		position.x = move_toward(position.x, flee_to, float(t.run_speed) * delta)
+		_animate(&"run", 1.0)
+		if homecoming and is_equal_approx(position.x, flee_to):
+			flee_to = NAN
+			homecoming = false
+			_wander()
+		return
 	var gull: BeachGull = _pick_prey(player, rivals)
 	var notice: bool = _can_chase(gull) and absf(gull.position.x - position.x) <= float(t.notice_radius)
 	leap_gap = maxf(0.0, leap_gap - delta)
@@ -170,6 +181,13 @@ func tick(delta: float, player: BeachGull, rivals: Array[BeachGull] = []) -> voi
 			if timer <= 0.0 and not returning:
 				_wander()
 	_animate(clip, rate)
+
+## Squall over: trot back to the middle of the home range, then wander as usual.
+func come_home() -> void:
+	if is_nan(flee_to):
+		return
+	flee_to = (home.x + home.y) * 0.5
+	homecoming = true
 
 func _start_warn(gull: BeachGull) -> void:
 	state = State.WARN

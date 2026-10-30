@@ -1,5 +1,5 @@
 extends RefCounted
-## Level 6 "Squall": level order and saves, phase timing, abandoned food, umbrella blocking and the two quests.
+## Level 6 "Squall": level order and saves, phase timing, abandoned food, everyone leaving the map and the two quests.
 const DT: float = 0.1
 
 static func _fresh(suite: Node) -> BeachGame:
@@ -50,6 +50,13 @@ static func run(suite: Node, check: Callable) -> void:
 	_run_to(game, 40.0)
 	check.call(squall.phase == BeachSquall.Phase.CALM and not squall.warned and is_zero_approx(squall.intensity) and not game.wind.gusts and is_equal_approx(game.wind.strength, 0.3) and _abandoned(game).is_empty(), "calm lasts 45 s: light wind, no gusts, no rain, no loose food")
 	check.call(not squall.rain.visible and game.beach.modulate == Color.WHITE, "calm has no rain overlay and no tint")
+	# Umbrella: pier diners hold their food under one, so a steep dive is blocked and a low one lands the snatch.
+	var steep: bool = _dive(game, diner, 70.0)
+	check.call(not steep and diner.food, "a steep dive cannot take food from a pier diner")
+	game.player.invulnerable = 0.0
+	var low: bool = _dive(game, diner, 20.0)
+	check.call(low and not diner.food, "a low dive snatches from under a diner's umbrella")
+	check.call(game.quests.quests[1].done and int(game.quests.quests[1].progress) == 1, "snatching an umbrella-twist target completes the umbrella quest")
 	# The warning arrives three seconds ahead.
 	_run_to(game, 42.1)
 	check.call(squall.warned and squall.phase == BeachSquall.Phase.CALM and game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == "SQUALL INCOMING!"), "SQUALL INCOMING! shows 3 s before the squall")
@@ -62,25 +69,19 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(loose.size() == squall.abandoned and loose.size() >= 4, "food on the sand is abandoned at the squall (%d items)" % loose.size())
 	check.call(not _abandoned(game).any(func(item: Dictionary) -> bool: return not Config.foods.has(item.food_id) or bool(item.get("recovered", false))), "abandoned items are real, unrecovered foods")
 	check.call(_abandoned(game).all(func(item: Dictionary) -> bool: return item.grounded), "abandoned food has landed on the sand")
-	check.call(mum.panic.state == CrowdPanic.State.SHELTER and sunbather.panic.state == CrowdPanic.State.SHELTER and old_man.panic.state == CrowdPanic.State.SHELTER and diner.panic.state == CrowdPanic.State.SHELTER, "everyone runs for cover")
-	check.call(mum.panic.destination < 0.0 and sunbather.panic.destination < 0.0 and old_man.panic.destination >= 760.0, "the sand runs off the map, the promenade shelters")
-	check.call(old_man.food and diner.food and not mum.food and not sunbather.food and not _find(game, "kiosk_customer", "kiosk_customer").food, "promenade holders keep their food, sand holders drop it")
-	check.call(old_man.info.twist == "umbrella" and sunbather.info.twist != "umbrella" and Config.targets[mum.kind].twist == "shield", "promenade shelterers take the umbrella twist without changing shared target data")
+	var width: float = float(Config.tuning.world.width)
+	check.call(game.spawner.targets.all(func(t: BeachTarget) -> bool: return t.panic.state == CrowdPanic.State.SHELTER), "everyone runs from the squall")
+	check.call(game.spawner.targets.all(func(t: BeachTarget) -> bool: return t.panic.destination < 0.0 or t.panic.destination > width), "everyone runs for an edge of the map, sand and promenade alike")
+	check.call(not old_man.food and not diner.food and not mum.food and not sunbather.food and not _find(game, "kiosk_customer", "kiosk_customer").food, "everyone drops their food")
+	check.call(game.spawner.arrivals_blocked, "nobody new arrives while the squall rages")
+	check.call(game.dogs.all(func(d: OffLeadDog) -> bool: return d.flee_to < 0.0 or d.flee_to > width), "the off-lead dog runs off too")
 	check.call(game.pilots.size() == 2 and game.pending_rivals.is_empty(), "Gary and Chip are both out for the squall")
 	for pilot: RivalPilot in game.pilots:
 		check.call(float(pilot.personality.ground.scraps) >= 0.95, "%s mobs abandoned food in the squall" % pilot.gull.rival_name)
-	# Arrivals mid-squall are sent for cover as well.
+	# Arrivals mid-squall are sent off the map as well.
 	var late: BeachTarget = game.spawner.create("kiosk_customer", 400.0, {"appearance": "shopper_mullet", "food_id": "hotdog"})
 	_run_to(game, 49.3)
-	check.call(late.panic.state == CrowdPanic.State.SHELTER, "someone arriving mid-squall runs for cover")
-	# Umbrella: a steep dive is blocked, a low one lands the snatch.
-	_settle_at_shelter(old_man)
-	var steep: bool = _dive(game, old_man, 70.0)
-	check.call(not steep and old_man.food, "a steep dive cannot take food from a sheltering adult")
-	game.player.invulnerable = 0.0
-	var low: bool = _dive(game, old_man, 20.0)
-	check.call(low and not old_man.food, "a low dive snatches from under the umbrella")
-	check.call(game.quests.quests[1].done and int(game.quests.quests[1].progress) == 1, "snatching an umbrella-twist target completes the umbrella quest")
+	check.call(late.panic.state == CrowdPanic.State.SHELTER, "someone arriving mid-squall runs off the map")
 	# Looting abandoned food counts toward LOOT 3 PICNICS.
 	game.player.digestion.snacks.clear()
 	var looted: int = 0
@@ -105,8 +106,8 @@ static func run(suite: Node, check: Callable) -> void:
 	game.player.state = BeachGull.State.GROUNDED
 	_run_to(game, 85.2)
 	check.call(squall.phase == BeachSquall.Phase.CLEARING and not game.wind.gusts, "clearing begins at 85 s and the gusts stop")
-	check.call(old_man.panic.state == CrowdPanic.State.RETURN or old_man.panic.state == CrowdPanic.State.NONE, "people leave shelter when it clears")
-	check.call(old_man.info.twist == "walk" and sunbather.info.twist == "sleep" and mum.info.twist == "shield", "targets get their own twists back")
+	check.call(old_man.panic.state == CrowdPanic.State.RETURN or old_man.panic.state == CrowdPanic.State.NONE, "people come back when it clears")
+	check.call(old_man.info.twist == "walk" and sunbather.info.twist == "sleep" and mum.info.twist == "shield", "nobody's twist was changed by the squall")
 	_run_to(game, 100.0)
 	check.call(is_zero_approx(squall.intensity) and not squall.rain.visible and game.beach.modulate == Color.WHITE and is_equal_approx(game.wind.strength, 0.3), "rain stops, tint fades and the wind eases back to light")
 	check.call(game.pilots.all(func(pilot: RivalPilot) -> bool: return float(pilot.personality.ground.scraps) < 0.95), "rivals' own tastes are restored when it clears")
@@ -121,10 +122,37 @@ static func run(suite: Node, check: Callable) -> void:
 	_run_to(game, 100.0)
 	check.call(game.wind.direction == -start_dir and not game.wind.gusts and is_equal_approx(game.wind.strength, 0.3), "after the flip it stays put and the clearing leaves a light wind")
 	suite.main.clear_game()
+	_full_run(suite, check)
 
-static func _settle_at_shelter(target: BeachTarget) -> void:
-	target.position.x = target.panic.destination
-	target.panic.running = false
+## Plays the real level loop through a squall: everyone is off the map by the end of it, nobody jumps
+## across the beach on the way, nobody new arrives, and the beach refills afterwards.
+static func _full_run(suite: Node, check: Callable) -> void:
+	var game: BeachGame = _fresh(suite)
+	var width: float = float(Config.tuning.world.width)
+	var count: int = -1 ## people on the beach when the squall hit
+	var jumps: int = 0
+	var last: Dictionary = {}
+	var arrivals: bool = false
+	for stop: float in [84.0, 125.0]:
+		while game.elapsed < stop:
+			game._physics_process(DT)
+			if game.squall.phase == BeachSquall.Phase.SQUALL:
+				if count < 0:
+					count = game.spawner.targets.size()
+				arrivals = arrivals or game.spawner.targets.size() > count
+			for t: BeachTarget in game.spawner.targets:
+				if last.has(t) and absf(t.position.x - float(last[t])) > 25.0:
+					jumps += 1
+				last[t] = t.position.x
+		if stop == 84.0:
+			var stragglers: Array = game.spawner.targets.filter(func(t: BeachTarget) -> bool: return t.position.x > -20.0 and t.position.x < width + 20.0).map(func(t: BeachTarget) -> String: return "%s@%d" % [t.kind, int(t.position.x)])
+			check.call(stragglers.is_empty(), "by the end of the squall the whole crowd is off the map (stragglers: %s)" % str(stragglers))
+			check.call(game.dogs.all(func(d: OffLeadDog) -> bool: return d.position.x <= -20.0 or d.position.x >= width + 20.0), "the dog is off the map too")
+		else:
+			check.call(game.spawner.targets.all(func(t: BeachTarget) -> bool: return t.position.x >= 0.0 and t.position.x <= width) and game.dogs.all(func(d: OffLeadDog) -> bool: return d.position.x >= 0.0 and d.position.x <= width and is_nan(d.flee_to)), "once it clears everyone, dog included, is back on the map")
+	check.call(jumps == 0, "nobody teleports across the beach while running off (%d jumps)" % jumps)
+	check.call(not arrivals, "no new beachgoer walks on during the squall")
+	suite.main.clear_game()
 
 ## A dive at the held food from the given angle below horizontal; true when the food was taken.
 static func _dive(game: BeachGame, target: BeachTarget, degrees: float) -> bool:

@@ -311,6 +311,8 @@ func tick(delta: float) -> void:
 			continue
 		if not owner.reaction.mode.is_empty():
 			continue
+		if owner.panic.state != CrowdPanic.State.NONE:
+			continue # running from a squall or a gang call: the bag can wait
 		raid["action"] = str(raid.get("action",""))
 		raid["action_time"] = float(raid.get("action_time",0.0))
 		raid["pickup_item"] = raid.get("pickup_item",{})

@@ -1,10 +1,9 @@
 class_name BeachSquall
 extends RefCounted
-## Level 6 twist. Calm, a warned squall that sends the beach running for the promenade shelters and
-## leaves its food on the sand, then a clearing where people drift back. Timings come from level.twist.
+## Level 6 twist. Calm, a warned squall that sends everyone (and the dog) running off the map, dropping
+## their food on the sand, then a clearing where people drift back. Timings come from level.twist.
 enum Phase { CALM, SQUALL, CLEARING }
 const FLEERS: Array[String] = ["sunbather", "kiosk_customer", "picnic_family", "toddler", "pier_diner"]
-const ADULTS: Array[String] = ["sunbather", "kiosk_customer", "picnic_family", "pier_diner"]
 var game: BeachGame
 var cfg: Dictionary
 var phase: Phase = Phase.CALM
@@ -14,14 +13,12 @@ var abandoned: int = 0
 var flipped: bool = false
 var start_dir: int = 1
 var handled: Dictionary = {} ## target -> true once it has been sent for cover this squall
-var twists: Dictionary = {} ## target -> its own twist, restored when the squall passes
-var shelter_load: Dictionary = {} ## shelter x -> people sent there
 var rain: BeachRain
 var rival_scraps: Dictionary = {} ## rival pilot -> its own scraps weight
 var next_strike: float = INF ## elapsed time of the next lightning strike during the squall
 var downpour: AudioStreamPlayer ## wind-and-rain bed, faded with the squall's intensity
 const DOWNPOUR_DB: float = -10.0
-const OFF_EDGE: float = 40.0 ## how far past the world edge people on the sand run
+const OFF_EDGE: float = 40.0 ## how far past the world edge people run
 
 func setup(owner_game: BeachGame) -> void:
 	game = owner_game
@@ -62,10 +59,13 @@ func tick(delta: float) -> void:
 	_wind()
 	if storming and seconds >= next_strike:
 		_strike(seconds)
+	game.spawner.arrivals_blocked = storming # nobody new walks onto the beach mid-storm
 	if storming:
 		for target: BeachTarget in game.spawner.targets:
 			if is_instance_valid(target) and not handled.has(target):
 				_flee(target)
+		for dog: OffLeadDog in game.dogs:
+			dog.flee_to = _edge_for(dog.position.x)
 	var tint: Array = cfg.tint
 	var dark: Color = Color(tint[0], tint[1], tint[2])
 	game.beach.modulate = Color.WHITE.lerp(dark, intensity)
@@ -116,10 +116,9 @@ func _clear() -> void:
 		if not is_instance_valid(target):
 			continue
 		target.panic.release_shelter()
-		if twists.has(target):
-			target.info.twist = twists[target]
-	twists.clear()
 	handled.clear()
+	for dog: OffLeadDog in game.dogs:
+		dog.come_home()
 	for pilot: RivalPilot in rival_scraps.keys():
 		var original: Variant = rival_scraps[pilot]
 		if original == null:
@@ -134,9 +133,8 @@ func _flee(target: BeachTarget) -> void:
 		return
 	var world: Dictionary = Config.tuning.world
 	var snacks: Array = world.stash_snacks
-	# People caught out on the sand drop what they hold; those already by the promenade keep it.
-	var on_sand: bool = target.position.x < float(world.promenade_start)
-	if target.food and on_sand:
+	# Everyone drops what they hold and runs for the nearest edge of the map.
+	if target.food:
 		_abandon(target.food_id, target.food_position(), target.facing)
 		target.food = false
 		target.food_sprite.hide()
@@ -149,34 +147,12 @@ func _flee(target: BeachTarget) -> void:
 		spare = int(cfg.picnic_items)
 	for i: int in spare:
 		_abandon(str(snacks[(i + int(target.position.x)) % snacks.size()]), target.position - Vector2(0.0, 10.0), 1.0 if i % 2 == 0 else -1.0)
-	# The sand clears completely: those caught out run off the nearest edge until it passes.
-	target.panic.shelter(target, _off_edge(target) if on_sand else _shelter_for(target))
-	if target.panic.state == CrowdPanic.State.SHELTER and target.kind in ADULTS and not on_sand:
-		# Sheltering adults hold food under cover like the pier diners: steep dives are blocked.
-		twists[target] = target.info.twist
-		target.info = target.info.duplicate()
-		target.info.twist = "umbrella"
+	target.panic.shelter(target, _edge_for(target.position.x))
 
 func _abandon(food_id: String, at: Vector2, side: float) -> void:
 	abandoned += 1
-	game.stash_raids.items.append({"food_id": food_id, "source": "abandoned", "snack": {"abandoned": true}, "position": at, "velocity": Vector2(side * 30.0, -55.0), "grounded": false, "age": 0.0})
+	game.stash_raids.items.append({"owner": null, "food_id": food_id, "source": "abandoned", "snack": {"abandoned": true}, "position": at, "velocity": Vector2(side * 30.0, -55.0), "grounded": false, "age": 0.0})
 
-func _off_edge(target: BeachTarget) -> float:
+func _edge_for(x: float) -> float:
 	var width: float = float(Config.tuning.world.width)
-	return -OFF_EDGE if target.position.x < width * 0.5 else width + OFF_EDGE
-
-func _shelter_for(target: BeachTarget) -> float:
-	var promenade: float = float(Config.tuning.world.promenade_start)
-	var best: Dictionary = {}
-	var best_cost: float = INF
-	for prop: Dictionary in game.beach.props:
-		if str(prop.type) in cfg.shelters and float(prop.x) >= promenade:
-			var cost: float = absf(float(prop.x) - target.position.x) + 40.0 * int(shelter_load.get(prop.x, 0))
-			if cost < best_cost:
-				best = prop
-				best_cost = cost
-	if best.is_empty():
-		return promenade + 40.0
-	var load: int = int(shelter_load.get(best.x, 0))
-	shelter_load[best.x] = load + 1
-	return clampf(float(best.x) + (load % 3 - 1) * 14.0, 20.0, float(Config.tuning.world.width) - 20.0)
+	return -OFF_EDGE if x < width * 0.5 else width + OFF_EDGE
