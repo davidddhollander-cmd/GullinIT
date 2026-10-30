@@ -4,11 +4,11 @@
 
 The dog walker and leashed terrier now use the same chunky pixel style as the newer shoppers. The woman remains a full-size 40px adult in a lavender tee, beige shorts and lilac/white trainers, accompanied by the small sandy terrier with a teal collar. The existing paired sprite and behavior are retained, with four walk poses plus idle, alert, barking and angry poses. Food remains a separate stealable sprite attached to her forward hand.
 
-Production art is `assets/sprites/dog-owner-pixel-v1.png`, registered as the existing `dog` ID in `data/dog_owner_art.json` and `data/sprites.json`. It uses 192×128 canvases at 0.5 scale, lossless hard alpha, nearest-pixel rendering and no mipmaps. Full generated sources, exact prompts and rebuild instructions are preserved in [dog-walker-pixel-v1](../assets/reference/dog-walker-pixel-v1/README.md). [Production comparison and pose preview](../assets/previews/dog-walker-pixel-v1.png).
+Production art is `assets/sprites/dog-owner-pixel-v1.png`, registered as the existing `dog` ID in `data/dog_owner_art.json` and `data/sprites.json`. It uses 192×128 canvases at 0.5 scale, lossless hard alpha, nearest-pixel rendering and no mipmaps. Full generated sources, exact prompts and rebuild instructions are preserved in [dog-walker-pixel-v1](../assets/reference/dog-walker-pixel-v1/README.md). [Production comparison and pose preview](../assets/archive/previews/dog-walker-pixel-v1.png).
 
 ## Original polished art — 9 October 2026
 
-Created with the built-in ChatGPT image generator. Original source files are preserved as `assets/sprites/customer-polished.png` (1586 × 992) and `assets/sprites/dog-owner-polished.png` (1774 × 887). Each contains eight poses. The owner and small terrier are a single paired sprite; the leash and dog turn together. They are not independent navigation actors.
+Created with the built-in ChatGPT image generator. Original source files are preserved as `assets/archive/sprites/customer-polished.png` (1586 × 992) and `assets/archive/sprites/dog-owner-polished.png` (1774 × 887). Each contains eight poses. The owner and small terrier are a single paired sprite; the leash and dog turn together. They are not independent navigation actors.
 
 `tools/map_beachgoer_sheets.py` writes aligned atlas crops and hand anchors into the sprite manifest without modifying source pixels. The original placeholder files remain available. Customer canvas: 400 × 500 at 0.085 scale; owner canvas: 600 × 460 at 0.09 scale. Both use mipmaps, linear filtering and the existing alpha cutout shader. Generated walk poses are a first cycle and still have some repeated limb positions.
 

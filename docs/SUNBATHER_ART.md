@@ -12,7 +12,7 @@ The shader converts atlas UVs to local frame coordinates and masks towel colours
 
 ## Female set and revised proportions
 
-The second user-supplied sheet is preserved unchanged as `assets/sprites/sunbather-female-sheet.png` (1536×1024). The same atlas helper now selects male/female and red/blue sets through each level spawn's `appearance` field. All four combinations are distributed across the six levels. Female frames have their own crop regions and resolution-adjusted scale so they match male adults in the game, with the same wake timer, running clock, facing and stationary towel behaviour.
+The second user-supplied sheet is preserved unchanged as `assets/archive/sprites/sunbather-female-sheet.png` (1536×1024). The same atlas helper now selects male/female and red/blue sets through each level spawn's `appearance` field. All four combinations are distributed across the six levels. Female frames have their own crop regions and resolution-adjusted scale so they match male adults in the game, with the same wake timer, running clock, facing and stationary towel behaviour.
 
 Adults are 10% larger than the first integration (male scale 0.209; female scale 0.209/1.2). Towels increase to match. Toddler scale is now 0.0525, exactly 70% of the previous 0.075; its food anchor also scales to 70% to stay at the hand. Food item sizes and score values are unchanged. High-resolution canvas rendering and toddler mipmapped filtering remain enabled.
 
@@ -20,7 +20,7 @@ Rendered validation: **889 checks, zero failures**, including both female colour
 
 ## Original male integration
 
-Source: the user's attached `1-Pasted-Image-1.jpg`, copied unchanged to `assets/sprites/sunbather-user-sheet.jpg` (1280×853). No regeneration or raster editing was used.
+Source: the user's attached `1-Pasted-Image-1.jpg`, copied unchanged to `assets/archive/sprites/sunbather-user-sheet.jpg` (1280×853). No regeneration or raster editing was used.
 
 `scripts/sunbather_art.gd` is the frame manifest: seven getting-up regions and seven running regions per colour, with the first getting-up region also used for resting. The lower two rows provide blue trunks and a yellow towel; upper rows provide red trunks and a blue towel. Atlas regions are sampled directly from the original JPEG. Black background is discarded by `assets/shaders/sunbather_black_key.gdshader`; this is a colour key, not an authored alpha mask, so very dark details are also affected.
 

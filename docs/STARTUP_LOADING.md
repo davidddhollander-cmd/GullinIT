@@ -4,7 +4,7 @@ The beach palette and large LOADING lettering are readable. The original gull oc
 
 `scenes/loading.tscn` is now the application entry point. It overlays the existing approved herring gull's four wingbeat poses on a bird-free backdrop. The gull has a maximum flight width of 40.5 logical pixels, about 47% smaller, and flies right with a gentle bob and bank. The title scene loads through Godot's threaded resource loader. A one-second minimum display gives the animation time to read and prevents a flash on fast launches. Longer loads keep animating until ready. A load failure displays an explanation instead of waiting forever.
 
-The engine's initial, static splash uses the same bird-free backdrop, so it does not briefly show the old oversized gull. The original `assets/sprites/boot-splash.png` and complete gull source atlases remain unchanged.
+The engine's initial, static splash uses the same bird-free backdrop, so it does not briefly show the old oversized gull. The original `assets/archive/sprites/boot-splash.png` and complete gull source atlases remain unchanged.
 
 ## Artwork provenance
 

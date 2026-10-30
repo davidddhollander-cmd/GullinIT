@@ -81,6 +81,6 @@ func _capture() -> void:
 	for i: int in 4:
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
-	check(get_viewport().get_texture().get_image().save_png("res://assets/previews/off-lead-dog-production-v1.png")==OK,"Save preview")
+	check(get_viewport().get_texture().get_image().save_png("res://assets/archive/previews/off-lead-dog-production-v1.png")==OK,"Save preview")
 	print("OFF-LEAD ART: %d checks, %d failures" % [checks,failures])
 	get_tree().quit(1 if failures else 0)

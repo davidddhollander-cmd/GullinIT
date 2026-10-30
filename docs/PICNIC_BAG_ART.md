@@ -8,7 +8,7 @@ Three separate transparent 32 × 24 PNGs in `assets/sprites`:
 - `retro-picnic-bag-teal-32bit.png`: teal insulated cooler bag with front pocket.
 - `retro-picnic-bag-woven-32bit.png`: woven straw tote with coral stripe.
 
-All cells use bottom-centre ground anchor (16, 23), binary alpha and a maximum 28 × 21 silhouette. Render at 1× with nearest filtering; mipmaps off. The review sheet in `assets/previews/picnic-bags-review-v1.png` shows coral, teal and woven from left to right at 8×. Sources are preserved in `assets/reference/picnic-bags`. The bags are now in gameplay: each sunbather's picnic bag uses one of the three, chosen randomly (seeded per level) by `BeachSpawner._free_bag_variant` so no two live bags in a level share a style. The remaining-peck dots are still drawn over the sprite.
+All cells use bottom-centre ground anchor (16, 23), binary alpha and a maximum 28 × 21 silhouette. Render at 1× with nearest filtering; mipmaps off. The review sheet in `assets/archive/previews/picnic-bags-review-v1.png` shows coral, teal and woven from left to right at 8×. Sources are preserved in `assets/reference/picnic-bags`. The bags are now in gameplay: each sunbather's picnic bag uses one of the three, chosen randomly (seeded per level) by `BeachSpawner._free_bag_variant` so no two live bags in a level share a style. The remaining-peck dots are still drawn over the sprite.
 
 Regenerate native assets and the review sheet from the project root:
 

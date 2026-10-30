@@ -4,7 +4,7 @@ from pathlib import Path
 from PIL import Image
 
 root = Path(__file__).resolve().parent.parent
-sheet = Image.open(root / 'assets/sprites/mum-polished.png')
+sheet = Image.open(root / 'assets/archive/sprites/mum-polished.png')
 columns = [0, 385, 680, 978, 1279]
 rows = [0, 308, 616, 918, 1230]
 centres = [240, 525, 820, 1118]
@@ -24,7 +24,7 @@ path = root / 'data/sprites.json'
 data = json.loads(path.read_text(encoding='utf-8-sig'))
 def animation(frames, fps=8, loop=True):
     return dict(frames=frames, fps=fps, loop=loop)
-data['parent'] = dict(file='res://assets/sprites/mum-polished.png', frame_w=400, frame_h=320,
+data['parent'] = dict(file='res://assets/archive/sprites/mum-polished.png', frame_w=400, frame_h=320,
     visual_scale=0.13, regions=regions, animations={
         'idle':animation([8],1), 'walk':animation([0,1,2,3]),
         'carry':animation([4,5,6,7]), 'handover':animation([8,9,10,10,11],8,False),

@@ -11,7 +11,7 @@ func _ready() -> void:
 	_actor("pier_diner",Vector2(50,89),&"idle",0)
 	_actor("kiosk_customer",Vector2(150,89),&"idle",0)
 	_actor("lifeguard",Vector2(250,89),&"walk",0)
-	var path := "res://assets/previews/lifeguard-motion-review-v1.png"
+	var path := "res://assets/archive/previews/lifeguard-motion-review-v1.png"
 	var walk: Array[Image] = source._row(path,0,2,[80,80,80,80])
 	var actions: Array[Image] = source._row(path,1,2,[80,80,80,80])
 	_candidate(actions[0],Vector2(350,89))
@@ -64,5 +64,5 @@ func _capture() -> void:
 	for i: int in 4:
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
-	assert(get_viewport().get_texture().get_image().save_png("res://assets/previews/shopper-lifeguard-assessment-v1.png")==OK)
+	assert(get_viewport().get_texture().get_image().save_png("res://assets/archive/previews/shopper-lifeguard-assessment-v1.png")==OK)
 	get_tree().quit()

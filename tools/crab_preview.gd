@@ -66,10 +66,10 @@ func capture() -> void:
 		await RenderingServer.frame_post_draw
 		var image: Image = get_viewport().get_texture().get_image()
 		if frame==30:
-			image.save_png("res://assets/previews/crab-desktop-v3.png")
+			image.save_png("res://assets/archive/previews/crab-desktop-v3.png")
 		image.resize(640,360,Image.INTERPOLATE_NEAREST)
 		if frame==30:
-			image.save_png("res://assets/previews/crab-phone-v3.png")
+			image.save_png("res://assets/archive/previews/crab-phone-v3.png")
 		image.save_png(path+"/frame-%03d.png" % frame)
 	print("Crab preview scored ",game.score.points," from ",game.score.items," catches")
 	get_tree().quit()

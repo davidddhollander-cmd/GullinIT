@@ -56,11 +56,11 @@ The full headless integration run reports **15,910 checks, one failure**: `level
 
 Run `tools/crab_preview.tscn` for the reproducible actual-game capture: red sea emergence, blue right-edge arrival, ground peck, red left-edge arrival, and blue dive-snatch. The capture finishes with two swallowed crabs and 200 points. It manually steps a staged scene and uses the real catch/digestion/scoring routes. Output frames go to `test-output/crab-frames/`, assembled at 20 fps using FFmpeg.
 
-Preview artifacts: `assets/previews/crab-cycle-v1.gif`, `crab-desktop-v1.png` and `crab-phone-v1.png`. Desktop/phone arrival, ground-catch and dive-catch frames were visually inspected; the render error log is empty.
+Preview artifacts: `assets/archive/previews/crab-cycle-v1.gif`, `crab-desktop-v1.png` and `crab-phone-v1.png`. Desktop/phone arrival, ground-catch and dive-catch frames were visually inspected; the render error log is empty.
 
 ## Sharper art and emergence revision
 
-The current preview is `assets/previews/crab-cycle-v2.gif`, with `crab-desktop-v2.png` and `crab-phone-v2.png`. It uses the sharper supplied-art imports and perspective growth described above. The original source artwork remains untouched. Its staged ground/dive catches still produce 200 points from two swallowed crabs. Both desktop and phone renders, including a small sea-emergence frame, were visually inspected.
+The current preview is `assets/archive/previews/crab-cycle-v2.gif`, with `crab-desktop-v2.png` and `crab-phone-v2.png`. It uses the sharper supplied-art imports and perspective growth described above. The original source artwork remains untouched. Its staged ground/dive catches still produce 200 points from two swallowed crabs. Both desktop and phone renders, including a small sea-emergence frame, were visually inspected.
 
 V2 focused checks: **82 checks, zero failures**, including source detail/alignment, small sea arrival, growth/foot anchoring, full-size land/edge arrival and shrinking retreat, alongside all previous capture/scoring checks (`test-output/crab-v2-checks.log`).
 

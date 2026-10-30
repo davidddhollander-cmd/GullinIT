@@ -56,7 +56,7 @@ Parent inspected the unobstructed before/after captures at `test-output/toddler-
 
 ## Supplied sunbather animation sheet — 6 October 2026
 
-Integrated the user's selected JPEG unchanged as `assets/sprites/sunbather-user-sheet.jpg`. `scripts/sunbather_art.gd` defines atlas regions for both colour variations, resting, seven getting-up poses and seven running poses. A black-key shader hides the JPEG background. Wake countdown controls rising; movement controls running and facing. The old drawn standing person is removed; towels remain anchored at home during pursuit. No new food mechanics or refill trips. See `SUNBATHER_ART.md` for limitations and mapping. Rendered validation: **842 checks, zero failures**; rest/wake/run captures visually inspected.
+Integrated the user's selected JPEG unchanged as `assets/archive/sprites/sunbather-user-sheet.jpg`. `scripts/sunbather_art.gd` defines atlas regions for both colour variations, resting, seven getting-up poses and seven running poses. A black-key shader hides the JPEG background. Wake countdown controls rising; movement controls running and facing. The old drawn standing person is removed; towels remain anchored at home during pursuit. No new food mechanics or refill trips. See `SUNBATHER_ART.md` for limitations and mapping. Rendered validation: **842 checks, zero failures**; rest/wake/run captures visually inspected.
 
 ## Beach placement, faster retrieval and peckable bins — 5 October 2026
 

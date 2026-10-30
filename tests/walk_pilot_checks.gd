@@ -11,7 +11,7 @@ func check(condition: bool, label: String) -> void:
 		push_error(label)
 
 func _initialize() -> void:
-	var metadata: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/pilots/shopper-walk-v1/walk.json"))
+	var metadata: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/archive/pilots/shopper-walk-v1/walk.json"))
 	var atlas := Image.load_from_file(ProjectSettings.globalize_path(metadata.file))
 	atlas.convert(Image.FORMAT_RGBA8)
 	check(atlas.get_size()==Vector2i(512,256),"Eight full 128-pixel review cells")
@@ -49,7 +49,7 @@ func _initialize() -> void:
 		motion.advance_distance(0)
 		check(is_equal_approx(motion.phase,held),"Paused movement cannot advance gait")
 		check(motion.plant() in [0,4],"Stopping uses a contact pose")
-	var rig: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/pilots/shopper-walk-v1/rig.json"))
+	var rig: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/archive/pilots/shopper-walk-v1/rig.json"))
 	check(rig.parts.size()==6,"Six complete generated leg pieces")
 	for speed: float in [9.0,20.0]:
 		for hz: int in [30,60,120]:

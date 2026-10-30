@@ -1,6 +1,6 @@
 extends SceneTree
 const SRC="res://assets/reference/pier-restaurant-props-v1/beach-hole-restaurant-v2-source.png"
-const OUT="res://assets/sprites/pier-restaurant-props-v1/beach-hole-restaurant-v2.png"
+const OUT="res://assets/lab/pier-restaurant-props-v1/beach-hole-restaurant-v2.png"
 const NAVY=Color8(24,59,78)
 const P=[
 Color8(24,59,78),Color8(40,102,123),Color8(64,143,168),Color8(75,136,183),

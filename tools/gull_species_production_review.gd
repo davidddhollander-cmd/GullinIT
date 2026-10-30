@@ -53,7 +53,7 @@ func _capture() -> void:
 		var image := get_viewport().get_texture().get_image()
 		image.save_png("res://test-output/gull-production-%02d.png"%frame)
 		if frame==0:
-			image.save_png("res://assets/previews/gull-species-production-v1.png")
+			image.save_png("res://assets/archive/previews/gull-species-production-v1.png")
 	# Release the autoload's music playback before closing this short review run.
 	for player: Node in Audio.get_children():
 		if player is AudioStreamPlayer:

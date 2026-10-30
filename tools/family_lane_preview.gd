@@ -39,7 +39,7 @@ func capture() -> void:
 	for frame: int in 3:
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png("res://assets/previews/family-ground-lane.png")
+	get_viewport().get_texture().get_image().save_png("res://assets/archive/previews/family-ground-lane.png")
 	get_tree().quit()
 
 func _draw() -> void:

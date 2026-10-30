@@ -2,7 +2,7 @@ extends SceneTree
 ## Builds a compact review board from the runtime atlas only.
 
 const OldMan = preload("res://scripts/old_man_art.gd")
-const OUT := "res://assets/previews/old-man-stick-v1-comparison.png"
+const OUT := "res://assets/archive/previews/old-man-stick-v1-comparison.png"
 const SAMPLES := [
 	["idle", 0], ["walk", 1], ["walk_left", 4], ["chase", 2],
 	["alert", 1], ["block", 1], ["pickup", 2], ["carry", 3],

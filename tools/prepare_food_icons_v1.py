@@ -9,8 +9,8 @@ How an item is made
   2. Items are the connected blobs left over (found on a 1/3 scale mask).
   3. Each item is palette-quantised, then reduced block by block: majority colour per block, but the dark
      outline wins a block when it covers a fifth of it, so outlines stay one clean pixel wide.
-  4. Scale follows the live foods: the hot dog on the sheet becomes a 16 px wide cell, shown at 0.5 as 8 px
-     wide (the same 2x-art, 0.5-shown rule as the half-eaten foods and task 047).
+  4. Scale follows the live foods: the hot dog on the sheet becomes a 32 px wide cell, shown at 0.25 as 8 px
+     wide (4x art, so the pixels land on single screen pixels at the 1280x720 window).
 """
 import json
 import sys
@@ -21,16 +21,17 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
 SHEET = Path(sys.argv[1] if len(sys.argv) > 1 else r"C:\Users\david\Desktop\GAssets\Retro Pixel Food Icon Collection.png")
-OUT_DIR = ROOT / "assets" / "previews" / "food-icons-v1"  # previews are imported by Godot and excluded from exports; assets/reference is .gdignore
+OUT_DIR = ROOT / "assets" / "lab" / "food-icons-v1"  # assets/lab is imported by Godot and excluded from exports
 ATLAS = OUT_DIR / "food-icons-atlas-v1.png"
-RES_ATLAS = "res://assets/previews/food-icons-v1/food-icons-atlas-v1.png"
+RES_ATLAS = "res://assets/lab/food-icons-v1/food-icons-atlas-v1.png"
 LAB = ROOT / "data" / "art_lab.json"
 
 WALL_LUMA = 55  # outline pixels block the background fill
-HOTDOG_ART_WIDTH = 16.0  # px the sheet's hot dog (item 54) becomes in the art cell
+ART_SCALE = 4  # art px per game px: the cell is drawn at 4x and shown at 0.25, so 1 art px = 1 screen px at the 1280x720 window
+HOTDOG_ART_WIDTH = 8.0 * ART_SCALE  # px the sheet's hot dog (item 54) becomes in the art cell
 OUTLINE_SHARE = 0.20  # a block turns into outline when this share of its opaque pixels is outline
 OUTLINE_LUMA = 36  # palette colours darker than this are outline; chocolate and coffee browns stay fill
-PALETTE_COLOURS = 14
+PALETTE_COLOURS = 20
 LIVE_SHEET_ITEM = 54
 
 # index -> (name, live food it is compared against, True when that food is a real match)
@@ -175,7 +176,7 @@ def reduce_item(rgb: np.ndarray, own: np.ndarray, box: tuple[int, int, int, int]
 	return out
 
 
-def pack(cells: list[np.ndarray], width: int = 480) -> tuple[np.ndarray, list[tuple[int, int]]]:
+def pack(cells: list[np.ndarray], width: int = 1024) -> tuple[np.ndarray, list[tuple[int, int]]]:
 	spots, x, y, shelf = [], 2, 2, 0
 	for c in cells:
 		h, w = c.shape[:2]
@@ -207,7 +208,7 @@ def main() -> None:
 	manifest = []
 	for n, ((name, live, match), cell, (px, py)) in enumerate(zip(ITEMS, cells, spots), start=1):
 		h, w = cell.shape[:2]
-		size = [w / 2, h / 2]
+		size = [w / ART_SCALE, h / ART_SCALE]
 		comparisons.append({
 			"title": f"FOOD {n:02d} {name}",
 			"description": ("NEW ART VS LIVE " if match else "NEW ITEM. SIZE REF: ") + live.replace("food_", "").replace("half_eaten_", "").replace("_", " ").upper(),

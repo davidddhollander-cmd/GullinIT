@@ -8,7 +8,7 @@ Runtime uses `assets/sprites/shopper-mullet-walk-v2.png`. Only walk cells 1–6 
 
 `tools/prepare_mullet_walk.gd` builds this versioned atlas and its review metadata in `data/mullet_walk_v2.json`. The common `tools/prepare_shopper_variants.gd` rebuild also applies these six replacement cells, so rebuilding the shoppers does not silently restore the old walk. Register the common rebuild with `tools/map_staff_art.py` as before.
 
-`tools/mullet_walk_preview.tscn` captures the approved original, previous man and new man at identical frame indices, plus enlarged lower legs and moving views in both directions. `assets/previews/mullet-walk-v2.gif` presents two complete loops at the existing 8 fps. Visual review shows the raised foot now separates clearly from the ground in passing poses. This is a comparison for user review, not an automatic claim of animation quality based on pixel changes.
+`tools/mullet_walk_preview.tscn` captures the approved original, previous man and new man at identical frame indices, plus enlarged lower legs and moving views in both directions. `assets/archive/previews/mullet-walk-v2.gif` presents two complete loops at the existing 8 fps. Visual review shows the raised foot now separates clearly from the ground in passing poses. This is a comparison for user review, not an automatic claim of animation quality based on pixel changes.
 
 Validation: the integration suite includes `tests/mullet_walk_checks.gd`, which checks the narrow metadata change and pixel preservation outside walking. Existing staff checks cover complete isolated sprites, alpha, gutters and feet alignment. The shopper variants scene checks food-hand mirroring, chase and swat selection, theft and identity persistence after config reload.
 

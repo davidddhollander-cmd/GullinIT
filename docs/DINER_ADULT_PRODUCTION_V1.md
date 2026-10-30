@@ -26,8 +26,8 @@ Seven source sheets were created with the built-in image generation tool using t
 
 ## Review artifacts
 
-- `assets/previews/adult-diner-production-cast-v1.png`: actual production idle/walk/swat sprites beside the unchanged diner at their runtime presentation sizes.
-- `assets/previews/adult-diner-production-review-v1.png`: five appearances with directional walk, swat, kick, carry/handover or rest/pickup samples.
+- `assets/archive/previews/adult-diner-production-cast-v1.png`: actual production idle/walk/swat sprites beside the unchanged diner at their runtime presentation sizes.
+- `assets/archive/previews/adult-diner-production-review-v1.png`: five appearances with directional walk, swat, kick, carry/handover or rest/pickup samples.
 - Final gameplay captures are retained in `assets/previews/adult-diner-production-v1/` after validation.
 
 ## Validation

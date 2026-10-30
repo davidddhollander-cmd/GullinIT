@@ -8,7 +8,7 @@ Created 19 October 2026 with built-in ImageGen. Three isolated half-eaten foods 
 - `assets/sprites/retro-food-half-eaten-sandwich-32bit.png`
 - `assets/sprites/retro-food-half-eaten-pizza-32bit.png`
 - `assets/sprites/retro-food-bin-leftovers-atlas-32bit.png`: three 16 × 16 cells, left to right doughnut, sandwich, pizza.
-- `assets/previews/bin-leftovers-review-v1.png`: the same three native sprites enlarged 12× with nearest-neighbour scaling.
+- `assets/archive/previews/bin-leftovers-review-v1.png`: the same three native sprites enlarged 12× with nearest-neighbour scaling.
 
 The individual PNGs use equal 16 × 16 transparent cells, with artwork fitting inside 14 × 14 pixels. Each uses a subset of the game palette (navy outline, cream, gold, tan, brown, coral, muted coral, lettuce green) and binary alpha. Ground anchor is bottom-centre (8, 15); nearest filtering, lossless import, mipmaps off. Raw generated artwork is preserved under `assets/reference/bin-leftovers`.
 

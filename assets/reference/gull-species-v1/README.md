@@ -14,10 +14,10 @@ Prepared review silhouettes are in `assets/pilots/gull-species-v1/`. Each concep
 
 Review boards:
 
-- `assets/previews/gull-species-herring-v1.png`
-- `assets/previews/gull-species-kittiwake-v1.png`
-- `assets/previews/gull-species-great-black-backed-v1.png`
-- `assets/previews/gull-species-size-comparison-v1.png`
+- `assets/archive/previews/gull-species-herring-v1.png`
+- `assets/archive/previews/gull-species-kittiwake-v1.png`
+- `assets/archive/previews/gull-species-great-black-backed-v1.png`
+- `assets/archive/previews/gull-species-size-comparison-v1.png`
 
 The first three present design detail, with standing and flight views aligned for comparison; they are not biological scale charts. The last board compares B at proposed game sizes: 22, 17 and 28 logical pixels of standing height. These are game-art proposals. Kittiwake speed tuning and all other gameplay statistics remain a later implementation decision.
 

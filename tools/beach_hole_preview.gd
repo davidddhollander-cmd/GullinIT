@@ -17,7 +17,7 @@ func _ready():
  holder.position=Vector2(160,104)
  add_child(holder)
  var sprite=Sprite2D.new()
- sprite.texture=load("res://assets/sprites/pier-restaurant-props-v1/beach-hole-restaurant-v2.png")
+ sprite.texture=load("res://assets/lab/pier-restaurant-props-v1/beach-hole-restaurant-v2.png")
  sprite.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST
  holder.add_child(sprite)
  var label=Label.new()

@@ -48,6 +48,6 @@ func _ready() -> void:
 	for frame: int in 3:
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png("res://assets/previews/crumbs-beach-original-restored.png")
+	get_viewport().get_texture().get_image().save_png("res://assets/archive/previews/crumbs-beach-original-restored.png")
 	print("Crumb checks: ",checks," passed across all six levels")
 	get_tree().quit()

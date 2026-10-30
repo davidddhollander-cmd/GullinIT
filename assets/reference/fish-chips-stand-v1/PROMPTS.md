@@ -4,7 +4,7 @@ Generated on 2026-10-24 with ChatGPT's built-in `image_gen` tool and `transparen
 
 ## Stall source
 
-References: `assets/previews/beach-buildings-32bit-concept-v1.png`, `assets/sprites/retro-kiosk-32bit.png`, `assets/sprites/retro-hotdog-stand-32bit.png`.
+References: `assets/archive/previews/beach-buildings-32bit-concept-v1.png`, `assets/sprites/retro-kiosk-32bit.png`, `assets/sprites/retro-hotdog-stand-32bit.png`.
 
 > Create ONE standalone British seaside fish-and-chips stall matching the two reference food stalls. Use the same straight-on viewpoint, body proportions, roof/canopy height, open serving-window dimensions, counter height, full lower front panel and footprint. Use a navy-blue and cream striped awning, warm wood counter/posts, deep teal-blue booth body, and a small simple fish-and-chip motif on the fascia. Detailed retro pixel-art concept source, chunky stepped dark-navy outline, crisp block shading, limited shared seaside palette. Single centered front elevation on a genuinely transparent background. Booth only: no vendor, people, food portions, utensils, scenery, ground, flag, lettering, words, logos, watermark, grid or drop shadow.
 

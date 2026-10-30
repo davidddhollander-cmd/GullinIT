@@ -1,7 +1,7 @@
 extends RefCounted
 ## Technical cropping only: every complete pose comes from preserved ImageGen art.
 const Source = preload("res://tools/diner_adult_atlas_source.gd")
-const BASE := "res://assets/sprites/shopper-mullet-diner-style.png"
+const BASE := "res://assets/archive/sprites/shopper-mullet-diner-style.png"
 const OUTPUT := "res://assets/sprites/shopper-mullet-walk-v2.png"
 const REFERENCES := "res://assets/reference/mullet-walk-v2/"
 
