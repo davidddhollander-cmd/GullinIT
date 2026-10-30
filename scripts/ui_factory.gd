@@ -8,6 +8,7 @@ const FONT_NATIVE: int = 8
 const FONT_DISPLAY: int = 16
 const BACK_WIDTH: float = 59.0
 const BACK_HEIGHT: float = 13.0
+const WOOD_FRAME: Texture2D = preload("res://assets/ui/wood-frame.png")
 
 static func theme() -> Theme:
 	var result: Theme = Theme.new()
@@ -21,6 +22,8 @@ static func theme() -> Theme:
 			box.bg_color = Color("304956")
 		box.border_color = GOLD if state == "focus" else Color("80bcb8")
 		box.set_border_width_all(1 if state == "focus" else 0)
+		box.set_corner_radius_all(3)
+		box.anti_aliasing = false
 		box.content_margin_left = 8
 		box.content_margin_right = 8
 		box.content_margin_top = 6
@@ -97,6 +100,24 @@ static func panel(parent: Control, color: Color = INK) -> PanelContainer:
 	box.content_margin_right = 10
 	box.content_margin_top = 8
 	box.content_margin_bottom = 8
+	node.add_theme_stylebox_override("panel",box)
+	parent.add_child(node)
+	return node
+
+## Menu panel: the weathered-wood rope frame around a cream board. The frame art leaves 10-11 px of
+## wood on each side; content sits a further 5 px in, the same gap menus leave between buttons.
+static func wood_panel(parent: Control) -> PanelContainer:
+	var node: PanelContainer = PanelContainer.new()
+	var box: StyleBoxTexture = StyleBoxTexture.new()
+	box.texture = WOOD_FRAME
+	box.texture_margin_left = 13
+	box.texture_margin_right = 13
+	box.texture_margin_top = 12
+	box.texture_margin_bottom = 12
+	box.content_margin_left = 16
+	box.content_margin_right = 16
+	box.content_margin_top = 15
+	box.content_margin_bottom = 16
 	node.add_theme_stylebox_override("panel",box)
 	parent.add_child(node)
 	return node

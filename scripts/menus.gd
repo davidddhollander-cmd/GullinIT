@@ -12,8 +12,9 @@ func clear(title: String, subtitle: String = "", card: bool = false) -> VBoxCont
 	for child: Node in get_children():
 		remove_child(child)
 		child.queue_free()
-	var margin: MarginContainer = BeachUI.margin(self,12)
-	var panel: PanelContainer = BeachUI.panel(margin,Color(0.094,0.23,0.30,0.72 if card else 0.96))
+	var margin: MarginContainer = BeachUI.margin(self,6)
+	var panel: PanelContainer = BeachUI.wood_panel(margin)
+	_ink_labels.call_deferred()
 	if card:
 		panel.size_flags_horizontal = SIZE_SHRINK_BEGIN
 		panel.size_flags_vertical = SIZE_SHRINK_CENTER
@@ -23,6 +24,25 @@ func clear(title: String, subtitle: String = "", card: bool = false) -> VBoxCont
 	if not subtitle.is_empty():
 		BeachUI.label(content,subtitle,BeachUI.FONT_NATIVE,Color("a9d7d2"))
 	return content
+
+# Menu text was picked for dark panels; on the cream board, swap the light colours for dark ones.
+# Labels inside buttons keep their colours (buttons stay dark teal).
+const ON_CREAM: Dictionary = {
+	BeachUI.CREAM: BeachUI.INK,
+	BeachUI.GOLD: Color("a8581c"),
+	Color("a9d7d2"): Color("397a85"),
+	Color("80bcb8"): Color("397a85"),
+}
+
+func _ink_labels(node: Node = self) -> void:
+	for child: Node in node.get_children():
+		if child is Button:
+			continue
+		if child is Label:
+			var color: Color = (child as Label).get_theme_color("font_color")
+			if ON_CREAM.has(color):
+				(child as Label).add_theme_color_override("font_color",ON_CREAM[color])
+		_ink_labels(child)
 
 func choose(action: String, payload: Variant = null) -> void:
 	requested.emit(action,payload)
@@ -82,7 +102,7 @@ func level_select(casual: bool) -> void:
 	content.add_theme_constant_override("separation",2)
 	var outer: MarginContainer = content.get_parent().get_parent() as MarginContainer
 	for edge: String in ["top","bottom","left","right"]:
-		outer.add_theme_constant_override("margin_" + edge,6)
+		outer.add_theme_constant_override("margin_" + edge,0)
 	var feathers: Label = BeachUI.label(self,"FEATHERS %d" % GameState.feathers(),BeachUI.FONT_NATIVE,BeachUI.CREAM)
 	feathers.name = "Feathers"
 	feathers.position = Vector2(188,20)
@@ -129,7 +149,7 @@ func gull_picker() -> void:
 	content.add_theme_constant_override("separation",3)
 	var outer: MarginContainer = content.get_parent().get_parent() as MarginContainer
 	for edge: String in ["top","bottom"]:
-		outer.add_theme_constant_override("margin_" + edge,6)
+		outer.add_theme_constant_override("margin_" + edge,0)
 	var row: HBoxContainer = HBoxContainer.new()
 	row.size_flags_vertical = SIZE_EXPAND_FILL
 	row.add_theme_constant_override("separation",4)
@@ -264,7 +284,7 @@ func shop(bought: bool = false) -> void:
 	content.add_theme_constant_override("separation",2)
 	var outer: MarginContainer = content.get_parent().get_parent() as MarginContainer
 	for edge: String in ["top","bottom"]:
-		outer.add_theme_constant_override("margin_" + edge,6)
+		outer.add_theme_constant_override("margin_" + edge,0)
 	var feathers: Label = BeachUI.label(self,"FEATHERS %d" % GameState.feathers(),BeachUI.FONT_NATIVE,BeachUI.CREAM)
 	feathers.name = "Feathers"
 	feathers.position = Vector2(188,20)
