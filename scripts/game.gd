@@ -74,6 +74,7 @@ var peck_hold_pending: bool = false
 var peck_hold_elapsed: float = 0.0
 var screech_audio: AudioStreamPlayer
 var brash: BeachBrash = BeachBrash.new()
+var squall: BeachSquall ## level 6 weather twist
 var peck_hold_touch: bool = false
 # Level 2's first-play herring lesson: perch, screech, Gang Call, grab. The level clock is paused meanwhile.
 var screech_lesson: bool = false
@@ -222,6 +223,9 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	effects = BeachEffects.new()
 	effects.z_index = 5
 	add_child(effects)
+	if _twist() == "squall":
+		squall = BeachSquall.new()
+		squall.setup(self)
 	input = GullInput.new()
 	input.game = self
 	add_child(input)
@@ -441,6 +445,8 @@ func _physics_process(delta: float) -> void:
 	if not screech_lesson:
 		elapsed += step
 	wind.tick(step)
+	if squall != null:
+		squall.tick(step)
 	score.tick(step)
 	input.update_player(player,camera_x)
 	_advance_screech_hold(step)
@@ -694,6 +700,8 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 			dive_hit = true
 			dive_stats.dive_snatches += 1
 		player.digestion.collect(target.food_id,{"risky":risky,"upwind":player.upwind,"handover":handover})
+		if target.info.twist == "umbrella" and not target.is_loose():
+			_quest_event("umbrella_snatch")
 		if target.last_theft_direct:
 			brash.add(float(Config.tuning.brash.snatch)+(float(Config.tuning.brash.handover) if handover else 0.0))
 		effects.snatch_contact(contact_at,gull.velocity,handover)

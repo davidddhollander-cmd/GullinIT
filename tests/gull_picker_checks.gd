@@ -64,7 +64,7 @@ static func _stats(host: Node, check: Callable) -> void:
 		check.call(drift["herring"] > 0.0 and is_equal_approx(drift[id] / drift["herring"], float(data[id].wind)), id + " wind push follows data/species.json")
 
 static func _shove(suite: Node, check: Callable) -> void:
-	suite.main.start_level(6)
+	suite.main.start_level(7)
 	var game: BeachGame = suite.main.game
 	game.set_physics_process(false)
 	game.running = true

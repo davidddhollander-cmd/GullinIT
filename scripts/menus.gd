@@ -81,17 +81,25 @@ func level_select(casual: bool) -> void:
 	clear("PICK YOUR BEACH", "PRACTICE / 15 SNATCHES. NO TIMER" if casual else ("ARCADE / TRAINING DAY FIRST" if not trained else "ARCADE / EARN A STAR TO MOVE ON"))
 	content.add_theme_constant_override("separation",2)
 	var outer: MarginContainer = content.get_parent().get_parent() as MarginContainer
-	for edge: String in ["top","bottom"]:
+	for edge: String in ["top","bottom","left","right"]:
 		outer.add_theme_constant_override("margin_" + edge,6)
 	var feathers: Label = BeachUI.label(self,"FEATHERS %d" % GameState.feathers(),BeachUI.FONT_NATIVE,BeachUI.CREAM)
 	feathers.name = "Feathers"
 	feathers.position = Vector2(188,20)
 	feathers.size = Vector2(108,9)
 	feathers.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	var grid: GridContainer = GridContainer.new()
-	grid.columns = 3
+	# Seven cards: three on the first row (Training Day's REPLAY LESSONS card is wide), four on the second.
+	var grid: VBoxContainer = VBoxContainer.new()
 	grid.size_flags_vertical = SIZE_EXPAND_FILL
+	grid.add_theme_constant_override("separation",2)
 	content.add_child(grid)
+	var rows: Array[HBoxContainer] = []
+	for row_index: int in 2:
+		var level_row: HBoxContainer = HBoxContainer.new()
+		level_row.size_flags_vertical = SIZE_EXPAND_FILL
+		level_row.add_theme_constant_override("separation",2)
+		grid.add_child(level_row)
+		rows.append(level_row)
 	for level: Dictionary in Config.levels:
 		var id: int = level.id
 		var record: Dictionary = GameState.entry(id)
@@ -102,7 +110,7 @@ func level_select(casual: bool) -> void:
 %s
 %s" % [id,stars,level.name.to_upper().replace(" ","
 "),status]
-		var button: Button = BeachUI.button(grid,caption,func() -> void: choose("start",id),82)
+		var button: Button = BeachUI.button(rows[0] if id <= 3 else rows[1],caption,func() -> void: choose("start",id),60)
 		button.size_flags_horizontal = SIZE_EXPAND_FILL
 		button.size_flags_vertical = SIZE_EXPAND_FILL
 		button.disabled = not unlocked

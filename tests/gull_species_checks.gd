@@ -85,7 +85,7 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(speeds[1] > speeds[0]*1.15 and speeds[2] < speeds[0],"as player gulls, kittiwake flies faster and the great black-back slower than the herring gull")
 	await host.get_tree().process_frame
 	# Exercise the authored rival assignments and capture their real game rendering.
-	host.main.start_level(6)
+	host.main.start_level(7)
 	var game: BeachGame = host.main.game
 	game.set_physics_process(false)
 	game.intro = 0

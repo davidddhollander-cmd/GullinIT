@@ -54,6 +54,9 @@ static func run(suite: Node, check: Callable) -> void:
 	var six: BeachGame = _fresh(suite, 6)
 	check.call(six.dog != null, "level 6 has an off-lead dog")
 	suite.main.clear_game()
+	var seven: BeachGame = _fresh(suite, 7)
+	check.call(seven.dog != null, "level 7 has an off-lead dog")
+	suite.main.clear_game()
 	var game: BeachGame = _fresh(suite, 4)
 	var dog: OffLeadDog = game.dog
 	check.call(dog != null and game.spawner.targets.size() == level.spawns.size() - 1, "dog is its own actor, not a target")

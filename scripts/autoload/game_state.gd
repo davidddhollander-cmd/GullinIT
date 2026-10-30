@@ -1,4 +1,5 @@
 extends Node
+const SAVE_VERSION: int = 2
 var progress: Dictionary = {}
 var wallet: Dictionary = {"feathers": 0}
 var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false, "stats": true, "tips": [], "gull": "herring"}
@@ -9,7 +10,7 @@ var save_error: String = ""
 var unlock_all: bool = true
 # Demo build settings from data/demo.json: levels after last_level are always
 # locked (even with unlock_all), and feedback_url powers the feedback buttons.
-var demo: Dictionary = {"enabled": false, "last_level": 6, "feedback_url": ""}
+var demo: Dictionary = {"enabled": false, "last_level": 7, "feedback_url": ""}
 
 func _ready() -> void:
 	load_demo()
@@ -23,10 +24,10 @@ func load_demo(path: String = "res://data/demo.json") -> void:
 		demo.merge(data, true)
 
 func demo_locked(id: int) -> bool:
-	return bool(demo.get("enabled", false)) and id > int(demo.get("last_level", 6))
+	return bool(demo.get("enabled", false)) and id > int(demo.get("last_level", 7))
 
 func last_playable_level() -> int:
-	return int(demo.get("last_level", 6)) if bool(demo.get("enabled", false)) else 6
+	return int(demo.get("last_level", 7)) if bool(demo.get("enabled", false)) else 7
 
 func feedback_url() -> String:
 	return str(demo.get("feedback_url", "")).strip_edges()
@@ -45,18 +46,33 @@ func load_progress() -> void:
 	if data is Dictionary:
 		if data.get("progress") is Dictionary:
 			progress = data.progress
+			if int(data.get("version", 1)) < SAVE_VERSION:
+				migrate_progress()
 		if data.get("wallet") is Dictionary:
 			wallet.merge(data.wallet, true)
 		_anon_id = str(data.get("anon_id", ""))
 		if data.get("options") is Dictionary:
 			options.merge(data.options, true)
 
+## Save v2 inserted Squall as level 6 and moved the Sunset Showdown boss to 7: the old level 6 record
+## (best, stars, quests) becomes level 7's, so a beaten boss stays beaten. Level 7 also opens for
+## anyone who already has a record there (see unlocked), so nobody is locked out of the boss.
+func migrate_progress() -> void:
+	var old: Variant = progress.get("6")
+	if old is Dictionary and not progress.has("7"):
+		var moved: Dictionary = old.duplicate()
+		var done: Array = moved.get("quests", [])
+		if "l6_random" in done:
+			done[done.find("l6_random")] = "l7_random"
+		progress["7"] = moved
+		progress.erase("6")
+
 func save_progress() -> void:
 	var file: FileAccess = FileAccess.open(save_path + ".tmp", FileAccess.WRITE)
 	if file == null:
 		save_error = "Progress could not be saved."
 		return
-	file.store_string(JSON.stringify({"version": 1, "progress": progress, "wallet": wallet, "options": options, "anon_id": _anon_id}))
+	file.store_string(JSON.stringify({"version": SAVE_VERSION, "progress": progress, "wallet": wallet, "options": options, "anon_id": _anon_id}))
 	file.close()
 	var error: Error = DirAccess.rename_absolute(save_path + ".tmp", save_path)
 	save_error = "" if error == OK else "Progress could not be saved."
@@ -131,6 +147,9 @@ func unlocked(id: int) -> bool:
 		return false
 	if id == 1 or unlock_all:
 		return true
+	var own: Dictionary = entry(id)
+	if int(own.get("stars", 0)) > 0 or own.has("casual_time"):
+		return true # already cleared (e.g. a migrated boss record)
 	var previous: Dictionary = entry(id - 1)
 	return int(previous.get("stars", 0)) > 0 or previous.has("casual_time") or (id == 2 and bool(previous.get("training_complete", false)))
 

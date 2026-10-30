@@ -154,6 +154,7 @@ func run() -> void:
 	await preload("res://tests/watergun_vfx_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/level5_checks.gd").run(self,main,Callable(self,"check"))
 	await preload("res://tests/boss_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/squall_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/gull_picker_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/control_mode_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/shop_checks.gd").run(self,Callable(self,"check"))
@@ -220,7 +221,7 @@ func run() -> void:
 	check(GameState.entry(1).casual_time==45 and GameState.entry(1).best==400,"save round trip separates casual and arcade")
 	check(Config.reload_data(),"JSON reload")
 	pin_base_reactions()
-	for i: int in range(1,7):
+	for i: int in range(1,8):
 		main.start_level(i)
 		var game: BeachGame = main.game
 		game.set_physics_process(false)
@@ -1563,13 +1564,13 @@ func target_checks(game: BeachGame) -> void:
 	vendor.tick(0.01,game.gulls)
 	check(game.player.state==BeachGull.State.STUNNED,"broom hits after telegraph")
 	var wind: BeachWind = BeachWind.new()
-	wind.setup(Config.levels[5])
+	wind.setup(Config.levels[6])
 	wind.countdown = 1.01
 	wind.tick(0.02)
 	check(wind.warned,"gust warns one second ahead")
 	var before: int = wind.direction
 	wind.tick(1.0)
-	check(wind.direction==-before,"level 6 gust flips direction")
+	check(wind.direction==-before,"level 7 gust flips direction")
 	wind.tick(0.5)
 	check(wind.strength>wind.base,"gust ramps strength")
 
@@ -2468,7 +2469,7 @@ func female_sunbather_art_checks() -> void:
 func generated_layout_checks() -> void:
 	var layouts: Array = []
 	var moved_far: int = 0
-	for number: int in range(1,7):
+	for number: int in range(1,8):
 		main.start_level(number)
 		var game: BeachGame = main.game
 		game.set_physics_process(false)
@@ -2889,7 +2890,7 @@ func extended_beach_checks() -> void:
 				stands[prop.type] = prop.x
 		check((stands.has("kiosk") or int(level.id) == 5) and (int(level.id) <= 2 or stands.has("hotdog_stand")),"each level has its authored food stands")
 	# Task 034 review set: the first playable frame of every level, before anyone moves.
-	for number: int in range(1,7):
+	for number: int in range(1,8):
 		main.start_level(number)
 		var opening_game: BeachGame = main.game
 		opening_game.set_physics_process(false)
@@ -2921,7 +2922,7 @@ func extended_beach_checks() -> void:
 	main.clear_game()
 	await settle()
 	# Level identity review: one render per level 2-6 around its stalls.
-	for entry: Array in [[2,820],[3,640],[4,640],[5,640],[6,600]]:
+	for entry: Array in [[2,820],[3,640],[4,640],[5,640],[6,940],[7,600]]:
 		main.start_level(int(entry[0]))
 		game = main.game
 		game.set_physics_process(false)
