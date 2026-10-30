@@ -335,26 +335,26 @@ func show_score_announcement(food_id: String, earned: int) -> void:
 	score_announcement_tween.chain().tween_property(score_announcement,"modulate:a",0.0,SCORE_ANNOUNCEMENT_FADE).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	score_announcement_tween.chain().tween_callback(score_announcement.hide)
 
-func _draw_digestion(offset: Vector2) -> void:
+const DIGEST_POS: Vector2 = Vector2(229,2) ## top bar, right of the points bar; ~18 px before the longest wind text
+
+## Compact digest slot in the top bar: the snack being eaten, a progress line under it,
+## one dot per queued snack; a full stomach shows a cream rest line instead.
+func _draw_digestion() -> void:
 	var belly: GullDigestion = game.player.digestion
 	if belly.snacks.is_empty() and belly.rest <= 0:
 		return
-	# Beside the gull (right, or left near the screen edge) so it never covers what is below.
-	var point: Vector2 = game.player.position-offset+Vector2(18,-8)
-	if point.x > 268:
-		point.x -= 86
-	point.x = clampf(point.x,2,268)
-	point.y = clampf(point.y,32,155)
-	draw_rect(Rect2(point,Vector2(50,15)),Color("183b4e"))
+	var p: Vector2 = DIGEST_POS
 	if belly.rest > 0:
-		draw_string(font,point+Vector2(2,8),"DIGEST",HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.CREAM)
-		draw_rect(Rect2(point+Vector2(2,11),Vector2(46*(1-belly.rest/2),2)),BeachUI.GOLD)
+		draw_string(HUD_FONT,p+Vector2(0,8),"FULL",HORIZONTAL_ALIGNMENT_LEFT,-1,TOP_BAR_FONT_SIZE,BeachUI.CREAM)
+		draw_rect(Rect2(p+Vector2(0,11),Vector2(17,2)),Color("397a85"))
+		draw_rect(Rect2(p+Vector2(0,11),Vector2(17*(1-belly.rest/2),2)),BeachUI.CREAM)
 		return
-	for i: int in belly.snacks.size():
-		var snack: Dictionary = belly.snacks[i]
-		var texture: Texture2D = Config.frames(Config.foods[snack.id].sprite).get_frame_texture(&"idle",0)
-		draw_texture_rect(texture,Rect2(point+Vector2(2+i*12,1),Vector2(10,10)),false,Color.WHITE if i == 0 else Color(0.65,0.7,0.7))
-	draw_rect(Rect2(point+Vector2(2,12),Vector2(46*belly.progress/belly.duration(belly.snacks[0].id),2)),BeachUI.GOLD)
+	var texture: Texture2D = Config.frames(Config.foods[belly.snacks[0].id].sprite).get_frame_texture(&"idle",0)
+	draw_texture_rect(texture,Rect2(p,Vector2(10,10)),false)
+	for i: int in mini(belly.snacks.size()-1,3):
+		draw_rect(Rect2(p+Vector2(12,1+i*3),Vector2(2,2)),Color(0.65,0.7,0.7))
+	draw_rect(Rect2(p+Vector2(0,11),Vector2(17,2)),Color("397a85"))
+	draw_rect(Rect2(p+Vector2(0,11),Vector2(17*belly.progress/belly.duration(belly.snacks[0].id),2)),BeachUI.GOLD)
 
 const METER_RECT: Rect2 = Rect2(92,4,36,8)
 
@@ -426,7 +426,7 @@ func _draw() -> void:
 	draw_rect(Rect2(5,TOP_BAR_HEIGHT-3,85,2),Color("397a85"))
 	draw_rect(Rect2(5,TOP_BAR_HEIGHT-3,85*game.score.window/float(Config.tuning.score.combo_window),2),BeachUI.GOLD)
 	var offset: Vector2 = Vector2(game.camera_x-160,0)
-	_draw_digestion(offset)
+	_draw_digestion()
 	if game.running:
 		_draw_perks(offset)
 		if not game.training:
