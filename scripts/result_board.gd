@@ -411,21 +411,13 @@ func _add_quest_row(quest: Dictionary, y: float) -> void:
 	name_label.position = Vector2(x, y)
 	name_label.size = Vector2(width, 9)
 	var font := QUEST_FONT
-	var feather := bool(quest.get("feather", false))
-	var room := width - font.get_string_size(" +%d" % 999, HORIZONTAL_ALIGNMENT_LEFT, -1, QUEST_FONT_SIZE).x - (12.0 if feather else 0.0)
+	var room := width - font.get_string_size(" +%d" % 999, HORIZONTAL_ALIGNMENT_LEFT, -1, QUEST_FONT_SIZE).x
 	var caption := "%s %s" % [">" if done else "-", quest.text]
 	while caption.length() > 3 and font.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, QUEST_FONT_SIZE).x > room:
 		caption = caption.left(caption.length() - 1)
 	name_label.text = caption
 	name_label.size.x = room
 	captions.append(name_label)
-	if feather:
-		# First completion paid a Feather: its icon sits between the name and the bonus.
-		var icon := TextureRect.new()
-		icon.texture = BeachUI.FEATHER_ICON
-		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		icon.position = Vector2(x + room + 1.0, y)
-		add_child(icon)
 	var label := _quest_label("" if done else value_text, color)
 	label.position = Vector2(x, y)
 	label.size = Vector2(width, 9)
