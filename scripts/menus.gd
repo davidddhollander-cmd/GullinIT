@@ -399,7 +399,7 @@ func _small_label(parent: Control, text: String, color: Color) -> Label:
 	node.add_theme_font_size_override("font_size",6)
 	return node
 
-func pause(skippable: bool = false, can_replay: bool = false) -> void:
+func pause(skippable: bool = false, replay: String = "") -> void:
 	clear("TAKING A BREATHER", "YOUR LUNCH CAN WAIT.")
 	# A compact box: half the usual menu, 8 px heading, 6 px subtitle and 13 px buttons.
 	var panel: PanelContainer = content.get_parent() as PanelContainer
@@ -413,8 +413,8 @@ func pause(skippable: bool = false, can_replay: bool = false) -> void:
 	resume.grab_focus()
 	if skippable:
 		_small_button(content,"SKIP LESSON",func() -> void: choose("skip_lesson"))
-	elif can_replay:
-		_small_button(content,"REPLAY LESSON",func() -> void: choose("screech_lesson"))
+	elif not replay.is_empty():
+		_small_button(content,"REPLAY LESSON",func() -> void: choose(replay))
 	_small_button(content,"RESTART",func() -> void: choose("restart"))
 	var pair: HBoxContainer = HBoxContainer.new()
 	content.add_child(pair)

@@ -216,10 +216,18 @@ func _small(label: Label) -> Label:
 	label.add_theme_font_size_override("font_size",TOP_BAR_FONT_SIZE)
 	return label
 
-## Lesson 3 freezes just before the beak reaches the snack: a pulsing prompt well above the dive shows when to peck.
+## The frozen prompt's words: PRESS E before the first swoop's peck, DIVE! SHIFT on the counter snatch lesson.
+func prompt_text() -> String:
+	var key: String = str(Config.trainer.keys[TrainerScript.device(game.input)][game.prompt_action]).split(" or ")[0].to_upper()
+	if game.prompt_action == "peck":
+		return "PRESS %s" % key
+	return "DIVE!" if key == "DIVE" else "DIVE! %s" % key
+
+## Lesson 3 freezes just before the beak reaches the snack and the counter lesson when the serving lands: a pulsing prompt well above the gull.
 func _draw_peck_prompt(offset: Vector2) -> void:
-	var text: String = "PRESS %s" % str(Config.trainer.keys[TrainerScript.device(game.input)].peck).to_upper()
-	var box: Vector2 = Vector2(float(text.length()) * 6.0 + 14.0,19.0)
+	var text: String = prompt_text()
+	var width: float = font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x
+	var box: Vector2 = Vector2(ceilf(width * 1.3) + 14.0,19.0) # room for the text at its biggest pulse
 	var anchor: Vector2 = game.player.position - offset
 	var top: float = clampf(anchor.y - 54.0,TOP_BAR_HEIGHT + 6.0,148.0)
 	var left: float = clampf(anchor.x - box.x * 0.5,4.0,316.0 - box.x)
@@ -231,7 +239,7 @@ func _draw_peck_prompt(offset: Vector2) -> void:
 	draw_colored_polygon(PackedVector2Array([Vector2(tip.x - 4.0,top + box.y),Vector2(tip.x + 4.0,top + box.y),tip]),tint)
 	var scale: float = 1.0 + 0.3 * pulse
 	draw_set_transform(Vector2(left + box.x * 0.5,top + box.y * 0.5),0.0,Vector2(scale,scale))
-	draw_string(font,Vector2(-float(text.length()) * 3.0,4.0),text,HORIZONTAL_ALIGNMENT_LEFT,-1,8,tint)
+	draw_string(font,Vector2(-width * 0.5,4.0),text,HORIZONTAL_ALIGNMENT_LEFT,-1,8,tint)
 	draw_set_transform(Vector2.ZERO,0.0,Vector2.ONE)
 
 func _process(delta: float) -> void:
@@ -248,13 +256,17 @@ func _process(delta: float) -> void:
 	time_label.modulate.a = 0.35 if warning and Time.get_ticks_msec()%500 < 200 else 1.0
 	wind_label.text = "CALM" if absf(game.player.wind_force) < 0.01 else "%s %d%%" % ["WIND >" if game.player.wind_force > 0 else "< WIND",roundi(absf(game.player.wind_force)*100)]
 	intro_panel.visible = game.intro > 0 and not trainer_intro
-	training_panel.visible = game.lesson_active() and game.running and game.intro <= 0 and not game.trainer_open
+	# The frozen prompt sits high above the gull; the lesson strip and quest row would cover it.
+	training_panel.visible = game.lesson_active() and game.running and game.intro <= 0 and not game.trainer_open and not game.peck_pause
 	if game.training:
 		lesson_label.text = "LESSON %d/%d" % [mini(game.lesson + 1, BeachGame.TRAINING_LESSONS), BeachGame.TRAINING_LESSONS]
 		lesson_prompt.text = game.training_text()
 	elif game.screech_lesson:
 		lesson_label.text = "LESSON %d/%d" % [mini(game.screech_step + 1, BeachGame.SCREECH_STEPS), BeachGame.SCREECH_STEPS]
 		lesson_prompt.text = game.screech_lesson_text()
+	elif game.counter_lesson:
+		lesson_label.text = "LAST LESSON"
+		lesson_prompt.text = game.counter_lesson_text()
 	pause_button.visible = game.running
 	sync_quests()
 	if rival_score_labels.size() != game.pilots.size():
@@ -271,7 +283,7 @@ func _process(delta: float) -> void:
 # Quests finished on an earlier run are dimmed: they still pay points but no Feather.
 func sync_quests() -> void:
 	quest_box.visible = not quest_labels.is_empty() and game.intro <= 0.0
-	quest_panel.visible = quest_box.visible
+	quest_panel.visible = quest_box.visible and not game.peck_pause
 	# Replays of the training day keep the lesson panel on top, so the list sits below it.
 	# training_panel's rect is relative to training_center, which starts below the top bar.
 	quest_panel.position.y = TOP_BAR_HEIGHT + training_panel.get_rect().end.y + 1.0 if game.lesson_active() else TOP_BAR_HEIGHT + 1.0
@@ -440,8 +452,8 @@ func _draw() -> void:
 			if training_target.x >= 4 and training_target.x <= 316 and training_target.y >= 28 and training_target.y <= 165:
 				draw_arc(training_target,12,0,TAU,24,BeachUI.GOLD,2)
 				draw_arc(training_target,16,0,TAU,24,Color(1.0,0.95,0.7,0.55),1)
-		elif game.screech_lesson:
-			var lesson_target: Vector2 = game.screech_lesson_target() - offset
+		elif game.screech_lesson or game.counter_lesson:
+			var lesson_target: Vector2 = (game.screech_lesson_target() if game.screech_lesson else game.counter_lesson_target()) - offset
 			if lesson_target.x >= 4 and lesson_target.x <= 316 and lesson_target.y >= 28 and lesson_target.y <= 165:
 				draw_arc(lesson_target,12,0,TAU,24,BeachUI.GOLD,2)
 				draw_arc(lesson_target,16,0,TAU,24,Color(1.0,0.95,0.7,0.55),1)
