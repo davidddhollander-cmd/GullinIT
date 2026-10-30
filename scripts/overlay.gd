@@ -23,7 +23,6 @@ var rival_score_panel: PanelContainer
 var rival_score_list: VBoxContainer
 var rival_score_labels: Array[Label] = []
 var you_score_label: Label
-var goal_label: Label
 var shown_score: float = 0.0 ## the top-left score counts up toward the real one
 var score_announcement_fonts: Array[Font] = [
 	preload("res://assets/arcade_score_blue.fnt"),
@@ -37,8 +36,8 @@ const TOP_BAR_FONT_SIZE: int = 6
 const TIME_WARNING: float = 20.0 ## seconds left when the timer turns red and flashes
 const QUEST_STRIP_HEIGHT: float = 10.0 ## small-font quest row directly under the top bar
 const SCORE_CALLOUT_TOP: float = TOP_BAR_HEIGHT + QUEST_STRIP_HEIGHT + 2.0 ## pop-ups sit below the strip
-const GOAL_PANEL: Rect2 = Rect2(232,SCORE_CALLOUT_TOP,84,43) ## scoreboard slot under the quest strip: up to 3 rivals, YOU and the star goal
-const BOARD_FONT_SIZE: int = 8
+const GOAL_PANEL: Rect2 = Rect2(232,SCORE_CALLOUT_TOP,84,43) ## slot under the quest strip kept clear for the rival board
+const POINTS_RECT: Rect2 = Rect2(185,4,40,8) ## points-to-next-star bar, mirrors the brash meter's gap around the timer (centre 156.5)
 const HUD_FONT: Font = preload("res://assets/fonts/gull_hud.fnt")
 
 func setup(owner_game: BeachGame) -> void:
@@ -96,9 +95,12 @@ func setup(owner_game: BeachGame) -> void:
 	score_announcement.hide()
 	rival_score_panel = BeachUI.panel(self,Color(0.055,0.14,0.19,0.92))
 	rival_score_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	rival_score_panel.offset_left = GOAL_PANEL.position.x - 320.0
+	# Sized by its rows and grows leftward from the right edge.
+	rival_score_panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	rival_score_panel.offset_left = -4.0
 	rival_score_panel.offset_top = GOAL_PANEL.position.y
 	rival_score_panel.offset_right = -4.0
+	rival_score_panel.offset_bottom = GOAL_PANEL.position.y
 	rival_score_panel.mouse_filter = MOUSE_FILTER_IGNORE
 	var rival_panel_style: StyleBoxFlat = rival_score_panel.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
 	rival_panel_style.content_margin_left = 2.0
@@ -257,19 +259,13 @@ func _process(delta: float) -> void:
 	sync_quests()
 	if rival_score_labels.size() != game.pilots.size():
 		sync_rival_scores()
-	rival_score_panel.visible = not game.lesson_active() and game.running and game.intro <= 0.0
+	# A one-rival level doesn't need a board; the points bar covers the target.
+	rival_score_panel.visible = game.pilots.size() >= 2 and not game.lesson_active() and game.running and game.intro <= 0.0
 	for i: int in rival_score_labels.size():
 		var pilot: RivalPilot = game.pilots[i]
 		rival_score_labels[i].text = "%03d" % pilot.score
 	if you_score_label != null:
 		you_score_label.text = "%03d" % game.score.points
-		var status: Dictionary = goal_status()
-		if game.casual:
-			goal_label.text = "%d/%d" % [int(status.progress),int(status.goal)]
-		elif bool(status.done):
-			goal_label.text = "ALL STARS!"
-		else:
-			goal_label.text = "%s %d" % [str(status.title),int(status.goal)]
 
 # One row per quest, laid out horizontally: "- text" until done, green "> text" after; counted quests add n/N.
 # Quests finished on an earlier run are dimmed: they still pay points but no Feather.
@@ -298,24 +294,19 @@ func sync_rival_scores() -> void:
 		row.mouse_filter = MOUSE_FILTER_IGNORE
 		row.add_theme_constant_override("separation",2)
 		rival_score_list.add_child(row)
-		var name_label: Label = BeachUI.label(row,pilot.gull.rival_name.to_upper(),BOARD_FONT_SIZE,pilot.gull.rival_tint)
+		var name_label: Label = _small(BeachUI.label(row,pilot.gull.rival_name.to_upper(),TOP_BAR_FONT_SIZE,pilot.gull.rival_tint))
 		name_label.size_flags_horizontal = SIZE_EXPAND_FILL
-		var label: Label = BeachUI.label(row,"%03d" % pilot.score,BOARD_FONT_SIZE,BeachUI.CREAM)
+		var label: Label = _small(BeachUI.label(row,"%03d" % pilot.score,TOP_BAR_FONT_SIZE,BeachUI.CREAM))
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		rival_score_labels.append(label)
 	var you_row: HBoxContainer = HBoxContainer.new()
 	you_row.mouse_filter = MOUSE_FILTER_IGNORE
 	you_row.add_theme_constant_override("separation",2)
 	rival_score_list.add_child(you_row)
-	var you_name: Label = BeachUI.label(you_row,"YOU",BOARD_FONT_SIZE,BeachUI.GOLD)
+	var you_name: Label = _small(BeachUI.label(you_row,"YOU",TOP_BAR_FONT_SIZE,BeachUI.GOLD))
 	you_name.size_flags_horizontal = SIZE_EXPAND_FILL
-	you_score_label = BeachUI.label(you_row,"000",BOARD_FONT_SIZE,BeachUI.GOLD)
+	you_score_label = _small(BeachUI.label(you_row,"000",TOP_BAR_FONT_SIZE,BeachUI.GOLD))
 	you_score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	goal_label = BeachUI.label(rival_score_list,"",BOARD_FONT_SIZE,Color("7fd0d8"))
-	goal_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	var height: float = 3.0 + float(game.pilots.size() + 2) * float(BOARD_FONT_SIZE)
-	rival_score_panel.offset_bottom = rival_score_panel.offset_top + height
-	rival_score_panel.show()
 
 func show_score_announcement(food_id: String, earned: int) -> void:
 	if not Config.foods.has(food_id):
@@ -405,6 +396,20 @@ func _draw_brash() -> void:
 	if game.screech_lesson and game.screech_step in [1,2] and int(Time.get_ticks_msec()/300)%2 == 0:
 		draw_rect(METER_RECT.grow(2),BeachUI.GOLD,false,1.0)
 
+## Points bar right of the timer, styled like the brash meter: fills toward the pass mark,
+## then toward each next star; full gold once every star is earned.
+func _draw_points() -> void:
+	var status: Dictionary = goal_status()
+	var done: bool = bool(status.done)
+	var fill: float = 1.0 if done else clampf(float(status.progress)/maxf(1.0,float(status.goal)),0.0,1.0)
+	var inner: float = POINTS_RECT.size.x - 2.0
+	draw_rect(POINTS_RECT,BeachUI.INK)
+	draw_rect(POINTS_RECT.grow(-1),Color("233a4a"))
+	draw_rect(Rect2(POINTS_RECT.position+Vector2.ONE,Vector2(inner*fill,6)),BeachUI.GOLD if done else Color("7fd0d8"))
+	draw_rect(POINTS_RECT,BeachUI.CREAM if done else Color("397a85"),false,1.0)
+	var text: String = "ALL STARS" if done else ("GOAL" if game.casual else str(status.title))
+	draw_string(HUD_FONT,POINTS_RECT.position+Vector2(3,6),text,HORIZONTAL_ALIGNMENT_LEFT,-1,TOP_BAR_FONT_SIZE,BeachUI.INK if done or fill > 0.5 else BeachUI.CREAM)
+
 func goal_status() -> Dictionary:
 	if game.casual:
 		return {"title":"PRACTICE","progress":game.score.items,"goal":int(Config.tuning.score.casual_items),"done":false}
@@ -424,6 +429,8 @@ func _draw() -> void:
 	_draw_digestion(offset)
 	if game.running:
 		_draw_perks(offset)
+		if not game.training:
+			_draw_points()
 	if game.peck_pause:
 		_draw_peck_prompt(offset)
 	var aim: Vector2 = game.player.aim-offset
