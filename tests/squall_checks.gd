@@ -149,7 +149,7 @@ static func _order_and_saves(check: Callable) -> void:
 	var names: Array[String] = []
 	for level: Dictionary in Config.levels:
 		names.append(str(level.name))
-	check.call(Config.levels.size() == 7 and names == ["Training Day", "Family Picnic", "Boardwalk Bustle", "Dog Day Afternoon", "Three's a Crowd", "Squall", "Sunset Showdown"], "seven levels in order, Squall at 6 and the boss at 7: %s" % str(names))
+	check.call(Config.levels.size() == 7 and names == ["Training Day", "Family Picnic", "Boardwalk Bustle", "Water Fight", "Three's a Crowd", "Squall", "Sunset Showdown"], "seven levels in order, Squall at 6 and the boss at 7: %s" % str(names))
 	var ids_ok: bool = true
 	for index: int in Config.levels.size():
 		ids_ok = ids_ok and int(Config.levels[index].id) == index + 1

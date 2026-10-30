@@ -114,12 +114,12 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 ## A loose-only rival (Gary) never steals or knocks food a person holds, and can be mugged
 ## while carrying food he claimed from the sand.
 static func loose_only_checks(host: Node, main: Node, check: Callable) -> void:
-	var r: Dictionary = await simulate(host, main, 3, 60.0)
+	var r: Dictionary = await simulate(host, main, 2, 60.0)
 	var game: BeachGame = main.game
 	var held_thefts: int = 0
 	for target: BeachTarget in game.spawner.targets:
 		held_thefts += target.thefts + (1 if target.dropped_pending else 0)
-	check.call(bool(game.pilots[0].personality.get("loose_only", false)), "level 3 Gary profile is loose-only")
+	check.call(bool(game.pilots[0].personality.get("loose_only", false)), "level 2 Gary profile is loose-only")
 	check.call(held_thefts == 0 and r.held_picks == 0, "loose-only Gary never steals or knocks held food over 60 s (%d)" % held_thefts)
 	game.pilots[0].target = null
 	var held: Array[BeachTarget] = []
@@ -129,7 +129,7 @@ static func loose_only_checks(host: Node, main: Node, check: Callable) -> void:
 	game.pilots[0].pick_target(held, {})
 	check.call(game.pilots[0].target == null, "loose-only Gary ignores every held-food target")
 	# Gary claims a hotdog from the sand, then the player mugs him.
-	main.start_level(3)
+	main.start_level(2)
 	game = main.game
 	game.set_physics_process(false)
 	await host.settle()
@@ -154,7 +154,7 @@ static func loose_only_checks(host: Node, main: Node, check: Callable) -> void:
 	game.player.sweep_beak = gary.gull.position
 	game._mugging()
 	host.eat_pending(game)
-	check.call(game.quests.quests[0].id == "l3_mug_gary" and game.quests.quests[0].done, "mugging loose-only Gary completes l3_mug_gary")
+	check.call(gary.carried == 0 and game.score.points > 0, "mugging loose-only Gary takes his food")
 
 static func fresh(host: Node, main: Node, level: int) -> BeachGame:
 	main.start_level(level)
@@ -359,9 +359,9 @@ static func ground_checks(host: Node, main: Node, check: Callable) -> void:
 	plain.personality = {}
 	check.call(plain.weight("bins") == 0.5, "a profile without a ground block uses the tuning defaults")
 	# Lands next to a ground item, walks to it and eats it (a theft: score and mug window), without crashing.
-	game = await fresh(host, main, 3)
+	game = await fresh(host, main, 2)
 	var gary: RivalPilot = isolate(game, {"scraps": 1.0}, 360.0)
-	game.stash_raids.items.append(ground_item("hotdog", 480.0))
+	game.stash_raids.items.append(ground_item("hotdog", 610.0))
 	var landed: Array[bool] = [false]
 	var steps: int = step(game, 60 * 25, func() -> bool:
 		landed[0] = landed[0] or gary.gull.state == BeachGull.State.GROUNDED
@@ -372,7 +372,7 @@ static func ground_checks(host: Node, main: Node, check: Callable) -> void:
 	step(game, 60 * 12)
 	check.call(gary.gull.state != BeachGull.State.GROUNDED or gary.mode == RivalPilot.Mode.PATROL, "after the meal the rival takes off again (mode %d)" % gary.mode)
 	# A player who gets there first wins; the rival does not get stuck.
-	game = await fresh(host, main, 3)
+	game = await fresh(host, main, 2)
 	gary = isolate(game, {"scraps": 1.0}, 360.0)
 	var prize: Dictionary = ground_item("hotdog", 560.0)
 	game.stash_raids.items.append(prize)
@@ -382,7 +382,7 @@ static func ground_checks(host: Node, main: Node, check: Callable) -> void:
 	step(game, 60 * 3)
 	check.call(gary.ground_eats == 0 and gary.work.is_empty() and gary.mode != RivalPilot.Mode.WALK, "a rival that loses the item stops walking to it (mode %d)" % gary.mode)
 	# Bin: land, peck bin_pecks times, scraps spill (the bin stays emptied), eat food but not garbage.
-	game = await fresh(host, main, 3)
+	game = await fresh(host, main, 2)
 	gary = isolate(game, {"scraps": 1.0, "bins": 1.0}, 360.0)
 	var bin: Dictionary = game.stash_raids.bins[0]
 	var capacity: int = int(bin.remaining)
@@ -402,7 +402,7 @@ static func ground_checks(host: Node, main: Node, check: Callable) -> void:
 		return gary.stats.bins > 0)
 	check.call(lid_seen[0] and gary.stats.bins >= 1, "rival lands on the wheelie bin lid and pecks it open (%d steps)" % steps)
 	# Bag: peck a sunbather's stash open.
-	game = await fresh(host, main, 3)
+	game = await fresh(host, main, 2)
 	gary = isolate(game, {"bags": 1.0}, 140.0)
 	var bag: BeachTarget
 	for target: BeachTarget in game.spawner.targets:
@@ -421,21 +421,21 @@ static func ground_checks(host: Node, main: Node, check: Callable) -> void:
 	game.stash_raids.tick(1.0 / 60)
 	check.call(gary.gull.state == BeachGull.State.STUNNED, "a swatting sunbather stuns the rival that raided the bag")
 	# Catch: a snack flung through the air is caught by a rival that is flying through it.
-	game = await fresh(host, main, 3)
+	game = await fresh(host, main, 2)
 	gary = isolate(game, {"catch": 1.0}, 470.0)
 	gary.gull.facing = 1.0
 	game.stash_raids.items.append({"owner": null, "source": "bin", "food_id": "hotdog", "position": Vector2(500.0, 80.0), "velocity": Vector2(0, -90), "grounded": false, "age": 0.35})
 	steps = step(game, 60 * 4, func() -> bool: return gary.thefts > 0)
 	check.call(gary.stats.catch == 1 and gary.carried_food_id == "hotdog" and gary.gull.state != BeachGull.State.GROUNDED, "rival catches falling food in the air (%d steps)" % steps)
 	# A weight of 0 switches the skill off.
-	game = await fresh(host, main, 3)
+	game = await fresh(host, main, 2)
 	gary = isolate(game, {}, 380.0)
 	game.stash_raids.items.append(ground_item("hotdog", 420.0))
 	game.stash_raids.items.append({"owner": null, "source": "bin", "food_id": "cookie", "position": Vector2(400.0, 60.0), "velocity": Vector2(0, -30), "grounded": false, "age": 0.35})
 	check.call(gary.ground_options().is_empty() and not gary.accepts_item(game.stash_raids.items[0]) and not gary.accepts_item(game.stash_raids.items[1]), "all-zero weights: no ground options, nothing accepted")
 	step(game, 60 * 12)
 	check.call(gary.ground_eats == 0 and gary.stats.catch == 0 and gary.mode in [RivalPilot.Mode.PATROL, RivalPilot.Mode.RECOVER], "a rival with every ground weight at 0 never lands for food (%d eats)" % gary.ground_eats)
-	game = await fresh(host, main, 3)
+	game = await fresh(host, main, 2)
 	gary = isolate(game, {"scraps": 1.0, "bags": 1.0, "catch": 1.0}, 360.0)
 	var kinds: Array = gary.ground_options().map(func(option: Dictionary) -> String: return str(option.kind))
 	check.call(not kinds.has("bin") and kinds.has("bag"), "bins weight 0 removes bin jobs only (%s)" % str(kinds))
@@ -447,22 +447,22 @@ static func ground_checks(host: Node, main: Node, check: Callable) -> void:
 	kinds = gary.ground_options().map(func(option: Dictionary) -> String: return str(option.kind))
 	check.call(kinds.is_empty() or not (kinds.has("item") or kinds.has("scrap")), "scraps weight 0 removes item and crumb jobs")
 
-## Gary the scavenger in a plain level 3 (no scattered food): eats a lot, with at least two different skills.
+## Gary the scavenger in a plain level 2 (no scattered food): eats a lot, with at least two different skills.
 static func scavenger_checks(host: Node, main: Node, check: Callable) -> void:
-	var r: Dictionary = await simulate(host, main, 3, 90.0)
+	var r: Dictionary = await simulate(host, main, 2, 90.0)
 	var pilot: RivalPilot = main.game.pilots[0]
 	var used: int = 0
 	for skill: String in ["scraps", "bins", "bags", "catch"]:
 		used += 1 if int(pilot.stats[skill]) > 0 else 0
-	print("RIVAL SIM level 3 ground: eats %d stats %s ground_max %.1f" % [pilot.ground_eats, str(pilot.stats), r.ground_max])
-	check.call(pilot.ground_eats >= 4, "level 3 Gary eats at least 4 items with no scattered food (%d)" % pilot.ground_eats)
-	check.call(used >= 2, "level 3 Gary uses at least two ground skills (%s)" % str(pilot.stats))
-	check.call(r.ground_max <= 6.0, "level 3 Gary is never stuck on the ground for over 6 s (%.1f)" % r.ground_max)
-	check.call(r.dives[0] == 0 and r.held_picks == 0, "level 3 Gary stays loose-only: no snatching from hands")
+	print("RIVAL SIM level 2 ground: eats %d stats %s ground_max %.1f" % [pilot.ground_eats, str(pilot.stats), r.ground_max])
+	check.call(pilot.ground_eats >= 4, "level 2 Gary eats at least 4 items with no scattered food (%d)" % pilot.ground_eats)
+	check.call(used >= 2, "level 2 Gary uses at least two ground skills (%s)" % str(pilot.stats))
+	check.call(r.ground_max <= 6.0, "level 2 Gary is never stuck on the ground for over 6 s (%.1f)" % r.ground_max)
+	check.call(r.dives[0] == 0 and r.held_picks == 0, "level 2 Gary stays loose-only: no snatching from hands")
 
 ## Screenshots: a rival pecking a bin, then eating a scrap it released.
 static func ground_captures(host: Node, main: Node) -> void:
-	var game: BeachGame = await fresh(host, main, 3)
+	var game: BeachGame = await fresh(host, main, 2)
 	var gary: RivalPilot = isolate(game, {"scraps": 1.0, "bins": 1.0}, 360.0)
 	step(game, 60 * 60, func() -> bool: return gary.mode == RivalPilot.Mode.PECK and not gary.work.is_empty() and int(gary.work.ref.pecks) >= 2 and gary.gull.art_event_left > 0.1)
 	game.camera_x = clampf(gary.gull.position.x, 160.0, 1120.0)

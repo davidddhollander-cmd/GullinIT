@@ -1,13 +1,15 @@
 # Opening level redesign — 18 October 2026
 
+**Progression (L1-L7):** Training Day · Family Picnic (Gary intro) · Boardwalk Bustle (two off-lead dogs) · Water Fight (water-gun teen) · Three's a Crowd (Chip) · Squall (weather) · Sunset Showdown (boss). Twists may carry `tip` {id, text}: a one-time airborne toast (`BeachGame._twist_tip`).
+
 The first four levels use authored JSON layouts with deterministic +/-3 position variation. Their rosters are not filled by the legacy generator. Level 6 keeps the existing generation rules.
 
 | Level | Geometry | Cast and rhythm |
 | --- | --- | --- |
 | Training Day | 800 units of sand; open flight area, customer, bag, family | Four actors, calm air, slower customer and longer warnings. Nine action-driven lessons on the first visit. |
-| Family Picnic | 1040 units of sand; quiet sunbathers, separated families, kiosk | Seven actors; gentle steady breeze; family restocking creates moving opportunities. No rival, dog, or pier. |
-| Boardwalk Bustle | 1280 units; promenade begins at 430, pier at 920 | Sunbather, two customers, dog owner, pier diner. Gary arrives after the first swallowed non-scrap snack. No vendor or lifeguard. |
-| Dog Day Afternoon | 1280 units; Boardwalk Bustle's promenade/pier layout, wind gusts, Gary from the start | The Boardwalk cast plus an off-lead terrier (`scripts/off_lead_dog.gd`, tuning in `data/tuning.json` under `off_lead_dog`) roaming the quiet beach x=250-410. It barks (0.4 s windup), chases at 95 px/s, leaps at low fliers and stuns on a bite. A gull more than 40 px above the sand is safe. A chase of 1.5 s or more that ends without a catch is an OUTRUN. |
+| Family Picnic | 1040 units of sand; quiet sunbathers, separated families, kiosk | Seven actors; gentle steady breeze; family restocking creates moving opportunities. **Gary debuts here** (`gary_intro`): loose-food only, speed 0.65, accuracy 22 px, mug chance 0.15, released with his taunt after the first swallowed snack. No dog or pier. |
+| Boardwalk Bustle | 1280 units; promenade begins at 430, pier at 920 | Sunbather, three customers, pier diner, plus **two off-lead dogs** (twist `off_lead_dogs`, homes x=60-200 and x=270-400, one-time toast, quest OUTRUN THE DOGS x3). Gary is an ordinary rival from the start (speed 0.8). No vendor or lifeguard. |
+| Water Fight | 1280 units; Boardwalk Bustle's promenade/pier layout, wind gusts, Gary from the start | The water-gun teenager (`scripts/watergun_teen.gd`) patrols x=600-740 and soaks the nearest gull, rivals included. Twist `watergun_teen_intro` (one-time toast); quest GET A RIVAL SOAKED (`rival_soaked`). No dog (the off-lead dog debuted in level 3; levels 5-7 keep one terrier: barks 0.4 s, chases at 95 px/s, leaps at low fliers; a gull more than 40 px above the sand is safe; a 1.5 s+ chase that ends without a catch is an OUTRUN). |
 | Three's a Crowd | 1280 units; Dog Day's promenade/pier layout without the dog, two pier diners (fried fish) | Gary from the start; Chip (speed 1.1, mug_chance 0.8) joins after the first swallowed snack with a `taunt` profile line (`after_snatch` and `taunt` are per-rival profile keys). Rivals race and mug each other and the player. |
 
 ## Training rules

@@ -151,6 +151,24 @@ func run() -> void:
 	await preload("res://tests/off_lead_dog_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/water_shot_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/watergun_teen_checks.gd").run(self,Callable(self,"check"))
+	# Progression: Gary debuts in L2 (gentler than his later self), L3 is the two-dog level, L4's headline is the water-gun teen.
+	var l2: Dictionary = Config.levels[1]
+	var l3: Dictionary = Config.levels[2]
+	var l4: Dictionary = Config.levels[3]
+	check(l2.twist.id=="gary_intro" and l2.rivals.size()==1 and l2.rivals[0].name=="Gary" and bool(l2.rivals_after_snatch) and bool(l2.rivals[0].loose_only) and l2.rivals[0].has("taunt"),"level 2 has the Gary intro")
+	check(float(l2.rivals[0].speed)<float(l3.rivals[0].speed) and float(l2.rivals[0].accuracy_px)>float(l3.rivals[0].accuracy_px) and float(l2.rivals[0].mug_chance)<float(l3.rivals[0].mug_chance),"level 2 Gary is slower, less accurate and mugs less than level 3 Gary")
+	check(l3.twist.id!="gary_intro" and l3.rivals.size()==1 and l3.rivals[0].name=="Gary" and not l3.rivals[0].has("taunt"),"level 3 keeps Gary as an ordinary rival")
+	check(l4.twist.id=="watergun_teen_intro" and l4.has("watergun_teens") and not l4.spawns.any(func(spawn: Dictionary) -> bool: return spawn.type=="off_lead_dog") and l4.quests.any(func(q: Dictionary) -> bool: return q.event=="rival_soaked"),"level 4's twist is the water-gun teen, with no dog and a soak quest")
+	main.start_level(3)
+	main.game.set_physics_process(false)
+	main.game.player.state=BeachGull.State.GLIDE
+	GameState.options.tips.erase("dogs")
+	main.game._twist_tip()
+	check(main.game.effects.texts.any(func(t: Dictionary) -> bool: return str(t.text).begins_with("OFF-LEAD DOGS")) and "dogs" in GameState.options.tips,"level 3 shows the dog intro toast once")
+	var tip_count: int = main.game.effects.texts.size()
+	main.game._twist_tip()
+	check(main.game.effects.texts.size()==tip_count,"the dog toast is not repeated")
+	main.clear_game()
 	await preload("res://tests/watergun_vfx_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/level5_checks.gd").run(self,main,Callable(self,"check"))
 	await preload("res://tests/boss_checks.gd").run(self,Callable(self,"check"))

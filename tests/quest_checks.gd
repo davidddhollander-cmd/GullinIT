@@ -28,7 +28,7 @@ static func run(check: Callable) -> void:
 	check.call(l1.quests.is_empty() and not _level(1).has("quests") and not _level(1).has("random_quest"), "Training Day has no quests")
 	var l3: BeachQuests = BeachQuests.new()
 	l3.setup(_level(3), rng)
-	check.call(l3.quests.size() == 3 and l3.quests[0].id == "l3_mug_gary" and l3.quests[2].id == "l3_random", "level 3 has two quests plus random")
+	check.call(l3.quests.size() == 3 and l3.quests[0].id == "l3_outrun" and l3.quests[2].id == "l3_random", "level 3 has two quests plus random")
 
 	var fired: Array[String] = []
 	quests.quest_completed.connect(func(q: Dictionary) -> void: fired.append(q.id))
@@ -117,8 +117,6 @@ static func run_game(suite: Node, check: Callable) -> void:
 	result = _finish(game)
 	check.call(int(result.get("feathers_earned", -1)) == 0 and GameState.feathers() == 1, "replay earns no Feather")
 	game = _play(main, 3)
-	game._swallowed({"id": "hotdog", "mugged": true, "mugged_from": "Gary"})
-	check.call(game.quests.quests[0].done, "mugging Gary completes l3_mug_gary")
 	game._swallowed({"id": "hotdog", "scrap": true})
 	check.call(not game.quests.quests[1].done, "scrap hotdog does not complete the crab quest")
 	main.casual = true
@@ -234,7 +232,7 @@ static func run_game(suite: Node, check: Callable) -> void:
 	check.call(bonus > 0 and int(r.base) + int(r.clean) + bonus == int(r.score), "level 2 result: earned + clean + quest bonus equals total")
 	check.call(r.quests.all(func(q: Dictionary) -> bool: return q.has("progress") and q.has("count") and q.has("bonus")), "result quests carry progress, count and bonus")
 	check.call(not run.overlay.quest_box.visible or true, "")
-	# Task 005: level 2 wind flags and one-time upwind tip; level 3 Gary taunt.
+	# Task 005: level 2 wind flags and one-time upwind tip; level 2 Gary taunt (the intro moved from level 3).
 	GameState.options.tips = []
 	game = _play(main, 2)
 	check.call(game.beach.wind_flags.is_empty(), "level 2 has no flagpoles")
@@ -246,10 +244,10 @@ static func run_game(suite: Node, check: Callable) -> void:
 	game.player.state = BeachGull.State.GLIDE
 	game._physics_process(1.0 / 60)
 	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return str(t.text).begins_with("FLY INTO THE WIND")) and not ("upwind" in GameState.options.tips), "level 2 has no wind, so no upwind tip")
-	game = _play(main, 3)
+	game = _play(main, 2)
 	game._swallowed({"id": "hotdog"})
 	var is_taunt: Callable = func(t: Dictionary) -> bool: return t.text == "GARY: OI! THAT'S MY LUNCH!"
-	check.call(not game.effects.texts.any(is_taunt) and game.taunt_wait > 0.0, "level 3 taunt waits after Gary is released")
+	check.call(not game.effects.texts.any(is_taunt) and game.taunt_wait > 0.0, "level 2 taunt waits after Gary is released")
 	game.effects.freeze = 0.0
 	game.taunt_wait = 0.0
 	check.call(game.overlay.score_announcement.visible, "score announcement is up after the first swallow")
@@ -261,14 +259,14 @@ static func run_game(suite: Node, check: Callable) -> void:
 	game.effects.texts.clear()
 	game._physics_process(1.0 / 60)
 	var taunt: Array = game.effects.texts.filter(is_taunt)
-	check.call(taunt.size() == 1 and float(taunt[0].life) >= 1.9, "level 3 releasing Gary shows a 2 s taunt")
+	check.call(taunt.size() == 1 and float(taunt[0].life) >= 1.9, "level 2 releasing Gary shows a 2 s taunt")
 	if taunt.size() == 1:
 		var taunt_rect: Rect2 = _text_rect(game, taunt[0])
 		var gary: Vector2 = game.pilots[0].gull.position
 		check.call(not taunt_rect.intersects(Rect2(gary - Vector2(12, 28), Vector2(24, 36))), "taunt covers neither Gary nor his name tag")
 		check.call(taunt_rect.position.x >= game.camera_x - 160.0 and taunt_rect.end.x <= game.camera_x + 160.0, "taunt stays on screen")
-	await suite.snapshot("level3-gary-taunt")
-	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == "GARY JOINS THE LUNCH RUSH!"), "level 3 no longer shows the generic join message")
+	await suite.snapshot("level2-gary-taunt")
+	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == "GARY JOINS THE LUNCH RUSH!"), "level 2 no longer shows the generic join message")
 	check.call(game.pilots.size() == 1 and bool(game.pilots[0].personality.get("loose_only", false)), "Gary is loose-only")
 	# Task 007: customer bite window and the mid-air bite quest (level 1 replay).
 	GameState.complete_training()
