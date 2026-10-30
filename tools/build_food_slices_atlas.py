@@ -1,7 +1,7 @@
 """Promotes the pizza slices and ice-cream cones from the Art Lab food preview atlas into a shipped atlas.
 
 Usage:  python tools/build_food_slices_atlas.py
-assets/previews/ is excluded from exports, so the art is copied (pixel-exact, no resampling) into
+assets/lab/ is excluded from exports, so the art is copied (pixel-exact, no resampling) into
 assets/sprites/food-slices-icecream-v1.png. Prints the sprite defs for data/sprites.json and data/food_art.json.
 """
 import json
@@ -10,7 +10,7 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "assets/previews/food-icons-v1"
+SRC = ROOT / "assets/lab/food-icons-v1"
 OUT = ROOT / "assets/sprites/food-slices-icecream-v1.png"
 # manifest n -> food id (n 1..9 pizza slices, 28-31 and 33 ice-cream cones)
 FOODS = {1: "pizza_slice_cheese", 2: "pizza_slice_pepperoni", 3: "pizza_slice_mushroom", 4: "pizza_slice_veggie",

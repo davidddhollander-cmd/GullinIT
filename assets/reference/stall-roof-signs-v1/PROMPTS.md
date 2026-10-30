@@ -1,6 +1,6 @@
 # Standalone stall roof signs — approval assets
 
-Created with ChatGPT's built-in image_gen, transparent_background=true. The existing `assets/previews/stall-vendor-handover-v3.png` was supplied as a palette/style reference only. These are separate roof-sign assets for review; they have not been added to either stall. Generated source artwork is preserved intact alongside this file, with selected copies under `assets/sprites/`.
+Created with ChatGPT's built-in image_gen, transparent_background=true. The existing `assets/archive/previews/stall-vendor-handover-v3.png` was supplied as a palette/style reference only. These are separate roof-sign assets for review; they have not been added to either stall. Generated source artwork is preserved intact alongside this file, with selected copies under `assets/sprites/`.
 
 ## HOT DOGS
 

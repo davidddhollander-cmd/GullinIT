@@ -16,6 +16,6 @@ Appearance is chosen once per person. Automatic customers cycle original / mulle
 
 Rebuild using Godot's `--headless --path . --script tools/prepare_shopper_variants.gd`, then run `tools/map_staff_art.py`. The preparation reuses the established adult cropping, alpha cleanup and nearest-neighbor resizing pipeline; source artwork stays intact. Registry entries are also saved in `data/shopper_variants_art.json`.
 
-Preview: `tools/shopper_variants_preview.tscn` writes `assets/previews/shopper-variants-production-v1.png` beside existing cast members at production scale.
+Preview: `tools/shopper_variants_preview.tscn` writes `assets/archive/previews/shopper-variants-production-v1.png` beside existing cast members at production scale.
 
 Validation: existing staff art checks cover both atlases for hard alpha, transparent gutters, isolated actors, baseline alignment and distinct drawn animation frames. `tests/shopper_variants_checks.tscn` checks appearance rotation, refresh/reload persistence, hand mirroring, chase/windup/contact selection and swept food theft for both new characters. Run it headlessly after importing the project. The full integration suite also exercises the new appearances through ordinary spawning.

@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
 ATLAS = ROOT / "assets/sprites/gull-herring-screech-v1.png"
-OUTPUT = ROOT / "assets/previews/gull-herring-screech-v1.gif"
+OUTPUT = ROOT / "assets/archive/previews/gull-herring-screech-v1.gif"
 
 
 def main() -> None:

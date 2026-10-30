@@ -33,7 +33,7 @@ keeps this small, CPU-visible effect deterministic in tests without extra nodes.
   crashes, adult reactions, perch movement, and rival simulations.
 - Preview scene: `res://tools/gull_tumble_preview.tscn`; package its captures with
   `tools/package_gull_tumble_preview.py`.
-- Animated result: `assets/previews/gull-tumble-v1.gif`.
+- Animated result: `assets/archive/previews/gull-tumble-v1.gif`.
 - Code review: typed calls, existing sprite-only rotation, signal-owned VFX,
   preloaded textures, bounded emission and cleanup, input lockout, and scoring
   callbacks checked. No character artwork was generated or painted for this change.

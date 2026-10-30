@@ -54,7 +54,7 @@ func _initialize() -> void:
 		review.blit_rect(output, Rect2i(0, 0, 32, 24), Vector2i(4+index*36, 4))
 		print("%s: 32x24, silhouette %dx%d, %d opaque pixels, %d colors, binary alpha" % [kind, width, height, opaque, colors.size()])
 	review.resize(896, 256, Image.INTERPOLATE_NEAREST)
-	if review.save_png("res://assets/previews/picnic-bags-review-v1.png") != OK:
+	if review.save_png("res://assets/archive/previews/picnic-bags-review-v1.png") != OK:
 		push_error("Could not save review sheet")
 		quit(1)
 		return

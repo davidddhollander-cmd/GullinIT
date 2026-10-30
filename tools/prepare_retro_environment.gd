@@ -2,8 +2,8 @@ extends SceneTree
 ## Rebuilds native-resolution transparent assets from the approved-style
 ## ImageGen concept sheets. Nearest-neighbour reduction and a fixed 16-colour
 ## palette remove the fine shading that made the previous art read too smooth.
-const BUILDINGS := "res://assets/previews/beach-buildings-32bit-concept-v1.png"
-const PROPS := "res://assets/previews/beach-props-32bit-concept-v1.png"
+const BUILDINGS := "res://assets/archive/previews/beach-buildings-32bit-concept-v1.png"
+const PROPS := "res://assets/archive/previews/beach-props-32bit-concept-v1.png"
 const PALETTE := [
 	Color("183b4e"), Color("fff4da"), Color("408fa8"), Color("28667b"),
 	Color("ef725c"), Color("b94d4e"), Color("aa7047"), Color("d59a5e"),

@@ -17,7 +17,7 @@ David **accepted the Beach Hole design** ("yes, but needs some cleaning"). After
    - The thatch fringe under the sign is ragged, with dangling single pixels and uneven colour breaks.
    - The centre pillar between the windows has a stray dark spike and broken cream pieces.
    The isolated-pixel count (2 of 10,272) is good, so this is not lone pixels: it is small ragged shapes of 2 to 6 pixels, which the lone-pixel cleanup cannot see.
-2. **Name preview is wrong.** `assets/previews/beach-hole-restaurant-v2-name-preview.png` shows "THE BEACH HO" starting about 18 px right of centre and running off the right edge of the panel, where the last letters vanish (navy text on a navy outline). The panel is 94 px of cream and the name 80 px, so the preview script `tools/beach_hole_preview.gd` is misplacing the label, not the art.
+2. **Name preview is wrong.** `assets/archive/previews/beach-hole-restaurant-v2-name-preview.png` shows "THE BEACH HO" starting about 18 px right of centre and running off the right edge of the panel, where the last letters vanish (navy text on a navy outline). The panel is 94 px of cream and the name 80 px, so the preview script `tools/beach_hole_preview.gd` is misplacing the label, not the art.
 3. **Counter anchors are off-centre.** `service_counter_anchors` is `[[50,67],[101,67]]`. Measured from the sprite, the window openings span x 28-59 and x 71-103 (centres about 43.5 and 87). The left anchor is about 7 px right of centre and the right anchor sits at the window's right edge.
 
 ## Requirements

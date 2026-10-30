@@ -9,7 +9,7 @@ func _ready() -> void:
 	get_window().content_scale_size = Vector2i(360,270)
 	get_window().size = Vector2i(1080,810)
 	var old: Dictionary = Config.sprites.shopper_mullet.duplicate(true)
-	old.file = "res://assets/sprites/shopper-mullet-diner-style.png"
+	old.file = "res://assets/archive/sprites/shopper-mullet-diner-style.png"
 	var old_anchors: Array = JSON.parse_string(FileAccess.get_file_as_string("res://assets/reference/mullet-walk-v2/previous-entry.json")).food_anchors.walk
 	old.food_anchors.walk = old_anchors
 	Config.sprites.mullet_previous = old

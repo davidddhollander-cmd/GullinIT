@@ -10,4 +10,4 @@ The older woman's walk artwork is replaced with six complete ImageGen drawings b
 
 `tools/sundress_walk_preview.tscn` captures the original shopper, previous lady and new lady using identical walk frame indices. Enlarged lower-leg crops show the pose differences. The bottom row uses actual patrol ticks to demonstrate both directions returning from outside the patrol area without alternating facing. The 36 captured frames play at 24 fps, with each of the six walk poses held for three samples.
 
-Completed validation: 13,447 rendered integration checks and 51 standalone shopper checks, zero failures. The 26 focused patrol checks and 94 standalone stall-service checks also passed. Full logs are in ignored `test-output/sundress-walk-validation.log`, and `assets/previews/sundress-walk-v2.gif` contains the rendered comparison.
+Completed validation: 13,447 rendered integration checks and 51 standalone shopper checks, zero failures. The 26 focused patrol checks and 94 standalone stall-service checks also passed. Full logs are in ignored `test-output/sundress-walk-validation.log`, and `assets/archive/previews/sundress-walk-v2.gif` contains the rendered comparison.

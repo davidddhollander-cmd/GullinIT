@@ -20,7 +20,7 @@ The shorter visible leg area is a contributing silhouette constraint, not a reas
 
 ## Controlled comparison
 
-`assets/previews/shopper-walk-reassessment.gif` displays only the three current production characters, synchronised to the same six frame indices at 8 fps. It includes enlarged lower-leg crops. No new character artwork, movement driver or pilot rig is used in this comparison. The diagnostic scene is retained under ignored `test-output/shopper_reassessment.tscn`.
+`assets/archive/previews/shopper-walk-reassessment.gif` displays only the three current production characters, synchronised to the same six frame indices at 8 fps. It includes enlarged lower-leg crops. No new character artwork, movement driver or pilot rig is used in this comparison. The diagnostic scene is retained under ignored `test-output/shopper_reassessment.tscn`.
 
 As a supporting diagnostic, mean adjacent-frame alpha-silhouette change in the same lower-body region (source y=94..115, x=20..107) was 0.554 for the original, 0.272 for the man and 0.200 for the woman. This measures changed occupancy divided by the union of occupied pixels, including loop closure. It is not a biomechanical score or a direct foot-travel measurement; it quantifies how much less their visible lower silhouettes change. Source-sheet inspection and the animation comparison are the decisive evidence.
 

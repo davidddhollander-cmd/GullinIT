@@ -8,8 +8,8 @@ Normal routine walking remains 9 pixels per second and plays at 7 fps. The faste
 
 Review assets:
 
-- `assets/previews/diner-walk-v2.png` compares the old and new walks, shows both directions with food at actual gameplay scale, and enlarges all six new poses.
-- `assets/previews/diner-walk-v2-live.png` is a captured actual-scale live sample.
+- `assets/archive/previews/diner-walk-v2.png` compares the old and new walks, shows both directions with food at actual gameplay scale, and enlarges all six new poses.
+- `assets/archive/previews/diner-walk-v2-live.png` is a captured actual-scale live sample.
 - Run `tools/diner_walk_v2_live_preview.tscn` for the moving normal/fast comparison; Space pauses it.
 
 Focused validation is in `tests/diner_walk_v2_checks.tscn`. It checks clip timing, complete isolated figures, sole alignment and height, mirrored food anchors, pause behavior, normal/fast cadence and pixel-identical preservation of run/eat art.

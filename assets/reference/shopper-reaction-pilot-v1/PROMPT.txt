@@ -11,6 +11,6 @@ Style/medium: match the references exactly—expressive polished 2D game sprite 
 Constraints: do not redesign the character; preserve complete anatomy, face, hair, outfit, proportions, adult scale, clothing colors, foot baseline, and hand placement conventions. Every frame is a separate complete character with all hair, hands, limbs and sandals intact. No touching neighboring figures, no crop, no body-size drift, no food in any frame, no watermark.
 
 Built-in image generator, 21 October 2026. Transparent-background edit/generation using:
-- assets/sprites/shopper-diner-style.png
+- assets/archive/sprites/shopper-diner-style.png
 - assets/reference/shopper-lifeguard-v1/shopper-actions.png
 - assets/reference/shopper-lifeguard-v1/shopper-locomotion.png

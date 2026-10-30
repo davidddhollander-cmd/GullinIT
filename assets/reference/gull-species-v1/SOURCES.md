@@ -30,6 +30,6 @@ Design translation: broad white chest, heavier neck/head/bill, charcoal-black up
 
 - `assets/sprites/pier-diner-retro-clean.png`: approved dark-outline and compact cel/pixel rendering reference.
 - `assets/reference/adult-diner-pilot-v1/mum-three-poses-source.png`: inspected to confirm current cast detail and proportions.
-- `assets/sprites/gull_reference_clean.png`: inspected for existing pose coverage. The current player and rivals share this source, with rivals tinted. The new species designs establish distinct silhouettes and markings for the next animation pass.
+- `assets/archive/sprites/gull_reference_clean.png`: inspected for existing pose coverage. The current player and rivals share this source, with rivals tinted. The new species designs establish distinct silhouettes and markings for the next animation pass.
 
 Web image searches were used to cross-check standing and flying silhouettes. The saved official photographs above were the external image inputs supplied to the built-in generator; web photos are not used as runtime sprites.

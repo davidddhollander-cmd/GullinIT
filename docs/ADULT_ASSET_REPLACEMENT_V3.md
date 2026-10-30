@@ -28,7 +28,7 @@ The exact prompts are saved beside those sources in `PROMPTS.md`. Blue swimwear 
 
 ## Preparation and limitations
 
-`tools/adult_atlas_source.gd` records source regions, native heights, shared palette and clip mappings. `tools/generate_retro_adults.gd` rebuilds all five runtime images and `assets/previews/adult-replacement-review-v3.png`. Runtime `scripts/adult_pixel_art.gd` now defines layout/loading only, so regenerating no longer restores the old geometric people. Review columns are idle, walk 0, walk 1, left walk 2, swat contact, kick contact, handover/rest, and carry-left/pickup. Rows are mum, male red, male blue, female red, female blue.
+`tools/adult_atlas_source.gd` records source regions, native heights, shared palette and clip mappings. `tools/generate_retro_adults.gd` rebuilds all five runtime images and `assets/archive/previews/adult-replacement-review-v3.png`. Runtime `scripts/adult_pixel_art.gd` now defines layout/loading only, so regenerating no longer restores the old geometric people. Review columns are idle, walk 0, walk 1, left walk 2, swat contact, kick contact, handover/rest, and carry-left/pickup. Rows are mum, male red, male blue, female red, female blue.
 
 Adults remain about 40 native pixels tall with the soles at y=58, no mipmaps and nearest sampling. Each appearance uses at most 14 opaque palette colours and fully transparent remaining pixels. The contact sheet has transparent gutters for inspecting edge contamination.
 

@@ -13,8 +13,8 @@ func _row(path: String, top: int, bottom: int) -> Array[Image]:
 	return result
 
 func _initialize() -> void:
-	var old := "res://assets/previews/lifeguard-pixel-review-v1.png"
-	var motion := "res://assets/previews/lifeguard-motion-review-v1.png"
+	var old := "res://assets/archive/previews/lifeguard-pixel-review-v1.png"
+	var motion := "res://assets/archive/previews/lifeguard-motion-review-v1.png"
 	var idle := _row(old,0,382)
 	var reactions := _row(old,736,1088)
 	var walk := _row(motion,0,444)

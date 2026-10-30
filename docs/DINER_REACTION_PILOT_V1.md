@@ -20,4 +20,4 @@ Generated sources and all prompts are preserved in
 atlases remain unchanged.
 
 Focused validation scene: `tests/diner_reaction_pilot_checks.tscn`.  
-Review image: `assets/previews/diner-reaction-pilot-v1.png`.
+Review image: `assets/archive/previews/diner-reaction-pilot-v1.png`.

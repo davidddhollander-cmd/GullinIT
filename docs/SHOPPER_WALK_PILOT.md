@@ -6,11 +6,11 @@
 
 ## Review
 
-Open `assets/previews/shopper-walk-pilot-v1.gif`: current animation on the left, the selected cutout pilot on the right. The three rows demonstrate a cycle in place, patrol at 9 pixels/second and a kiosk trip at 20 pixels/second. Both columns move at the same speeds and turn left. Food remains separate and follows the generated hand.
+Open `assets/archive/previews/shopper-walk-pilot-v1.gif`: current animation on the left, the selected cutout pilot on the right. The three rows demonstrate a cycle in place, patrol at 9 pixels/second and a kiosk trip at 20 pixels/second. Both columns move at the same speeds and turn left. Food remains separate and follows the generated hand.
 
 Run `tools/walk_cycle_pilot.tscn` in Godot for the live version. Space pauses and R replays. The top row demonstrates one cycle per second. The moving pilot rows follow distance travelled, with a 28-pixel full stride: about 3.11 seconds per patrol cycle and 1.4 seconds per kiosk-trip cycle.
 
-The eight key positions are also baked into `assets/pilots/shopper-walk-v1/rig-poses.png` for pose review. These are renders of animated generated artwork, not characters drawn with primitives.
+The eight key positions are also baked into `assets/archive/pilots/shopper-walk-v1/rig-poses.png` for pose review. These are renders of animated generated artwork, not characters drawn with primitives.
 
 ## Why the approach changed
 
@@ -24,7 +24,7 @@ The upper body is cropped from the generated complete character; its complete so
 
 - Complete sources, rejected attempts and exact built-in-tool prompts: `assets/reference/shopper-walk-pilot-v1/`.
 - Selected limb source: `leg-parts-flat.png`; upper-body source: `source.png`.
-- Prepared body and six parts, pivot/dimension metadata: `assets/pilots/shopper-walk-v1/rig.json` and sibling PNGs.
+- Prepared body and six parts, pivot/dimension metadata: `assets/archive/pilots/shopper-walk-v1/rig.json` and sibling PNGs.
 - Earlier whole-body frame candidate: `walk.png` / `walk.json`; retained as experimental reference, not the selected moving pilot.
 - Preparation: `tools/prepare_walk_pilot.gd`, then `tools/prepare_walk_rig.gd`.
 - Joint animation and distance phase: `tools/walk_pilot_rig.gd`, `tools/walk_pilot_motion.gd`.

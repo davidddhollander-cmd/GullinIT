@@ -76,16 +76,16 @@ func review() -> void:
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var single: Image = get_viewport().get_texture().get_image()
-	single.save_png("res://assets/previews/beach-signs-single-arrow-v7.png")
+	single.save_png("res://assets/archive/previews/beach-signs-single-arrow-v7.png")
 	single.resize(320,180,Image.INTERPOLATE_NEAREST)
 	sheet.blit_rect(single,Rect2i(0,0,320,180),Vector2i(320,180))
 	sheet.resize(1280,720,Image.INTERPOLATE_NEAREST)
-	sheet.save_png("res://assets/previews/beach-signs-review-v7.png")
+	sheet.save_png("res://assets/archive/previews/beach-signs-review-v7.png")
 	get_window().size = Vector2i(640,360)
 	for frame: int in 3:
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png("res://assets/previews/beach-signs-phone-v7.png")
+	get_viewport().get_texture().get_image().save_png("res://assets/archive/previews/beach-signs-phone-v7.png")
 	var level_sheet := Image.create(960,360,false,Image.FORMAT_RGBA8)
 	for number: int in 6:
 		game.queue_free()
@@ -117,6 +117,6 @@ func review() -> void:
 				capture.resize(320,180,Image.INTERPOLATE_NEAREST)
 				level_sheet.blit_rect(capture,Rect2i(0,0,320,180),Vector2i((number%3)*320,(number/3)*180))
 	level_sheet.resize(1920,720,Image.INTERPOLATE_NEAREST)
-	level_sheet.save_png("res://assets/previews/beach-signs-all-levels-v7.png")
+	level_sheet.save_png("res://assets/archive/previews/beach-signs-all-levels-v7.png")
 	print("Beach sign checks: ",failures," failures")
 	get_tree().quit(1 if failures else 0)

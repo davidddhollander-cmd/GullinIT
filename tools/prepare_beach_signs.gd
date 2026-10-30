@@ -20,6 +20,6 @@ func _initialize() -> void:
 			return
 		if item=="arrow":
 			native.flip_x()
-			native.save_png("res://assets/sprites/beach-sign-arrow-left-v1.png")
+			native.save_png("res://assets/archive/sprites/beach-sign-arrow-left-v1.png")
 		print("Prepared ",path)
 	quit()

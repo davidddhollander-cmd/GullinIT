@@ -65,5 +65,5 @@ func _capture() -> void:
 	for i: int in 4:
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
-	assert(get_viewport().get_texture().get_image().save_png("res://assets/previews/toddler-diner-comparison-v1.png")==OK)
+	assert(get_viewport().get_texture().get_image().save_png("res://assets/archive/previews/toddler-diner-comparison-v1.png")==OK)
 	get_tree().quit()

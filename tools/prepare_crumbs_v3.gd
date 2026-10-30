@@ -13,5 +13,5 @@ func _initialize() -> void:
 		var sprite: Image = source.get_region(source.get_used_rect())
 		sprite.resize(10,6,Image.INTERPOLATE_NEAREST)
 		atlas.blit_rect(sprite,Rect2i(0,0,10,6),Vector2i(index*10,0))
-	assert(atlas.save_png("res://assets/sprites/food-crumbs-retro-v3.png")==OK)
+	assert(atlas.save_png("res://assets/archive/sprites/food-crumbs-retro-v3.png")==OK)
 	quit()

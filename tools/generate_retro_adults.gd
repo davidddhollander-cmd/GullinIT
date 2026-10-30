@@ -50,5 +50,5 @@ func _generate() -> void:
 			review.blit_rect(image, Rect2i(frame_index % 8 * CELL, frame_index / 8 * CELL, CELL, CELL), Vector2i(column * CELL, row * CELL))
 		row += 1
 	review.resize(review.get_width() * 2, review.get_height() * 2, Image.INTERPOLATE_NEAREST)
-	assert(review.save_png("res://assets/previews/adult-diner-production-review-v1.png") == OK)
+	assert(review.save_png("res://assets/archive/previews/adult-diner-production-review-v1.png") == OK)
 	quit()

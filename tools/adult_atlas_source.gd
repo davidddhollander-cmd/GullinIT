@@ -129,7 +129,7 @@ func _setup(mum: bool, female: bool, blue: bool) -> void:
 		poses.append_array(_row(review, row, 3, heights, blue, bounds))
 	standing = poses[0]
 	if not mum:
-		var cast := _read("res://assets/previews/adult-cast-32bit-style-review-v2.png")
+		var cast := _read("res://assets/archive/previews/adult-cast-32bit-style-review-v2.png")
 		standing = _pose(cast, Rect2i(1190 if female else 610, 0, 584 if female else 580, 887), 40, blue)
 	if female:
 		var motion := _read(SOURCE + "female-motion.png")

@@ -1,6 +1,6 @@
 # Pixel dog walker and terrier
 
-User-requested prerequisite to task 008, created 23 October 2026 with the built-in image generator. The original `assets/sprites/dog-owner-polished.png` was the identity reference; `assets/previews/shopper-variants-production-v1.png` supplied the current cast's pixel style. The old art and both complete generated sheets remain intact.
+User-requested prerequisite to task 008, created 23 October 2026 with the built-in image generator. The original `assets/archive/sprites/dog-owner-polished.png` was the identity reference; `assets/archive/previews/shopper-variants-production-v1.png` supplied the current cast's pixel style. The old art and both complete generated sheets remain intact.
 
 - [paired-source.png](paired-source.png): original eight-pose pixel replacement, including idle, alert, bark and angry utility poses.
 - [walk-source.png](walk-source.png): follow-up four-pose walk strip, with distinct contacts/passing poses for the owner and dog.

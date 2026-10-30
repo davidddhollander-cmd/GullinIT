@@ -11,10 +11,10 @@ flip and return to the existing routine.
 The complete generated source and exact built-in image-generator prompt are in
 `assets/reference/shopper-reaction-pilot-v1/`. The old production atlas remains
 untouched; `tools/prepare_shopper_reaction_pilot.gd` maps the new complete figures
-into `assets/sprites/shopper-diner-style-v2.png`.
+into `assets/archive/sprites/shopper-diner-style-v2.png`.
 
 Review assets:
 
 - `tools/shopper_reaction_pilot_preview.tscn`
-- `assets/previews/shopper-reaction-pilot-v1.png`
+- `assets/archive/previews/shopper-reaction-pilot-v1.png`
 - `tests/shopper_reaction_pilot_checks.tscn`

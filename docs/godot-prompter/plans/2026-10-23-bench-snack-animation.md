@@ -10,7 +10,7 @@ Status: implemented and visually reviewed; no new validation failures. Existing 
 
 David reported that crowd spacing sent pedestrians onto the bench via the rear lane. BenchRegistry now records a walking exclusion footprint derived from the rendered bench width, height, scale and authored position, expanded for shoes. BeachSpawner rejects candidate offsets within that footprint and also projects interpolated offsets to its foreground edge, so an already-raised walker cannot slide through the bench. Empty benches are obstacles too; anchored sitting/standing visitors retain their seat position. Simulation positions still restore through reset_spacing.
 
-Validation: 113 crowd-spacing checks and all 474 bench-snack checks pass. Full tools/validate.ps1: 16,377 checks, one unchanged pre-existing level-6 rival escape failure (escape_short=4), no new failures. The existing grab_focus diagnostic remains. Rendered both approach directions around empty/occupied benches using tools/bench_lane_preview.tscn; inspected assets/previews/bench-lanes-50.png. Regression checks include an existing rear-lane offset, interpolation, crossings from both sides, seated anchors, and scaled/repositioned bench geometry. No new character art was required.
+Validation: 113 crowd-spacing checks and all 474 bench-snack checks pass. Full tools/validate.ps1: 16,377 checks, one unchanged pre-existing level-6 rival escape failure (escape_short=4), no new failures. The existing grab_focus diagnostic remains. Rendered both approach directions around empty/occupied benches using tools/bench_lane_preview.tscn; inspected assets/archive/previews/bench-lanes-50.png. Regression checks include an existing rear-lane offset, interpolation, crossings from both sides, seated anchors, and scaled/repositioned bench geometry. No new character art was required.
 
 The original yellow-shirt shopper, mullet shopper and floral-sundress shopper sometimes walk to an available bench with their existing snack, sit, take occasional bites, stand up and resume strolling. First implement and visually verify the original shopper, then adapt the other two identities. Keep the architecture reusable for pier diners, but leave diners, families, toddlers, lifeguards and vendors out of this first rollout.
 
@@ -114,10 +114,10 @@ Food remains the existing single visible/snatchable object at its animated hand 
 
 ### Deliverables
 
-- `assets/previews/bench-snack-v1.gif`: all three identities, actual logical game scale; natural rest/departure left and theft/stand/chase right.
-- `assets/previews/bench-snack-v1.png`: representative 2x rendered seated view.
-- `assets/previews/bench-snack-contact-sheet-v1.png`: six representative stages.
-- `assets/previews/bench-snack-yellow-proof-v1.png/.gif`: original shopper proof.
+- `assets/archive/previews/bench-snack-v1.gif`: all three identities, actual logical game scale; natural rest/departure left and theft/stand/chase right.
+- `assets/archive/previews/bench-snack-v1.png`: representative 2x rendered seated view.
+- `assets/archive/previews/bench-snack-contact-sheet-v1.png`: six representative stages.
+- `assets/archive/previews/bench-snack-yellow-proof-v1.png/.gif`: original shopper proof.
 - `assets/previews/bench-snack-{seated,standing-after-theft,eat-and-chase,resume}-v1.png`: representative rendered screenshots.
 - Generated sources and prompt set: `assets/reference/bench-snack-v1/`.
 
@@ -133,7 +133,7 @@ User requested that walkers stop using the raised lane over benches, and that mu
 - Sol completed the bench implementation. The follow-up delegation hit a usage limit; the parent agent completed family spacing and final validation.
 - Focused crowd-spacing validation: **251 checks, 0 failures**, including two families crossing beside a bench. Bench-snack regression: **474 checks, 0 failures**.
 - Final `tools/validate.ps1`: **16,515 checks, 1 failure**, the pre-existing `level 6 rival leaves the scene of a theft` (`escape_short=4`). No new failures. The existing outside-tree `grab_focus` error is unchanged. Log: `test-output/family-lanes-integration.log`.
-- Rendered `assets/previews/family-ground-lane.png` inspected: mum and two toddlers stay together on the ground line; the crowded two-family case retains distinct silhouettes. Existing generated character artwork is used unchanged.
+- Rendered `assets/archive/previews/family-ground-lane.png` inspected: mum and two toddlers stay together on the ground line; the crowded two-family case retains distinct silhouettes. Existing generated character artwork is used unchanged.
 - Reproducible family preview: `tools/family_lane_preview.tscn`. Focused suite: `tests/crowd_spacing_checks.tscn`.
 
 ## Merge with updated main

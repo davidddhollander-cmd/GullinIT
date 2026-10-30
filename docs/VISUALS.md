@@ -10,7 +10,7 @@
 ## Implemented assets
 
 - `assets/reference/gull_sheet_original.png`: preserved user attachment, unchanged.
-- `assets/sprites/gull_reference_clean.png`: transparent derivative prepared with the built-in image tool.
+- `assets/archive/sprites/gull_reference_clean.png`: transparent derivative prepared with the built-in image tool.
 - `data/sprites.json`: live player atlas regions, frame padding, scale and animation definitions.
 - `data/gull_art.json`: curated manifest override preserved by `tools/generate_assets.py` when regenerating placeholders.
 - `assets/shaders/gull_cutout.gdshader`: suppresses faint extraction fringes during rendering; source PNG remains intact.

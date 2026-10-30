@@ -13,7 +13,7 @@ func _initialize() -> void:
 		var sprite: Image = source.get_region(source.get_used_rect())
 		sprite.resize(5,3,Image.INTERPOLATE_NEAREST)
 		atlas.blit_rect(sprite,Rect2i(0,0,5,3),Vector2i(index*5,0))
-	assert(atlas.save_png("res://assets/sprites/food-crumbs-retro-v2.png")==OK)
+	assert(atlas.save_png("res://assets/archive/sprites/food-crumbs-retro-v2.png")==OK)
 	for y: int in 3:
 		var row: String = ""
 		for x: int in 15:

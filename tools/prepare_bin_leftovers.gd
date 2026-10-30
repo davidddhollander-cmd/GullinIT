@@ -59,7 +59,7 @@ func _initialize() -> void:
 		print("%s: saved 16x16, silhouette %dx%d, %d opaque pixels, %d colors, binary alpha" % [kind, width, height, opaque, colors.size()])
 	assert(atlas.save_png("res://assets/sprites/retro-food-bin-leftovers-atlas-32bit.png") == OK)
 	review.resize(720, 240, Image.INTERPOLATE_NEAREST)
-	assert(review.save_png("res://assets/previews/bin-leftovers-review-v1.png") == OK)
+	assert(review.save_png("res://assets/archive/previews/bin-leftovers-review-v1.png") == OK)
 	quit()
 
 func _solid_bounds(source: Image) -> Rect2i:

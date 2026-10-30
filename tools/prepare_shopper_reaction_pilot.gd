@@ -2,8 +2,8 @@ extends SceneTree
 ## Append generated complete figures to a versioned atlas; preserve both old atlas and source.
 const Source = preload("res://tools/diner_adult_atlas_source.gd")
 const SOURCE_PATH := "res://assets/reference/shopper-reaction-pilot-v1/shopper-reactions-source.png"
-const OLD_ATLAS_PATH := "res://assets/sprites/shopper-diner-style.png"
-const OUTPUT_PATH := "res://assets/sprites/shopper-diner-style-v2.png"
+const OLD_ATLAS_PATH := "res://assets/archive/sprites/shopper-diner-style.png"
+const OUTPUT_PATH := "res://assets/archive/sprites/shopper-diner-style-v2.png"
 const FIRST_NEW_FRAME := 26
 var source := Source.new()
 

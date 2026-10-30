@@ -49,7 +49,7 @@ func _initialize() -> void:
 			anchors[clip].append(_palm(frame))
 			index += 1
 		animations[clip] = {"frames":indices,"fps":10 if clip in ["run","swat"] else (8 if clip=="walk" else 4),"loop":clip not in ["swat","angry"]}
-	assert(atlas.save_png("res://assets/sprites/shopper-diner-style.png")==OK)
-	var entry := {"file":"res://assets/sprites/shopper-diner-style.png","frame_w":128,"frame_h":128,"visual_scale":0.5,"art_height":40,"sprite_offset_y":-26,"animations":animations,"food_anchors":anchors}
+	assert(atlas.save_png("res://assets/archive/sprites/shopper-diner-style.png")==OK)
+	var entry := {"file":"res://assets/archive/sprites/shopper-diner-style.png","frame_w":128,"frame_h":128,"visual_scale":0.5,"art_height":40,"sprite_offset_y":-26,"animations":animations,"food_anchors":anchors}
 	FileAccess.open("res://data/shopper_art.json",FileAccess.WRITE).store_string(JSON.stringify({"kiosk_customer":entry},"  ",false)+"\n")
 	quit()

@@ -35,10 +35,10 @@ func capture() -> void:
 		await RenderingServer.frame_post_draw
 		var image: Image = get_viewport().get_texture().get_image()
 		if frame==16:
-			image.save_png("res://assets/previews/order-bubble-desktop.png")
+			image.save_png("res://assets/archive/previews/order-bubble-desktop.png")
 		image.resize(640,360,Image.INTERPOLATE_NEAREST)
 		if frame==16:
-			image.save_png("res://assets/previews/order-bubble-phone.png")
+			image.save_png("res://assets/archive/previews/order-bubble-phone.png")
 		image.save_png(output+"/frame-%03d.png" % frame)
 		Checks.step(game,0.05)
 	get_tree().quit()

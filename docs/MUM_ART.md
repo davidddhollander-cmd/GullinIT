@@ -1,6 +1,6 @@
 # Mum artwork — 8 October 2026
 
-Replaced the 16 × 32 placeholder parent sheet with `assets/sprites/mum-polished.png`, created using the built-in ChatGPT image generator. The original placeholder remains available. One brunette mum appearance currently serves all families.
+Replaced the 16 × 32 placeholder parent sheet with `assets/archive/sprites/mum-polished.png`, created using the built-in ChatGPT image generator. The original placeholder remains available. One brunette mum appearance currently serves all families.
 
 The new transparent 1279 × 1230 source contains 16 poses. `tools/map_mum_sheet.py` reads alpha bounds and writes atlas regions into `data/sprites.json`; it does not modify source pixels. Frames use a shared 400 × 320 canvas and 0.13 display scale. Linear filtering with mipmaps and the existing alpha-cutout shader preserve detail at game size. Generated frames still have slight natural proportion variation; this is a first art pass, not a hand-cleaned animation master.
 
