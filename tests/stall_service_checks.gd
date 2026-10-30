@@ -144,7 +144,7 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(game.stalls.requests[preparing].order_bubble.get_parent()==mum,"mum orders once for the family instead of adding bubbles to every child")
 	var service_duration: float = float(Config.tuning.world.stall_prepare_time)+float(Config.tuning.world.stall_extend_time)+float(Config.tuning.world.stall_handover_time)+float(Config.tuning.world.stall_retract_time)
 	step(game,3.0*service_duration+0.7)
-	check.call(child.food and child.food_id=="ice_cream" and sibling.food and sibling.food_id==sibling_id,"visible family receipts fill missing hand and preserve existing sibling snack")
+	check.call(child.food and Config.food_family(child.food_id)=="ice_cream" and sibling.food and sibling.food_id==sibling_id,"visible family receipts fill missing hand and preserve existing sibling snack")
 	check.call(mum.food and mum.supply_crisps==1 and mum.supply_cookies==0 and mum.purchased_on_trip==3,"family order conserves two crisps including held bag and no cookie refill")
 	# A serving theft during BUY aborts outstanding grants, not just return trips.
 	step(game,1.0)

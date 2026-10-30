@@ -184,6 +184,9 @@ func _peck_bin(bin: Dictionary) -> bool:
 			# Wheelie bins are harder to reach, so their scatter list is richer.
 			var choices: Array = t.get("wheelie_bin_scatter",t.bin_scatter) if wheelie else t.bin_scatter
 			var kind: String = str(choices[int(bin.scatter_index)%choices.size()])
+			var look_alikes: Array[String] = Config.family_members(kind) # pizza leftovers vary: any slice, or the old half pizza
+			if look_alikes.size() > 1:
+				kind = look_alikes[visual_rng.randi_range(0,look_alikes.size()-1)]
 			var is_food: bool = Config.foods.has(kind)
 			bin.scatter_index = int(bin.scatter_index)+1
 			var direction: float = -1.0 if i%2 == 0 else 1.0
