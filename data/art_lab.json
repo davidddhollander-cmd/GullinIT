@@ -7,7 +7,8 @@
       "candidate": {
         "clone": "gull_herring"
       },
-      "motion": "dive"
+      "motion": "dive",
+      "category": "test"
     },
     {
       "title": "SHOPPER WALK SELF-TEST",
@@ -16,7 +17,8 @@
       "candidate": {
         "clone": "shopper_mullet"
       },
-      "motion": "walk_across"
+      "motion": "walk_across",
+      "category": "test"
     },
     {
       "title": "SUNDRESS WALK SELF-TEST",
@@ -25,7 +27,8 @@
       "candidate": {
         "clone": "shopper_sundress"
       },
-      "motion": "walk_across"
+      "motion": "walk_across",
+      "category": "test"
     },
     {
       "title": "FOOD ON SAND SELF-TEST",
@@ -38,7 +41,8 @@
       "size": [
         8,
         4
-      ]
+      ],
+      "category": "test"
     },
     {
       "title": "FOOD IN BEAK SELF-TEST",
@@ -51,7 +55,8 @@
       "size": [
         9,
         5
-      ]
+      ],
+      "category": "test"
     },
     {
       "title": "DINER A IDLE GRID",
@@ -68,7 +73,8 @@
       },
       "reference": "pier_diner_b",
       "motion": "idle",
-      "animation": "idle"
+      "animation": "idle",
+      "category": "diner"
     },
     {
       "title": "DINER A WALK GRID",
@@ -85,7 +91,8 @@
       },
       "reference": "pier_diner_b_motion",
       "motion": "walk_across",
-      "animation": "walk"
+      "animation": "walk",
+      "category": "diner"
     },
     {
       "title": "DINER A SWAT GRID",
@@ -102,7 +109,8 @@
       },
       "reference": "pier_diner_b",
       "motion": "idle",
-      "animation": "swat"
+      "animation": "swat",
+      "category": "diner"
     },
     {
       "title": "DINER A REACTION GRID",
@@ -119,7 +127,8 @@
       },
       "reference": "pier_diner_b_reactions",
       "motion": "idle",
-      "animation": "surprise"
+      "animation": "surprise",
+      "category": "diner"
     },
     {
       "title": "TOUCHUP B IDLE",
@@ -136,7 +145,8 @@
       },
       "reference": "shopper_mullet",
       "motion": "idle",
-      "animation": "idle"
+      "animation": "idle",
+      "category": "touchup"
     },
     {
       "title": "TOUCHUP B WALK",
@@ -153,7 +163,8 @@
       },
       "reference": "shopper_mullet",
       "motion": "walk_across",
-      "animation": "walk"
+      "animation": "walk",
+      "category": "touchup"
     },
     {
       "title": "TOUCHUP A IDLE",
@@ -170,7 +181,8 @@
       },
       "reference": "shopper_mullet",
       "motion": "idle",
-      "animation": "idle"
+      "animation": "idle",
+      "category": "touchup"
     },
     {
       "title": "TOUCHUP A WALK",
@@ -187,7 +199,8 @@
       },
       "reference": "shopper_mullet",
       "motion": "walk_across",
-      "animation": "walk"
+      "animation": "walk",
+      "category": "touchup"
     },
     {
       "title": "PIER RESTAURANT",
@@ -205,7 +218,8 @@
         "file": "res://assets/sprites/pier-restaurant-props-v1/existing-stands-row-v1.png",
         "frame_w": 160,
         "frame_h": 56
-      }
+      },
+      "category": "props"
     },
     {
       "title": "RESTAURANT TABLE",
@@ -219,7 +233,8 @@
         "visual_scale": 1.0
       },
       "reference": "shopper_mullet",
-      "motion": "static"
+      "motion": "static",
+      "category": "props"
     },
     {
       "title": "PIER WIRE FENCE",
@@ -233,7 +248,8 @@
         "visual_scale": 1.0
       },
       "reference": "shopper_mullet",
-      "motion": "static"
+      "motion": "static",
+      "category": "props"
     },
     {
       "title": "FOOD 01 PIZZA SLICE CHEESE",
@@ -263,7 +279,8 @@
       "size": [
         8.5,
         7.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 02 PIZZA SLICE PEPPERONI",
@@ -293,7 +310,8 @@
       "size": [
         8.0,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 03 PIZZA SLICE MUSHROOM",
@@ -323,7 +341,8 @@
       "size": [
         7.5,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 04 PIZZA SLICE VEGGIE",
@@ -353,7 +372,8 @@
       "size": [
         8.0,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 05 PIZZA SLICE HAWAIIAN",
@@ -383,7 +403,8 @@
       "size": [
         8.0,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 06 PIZZA SLICE WHITE",
@@ -413,7 +434,8 @@
       "size": [
         8.0,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 07 PIZZA SLICE HAM CORN",
@@ -443,7 +465,8 @@
       "size": [
         8.0,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 08 PIZZA SLICE ROCKET",
@@ -473,7 +496,8 @@
       "size": [
         8.5,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 09 PIZZA SLICE BASIL",
@@ -503,7 +527,8 @@
       "size": [
         8.5,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 10 PIZZA BOX",
@@ -533,7 +558,8 @@
       "size": [
         13.5,
         15.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 11 PIZZA BASIL",
@@ -563,7 +589,8 @@
       "size": [
         10.0,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 12 PIZZA PEPPERONI",
@@ -593,7 +620,8 @@
       "size": [
         10.0,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 13 PIZZA MUSHROOM",
@@ -623,7 +651,8 @@
       "size": [
         9.5,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 14 PIZZA VEGGIE",
@@ -653,7 +682,8 @@
       "size": [
         9.5,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 15 PIZZA HAWAIIAN",
@@ -683,7 +713,8 @@
       "size": [
         9.5,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 16 PIZZA ROCKET",
@@ -713,7 +744,8 @@
       "size": [
         10.0,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 17 PIZZA MARGHERITA",
@@ -743,7 +775,8 @@
       "size": [
         9.5,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 18 DOUGHNUT PINK SPRINKLES",
@@ -773,7 +806,8 @@
       "size": [
         6.5,
         6.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 19 DOUGHNUT CHOC SPRINKLES",
@@ -803,7 +837,8 @@
       "size": [
         6.5,
         6.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 20 DOUGHNUT WHITE SPRINKLES",
@@ -833,7 +868,8 @@
       "size": [
         6.5,
         6.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 21 DOUGHNUT PLAIN",
@@ -863,7 +899,8 @@
       "size": [
         6.5,
         6.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 22 DOUGHNUT CHOC DRIZZLE",
@@ -893,7 +930,8 @@
       "size": [
         7.0,
         6.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 23 DOUGHNUT PINK DRIZZLE",
@@ -923,7 +961,8 @@
       "size": [
         7.0,
         6.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 24 DOUGHNUT SUGAR",
@@ -953,7 +992,8 @@
       "size": [
         7.0,
         6.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 25 DOUGHNUT CHOC NUTS",
@@ -983,7 +1023,8 @@
       "size": [
         7.0,
         6.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 26 DOUGHNUT BERRY",
@@ -1013,7 +1054,8 @@
       "size": [
         7.5,
         6.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 27 DOUGHNUT BOX",
@@ -1043,7 +1085,8 @@
       "size": [
         15.5,
         11.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 28 CONE VANILLA",
@@ -1073,7 +1116,8 @@
       "size": [
         4.0,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 29 CONE CHOCOLATE",
@@ -1103,7 +1147,8 @@
       "size": [
         4.0,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 30 CONE STRAWBERRY",
@@ -1133,7 +1178,8 @@
       "size": [
         4.0,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 31 CONE MINT",
@@ -1163,7 +1209,8 @@
       "size": [
         4.0,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 32 CONE STRAWBERRY SWIRL",
@@ -1193,7 +1240,8 @@
       "size": [
         4.0,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 33 CONE CHOC VANILLA SWIRL",
@@ -1223,7 +1271,8 @@
       "size": [
         4.0,
         8.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 34 CONE CHOC STRAWB SCOOPS",
@@ -1253,7 +1302,8 @@
       "size": [
         4.0,
         7.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 35 CONE VANILLA MINT SCOOPS",
@@ -1283,7 +1333,8 @@
       "size": [
         4.5,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 36 LOLLY CHOC NUT",
@@ -1313,7 +1364,8 @@
       "size": [
         4.5,
         7.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 37 LOLLY CHOCOLATE",
@@ -1343,7 +1395,8 @@
       "size": [
         3.5,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 38 LOLLY STRAWBERRY",
@@ -1373,7 +1426,8 @@
       "size": [
         3.5,
         7.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 39 LOLLY ORANGE",
@@ -1403,7 +1457,8 @@
       "size": [
         3.5,
         7.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 40 LOLLY ROCKET",
@@ -1433,7 +1488,8 @@
       "size": [
         3.5,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 41 LOLLY CHOCOLATE 2",
@@ -1463,7 +1519,8 @@
       "size": [
         3.5,
         7.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 42 ICE CREAM CART",
@@ -1493,7 +1550,8 @@
       "size": [
         13.0,
         11.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 43 ICE CREAM SIGN",
@@ -1523,7 +1581,8 @@
       "size": [
         8.0,
         9.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 44 FRIES CHECK CUP",
@@ -1553,7 +1612,8 @@
       "size": [
         5.5,
         6.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 45 FRIES WHITE CONE",
@@ -1583,7 +1643,8 @@
       "size": [
         5.0,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 46 FRIES BLUE CONE",
@@ -1613,7 +1674,8 @@
       "size": [
         5.0,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 47 FRIES PAPER CONE",
@@ -1643,7 +1705,8 @@
       "size": [
         6.0,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 48 ONION RING BUCKET",
@@ -1673,7 +1736,8 @@
       "size": [
         5.0,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 49 NUGGET BUCKET",
@@ -1703,7 +1767,8 @@
       "size": [
         6.0,
         7.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 50 POPCORN BUCKET",
@@ -1733,7 +1798,8 @@
       "size": [
         5.5,
         6.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 51 FISH AND CHIPS TRAY",
@@ -1763,7 +1829,8 @@
       "size": [
         13.5,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 52 CHIPS AND DIP TRAY",
@@ -1793,7 +1860,8 @@
       "size": [
         10.0,
         6.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 53 ONION RING TRAY",
@@ -1823,7 +1891,8 @@
       "size": [
         9.5,
         6.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 54 ONION RING TRAY SMALL",
@@ -1853,7 +1922,8 @@
       "size": [
         8.0,
         5.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 55 HOT DOG MUSTARD",
@@ -1883,7 +1953,8 @@
       "size": [
         8.0,
         6.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 56 HOT DOG RELISH",
@@ -1913,7 +1984,8 @@
       "size": [
         8.0,
         6.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 57 HOT DOG KETCHUP MUSTARD",
@@ -1943,7 +2015,8 @@
       "size": [
         8.0,
         6.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 58 HOT DOG LOADED",
@@ -1973,7 +2046,8 @@
       "size": [
         8.5,
         6.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 59 BURGER 1",
@@ -2003,7 +2077,8 @@
       "size": [
         7.0,
         6.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 60 BURGER 2",
@@ -2033,7 +2108,8 @@
       "size": [
         7.0,
         6.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 61 BURGER 3",
@@ -2063,7 +2139,8 @@
       "size": [
         7.0,
         6.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 62 WRAP",
@@ -2093,7 +2170,8 @@
       "size": [
         9.0,
         6.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 63 SUB HAM SALAD",
@@ -2123,7 +2201,8 @@
       "size": [
         10.0,
         6.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 64 PANINI",
@@ -2153,7 +2232,8 @@
       "size": [
         10.5,
         6.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 65 CAN RED",
@@ -2183,7 +2263,8 @@
       "size": [
         4.0,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 66 CAN BLUE",
@@ -2213,7 +2294,8 @@
       "size": [
         4.0,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 67 CAN GREEN",
@@ -2243,7 +2325,8 @@
       "size": [
         4.0,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 68 CAN ORANGE",
@@ -2273,7 +2356,8 @@
       "size": [
         4.0,
         7.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 69 BOTTLE KETCHUP",
@@ -2303,7 +2387,8 @@
       "size": [
         3.0,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 70 BOTTLE MUSTARD",
@@ -2333,7 +2418,8 @@
       "size": [
         3.0,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 71 BOTTLE MAYO",
@@ -2363,7 +2449,8 @@
       "size": [
         3.0,
         7.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 72 COFFEE CUP",
@@ -2393,7 +2480,8 @@
       "size": [
         4.5,
         7.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 73 COLA GLASS",
@@ -2423,7 +2511,8 @@
       "size": [
         4.0,
         8.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 74 MILKSHAKE",
@@ -2453,7 +2542,8 @@
       "size": [
         4.0,
         9.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 75 ORANGE JUICE",
@@ -2483,7 +2573,8 @@
       "size": [
         4.0,
         7.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 76 WATER BOTTLE",
@@ -2513,7 +2604,8 @@
       "size": [
         3.0,
         8.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 77 COCONUT DRINK",
@@ -2543,7 +2635,8 @@
       "size": [
         8.5,
         8.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 78 SALT SHAKER",
@@ -2573,7 +2666,8 @@
       "size": [
         2.5,
         5.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 79 PEPPER SHAKER",
@@ -2603,7 +2697,8 @@
       "size": [
         2.5,
         5.0
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 80 NAPKIN DISPENSER",
@@ -2633,7 +2728,8 @@
       "size": [
         5.5,
         7.5
-      ]
+      ],
+      "category": "food"
     },
     {
       "title": "FOOD 81 CUTLERY CRATE",
@@ -2663,7 +2759,8 @@
       "size": [
         9.5,
         9.0
-      ]
+      ],
+      "category": "food"
     }
   ]
 }

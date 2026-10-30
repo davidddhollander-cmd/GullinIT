@@ -117,7 +117,7 @@ func _build_hud() -> void:
 	for x: float in [40.0, 200.0]:
 		side_labels.append(_label(layer, Vector2(x, 22), 80, HORIZONTAL_ALIGNMENT_CENTER))
 	reference_label = _label(layer, Vector2(120, 22), 80, HORIZONTAL_ALIGNMENT_CENTER)
-	_label(layer, Vector2(2, 161), 316, HORIZONTAL_ALIGNMENT_LEFT).text = "1-9/ARROWS PICK  Z ZOOM  B BLIND  F FILTER"
+	_label(layer, Vector2(2, 161), 316, HORIZONTAL_ALIGNMENT_LEFT).text = "ARROWS PICK  TAB GROUP  Z ZOOM  B BLIND  F FILTER"
 	_label(layer, Vector2(2, 170), 316, HORIZONTAL_ALIGNMENT_LEFT).text = "I INT  P PAUSE  . STEP  C CAPTURE  G SKY  D DUSK"
 
 func _label(parent: Node, at: Vector2, width: float, align: HorizontalAlignment) -> Label:
@@ -297,9 +297,35 @@ func _process(_delta: float) -> void:
 		_advance(STEP)
 	_refresh_hud()
 
+## Entries carry a `category`; Tab jumps between the groups, in order of first appearance.
+func _category(i: int) -> String:
+	return str(comparisons[i].get("category", "other"))
+
+## "FOOD 12/81": the selected entry's place within its own group.
+func _group_position() -> String:
+	var category: String = _category(index)
+	var place: int = 0
+	var total: int = 0
+	for i: int in comparisons.size():
+		if _category(i) == category:
+			total += 1
+			if i <= index:
+				place += 1
+	return "%s %d/%d" % [category.to_upper(), place, total]
+
+## Selects the first entry of the next (step 1) or previous (step -1) group, wrapping.
+func _select_group(step: int) -> void:
+	var firsts: Array[int] = []
+	var seen: Array[String] = []
+	for i: int in comparisons.size():
+		if not seen.has(_category(i)):
+			seen.append(_category(i))
+			firsts.append(i)
+	_select(firsts[posmod(seen.find(_category(index)) + step, firsts.size())])
+
 func _refresh_hud() -> void:
 	var entry: Dictionary = comparisons[index]
-	title_label.text = "%d/%d %s" % [index + 1, comparisons.size(), str(entry.title).to_upper()]
+	title_label.text = "%s %s" % [_group_position(), str(entry.title).to_upper()]
 	desc_label.text = str(entry.get("description", "")).to_upper()
 	var flags: PackedStringArray = ["%dX" % zoom, "SMOOTH" if smooth else "SHARP", "INT" if integer_scale else "FRAC"]
 	if blind:
@@ -346,6 +372,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_select(index + 1)
 		KEY_LEFT, KEY_UP:
 			_select(index - 1)
+		KEY_TAB:
+			_select_group(-1 if key.shift_pressed else 1)
 		KEY_Z:
 			zoom = 4 if zoom == 1 else 1
 			camera.zoom = Vector2.ONE * zoom

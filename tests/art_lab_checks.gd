@@ -97,6 +97,14 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(lab.index == count - 1, "left arrow wraps to the last comparison")
 	_key(lab, KEY_1)
 	check.call(lab.index == 0, "1 picks the first comparison")
+	_key(lab, KEY_TAB)
+	check.call(lab._category(lab.index) != lab._category(0) and lab.index > 0 and lab._category(lab.index - 1) == lab._category(0), "Tab jumps to the first entry of the next category")
+	_key(lab, KEY_TAB)
+	_key(lab, KEY_TAB)
+	_key(lab, KEY_TAB)
+	_key(lab, KEY_TAB)
+	check.call(lab.index == 0, "Tab wraps from the last category back to the first")
+	check.call(lab._group_position().begins_with("TEST 1/"), "HUD shows the position within the category")
 	var diner_entry_index: int = -1
 	for i: int in entries.size():
 		if entries[i].has("reference"):
