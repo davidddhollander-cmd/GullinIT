@@ -8,7 +8,17 @@ const FONT_NATIVE: int = 8
 const FONT_DISPLAY: int = 16
 const BACK_WIDTH: float = 59.0
 const BACK_HEIGHT: float = 13.0
-const WOOD_FRAME: Texture2D = preload("res://assets/ui/wood-frame.png")
+# The wood frame PNG holds 2 pixels per game pixel. With the canvas_items stretch mode the extra
+# detail reaches the screen, so the frame is drawn finer than the 320x180 grid.
+const WOOD_FRAME_HIRES: Texture2D = preload("res://assets/ui/wood-frame.png")
+const WOOD_FRAME_SCALE: int = 2
+static var _wood_frame: ImageTexture
+
+static func wood_frame() -> ImageTexture:
+	if _wood_frame == null:
+		_wood_frame = ImageTexture.create_from_image(WOOD_FRAME_HIRES.get_image())
+		_wood_frame.set_size_override(WOOD_FRAME_HIRES.get_size() / WOOD_FRAME_SCALE)
+	return _wood_frame
 
 static func theme() -> Theme:
 	var result: Theme = Theme.new()
@@ -109,7 +119,7 @@ static func panel(parent: Control, color: Color = INK) -> PanelContainer:
 static func wood_panel(parent: Control) -> PanelContainer:
 	var node: PanelContainer = PanelContainer.new()
 	var box: StyleBoxTexture = StyleBoxTexture.new()
-	box.texture = WOOD_FRAME
+	box.texture = wood_frame()
 	box.texture_margin_left = 13
 	box.texture_margin_right = 13
 	box.texture_margin_top = 12
