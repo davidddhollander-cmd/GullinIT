@@ -316,6 +316,8 @@ func context_line() -> String:
 				parts.append("training lesson %d of %d" % [game.lesson + 1,BeachGame.TRAINING_LESSONS])
 			elif game.screech_lesson:
 				parts.append("screech lesson step %d of %d" % [game.screech_step + 1,BeachGame.SCREECH_STEPS])
+			elif game.counter_lesson:
+				parts.append("counter lesson step %d of %d" % [game.counter_step + 1,BeachGame.COUNTER_STEPS])
 	parts.append("control mode: " + GameState.control_mode())
 	return " | ".join(parts)
 
