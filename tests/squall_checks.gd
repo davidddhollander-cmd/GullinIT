@@ -63,9 +63,9 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(not _abandoned(game).any(func(item: Dictionary) -> bool: return not Config.foods.has(item.food_id) or bool(item.get("recovered", false))), "abandoned items are real, unrecovered foods")
 	check.call(_abandoned(game).all(func(item: Dictionary) -> bool: return item.grounded), "abandoned food has landed on the sand")
 	check.call(mum.panic.state == CrowdPanic.State.SHELTER and sunbather.panic.state == CrowdPanic.State.SHELTER and old_man.panic.state == CrowdPanic.State.SHELTER and diner.panic.state == CrowdPanic.State.SHELTER, "everyone runs for cover")
-	check.call(mum.panic.destination >= 760.0 and sunbather.panic.destination >= 760.0, "shelters are on the promenade")
+	check.call(mum.panic.destination < 0.0 and sunbather.panic.destination < 0.0 and old_man.panic.destination >= 760.0, "the sand runs off the map, the promenade shelters")
 	check.call(old_man.food and diner.food and not mum.food and not sunbather.food and not _find(game, "kiosk_customer", "kiosk_customer").food, "promenade holders keep their food, sand holders drop it")
-	check.call(old_man.info.twist == "umbrella" and sunbather.info.twist == "umbrella" and mum.info.twist == "umbrella" and Config.targets[mum.kind].twist == "shield", "sheltering adults take the umbrella twist without changing shared target data")
+	check.call(old_man.info.twist == "umbrella" and sunbather.info.twist != "umbrella" and Config.targets[mum.kind].twist == "shield", "promenade shelterers take the umbrella twist without changing shared target data")
 	check.call(game.pilots.size() == 2 and game.pending_rivals.is_empty(), "Gary and Chip are both out for the squall")
 	for pilot: RivalPilot in game.pilots:
 		check.call(float(pilot.personality.ground.scraps) >= 0.95, "%s mobs abandoned food in the squall" % pilot.gull.rival_name)

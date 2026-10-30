@@ -21,6 +21,7 @@ var rival_scraps: Dictionary = {} ## rival pilot -> its own scraps weight
 var next_strike: float = INF ## elapsed time of the next lightning strike during the squall
 var downpour: AudioStreamPlayer ## wind-and-rain bed, faded with the squall's intensity
 const DOWNPOUR_DB: float = -10.0
+const OFF_EDGE: float = 40.0 ## how far past the world edge people on the sand run
 
 func setup(owner_game: BeachGame) -> void:
 	game = owner_game
@@ -134,7 +135,8 @@ func _flee(target: BeachTarget) -> void:
 	var world: Dictionary = Config.tuning.world
 	var snacks: Array = world.stash_snacks
 	# People caught out on the sand drop what they hold; those already by the promenade keep it.
-	if target.food and target.position.x < float(world.promenade_start):
+	var on_sand: bool = target.position.x < float(world.promenade_start)
+	if target.food and on_sand:
 		_abandon(target.food_id, target.food_position(), target.facing)
 		target.food = false
 		target.food_sprite.hide()
@@ -147,8 +149,9 @@ func _flee(target: BeachTarget) -> void:
 		spare = int(cfg.picnic_items)
 	for i: int in spare:
 		_abandon(str(snacks[(i + int(target.position.x)) % snacks.size()]), target.position - Vector2(0.0, 10.0), 1.0 if i % 2 == 0 else -1.0)
-	target.panic.shelter(target, _shelter_for(target))
-	if target.panic.state == CrowdPanic.State.SHELTER and target.kind in ADULTS:
+	# The sand clears completely: those caught out run off the nearest edge until it passes.
+	target.panic.shelter(target, _off_edge(target) if on_sand else _shelter_for(target))
+	if target.panic.state == CrowdPanic.State.SHELTER and target.kind in ADULTS and not on_sand:
 		# Sheltering adults hold food under cover like the pier diners: steep dives are blocked.
 		twists[target] = target.info.twist
 		target.info = target.info.duplicate()
@@ -157,6 +160,10 @@ func _flee(target: BeachTarget) -> void:
 func _abandon(food_id: String, at: Vector2, side: float) -> void:
 	abandoned += 1
 	game.stash_raids.items.append({"food_id": food_id, "source": "abandoned", "snack": {"abandoned": true}, "position": at, "velocity": Vector2(side * 30.0, -55.0), "grounded": false, "age": 0.0})
+
+func _off_edge(target: BeachTarget) -> float:
+	var width: float = float(Config.tuning.world.width)
+	return -OFF_EDGE if target.position.x < width * 0.5 else width + OFF_EDGE
 
 func _shelter_for(target: BeachTarget) -> float:
 	var promenade: float = float(Config.tuning.world.promenade_start)
