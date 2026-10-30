@@ -2761,6 +2761,96 @@
         9.0
       ],
       "category": "food"
+    },
+    {
+      "title": "BG PROP BUCKET AND SPADE",
+      "description": "NEW BACKGROUND PROP. SAND TOY SIZE REF: CASTLE",
+      "current": "beach_castle",
+      "candidate": {
+        "clone": "beach_castle",
+        "file": "res://assets/previews/beach-props-v1/bucket-and-spade-v1.png",
+        "frame_w": 20,
+        "frame_h": 16,
+        "visual_scale": 1.0
+      },
+      "reference": "shopper_mullet",
+      "motion": "static",
+      "category": "bgprops"
+    },
+    {
+      "title": "BG PROP BEACH BALL",
+      "description": "NEW BACKGROUND PROP. SIZE REF: CASTLE",
+      "current": "beach_castle",
+      "candidate": {
+        "clone": "beach_castle",
+        "file": "res://assets/previews/beach-props-v1/beach-ball-v1.png",
+        "frame_w": 12,
+        "frame_h": 12,
+        "visual_scale": 1.0
+      },
+      "reference": "shopper_mullet",
+      "motion": "static",
+      "category": "bgprops"
+    },
+    {
+      "title": "BG PROP LIFEBUOY HUNG",
+      "description": "NEW BACKGROUND PROP. SIZE REF: CHAIR",
+      "current": "beach_chair",
+      "candidate": {
+        "clone": "beach_chair",
+        "file": "res://assets/previews/beach-props-v1/lifebuoy-hung-v1.png",
+        "frame_w": 16,
+        "frame_h": 23,
+        "visual_scale": 1.0
+      },
+      "reference": "shopper_mullet",
+      "motion": "static",
+      "category": "bgprops"
+    },
+    {
+      "title": "BG PROP LIFEBUOY FLAT",
+      "description": "NEW BACKGROUND PROP. SIZE REF: CHAIR",
+      "current": "beach_chair",
+      "candidate": {
+        "clone": "beach_chair",
+        "file": "res://assets/previews/beach-props-v1/lifebuoy-flat-v1.png",
+        "frame_w": 26,
+        "frame_h": 16,
+        "visual_scale": 1.0
+      },
+      "reference": "shopper_mullet",
+      "motion": "static",
+      "category": "bgprops"
+    },
+    {
+      "title": "BG PROP SHELLS",
+      "description": "NEW BACKGROUND PROP. GROUND CLUTTER SIZE REF: ROCKS",
+      "current": "beach_rocks",
+      "candidate": {
+        "clone": "beach_rocks",
+        "file": "res://assets/previews/beach-props-v1/shells-v1.png",
+        "frame_w": 18,
+        "frame_h": 15,
+        "visual_scale": 1.0
+      },
+      "reference": "shopper_mullet",
+      "motion": "static",
+      "category": "bgprops"
+    },
+    {
+      "title": "BG PROP JET SKI",
+      "description": "NEW BACKGROUND PROP. SIZE REF: ROCKS",
+      "current": "beach_rocks",
+      "candidate": {
+        "clone": "beach_rocks",
+        "file": "res://assets/previews/beach-props-v1/jet-ski-v1.png",
+        "frame_w": 44,
+        "frame_h": 24,
+        "visual_scale": 1.0
+      },
+      "reference": "shopper_mullet",
+      "motion": "static",
+      "category": "bgprops"
     }
   ]
 }

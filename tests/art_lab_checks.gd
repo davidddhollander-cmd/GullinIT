@@ -99,9 +99,13 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(lab.index == 0, "1 picks the first comparison")
 	_key(lab, KEY_TAB)
 	check.call(lab._category(lab.index) != lab._category(0) and lab.index > 0 and lab._category(lab.index - 1) == lab._category(0), "Tab jumps to the first entry of the next category")
-	_key(lab, KEY_TAB)
-	_key(lab, KEY_TAB)
-	_key(lab, KEY_TAB)
+	var categories: Array = []
+	for i: int in count:
+		if not categories.has(lab._category(i)):
+			categories.append(lab._category(i))
+	for _i: int in categories.size() - 2: # one Tab is already done above; the last one wraps
+		_key(lab, KEY_TAB)
+	check.call(lab.index != 0, "Tab stays on the last category until it wraps")
 	_key(lab, KEY_TAB)
 	check.call(lab.index == 0, "Tab wraps from the last category back to the first")
 	check.call(lab._group_position().begins_with("TEST 1/"), "HUD shows the position within the category")
