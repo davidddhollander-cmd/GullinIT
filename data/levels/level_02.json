@@ -40,8 +40,6 @@
     {"type": "bin", "x": 560},
     {"type": "beach_ball", "x": 205, "y": 150},
     {"type": "beach_bucket", "x": 385, "y": 149},
-    {"type": "beach_shells", "x": 530, "y": 152},
-    {"type": "beach_jet_ski", "x": 735, "y": 148},
     {"type": "beach_lifebuoy_flat", "x": 855, "y": 151},
     {"type": "beach_castle", "x": 650, "y": 171, "jitter": true},
     {"type": "bin", "x": 780},
