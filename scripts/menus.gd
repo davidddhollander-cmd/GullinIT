@@ -377,6 +377,13 @@ func _stat_rows(parent: Control, card: Dictionary, owned: bool) -> void:
 			pip.color = (BeachUI.GOLD if owned else Color("6b858b")) if lit else Color(0.0,0.0,0.0,0.3)
 			line.add_child(pip)
 
+func _small_button(parent: Control, text: String, action: Callable) -> Button:
+	var node: Button = BeachUI.back_button(parent,text,action,0)
+	node.size_flags_horizontal = SIZE_EXPAND_FILL
+	node.add_theme_font_override("font",SMALL_FONT)
+	node.add_theme_font_size_override("font_size",6)
+	return node
+
 func _small_label(parent: Control, text: String, color: Color) -> Label:
 	var node: Label = BeachUI.label(parent,text,6,color)
 	node.add_theme_font_override("font",SMALL_FONT)
@@ -385,23 +392,31 @@ func _small_label(parent: Control, text: String, color: Color) -> Label:
 
 func pause(skippable: bool = false, can_replay: bool = false) -> void:
 	clear("TAKING A BREATHER", "YOUR LUNCH CAN WAIT.")
-	var resume: Button = BeachUI.button(content,"RESUME",func() -> void: choose("resume"))
+	# A compact box: half the usual menu, 8 px heading, 6 px subtitle and 13 px buttons.
+	var panel: PanelContainer = content.get_parent() as PanelContainer
+	panel.size_flags_horizontal = SIZE_SHRINK_CENTER
+	panel.size_flags_vertical = SIZE_SHRINK_CENTER
+	content.custom_minimum_size.x = 128
+	content.get_child(0).add_theme_font_size_override("font_size",BeachUI.FONT_NATIVE)
+	content.get_child(1).add_theme_font_override("font",SMALL_FONT)
+	content.get_child(1).add_theme_font_size_override("font_size",6)
+	var resume: Button = _small_button(content,"RESUME",func() -> void: choose("resume"))
 	resume.grab_focus()
 	if skippable:
-		BeachUI.button(content,"SKIP LESSON",func() -> void: choose("skip_lesson"))
+		_small_button(content,"SKIP LESSON",func() -> void: choose("skip_lesson"))
 	elif can_replay:
-		BeachUI.button(content,"REPLAY LESSON",func() -> void: choose("screech_lesson"))
-	BeachUI.button(content,"RESTART",func() -> void: choose("restart"))
+		_small_button(content,"REPLAY LESSON",func() -> void: choose("screech_lesson"))
+	_small_button(content,"RESTART",func() -> void: choose("restart"))
 	var pair: HBoxContainer = HBoxContainer.new()
 	content.add_child(pair)
-	var rules: Button = BeachUI.button(pair,"SCORE RULES",func() -> void: pass)
+	var rules: Button = _small_button(pair,"SCORE RULES",func() -> void: pass)
 	rules.size_flags_horizontal = SIZE_EXPAND_FILL
 	rules.pressed.connect(func() -> void:
 		ScoreRulesCard.open(self,"BACK").closed.connect(func() -> void:
 			if is_instance_valid(rules):
 				rules.grab_focus()))
-	BeachUI.button(pair,"OPTIONS",func() -> void: choose("options_pause")).size_flags_horizontal = SIZE_EXPAND_FILL
-	BeachUI.button(content,"LEVEL SELECT",func() -> void: choose("select"))
+	_small_button(pair,"OPTIONS",func() -> void: choose("options_pause")).size_flags_horizontal = SIZE_EXPAND_FILL
+	_small_button(content,"LEVEL SELECT",func() -> void: choose("select"))
 
 func options(from_pause: bool) -> void:
 	clear("MAKE YOURSELF AT HOME")
