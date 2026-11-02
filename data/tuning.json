@@ -324,6 +324,7 @@
     "hitstop": true,
     "shake": true,
     "particles": true,
+    "pixelfx": true,
     "floating_text": true,
     "speed_lines": true,
     "near_miss": true,

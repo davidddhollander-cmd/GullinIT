@@ -4766,6 +4766,14 @@
       "burst": {"frames": [0, 1, 2], "fps": 20, "loop": false}
     }
   },
+  "pixelfx_hit_spark": {
+    "file": "res://assets/sprites/pixelfx/hit-spark-v1.png",
+    "frame_w": 136,
+    "frame_h": 80,
+    "animations": {
+      "burst": {"frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "fps": 30, "loop": false}
+    }
+  },
   "water_splash": {
     "file": "res://assets/sprites/watergun-teen-v1/water-splash-v1.png",
     "frame_w": 24,

@@ -171,6 +171,7 @@ func run() -> void:
 	check(main.game.effects.texts.size()==tip_count,"the dog toast is not repeated")
 	main.clear_game()
 	await preload("res://tests/watergun_vfx_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/pixelfx_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/level5_checks.gd").run(self,main,Callable(self,"check"))
 	await preload("res://tests/boss_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/squall_checks.gd").run(self,Callable(self,"check"))
