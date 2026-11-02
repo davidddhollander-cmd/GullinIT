@@ -26,14 +26,16 @@ var target: BeachGull
 var shots: Array[BeachWaterShot] = []
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var sprite: AnimatedSprite2D
+var art_id: String = "watergun_teen" ## "watergun_teen_b": purple shirt, green shorts
 
-func setup(x: float, home_range: Array, seed_value: int) -> void:
-	var art: Dictionary = Config.sprites.watergun_teen
+func setup(x: float, home_range: Array, seed_value: int, art_name: String = "watergun_teen") -> void:
+	art_id = art_name
+	var art: Dictionary = Config.sprites[art_id]
 	rng.seed = seed_value
 	home = Vector2(float(home_range[0]),float(home_range[1]))
 	position = Vector2(x,float(Config.tuning.world.ground))
 	sprite = AnimatedSprite2D.new()
-	sprite.sprite_frames = Config.frames("watergun_teen")
+	sprite.sprite_frames = Config.frames(art_id)
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	sprite.scale = Vector2.ONE*float(art.visual_scale)
 	add_child(sprite)
@@ -43,11 +45,11 @@ func _t() -> Dictionary:
 	return Config.tuning.watergun_teen
 
 func _shooting() -> Dictionary:
-	return Config.sprites.watergun_teen.shooting
+	return Config.sprites[art_id].shooting
 
 # Height of the barrel when he stands level, used to choose the aim pose.
 func muzzle_level_y() -> float:
-	var art: Dictionary = Config.sprites.watergun_teen
+	var art: Dictionary = Config.sprites[art_id]
 	var anchor: Array = _shooting().muzzle_anchors_source_px.shoot_level[int(_shooting().fire_frame_offset)]
 	return position.y+float(art.sprite_offset_y)+(float(anchor[1])-float(art.frame_h)*0.5)*float(art.visual_scale)
 
@@ -96,7 +98,7 @@ func aim_clip_for(gull: BeachGull) -> StringName:
 	return &"shoot_level"
 
 func muzzle() -> Vector2:
-	var art: Dictionary = Config.sprites.watergun_teen
+	var art: Dictionary = Config.sprites[art_id]
 	var anchor: Array = _shooting().muzzle_anchors_source_px[str(aim_clip)][int(_shooting().fire_frame_offset)]
 	var half: float = float(art.frame_w)*0.5
 	return position+Vector2(facing*(float(anchor[0])-half)*float(art.visual_scale),float(art.sprite_offset_y)+(float(anchor[1])-float(art.frame_h)*0.5)*float(art.visual_scale))
@@ -235,7 +237,7 @@ func _give_up() -> void:
 
 func _animate(clip: StringName) -> void:
 	sprite.flip_h = facing < 0
-	sprite.position.y = float(Config.sprites.watergun_teen.sprite_offset_y)
+	sprite.position.y = float(Config.sprites[art_id].sprite_offset_y)
 	if state == State.AIM or state == State.FIRE or state == State.RECOVER:
 		# The state machine drives these frames so the fire frame is exact: aim, fire, recover.
 		sprite.animation = aim_clip

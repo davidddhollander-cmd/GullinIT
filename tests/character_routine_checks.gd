@@ -99,9 +99,9 @@ static func run(root: Node, check: Callable) -> void:
 		var before: float = victim.position.x
 		victim.tick(0.2,[gull])
 		check.call(victim.position.x > before and victim.sprite.animation == &"run",kind+" runs after high and distant escape instead of immediately quitting")
-		for frame: int in 101:
+		for frame: int in int(float(Config.tuning.world.snatch_chase_time)/0.02)+1:
 			victim.tick(0.02,[gull])
-		check.call(victim.reaction.mode == "give_up" and victim.sprite.animation == &"fist_shake" and victim.position.x-before <= 120.0,kind+" gives up visibly after bounded short pursuit")
+		check.call(victim.reaction.mode == "give_up" and victim.sprite.animation == &"fist_shake" and victim.position.x-before <= float(Config.tuning.world.snatch_chase_distance),kind+" gives up visibly after bounded short pursuit")
 		victim.tick(AdultReaction.FAILED_CHASE_ANGER_TIME+0.01,[])
 		check.call(victim.reaction.mode.is_empty() and victim.routine.enabled,kind+" resumes routine after give-up pause")
 		victim.reaction = AdultReaction.new()

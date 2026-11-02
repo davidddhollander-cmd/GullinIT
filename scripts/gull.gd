@@ -247,16 +247,16 @@ func _ready() -> void:
 		add_child(carry_marker)
 		rival_badge = ColorRect.new()
 		rival_badge.position = Vector2(-22,-30)
-		rival_badge.size = Vector2(44,10)
+		rival_badge.size = Vector2(44,8)
 		rival_badge.color = Color("183b4e")
 		rival_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(rival_badge)
 		rival_label = Label.new()
 		rival_label.position = Vector2(-22,-30)
-		rival_label.size = Vector2(44,10)
+		rival_label.size = Vector2(44,8)
 		rival_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		rival_label.add_theme_font_override("font",preload("res://assets/fonts/gull_pixel.fnt"))
-		rival_label.add_theme_font_size_override("font_size",8)
+		rival_label.add_theme_font_override("font",preload("res://assets/fonts/gull_hud.fnt"))
+		rival_label.add_theme_font_size_override("font_size",6)
 		add_child(rival_label)
 	refresh_art()
 	Config.reloaded.connect(refresh_art)
@@ -278,6 +278,12 @@ func refresh_art() -> void:
 	if rival:
 		if is_instance_valid(rival_label):
 			rival_label.text = rival_name.to_upper()
+			# Badge hugs the name instead of a fixed plate.
+			var plate: float = ceilf(rival_label.get_theme_font("font").get_string_size(rival_label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,6).x)+4.0
+			rival_badge.size.x = plate
+			rival_label.size.x = plate
+			rival_badge.position.x = -plate*0.5
+			rival_label.position.x = -plate*0.5
 			rival_label.add_theme_color_override("font_color",Color("fff4da"))
 	if detailed_art and not bool(art_entry.get("native_alpha",false)):
 		var cutout: ShaderMaterial = ShaderMaterial.new()
@@ -603,8 +609,8 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 				if sprite.flip_h:
 					point.x = -point.x
 				top = minf(top,(point.rotated(sprite.rotation)+sprite.position).y)
-			rival_badge.position.y = top-12
-			rival_label.position.y = top-12
+			rival_badge.position.y = top-9
+			rival_label.position.y = top-9
 	sync_carry()
 	queue_redraw()
 

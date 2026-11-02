@@ -258,6 +258,10 @@ func tick(delta: float) -> void:
 			var floor_y: float = float(t.ground)-item_height*0.5
 			if item.position.y >= floor_y:
 				item.position.y = floor_y
+				# Foods with landed art splat: a straight drop lands cone-up, a sideways one lies down facing its travel.
+				if definition.has("landed"):
+					item.landed = "lying" if absf(float(item.velocity.x)) >= float(definition.landed.lying_speed) else "up"
+					item.landed_dir = 1.0 if float(item.velocity.x) >= 0.0 else -1.0
 				item.velocity = Vector2.ZERO
 				item.grounded = true
 				if is_garbage:
@@ -451,6 +455,15 @@ func _draw() -> void:
 			var size: Vector2 = Vector2(display_size[0],display_size[1])
 			var texture: Texture2D = Config.frames(definition.sprite).get_frame_texture(&"idle",0)
 			var rect: Rect2 = Rect2(item.position-size*0.5,size)
+			if bool(item.grounded) and item.has("landed"):
+				var landed: Dictionary = definition.landed
+				texture = Config.frames(landed[item.landed]).get_frame_texture(&"idle",0)
+				size = texture.get_size()*float(landed.scale)
+				# Sits on the sand where the upright sprite's feet were.
+				rect = Rect2(Vector2(item.position.x-size.x*0.5,item.position.y+float(definition.size[1])*0.5-size.y),size)
+				if float(item.landed_dir) < 0.0:
+					rect.position.x += size.x
+					rect.size.x = -size.x
 			if item.food_id == "crumbs":
 				draw_texture_rect(texture,Rect2(rect.position+Vector2(0,1),size),false,Color("754a39"))
 			draw_texture_rect(texture,rect,false)

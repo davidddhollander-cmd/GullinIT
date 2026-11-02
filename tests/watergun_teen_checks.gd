@@ -44,9 +44,9 @@ static func run(suite: Node, check: Callable) -> void:
 		check.call(not Config.levels[number-1].has("watergun_teens"),"level %d has no water-gun teenager" % number)
 	for number: int in [4, 5, 7]:
 		var placed: Array = Config.levels[number-1].get("watergun_teens",[])
-		check.call(placed.size() == 1,"level %d places one water-gun teenager" % number)
+		check.call(placed.size() == (2 if number == 7 else 1),"level %d places its water-gun teenagers" % number)
 		var other: BeachGame = _fresh(suite,number)
-		check.call(other.teens.size() == 1 and other.teens[0].get_parent() == other.actors,"level %d spawns the teenager as an actor" % number)
+		check.call(other.teens.size() == placed.size() and other.teens[0].get_parent() == other.actors,"level %d spawns the teenager as an actor" % number)
 		check.call(other.spawner.targets.size() == Config.levels[number-1].spawns.filter(func(spawn: Dictionary) -> bool: return spawn.type != "off_lead_dog").size(),"level %d teenager is not a food target" % number)
 		suite.main.clear_game()
 

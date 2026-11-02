@@ -32,6 +32,8 @@ func find_stall(buyer: BeachTarget, type: String = "") -> FoodStall:
 		if distance < gap:
 			gap = distance
 			best = stand
+	if best != null and not requests.has(best):
+		best.face(buyer.position.x)
 	return best
 
 func request_family(buyer: BeachTarget) -> bool:
@@ -53,6 +55,12 @@ func request_family(buyer: BeachTarget) -> bool:
 		return true
 	_begin(stand,buyer,orders,true)
 	return true
+
+func serving(buyer: BeachTarget) -> bool:
+	for request: Dictionary in requests.values():
+		if request.owner == buyer:
+			return true
+	return false
 
 func request_shopper(buyer: BeachTarget) -> bool:
 	var type: String = buyer.purchase_stall_type()

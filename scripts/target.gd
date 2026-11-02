@@ -69,7 +69,7 @@ var bag_squish_strength: float = 0.12
 var bag_release_bounce: bool = false
 var sunbather_blue: bool = false
 var sunbather_female: bool = false
-var sunbather_mirror: bool = false # lies with feet on the left; bag and Zzz move to the head side
+var sunbather_mirror: bool = false # lies with feet on the left, head on the right; the bag always sits on the feet side, clear of the face
 var sunbather_run_time: float = 0.0
 var seeking_parent: bool = false
 var handover_timer: float = 0.0
@@ -79,6 +79,8 @@ var family_trip: FamilyTrip = FamilyTrip.IDLE
 var family_home: float = 0.0
 var family_kiosk_x: float = 520.0
 var family_trip_timer: float = 0.0
+var family_buy_wait: float = 0.0
+const FAMILY_BUY_PATIENCE: float = 6.0
 var family_trip_serial: int = 0
 var purchased_on_trip: int = 0
 var purchase_trip_serial: int = -1
@@ -159,7 +161,7 @@ func art_height() -> float:
 	return float(entry.get("art_height",float(entry.frame_h) * float(entry.get("visual_scale",1.0))))
 
 func stash_position() -> Vector2:
-	return Vector2(clampf(stash_home_x+(30.0 if sunbather_mirror else -30.0),16,float(Config.tuning.world.width)-16),float(Config.tuning.world.ground)-9)
+	return Vector2(clampf(stash_home_x+(-30.0 if sunbather_mirror else 30.0),16,float(Config.tuning.world.width)-16),float(Config.tuning.world.ground)-9)
 
 func peck_bag(progress: float = 0.0, released: bool = false) -> void:
 	bag_squish_duration = 0.30 if released else BAG_SQUISH_TIME
@@ -692,7 +694,14 @@ func _tick_family_trip(delta: float) -> void:
 				family_trip_timer = float(Config.tuning.world.family_purchase_pause)
 		FamilyTrip.BUY:
 			if stall_service != null:
-				stall_service.request_family(self)
+				if stall_service.request_family(self) or stall_service.serving(self):
+					family_buy_wait = 0.0
+				else:
+					# A busy or missing stand must not strand the family on a BUY cue.
+					family_buy_wait += delta
+					if family_buy_wait > FAMILY_BUY_PATIENCE:
+						family_buy_wait = 0.0
+						family_trip = FamilyTrip.RETREAT
 				return
 			family_trip_timer -= delta
 			if family_trip_timer <= 0:
@@ -933,7 +942,7 @@ func _draw() -> void:
 		fill = clampf(1.0-reaction.timer/((notice_time if kind == "sunbather" else 0.35)*reaction_delay),0.05,1.0)
 	elif reaction.mode == "chase":
 		awareness_cue = "CHASE"
-		fill = clampf(reaction.timer/(float(Config.tuning.world.snatch_chase_time) if reaction.committed else 3.0),0.0,1.0)
+		fill = clampf(reaction.timer/(float(Config.tuning.world.snatch_chase_time) if reaction.committed else 5.0),0.0,1.0)
 		color = Color("ef725c")
 	elif reaction.mode == "give_up":
 		awareness_cue = "GONE!"
@@ -952,7 +961,7 @@ func _draw() -> void:
 	if kind == "sunbather" and sleep_state == SleepState.SLEEPING:
 		awareness_cue = ""
 	if not awareness_cue.is_empty():
-		var marker_y: float = -art_height()-20
+		var marker_y: float = -art_height()-10
 		# Only the parent speaks for a family; low urgency text fades, not the bar.
 		var tag_alpha: float = 1.0
 		if awareness_cue == "SEEN":
@@ -960,10 +969,10 @@ func _draw() -> void:
 		if tag_alpha > 0.0:
 			var tag_color: Color = color
 			tag_color.a = tag_alpha
-			draw_rect(Rect2(-16,marker_y-9,32,9),Color(0.094,0.231,0.306,tag_alpha))
-			draw_string(preload("res://assets/fonts/gull_pixel.fnt"),Vector2(-14,marker_y-2),awareness_cue,HORIZONTAL_ALIGNMENT_LEFT,-1,8,tag_color)
-		draw_rect(Rect2(-16,marker_y,32,3),Color("397a85"))
-		draw_rect(Rect2(-16,marker_y,32*clampf(fill,0.0,1.0),3),color)
+			draw_rect(Rect2(-13,marker_y-9,26,9),Color(0.094,0.231,0.306,tag_alpha))
+			draw_string(preload("res://assets/fonts/gull_hud.fnt"),Vector2(-11,marker_y-2),awareness_cue,HORIZONTAL_ALIGNMENT_LEFT,-1,6,tag_color)
+		draw_rect(Rect2(-12,marker_y,24,3),Color("397a85"))
+		draw_rect(Rect2(-12,marker_y,24*clampf(fill,0.0,1.0),3),color)
 	if kind == "sunbather":
 		# Large zipped picnic duffle beside the feet. Food stays inside until pecked.
 		var bag_anchor: Vector2 = stash_position()-position
@@ -993,4 +1002,4 @@ func _draw() -> void:
 			draw_line(Vector2(0,-18),Vector2(facing*10,-14),Color("ffc65c"),2)
 		if family_trip != FamilyTrip.IDLE:
 			var cue: String = ["","GATHER","KIOSK","BUY","HOME","RETREAT","WAIT"][int(family_trip)]
-			draw_string(preload("res://assets/fonts/gull_pixel.fnt"),Vector2(-18,-art_height()-11),cue,HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("183b4e"))
+			draw_string(preload("res://assets/fonts/gull_hud.fnt"),Vector2(-12,-art_height()-12),cue,HORIZONTAL_ALIGNMENT_LEFT,-1,6,Color("183b4e"))

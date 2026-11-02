@@ -5,6 +5,8 @@ extends Node2D
 enum Phase { IDLE, PREPARE, PLACE, COUNTER, RETRACT }
 const WINDOW := Rect2(-19,-40,38,23)
 const COUNTER_TOP: float = -17.0
+const COUNTER_FOOD_X: float = 28.0
+const COUNTER_REACH: float = 32.0 ## shelf sticks out this far each side of the centre
 const DRAW_DEPTH: int = 2 # Behind foreground buyers, in front of the rear walking lane.
 var phase: Phase = Phase.IDLE
 var clock: float = 0.0
@@ -48,11 +50,17 @@ func setup(entry: Dictionary, index: int) -> void:
 	add_child(prepared_food)
 	sync_pose()
 
+## An idle stand serves whichever side the buyer arrives on; the vendor turns to match.
+func face(buyer_x: float) -> void:
+	if phase == Phase.IDLE and not is_zero_approx(buyer_x-position.x):
+		side = signf(buyer_x-position.x)
+		sync_pose()
+
 func contact_x() -> float:
 	return position.x+side*47.0
 
 func counter_food_position() -> Vector2:
-	return position+Vector2(side*31.0,COUNTER_TOP-food_size.y*0.5)
+	return position+Vector2(side*COUNTER_FOOD_X,COUNTER_TOP-food_size.y*0.5)
 
 func show_food(id: String) -> void:
 	food_texture = Config.frames(str(Config.foods[id].sprite)).get_frame_texture(&"idle",0)
@@ -98,6 +106,5 @@ func _draw() -> void:
 	draw_rect(Rect2(-23,-40,4,26),Color("d59a5e"))
 	draw_rect(Rect2(19,-40,4,26),Color("d59a5e"))
 	# A real shelf supports the stationary food outside the roof's footprint.
-	var left: float = -39.0 if side<0 else -24.0
-	draw_rect(Rect2(left,COUNTER_TOP,63,3),Color("a56942"))
-	draw_rect(Rect2(left,COUNTER_TOP,63,1),Color("efc181"))
+	draw_rect(Rect2(-COUNTER_REACH,COUNTER_TOP,COUNTER_REACH*2.0,3),Color("a56942"))
+	draw_rect(Rect2(-COUNTER_REACH,COUNTER_TOP,COUNTER_REACH*2.0,1),Color("efc181"))

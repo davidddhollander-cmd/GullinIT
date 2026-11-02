@@ -150,7 +150,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	for spawn: Dictionary in level.get("watergun_teens",[]):
 		var teen: WatergunTeen = WatergunTeen.new()
 		actors.add_child(teen)
-		teen.setup(float(spawn.x),spawn.home,int(level.seed)+7+teens.size())
+		teen.setup(float(spawn.x),spawn.home,int(level.seed)+7+teens.size(),str(spawn.get("art","watergun_teen")))
 		teen.spotted.connect(func(_gull: BeachGull) -> void:
 			effects.message(teen.position-Vector2(0,34),"HEY!",BeachUI.GOLD)
 			Audio.play("click")

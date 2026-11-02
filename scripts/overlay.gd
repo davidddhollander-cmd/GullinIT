@@ -464,7 +464,7 @@ func _draw() -> void:
 			draw_rect(hint_box,Color(0.09,0.20,0.26,0.85))
 			if danger:
 				draw_rect(hint_box,Color("ef725c"),false,1.0)
-			draw_string(font,hint_box.position+Vector2(3,8),str(hint.text),HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("ef725c") if danger else BeachUI.CREAM)
+			draw_string(HUD_FONT,hint_box.position+Vector2(3,7),str(hint.text),HORIZONTAL_ALIGNMENT_LEFT,-1,6,Color("ef725c") if danger else BeachUI.CREAM)
 		if game.player.landing_aim() and game.player.state != BeachGull.State.GROUNDED:
 			var landing_x: float = clampf(aim.x,8,312)
 			draw_line(Vector2(landing_x-6,159),Vector2(landing_x+6,159),BeachUI.CREAM,2)
@@ -600,9 +600,9 @@ func context_hint() -> Dictionary:
 # Fixed slot: below the score callout (or the lesson panel), left of the goal panel,
 # and above the zone signs, so the hint never crosses world labels.
 func hint_rect(text: String) -> Rect2:
-	var width: float = ceilf(font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x) + 6.0
+	var width: float = ceilf(HUD_FONT.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,6).x) + 6.0
 	var y: float = training_panel.get_global_rect().end.y + 2.0 if game.lesson_active() else SCORE_CALLOUT_TOP + 26.0
-	return Rect2(4.0,roundf(y),width,11.0)
+	return Rect2(4.0,roundf(y),width,9.0)
 
 func touch_buttons_visible() -> bool:
 	return game != null and game.running and game.input.touch_visible

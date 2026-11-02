@@ -60,6 +60,7 @@
     "category": "medium",
     "points": 25,
     "sprite": "food_ice_cream",
+    "landed": {"up": "food_ice_cream_vanilla_landed_up", "lying": "food_ice_cream_vanilla_landed_lying", "scale": 0.25, "lying_speed": 50},
     "size": [
       4,
       7
@@ -256,6 +257,7 @@
     "category": "medium",
     "points": 25,
     "sprite": "food_ice_cream_vanilla",
+    "landed": {"up": "food_ice_cream_vanilla_landed_up", "lying": "food_ice_cream_vanilla_landed_lying", "scale": 0.25, "lying_speed": 50},
     "size": [4.0, 8.0],
     "pickup_radius": [2.0, 4.0],
     "ground": false
@@ -267,6 +269,7 @@
     "category": "medium",
     "points": 25,
     "sprite": "food_ice_cream_chocolate",
+    "landed": {"up": "food_ice_cream_chocolate_landed_up", "lying": "food_ice_cream_chocolate_landed_lying", "scale": 0.25, "lying_speed": 50},
     "size": [4.0, 8.0],
     "pickup_radius": [2.0, 4.0],
     "ground": false
@@ -278,6 +281,7 @@
     "category": "medium",
     "points": 25,
     "sprite": "food_ice_cream_strawberry",
+    "landed": {"up": "food_ice_cream_strawberry_landed_up", "lying": "food_ice_cream_strawberry_landed_lying", "scale": 0.25, "lying_speed": 50},
     "size": [4.0, 8.0],
     "pickup_radius": [2.0, 4.0],
     "ground": false
@@ -289,6 +293,7 @@
     "category": "medium",
     "points": 25,
     "sprite": "food_ice_cream_mint",
+    "landed": {"up": "food_ice_cream_mint_landed_up", "lying": "food_ice_cream_mint_landed_lying", "scale": 0.25, "lying_speed": 50},
     "size": [4.0, 8.0],
     "pickup_radius": [2.0, 4.0],
     "ground": false
@@ -300,6 +305,7 @@
     "category": "medium",
     "points": 25,
     "sprite": "food_ice_cream_swirl",
+    "landed": {"up": "food_ice_cream_swirl_landed_up", "lying": "food_ice_cream_swirl_landed_lying", "scale": 0.25, "lying_speed": 50},
     "size": [4.0, 8.5],
     "pickup_radius": [2.0, 4.25],
     "ground": false

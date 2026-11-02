@@ -219,8 +219,8 @@
     "pickup_slow": 0.3,
     "sunbather_notice_delay": 0.25,
     "sunbather_warning_time": 0.3,
-    "snatch_chase_time": 2.2,
-    "snatch_chase_distance": 120,
+    "snatch_chase_time": 5.0,
+    "snatch_chase_distance": 160,
     "snatch_give_up_time": 0.65,
     "stash_pecks": 3,
     "stash_burst": 2,
@@ -308,7 +308,7 @@
     "shot_speed": 170, "shot_range": 150, "lead": 0.5, "hit_radius": [10, 7], "hit_stun": 0.5
   },
   "brash": {
-    "snatch": 0.15, "handover": 0.08, "mug": 0.2, "bump": 0.1, "stun": -0.25,
+    "snatch": 0.15, "handover": 0.08, "mug": 0.2, "bump": 0.34, "stun": -0.25,
     "screech_per_sec": 0.06, "vantage_per_px": 0.03, "vantage_max": 3.5,
     "hit_shake": 5, "hit_stop": 0.08, "hit_feathers": 50, "hit_feathers_per_hit": 4, "hit_crumbs": 24, "dust_time": 1.0, "dust_gap": 0.15, "food_lift": 2.8, "shadow_lead": 0.7
   },

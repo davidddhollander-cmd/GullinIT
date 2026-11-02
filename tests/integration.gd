@@ -152,6 +152,7 @@ func run() -> void:
 	await preload("res://tests/off_lead_dog_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/water_shot_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/watergun_teen_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/landed_food_checks.gd").run(self,Callable(self,"check"))
 	# Progression: Gary debuts in L2 (gentler than his later self), L3 is the two-dog level, L4's headline is the water-gun teen.
 	var l2: Dictionary = Config.levels[1]
 	var l3: Dictionary = Config.levels[2]
@@ -1533,7 +1534,7 @@ func screech_checks() -> void:
 	game._unhandled_input(release)
 	brash.tick(0.55)
 	await snapshot("gang-call")
-	brash.tick(float(game.player.species_stats().power.swoop_time) * 3.0)
+	brash.tick(float(game.player.species_stats().power.swoop_time) * 3.0 + float(game.player.species_stats().power.stagger) * float(game.player.species_stats().power.allies))
 	if not holders.is_empty():
 		check(not holders[0].food, "the gang knocks food out of the nearest beachgoer's hands")
 	brash.tick(0.1)
@@ -2756,7 +2757,7 @@ func beachgoer_art_checks() -> void:
 	customer.tick(0.1,[])
 	check(customer.position.x != before and customer.sprite.animation == &"run","robbed customer uses the existing chase run after surprise")
 	await snapshot("polished-customer-theft")
-	customer.tick(2.2,[])
+	customer.tick(float(Config.tuning.world.snatch_chase_time),[])
 	check(customer.reaction.mode == "give_up" and customer.sprite.animation == &"fist_shake","robbed original shopper gives up with the planted fist shake")
 	customer.tick(AdultReaction.FAILED_CHASE_ANGER_TIME+0.01,[])
 	check(customer.reaction.mode.is_empty(),"robbed customer resumes strolling after giving up")

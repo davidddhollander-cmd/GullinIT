@@ -69,12 +69,12 @@ func title() -> void:
 	logo.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	logo.stretch_mode = TextureRect.STRETCH_SCALE
-	logo.size = Vector2(175,26)
-	logo.position.y = 1.5
+	logo.size = Vector2(112,28)
+	logo.position = Vector2(31.5,1.0)
 	logo.material = ShaderMaterial.new()
 	logo.material.shader = GLINT
 	var slot: Control = Control.new()
-	slot.custom_minimum_size = Vector2(175,29)
+	slot.custom_minimum_size = Vector2(175,30)
 	slot.size_flags_horizontal = SIZE_SHRINK_CENTER
 	slot.add_child(logo)
 	column.add_child(slot)

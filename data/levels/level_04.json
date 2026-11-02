@@ -26,16 +26,16 @@
   "watergun_teens": [{"x": 640, "home": [600, 740]}],
   "spawns": [
     {"type": "sunbather", "x": 150, "appearance": "male_blue", "station": "sun_0", "patrol_radius": 0},
-    {"type": "sunbather", "x": 265, "appearance": "female_blue", "station": "sun_2", "patrol_radius": 0},
-    {"type": "sunbather", "x": 310, "appearance": "male_red", "station": "sun_3", "patrol_radius": 0},
+    {"type": "sunbather", "x": 250, "appearance": "female_blue", "station": "sun_2", "patrol_radius": 0},
+    {"type": "sunbather", "x": 300, "appearance": "male_red", "station": "sun_3", "patrol_radius": 0},
     {"type": "kiosk_customer", "x": 545, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "ice_cream", "patrol_radius": 12},
     {"type": "kiosk_customer", "x": 1190, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "hotdogs", "patrol_radius": 12}
   ],
   "props": [
     {"type": "beach_palm", "x": 30, "y": 148},
     {"type": "beach_parasol_blue", "x": 170, "y": 143},
-    {"type": "beach_parasol", "x": 285, "y": 143},
-    {"type": "beach_parasol_blue", "x": 330, "y": 143},
+    {"type": "beach_parasol", "x": 270, "y": 143},
+    {"type": "beach_parasol_blue", "x": 320, "y": 143},
     {"type": "beach_palm", "x": 355, "y": 148},
     {"type": "beach_hut", "x": 390, "y": 151},
     {"type": "beach_rocks", "x": 1000, "y": 172},

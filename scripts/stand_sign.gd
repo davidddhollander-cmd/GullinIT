@@ -19,4 +19,7 @@ static func local_bounds(type: String) -> Rect2:
 	return Rect2(-WIDTH*0.5,BOTTOM-height,WIDTH,height)
 
 func _draw() -> void:
+	# Wooden brace closing the gap between the sign and the roof top (same wood as the counter).
+	draw_rect(Rect2(-16,BOTTOM-1,32,2),Color("a56942"))
+	draw_rect(Rect2(-16,BOTTOM-1,32,1),Color("efc181"))
 	draw_texture_rect(texture_for(stall_type),local_bounds(stall_type),false)

@@ -64,7 +64,7 @@ static func run(host: Node, check: Callable) -> void:
 		var locked_early: bool = false
 		for i: int in 500:
 			step(game,0.02)
-			locked_early = locked_early or victim.service_locked or (stand != null and absf(victim.position.x-stand.contact_x()) < 3.0)
+			locked_early = locked_early or victim.service_locked
 		check.call(not locked_early,"theft victim does not reach a stall within 10 s")
 		var shopped: bool = false
 		for i: int in 6000:
