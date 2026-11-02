@@ -775,7 +775,6 @@ func _stunned() -> void:
 	if not dropped.is_empty():
 		stash_raids.items.append({"owner":null,"source":"dropped","food_id":dropped.id,"snack":dropped,"position":player.beak(),"velocity":Vector2(-player.facing*35,-55),"grounded":false,"age":0.0})
 	score.stunned()
-	effects.message(player.position,"RUDE.",Color("ef725c"))
 	effects.impact(player.position,true)
 	Audio.play("stun")
 
@@ -791,7 +790,7 @@ func _rival_drops_carry(rival: BeachGull, attacker: Vector2) -> void:
 			if pilot.mug(attacker) > 0:
 				stash_raids.items.append({"owner":null,"source":"dropped","food_id":food_id,"position":rival.position-Vector2(0,10),"velocity":Vector2(-rival.facing*35,-55),"grounded":false,"age":0.0})
 
-# The player's own stun handler already reacts (RUDE.), so only rivals get a callout.
+# The player's own stun handler already reacts, so only rivals get a callout.
 func _water_hit(gull: BeachGull, teen: WatergunTeen) -> void:
 	effects.water_soak(gull.position,teen.position)
 	if not gull.rival:
