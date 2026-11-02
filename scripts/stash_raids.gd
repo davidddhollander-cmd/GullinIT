@@ -168,7 +168,7 @@ func _peck_bin(bin: Dictionary) -> bool:
 	var final_hit: bool = int(bin.pecks) >= int(t.bin_pecks)
 	var progress: float = clampf(float(bin.pecks)/float(maxi(1,int(t.bin_pecks))),0.0,1.0)
 	var wheelie: bool = str(bin.type) == BeachBackdrop.WHEELIE_BIN_TYPE
-	game.effects.message(content_position,"POSH TRASH!" if wheelie and final_hit else "RATTLE!",BeachUI.GOLD)
+	game.effects.whisper(content_position-Vector2(0,20),"RATTLE!")
 	game.beach.wobble_bin(float(bin.x),progress,final_hit)
 	game.effects.peck_contact(content_position,Vector2(_gull().facing,-0.35),progress,"bin")
 	Audio.play("bin_rattle",0.90+0.20*progress)

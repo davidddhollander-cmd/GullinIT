@@ -197,6 +197,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		Audio.play("dive")
 		_dive_began()
 	)
+	player.dive_released.connect(func(at: Vector2, heading: Vector2) -> void: effects.dive_release(at,heading))
 	player.stun_ignored.connect(func() -> void:
 		effects.message(player.position,"SKULL!",BeachUI.GOLD)
 		Audio.play("click")
@@ -339,6 +340,8 @@ func _release_rivals() -> void:
 
 func _wire_sand(gull: BeachGull) -> void:
 	gull.sand_landed.connect(func(at: Vector2) -> void: effects.sand_puff(at))
+	gull.hard_landed.connect(func(at: Vector2) -> void: effects.pixelfx("pixelfx_heavy_landing",at))
+	gull.gull_stunned.connect(func() -> void: effects.pixelfx_stunned(gull))
 	gull.sand_departed.connect(func(at: Vector2) -> void: effects.sand_puff(at, true))
 	gull.tumble_feathers.connect(func(at: Vector2, impulse: Vector2, amount: int) -> void: effects.feather_burst(at,impulse,amount))
 
@@ -552,10 +555,13 @@ func _physics_process(delta: float) -> void:
 	spawner.apply_spacing(step)
 	camera_x = lerpf(camera_x,clampf(player.position.x,160,float(Config.tuning.world.width)-160),1-pow(1-float(Config.tuning.world.camera_lerp),step*60))
 	camera.position = Vector2(roundf(camera_x),90)
-	camera.offset = Vector2(sin(effects.clock*65),cos(effects.clock*73))*effects.shake
+	camera.offset = Vector2(sin(effects.clock*65),cos(effects.clock*73))*effects.shake+effects.kick
+	if player.state == BeachGull.State.STRIKE:
+		effects.dive_trail(player.beak(),player.direction,player.dive_speed,step)
 	beach.camera_x = camera_x
 	beach.wind_dir = int(signf(player.wind_force))
 	beach.strength = absf(player.wind_force)
+	effects.wind_tick(step,camera_x,player)
 	beach.tick(step)
 	overlay.queue_redraw()
 	if training:
@@ -756,10 +762,11 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 				pilot.took_food(target.food_value())
 				effects.message(gull.position,"MINE!",Color("ffc65c"))
 
-func _award(value: int, risky: bool, upwind: bool, mugged: bool, handover: bool = false) -> int:
+func _award(value: int, risky: bool, upwind: bool, mugged: bool, handover: bool = false, food_id: String = "") -> int:
 	var earned: int = score.snatch(value,risky,upwind,mugged,handover)
 	var quip: String = "COUNTER!" if handover else ("MUGGED!" if mugged else str(Config.quips.snatch[rng.randi_range(0,Config.quips.snatch.size()-1)]))
 	effects.score_message(player.position-Vector2(0,15),"+%d %s" % [earned,quip],Color("ffc65c"))
+	effects.collect_burst(player.position+Vector2(0,6),food_id)
 	return earned
 
 func _stunned() -> void:
@@ -772,7 +779,6 @@ func _stunned() -> void:
 	if not dropped.is_empty():
 		stash_raids.items.append({"owner":null,"source":"dropped","food_id":dropped.id,"snack":dropped,"position":player.beak(),"velocity":Vector2(-player.facing*35,-55),"grounded":false,"age":0.0})
 	score.stunned()
-	effects.message(player.position,"RUDE.",Color("ef725c"))
 	effects.impact(player.position,true)
 	Audio.play("stun")
 
@@ -788,7 +794,7 @@ func _rival_drops_carry(rival: BeachGull, attacker: Vector2) -> void:
 			if pilot.mug(attacker) > 0:
 				stash_raids.items.append({"owner":null,"source":"dropped","food_id":food_id,"position":rival.position-Vector2(0,10),"velocity":Vector2(-rival.facing*35,-55),"grounded":false,"age":0.0})
 
-# The player's own stun handler already reacts (RUDE.), so only rivals get a callout.
+# The player's own stun handler already reacts, so only rivals get a callout.
 func _water_hit(gull: BeachGull, teen: WatergunTeen) -> void:
 	effects.water_soak(gull.position,teen.position)
 	if not gull.rival:
@@ -835,6 +841,7 @@ func _swallowed(snack: Dictionary) -> void:
 	if snack.get("scrap",false):
 		score.points += value
 		effects.score_message(player.position,"+%d" % value,Color("ffc65c"))
+		effects.collect_burst(player.position+Vector2(0,6),str(snack.id))
 		Audio.play("snatch")
 		overlay.show_score_announcement(str(snack.id),value)
 	else:
@@ -843,7 +850,7 @@ func _swallowed(snack: Dictionary) -> void:
 			track("first_steal", {"level": int(level.id), "seconds": snappedf(elapsed, 0.1)})
 		if perk_id == "bullet_time" and not snack.get("mugged",false) and not slowmo_active():
 			bullet_meter = minf(1.0,bullet_meter+float(perk_value("fill_per_clean_snatch",0.34)))
-		var earned: int = _award(value,snack.get("risky",false),snack.get("upwind",false),snack.get("mugged",false),snack.get("handover",false))
+		var earned: int = _award(value,snack.get("risky",false),snack.get("upwind",false),snack.get("mugged",false),snack.get("handover",false),str(snack.id))
 		overlay.show_score_announcement(str(snack.id),earned)
 		if not pending_rivals.is_empty():
 			var taunter: Dictionary = {}

@@ -4802,6 +4802,65 @@
       "burst": {"frames": [0, 1, 2], "fps": 20, "loop": false}
     }
   },
+  "pixelfx_heavy_landing": {
+    "file": "res://assets/sprites/pixelfx/heavy-landing-v1.png",
+    "frame_w": 135,
+    "frame_h": 42,
+    "pivot": [69, 28],
+    "scale": 0.5,
+    "animations": {
+      "burst": {"frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35], "fps": 30, "loop": false}
+    }
+  },
+  "pixelfx_stunned": {
+    "file": "res://assets/sprites/pixelfx/stunned-v1.png",
+    "frame_w": 48,
+    "frame_h": 31,
+    "pivot": [24, 15],
+    "scale": 0.7,
+    "animations": {
+      "burst": {"frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59], "fps": 30, "loop": true}
+    }
+  },
+  "pixelfx_hit_spark": {
+    "file": "res://assets/sprites/pixelfx/hit-spark-v1.png",
+    "frame_w": 136,
+    "frame_h": 80,
+    "pivot": [44, 64],
+    "scale": 1.25,
+    "animations": {
+      "burst": {"frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "fps": 30, "loop": false}
+    }
+  },
+  "pixelfx_crit_hit": {
+    "file": "res://assets/sprites/pixelfx/crit-hit-v1.png",
+    "frame_w": 174,
+    "frame_h": 132,
+    "pivot": [77, 102],
+    "animations": {
+      "burst": {"frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24], "fps": 30, "loop": false}
+    }
+  },
+  "pixelfx_poof": {
+    "file": "res://assets/sprites/pixelfx/poof-v1.png",
+    "frame_w": 92,
+    "frame_h": 76,
+    "pivot": [43, 65],
+    "scale": 0.5,
+    "animations": {
+      "burst": {"frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42], "fps": 30, "loop": false}
+    }
+  },
+  "pixelfx_collect_burst": {
+    "file": "res://assets/sprites/pixelfx/collect-burst-v1.png",
+    "frame_w": 78,
+    "frame_h": 88,
+    "pivot": [36, 81],
+    "scale": 0.5,
+    "animations": {
+      "burst": {"frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32], "fps": 30, "loop": false}
+    }
+  },
   "water_splash": {
     "file": "res://assets/sprites/watergun-teen-v1/water-splash-v1.png",
     "frame_w": 24,

@@ -6,6 +6,9 @@ var shake: float = 0.0
 var freeze: float = 0.0
 var slow: float = 0.0
 var clock: float = 0.0
+var kick: Vector2 = Vector2.ZERO ## camera shove along a dive, decays to zero
+var trail_clock: float = 0.0
+var wind_clock: float = 0.0
 var font: Font = preload("res://assets/fonts/gull_pixel.fnt")
 const FEATHER_TEXTURES: Array[Texture2D] = [
 	preload("res://assets/sprites/feather-down-v1.png"),
@@ -27,6 +30,12 @@ const SCORE_MESSAGE_RISE_SPEED: float = 4.0
 func message(at: Vector2, text: String, color: Color = Color("fff4da"), life: float = 0.0, rise_speed: float = 10.0) -> void:
 	if Config.tuning.juice.floating_text:
 		texts.append({"at":at,"text":text,"color":color,"life":life if life > 0.0 else float(Config.tuning.juice.float_time),"rise_speed":rise_speed})
+
+## Ambient floating text in the sleeping-sunbather "Zzz" style: outlined letters, no backing plate, fading out.
+func whisper(at: Vector2, text: String, life: float = 0.0) -> void:
+	if Config.tuning.juice.floating_text:
+		var seconds: float = life if life > 0.0 else float(Config.tuning.juice.float_time)
+		texts.append({"at":at,"text":text,"color":BeachUI.CREAM,"life":seconds,"fade_time":seconds*0.7,"rise_speed":10.0,"plain":true})
 
 func score_message(at: Vector2, text: String, color: Color = Color("fff4da")) -> void:
 	if Config.tuning.juice.floating_text:
@@ -75,7 +84,7 @@ func peck_contact(at: Vector2,direction: Vector2,strength: float = 0.0,material:
 	var life: float = float(Config.tuning.juice.peck_contact_life)
 	var count: int = maxi(2,int(Config.tuning.juice.peck_contact_count))
 	var power: float = clampf(strength,0.0,1.0)
-	_texture_particle("peck_star",PECK_STAR_TEXTURE,at,heading*(5.0+power*4.0)+Vector2.UP*5.0,life,heading.angle(),0.0,0.75+power*0.22)
+	_texture_particle("peck_star",PECK_STAR_TEXTURE,at,heading*(5.0+power*4.0)+Vector2.UP*5.0,life,heading.angle(),0.0,(0.75+power*0.22)*float(Config.tuning.juice.peck_star_scale))
 	var debris_texture: Texture2D = DUST_PUFF_TEXTURE if material == "bag" else (IMPACT_WEDGE_TEXTURE if material == "glance" else CRUMB_FLECKS_TEXTURE)
 	var debris_color: Color = Color("ef725c") if material == "glance" else Color.WHITE
 	for index: int in count-1:
@@ -94,6 +103,9 @@ func snatch_contact(at: Vector2,motion: Vector2,bonus: bool = false) -> void:
 	var angle: float = heading.angle()
 	var life: float = float(Config.tuning.juice.snatch_contact_life)
 	var count: int = maxi(3,int(Config.tuning.juice.snatch_contact_count))
+	pixelfx_hit_spark(at,heading)
+	if bonus:
+		pixelfx("pixelfx_crit_hit",at,heading)
 	_texture_particle("snatch_slash",SNATCH_SLASH_TEXTURE,at-heading*2.0,heading*18.0,life,angle,0.0,1.12 if bonus else 0.92)
 	_texture_particle("snatch_streak",SPEED_STREAK_TEXTURE,at-heading*5.0,heading*9.0,life*0.72,angle,0.0,1.0 if bonus else 0.78)
 	for index: int in count-2:
@@ -109,6 +121,57 @@ func sound_wave(at: Vector2) -> void:
 	for i: int in 3:
 		var life: float = 0.45+0.12*i
 		particles.append({"ring":true,"at":at,"v":Vector2.ZERO,"gravity":0.0,"life":life,"duration":life,"delay":0.1*i,"color":Color("fff4da")})
+	queue_redraw()
+
+## The windup ends: a tight ring where the gull let go and a camera shove along the dive.
+func dive_release(at: Vector2, heading: Vector2) -> void:
+	if bool(Config.tuning.juice.particles):
+		for i: int in 2:
+			particles.append({"ring":true,"at":at,"v":Vector2.ZERO,"gravity":0.0,"life":0.26,"duration":0.26,"delay":0.06*i,"grow":44.0,"color":Color("fff4da")})
+		queue_redraw()
+	if bool(Config.tuning.juice.shake) and GameState.options.shake:
+		kick = heading.normalized()*float(Config.tuning.juice.dive_kick)
+
+## Vapour streaks off the beak, longer and denser the faster the dive.
+func dive_trail(beak: Vector2, heading: Vector2, speed: float, delta: float) -> void:
+	if not bool(Config.tuning.juice.particles):
+		return
+	var t: Dictionary = Config.tuning.juice
+	var ratio: float = clampf((speed-float(t.dive_trail_min_speed))/(float(Config.tuning.dive.max_speed)-float(t.dive_trail_min_speed)),0.0,1.0)
+	if ratio <= 0.0:
+		return
+	trail_clock += delta
+	if trail_clock < 0.03:
+		return
+	trail_clock = 0.0
+	var life: float = 0.14+0.08*ratio
+	particles.append({"streak":true,"at":beak-heading*3.0,"dir":heading,"length":6.0+16.0*ratio,"v":Vector2.ZERO,"gravity":0.0,"life":life,"duration":life,"color":Color(1.0,0.96,0.85,0.55+0.3*ratio)})
+
+## Wind made visible: faint gust lines across the screen, sand skating along the ground, and brighter lines
+## around a flying gull that the wind is helping. Everything scales with the gull's smoothed wind force.
+func wind_tick(delta: float, camera_x: float, gull: BeachGull) -> void:
+	var t: Dictionary = Config.tuning.juice
+	if not bool(t.particles) or not bool(t.wind_streaks):
+		return
+	var strength: float = absf(gull.wind_force)
+	if strength < float(t.wind_min):
+		return
+	var heading := Vector2(signf(gull.wind_force),0.0)
+	wind_clock += delta
+	var interval: float = 1.0/(float(t.wind_rate)*strength)
+	while wind_clock >= interval:
+		wind_clock -= interval
+		var at := Vector2(camera_x+feather_rng.randf_range(-170.0,170.0),feather_rng.randf_range(14.0,float(Config.tuning.world.ground)-8.0))
+		var life: float = feather_rng.randf_range(0.5,0.9)
+		particles.append({"streak":true,"at":at,"dir":heading,"length":6.0+feather_rng.randf()*8.0+8.0*strength,"v":heading*(70.0+60.0*strength),"gravity":0.0,"life":life,"duration":life,"color":Color(1.0,0.96,0.85,0.32)})
+		if strength >= float(t.wind_sand_min) and at.x < float(Config.tuning.world.promenade_start):
+			var sand_life: float = feather_rng.randf_range(0.35,0.6)
+			var ground: float = float(Config.tuning.world.ground)
+			particles.append({"at":Vector2(at.x,ground-feather_rng.randf_range(0.0,7.0)),"v":Vector2(heading.x*(80.0+50.0*strength),-feather_rng.randf_range(0.0,6.0)),"gravity":0.0,"life":sand_life,"duration":sand_life,"color":Color("d4ad78"),"size":Vector2(2,1),"sand":true})
+		# Wind that is lifting or pushing a flying gull gets its own brighter lines beside the bird.
+		if gull.state != BeachGull.State.GROUNDED and gull.state != BeachGull.State.STUNNED and gull.wind_lift() >= 0.5:
+			var near: Vector2 = gull.position+Vector2(-heading.x*feather_rng.randf_range(2.0,14.0),feather_rng.randf_range(-12.0,12.0))
+			particles.append({"streak":true,"at":near,"dir":heading,"length":10.0+8.0*strength,"v":heading*(90.0+60.0*strength),"gravity":0.0,"life":0.4,"duration":0.4,"color":Color(1.0,1.0,1.0,0.6)})
 	queue_redraw()
 
 func sand_puff(at: Vector2, taking_off: bool = false) -> void:
@@ -163,6 +226,50 @@ func water_soak(at: Vector2, from: Vector2) -> void:
 		particles.append({"at":at+Vector2(fan*3,-2),"v":Vector2(away*(18.0+float(i%3)*14.0)+fan*34,-48-float(i%4)*14),"life":life,"duration":life,"color":Color("fff4da") if i%3==0 else Color("6ec6f0"),"size":Vector2(2,2) if i%3!=1 else Vector2(1,2),"gravity":170.0,"crumb":true})
 	queue_redraw()
 
+## One-shot sheet effect rendered by pixelfx (see assets/sprites/pixelfx/NOTICE.md). Sheets are drawn
+## facing right; the sprite entry's `pivot` (pixel in the frame) lands on `at`, and a leftward heading
+## mirrors it. Effects live in z band 5.
+func pixelfx(sprite_id: String, at: Vector2, heading: Vector2 = Vector2.RIGHT, parent: Node = null, scale_mul: float = 1.0) -> AnimatedSprite2D:
+	if not bool(Config.tuning.juice.particles) or not bool(Config.tuning.juice.get("pixelfx",false)):
+		return null
+	var entry: Dictionary = Config.sprites[sprite_id]
+	var pivot: Array = entry.pivot
+	var sprite := AnimatedSprite2D.new()
+	sprite.name = sprite_id.to_pascal_case()
+	sprite.sprite_frames = Config.frames(sprite_id)
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var mirrored: bool = heading.x < 0.0
+	sprite.flip_h = mirrored
+	# AnimatedSprite2D is centred and does not mirror `offset`, so mirror the x shift by hand.
+	var shift := Vector2(float(entry.frame_w)*0.5-float(pivot[0]),float(entry.frame_h)*0.5-float(pivot[1]))
+	sprite.offset = Vector2(-shift.x if mirrored else shift.x,shift.y)
+	sprite.position = Vector2(roundf(at.x),roundf(at.y))
+	sprite.scale = Vector2.ONE*float(entry.get("scale",1.0))*scale_mul
+	sprite.z_index = 5
+	sprite.z_as_relative = false
+	(parent if parent != null else self).add_child(sprite)
+	sprite.animation_finished.connect(sprite.queue_free,CONNECT_ONE_SHOT)
+	sprite.play(&"burst")
+	return sprite
+
+## Stars and birds circling a stunned gull's head. The sheet loops, so it rides the gull for the stun then frees itself.
+func pixelfx_stunned(gull: BeachGull) -> AnimatedSprite2D:
+	var sprite: AnimatedSprite2D = pixelfx("pixelfx_stunned",Vector2(0,-14),Vector2.RIGHT,gull)
+	if sprite != null:
+		get_tree().create_timer(maxf(gull.timer,0.2)).timeout.connect(sprite.queue_free)
+	return sprite
+
+## Gold sparkle where a snack scores, sized by the food: crumbs get a pinch, a hot dog or pizza slice the full burst.
+func collect_burst(at: Vector2, food_id: String = "") -> AnimatedSprite2D:
+	var t: Dictionary = Config.tuning.juice
+	var size: Array = Config.foods.get(food_id,{}).get("size",[8,8])
+	var longest: float = maxf(float(size[0]),float(size[1]))
+	var amount: float = clampf((longest-float(t.collect_size_min))/(float(t.collect_size_max)-float(t.collect_size_min)),0.0,1.0)
+	return pixelfx("pixelfx_collect_burst",at,Vector2.RIGHT,null,lerpf(float(t.collect_scale_min),1.0,amount))
+
+func pixelfx_hit_spark(at: Vector2, heading: Vector2) -> AnimatedSprite2D:
+	return pixelfx("pixelfx_hit_spark",at,heading)
+
 func water_muzzle(at: Vector2, direction: Vector2) -> AnimatedSprite2D:
 	if not bool(Config.tuning.juice.particles):
 		return null
@@ -176,6 +283,8 @@ func water_muzzle(at: Vector2, direction: Vector2) -> AnimatedSprite2D:
 func release_burst(at: Vector2, from_bin: bool = false) -> void:
 	if not bool(Config.tuning.juice.particles):
 		return
+	if from_bin:
+		pixelfx("pixelfx_poof",at+Vector2(0,4))
 	for i: int in 6:
 		var side: float = float(i) - 2.5
 		particles.append({"at":at + Vector2(side * 2.0, -2),"v":Vector2(side * 13.0,-20.0 - float(i % 3) * 5.0),"life":0.32,"duration":0.32,"color":Color("d4ad78") if from_bin else Color("f3c443"),"size":Vector2(2,2),"sand":true})
@@ -195,6 +304,7 @@ func tick(delta: float) -> void:
 	freeze = maxf(0.0,freeze-delta)
 	slow = maxf(0.0,slow-delta)
 	shake = move_toward(shake,0,delta*12)
+	kick = kick.move_toward(Vector2.ZERO,delta*float(Config.tuning.juice.dive_kick_decay))
 	for i: int in range(texts.size()-1,-1,-1):
 		texts[i].life -= delta
 		texts[i].at.y -= delta*float(texts[i].get("rise_speed",10.0))
@@ -246,7 +356,12 @@ func _draw() -> void:
 		backing.a = alpha
 		var lettering: Color = item.color
 		lettering.a *= alpha
-		draw_rect(Rect2(at-Vector2(2,8),Vector2(width+4,11)),backing)
+		if item.get("plain",false):
+			var outline: Color = BeachUI.INK
+			outline.a = alpha
+			draw_string_outline(font,at,item.text,HORIZONTAL_ALIGNMENT_LEFT,-1,8,1,outline)
+		else:
+			draw_rect(Rect2(at-Vector2(2,8),Vector2(width+4,11)),backing)
 		draw_string(font,at,item.text,HORIZONTAL_ALIGNMENT_LEFT,-1,8,lettering)
 	for item: Dictionary in particles:
 		if item.get("feather",false):
@@ -268,12 +383,18 @@ func _draw() -> void:
 			draw_texture_rect(item.texture,Rect2(-size*0.5,size),false,tint)
 			draw_set_transform(Vector2.ZERO)
 			continue
+		if item.get("streak",false):
+			var streak_color: Color = item.color
+			streak_color.a *= clampf(float(item.life)/float(item.duration),0.0,1.0)
+			var start: Vector2 = Vector2(roundf(item.at.x),roundf(item.at.y))
+			draw_line(start,start-item.dir*float(item.length),streak_color,1.0)
+			continue
 		if item.get("ring",false):
 			var age: float = float(item.duration)-float(item.life)-float(item.delay)
 			if age > 0.0:
 				var ring_color: Color = item.color
 				ring_color.a = clampf(float(item.life)/float(item.duration),0.0,1.0)
-				draw_arc(item.at,4.0+age*70.0,0,TAU,20,ring_color,1.0)
+				draw_arc(item.at,4.0+age*float(item.get("grow",70.0)),0,TAU,20,ring_color,1.0)
 			continue
 		var color: Color = item.get("color",Color("fff4da"))
 		if item.has("duration"):
