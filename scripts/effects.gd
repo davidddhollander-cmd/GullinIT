@@ -8,6 +8,7 @@ var slow: float = 0.0
 var clock: float = 0.0
 var kick: Vector2 = Vector2.ZERO ## camera shove along a dive, decays to zero
 var trail_clock: float = 0.0
+var wind_clock: float = 0.0
 var font: Font = preload("res://assets/fonts/gull_pixel.fnt")
 const FEATHER_TEXTURES: Array[Texture2D] = [
 	preload("res://assets/sprites/feather-down-v1.png"),
@@ -77,7 +78,7 @@ func peck_contact(at: Vector2,direction: Vector2,strength: float = 0.0,material:
 	var life: float = float(Config.tuning.juice.peck_contact_life)
 	var count: int = maxi(2,int(Config.tuning.juice.peck_contact_count))
 	var power: float = clampf(strength,0.0,1.0)
-	_texture_particle("peck_star",PECK_STAR_TEXTURE,at,heading*(5.0+power*4.0)+Vector2.UP*5.0,life,heading.angle(),0.0,0.75+power*0.22)
+	_texture_particle("peck_star",PECK_STAR_TEXTURE,at,heading*(5.0+power*4.0)+Vector2.UP*5.0,life,heading.angle(),0.0,(0.75+power*0.22)*float(Config.tuning.juice.peck_star_scale))
 	var debris_texture: Texture2D = DUST_PUFF_TEXTURE if material == "bag" else (IMPACT_WEDGE_TEXTURE if material == "glance" else CRUMB_FLECKS_TEXTURE)
 	var debris_color: Color = Color("ef725c") if material == "glance" else Color.WHITE
 	for index: int in count-1:
@@ -139,6 +140,33 @@ func dive_trail(beak: Vector2, heading: Vector2, speed: float, delta: float) -> 
 	trail_clock = 0.0
 	var life: float = 0.14+0.08*ratio
 	particles.append({"streak":true,"at":beak-heading*3.0,"dir":heading,"length":6.0+16.0*ratio,"v":Vector2.ZERO,"gravity":0.0,"life":life,"duration":life,"color":Color(1.0,0.96,0.85,0.55+0.3*ratio)})
+
+## Wind made visible: faint gust lines across the screen, sand skating along the ground, and brighter lines
+## around a flying gull that the wind is helping. Everything scales with the gull's smoothed wind force.
+func wind_tick(delta: float, camera_x: float, gull: BeachGull) -> void:
+	var t: Dictionary = Config.tuning.juice
+	if not bool(t.particles) or not bool(t.wind_streaks):
+		return
+	var strength: float = absf(gull.wind_force)
+	if strength < float(t.wind_min):
+		return
+	var heading := Vector2(signf(gull.wind_force),0.0)
+	wind_clock += delta
+	var interval: float = 1.0/(float(t.wind_rate)*strength)
+	while wind_clock >= interval:
+		wind_clock -= interval
+		var at := Vector2(camera_x+feather_rng.randf_range(-170.0,170.0),feather_rng.randf_range(14.0,float(Config.tuning.world.ground)-8.0))
+		var life: float = feather_rng.randf_range(0.5,0.9)
+		particles.append({"streak":true,"at":at,"dir":heading,"length":6.0+feather_rng.randf()*8.0+8.0*strength,"v":heading*(70.0+60.0*strength),"gravity":0.0,"life":life,"duration":life,"color":Color(1.0,0.96,0.85,0.32)})
+		if strength >= float(t.wind_sand_min) and at.x < float(Config.tuning.world.promenade_start):
+			var sand_life: float = feather_rng.randf_range(0.35,0.6)
+			var ground: float = float(Config.tuning.world.ground)
+			particles.append({"at":Vector2(at.x,ground-feather_rng.randf_range(0.0,7.0)),"v":Vector2(heading.x*(80.0+50.0*strength),-feather_rng.randf_range(0.0,6.0)),"gravity":0.0,"life":sand_life,"duration":sand_life,"color":Color("d4ad78"),"size":Vector2(2,1),"sand":true})
+		# Wind that is lifting or pushing a flying gull gets its own brighter lines beside the bird.
+		if gull.state != BeachGull.State.GROUNDED and gull.state != BeachGull.State.STUNNED and gull.wind_lift() >= 0.5:
+			var near: Vector2 = gull.position+Vector2(-heading.x*feather_rng.randf_range(2.0,14.0),feather_rng.randf_range(-12.0,12.0))
+			particles.append({"streak":true,"at":near,"dir":heading,"length":10.0+8.0*strength,"v":heading*(90.0+60.0*strength),"gravity":0.0,"life":0.4,"duration":0.4,"color":Color(1.0,1.0,1.0,0.6)})
+	queue_redraw()
 
 func sand_puff(at: Vector2, taking_off: bool = false) -> void:
 	if not bool(Config.tuning.juice.particles) or at.x >= float(Config.tuning.world.promenade_start):

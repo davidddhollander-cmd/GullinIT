@@ -561,6 +561,7 @@ func _physics_process(delta: float) -> void:
 	beach.camera_x = camera_x
 	beach.wind_dir = int(signf(player.wind_force))
 	beach.strength = absf(player.wind_force)
+	effects.wind_tick(step,camera_x,player)
 	beach.tick(step)
 	overlay.queue_redraw()
 	if training:

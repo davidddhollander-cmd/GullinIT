@@ -86,6 +86,28 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(not effects.particles.is_empty() and fast_scale > float(effects.particles[0].length), "the beak trail grows with dive speed")
 	effects.particles.clear()
 
+	# Wind lines: none in calm air, streaks and sand once the gull feels a real wind, none when the flag is off.
+	effects.particles.clear()
+	game.player.wind_force = 0.0
+	effects.wind_tick(1.0,400.0,game.player)
+	check.call(effects.particles.is_empty(), "calm air spawns no wind lines")
+	game.player.wind_force = 1.0
+	effects.wind_tick(1.0,400.0,game.player)
+	var wind_streaks: int = 0
+	var wind_sand: int = 0
+	for item: Dictionary in effects.particles:
+		wind_streaks += 1 if item.get("streak",false) else 0
+		wind_sand += 1 if item.get("sand",false) else 0
+		check.call(not item.get("streak",false) or float(item.dir.x) > 0.0, "gust lines blow with the wind")
+	check.call(wind_streaks > 0 and wind_sand > 0, "a strong wind spawns gust lines and skating sand")
+	Config.tuning.juice.wind_streaks = false
+	effects.particles.clear()
+	effects.wind_tick(1.0,400.0,game.player)
+	check.call(effects.particles.is_empty(), "juice.wind_streaks turns the wind lines off")
+	Config.tuning.juice.wind_streaks = true
+	game.player.wind_force = 0.0
+	effects.particles.clear()
+
 	Config.tuning.juice.pixelfx = false
 	check.call(effects.pixelfx_hit_spark(Vector2(100,80),Vector2.RIGHT) == null, "the juice.pixelfx flag turns the spark off")
 	Config.tuning.juice.pixelfx = true
