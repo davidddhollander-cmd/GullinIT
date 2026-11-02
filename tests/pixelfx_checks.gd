@@ -17,7 +17,7 @@ static func run(suite: Node, check: Callable) -> void:
 		var entry: Dictionary = Config.sprites[id]
 		var texture: Texture2D = load(entry.file) as Texture2D
 		var columns: int = texture.get_width()/int(entry.frame_w)
-		check.call(entry.has("pivot") and columns*ceili(float(spec.frames)/float(columns))*int(entry.frame_h) == texture.get_height(),
+		check.call(entry.has("pivot") and ceili(float(spec.frames)/float(columns))*int(entry.frame_h) == texture.get_height(),
 			"%s has a pivot and its sheet is a whole grid of frames" % id)
 
 	suite.main.start_level(1)
