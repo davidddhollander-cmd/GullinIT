@@ -152,7 +152,6 @@ func _water_animation(sprite_id: String, clip: StringName, at: Vector2, angle: f
 func water_splash(at: Vector2) -> AnimatedSprite2D:
 	if not bool(Config.tuning.juice.particles):
 		return null
-	pixelfx("pixelfx_splash",at)
 	# The crown is drawn at the bottom of its frame: lift it so the base sits on `at`.
 	return _water_animation("water_splash",&"impact",at-Vector2(0,10))
 
