@@ -339,6 +339,8 @@ func _release_rivals() -> void:
 
 func _wire_sand(gull: BeachGull) -> void:
 	gull.sand_landed.connect(func(at: Vector2) -> void: effects.sand_puff(at))
+	gull.hard_landed.connect(func(at: Vector2) -> void: effects.pixelfx("pixelfx_heavy_landing",at))
+	gull.gull_stunned.connect(func() -> void: effects.pixelfx_stunned(gull))
 	gull.sand_departed.connect(func(at: Vector2) -> void: effects.sand_puff(at, true))
 	gull.tumble_feathers.connect(func(at: Vector2, impulse: Vector2, amount: int) -> void: effects.feather_burst(at,impulse,amount))
 

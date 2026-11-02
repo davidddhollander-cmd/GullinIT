@@ -7,6 +7,7 @@ signal stun_ignored
 signal ground_crashed
 signal peck_started
 signal sand_landed(at: Vector2)
+signal hard_landed(at: Vector2) ## a dive-speed touchdown on the sand
 signal sand_departed(at: Vector2)
 signal tumble_feathers(at: Vector2, impulse: Vector2, amount: int)
 enum State { GLIDE, WINDUP, STRIKE, GROUNDED, STUNNED }
@@ -737,6 +738,7 @@ func climb_loop_time() -> float:
 
 func land() -> void:
 	var was_airborne: bool = state in [State.GLIDE, State.WINDUP, State.STRIKE]
+	var hard: bool = was_airborne and velocity.y >= float(Config.tuning.dive.hard_landing_speed)
 	if was_airborne and velocity.y > 0.1:
 		art_event = &"landing"
 		art_event_left = 0.16
@@ -749,6 +751,8 @@ func land() -> void:
 	sprite.rotation = 0
 	if was_airborne and support.is_empty():
 		sand_landed.emit(position + Vector2(0, float(Config.tuning.flight.feet_offset)))
+		if hard:
+			hard_landed.emit(position + Vector2(0, float(Config.tuning.flight.feet_offset)))
 
 func pullup() -> void:
 	# Return control to normal flight without a scripted upward movement.

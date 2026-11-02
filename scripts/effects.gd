@@ -152,6 +152,7 @@ func _water_animation(sprite_id: String, clip: StringName, at: Vector2, angle: f
 func water_splash(at: Vector2) -> AnimatedSprite2D:
 	if not bool(Config.tuning.juice.particles):
 		return null
+	pixelfx("pixelfx_splash",at)
 	# The crown is drawn at the bottom of its frame: lift it so the base sits on `at`.
 	return _water_animation("water_splash",&"impact",at-Vector2(0,10))
 
@@ -169,7 +170,7 @@ func water_soak(at: Vector2, from: Vector2) -> void:
 ## One-shot sheet effect rendered by pixelfx (see assets/sprites/pixelfx/NOTICE.md). Sheets are drawn
 ## facing right; the sprite entry's `pivot` (pixel in the frame) lands on `at`, and a leftward heading
 ## mirrors it. Effects live in z band 5.
-func pixelfx(sprite_id: String, at: Vector2, heading: Vector2 = Vector2.RIGHT) -> AnimatedSprite2D:
+func pixelfx(sprite_id: String, at: Vector2, heading: Vector2 = Vector2.RIGHT, parent: Node = null) -> AnimatedSprite2D:
 	if not bool(Config.tuning.juice.particles) or not bool(Config.tuning.juice.get("pixelfx",false)):
 		return null
 	var entry: Dictionary = Config.sprites[sprite_id]
@@ -186,9 +187,17 @@ func pixelfx(sprite_id: String, at: Vector2, heading: Vector2 = Vector2.RIGHT) -
 	sprite.position = Vector2(roundf(at.x),roundf(at.y))
 	sprite.scale = Vector2.ONE*float(entry.get("scale",1.0))
 	sprite.z_index = 5
-	add_child(sprite)
+	sprite.z_as_relative = false
+	(parent if parent != null else self).add_child(sprite)
 	sprite.animation_finished.connect(sprite.queue_free,CONNECT_ONE_SHOT)
 	sprite.play(&"burst")
+	return sprite
+
+## Stars and birds circling a stunned gull's head. The sheet loops, so it rides the gull for the stun then frees itself.
+func pixelfx_stunned(gull: BeachGull) -> AnimatedSprite2D:
+	var sprite: AnimatedSprite2D = pixelfx("pixelfx_stunned",Vector2(0,-14),Vector2.RIGHT,gull)
+	if sprite != null:
+		get_tree().create_timer(maxf(gull.timer,0.2)).timeout.connect(sprite.queue_free)
 	return sprite
 
 func pixelfx_hit_spark(at: Vector2, heading: Vector2) -> AnimatedSprite2D:

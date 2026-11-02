@@ -8,12 +8,15 @@ static func run(suite: Node, check: Callable) -> void:
 		{"id":"pixelfx_crit_hit","frames":25},
 		{"id":"pixelfx_poof","frames":43},
 		{"id":"pixelfx_collect_burst","frames":33},
+		{"id":"pixelfx_heavy_landing","frames":36},
+		{"id":"pixelfx_splash","frames":46},
+		{"id":"pixelfx_stunned","frames":60,"loop":true},
 	]:
 		var id: String = spec.id
 		check.call(Config.sprites.has(id) and FileAccess.file_exists(str(Config.sprites[id].file)),"%s sprite entry and sheet exist" % id)
 		var frames: SpriteFrames = Config.frames(id)
-		check.call(frames.has_animation(&"burst") and frames.get_frame_count(&"burst") == int(spec.frames) and not frames.get_animation_loop(&"burst"),
-			"%s exposes a %d-frame one-shot burst" % [id,int(spec.frames)])
+		check.call(frames.has_animation(&"burst") and frames.get_frame_count(&"burst") == int(spec.frames) and frames.get_animation_loop(&"burst") == bool(spec.get("loop",false)),
+			"%s exposes a %d-frame burst (one-shot unless flagged loop)" % [id,int(spec.frames)])
 		var entry: Dictionary = Config.sprites[id]
 		var texture: Texture2D = load(entry.file) as Texture2D
 		var columns: int = texture.get_width()/int(entry.frame_w)
@@ -51,6 +54,25 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(is_equal_approx(mirrored_offset,-effects.pixelfx("pixelfx_crit_hit",Vector2(100,80)).offset.x),
 		"every sheet mirrors its pivot offset for leftward heading")
 
+	# Hard landing, splash and stun stars hang off the existing game events.
+	var landed: Array = []
+	game.player.hard_landed.connect(func(at: Vector2) -> void: landed.append(at))
+	game.player.state = BeachGull.State.STRIKE
+	game.player.velocity = Vector2(0,float(Config.tuning.dive.hard_landing_speed)+10.0)
+	game.player.land()
+	check.call(landed.size() == 1, "a dive-speed landing emits hard_landed")
+	game.player.state = BeachGull.State.GLIDE
+	game.player.velocity = Vector2(0,20)
+	game.player.land()
+	check.call(landed.size() == 1, "a gentle landing does not")
+	var before_splash: int = effects.get_child_count()
+	effects.water_splash(Vector2(100,80))
+	check.call(effects.get_child_count() == before_splash+2 and effects.get_node_or_null("PixelfxSplash") != null, "a water splash adds the pixelfx splash")
+	game.player.invulnerable = 0.0
+	game.player.stun(0.9)
+	var stars: AnimatedSprite2D = game.player.get_node_or_null("PixelfxStunned")
+	check.call(stars != null and stars.z_index == 5 and not stars.z_as_relative and stars.sprite_frames.get_animation_loop(&"burst"),
+		"a stunned gull wears looping stars in effect band 5")
 	Config.tuning.juice.pixelfx = false
 	check.call(effects.pixelfx_hit_spark(Vector2(100,80),Vector2.RIGHT) == null, "the juice.pixelfx flag turns the spark off")
 	Config.tuning.juice.pixelfx = true

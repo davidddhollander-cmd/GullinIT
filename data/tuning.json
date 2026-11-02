@@ -92,6 +92,7 @@
     "uphill_deceleration": 420,
     "uphill_drag": 75,
     "crash_vertical_speed": 170,
+    "hard_landing_speed": 120,
     "warning_risk": 0.7,
     "warning_time": 0.65
   },
