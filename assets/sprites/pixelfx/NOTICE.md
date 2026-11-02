@@ -17,4 +17,7 @@ Sheets are trimmed to their used area and empty tail frames (tools were run outs
 | poof-v1.png | spawn/poof | 43 of 49 | 92x76 | 43,65 | bin burst |
 | collect-burst-v1.png | pickups/collect-burst | 33 of 42 | 78x88 | 36,81 | points awarded; gold palette `["#3a1c0a","#8a4a12","#d4832a","#ffc65c","#ffe9a8","#ffffff"]` |
 
+`collect-burst-v1.png` is post-processed after export: opaque sparkle pixels are thickened by one pixel (4-neighbour) and given a
+1 px dark outline (`#3a1c0a`) so it reads on light sand and sky; the soft glow is left as exported.
+
 `hit-spark-v1.json` is the unmodified export for reference.
