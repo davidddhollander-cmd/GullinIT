@@ -47,6 +47,11 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(effects.get_child_count() == before_bin, "poof is parked: a bin burst spawns no pixelfx sprite")
 	check.call(is_equal_approx(right.scale.x,1.25) and is_equal_approx(effects.pixelfx("pixelfx_collect_burst",Vector2(100,80)).scale.x,0.5),
 		"data scale applies: hit spark 1.25x, collect burst 0.5x")
+	var crumb: AnimatedSprite2D = effects.collect_burst(Vector2(100,80),"crumbs")
+	var dog: AnimatedSprite2D = effects.collect_burst(Vector2(100,80),"hotdog")
+	var pie: AnimatedSprite2D = effects.collect_burst(Vector2(100,80),"pizza_slice_cheese")
+	check.call(crumb.scale.x < effects.collect_burst(Vector2(100,80),"crisps_bag").scale.x and effects.collect_burst(Vector2(100,80),"crisps_bag").scale.x < dog.scale.x and is_equal_approx(dog.scale.x,0.5) and pie.scale.x >= dog.scale.x - 0.001,
+		"the collect burst grows with the food: crumbs smallest, hot dog and pizza full size")
 	var gold: AnimatedSprite2D = effects.pixelfx("pixelfx_collect_burst",Vector2(100,80))
 	check.call(gold != null and gold.animation == &"burst" and gold.z_index == 5, "collect burst plays in effect band 5")
 	var mirrored_offset: float = effects.pixelfx("pixelfx_crit_hit",Vector2(100,80),Vector2.LEFT).offset.x

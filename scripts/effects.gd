@@ -223,7 +223,7 @@ func water_soak(at: Vector2, from: Vector2) -> void:
 ## One-shot sheet effect rendered by pixelfx (see assets/sprites/pixelfx/NOTICE.md). Sheets are drawn
 ## facing right; the sprite entry's `pivot` (pixel in the frame) lands on `at`, and a leftward heading
 ## mirrors it. Effects live in z band 5.
-func pixelfx(sprite_id: String, at: Vector2, heading: Vector2 = Vector2.RIGHT, parent: Node = null) -> AnimatedSprite2D:
+func pixelfx(sprite_id: String, at: Vector2, heading: Vector2 = Vector2.RIGHT, parent: Node = null, scale_mul: float = 1.0) -> AnimatedSprite2D:
 	if not bool(Config.tuning.juice.particles) or not bool(Config.tuning.juice.get("pixelfx",false)):
 		return null
 	var entry: Dictionary = Config.sprites[sprite_id]
@@ -238,7 +238,7 @@ func pixelfx(sprite_id: String, at: Vector2, heading: Vector2 = Vector2.RIGHT, p
 	var shift := Vector2(float(entry.frame_w)*0.5-float(pivot[0]),float(entry.frame_h)*0.5-float(pivot[1]))
 	sprite.offset = Vector2(-shift.x if mirrored else shift.x,shift.y)
 	sprite.position = Vector2(roundf(at.x),roundf(at.y))
-	sprite.scale = Vector2.ONE*float(entry.get("scale",1.0))
+	sprite.scale = Vector2.ONE*float(entry.get("scale",1.0))*scale_mul
 	sprite.z_index = 5
 	sprite.z_as_relative = false
 	(parent if parent != null else self).add_child(sprite)
@@ -252,6 +252,14 @@ func pixelfx_stunned(gull: BeachGull) -> AnimatedSprite2D:
 	if sprite != null:
 		get_tree().create_timer(maxf(gull.timer,0.2)).timeout.connect(sprite.queue_free)
 	return sprite
+
+## Gold sparkle where a snack scores, sized by the food: crumbs get a pinch, a hot dog or pizza slice the full burst.
+func collect_burst(at: Vector2, food_id: String = "") -> AnimatedSprite2D:
+	var t: Dictionary = Config.tuning.juice
+	var size: Array = Config.foods.get(food_id,{}).get("size",[8,8])
+	var longest: float = maxf(float(size[0]),float(size[1]))
+	var amount: float = clampf((longest-float(t.collect_size_min))/(float(t.collect_size_max)-float(t.collect_size_min)),0.0,1.0)
+	return pixelfx("pixelfx_collect_burst",at,Vector2.RIGHT,null,lerpf(float(t.collect_scale_min),1.0,amount))
 
 func pixelfx_hit_spark(at: Vector2, heading: Vector2) -> AnimatedSprite2D:
 	return pixelfx("pixelfx_hit_spark",at,heading)

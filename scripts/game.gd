@@ -762,11 +762,11 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 				pilot.took_food(target.food_value())
 				effects.message(gull.position,"MINE!",Color("ffc65c"))
 
-func _award(value: int, risky: bool, upwind: bool, mugged: bool, handover: bool = false) -> int:
+func _award(value: int, risky: bool, upwind: bool, mugged: bool, handover: bool = false, food_id: String = "") -> int:
 	var earned: int = score.snatch(value,risky,upwind,mugged,handover)
 	var quip: String = "COUNTER!" if handover else ("MUGGED!" if mugged else str(Config.quips.snatch[rng.randi_range(0,Config.quips.snatch.size()-1)]))
 	effects.score_message(player.position-Vector2(0,15),"+%d %s" % [earned,quip],Color("ffc65c"))
-	effects.pixelfx("pixelfx_collect_burst",player.position+Vector2(0,6))
+	effects.collect_burst(player.position+Vector2(0,6),food_id)
 	return earned
 
 func _stunned() -> void:
@@ -841,7 +841,7 @@ func _swallowed(snack: Dictionary) -> void:
 	if snack.get("scrap",false):
 		score.points += value
 		effects.score_message(player.position,"+%d" % value,Color("ffc65c"))
-		effects.pixelfx("pixelfx_collect_burst",player.position+Vector2(0,6))
+		effects.collect_burst(player.position+Vector2(0,6),str(snack.id))
 		Audio.play("snatch")
 		overlay.show_score_announcement(str(snack.id),value)
 	else:
@@ -850,7 +850,7 @@ func _swallowed(snack: Dictionary) -> void:
 			track("first_steal", {"level": int(level.id), "seconds": snappedf(elapsed, 0.1)})
 		if perk_id == "bullet_time" and not snack.get("mugged",false) and not slowmo_active():
 			bullet_meter = minf(1.0,bullet_meter+float(perk_value("fill_per_clean_snatch",0.34)))
-		var earned: int = _award(value,snack.get("risky",false),snack.get("upwind",false),snack.get("mugged",false),snack.get("handover",false))
+		var earned: int = _award(value,snack.get("risky",false),snack.get("upwind",false),snack.get("mugged",false),snack.get("handover",false),str(snack.id))
 		overlay.show_score_announcement(str(snack.id),earned)
 		if not pending_rivals.is_empty():
 			var taunter: Dictionary = {}
