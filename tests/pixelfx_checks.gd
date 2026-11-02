@@ -42,8 +42,9 @@ static func run(suite: Node, check: Callable) -> void:
 	effects.release_burst(Vector2(120,100))
 	check.call(effects.get_child_count() == before_bin, "a non-bin release burst spawns no poof")
 	effects.release_burst(Vector2(120,100),true)
-	check.call(effects.get_child_count() == before_bin+1 and effects.get_child(effects.get_child_count()-1).name == &"PixelfxPoof",
-		"a bin burst spawns the poof")
+	check.call(effects.get_child_count() == before_bin, "poof is parked: a bin burst spawns no pixelfx sprite")
+	check.call(is_equal_approx(right.scale.x,1.25) and is_equal_approx(effects.pixelfx("pixelfx_collect_burst",Vector2(100,80)).scale.x,0.5),
+		"data scale applies: hit spark 1.25x, collect burst 0.5x")
 	var gold: AnimatedSprite2D = effects.pixelfx("pixelfx_collect_burst",Vector2(100,80))
 	check.call(gold != null and gold.animation == &"burst" and gold.z_index == 5, "collect burst plays in effect band 5")
 	var mirrored_offset: float = effects.pixelfx("pixelfx_crit_hit",Vector2(100,80),Vector2.LEFT).offset.x

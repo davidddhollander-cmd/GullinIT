@@ -184,6 +184,7 @@ func pixelfx(sprite_id: String, at: Vector2, heading: Vector2 = Vector2.RIGHT) -
 	var shift := Vector2(float(entry.frame_w)*0.5-float(pivot[0]),float(entry.frame_h)*0.5-float(pivot[1]))
 	sprite.offset = Vector2(-shift.x if mirrored else shift.x,shift.y)
 	sprite.position = Vector2(roundf(at.x),roundf(at.y))
+	sprite.scale = Vector2.ONE*float(entry.get("scale",1.0))
 	sprite.z_index = 5
 	add_child(sprite)
 	sprite.animation_finished.connect(sprite.queue_free,CONNECT_ONE_SHOT)
@@ -206,8 +207,6 @@ func water_muzzle(at: Vector2, direction: Vector2) -> AnimatedSprite2D:
 func release_burst(at: Vector2, from_bin: bool = false) -> void:
 	if not bool(Config.tuning.juice.particles):
 		return
-	if from_bin:
-		pixelfx("pixelfx_poof",at+Vector2(0,4))
 	for i: int in 6:
 		var side: float = float(i) - 2.5
 		particles.append({"at":at + Vector2(side * 2.0, -2),"v":Vector2(side * 13.0,-20.0 - float(i % 3) * 5.0),"life":0.32,"duration":0.32,"color":Color("d4ad78") if from_bin else Color("f3c443"),"size":Vector2(2,2),"sand":true})
