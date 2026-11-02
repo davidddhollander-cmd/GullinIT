@@ -3,6 +3,7 @@ extends Node2D
 ## Shared flight model for the player and rivals; swept beak collisions live in Game.
 signal gull_stunned
 signal dive_started
+signal dive_released(at: Vector2, direction: Vector2) ## windup ends and the strike begins
 signal stun_ignored
 signal ground_crashed
 signal peck_started
@@ -508,6 +509,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 				if launch_offset.length() > float(d.aim_deadzone):
 					direction = launch_offset.normalized()
 				state = State.STRIKE
+				dive_released.emit(position,direction)
 		State.STRIKE:
 			var offset: Vector2 = aim - position
 			if offset.length() > float(d.aim_deadzone):
@@ -878,9 +880,9 @@ func _draw() -> void:
 	if detailed_art:
 		# Ground projection anchors the bird and helps judge dive height.
 		var altitude: float = maxf(0,ground_y()-position.y)
-		var radius: float = lerpf(8,3,clampf(altitude/130,0,1))
+		var radius: float = lerpf(9,3,clampf(altitude/150,0,1))
 		draw_set_transform(Vector2(0,float(Config.tuning.world.ground)-position.y),0,Vector2(1,0.25))
-		draw_circle(Vector2.ZERO,radius,Color(0.09,0.18,0.22,lerpf(0.24,0.07,clampf(altitude/130,0,1))))
+		draw_circle(Vector2.ZERO,radius,Color(0.09,0.18,0.22,lerpf(0.36,0.12,clampf(altitude/150,0,1))))
 		draw_set_transform(Vector2.ZERO)
 		return
 	if state != State.GROUNDED:

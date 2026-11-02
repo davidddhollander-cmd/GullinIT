@@ -69,6 +69,23 @@ static func run(suite: Node, check: Callable) -> void:
 	var stars: AnimatedSprite2D = game.player.get_node_or_null("PixelfxStunned")
 	check.call(stars != null and stars.z_index == 5 and not stars.z_as_relative and stars.sprite_frames.get_animation_loop(&"burst"),
 		"a stunned gull wears looping stars in effect band 5")
+	# Dive juice: release ring + camera shove, speed-scaled beak trail.
+	effects.particles.clear()
+	effects.kick = Vector2.ZERO
+	effects.dive_release(Vector2(100,80),Vector2.RIGHT)
+	check.call(effects.particles.size() == 2 and effects.particles[0].has("grow") and effects.kick.x > 0.0, "dive release adds rings and a camera shove along the dive")
+	effects.kick = effects.kick.move_toward(Vector2.ZERO,10.0)
+	check.call(effects.kick == Vector2.ZERO, "the shove decays to zero")
+	effects.particles.clear()
+	effects.dive_trail(Vector2(100,80),Vector2.RIGHT,float(Config.tuning.juice.dive_trail_min_speed)-1.0,0.1)
+	check.call(effects.particles.is_empty(), "no beak trail below the trail speed")
+	effects.dive_trail(Vector2(100,80),Vector2.RIGHT,float(Config.tuning.dive.max_speed),0.1)
+	var fast_scale: float = float(effects.particles[0].length)
+	effects.particles.clear()
+	effects.dive_trail(Vector2(100,80),Vector2.RIGHT,float(Config.tuning.juice.dive_trail_min_speed)+20.0,0.1)
+	check.call(not effects.particles.is_empty() and fast_scale > float(effects.particles[0].length), "the beak trail grows with dive speed")
+	effects.particles.clear()
+
 	Config.tuning.juice.pixelfx = false
 	check.call(effects.pixelfx_hit_spark(Vector2(100,80),Vector2.RIGHT) == null, "the juice.pixelfx flag turns the spark off")
 	Config.tuning.juice.pixelfx = true

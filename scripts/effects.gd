@@ -6,6 +6,8 @@ var shake: float = 0.0
 var freeze: float = 0.0
 var slow: float = 0.0
 var clock: float = 0.0
+var kick: Vector2 = Vector2.ZERO ## camera shove along a dive, decays to zero
+var trail_clock: float = 0.0
 var font: Font = preload("res://assets/fonts/gull_pixel.fnt")
 const FEATHER_TEXTURES: Array[Texture2D] = [
 	preload("res://assets/sprites/feather-down-v1.png"),
@@ -113,6 +115,30 @@ func sound_wave(at: Vector2) -> void:
 		var life: float = 0.45+0.12*i
 		particles.append({"ring":true,"at":at,"v":Vector2.ZERO,"gravity":0.0,"life":life,"duration":life,"delay":0.1*i,"color":Color("fff4da")})
 	queue_redraw()
+
+## The windup ends: a tight ring where the gull let go and a camera shove along the dive.
+func dive_release(at: Vector2, heading: Vector2) -> void:
+	if bool(Config.tuning.juice.particles):
+		for i: int in 2:
+			particles.append({"ring":true,"at":at,"v":Vector2.ZERO,"gravity":0.0,"life":0.26,"duration":0.26,"delay":0.06*i,"grow":44.0,"color":Color("fff4da")})
+		queue_redraw()
+	if bool(Config.tuning.juice.shake) and GameState.options.shake:
+		kick = heading.normalized()*float(Config.tuning.juice.dive_kick)
+
+## Vapour streaks off the beak, longer and denser the faster the dive.
+func dive_trail(beak: Vector2, heading: Vector2, speed: float, delta: float) -> void:
+	if not bool(Config.tuning.juice.particles):
+		return
+	var t: Dictionary = Config.tuning.juice
+	var ratio: float = clampf((speed-float(t.dive_trail_min_speed))/(float(Config.tuning.dive.max_speed)-float(t.dive_trail_min_speed)),0.0,1.0)
+	if ratio <= 0.0:
+		return
+	trail_clock += delta
+	if trail_clock < 0.03:
+		return
+	trail_clock = 0.0
+	var life: float = 0.14+0.08*ratio
+	particles.append({"streak":true,"at":beak-heading*3.0,"dir":heading,"length":6.0+16.0*ratio,"v":Vector2.ZERO,"gravity":0.0,"life":life,"duration":life,"color":Color(1.0,0.96,0.85,0.55+0.3*ratio)})
 
 func sand_puff(at: Vector2, taking_off: bool = false) -> void:
 	if not bool(Config.tuning.juice.particles) or at.x >= float(Config.tuning.world.promenade_start):
@@ -234,6 +260,7 @@ func tick(delta: float) -> void:
 	freeze = maxf(0.0,freeze-delta)
 	slow = maxf(0.0,slow-delta)
 	shake = move_toward(shake,0,delta*12)
+	kick = kick.move_toward(Vector2.ZERO,delta*float(Config.tuning.juice.dive_kick_decay))
 	for i: int in range(texts.size()-1,-1,-1):
 		texts[i].life -= delta
 		texts[i].at.y -= delta*float(texts[i].get("rise_speed",10.0))
@@ -307,12 +334,18 @@ func _draw() -> void:
 			draw_texture_rect(item.texture,Rect2(-size*0.5,size),false,tint)
 			draw_set_transform(Vector2.ZERO)
 			continue
+		if item.get("streak",false):
+			var streak_color: Color = item.color
+			streak_color.a *= clampf(float(item.life)/float(item.duration),0.0,1.0)
+			var start: Vector2 = Vector2(roundf(item.at.x),roundf(item.at.y))
+			draw_line(start,start-item.dir*float(item.length),streak_color,1.0)
+			continue
 		if item.get("ring",false):
 			var age: float = float(item.duration)-float(item.life)-float(item.delay)
 			if age > 0.0:
 				var ring_color: Color = item.color
 				ring_color.a = clampf(float(item.life)/float(item.duration),0.0,1.0)
-				draw_arc(item.at,4.0+age*70.0,0,TAU,20,ring_color,1.0)
+				draw_arc(item.at,4.0+age*float(item.get("grow",70.0)),0,TAU,20,ring_color,1.0)
 			continue
 		var color: Color = item.get("color",Color("fff4da"))
 		if item.has("duration"):

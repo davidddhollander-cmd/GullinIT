@@ -197,6 +197,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		Audio.play("dive")
 		_dive_began()
 	)
+	player.dive_released.connect(func(at: Vector2, heading: Vector2) -> void: effects.dive_release(at,heading))
 	player.stun_ignored.connect(func() -> void:
 		effects.message(player.position,"SKULL!",BeachUI.GOLD)
 		Audio.play("click")
@@ -554,7 +555,9 @@ func _physics_process(delta: float) -> void:
 	spawner.apply_spacing(step)
 	camera_x = lerpf(camera_x,clampf(player.position.x,160,float(Config.tuning.world.width)-160),1-pow(1-float(Config.tuning.world.camera_lerp),step*60))
 	camera.position = Vector2(roundf(camera_x),90)
-	camera.offset = Vector2(sin(effects.clock*65),cos(effects.clock*73))*effects.shake
+	camera.offset = Vector2(sin(effects.clock*65),cos(effects.clock*73))*effects.shake+effects.kick
+	if player.state == BeachGull.State.STRIKE:
+		effects.dive_trail(player.beak(),player.direction,player.dive_speed,step)
 	beach.camera_x = camera_x
 	beach.wind_dir = int(signf(player.wind_force))
 	beach.strength = absf(player.wind_force)
