@@ -3,11 +3,22 @@ extends RefCounted
 ## snatches, frees itself, and the tuning flag turns it off.
 
 static func run(suite: Node, check: Callable) -> void:
-	check.call(Config.sprites.has("pixelfx_hit_spark") and FileAccess.file_exists(str(Config.sprites.pixelfx_hit_spark.file)),
-		"pixelfx hit spark sprite entry and sheet exist")
-	var frames: SpriteFrames = Config.frames("pixelfx_hit_spark")
-	check.call(frames.has_animation(&"burst") and frames.get_frame_count(&"burst") == 13 and not frames.get_animation_loop(&"burst"),
-		"pixelfx hit spark exposes a 13-frame one-shot burst")
+	for spec: Dictionary in [
+		{"id":"pixelfx_hit_spark","frames":13},
+		{"id":"pixelfx_crit_hit","frames":25},
+		{"id":"pixelfx_poof","frames":43},
+		{"id":"pixelfx_collect_burst","frames":33},
+	]:
+		var id: String = spec.id
+		check.call(Config.sprites.has(id) and FileAccess.file_exists(str(Config.sprites[id].file)),"%s sprite entry and sheet exist" % id)
+		var frames: SpriteFrames = Config.frames(id)
+		check.call(frames.has_animation(&"burst") and frames.get_frame_count(&"burst") == int(spec.frames) and not frames.get_animation_loop(&"burst"),
+			"%s exposes a %d-frame one-shot burst" % [id,int(spec.frames)])
+		var entry: Dictionary = Config.sprites[id]
+		var texture: Texture2D = load(entry.file) as Texture2D
+		var columns: int = texture.get_width()/int(entry.frame_w)
+		check.call(entry.has("pivot") and columns*ceili(float(spec.frames)/float(columns))*int(entry.frame_h) == texture.get_height(),
+			"%s has a pivot and its sheet is a whole grid of frames" % id)
 
 	suite.main.start_level(1)
 	var game: BeachGame = suite.main.game
@@ -23,6 +34,21 @@ static func run(suite: Node, check: Callable) -> void:
 	var before: int = effects.get_child_count()
 	effects.snatch_contact(Vector2(90,70),Vector2.RIGHT,false)
 	check.call(effects.get_child_count() == before+1, "snatch contact spawns one pixelfx hit spark")
+
+	var before_bonus: int = effects.get_child_count()
+	effects.snatch_contact(Vector2(90,70),Vector2.RIGHT,true)
+	check.call(effects.get_child_count() == before_bonus+2, "a bonus snatch adds the crit burst to the hit spark")
+	var before_bin: int = effects.get_child_count()
+	effects.release_burst(Vector2(120,100))
+	check.call(effects.get_child_count() == before_bin, "a non-bin release burst spawns no poof")
+	effects.release_burst(Vector2(120,100),true)
+	check.call(effects.get_child_count() == before_bin+1 and effects.get_child(effects.get_child_count()-1).name == &"PixelfxPoof",
+		"a bin burst spawns the poof")
+	var gold: AnimatedSprite2D = effects.pixelfx("pixelfx_collect_burst",Vector2(100,80))
+	check.call(gold != null and gold.animation == &"burst" and gold.z_index == 5, "collect burst plays in effect band 5")
+	var mirrored_offset: float = effects.pixelfx("pixelfx_crit_hit",Vector2(100,80),Vector2.LEFT).offset.x
+	check.call(is_equal_approx(mirrored_offset,-effects.pixelfx("pixelfx_crit_hit",Vector2(100,80)).offset.x),
+		"every sheet mirrors its pivot offset for leftward heading")
 
 	Config.tuning.juice.pixelfx = false
 	check.call(effects.pixelfx_hit_spark(Vector2(100,80),Vector2.RIGHT) == null, "the juice.pixelfx flag turns the spark off")

@@ -95,6 +95,8 @@ func snatch_contact(at: Vector2,motion: Vector2,bonus: bool = false) -> void:
 	var life: float = float(Config.tuning.juice.snatch_contact_life)
 	var count: int = maxi(3,int(Config.tuning.juice.snatch_contact_count))
 	pixelfx_hit_spark(at,heading)
+	if bonus:
+		pixelfx("pixelfx_crit_hit",at,heading)
 	_texture_particle("snatch_slash",SNATCH_SLASH_TEXTURE,at-heading*2.0,heading*18.0,life,angle,0.0,1.12 if bonus else 0.92)
 	_texture_particle("snatch_streak",SPEED_STREAK_TEXTURE,at-heading*5.0,heading*9.0,life*0.72,angle,0.0,1.0 if bonus else 0.78)
 	for index: int in count-2:
@@ -164,25 +166,32 @@ func water_soak(at: Vector2, from: Vector2) -> void:
 		particles.append({"at":at+Vector2(fan*3,-2),"v":Vector2(away*(18.0+float(i%3)*14.0)+fan*34,-48-float(i%4)*14),"life":life,"duration":life,"color":Color("fff4da") if i%3==0 else Color("6ec6f0"),"size":Vector2(2,2) if i%3!=1 else Vector2(1,2),"gravity":170.0,"crumb":true})
 	queue_redraw()
 
-## One-shot sheet effect rendered by pixelfx (see assets/sprites/pixelfx/NOTICE.md). The sheet is drawn
-## facing right with its pivot at `at`; leftward headings mirror it. Effects live in z band 5.
-func pixelfx_hit_spark(at: Vector2, heading: Vector2) -> AnimatedSprite2D:
+## One-shot sheet effect rendered by pixelfx (see assets/sprites/pixelfx/NOTICE.md). Sheets are drawn
+## facing right; the sprite entry's `pivot` (pixel in the frame) lands on `at`, and a leftward heading
+## mirrors it. Effects live in z band 5.
+func pixelfx(sprite_id: String, at: Vector2, heading: Vector2 = Vector2.RIGHT) -> AnimatedSprite2D:
 	if not bool(Config.tuning.juice.particles) or not bool(Config.tuning.juice.get("pixelfx",false)):
 		return null
+	var entry: Dictionary = Config.sprites[sprite_id]
+	var pivot: Array = entry.pivot
 	var sprite := AnimatedSprite2D.new()
-	sprite.name = "PixelfxHitSpark"
-	sprite.sprite_frames = Config.frames("pixelfx_hit_spark")
+	sprite.name = sprite_id.to_pascal_case()
+	sprite.sprite_frames = Config.frames(sprite_id)
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	# Frame is 136x80 with the pivot at (44,64): shift the centred sprite so the pivot lands on `at`.
 	var mirrored: bool = heading.x < 0.0
 	sprite.flip_h = mirrored
-	sprite.offset = Vector2(-24.0 if mirrored else 24.0,-24.0)
+	# AnimatedSprite2D is centred and does not mirror `offset`, so mirror the x shift by hand.
+	var shift := Vector2(float(entry.frame_w)*0.5-float(pivot[0]),float(entry.frame_h)*0.5-float(pivot[1]))
+	sprite.offset = Vector2(-shift.x if mirrored else shift.x,shift.y)
 	sprite.position = Vector2(roundf(at.x),roundf(at.y))
 	sprite.z_index = 5
 	add_child(sprite)
 	sprite.animation_finished.connect(sprite.queue_free,CONNECT_ONE_SHOT)
 	sprite.play(&"burst")
 	return sprite
+
+func pixelfx_hit_spark(at: Vector2, heading: Vector2) -> AnimatedSprite2D:
+	return pixelfx("pixelfx_hit_spark",at,heading)
 
 func water_muzzle(at: Vector2, direction: Vector2) -> AnimatedSprite2D:
 	if not bool(Config.tuning.juice.particles):
@@ -197,6 +206,8 @@ func water_muzzle(at: Vector2, direction: Vector2) -> AnimatedSprite2D:
 func release_burst(at: Vector2, from_bin: bool = false) -> void:
 	if not bool(Config.tuning.juice.particles):
 		return
+	if from_bin:
+		pixelfx("pixelfx_poof",at+Vector2(0,4))
 	for i: int in 6:
 		var side: float = float(i) - 2.5
 		particles.append({"at":at + Vector2(side * 2.0, -2),"v":Vector2(side * 13.0,-20.0 - float(i % 3) * 5.0),"life":0.32,"duration":0.32,"color":Color("d4ad78") if from_bin else Color("f3c443"),"size":Vector2(2,2),"sand":true})

@@ -760,6 +760,7 @@ func _award(value: int, risky: bool, upwind: bool, mugged: bool, handover: bool 
 	var earned: int = score.snatch(value,risky,upwind,mugged,handover)
 	var quip: String = "COUNTER!" if handover else ("MUGGED!" if mugged else str(Config.quips.snatch[rng.randi_range(0,Config.quips.snatch.size()-1)]))
 	effects.score_message(player.position-Vector2(0,15),"+%d %s" % [earned,quip],Color("ffc65c"))
+	effects.pixelfx("pixelfx_collect_burst",player.position+Vector2(0,6))
 	return earned
 
 func _stunned() -> void:
@@ -835,6 +836,7 @@ func _swallowed(snack: Dictionary) -> void:
 	if snack.get("scrap",false):
 		score.points += value
 		effects.score_message(player.position,"+%d" % value,Color("ffc65c"))
+		effects.pixelfx("pixelfx_collect_burst",player.position+Vector2(0,6))
 		Audio.play("snatch")
 		overlay.show_score_announcement(str(snack.id),value)
 	else:
