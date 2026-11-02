@@ -44,7 +44,8 @@ static func run(suite: Node, check: Callable) -> void:
 	effects.release_burst(Vector2(120,100))
 	check.call(effects.get_child_count() == before_bin, "a non-bin release burst spawns no poof")
 	effects.release_burst(Vector2(120,100),true)
-	check.call(effects.get_child_count() == before_bin, "poof is parked: a bin burst spawns no pixelfx sprite")
+	check.call(effects.get_child_count() == before_bin+1 and effects.get_child(effects.get_child_count()-1).name == &"PixelfxPoof",
+		"a bin burst spawns the small poof")
 	check.call(is_equal_approx(right.scale.x,1.25) and is_equal_approx(effects.pixelfx("pixelfx_collect_burst",Vector2(100,80)).scale.x,0.5),
 		"data scale applies: hit spark 1.25x, collect burst 0.5x")
 	var crumb: AnimatedSprite2D = effects.collect_burst(Vector2(100,80),"crumbs")

@@ -20,6 +20,6 @@ Sheets are trimmed to their used area and empty tail frames (tools were run outs
 `collect-burst-v1.png` is post-processed after export: opaque sparkle pixels are thickened by one pixel (4-neighbour) and given a
 1 px dark outline (`#3a1c0a`) so it reads on light sand and sky; the soft glow is left as exported.
 
-Later additions, same pipeline and trimming: `heavy-landing-v1.png` (impacts/heavy-landing, 36 of 49 frames, 135x42, pivot 69,28, scale 0.5, dive-speed touchdowns), `stunned-v1.png` (status/stunned, 60 frames, 48x31, pivot at centre, scale 0.7, looping stars and birds above a stunned gull). The poof sheet is kept but not played. No pixelfx water effect suits a mid-air watergun hit (splash, rain-splash, drip, bubbles and acid-splash are all floor based), so none is used.
+Later additions, same pipeline and trimming: `heavy-landing-v1.png` (impacts/heavy-landing, 36 of 49 frames, 135x42, pivot 69,28, scale 0.5, dive-speed touchdowns), `stunned-v1.png` (status/stunned, 60 frames, 48x31, pivot at centre, scale 0.7, looping stars and birds above a stunned gull). The poof plays at 0.5x on the final bin peck. No pixelfx water effect suits a mid-air watergun hit (splash, rain-splash, drip, bubbles and acid-splash are all floor based), so none is used.
 
 `hit-spark-v1.json` is the unmodified export for reference.

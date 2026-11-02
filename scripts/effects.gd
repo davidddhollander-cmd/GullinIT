@@ -31,6 +31,12 @@ func message(at: Vector2, text: String, color: Color = Color("fff4da"), life: fl
 	if Config.tuning.juice.floating_text:
 		texts.append({"at":at,"text":text,"color":color,"life":life if life > 0.0 else float(Config.tuning.juice.float_time),"rise_speed":rise_speed})
 
+## Ambient floating text in the sleeping-sunbather "Zzz" style: outlined letters, no backing plate, fading out.
+func whisper(at: Vector2, text: String, life: float = 0.0) -> void:
+	if Config.tuning.juice.floating_text:
+		var seconds: float = life if life > 0.0 else float(Config.tuning.juice.float_time)
+		texts.append({"at":at,"text":text,"color":BeachUI.CREAM,"life":seconds,"fade_time":seconds*0.7,"rise_speed":10.0,"plain":true})
+
 func score_message(at: Vector2, text: String, color: Color = Color("fff4da")) -> void:
 	if Config.tuning.juice.floating_text:
 		texts.append({
@@ -277,6 +283,8 @@ func water_muzzle(at: Vector2, direction: Vector2) -> AnimatedSprite2D:
 func release_burst(at: Vector2, from_bin: bool = false) -> void:
 	if not bool(Config.tuning.juice.particles):
 		return
+	if from_bin:
+		pixelfx("pixelfx_poof",at+Vector2(0,4))
 	for i: int in 6:
 		var side: float = float(i) - 2.5
 		particles.append({"at":at + Vector2(side * 2.0, -2),"v":Vector2(side * 13.0,-20.0 - float(i % 3) * 5.0),"life":0.32,"duration":0.32,"color":Color("d4ad78") if from_bin else Color("f3c443"),"size":Vector2(2,2),"sand":true})
@@ -348,7 +356,12 @@ func _draw() -> void:
 		backing.a = alpha
 		var lettering: Color = item.color
 		lettering.a *= alpha
-		draw_rect(Rect2(at-Vector2(2,8),Vector2(width+4,11)),backing)
+		if item.get("plain",false):
+			var outline: Color = BeachUI.INK
+			outline.a = alpha
+			draw_string_outline(font,at,item.text,HORIZONTAL_ALIGNMENT_LEFT,-1,8,1,outline)
+		else:
+			draw_rect(Rect2(at-Vector2(2,8),Vector2(width+4,11)),backing)
 		draw_string(font,at,item.text,HORIZONTAL_ALIGNMENT_LEFT,-1,8,lettering)
 	for item: Dictionary in particles:
 		if item.get("feather",false):
