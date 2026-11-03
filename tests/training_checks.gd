@@ -90,6 +90,10 @@ static func run(host: Node, check: Callable) -> void:
 	game.training_clean_snatch = false
 	game.player.state = BeachGull.State.STRIKE
 	game._food_knocked(customer,"ice_cream",Vector2(100,150),Vector2.ZERO)
+	check.call(game.lesson == 2,"knocked snack waits before the next card")
+	game._training_tick(3.4)
+	check.call(game.lesson == 2,"next card is not early")
+	game._training_tick(0.2)
 	check.call(game.lesson == 3 and game.training_miss_hint > 0.0 and game.training_text().contains("First miss"),"knocked snack passes the swoop lesson with a first-miss hint")
 	game.overlay._process(0)
 	check.call(game.overlay.trainer_portrait.visible and game.overlay.trainer_portrait.texture != null,"first-miss hint shows the trainer portrait")

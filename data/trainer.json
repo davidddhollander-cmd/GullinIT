@@ -56,7 +56,7 @@
     "closing": {
       "mood": "proud",
       "text": "Not bad, gullster. Not bad at all. You can swoop, raid bins, bump rivals and mug them blind. Now get out there and fleece that beach.",
-      "first_time_text": "Not bad, gullster. Not bad at all. You can swoop, raid bins, bump rivals and mug them blind. Here's a feather for your trouble. Now get out there and fleece that beach.",
+      "first_time_text": "Not bad, gullster. Not bad at all.\n\nYou can swoop, raid bins, bump rivals and mug them blind. Here's a feather for your trouble.\n\nNow get out there and fleece that beach.",
       "button": "To the beach!"
     },
     "lessons": [
@@ -132,7 +132,7 @@
       },
       {
         "mood": "amused",
-        "lay": "Time to meet the competition. This dummy is a rival gull, flying round with an empty beak. Nothing to steal, but you better show who's boss.\n\nGive him a little push for me will ya?",
+        "lay": "Time to meet the competition. This dummy is a rival gull. You better show who's boss. Give him a little push for me will ya?",
         "how": "Climb above the dummy. Dive with {dive} and fly right into it. A bonk means it worked.",
         "strip": "Dive with {dive} into the dummy gull"
       },

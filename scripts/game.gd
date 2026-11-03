@@ -54,10 +54,12 @@ var peck_pause_armed: bool = true
 var prompt_action: String = "peck" ## the press the frozen prompt waits for: peck (lesson 3) or dive (the counter lesson)
 var training_took_off: bool = false
 var training_clean_snatch: bool = false
-var training_raid_started: bool = false
 var training_snatch_age: float = 0.0
 const MISS_HINT_TIME: float = 5.0
 var training_miss_hint: float = 0.0
+const MISS_ADVANCE_DELAY: float = 3.5
+var training_miss_advance: float = 0.0  # counts down to the next card after a first miss
+var training_raid_started: bool = false
 var training_reset_clock: float = 0.0
 var pending_rivals: Array = []
 var taunt_wait: float = -1.0
@@ -263,12 +265,12 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	if overlay.trainer_card != null:
 		overlay.trainer_card.dismissed.connect(_on_trainer_dismissed)
 	if training:
+		player.peck_window_scale = 2.5
 		player.position = Vector2(70,player.ground_y())
 		player.state = BeachGull.State.GROUNDED
 		if lesson >= 2:
 			player.position = Vector2(180,70)
 			player.state = BeachGull.State.GLIDE
-		player.peck_window_scale = 2.5
 		if lesson >= BUMP_LESSON:
 			_training_dummy_setup()
 		if trainer_cards:
@@ -358,15 +360,15 @@ func _wire_target(target: BeachTarget) -> void:
 	target.food_knocked.connect(_food_knocked)
 
 func _food_knocked(target: BeachTarget, food_id: String, at: Vector2, impulse: Vector2) -> void:
+	# Dive lesson: a dropped snack counts as a pass, so a first miss never blocks the lesson.
+	if training and lesson == 2 and player.state == BeachGull.State.STRIKE:
+		training_miss_hint = MISS_HINT_TIME
+		training_miss_advance = MISS_ADVANCE_DELAY
 	stash_raids.add_knocked_food(target,food_id,at,impulse)
 	effects.peck_contact(at,impulse,0.55,"glance")
 	effects.food_crumble(at,impulse)
 	effects.message(at-Vector2(0,18),"DROPPED!",Color("ef725c"))
 	effects.impact(at,false)
-	# Dive lesson: a dropped snack counts as a pass, so a first miss never blocks the lesson.
-	if training and lesson == 2 and player.state == BeachGull.State.STRIKE:
-		training_miss_hint = MISS_HINT_TIME
-		_training_advance()
 
 func _reload() -> void:
 	level = Config.levels[int(level.id)-1]
@@ -615,6 +617,8 @@ func _dive_tick() -> void:
 func dismiss_intro() -> void:
 	lesson_started = elapsed
 	track("level_start", {"level": int(level.id), "mode": mode_name()})
+	if training:
+		track("lesson_start", {"lesson": lesson + 1})
 	intro = 0.0
 	intro_dismissed_elapsed = 0.0
 	input.clear_touch()
@@ -624,8 +628,6 @@ func dismiss_intro() -> void:
 	if trainer_cards and training:
 		open_trainer(_trainer_entry("training", lesson))
 	elif trainer_cards and screech_lesson:
-	if training:
-		track("lesson_start", {"lesson": lesson + 1})
 		open_trainer(_trainer_entry("screech", 0))
 	elif trainer_cards and counter_lesson:
 		open_trainer(_trainer_entry("counter", 0))
@@ -1000,6 +1002,7 @@ func finish() -> void:
 func _training_snatch(_target: BeachTarget) -> void:
 	if lesson in [2,SECOND_SWOOP_LESSON]:
 		training_clean_snatch = true
+		training_snatch_age = 0.0
 
 func _training_advance() -> void:
 	lesson += 1
@@ -1011,6 +1014,8 @@ func _training_advance() -> void:
 			bin.pecks = 0
 	track("lesson_complete", {"lesson": lesson, "seconds": snappedf(elapsed - lesson_started, 0.1)})
 	lesson_started = elapsed
+	if lesson < TRAINING_LESSONS:
+		track("lesson_start", {"lesson": lesson + 1})
 	GameState.save_training_step(lesson)
 	effects.message(player.position-Vector2(0,24),_toast(),BeachUI.GOLD)
 	if lesson >= BUMP_LESSON and lesson < TRAINING_LESSONS:
@@ -1023,7 +1028,6 @@ func _training_advance() -> void:
 			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing[closing_key], input), "lay_source": "training.closing." + closing_key, "lay_template": closing[closing_key], "button": closing.button}, finish)
 		else:
 			finish()
-		training_snatch_age = 0.0
 	elif trainer_cards:
 		_queue_trainer(_trainer_entry("training", lesson))
 
@@ -1035,8 +1039,6 @@ func _training_dummy_setup() -> void:
 	var dummy: RivalPilot = training_dummy()
 	if dummy != null and lesson == MUG_LESSON:
 		dummy.dummy_food = DUMMY_FOOD
-	if lesson < TRAINING_LESSONS:
-		track("lesson_start", {"lesson": lesson + 1})
 
 func training_dummy() -> RivalPilot:
 	for pilot: RivalPilot in pilots:
@@ -1115,6 +1117,11 @@ func _end_peck_pause() -> void:
 	_freeze_actors(false)
 
 func _training_tick(delta: float) -> void:
+	training_miss_hint = maxf(0.0,training_miss_hint-delta)
+	if training_miss_advance > 0.0:
+		training_miss_advance -= delta
+		if training_miss_advance <= 0.0 and lesson == 2:
+			_training_advance()
 	_peck_pause_check()
 	if lesson == 0:
 		# Remember takeoff even when the player releases flap before steering.
@@ -1141,7 +1148,6 @@ func _training_tick(delta: float) -> void:
 					loose = true
 			if not loose:
 				target.stash_remaining = int(Config.tuning.world.sunbather_stash_size)
-	training_miss_hint = maxf(0.0,training_miss_hint-delta)
 		if target.kind == "kiosk_customer":
 			if target.dropped_pending:
 				# Reset abandoned practice food in place for another timed peck.
@@ -1159,6 +1165,8 @@ func training_text() -> String:
 	var live: Dictionary = Config.trainer.live
 	if player.crash_warning():
 		return TrainerScript.line(live.crash, input)
+	if training_miss_hint > 0.0:
+		return TrainerScript.line(live.first_miss, input)
 	var data: Dictionary = Config.trainer.training.lessons[mini(lesson, TRAINING_LESSONS-1)]
 	if lesson == 0 and training_took_off:
 		return TrainerScript.line(data.strip_steer, input)
@@ -1167,6 +1175,8 @@ func training_text() -> String:
 			return TrainerScript.line(live.clean, input)
 		if player.state == BeachGull.State.STRIKE and not player.peck_used:
 			return TrainerScript.line(live.peck_now, input)
+		if lesson == 2 and player.state == BeachGull.State.STRIKE and player.peck_used and not player.auto_peck():
+			return TrainerScript.line(live.missed, input)
 	if lesson == WHEELIE_LESSON:
 		var wheelie: Dictionary = training_bin(true)
 		if player.state == BeachGull.State.GROUNDED and not wheelie.is_empty() and player.support.is_empty() and absf(player.position.x-float(wheelie.x)) < 28.0:
@@ -1182,8 +1192,6 @@ func training_bin(wheelie: bool) -> Dictionary:
 	for bin: Dictionary in stash_raids.bins:
 		if (str(bin.type) == BeachBackdrop.WHEELIE_BIN_TYPE) == wheelie:
 			return bin
-	if training_miss_hint > 0.0:
-		return TrainerScript.line(live.first_miss, input)
 	return {}
 
 func training_target() -> Vector2:
@@ -1192,8 +1200,6 @@ func training_target() -> Vector2:
 		if not bin.is_empty():
 			# The wheelie ring marks its lid, where the gull has to stand.
 			return Vector2(float(bin.x),float(bin.content_y)-6.0 if lesson == WHEELIE_LESSON else float(Config.tuning.world.ground)-18)
-		if lesson == 2 and player.state == BeachGull.State.STRIKE and player.peck_used and not player.auto_peck():
-			return TrainerScript.line(live.missed, input)
 	if lesson == 0:
 		return Vector2(245,75)
 	if lesson == 1:
