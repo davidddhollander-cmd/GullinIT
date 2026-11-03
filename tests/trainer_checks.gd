@@ -32,6 +32,9 @@ static func _copy_checks(check: Callable) -> void:
 	check.call(trainer.counter.lessons.size() == BeachGame.COUNTER_STEPS and trainer.counter.strips.size() == BeachGame.COUNTER_STEPS,"trainer copy covers both counter lesson steps")
 	var worst_card: int = 0
 	var worst_strip: int = 0
+	var worst_banner: int = 0
+	var longest_banner_line: int = 0
+	var banner_count: int = 0
 	var unresolved: int = 0
 	var uppercase_blocks: int = 0
 	for mode: String in MODES:
@@ -40,6 +43,7 @@ static func _copy_checks(check: Callable) -> void:
 			_set_device(input,device)
 			var texts: Array[String] = []
 			var strips: Array[String] = []
+			var banners: Array[String] = []
 			texts.append(TrainerScript.line(trainer.training.opening.text,input))
 			texts.append(TrainerScript.line(trainer.training.closing.text,input))
 			texts.append(TrainerScript.line(trainer.training.closing.first_time_text,input))
@@ -56,7 +60,17 @@ static func _copy_checks(check: Callable) -> void:
 			for key: String in ["crash","peck_now","clean","wheelie_low","full_stomach","missed","first_miss"]:
 				strips.append(TrainerScript.line(trainer.live[key],input))
 			strips.append(TrainerScript.line(trainer.training.lessons[0].strip_steer,input))
-			for text: String in texts + pairs + strips:
+			for lesson: Dictionary in trainer.training.lessons:
+				if lesson.has("banner"):
+					banners.append(TrainerScript.line(lesson.banner,input))
+			banners.append(TrainerScript.line(trainer.training.lessons[0].banner_steer,input))
+			banner_count = banners.size()
+			for banner: String in banners:
+				worst_banner = maxi(worst_banner,_lines(banner,BeachOverlay.BANNER_TEXT_WIDTH))
+				for part: String in banner.split("
+"):
+					longest_banner_line = maxi(longest_banner_line,part.length())
+			for text: String in texts + pairs + strips + banners:
 				if text.contains("{") or text.contains("}"):
 					unresolved += 1
 			for text: String in texts:
@@ -70,6 +84,7 @@ static func _copy_checks(check: Callable) -> void:
 	check.call(unresolved == 0,"no unresolved {tokens} on any device or control mode")
 	check.call(worst_card <= MAX_CARD_LINES,"every trainer card fits %d lines (worst %d)" % [MAX_CARD_LINES,worst_card])
 	check.call(worst_strip <= MAX_STRIP_LINES,"every strip line fits %d lines (worst %d)" % [MAX_STRIP_LINES,worst_strip])
+	check.call(banner_count == 7 and worst_banner <= MAX_STRIP_LINES and longest_banner_line <= 70,"every live banner fits two lines of 70 characters (%d banners, worst %d lines, longest %d chars)" % [banner_count,worst_banner,longest_banner_line])
 	# Control-mode variants explain the controls that mode really has.
 	GameState.options.control_mode = "realistic"
 	_set_device(input,"keyboard")
@@ -102,9 +117,36 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	check.call(not game.overlay.intro_panel.visible,"the old intro panel is hidden behind the trainer card")
 	await host.snapshot("trainer-opening")
 	game.overlay.start_button.pressed.emit()
-	check.call(game.running and game.trainer_open and card.visible and card.counter_label.text == "Lesson 1/%d" % BeachGame.TRAINING_LESSONS,"starting opens the first lesson card")
-	check.call(card.how_label.get_parsed_text().contains("Fly through the golden ring") and not game.input.enabled,"the lesson card explains the action and disables controls")
+	check.call(game.running and not game.trainer_open and not card.visible and game.input.enabled,"a converted lesson opens no card and leaves controls on")
+	game.overlay._process(0)
+	check.call(game.banner_active() and game.banner_cue > 0.0 and game.overlay.training_panel.visible and game.overlay.trainer_portrait.visible,"lesson 1 shows the live banner with Screeches and an attention cue")
+	check.call(game.overlay.lesson_prompt.text.contains("golden ring") and game.overlay.lesson_prompt.text.contains("
+"),"the banner carries the lesson's two instruction lines")
 	await host.snapshot("trainer-lesson-1")
+	game._physics_process(0.5)
+	check.call(game.elapsed > 0.4,"the world keeps running under a banner")
+	game._training_advance()
+	game.overlay._process(0)
+	check.call(not game.trainer_open and game.trainer_queue.is_empty() and game.lesson == 1 and game.banner_delay > 0.0 and not game.overlay.training_panel.visible,"a converted lesson waits a beat after the toast, with no card queued")
+	game._physics_process(BeachGame.TRAINER_DELAY + 0.1)
+	game.overlay._process(0)
+	check.call(game.banner_active() and game.overlay.lesson_prompt.text.contains("aim down") and game.banner_cue > 0.0,"the next banner appears with a cue and its own text")
+	BeachGame.trainer_cards = false
+	check.call(not game.banner_active(),"cards-off runs keep the plain strip")
+	BeachGame.trainer_cards = true
+	Config.trainer.live_banners = false
+	check.call(not game.banner_lesson(1) and not game.banner_lesson(0),"live_banners false sends converted lessons back to cards")
+	Config.trainer.live_banners = true
+	var card_lessons: Array[int] = []
+	for index: int in BeachGame.TRAINING_LESSONS:
+		if not game.banner_lesson(index):
+			card_lessons.append(index)
+	check.call(card_lessons == [2,BeachGame.BIN_LESSON,BeachGame.BUMP_LESSON],"only the first dive, bins and the rival dummy keep cards: "+str(card_lessons))
+	# Finishing a lesson shows a toast first, then the next card after a short beat.
+	game._training_advance()
+	check.call(not game.trainer_open and not game.trainer_queue.is_empty() and game.lesson == 2,"the next card waits a beat after the lesson-done toast")
+	game._physics_process(BeachGame.TRAINER_DELAY + 0.1)
+	check.call(game.trainer_open and card.counter_label.text == "Lesson 3/%d" % BeachGame.TRAINING_LESSONS,"the first dive keeps its card")
 	var before: Vector2 = game.player.position
 	var clock: float = game.elapsed
 	game._physics_process(0.5)
@@ -113,11 +155,6 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	card.dismissed.connect(func() -> void: dismissed.append(true))
 	card.button.pressed.emit()
 	check.call(dismissed.size() == 1 and not game.trainer_open and not card.visible and game.input.enabled,"the card button resumes the game and its controls")
-	# Finishing a lesson shows a toast first, then the next card after a short beat.
-	game._training_advance()
-	check.call(not game.trainer_open and not game.trainer_queue.is_empty() and game.lesson == 1,"the next card waits a beat after the lesson-done toast")
-	game._physics_process(BeachGame.TRAINER_DELAY + 0.1)
-	check.call(game.trainer_open and card.counter_label.text == "Lesson 2/%d" % BeachGame.TRAINING_LESSONS,"the next lesson's card appears")
 	card.button.pressed.emit()
 	# The last lesson ends with the closing card; the result waits until it is dismissed.
 	game.lesson = BeachGame.MUG_LESSON
@@ -128,7 +165,14 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	check.call(game.trainer_open and results.is_empty() and card.lay_label.get_parsed_text().contains("feather"),"first completion shows the closing card with the Feather line")
 	check.call(card.button.text == "TO THE BEACH!","the closing button says to the beach")
 	await host.snapshot("trainer-closing")
-	card.button.pressed.emit()
+	var press: InputEventKey = InputEventKey.new()
+	press.pressed = true
+	press.keycode = KEY_SPACE
+	card._input(press)
+	check.call(game.trainer_open,"a button still mashed from the last lesson does not skip the closing card")
+	card._process(0.7)
+	card._input(press)
+	check.call(results.size() == 1 and not game.trainer_open,"any button press dismisses the closing card")
 	check.call(results.size() == 1 and not game.running and int(results[0].get("feathers_earned",0)) == 1,"dismissing the closing card ends training and pays the Feather")
 	# A replay of the lessons does not mention the Feather.
 	host.main.start_level(1,true)
@@ -140,6 +184,10 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	game._training_advance()
 	game._physics_process(BeachGame.TRAINER_DELAY + 0.1)
 	check.call(game.trainer_open and not game.overlay.trainer_card.lay_label.get_parsed_text().contains("feather"),"the closing card on a replay has no Feather line")
+	game.overlay.trainer_card._process(3.0)
+	check.call(game.trainer_open,"the closing card waits out most of its four seconds")
+	game.overlay.trainer_card._process(1.1)
+	check.call(not game.trainer_open,"the closing card dismisses itself after four seconds")
 	# A saved checkpoint resumes with that lesson's card, not the first.
 	GameState.progress = {"1": {"training_step": BeachGame.BUMP_LESSON}}
 	host.main.start_level(1)

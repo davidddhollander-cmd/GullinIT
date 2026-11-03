@@ -33,6 +33,8 @@ var score_announcement_font_index: int = 0
 const SCORE_ANNOUNCEMENT_HOLD: float = BeachEffects.SCORE_MESSAGE_HOLD
 const SCORE_ANNOUNCEMENT_FADE: float = BeachEffects.SCORE_MESSAGE_FADE
 const TOP_BAR_HEIGHT: int = 17
+const BANNER_PORTRAIT: float = 36.0 ## Screeches in the live lesson banner
+const BANNER_TEXT_WIDTH: float = 244.0 ## two lines of about 55 characters beside him
 const TOP_BAR_FONT_SIZE: int = 6
 const TIME_WARNING: float = 20.0 ## seconds left when the timer turns red and flashes
 const QUEST_STRIP_HEIGHT: float = 10.0 ## small-font quest row directly under the top bar
@@ -258,11 +260,22 @@ func _draw_peck_prompt(offset: Vector2) -> void:
 	draw_string(font,Vector2(-width * 0.5,4.0),text,HORIZONTAL_ALIGNMENT_LEFT,-1,8,tint)
 	draw_set_transform(Vector2.ZERO,0.0,Vector2.ONE)
 
-# Wince at the miss, then flap the beak while he explains.
+# Wince at the miss, then flap the beak while he explains. The live banner flaps his beak and pulses the panel when it appears or changes.
 func _sync_trainer() -> void:
+	var banner: bool = game.banner_active()
 	var talking: bool = game.training_miss_hint > 0.0
-	trainer_portrait.visible = talking
+	trainer_portrait.visible = talking or banner
+	var px: float = BANNER_PORTRAIT if banner and not talking else 48.0
+	trainer_portrait.custom_minimum_size = Vector2(px,px)
+	lesson_prompt.custom_minimum_size.x = BANNER_TEXT_WIDTH if banner else 176.0
+	var pulse: float = game.banner_cue / BeachGame.BANNER_CUE_TIME if banner else 0.0
+	training_panel.self_modulate = Color.WHITE.lerp(Color(1.0,0.86,0.5),pulse * (0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.02)))
 	if not talking:
+		if banner:
+			var cells: Array[ImageTexture] = TrainerCard.portrait_textures()
+			var mood: int = int(TrainerCard.MOODS.get(str(Config.trainer.training.lessons[mini(game.lesson,BeachGame.TRAINING_LESSONS-1)].mood),0))
+			var flap: bool = game.banner_cue > 0.0 and int((BeachGame.BANNER_CUE_TIME - game.banner_cue) / TrainerCard.TALK_STEP) % 2 == 0
+			trainer_portrait.texture = cells[int(TrainerCard.MOODS.talking) if flap else mood]
 		return
 	var since: float = BeachGame.MISS_HINT_TIME - game.training_miss_hint
 	var cells: Array[ImageTexture] = TrainerCard.portrait_textures()
@@ -283,7 +296,7 @@ func _process(delta: float) -> void:
 	wind_label.text = "CALM" if absf(game.player.wind_force) < 0.01 else "%s %d%%" % ["WIND >" if game.player.wind_force > 0 else "< WIND",roundi(absf(game.player.wind_force)*100)]
 	intro_panel.visible = game.intro > 0 and not trainer_intro
 	# The frozen prompt sits high above the gull; the lesson strip and quest row would cover it.
-	training_panel.visible = game.lesson_active() and game.running and game.intro <= 0 and not game.trainer_open and not game.peck_pause
+	training_panel.visible = game.lesson_active() and game.running and game.intro <= 0 and not game.trainer_open and not game.peck_pause and not (game.banner_delay > 0.0 and game.training_miss_hint <= 0.0)
 	if game.training:
 		lesson_label.text = "LESSON %d/%d" % [mini(game.lesson + 1, BeachGame.TRAINING_LESSONS), BeachGame.TRAINING_LESSONS]
 		lesson_prompt.text = game.training_text()

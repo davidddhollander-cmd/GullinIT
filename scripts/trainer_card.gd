@@ -29,6 +29,8 @@ var name_label: Label
 var mood_cell: int = 0
 var talk_left: float = 0.0
 var talk_clock: float = 0.0
+var auto_close: float = 0.0 ## entry "auto_close": seconds until the card dismisses itself; any button press dismisses it too
+var press_grace: float = 0.0
 
 ## The five 256 px cells scaled once to the on-screen size.
 static func portrait_textures() -> Array[ImageTexture]:
@@ -139,6 +141,8 @@ func open(entry: Dictionary) -> void:
 	button.text = str(entry.get("button","GOT IT")).to_upper()
 	talk_left = clampf((str(entry.get("lay","")).length()+str(entry.get("how","")).length())*0.02,0.8,2.6)
 	talk_clock = 0.0
+	auto_close = float(entry.get("auto_close",0.0))
+	press_grace = 0.6 # a button still mashed from the last lesson must not skip the card
 	_show_cell(int(MOODS.talking))
 	visible = true
 	set_process(true)
@@ -151,6 +155,7 @@ func dismiss() -> void:
 	if not visible:
 		return
 	visible = false
+	auto_close = 0.0
 	set_process(false)
 	dismissed.emit()
 
@@ -158,7 +163,18 @@ func _show_cell(index: int) -> void:
 	portrait.texture = portrait_textures()[index]
 
 ## The bill flaps between its closed and open cells while he talks, then settles on the mood.
+func _input(event: InputEvent) -> void:
+	if visible and auto_close > 0.0 and press_grace <= 0.0 and event.is_pressed() and not event.is_echo() and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton or event is InputEventScreenTouch):
+		get_viewport().set_input_as_handled()
+		dismiss()
+
 func _process(delta: float) -> void:
+	press_grace -= delta
+	if auto_close > 0.0:
+		auto_close -= delta
+		if auto_close <= 0.0:
+			dismiss()
+			return
 	if talk_left <= 0.0:
 		_show_cell(mood_cell)
 		return
