@@ -76,6 +76,25 @@ static func run(host: Node, check: Callable) -> void:
 	game.player.velocity.y = -25
 	game._training_tick(0.1)
 	check.call(game.lesson == 3,"clean swoop and safe pullup advance to picnic bag")
+	# A landed gull after a clean snatch still passes after a few seconds.
+	game.lesson = 2
+	game.training_clean_snatch = true
+	game.training_snatch_age = 0.0
+	game.player.state = BeachGull.State.GROUNDED
+	game._training_tick(3.9)
+	check.call(game.lesson == 2,"grounded gull does not pass the swoop lesson immediately")
+	game._training_tick(0.2)
+	check.call(game.lesson == 3,"clean snatch passes the swoop lesson after the fallback delay")
+	# A knocked-off snack also passes and explains that a first miss is normal.
+	game.lesson = 2
+	game.training_clean_snatch = false
+	game.player.state = BeachGull.State.STRIKE
+	game._food_knocked(customer,"ice_cream",Vector2(100,150),Vector2.ZERO)
+	check.call(game.lesson == 3 and game.training_miss_hint > 0.0 and game.training_text().contains("First miss"),"knocked snack passes the swoop lesson with a first-miss hint")
+	game.overlay._process(0)
+	check.call(game.overlay.trainer_portrait.visible and game.overlay.trainer_portrait.texture != null,"first-miss hint shows the trainer portrait")
+	game.training_miss_hint = 0.0
+	game.stash_raids.items.clear()
 	game.stash_raids.bag_collected.emit()
 	check.call(game.lesson == 3,"picnic lesson requires starting a bag raid")
 	game.training_raid_started = true

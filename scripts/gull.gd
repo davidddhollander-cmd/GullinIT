@@ -26,6 +26,7 @@ var sweep_state: State = State.GLIDE
 var grounded_sweep: bool = false
 var peck_used: bool = false
 var peck_time: float = 0.0
+var peck_window_scale: float = 1.0  # training widens the one-shot peck window
 var peck_sweep_active: bool = false
 var peck_near_target: BeachTarget
 var direction: Vector2 = Vector2.DOWN
@@ -381,7 +382,7 @@ func attempt_peck() -> bool:
 	if state != State.STRIKE or peck_used or auto_peck():
 		return false
 	peck_used = true
-	peck_time = float(Config.tuning.dive.peck_window)
+	peck_time = float(Config.tuning.dive.peck_window) * peck_window_scale
 	peck_started.emit()
 	return true
 

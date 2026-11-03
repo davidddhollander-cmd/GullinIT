@@ -6,6 +6,7 @@ var casual: bool = false
 var current_level: int = 1
 var screen: String = "title"
 var quitting: bool = false
+var _pagehide: JavaScriptObject
 
 func _ready() -> void:
 	GullInput.register_actions()
@@ -57,6 +58,10 @@ func _ready() -> void:
 	Audio.play_music("title", 0.0)
 	get_tree().auto_accept_quit = false
 	get_tree().root.close_requested.connect(_quit)
+	if OS.has_feature("web"):
+		# Closing the tab never raises close_requested; pagehide is the last chance to report it.
+		_pagehide = JavaScriptBridge.create_callback(func(_args: Array) -> void: _abandon())
+		JavaScriptBridge.get_interface("window").addEventListener("pagehide", _pagehide)
 	if OS.get_cmdline_user_args().has("--smoke"):
 		_navigate("start",1)
 
@@ -162,9 +167,14 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			if not url.is_empty():
 				OS.shell_open(url)
 
+func _abandon() -> void:
+	if is_instance_valid(game):
+		game.track_end("abandoned", {}, true)
+
 func _quit() -> void:
 	if quitting:
 		return
+	_abandon()
 	quitting = true
 	Audio.stop_all()
 	# Playback releases on the audio thread; give it time before engine teardown.

@@ -41,6 +41,8 @@
       "casual": "Auto peck is on. Fly into it!"
     },
     "clean": "Grand! Aim up and climb!",
+    "missed": "Missed! Pull up and dive again",
+    "first_miss": "First miss is normal! Scoop it off the floor later",
     "wheelie_low": "Too low, gullster. Land on the lid.",
     "full_stomach": "Finish your snack first, greedy guts.",
     "crash_toast": "Ouch! Dust yourself off."
@@ -94,7 +96,7 @@
           "casual": "Climb above him and hold {dive} to dive. Casual mode does the pecking, so just fly your beak into the cone. Then aim up and climb away."
         },
         "strip": {
-          "default": "Dive with {dive}, tap {peck} at the snack",
+          "default": "Aim at the snack, {dive} to dive, then tap {peck}",
           "casual": "Dive with {dive}, your beak pecks for you"
         }
       },

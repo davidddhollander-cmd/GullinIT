@@ -55,6 +55,9 @@ var prompt_action: String = "peck" ## the press the frozen prompt waits for: pec
 var training_took_off: bool = false
 var training_clean_snatch: bool = false
 var training_raid_started: bool = false
+var training_snatch_age: float = 0.0
+const MISS_HINT_TIME: float = 5.0
+var training_miss_hint: float = 0.0
 var training_reset_clock: float = 0.0
 var pending_rivals: Array = []
 var taunt_wait: float = -1.0
@@ -265,6 +268,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		if lesson >= 2:
 			player.position = Vector2(180,70)
 			player.state = BeachGull.State.GLIDE
+		player.peck_window_scale = 2.5
 		if lesson >= BUMP_LESSON:
 			_training_dummy_setup()
 		if trainer_cards:
@@ -359,6 +363,10 @@ func _food_knocked(target: BeachTarget, food_id: String, at: Vector2, impulse: V
 	effects.food_crumble(at,impulse)
 	effects.message(at-Vector2(0,18),"DROPPED!",Color("ef725c"))
 	effects.impact(at,false)
+	# Dive lesson: a dropped snack counts as a pass, so a first miss never blocks the lesson.
+	if training and lesson == 2 and player.state == BeachGull.State.STRIKE:
+		training_miss_hint = MISS_HINT_TIME
+		_training_advance()
 
 func _reload() -> void:
 	level = Config.levels[int(level.id)-1]
@@ -576,16 +584,16 @@ func _physics_process(delta: float) -> void:
 func mode_name() -> String:
 	return "training" if training else ("practice" if casual else "arcade")
 
-func track(event: String, props: Dictionary = {}) -> void:
+func track(event: String, props: Dictionary = {}, urgent: bool = false) -> void:
 	Analytics.input_kind = "touch" if input.touch_visible else ("gamepad" if input.gamepad else "keyboard_mouse")
-	Analytics.track(event, props)
+	Analytics.track(event, props, urgent)
 
-# Once per run; "quit" is reported by main when a started level is abandoned.
-func track_end(outcome: String, result: Dictionary = {}) -> void:
+# Once per run; "quit" is reported by main when a started level is abandoned, "abandoned" on window/tab close.
+func track_end(outcome: String, result: Dictionary = {}, urgent: bool = false) -> void:
 	if end_tracked or intro_dismissed_elapsed < 0.0:
 		return
 	end_tracked = true
-	track("level_end", {"level": int(level.id), "mode": mode_name(), "score": int(result.get("score", score.points)), "stars": int(result.get("stars", 0)), "seconds": snappedf(elapsed, 0.1), "crashes": crashes, "outcome": outcome}.merged(dive_stats))
+	track("level_end", {"level": int(level.id), "mode": mode_name(), "score": int(result.get("score", score.points)), "stars": int(result.get("stars", 0)), "seconds": snappedf(elapsed, 0.1), "crashes": crashes, "outcome": outcome, "lesson": mini(lesson + 1, TRAINING_LESSONS) if training else 0}.merged(dive_stats), urgent)
 
 func _dive_began() -> void:
 	dive_stats.dives += 1
@@ -616,6 +624,8 @@ func dismiss_intro() -> void:
 	if trainer_cards and training:
 		open_trainer(_trainer_entry("training", lesson))
 	elif trainer_cards and screech_lesson:
+	if training:
+		track("lesson_start", {"lesson": lesson + 1})
 		open_trainer(_trainer_entry("screech", 0))
 	elif trainer_cards and counter_lesson:
 		open_trainer(_trainer_entry("counter", 0))
@@ -1013,6 +1023,7 @@ func _training_advance() -> void:
 			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing[closing_key], input), "lay_source": "training.closing." + closing_key, "lay_template": closing[closing_key], "button": closing.button}, finish)
 		else:
 			finish()
+		training_snatch_age = 0.0
 	elif trainer_cards:
 		_queue_trainer(_trainer_entry("training", lesson))
 
@@ -1024,6 +1035,8 @@ func _training_dummy_setup() -> void:
 	var dummy: RivalPilot = training_dummy()
 	if dummy != null and lesson == MUG_LESSON:
 		dummy.dummy_food = DUMMY_FOOD
+	if lesson < TRAINING_LESSONS:
+		track("lesson_start", {"lesson": lesson + 1})
 
 func training_dummy() -> RivalPilot:
 	for pilot: RivalPilot in pilots:
@@ -1109,8 +1122,11 @@ func _training_tick(delta: float) -> void:
 			training_took_off = true
 		if training_took_off and player.state == BeachGull.State.GLIDE and player.position.x > float(level.world.start_x) + 30:
 			_training_advance()
-	elif lesson in [2,SECOND_SWOOP_LESSON] and training_clean_snatch and player.position.y < 100 and player.velocity.y <= 0 and player.state in [BeachGull.State.GLIDE,BeachGull.State.STRIKE]:
-		_training_advance()
+	elif lesson in [2,SECOND_SWOOP_LESSON] and training_clean_snatch:
+		training_snatch_age += delta
+		# Climbing is the goal, but a gull that landed or stalled after a clean snatch still passes.
+		if training_snatch_age > 4.0 or (player.position.y < 100 and player.velocity.y <= 0 and player.state in [BeachGull.State.GLIDE,BeachGull.State.STRIKE]):
+			_training_advance()
 	# Lessons cannot run out of food. Restore only after all loose food clears,
 	# so a missed peck never duplicates an item still lying on the beach.
 	training_reset_clock += delta
@@ -1125,6 +1141,7 @@ func _training_tick(delta: float) -> void:
 					loose = true
 			if not loose:
 				target.stash_remaining = int(Config.tuning.world.sunbather_stash_size)
+	training_miss_hint = maxf(0.0,training_miss_hint-delta)
 		if target.kind == "kiosk_customer":
 			if target.dropped_pending:
 				# Reset abandoned practice food in place for another timed peck.
@@ -1165,6 +1182,8 @@ func training_bin(wheelie: bool) -> Dictionary:
 	for bin: Dictionary in stash_raids.bins:
 		if (str(bin.type) == BeachBackdrop.WHEELIE_BIN_TYPE) == wheelie:
 			return bin
+	if training_miss_hint > 0.0:
+		return TrainerScript.line(live.first_miss, input)
 	return {}
 
 func training_target() -> Vector2:
@@ -1173,6 +1192,8 @@ func training_target() -> Vector2:
 		if not bin.is_empty():
 			# The wheelie ring marks its lid, where the gull has to stand.
 			return Vector2(float(bin.x),float(bin.content_y)-6.0 if lesson == WHEELIE_LESSON else float(Config.tuning.world.ground)-18)
+		if lesson == 2 and player.state == BeachGull.State.STRIKE and player.peck_used and not player.auto_peck():
+			return TrainerScript.line(live.missed, input)
 	if lesson == 0:
 		return Vector2(245,75)
 	if lesson == 1:

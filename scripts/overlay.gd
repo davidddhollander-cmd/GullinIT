@@ -7,6 +7,7 @@ var time_label: Label
 var wind_label: Label
 var intro_panel: PanelContainer
 var start_button: Button
+var trainer_portrait: TextureRect
 var trainer_card: TrainerCard
 var trainer_intro: bool = false ## Training Day opens with the trainer card instead of the intro panel
 var training_panel: PanelContainer
@@ -156,10 +157,24 @@ func setup(owner_game: BeachGame) -> void:
 	training_style.content_margin_bottom = 4
 	training_panel.add_theme_stylebox_override("panel",training_style)
 	training_panel.mouse_filter = MOUSE_FILTER_IGNORE
+	var training_row: HBoxContainer = HBoxContainer.new()
+	training_row.mouse_filter = MOUSE_FILTER_IGNORE
+	training_row.add_theme_constant_override("separation",6)
+	training_panel.add_child(training_row)
+	# Screeches McCrumbs winces and talks beside the strip while the first-miss hint shows.
+	trainer_portrait = TextureRect.new()
+	trainer_portrait.custom_minimum_size = Vector2(48,48)
+	trainer_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	trainer_portrait.stretch_mode = TextureRect.STRETCH_SCALE
+	trainer_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	trainer_portrait.mouse_filter = MOUSE_FILTER_IGNORE
+	trainer_portrait.hide()
+	training_row.add_child(trainer_portrait)
 	var lesson_column: VBoxContainer = VBoxContainer.new()
 	lesson_column.mouse_filter = MOUSE_FILTER_IGNORE
 	lesson_column.add_theme_constant_override("separation",2)
-	training_panel.add_child(lesson_column)
+	lesson_column.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	training_row.add_child(lesson_column)
 	lesson_label = BeachUI.label(lesson_column,"LESSON 1/%d" % BeachGame.TRAINING_LESSONS,8,BeachUI.GOLD)
 	lesson_prompt = BeachUI.label(lesson_column,"",8,BeachUI.CREAM)
 	for tip_label: Label in [lesson_label,lesson_prompt]:
@@ -202,6 +217,7 @@ TO PASS TO THE NEXT LEVEL" % [int(game.level.stars[0]),seconds/60,seconds%60])
 	elif int(game.level.id) == 1:
 		intro_panel.mouse_filter = MOUSE_FILTER_STOP
 		start_button = BeachUI.button(intro,"LET'S GULL IT",game.dismiss_intro)
+		start_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		start_button.grab_focus()
 	else:
 		BeachUI.label(intro,"ANY BUTTON TO GO",8,BeachUI.GOLD)
@@ -242,6 +258,16 @@ func _draw_peck_prompt(offset: Vector2) -> void:
 	draw_string(font,Vector2(-width * 0.5,4.0),text,HORIZONTAL_ALIGNMENT_LEFT,-1,8,tint)
 	draw_set_transform(Vector2.ZERO,0.0,Vector2.ONE)
 
+# Wince at the miss, then flap the beak while he explains.
+func _sync_trainer() -> void:
+	var talking: bool = game.training_miss_hint > 0.0
+	trainer_portrait.visible = talking
+	if not talking:
+		return
+	var since: float = BeachGame.MISS_HINT_TIME - game.training_miss_hint
+	var cells: Array[ImageTexture] = TrainerCard.portrait_textures()
+	trainer_portrait.texture = cells[int(TrainerCard.MOODS.wince)] if since < 0.8 else cells[int(TrainerCard.MOODS.talking) if int(since / TrainerCard.TALK_STEP) % 2 == 0 else int(TrainerCard.MOODS.neutral)]
+
 func _process(delta: float) -> void:
 	if game.peck_pause:
 		queue_redraw()
@@ -261,6 +287,7 @@ func _process(delta: float) -> void:
 	if game.training:
 		lesson_label.text = "LESSON %d/%d" % [mini(game.lesson + 1, BeachGame.TRAINING_LESSONS), BeachGame.TRAINING_LESSONS]
 		lesson_prompt.text = game.training_text()
+		_sync_trainer()
 	elif game.screech_lesson:
 		lesson_label.text = "LESSON %d/%d" % [mini(game.screech_step + 1, BeachGame.SCREECH_STEPS), BeachGame.SCREECH_STEPS]
 		lesson_prompt.text = game.screech_lesson_text()
@@ -491,7 +518,7 @@ func _draw() -> void:
 			if game.player.auto_peck():
 				draw_string(font,beak+Vector2(-18,-10),"AUTO PECK",HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.GOLD)
 			elif game.player.peck_time > 0:
-				draw_line(beak-Vector2(7,10),beak-Vector2(7-14*game.player.peck_time/float(Config.tuning.dive.peck_window),10),peck_color,2)
+				draw_line(beak-Vector2(7,10),beak-Vector2(7-14*game.player.peck_time/(float(Config.tuning.dive.peck_window)*game.player.peck_window_scale),10),peck_color,2)
 	if touch_buttons_visible():
 		_draw_touch_buttons()
 	var left_food: bool = false

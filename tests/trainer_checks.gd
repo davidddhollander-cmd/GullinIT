@@ -53,7 +53,7 @@ static func _copy_checks(check: Callable) -> void:
 				if trainer[set_name].has("strips"):
 					for strip: Variant in trainer[set_name].strips:
 						strips.append(TrainerScript.line(strip,input))
-			for key: String in ["crash","peck_now","clean","wheelie_low","full_stomach"]:
+			for key: String in ["crash","peck_now","clean","wheelie_low","full_stomach","missed","first_miss"]:
 				strips.append(TrainerScript.line(trainer.live[key],input))
 			strips.append(TrainerScript.line(trainer.training.lessons[0].strip_steer,input))
 			for text: String in texts + pairs + strips:

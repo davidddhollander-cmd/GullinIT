@@ -4,7 +4,8 @@ const MAX_ATTEMPTS: int = 2
 var config: Dictionary = {"enabled": true, "host": "", "project_key": ""}
 var queue: Array[Dictionary] = []
 var in_flight: bool = false
-var input_kind: String = "keyboard_mouse"
+var input_kind: String = ""  # set by the game once real input is known
+var seq: int = 0
 var page_host: String = ""
 # Replaceable in tests: sender.call(url: String, body: String, done: Callable(ok: bool)).
 var sender: Callable = _http_send
@@ -27,19 +28,28 @@ func _ready() -> void:
 func active() -> bool:
 	return bool(config.get("enabled", false)) and not str(config.get("project_key", "")).is_empty() and bool(GameState.options.get("stats", true))
 
-func track(event: String, props: Dictionary = {}) -> void:
+# urgent: page/window is closing, so on web hand the event to sendBeacon instead of the queue.
+func track(event: String, props: Dictionary = {}, urgent: bool = false) -> void:
 	if not active():
 		return
 	var properties: Dictionary = props.duplicate()
 	properties.platform = "web" if OS.has_feature("web") else ("windows" if OS.has_feature("windows") else OS.get_name().to_lower())
 	properties.build = str(ProjectSettings.get_setting("application/config/version", "dev"))
-	properties.input = input_kind
+	if not input_kind.is_empty():
+		properties.input = input_kind
+	seq += 1
+	properties.seq = seq
+	properties.schema = 2
+	properties.dev = OS.is_debug_build()
 	if not page_host.is_empty():
 		properties.host = page_host
 	properties["$process_person_profile"] = false
 	var body: String = JSON.stringify({
 		"api_key": config.project_key, "event": event, "distinct_id": GameState.anon_id(),
-		"properties": properties, "timestamp": Time.get_datetime_string_from_system(true) + "Z"})
+		"properties": properties, "timestamp": "%s.%03dZ" % [Time.get_datetime_string_from_system(true), int(fmod(Time.get_unix_time_from_system(), 1.0) * 1000)]})
+	if urgent and OS.has_feature("web"):
+		JavaScriptBridge.eval("navigator.sendBeacon(%s, %s)" % [JSON.stringify(str(config.host).rstrip("/") + "/i/v0/e/"), JSON.stringify(body)])
+		return
 	queue.append({"body": body, "attempts": 0})
 	_pump()
 
