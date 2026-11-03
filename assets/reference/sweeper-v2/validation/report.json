@@ -1,0 +1,79 @@
+{
+  "atlas": "assets/sprites/sweeper-v1/sweeper-v2-game.png",
+  "cell": [
+    211,
+    176
+  ],
+  "columns": 6,
+  "active_frames": 58,
+  "palette_colours_used": 25,
+  "binary_alpha": true,
+  "common_root": [
+    79,
+    154
+  ],
+  "walk_contact_foot_separation_px": [
+    56.4,
+    59.7
+  ],
+  "walk_passing_boot_bottom_px": [
+    141,
+    141
+  ],
+  "run_airborne_local_frame": 3,
+  "run_airborne_boot_bounds": [
+    [
+      94,
+      125,
+      122,
+      145
+    ],
+    [
+      26,
+      122,
+      45,
+      142
+    ]
+  ],
+  "swat_head_travel_source_px": 108.30050784737807,
+  "sweep_bristle_contact_y": [
+    152
+  ],
+  "sweeper_checks": {
+    "checks": 26,
+    "failures": 0
+  },
+  "integration_baseline": {
+    "checks": 16666,
+    "failures": 8,
+    "messages": [
+      "card 1 sets up the perfect steal, the stand and the pups",
+      "bin leftover gives its value without snatch or combo credit: half_eaten_doughnut",
+      "bin leftover gives its value without snatch or combo credit: half_eaten_sandwich",
+      "bin leftover gives its value without snatch or combo credit: half_eaten_pizza",
+      "bin leftover cannot score twice: half_eaten_pizza",
+      "nobody teleports across the beach while running off (1 jumps)",
+      "all twelve foods including crabs belong to requested categories",
+      "data/demo.json enables the four-level demo"
+    ]
+  },
+  "integration_final": {
+    "checks": 16670,
+    "failures": 9,
+    "messages": [
+      "every strip line fits 2 lines (worst 3)",
+      "card 1 sets up the perfect steal, the stand and the pups",
+      "bin leftover gives its value without snatch or combo credit: half_eaten_doughnut",
+      "bin leftover gives its value without snatch or combo credit: half_eaten_sandwich",
+      "bin leftover gives its value without snatch or combo credit: half_eaten_pizza",
+      "bin leftover cannot score twice: half_eaten_pizza",
+      "nobody teleports across the beach while running off (1 jumps)",
+      "all twelve foods including crabs belong to requested categories",
+      "data/demo.json enables the four-level demo"
+    ]
+  },
+  "additional_failure_outside_sweeper": [
+    "every strip line fits 2 lines (worst 3)"
+  ],
+  "context": "Game/UI files changed concurrently between baseline and final runs. No gameplay scripts or tests were edited for this art task."
+}

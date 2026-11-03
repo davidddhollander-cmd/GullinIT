@@ -1,0 +1,1695 @@
+{
+  "identity": "sweeper-identity-v5.png",
+  "cell_width": 192,
+  "cell_height": 160,
+  "columns": 6,
+  "visual_scale": 0.5,
+  "ground_baseline_exclusive": 140,
+  "palette": [
+    "183b4e",
+    "fff4da",
+    "ead8b4",
+    "b9a98a",
+    "ef9a55",
+    "ffbb7d",
+    "c76b37",
+    "754a39",
+    "9d754c",
+    "513c2b",
+    "76783b",
+    "97954a",
+    "52572d",
+    "c94e1f",
+    "ec7534",
+    "772c1c",
+    "bc8c51",
+    "d6aa6a",
+    "89603a",
+    "d4ad78",
+    "f1c677",
+    "a47743",
+    "d4a232",
+    "efbd48",
+    "986e29",
+    "42494e",
+    "667177",
+    "293238"
+  ],
+  "sheets": {
+    "locomotion": {
+      "file": "sweeper-locomotion-v1.png",
+      "width": 1152,
+      "height": 480,
+      "animations": {
+        "idle": {
+          "row": 0,
+          "count": 4,
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "walk": {
+          "row": 1,
+          "count": 6,
+          "frames": [
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ]
+        },
+        "run": {
+          "row": 2,
+          "count": 6,
+          "frames": [
+            12,
+            13,
+            14,
+            15,
+            16,
+            17
+          ]
+        }
+      },
+      "frames": [
+        {
+          "index": 0,
+          "animation": "idle",
+          "region": [
+            0,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            49,
+            60,
+            100,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.25828,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            27,
+            47,
+            225,
+            356
+          ],
+          "pixels": 42129
+        },
+        {
+          "index": 1,
+          "animation": "idle",
+          "region": [
+            192,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            48,
+            60,
+            99,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.25574,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            284,
+            45,
+            483,
+            356
+          ],
+          "pixels": 42635
+        },
+        {
+          "index": 2,
+          "animation": "idle",
+          "region": [
+            384,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            48,
+            60,
+            99,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.25574,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            534,
+            45,
+            734,
+            356
+          ],
+          "pixels": 42541
+        },
+        {
+          "index": 3,
+          "animation": "idle",
+          "region": [
+            576,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            48,
+            60,
+            99,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.25828,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            787,
+            47,
+            986,
+            356
+          ],
+          "pixels": 42153
+        },
+        {
+          "index": 6,
+          "animation": "walk",
+          "region": [
+            0,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            31,
+            60,
+            95,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.27857,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            9,
+            405,
+            240,
+            691
+          ],
+          "pixels": 37282
+        },
+        {
+          "index": 7,
+          "animation": "walk",
+          "region": [
+            192,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            29,
+            60,
+            98,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.27857,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            246,
+            400,
+            494,
+            687
+          ],
+          "pixels": 37487
+        },
+        {
+          "index": 8,
+          "animation": "walk",
+          "region": [
+            384,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            28,
+            60,
+            96,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.27758,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            495,
+            403,
+            741,
+            691
+          ],
+          "pixels": 33762
+        },
+        {
+          "index": 9,
+          "animation": "walk",
+          "region": [
+            576,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            23,
+            60,
+            98,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.27758,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            733,
+            403,
+            1002,
+            691
+          ],
+          "pixels": 39229
+        },
+        {
+          "index": 10,
+          "animation": "walk",
+          "region": [
+            768,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            29,
+            60,
+            97,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.27758,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            1002,
+            401,
+            1248,
+            688
+          ],
+          "pixels": 36566
+        },
+        {
+          "index": 11,
+          "animation": "walk",
+          "region": [
+            960,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            30,
+            60,
+            97,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.27562,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            1258,
+            401,
+            1500,
+            690
+          ],
+          "pixels": 38449
+        },
+        {
+          "index": 12,
+          "animation": "run",
+          "region": [
+            0,
+            320,
+            192,
+            160
+          ],
+          "art_bounds": [
+            39,
+            62,
+            116,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.28253,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            9,
+            721,
+            283,
+            996
+          ],
+          "pixels": 38359
+        },
+        {
+          "index": 13,
+          "animation": "run",
+          "region": [
+            192,
+            320,
+            192,
+            160
+          ],
+          "art_bounds": [
+            32,
+            62,
+            116,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.28358,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            237,
+            721,
+            534,
+            995
+          ],
+          "pixels": 38491
+        },
+        {
+          "index": 14,
+          "animation": "run",
+          "region": [
+            384,
+            320,
+            192,
+            160
+          ],
+          "art_bounds": [
+            36,
+            62,
+            118,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.27941,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            505,
+            721,
+            800,
+            999
+          ],
+          "pixels": 37264
+        },
+        {
+          "index": 15,
+          "animation": "run",
+          "region": [
+            576,
+            320,
+            192,
+            160
+          ],
+          "art_bounds": [
+            39,
+            62,
+            112,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.28044,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            775,
+            721,
+            1037,
+            998
+          ],
+          "pixels": 36771
+        },
+        {
+          "index": 16,
+          "animation": "run",
+          "region": [
+            768,
+            320,
+            192,
+            160
+          ],
+          "art_bounds": [
+            36,
+            62,
+            119,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.28044,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            1023,
+            719,
+            1318,
+            997
+          ],
+          "pixels": 36677
+        },
+        {
+          "index": 17,
+          "animation": "run",
+          "region": [
+            960,
+            320,
+            192,
+            160
+          ],
+          "art_bounds": [
+            40,
+            62,
+            109,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.28464,
+          "source": "locomotion-source.png",
+          "source_bounds": [
+            1293,
+            722,
+            1536,
+            996
+          ],
+          "pixels": 36383
+        }
+      ],
+      "active_frames": 16
+    },
+    "combat": {
+      "file": "sweeper-combat-v1.png",
+      "width": 1152,
+      "height": 640,
+      "animations": {
+        "alert": {
+          "row": 0,
+          "column_start": 0,
+          "count": 1,
+          "frames": [
+            0
+          ]
+        },
+        "warning": {
+          "row": 0,
+          "column_start": 1,
+          "count": 1,
+          "frames": [
+            1
+          ]
+        },
+        "windup": {
+          "row": 1,
+          "count": 2,
+          "frames": [
+            6,
+            7
+          ]
+        },
+        "swat": {
+          "row": 2,
+          "count": 6,
+          "frames": [
+            12,
+            13,
+            14,
+            15,
+            16,
+            17
+          ]
+        },
+        "recover": {
+          "row": 3,
+          "count": 3,
+          "frames": [
+            18,
+            19,
+            20
+          ]
+        }
+      },
+      "frames": [
+        {
+          "index": 0,
+          "animation": "alert",
+          "region": [
+            0,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            34,
+            60,
+            115,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.36111,
+          "source": "combat-source.png",
+          "source_bounds": [
+            33,
+            39,
+            258,
+            260
+          ],
+          "pixels": 25948
+        },
+        {
+          "index": 1,
+          "animation": "warning",
+          "region": [
+            192,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            39,
+            60,
+            124,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.35616,
+          "source": "combat-source.png",
+          "source_bounds": [
+            287,
+            36,
+            526,
+            260
+          ],
+          "pixels": 27739
+        },
+        {
+          "index": 6,
+          "animation": "windup",
+          "region": [
+            0,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            28,
+            54,
+            97,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.35849,
+          "source": "combat-source.png",
+          "source_bounds": [
+            30,
+            272,
+            222,
+            511
+          ],
+          "pixels": 26881
+        },
+        {
+          "index": 7,
+          "animation": "windup",
+          "region": [
+            192,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            23,
+            56,
+            102,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.35849,
+          "source": "combat-source.png",
+          "source_bounds": [
+            292,
+            278,
+            511,
+            511
+          ],
+          "pixels": 27413
+        },
+        {
+          "index": 12,
+          "animation": "swat",
+          "region": [
+            0,
+            320,
+            192,
+            160
+          ],
+          "art_bounds": [
+            28,
+            53,
+            103,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.34862,
+          "source": "combat-source.png",
+          "source_bounds": [
+            20,
+            517,
+            236,
+            767
+          ],
+          "pixels": 27954
+        },
+        {
+          "index": 13,
+          "animation": "swat",
+          "region": [
+            192,
+            320,
+            192,
+            160
+          ],
+          "art_bounds": [
+            29,
+            53,
+            108,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.35349,
+          "source": "combat-source.png",
+          "source_bounds": [
+            272,
+            521,
+            495,
+            768
+          ],
+          "pixels": 27771
+        },
+        {
+          "index": 14,
+          "animation": "swat",
+          "region": [
+            384,
+            320,
+            192,
+            160
+          ],
+          "art_bounds": [
+            34,
+            58,
+            124,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.35135,
+          "source": "combat-source.png",
+          "source_bounds": [
+            518,
+            534,
+            775,
+            768
+          ],
+          "pixels": 27560
+        },
+        {
+          "index": 15,
+          "animation": "swat",
+          "region": [
+            576,
+            320,
+            192,
+            160
+          ],
+          "art_bounds": [
+            33,
+            62,
+            129,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.34703,
+          "source": "combat-source.png",
+          "source_bounds": [
+            741,
+            544,
+            1017,
+            769
+          ],
+          "pixels": 29810
+        },
+        {
+          "index": 16,
+          "animation": "swat",
+          "region": [
+            768,
+            320,
+            192,
+            160
+          ],
+          "art_bounds": [
+            39,
+            64,
+            130,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.35238,
+          "source": "combat-source.png",
+          "source_bounds": [
+            991,
+            556,
+            1248,
+            771
+          ],
+          "pixels": 28224
+        },
+        {
+          "index": 17,
+          "animation": "swat",
+          "region": [
+            960,
+            320,
+            192,
+            160
+          ],
+          "art_bounds": [
+            41,
+            68,
+            135,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.35897,
+          "source": "combat-source.png",
+          "source_bounds": [
+            1255,
+            573,
+            1517,
+            773
+          ],
+          "pixels": 25476
+        },
+        {
+          "index": 18,
+          "animation": "recover",
+          "region": [
+            0,
+            480,
+            192,
+            160
+          ],
+          "art_bounds": [
+            41,
+            72,
+            129,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.34021,
+          "source": "combat-source.png",
+          "source_bounds": [
+            20,
+            801,
+            278,
+            1000
+          ],
+          "pixels": 25893
+        },
+        {
+          "index": 19,
+          "animation": "recover",
+          "region": [
+            192,
+            480,
+            192,
+            160
+          ],
+          "art_bounds": [
+            54,
+            68,
+            139,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.37634,
+          "source": "combat-source.png",
+          "source_bounds": [
+            300,
+            809,
+            527,
+            1000
+          ],
+          "pixels": 25590
+        },
+        {
+          "index": 20,
+          "animation": "recover",
+          "region": [
+            384,
+            480,
+            192,
+            160
+          ],
+          "art_bounds": [
+            45,
+            60,
+            107,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.375,
+          "source": "combat-source.png",
+          "source_bounds": [
+            546,
+            787,
+            710,
+            1001
+          ],
+          "pixels": 24047
+        }
+      ],
+      "active_frames": 13
+    },
+    "cleaning": {
+      "file": "sweeper-cleaning-v1.png",
+      "width": 1152,
+      "height": 320,
+      "animations": {
+        "sweep": {
+          "row": 0,
+          "count": 6,
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        "bin_sweep": {
+          "row": 1,
+          "count": 4,
+          "frames": [
+            6,
+            7,
+            8,
+            9
+          ]
+        }
+      },
+      "frames": [
+        {
+          "index": 0,
+          "animation": "sweep",
+          "region": [
+            0,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            37,
+            64,
+            166,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.31092,
+          "source": "cleaning-refined-source.png",
+          "source_bounds": [
+            63,
+            10,
+            479,
+            253
+          ],
+          "pixels": 35707
+        },
+        {
+          "index": 1,
+          "animation": "sweep",
+          "region": [
+            192,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            40,
+            64,
+            161,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.3176,
+          "source": "cleaning-refined-source.png",
+          "source_bounds": [
+            597,
+            14,
+            979,
+            252
+          ],
+          "pixels": 32204
+        },
+        {
+          "index": 2,
+          "animation": "sweep",
+          "region": [
+            384,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            34,
+            64,
+            169,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.3176,
+          "source": "cleaning-refined-source.png",
+          "source_bounds": [
+            1067,
+            15,
+            1492,
+            253
+          ],
+          "pixels": 35109
+        },
+        {
+          "index": 3,
+          "animation": "sweep",
+          "region": [
+            576,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            36,
+            64,
+            171,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.31624,
+          "source": "cleaning-refined-source.png",
+          "source_bounds": [
+            67,
+            268,
+            494,
+            508
+          ],
+          "pixels": 36807
+        },
+        {
+          "index": 4,
+          "animation": "sweep",
+          "region": [
+            768,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            39,
+            64,
+            163,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.31356,
+          "source": "cleaning-refined-source.png",
+          "source_bounds": [
+            595,
+            267,
+            992,
+            509
+          ],
+          "pixels": 34422
+        },
+        {
+          "index": 5,
+          "animation": "sweep",
+          "region": [
+            960,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            37,
+            64,
+            165,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.3176,
+          "source": "cleaning-refined-source.png",
+          "source_bounds": [
+            1088,
+            271,
+            1491,
+            509
+          ],
+          "pixels": 34921
+        },
+        {
+          "index": 6,
+          "animation": "bin_sweep",
+          "region": [
+            0,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            42,
+            64,
+            161,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.31624,
+          "source": "cleaning-refined-source.png",
+          "source_bounds": [
+            89,
+            523,
+            465,
+            763
+          ],
+          "pixels": 34720
+        },
+        {
+          "index": 7,
+          "animation": "bin_sweep",
+          "region": [
+            192,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            33,
+            62,
+            160,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.32203,
+          "source": "cleaning-refined-source.png",
+          "source_bounds": [
+            585,
+            526,
+            979,
+            768
+          ],
+          "pixels": 34035
+        },
+        {
+          "index": 8,
+          "animation": "bin_sweep",
+          "region": [
+            384,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            48,
+            60,
+            146,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.31707,
+          "source": "cleaning-refined-source.png",
+          "source_bounds": [
+            1141,
+            518,
+            1451,
+            769
+          ],
+          "pixels": 32337
+        },
+        {
+          "index": 9,
+          "animation": "bin_sweep",
+          "region": [
+            576,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            43,
+            60,
+            114,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.32636,
+          "source": "cleaning-refined-source.png",
+          "source_bounds": [
+            149,
+            770,
+            366,
+            1014
+          ],
+          "pixels": 32631
+        }
+      ],
+      "active_frames": 10
+    },
+    "reactions": {
+      "file": "sweeper-reactions-v1.png",
+      "width": 1152,
+      "height": 480,
+      "animations": {
+        "surprise": {
+          "row": 0,
+          "count": 6,
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        "fist_shake": {
+          "row": 1,
+          "count": 6,
+          "frames": [
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ]
+        },
+        "angry": {
+          "row": 2,
+          "count": 3,
+          "frames": [
+            12,
+            13,
+            14
+          ]
+        }
+      },
+      "frames": [
+        {
+          "index": 0,
+          "animation": "surprise",
+          "region": [
+            0,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            37,
+            61,
+            111,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.07059,
+          "source": "surprise-start-refined-source.png",
+          "source_bounds": [
+            111,
+            79,
+            1162,
+            1200
+          ],
+          "pixels": 553895
+        },
+        {
+          "index": 1,
+          "animation": "surprise",
+          "region": [
+            192,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            40,
+            47,
+            98,
+            136
+          ],
+          "ground_lift": 4,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.26523,
+          "source": "reactions-source.png",
+          "source_bounds": [
+            278,
+            34,
+            496,
+            368
+          ],
+          "pixels": 39937
+        },
+        {
+          "index": 2,
+          "animation": "surprise",
+          "region": [
+            384,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            37,
+            45,
+            98,
+            130
+          ],
+          "ground_lift": 10,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.26316,
+          "source": "reactions-source.png",
+          "source_bounds": [
+            513,
+            21,
+            743,
+            345
+          ],
+          "pixels": 40973
+        },
+        {
+          "index": 3,
+          "animation": "surprise",
+          "region": [
+            576,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            40,
+            45,
+            105,
+            132
+          ],
+          "ground_lift": 8,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.26966,
+          "source": "reactions-source.png",
+          "source_bounds": [
+            777,
+            43,
+            1017,
+            367
+          ],
+          "pixels": 41997
+        },
+        {
+          "index": 4,
+          "animation": "surprise",
+          "region": [
+            768,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            39,
+            65,
+            118,
+            138
+          ],
+          "ground_lift": 2,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.2963,
+          "source": "reactions-source.png",
+          "source_bounds": [
+            1044,
+            120,
+            1310,
+            368
+          ],
+          "pixels": 38599
+        },
+        {
+          "index": 5,
+          "animation": "surprise",
+          "region": [
+            960,
+            0,
+            192,
+            160
+          ],
+          "art_bounds": [
+            40,
+            60,
+            102,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.29885,
+          "source": "reactions-source.png",
+          "source_bounds": [
+            1320,
+            101,
+            1526,
+            368
+          ],
+          "pixels": 36835
+        },
+        {
+          "index": 6,
+          "animation": "fist_shake",
+          "region": [
+            0,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            37,
+            60,
+            104,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.18571,
+          "source": "fist-shake-refined-source.png",
+          "source_bounds": [
+            66,
+            48,
+            428,
+            478
+          ],
+          "pixels": 100922
+        },
+        {
+          "index": 7,
+          "animation": "fist_shake",
+          "region": [
+            192,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            38,
+            60,
+            108,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.18571,
+          "source": "fist-shake-refined-source.png",
+          "source_bounds": [
+            575,
+            48,
+            952,
+            478
+          ],
+          "pixels": 102540
+        },
+        {
+          "index": 8,
+          "animation": "fist_shake",
+          "region": [
+            384,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            38,
+            60,
+            117,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.18886,
+          "source": "fist-shake-refined-source.png",
+          "source_bounds": [
+            1081,
+            55,
+            1499,
+            478
+          ],
+          "pixels": 101733
+        },
+        {
+          "index": 9,
+          "animation": "fist_shake",
+          "region": [
+            576,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            33,
+            60,
+            108,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.18795,
+          "source": "fist-shake-refined-source.png",
+          "source_bounds": [
+            64,
+            542,
+            464,
+            967
+          ],
+          "pixels": 102699
+        },
+        {
+          "index": 10,
+          "animation": "fist_shake",
+          "region": [
+            768,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            38,
+            60,
+            119,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.18932,
+          "source": "fist-shake-refined-source.png",
+          "source_bounds": [
+            581,
+            546,
+            1011,
+            968
+          ],
+          "pixels": 103732
+        },
+        {
+          "index": 11,
+          "animation": "fist_shake",
+          "region": [
+            960,
+            160,
+            192,
+            160
+          ],
+          "art_bounds": [
+            37,
+            60,
+            106,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.19024,
+          "source": "fist-shake-refined-source.png",
+          "source_bounds": [
+            1095,
+            548,
+            1457,
+            968
+          ],
+          "pixels": 99835
+        },
+        {
+          "index": 12,
+          "animation": "angry",
+          "region": [
+            0,
+            320,
+            192,
+            160
+          ],
+          "art_bounds": [
+            48,
+            68,
+            121,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.28926,
+          "source": "reactions-source.png",
+          "source_bounds": [
+            16,
+            740,
+            268,
+            988
+          ],
+          "pixels": 38142
+        },
+        {
+          "index": 13,
+          "animation": "angry",
+          "region": [
+            192,
+            320,
+            192,
+            160
+          ],
+          "art_bounds": [
+            45,
+            60,
+            114,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.30233,
+          "source": "reactions-source.png",
+          "source_bounds": [
+            283,
+            724,
+            512,
+            988
+          ],
+          "pixels": 37114
+        },
+        {
+          "index": 14,
+          "animation": "angry",
+          "region": [
+            384,
+            320,
+            192,
+            160
+          ],
+          "art_bounds": [
+            44,
+            62,
+            120,
+            140
+          ],
+          "ground_lift": 0,
+          "body_anchor_x": 72,
+          "scale_from_source": 0.29008,
+          "source": "reactions-source.png",
+          "source_bounds": [
+            536,
+            719,
+            799,
+            987
+          ],
+          "pixels": 38787
+        }
+      ],
+      "active_frames": 15
+    }
+  },
+  "sources": {
+    "identity": "identity-v5-source.png",
+    "locomotion": "locomotion-source.png",
+    "combat": "combat-source.png",
+    "cleaning": "cleaning-refined-source.png",
+    "reactions": "reactions-source.png",
+    "fist": "fist-shake-refined-source.png",
+    "surprise_start": "surprise-start-refined-source.png"
+  },
+  "origin": [
+    72,
+    140
+  ],
+  "notes": [
+    "Artwork generated with built-in ImageGen using approved identity v5.",
+    "Frames use identical 192x160 cells; six columns; unused cells are transparent.",
+    "Standing adult approximately 80 native pixels, displayed at 0.5 scale for about 40 game pixels.",
+    "Ground is y=140 exclusive (lowest planted pixel row 139); origin is x=72, y=140.",
+    "Surprise frames intentionally rise above the same ground registration by their ground_lift values.",
+    "Alert and warning are separate single-frame poses; no gameplay code or sprite registry changes.",
+    "Complete original source images and generation prompts are preserved in the source archive."
+  ],
+  "source_archive": "sweeper-sources-v1.zip"
+}

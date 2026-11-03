@@ -1,0 +1,13 @@
+{
+  "frames": 58,
+  "colours": 25,
+  "black_edge_min": 0.9071,
+  "black_edge_mean": 0.962205172413793,
+  "swat_head_travel": 108.30050784737807,
+  "swat_hit_frames": [
+    2,
+    3,
+    4,
+    5
+  ]
+}

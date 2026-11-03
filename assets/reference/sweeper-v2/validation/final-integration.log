@@ -1,0 +1,96 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Started Scanning actions... (5 steps)[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | gull_hud.png[39m[0m
+[  16% ] [90m[1m_update_scan_actions[22m | gull_pixel.png[39m[0m
+[  33% ] [90m[1m_update_scan_actions[22m | gull_speech.png[39m[0m
+[  50% ] [90m[1m_update_scan_actions[22m | beach-arcade-font-sprite-sheet-v2.png[39m[0m
+[  66% ] [90m[1m_update_scan_actions[22m | beach-arcade-font-sprite-sheet-v3.png[39m[0m
+[92m[ DONE ][39m [1m_update_scan_actions[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[  33% ] [90m[1mloading_editor_layout[22m | Reopening scenes...[39m[0m
+[  50% ] [90m[1mloading_editor_layout[22m | Loading central editor layout...[39m[0m
+[  66% ] [90m[1mloading_editor_layout[22m | Loading plugin window layout...[39m[0m
+[  83% ] [90m[1mloading_editor_layout[22m | Editor layout ready.[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ERROR: Condition "!is_inside_tree()" is true.
+   at: grab_focus (scene/gui/control.cpp:3001)
+FAIL: every strip line fits 2 lines (worst 3)
+FAIL: card 1 sets up the perfect steal, the stand and the pups
+PROFILE kiosk [54.0, 56.0, 57.0, 58.0, 59.0, 60.0, 60.0, 60.0, 59.0, 58.0, 57.0, 57.0, 55.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 55.0, 56.0, 56.0, 56.0, 56.0, 56.0, 55.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 53.0, 52.0, 51.0]
+PROFILE fish_chips_stand [50.0, 50.0, 52.0, 52.0, 52.0, 53.0, 53.0, 54.0, 54.0, 54.0, 53.0, 53.0, 52.0, 52.0, 52.0, 53.0, 53.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 51.0, 50.0, 48.0]
+BENCH SIM level 3: 2 visits in 120 s
+BENCH SIM level 4: 3 visits in 120 s
+BENCH SIM level 5: 2 visits in 120 s
+BENCH SIM level 6: 1 visits in 120 s
+WARNING: Loaded resource as image file, this will not work on export: 'res://assets/lab/pier-diner-a-base-candidate-v1.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] run (res://tests/art_lab_checks.gd:129)
+       [1] run (res://tests/integration.gd:145)
+       [2] run (res://tests/vfx_polish_checks.gd:102)
+       [3] settle (res://tests/integration.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://assets/lab/pier-diner-a-motion-candidate-v1.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] run (res://tests/art_lab_checks.gd:129)
+       [1] run (res://tests/integration.gd:145)
+       [2] run (res://tests/vfx_polish_checks.gd:102)
+       [3] settle (res://tests/integration.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://assets/lab/pier-diner-a-reactions-candidate-v1.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] run (res://tests/art_lab_checks.gd:129)
+       [1] run (res://tests/integration.gd:145)
+       [2] run (res://tests/vfx_polish_checks.gd:102)
+       [3] settle (res://tests/integration.gd:24)
+FAIL: bin leftover gives its value without snatch or combo credit: half_eaten_doughnut
+FAIL: bin leftover gives its value without snatch or combo credit: half_eaten_sandwich
+FAIL: bin leftover gives its value without snatch or combo credit: half_eaten_pizza
+FAIL: bin leftover cannot score twice: half_eaten_pizza
+SCRIPT ERROR: Invalid access to property or key 'off_lead_dog' on a base object of type 'Dictionary'.
+   at: run (res://tests/level5_checks.gd:16)
+   GDScript backtrace (most recent call first):
+       [0] run (res://tests/level5_checks.gd:16)
+       [1] run (res://tests/integration.gd:177)
+       [2] run (res://tests/pixelfx_checks.gd:125)
+       [3] settle (res://tests/integration.gd:24)
+FAIL: nobody teleports across the beach while running off (1 jumps)
+FAIL: all twelve foods including crabs belong to requested categories
+WARNING: Loaded resource as image file, this will not work on export: 'res://assets/previews/pier-diner-b-v1-comparison.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] pier_diner_art_checks (res://tests/integration.gd:2794)
+       [1] run (res://tests/integration.gd:206)
+       [2] run (res://tests/staff_art_checks.gd:162)
+       [3] settle (res://tests/integration.gd:24)
+RIVAL SIM level 3: { "pilots": 1, "edge_max": 0.85, "out_of_bounds": 0, "sand_frames": 365, "shared_target": 0, "cooldown_dives": 0, "ground_max": 5.13333333333332, "escape_short": 0, "held_picks": 0, "dives": [8], "thefts": [3], "crashes": [0], "scores": [125], &"hud_visible": false, &"hud_rows": 1, &"hud_rect": [P: (282.0, 29.0), S: (34.0, 13.0)], &"quest_rect": [P: (3.0, 18.0), S: (201.0, 8.0)] }
+RIVAL SIM level 4: { "pilots": 1, "edge_max": 0.36666666666667, "out_of_bounds": 0, "sand_frames": 655, "shared_target": 0, "cooldown_dives": 0, "ground_max": 5.03333333333332, "escape_short": 0, "held_picks": 0, "dives": [5], "thefts": [8], "crashes": [0], "scores": [165], &"hud_visible": false, &"hud_rows": 1, &"hud_rect": [P: (282.0, 29.0), S: (34.0, 13.0)], &"quest_rect": [P: (3.0, 18.0), S: (228.0, 8.0)] }
+RIVAL SIM level 7: { "pilots": 3, "edge_max": 0.3, "out_of_bounds": 0, "sand_frames": 633, "shared_target": 307, "cooldown_dives": 0, "ground_max": 5.03333333333332, "escape_short": 0, "held_picks": 0, "dives": [4, 10, 8], "thefts": [6, 5, 5], "crashes": [0, 0, 0], "scores": [165, 105, 215], &"hud_visible": true, &"hud_rows": 3, &"hud_rect": [P: (282.0, 29.0), S: (34.0, 25.0)], &"quest_rect": [P: (3.0, 18.0), S: (250.0, 8.0)] }
+RIVAL SIM level 2 ground: eats 17 stats { "scraps": 17, "bins": 2, "bags": 0, "catch": 0 } ground_max 5.3
+SIGN SHIFT: level 2 ICE CREAM +64 px (x=92)
+SIGN SHIFT: level 3 PROMENADE +74 px (x=532)
+SIGN SHIFT: level 3 PIER DINING +44 px (x=992)
+SIGN SHIFT: level 4 PROMENADE +74 px (x=532)
+SIGN SHIFT: level 5 PROMENADE +54 px (x=512)
+SIGN SHIFT: level 6 OPEN BEACH +54 px (x=82)
+SIGN SHIFT: level 6 PROMENADE +65 px (x=853)
+SIGN SHIFT: level 7 QUIET BEACH +54 px (x=82)
+SIGN SHIFT: level 7 PIER DINING +74 px (x=1022)
+FAIL: data/demo.json enables the four-level demo
+INTEGRATION: 16670 checks, 9 failures

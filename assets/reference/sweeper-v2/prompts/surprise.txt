@@ -1,0 +1,23 @@
+Use case: stylized-concept. SIX consecutive SURPRISE animation frames of the supplied NEW Sweeper identity. SOURCE GRID3columns x2rows, exactly6 figures, reading order, no extras.
+The Sweeper: tired middle-aged seaside cleaner, full brown beard, olive-green bucket hat with navy band, cartoony tired face and nose, slightly stooped adult proportions with LONG LEGS and modest round belly, NOT chibi. Off-white long-sleeve tee pushed up to elbows, thick rust-orange work dungarees, BOTH straps fastened, darker chest pocket, small grey sock cuffs, oversized charcoal-grey work boots (exact boot palette takes priority over earlier tan boots). Exactly ONE wide wooden PUSH BROOM, chin-height pale straight timber handle, rectangular wooden block with yellow-brown bristles, whole broom visible in EVERY frame. All face RIGHT. Keep identity and mature proportions identical; do not shorten legs or enlarge head between actions.
+NATIVE PIXEL ART: each cell 211x176 actual pixels; adult about 88 native pixels high; registered ground y=154 and body mass x=79. Whole figure and broom safely within cell. Real transparent background and opaque art. Draw authentic native pixel sprites, no smooth high-resolution illustration. Uniform crisp near-black #0A0A18 contour exactly ONE PIXEL wide around the whole figure AND broom. Match the mum reference's crisp black line weight and pixel density. No thick slate/blue outer contour. Flat cel-shaded colour clusters, THREE clearly distinct steps per material: strong highlight, base, deep shadow. Orange clothes, peach skin and dark brown beard MUST be clearly distinguishable.
+EXACT PALETTE ONLY (first three per material mean highlight, base, shadow):
+outline: #0A0A18.
+dungarees: #FF8A2A #E5601A #A8400F.
+skin: #FFC08A #E8956A #B9654A.
+tee: #FFF4DA #E3D3B0 #B9A98A.
+hat: #8E9A3E #66742C #46501F.
+band: #1D3347.
+beard: #8A5A38 #5E3A24 #3A2314.
+boots: #6B7076 #474C52 #2B2F34.
+wood: #E3B26A #C28E48.
+bristles: #F2C94C #D4A232 #986E29.
+No other colours, no blended shades, antialiasing, gradients, dithering, glow, cast shadow, noisy texture, motion lines, food, bin, text, labels, watermark, scenery, floor/ground line or checkerboard. Fully transparent empty margins. Upper-left light. Keep a common ground registration across every frame; intentional jump/airborne feet can rise above this fixed ground.
+CRITICAL: exactly the SAME ADULT SIZE, HEAD SIZE AND BODY/LEG PROPORTIONS as idle/walk reference, never make surprised figures20% smaller or chibi.
+1 startled recoil backward, eyes wide, mouth open; one hand CLEARLY GRIPS the planted broom handle, free hand opens in surprise.
+2 knees bend and jump backward begins; same hand flings the HELD broom UP, hat tilting.
+3 peak small backward jump, BOTH boots off ground, hat tilted but still on head, one hand visibly gripping broom raised high.
+4 descending, mouth open, broom still up in same hand.
+5 landing with bent knees, broom lowering.
+6 settling back into shocked lean, same hand gripping broom again.
+Never let go of broom, never duplicate it, no detached extra hat or props. AllfaceRIGHT. Fixed invisible ground154 and bodycentre79 percell; feet can rise forjump. Full broom and allbodyparts insidecell. The surprise is expression and posture, not a change in character scale.

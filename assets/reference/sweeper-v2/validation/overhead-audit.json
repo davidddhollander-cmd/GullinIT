@@ -1,0 +1,21 @@
+{
+  "changed_cells": [
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32
+  ],
+  "unchanged_cells": 52,
+  "hard_alpha": true,
+  "palette_only": true,
+  "six_anchors_measured_from_opaque_bristles": true,
+  "untouched_sources_sha256": {
+    "overhead-windup-swat-source.png": "a780f871b54ac9c16b7e643167b61eba514ec03fe494b57c087029de21711275",
+    "overhead-impact-source.png": "339c57fd51cb0ebbcaf761093ddc1a4178c1d4f9ad0ee6210aa06dc8d88fbbf0",
+    "overhead-knee-source.png": "13352360f2a9bca3c3131e9c96f8b1b88bf0b52768731b9526f9139ff7b5b2e3"
+  }
+}

@@ -1,0 +1,20 @@
+Use case: stylized-concept. FOUR consecutive IDLE animation poses in ONE row, exactly same Sweeper as the supplied NEW identity. Use mum only for pixel-density and thin black contour quality.
+The Sweeper: tired middle-aged seaside cleaner, full brown beard, olive-green bucket hat with navy band, cartoony tired face and nose, slightly stooped adult proportions with LONG LEGS and modest round belly, NOT chibi. Off-white long-sleeve tee pushed up to elbows, thick rust-orange work dungarees, BOTH straps fastened, darker chest pocket, small grey sock cuffs, oversized charcoal-grey work boots (exact boot palette takes priority over earlier tan boots). Exactly ONE wide wooden PUSH BROOM, chin-height pale straight timber handle, rectangular wooden block with yellow-brown bristles, whole broom visible in EVERY frame. All face RIGHT. Keep identity and mature proportions identical; do not shorten legs or enlarge head between actions.
+NATIVE PIXEL ART: each cell 211x176 actual pixels; adult about 88 native pixels high; registered ground y=154 and body mass x=79. Whole figure and broom safely within cell. Real transparent background and opaque art. Draw authentic native pixel sprites, no smooth high-resolution illustration. Uniform crisp near-black #0A0A18 contour exactly ONE PIXEL wide around the whole figure AND broom. Match the mum reference's crisp black line weight and pixel density. No thick slate/blue outer contour. Flat cel-shaded colour clusters, THREE clearly distinct steps per material: strong highlight, base, deep shadow. Orange clothes, peach skin and dark brown beard MUST be clearly distinguishable.
+EXACT PALETTE ONLY (first three per material mean highlight, base, shadow):
+outline: #0A0A18.
+dungarees: #FF8A2A #E5601A #A8400F.
+skin: #FFC08A #E8956A #B9654A.
+tee: #FFF4DA #E3D3B0 #B9A98A.
+hat: #8E9A3E #66742C #46501F.
+band: #1D3347.
+beard: #8A5A38 #5E3A24 #3A2314.
+boots: #6B7076 #474C52 #2B2F34.
+wood: #E3B26A #C28E48.
+bristles: #F2C94C #D4A232 #986E29.
+No other colours, no blended shades, antialiasing, gradients, dithering, glow, cast shadow, noisy texture, motion lines, food, bin, text, labels, watermark, scenery, floor/ground line or checkerboard. Fully transparent empty margins. Upper-left light. Keep a common ground registration across every frame; intentional jump/airborne feet can rise above this fixed ground.
+Pose1 tired relaxed lean with one hand resting on planted broom handle.
+Pose2 inhale, slight chest/shoulder rise, same planted broom.
+Pose3 one slow glance upward while still facing RIGHT; head and eyes move slightly, broom stays planted.
+Pose4 exhale, shoulders fall back to initial posture.
+ONE broom planted in each frame, full rectangular bristle head flat on same ground y154 as boot soles. Both arms stay consistent, no extra broom. Four equal transparent cells, all88px adult scale, body centre79, 1px nearblack contour. Preserve all strong palette steps. No added poses, labels, motion lines, cast shadow, scenery or props.

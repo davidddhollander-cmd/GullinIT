@@ -1,0 +1,27 @@
+Use case: stylized-concept. Exactly EIGHT newly drawn WALK-cycle frames for the Sweeper, using supplied NEW identity sheet as STRICT character and colour reference. Secondary mum image is the crisp native-pixel outline quality reference.
+The Sweeper: tired middle-aged seaside cleaner, full brown beard, olive-green bucket hat with navy band, cartoony tired face and nose, slightly stooped adult proportions with LONG LEGS and modest round belly, NOT chibi. Off-white long-sleeve tee pushed up to elbows, thick rust-orange work dungarees, BOTH straps fastened, darker chest pocket, small grey sock cuffs, oversized charcoal-grey work boots (exact boot palette takes priority over earlier tan boots). Exactly ONE wide wooden PUSH BROOM, chin-height pale straight timber handle, rectangular wooden block with yellow-brown bristles, whole broom visible in EVERY frame. All face RIGHT. Keep identity and mature proportions identical; do not shorten legs or enlarge head between actions.
+NATIVE PIXEL ART: each cell 211x176 actual pixels; adult about 88 native pixels high; registered ground y=154 and body mass x=79. Whole figure and broom safely within cell. Real transparent background and opaque art. Draw authentic native pixel sprites, no smooth high-resolution illustration. Uniform crisp near-black #0A0A18 contour exactly ONE PIXEL wide around the whole figure AND broom. Match the mum reference's crisp black line weight and pixel density. No thick slate/blue outer contour. Flat cel-shaded colour clusters, THREE clearly distinct steps per material: strong highlight, base, deep shadow. Orange clothes, peach skin and dark brown beard MUST be clearly distinguishable.
+EXACT PALETTE ONLY (first three per material mean highlight, base, shadow):
+outline: #0A0A18.
+dungarees: #FF8A2A #E5601A #A8400F.
+skin: #FFC08A #E8956A #B9654A.
+tee: #FFF4DA #E3D3B0 #B9A98A.
+hat: #8E9A3E #66742C #46501F.
+band: #1D3347.
+beard: #8A5A38 #5E3A24 #3A2314.
+boots: #6B7076 #474C52 #2B2F34.
+wood: #E3B26A #C28E48.
+bristles: #F2C94C #D4A232 #986E29.
+No other colours, no blended shades, antialiasing, gradients, dithering, glow, cast shadow, noisy texture, motion lines, food, bin, text, labels, watermark, scenery, floor/ground line or checkerboard. Fully transparent empty margins. Upper-left light. Keep a common ground registration across every frame; intentional jump/airborne feet can rise above this fixed ground.
+SOURCE LAYOUT: FOUR COLUMNS x TWO ROWS, exactly 8 full-body right-facing poses. Chronological order left-to-right across row 1 (frames 1-4), then row 2 (frames 5-8). Full figure and broom per cell with generous gutters. Will be packed into six-column game atlas; do not add extra poses.
+THE WALK MUST BE AN EXAGGERATED TRUE TWO-LEGGED WALK, not a shuffle. LONG LEGS clearly separate from the pelvis. At contact, feet are at least ONE WHOLE TORSO WIDTH APART, front foot well ahead and back foot well behind. The back leg LIFTS CLEARLY OFF THE GROUND, knee BENT, and swings forward. Show exactly the eight classical key poses:
+1 RIGHT-LEG CONTACT: right leg straight reaching far forward, heel down, left leg stretched behind touching by toe. Widely separated feet.
+2 RIGHT DOWN: right stance knee bends, body sinks a little; left heel high and left back knee BENT, toe just leaving.
+3 RIGHT PASSING: right foot planted UNDER BODY, left swing leg LIFTED, knee sharply BENT and swinging FORWARD past stance leg, boot visibly several pixels above ground. Do not plant both feet here.
+4 RIGHT UP: right stance leg extended behind with heel raised, left knee clearly FORWARD and up, left boot still LIFTED ahead preparing contact, torso rises a few pixels.
+5 LEFT-LEG CONTACT: opposite leg now straight far forward and other far behind, same wide foot separation as frame 1; distinguish near/far legs by overlap and shade, not by mirroring.
+6 LEFT DOWN: opposite stance knee bends; other back heel up with bent back knee leaving ground.
+7 LEFT PASSING: left foot planted under body, right swing knee BENT and lifted passing forward; right boot entirely OFF GROUND.
+8 LEFT UP: left stance leg extends behind, right swing knee and boot forward/up preparing next contact, returning to frame 1.
+Far leg can use orange shadow #A8400F, near leg bright orange base #E5601A/highlight #FF8A2A, black one-pixel line separates crossed legs. Boots #6B7076 #474C52 #2B2F34. No leg disappears inside the trousers. DO NOT reuse the same two standing legs across all frames.
+ONE broom carried LOW TRAILING BEHIND on screen-left in one consistent hand, bristle head low behind rear foot, clear of the moving legs. Free arm swings slightly. Strong body bob of 2-3 native pixels, hat moves with head. Faces RIGHT in all eight. Same head size, beard, mature body scale and limb lengths. Native figure about88px, feet planted on common y154 except lifted swing foot. NO text, shadows, motion lines, dust, ground, bin or food. True transparent background.

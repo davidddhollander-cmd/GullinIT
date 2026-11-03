@@ -1,0 +1,251 @@
+{
+  "changed_frames": [
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32
+  ],
+  "unchanged_cells": 52,
+  "body_anchor_x": 79,
+  "ground_baseline": 154,
+  "swat_reach_source_px": [
+    [
+      65,
+      19
+    ],
+    [
+      25,
+      60
+    ],
+    [
+      141,
+      76
+    ],
+    [
+      130,
+      135
+    ],
+    [
+      128,
+      145
+    ],
+    [
+      133,
+      146
+    ]
+  ],
+  "swat_hit_frames": [
+    3,
+    4
+  ],
+  "frames": [
+    {
+      "atlas_frame": 25,
+      "source": "overhead-windup-swat-source.png",
+      "source_bounds": [
+        135,
+        13,
+        266,
+        426
+      ],
+      "uniform_scale": 0.3684210526315789,
+      "offset": [
+        52,
+        2
+      ],
+      "bounds": [
+        52,
+        2,
+        100,
+        154
+      ],
+      "bristle_centre": [
+        78,
+        19
+      ]
+    },
+    {
+      "atlas_frame": 26,
+      "source": "overhead-windup-swat-source.png",
+      "source_bounds": [
+        579,
+        14,
+        708,
+        426
+      ],
+      "uniform_scale": 0.3684210526315789,
+      "offset": [
+        52,
+        2
+      ],
+      "bounds": [
+        52,
+        2,
+        100,
+        154
+      ],
+      "bristle_centre": [
+        78,
+        18
+      ]
+    },
+    {
+      "atlas_frame": 27,
+      "source": "overhead-windup-swat-source.png",
+      "source_bounds": [
+        1008,
+        21,
+        1154,
+        426
+      ],
+      "uniform_scale": 0.37104072398190047,
+      "offset": [
+        44,
+        4
+      ],
+      "bounds": [
+        44,
+        4,
+        98,
+        154
+      ],
+      "bristle_centre": [
+        65,
+        19
+      ]
+    },
+    {
+      "atlas_frame": 28,
+      "source": "overhead-windup-swat-source.png",
+      "source_bounds": [
+        1378,
+        140,
+        1600,
+        426
+      ],
+      "uniform_scale": 0.375,
+      "offset": [
+        12,
+        47
+      ],
+      "bounds": [
+        12,
+        47,
+        95,
+        154
+      ],
+      "bristle_centre": [
+        25,
+        60
+      ]
+    },
+    {
+      "atlas_frame": 29,
+      "source": "overhead-windup-swat-source.png",
+      "source_bounds": [
+        96,
+        581,
+        421,
+        836
+      ],
+      "uniform_scale": 0.3514644351464435,
+      "offset": [
+        41,
+        64
+      ],
+      "bounds": [
+        41,
+        64,
+        155,
+        154
+      ],
+      "bristle_centre": [
+        141,
+        76
+      ]
+    },
+    {
+      "atlas_frame": 30,
+      "source": "overhead-knee-source.png",
+      "source_bounds": [
+        508,
+        596,
+        800,
+        840
+      ],
+      "uniform_scale": 0.34309623430962344,
+      "offset": [
+        45,
+        70
+      ],
+      "bounds": [
+        45,
+        70,
+        145,
+        154
+      ],
+      "bristle_centre": [
+        130,
+        135
+      ]
+    },
+    {
+      "atlas_frame": 31,
+      "source": "overhead-impact-source.png",
+      "source_bounds": [
+        950,
+        613,
+        1230,
+        853
+      ],
+      "uniform_scale": 0.3389830508474576,
+      "offset": [
+        49,
+        73
+      ],
+      "bounds": [
+        49,
+        73,
+        144,
+        154
+      ],
+      "bristle_centre": [
+        128,
+        145
+      ]
+    },
+    {
+      "atlas_frame": 32,
+      "source": "overhead-windup-swat-source.png",
+      "source_bounds": [
+        1396,
+        618,
+        1683,
+        843
+      ],
+      "uniform_scale": 0.35135135135135137,
+      "offset": [
+        51,
+        75
+      ],
+      "bounds": [
+        51,
+        75,
+        152,
+        154
+      ],
+      "bristle_centre": [
+        133,
+        146
+      ]
+    }
+  ],
+  "before_sha256": {
+    "C:\\Users\\david\\Documents\\ChatGPT\\GullinIt-main\\assets\\sprites\\sweeper-v1\\sweeper-v2-game.png": "49ab27e701880c305eb75bf693320a4888acdd67c7cf6142f8aef9bfe4ff978d",
+    "C:\\Users\\david\\Documents\\ChatGPT\\GullinIt-main\\data\\sweeper_art.json": "42438295e009969a8cc4c02a778a03bc977362963060d63396a801d469fbb658"
+  }
+}

@@ -17,5 +17,12 @@
     "Best seagull simulator. I am a seagull. - Gary",
     "The food is free if you are fast enough. - Chip",
     "Five stars. Zero manners. - Bev"
-  ]
+  ],
+  "sweeper": {
+    "arrive": ["OI! OI! OI!"],
+    "swing": ["TAKE THAT!"],
+    "hit": ["FLAMING GULLS!"],
+    "pile": ["OI! I SWEPT THAT!"],
+    "dump": ["THAT'S BETTER"]
+  }
 }

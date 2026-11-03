@@ -1,0 +1,30 @@
+Use case: stylized-concept. New COMBAT pose sheet using supplied NEW identity as STRICT reference, mum as crisp native outline/colour quality reference.
+The Sweeper: tired middle-aged seaside cleaner, full brown beard, olive-green bucket hat with navy band, cartoony tired face and nose, slightly stooped adult proportions with LONG LEGS and modest round belly, NOT chibi. Off-white long-sleeve tee pushed up to elbows, thick rust-orange work dungarees, BOTH straps fastened, darker chest pocket, small grey sock cuffs, oversized charcoal-grey work boots (exact boot palette takes priority over earlier tan boots). Exactly ONE wide wooden PUSH BROOM, chin-height pale straight timber handle, rectangular wooden block with yellow-brown bristles, whole broom visible in EVERY frame. All face RIGHT. Keep identity and mature proportions identical; do not shorten legs or enlarge head between actions.
+NATIVE PIXEL ART: each cell 211x176 actual pixels; adult about 88 native pixels high; registered ground y=154 and body mass x=79. Whole figure and broom safely within cell. Real transparent background and opaque art. Draw authentic native pixel sprites, no smooth high-resolution illustration. Uniform crisp near-black #0A0A18 contour exactly ONE PIXEL wide around the whole figure AND broom. Match the mum reference's crisp black line weight and pixel density. No thick slate/blue outer contour. Flat cel-shaded colour clusters, THREE clearly distinct steps per material: strong highlight, base, deep shadow. Orange clothes, peach skin and dark brown beard MUST be clearly distinguishable.
+EXACT PALETTE ONLY (first three per material mean highlight, base, shadow):
+outline: #0A0A18.
+dungarees: #FF8A2A #E5601A #A8400F.
+skin: #FFC08A #E8956A #B9654A.
+tee: #FFF4DA #E3D3B0 #B9A98A.
+hat: #8E9A3E #66742C #46501F.
+band: #1D3347.
+beard: #8A5A38 #5E3A24 #3A2314.
+boots: #6B7076 #474C52 #2B2F34.
+wood: #E3B26A #C28E48.
+bristles: #F2C94C #D4A232 #986E29.
+No other colours, no blended shades, antialiasing, gradients, dithering, glow, cast shadow, noisy texture, motion lines, food, bin, text, labels, watermark, scenery, floor/ground line or checkerboard. Fully transparent empty margins. Upper-left light. Keep a common ground registration across every frame; intentional jump/airborne feet can rise above this fixed ground.
+SIX COLUMNS x FOUR ROWS. Exactly THIRTEEN figures. Left-align each row's occupied cells, leave all unused cells fully transparent. Same body scale and centre x79 in211x176 cells, invisible registered ground y154. Full head-to-boots AND ENTIRE BROOM inside each cell.
+ROW1 TWO poses, then4empty:
+ALERT: head up, eyes on sky ahead RIGHT, broom lifted off ground.
+WARNING: broom held TWO-HANDED HORIZONTALLY across chest, glaring up/right, mouth OPEN shouting.
+ROW2 TWO WINDUP phases, then4empty: broom pulled FAR BACK BEHIND AND ABOVE his shoulder toward screen-LEFT, both hands near right shoulder, torso twisted away, weight on BACK foot. Frame2 draws farther back. Very exaggerated anticipation, not broom held in front. All faces RIGHT even when torso twists.
+ROW3 SIX consecutive SWAT phases filling row: a BIG HORIZONTAL SWING with a long forward/down follow-through. Bristle head must travel at least60 NATIVE pixels across the cell, ideally x35 behind body to x175 far ahead.
+1 head HIGH BEHIND him, around cell(35,80), full raised windup.
+2 recoil and launch with head still behind-left.
+3 head crosses IN FRONT of his BELLY at WAIST HEIGHT, close ahead of torso: about(116,120) in native cell, NOT up above his face. Arms/torso turn forward.
+4 head FAR ahead to RIGHT at WAIST HEIGHT around(174,124), long horizontal committed stroke.
+5 head forward and down near FRONT KNEE around(181,140).
+6 follow-through well PAST FRONT KNEE and low ahead around(176,145), weight forward.
+ONE continuous broom in each pose, not multiple heads or an arc effect. Head must pass belly/waist in middle frames, not six repeats of a raised overhead pose. Back shoulder load must read distinctly from forward waist strike.
+ROW4 THREE RECOVER phases, then3empty: off-balance after miss with broom dragging; hunched panting, mouth open, broom low; straighten to tired idle grip. No breath clouds.
+Same mature normal-proportioned legs, full beard, olive hat, cream tee, rust-orange dungarees both straps, grey sock cuffs, charcoal boots. Thin near-black exact1px contour, high-contrast material steps, no scenery, dust, food, bin, text, shadow or motion lines.

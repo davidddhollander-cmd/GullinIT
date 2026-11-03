@@ -1,0 +1,23 @@
+Use case: stylized-concept. SIX consecutive FIST_SHAKE frames of supplied NEW Sweeper identity; source grid3columns x2rows, reading order, exactly6 full figures.
+The Sweeper: tired middle-aged seaside cleaner, full brown beard, olive-green bucket hat with navy band, cartoony tired face and nose, slightly stooped adult proportions with LONG LEGS and modest round belly, NOT chibi. Off-white long-sleeve tee pushed up to elbows, thick rust-orange work dungarees, BOTH straps fastened, darker chest pocket, small grey sock cuffs, oversized charcoal-grey work boots (exact boot palette takes priority over earlier tan boots). Exactly ONE wide wooden PUSH BROOM, chin-height pale straight timber handle, rectangular wooden block with yellow-brown bristles, whole broom visible in EVERY frame. All face RIGHT. Keep identity and mature proportions identical; do not shorten legs or enlarge head between actions.
+NATIVE PIXEL ART: each cell 211x176 actual pixels; adult about 88 native pixels high; registered ground y=154 and body mass x=79. Whole figure and broom safely within cell. Real transparent background and opaque art. Draw authentic native pixel sprites, no smooth high-resolution illustration. Uniform crisp near-black #0A0A18 contour exactly ONE PIXEL wide around the whole figure AND broom. Match the mum reference's crisp black line weight and pixel density. No thick slate/blue outer contour. Flat cel-shaded colour clusters, THREE clearly distinct steps per material: strong highlight, base, deep shadow. Orange clothes, peach skin and dark brown beard MUST be clearly distinguishable.
+EXACT PALETTE ONLY (first three per material mean highlight, base, shadow):
+outline: #0A0A18.
+dungarees: #FF8A2A #E5601A #A8400F.
+skin: #FFC08A #E8956A #B9654A.
+tee: #FFF4DA #E3D3B0 #B9A98A.
+hat: #8E9A3E #66742C #46501F.
+band: #1D3347.
+beard: #8A5A38 #5E3A24 #3A2314.
+boots: #6B7076 #474C52 #2B2F34.
+wood: #E3B26A #C28E48.
+bristles: #F2C94C #D4A232 #986E29.
+No other colours, no blended shades, antialiasing, gradients, dithering, glow, cast shadow, noisy texture, motion lines, food, bin, text, labels, watermark, scenery, floor/ground line or checkerboard. Fully transparent empty margins. Upper-left light. Keep a common ground registration across every frame; intentional jump/airborne feet can rise above this fixed ground.
+In ALL SIX frames broom is VERTICAL PLANTED on SCREEN-LEFT of body. LEFT hand holds same handle at waist level, always on screen-left side; it NEVER switches to screen-right. Anatomical RIGHT FIST raised on SCREEN-RIGHT of head in all six frames. Same assignments throughout, no mirroring or third arm.
+1 furious scowl, right fist raised near cheek.
+2 lift same right fist ABOVE temple, glare at sky ahead/right.
+3 thrust same right fist FORWARD/UP to screen-right.
+4 pull same fist back while STAMPING one boot; broom still planted same screen-left position.
+5 shake same fist forward/up again.
+6 lower slightly toward initial pose.
+Broom head planted on same ground as other boot at154. Adult figure about88px, same head/torso size and long legs as identity. Strong dark beard, peach skin, orange clothes separate. Do not turn faceleft, no text, motion lines, dust or extra props.

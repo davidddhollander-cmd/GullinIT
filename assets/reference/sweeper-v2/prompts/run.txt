@@ -1,0 +1,26 @@
+Use case: stylized-concept. Exactly EIGHT consecutive RUN-cycle frames of the Sweeper from the supplied NEW identity sheet. STRICT same face, full beard, long adult legs, orange work dungarees, hat, shirt, broom and grey boots; mum is outline/pixel-density quality reference.
+The Sweeper: tired middle-aged seaside cleaner, full brown beard, olive-green bucket hat with navy band, cartoony tired face and nose, slightly stooped adult proportions with LONG LEGS and modest round belly, NOT chibi. Off-white long-sleeve tee pushed up to elbows, thick rust-orange work dungarees, BOTH straps fastened, darker chest pocket, small grey sock cuffs, oversized charcoal-grey work boots (exact boot palette takes priority over earlier tan boots). Exactly ONE wide wooden PUSH BROOM, chin-height pale straight timber handle, rectangular wooden block with yellow-brown bristles, whole broom visible in EVERY frame. All face RIGHT. Keep identity and mature proportions identical; do not shorten legs or enlarge head between actions.
+NATIVE PIXEL ART: each cell 211x176 actual pixels; adult about 88 native pixels high; registered ground y=154 and body mass x=79. Whole figure and broom safely within cell. Real transparent background and opaque art. Draw authentic native pixel sprites, no smooth high-resolution illustration. Uniform crisp near-black #0A0A18 contour exactly ONE PIXEL wide around the whole figure AND broom. Match the mum reference's crisp black line weight and pixel density. No thick slate/blue outer contour. Flat cel-shaded colour clusters, THREE clearly distinct steps per material: strong highlight, base, deep shadow. Orange clothes, peach skin and dark brown beard MUST be clearly distinguishable.
+EXACT PALETTE ONLY (first three per material mean highlight, base, shadow):
+outline: #0A0A18.
+dungarees: #FF8A2A #E5601A #A8400F.
+skin: #FFC08A #E8956A #B9654A.
+tee: #FFF4DA #E3D3B0 #B9A98A.
+hat: #8E9A3E #66742C #46501F.
+band: #1D3347.
+beard: #8A5A38 #5E3A24 #3A2314.
+boots: #6B7076 #474C52 #2B2F34.
+wood: #E3B26A #C28E48.
+bristles: #F2C94C #D4A232 #986E29.
+No other colours, no blended shades, antialiasing, gradients, dithering, glow, cast shadow, noisy texture, motion lines, food, bin, text, labels, watermark, scenery, floor/ground line or checkerboard. Fully transparent empty margins. Upper-left light. Keep a common ground registration across every frame; intentional jump/airborne feet can rise above this fixed ground.
+SOURCE LAYOUT: FOUR COLUMNS x TWO ROWS. Eight frames in chronological reading order (row1 frames1-4; row2 frames5-8). Full body and broom in equal transparent cells. Preserve adult size, not chibi.
+Fast long-striding run to RIGHT, strong FORWARD LEAN, high back-knee bend and visible boot lift, hat bobbing. Both hands hold ONE broom DIAGONALLY ACROSS BODY, bristle head UP and forward, never dragging. Keep handle/head size identical.
+1 right foot far forward landing/contact, left leg far behind with knee bent and heel up.
+2 right leg absorbs weight, left heel curls up toward backside.
+3 right stance leg propels, left knee swings far forward and high, visibly bent.
+4 unmistakable AIRBORNE EXTENSION: BOTH BOOTS OFF THE GROUND, right leg extended backward and left leg far forward, long flying split stride with bent knees; feet at least 8 native pixels ABOVE the common registered ground. No ground line is drawn.
+5 left foot lands far forward, opposite back leg far behind with heel lifted.
+6 left absorbs, right heel curls up high behind.
+7 left propulsion, right knee swings forward/up.
+8 passing/recoil preparing right contact, back leg visibly high, long limbs and forward momentum.
+The near and far legs must alternate, feet separate by at least a torso width on stride contacts. No little shuffle or walking-in-place posture. Large readable open space between legs, clear knee bends, boot soles visible. Face RIGHT, body/root registration constant. Hat bob 2px, long legs stay same length, no changes of scale. Exactly eight figures, real transparent alpha, no motion lines, shadows, scenery, food, bin, text or duplicate brooms.

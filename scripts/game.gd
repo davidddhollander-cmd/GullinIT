@@ -18,6 +18,7 @@ var score: BeachScore = BeachScore.new()
 var spawner: BeachSpawner = BeachSpawner.new()
 var stalls: StallService = StallService.new()
 var crabs: CrabPopulation
+var sweeper_visits: SweeperVisits
 var dogs: Array[OffLeadDog] = [] ## one per off_lead_dog spawn
 var teens: Array[WatergunTeen] = []
 var beach: BeachBackdrop
@@ -173,6 +174,10 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	add_child(crabs)
 	crabs.setup(level,beach.props,spawner)
 	crabs.crab_created.connect(_wire_target)
+	sweeper_visits = SweeperVisits.new()
+	add_child(sweeper_visits)
+	sweeper_visits.setup(self,level)
+	sweeper_visits.arrived.connect(_wire_sweeper)
 	player = BeachGull.new()
 	player.species = str(level.get("player_species",GameState.chosen_gull()))
 	player.apply_species_stats()
@@ -526,6 +531,10 @@ func _physics_process(delta: float) -> void:
 		player.digestion.tick(step,player.state == BeachGull.State.GROUNDED)
 	scraps.tick(step,player)
 	crabs.tick(step,camera_x,not training,gulls)
+	sweeper_visits.tick(step,not training)
+	if is_instance_valid(sweeper_visits.sweeper):
+		sweeper_visits.sweeper.tick(step,player)
+		sweeper_visits.sweeper.z_index = spawner.depth_z(sweeper_visits.sweeper.position,2)
 	var food_targets: Array[BeachTarget] = stalls.portions.duplicate()
 	food_targets.append_array(spawner.targets)
 	var claims: Dictionary = {}
@@ -744,6 +753,8 @@ func set_paused(value: bool) -> void:
 		dog.paused = value
 	for teen: WatergunTeen in teens:
 		teen.paused = value
+	if is_instance_valid(sweeper_visits.sweeper):
+		sweeper_visits.sweeper.paused = value
 
 func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 	if gull == player:
@@ -807,6 +818,31 @@ func _rival_drops_carry(rival: BeachGull, attacker: Vector2) -> void:
 				stash_raids.items.append({"owner":null,"source":"dropped","food_id":food_id,"position":rival.position-Vector2(0,10),"velocity":Vector2(-rival.facing*35,-55),"grounded":false,"age":0.0})
 
 # The player's own stun handler already reacts, so only rivals get a callout.
+func _sweeper_says(sweeper: BeachSweeper, key: String) -> void:
+	if not is_instance_valid(sweeper):
+		return
+	var lines: Array = Config.quips.sweeper[key]
+	effects.message(sweeper.position-Vector2(0,54),str(lines[rng.randi_range(0,lines.size()-1)]),BeachUI.GOLD,1.3,6.0)
+
+func _wire_sweeper(sweeper: BeachSweeper) -> void:
+	_sweeper_says(sweeper,"arrive")
+	Audio.play("click")
+	_quest_event("sweeper_arrived")
+	sweeper.said.connect(_sweeper_says.bind(sweeper))
+	sweeper.warned.connect(func() -> void: _quest_event("sweeper_warned"))
+	sweeper.swatted.connect(func(_gull: BeachGull) -> void:
+		_sweeper_says(sweeper,"hit")
+		_quest_event("sweeper_swatted")
+	)
+	sweeper.dumped.connect(func(count: int) -> void:
+		_sweeper_says(sweeper,"dump")
+		_quest_event("sweeper_dumped",{"count":count})
+	)
+	sweeper.pile_stolen.connect(func() -> void:
+		_sweeper_says(sweeper,"pile")
+		_quest_event("sweeper_pile_stolen")
+	)
+
 func _water_hit(gull: BeachGull, teen: WatergunTeen) -> void:
 	effects.water_soak(gull.position,teen.position)
 	if not gull.rival:

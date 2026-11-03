@@ -1,0 +1,22 @@
+Use case: stylized-concept. NEW CLEANING pose source sheet for the supplied NEW Sweeper identity, matching exact palette and pixel density. Exactly10 figures, arranged THREE COLUMNS x FOUR ROWS for ample room for the long broom, final2cells empty. These will be packed into six-column game sheet.
+The Sweeper: tired middle-aged seaside cleaner, full brown beard, olive-green bucket hat with navy band, cartoony tired face and nose, slightly stooped adult proportions with LONG LEGS and modest round belly, NOT chibi. Off-white long-sleeve tee pushed up to elbows, thick rust-orange work dungarees, BOTH straps fastened, darker chest pocket, small grey sock cuffs, oversized charcoal-grey work boots (exact boot palette takes priority over earlier tan boots). Exactly ONE wide wooden PUSH BROOM, chin-height pale straight timber handle, rectangular wooden block with yellow-brown bristles, whole broom visible in EVERY frame. All face RIGHT. Keep identity and mature proportions identical; do not shorten legs or enlarge head between actions.
+NATIVE PIXEL ART: each cell 211x176 actual pixels; adult about 88 native pixels high; registered ground y=154 and body mass x=79. Whole figure and broom safely within cell. Real transparent background and opaque art. Draw authentic native pixel sprites, no smooth high-resolution illustration. Uniform crisp near-black #0A0A18 contour exactly ONE PIXEL wide around the whole figure AND broom. Match the mum reference's crisp black line weight and pixel density. No thick slate/blue outer contour. Flat cel-shaded colour clusters, THREE clearly distinct steps per material: strong highlight, base, deep shadow. Orange clothes, peach skin and dark brown beard MUST be clearly distinguishable.
+EXACT PALETTE ONLY (first three per material mean highlight, base, shadow):
+outline: #0A0A18.
+dungarees: #FF8A2A #E5601A #A8400F.
+skin: #FFC08A #E8956A #B9654A.
+tee: #FFF4DA #E3D3B0 #B9A98A.
+hat: #8E9A3E #66742C #46501F.
+band: #1D3347.
+beard: #8A5A38 #5E3A24 #3A2314.
+boots: #6B7076 #474C52 #2B2F34.
+wood: #E3B26A #C28E48.
+bristles: #F2C94C #D4A232 #986E29.
+No other colours, no blended shades, antialiasing, gradients, dithering, glow, cast shadow, noisy texture, motion lines, food, bin, text, labels, watermark, scenery, floor/ground line or checkerboard. Fully transparent empty margins. Upper-left light. Keep a common ground registration across every frame; intentional jump/airborne feet can rise above this fixed ground.
+First TWO rows: six consecutive SWEEP-loop frames, reading order1-6. He takes small but clear alternating forward steps, visible bent lifted back leg on passing phases, pushing a wide broom with short firm two-handed strokes. Body bends slightly forward; hat steady; mature figure and legs same scale88px. The broom head is WELL IN FRONT of his boots, roughly one adult body length ahead, centred around x176 in211px cell while bodycentre79. Arms reach forward so the straight handle can slope down-and-forward from hands to broom. Whole broom fits inside cell. In EVERY frame bristle block is FLAT HORIZONTAL, bristles point DOWN, BOTTOM CONTACT at the same ground y154 as planted soles. No hovering, tilting or lifting the broom during this loop. One knee bends and foot lifts slightly on alternating frames; bristle contact height stays EXACTLY fixed. No sand/dust/litter.
+Next FOUR poses: row3 three poses and row4 first pose, then2empty. SWEEP_BIN toward an IMAGINARY waist-high bin on RIGHT, which is NOT DRAWN; leave empty space there.
+1 lean in with broom low.
+2 flick broom UP AND FORWARD so the bristle head reaches WAIST/BELLY height around y119, well BELOW shoulders and chest.
+3 hold bristle head at same WAIST HEIGHT for a beat, arms extended lower-forward, satisfied face.
+4 lower broom head back toward ground and straighten with satisfied sigh.
+No real bin or bin silhouette, no trash/food, no breath marks. Same broom, mature scale, full beard, fastened overalls, grey socks, charcoal boots in all10. True transparent background, thin sharp black outline, flat strong palette steps, no gradients/noisy texture/shadows.
