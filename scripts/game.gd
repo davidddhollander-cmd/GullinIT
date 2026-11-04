@@ -707,7 +707,7 @@ func _peck() -> void:
 			player.show_ground_peck()
 
 func _can_screech() -> bool:
-	return player != null and player.species == "herring" and player.detailed_art and player.state == BeachGull.State.GROUNDED and not player.climb and absf(player.velocity.x) <= 1.0 and Input.get_vector("aim_left","aim_right","aim_up","aim_down").length() <= 0.15 and (input == null or input.touch_stick().length() <= 0.15)
+	return player != null and not training and player.species == "herring" and player.detailed_art and player.state == BeachGull.State.GROUNDED and not player.climb and absf(player.velocity.x) <= 1.0 and Input.get_vector("aim_left","aim_right","aim_up","aim_down").length() <= 0.15 and (input == null or input.touch_stick().length() <= 0.15)
 
 func _advance_screech_hold(delta: float) -> void:
 	if not peck_hold_pending:
@@ -1176,6 +1176,7 @@ func _end_peck_pause() -> void:
 func _training_tick(delta: float) -> void:
 	training_miss_hint = maxf(0.0,training_miss_hint-delta)
 	banner_cue = maxf(0.0,banner_cue-delta)
+	stash_raids.reach_bonus = 14.0 if lesson == 3 else 0.0
 	if banner_delay > 0.0:
 		banner_delay -= delta
 		if banner_delay <= 0.0:

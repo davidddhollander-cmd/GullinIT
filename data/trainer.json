@@ -142,8 +142,8 @@
           "casual": "Dive at any snack, then climb away"
         },
         "banner": {
-          "default": "Dive at a snack with {dive}.\nTap {peck} on contact, then climb away.",
-          "casual": "Dive at a snack with {dive}.\nYour beak pecks. Then climb away."
+          "default": "Let's try another proper dive.\nDive with {dive}, tap {peck}, then climb.",
+          "casual": "Let's try another proper dive.\nDive with {dive}. Your beak does the pecking."
         }
       },
       {

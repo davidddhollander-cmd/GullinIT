@@ -34,7 +34,7 @@ const SCORE_ANNOUNCEMENT_HOLD: float = BeachEffects.SCORE_MESSAGE_HOLD
 const SCORE_ANNOUNCEMENT_FADE: float = BeachEffects.SCORE_MESSAGE_FADE
 const TOP_BAR_HEIGHT: int = 17
 const BANNER_PORTRAIT: float = 36.0 ## Screeches in the live lesson banner
-const BANNER_TEXT_WIDTH: float = 244.0 ## two lines of about 55 characters beside him
+const BANNER_TEXT_WIDTH: float = 262.0 ## widest the text may grow beside him; the panel shrinks to fit shorter lines
 const TOP_BAR_FONT_SIZE: int = 6
 const TIME_WARNING: float = 20.0 ## seconds left when the timer turns red and flashes
 const QUEST_STRIP_HEIGHT: float = 10.0 ## small-font quest row directly under the top bar
@@ -161,7 +161,7 @@ func setup(owner_game: BeachGame) -> void:
 	training_panel.mouse_filter = MOUSE_FILTER_IGNORE
 	var training_row: HBoxContainer = HBoxContainer.new()
 	training_row.mouse_filter = MOUSE_FILTER_IGNORE
-	training_row.add_theme_constant_override("separation",6)
+	training_row.add_theme_constant_override("separation",3)
 	training_panel.add_child(training_row)
 	# Screeches McCrumbs winces and talks beside the strip while the first-miss hint shows.
 	trainer_portrait = TextureRect.new()
@@ -171,7 +171,6 @@ func setup(owner_game: BeachGame) -> void:
 	trainer_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	trainer_portrait.mouse_filter = MOUSE_FILTER_IGNORE
 	trainer_portrait.hide()
-	training_row.add_child(trainer_portrait)
 	var lesson_column: VBoxContainer = VBoxContainer.new()
 	lesson_column.mouse_filter = MOUSE_FILTER_IGNORE
 	lesson_column.add_theme_constant_override("separation",2)
@@ -188,6 +187,7 @@ func setup(owner_game: BeachGame) -> void:
 	lesson_prompt.add_theme_font_override("font", TrainerCard.SPEECH)
 	lesson_prompt.add_theme_font_size_override("font_size", TrainerCard.SPEECH_SIZE)
 	lesson_prompt.custom_minimum_size = Vector2(176, 10)
+	training_row.add_child(trainer_portrait) # Screeches stands to the right of his words
 	var center: CenterContainer = CenterContainer.new()
 	add_child(center)
 	BeachUI.full(center)
@@ -267,7 +267,14 @@ func _sync_trainer() -> void:
 	trainer_portrait.visible = talking or banner
 	var px: float = BANNER_PORTRAIT if banner and not talking else 48.0
 	trainer_portrait.custom_minimum_size = Vector2(px,px)
-	lesson_prompt.custom_minimum_size.x = BANNER_TEXT_WIDTH if banner else 176.0
+	var align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_LEFT if banner else HORIZONTAL_ALIGNMENT_CENTER
+	lesson_prompt.horizontal_alignment = align
+	lesson_label.horizontal_alignment = align
+	var wide: float = 0.0
+	for part: String in lesson_prompt.text.split("
+"):
+		wide = maxf(wide,TrainerCard.SPEECH.get_string_size(part,HORIZONTAL_ALIGNMENT_LEFT,-1,TrainerCard.SPEECH_SIZE).x)
+	lesson_prompt.custom_minimum_size.x = minf(ceilf(wide) + 2.0,BANNER_TEXT_WIDTH) if banner else 176.0
 	var pulse: float = game.banner_cue / BeachGame.BANNER_CUE_TIME if banner else 0.0
 	training_panel.self_modulate = Color.WHITE.lerp(Color(1.0,0.86,0.5),pulse * (0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.02)))
 	if not talking:

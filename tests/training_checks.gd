@@ -14,6 +14,7 @@ static func run(host: Node, check: Callable) -> void:
 	game.overlay.start_button.pressed.emit()
 	check.call(game.running and game.input.enabled,"tutorial start button enables controls")
 	check.call(game.training and not game.casual and game.lesson == 0 and game.player.state == BeachGull.State.GROUNDED,"first visit starts grounded training without a timer")
+	check.call(not game._can_screech(),"Training Day never turns a held peck into a screech")
 	check.call(game.training_text().contains("Space") or game.training_text().contains("FLAP"),"first lesson explains takeoff: "+game.training_text())
 	check.call(game.training_target().x > game.player.position.x,"first lesson points into open sky: "+str(game.training_target())+" / "+str(game.player.position))
 	game._training_tick(0.1)
@@ -102,6 +103,8 @@ static func run(host: Node, check: Callable) -> void:
 	game.stash_raids.bag_collected.emit()
 	check.call(game.lesson == 3,"picnic lesson requires starting a bag raid")
 	game.training_raid_started = true
+	game._training_tick(0.0)
+	check.call(game.stash_raids.reach_bonus > 0.0,"the picnic lesson widens the bag reach")
 	game.stash_raids.collected.emit(Vector2.ZERO,"crumbs",true)
 	check.call(game.lesson == 3,"bin scrap cannot satisfy picnic bag lesson")
 	game.stash_raids.bag_collected.emit()

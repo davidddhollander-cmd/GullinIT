@@ -12,6 +12,7 @@ var raids: Dictionary = {}
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var visual_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var peck_cooldown: float = 0.0
+var reach_bonus: float = 0.0 ## training widens the bag peck reach so a near miss still lands
 var bins: Array[Dictionary] = []
 var shine_clock: float = 0.0
 var actor: BeachGull ## set while a rival pecks, so the player's code path serves any gull
@@ -85,7 +86,7 @@ func nearby_stash(include_empty: bool = false) -> BeachTarget:
 	if _gull().state != BeachGull.State.GROUNDED:
 		return null
 	var nearest: BeachTarget
-	var distance: float = float(Config.tuning.world.peck_reach)
+	var distance: float = float(Config.tuning.world.peck_reach) + reach_bonus
 	for target: BeachTarget in game.spawner.targets:
 		if target.kind != "sunbather" or (target.stash_remaining <= 0 and not include_empty):
 			continue
