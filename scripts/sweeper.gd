@@ -38,6 +38,9 @@ var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var sprite: AnimatedSprite2D
 var clip_name: StringName = &""
 var clip_clock: float = 0.0
+var swing_points: Array[Vector2] = []
+var fx_frame: int = -1
+var brush_step: int = -1
 
 static func art() -> Dictionary:
 	if art_data.is_empty():
@@ -214,6 +217,7 @@ func tick(delta: float, gull: BeachGull) -> void:
 			else:
 				# Never stands about: he keeps walking the sand, brushing as he goes.
 				clip = &"sweep" if brushing else &"walk"
+				_brush_fx()
 				_move(destination,float(t.sweep_speed) if brushing else float(t.walk_speed),delta)
 				if is_equal_approx(position.x,destination):
 					_patrol()
@@ -255,10 +259,12 @@ func tick(delta: float, gull: BeachGull) -> void:
 				timer = float(t.swat_time)
 				hit_done = false
 				landed_hit = false
+				_swing_fx_start()
 				said.emit("swing")
 		State.SWAT:
 			clip = &"swat"
 			timer -= delta
+			_swing_fx()
 			_swing_check(gull)
 			if timer <= 0.0:
 				if landed_hit:
@@ -329,6 +335,38 @@ func _patrol() -> void:
 		if absf(destination-position.x) > 80.0:
 			break
 
+## The drawn broom head on each swat frame, in world space, for the swoosh ribbon and the frame-by-frame stripes.
+func _swing_fx_start() -> void:
+	swing_points.clear()
+	for point: Array in art().swat_reach_source_px:
+		swing_points.append(_art_point(point))
+	fx_frame = -1
+	game.effects.swoosh(swing_points,float(tuning().swat_time))
+
+## Wind stripes along the strike (frames 1-3) and the broom slamming into the sand on frame 3.
+func _swing_fx() -> void:
+	var frame: int = clip_frame()
+	if clip_name != &"swat" or frame == fx_frame:
+		return
+	fx_frame = frame
+	if frame >= 1 and frame <= 3:
+		var from: Vector2 = swing_points[frame-1]
+		var to: Vector2 = swing_points[frame]
+		game.effects.wind_stripes(from.lerp(to,0.5),(to-from).normalized(),2,12.0,5.0)
+	if frame == 3:
+		game.effects.ground_slam(swing_points[3],facing)
+
+## Sand and a trailing stripe off the bristles every other brush stroke.
+func _brush_fx() -> void:
+	if clip_name != &"sweep":
+		return
+	var step: int = int(clip_clock*float(Config.sprites[SPRITE_ID].animations.sweep.fps))
+	if step == brush_step:
+		return
+	brush_step = step
+	if step%2 == 0:
+		game.effects.brush_dust(Vector2(_head_x(),float(Config.tuning.world.ground)),facing)
+
 func _swing_check(gull: BeachGull) -> void:
 	if hit_done or not is_instance_valid(gull) or clip_name != &"swat":
 		return
@@ -341,6 +379,7 @@ func _swing_check(gull: BeachGull) -> void:
 		gull.stun(float(tuning().knock_time),position)
 		if gull.state == BeachGull.State.STUNNED:
 			gull.velocity = Vector2(gull.velocity.x/maxf(absf(gull.velocity.x),0.001)*float(tuning().knock_speed),-float(tuning().knock_up)) # sent flying, far further than a normal tumble
+			game.effects.swat_hit(gull.position,Vector2(signf(gull.velocity.x),-0.6).normalized())
 			swatted.emit(gull)
 
 func _tick_sweep(delta: float, gull: BeachGull) -> StringName:
@@ -369,6 +408,7 @@ func _tick_sweep(delta: float, gull: BeachGull) -> StringName:
 	facing = push_dir
 	position.x += push_dir*float(t.sweep_speed)*delta
 	var head: float = _head_x()
+	_brush_fx()
 	for item: Dictionary in game.stash_raids.items:
 		if pile.size() < int(t.pile_max) and is_sweepable(item) and absf(float(item.position.x)-head) <= float(t.gather_radius) and (float(item.position.x)-head)*push_dir >= -2.0:
 			item.swept = true
@@ -392,6 +432,7 @@ func _dump() -> void:
 		bin.remaining = mini(int(bin.capacity),int(bin.remaining)+count)
 	pile.clear()
 	game.beach.wobble_bin(float(bin.x),0.5,false)
+	game.effects.wind_stripes(_art_point(art().bin_flick_anchors_source_px[1]),Vector2(facing*0.5,-1.0).normalized(),3,10.0,4.0)
 	game.effects.food_crumble(Vector2(float(bin.x),float(bin.get("content_y",float(Config.tuning.world.ground)-18.0))),Vector2(0,-30),5)
 	Audio.play("bin_rattle",1.0,-6.0)
 	dumped.emit(count)

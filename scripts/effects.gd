@@ -174,6 +174,82 @@ func wind_tick(delta: float, camera_x: float, gull: BeachGull) -> void:
 			particles.append({"streak":true,"at":near,"dir":heading,"length":10.0+8.0*strength,"v":heading*(90.0+60.0*strength),"gravity":0.0,"life":0.4,"duration":0.4,"color":Color(1.0,1.0,1.0,0.6)})
 	queue_redraw()
 
+## Short wind stripes fanned across `heading`, left drifting along it. Used for swings, flicks and launches.
+func wind_stripes(at: Vector2, heading: Vector2, count: int = 3, length: float = 10.0, spread: float = 5.0) -> void:
+	if not bool(Config.tuning.juice.particles):
+		return
+	var normal := Vector2(-heading.y,heading.x)
+	for i: int in count:
+		var side: float = float(i)-float(count-1)*0.5
+		var life: float = feather_rng.randf_range(0.16,0.26)
+		particles.append({"streak":true,"at":at+normal*side*spread+heading*feather_rng.randf_range(-3.0,3.0),"dir":heading,"length":length*feather_rng.randf_range(0.7,1.3),"v":heading*30.0,"gravity":0.0,"life":life,"duration":life,"color":Color(1.0,0.97,0.88,0.7)})
+	queue_redraw()
+
+## Swing stripe: a tapered ribbon through `points` (the head position on each animation frame, smoothed with a
+## Catmull-Rom curve) that is revealed over `duration` seconds so it tracks the drawn head. Point 0 is the
+## backswing, so the stripe only starts once the head passes point 1.
+func swoosh(points: Array[Vector2], duration: float) -> void:
+	if not bool(Config.tuning.juice.particles) or points.size() < 3:
+		return
+	var tail: float = float(Config.tuning.juice.swoosh_tail)
+	var life: float = (float(points.size()-1)+0.5+tail)/float(points.size())*duration
+	particles.append({"ribbon":true,"points":points.duplicate(),"tail":tail,"swing":duration,"life":life,"duration":life})
+	queue_redraw()
+
+func _ribbon_point(points: Array, u: float) -> Vector2:
+	var last: int = points.size()-1
+	var i: int = clampi(int(floor(u)),0,last-1)
+	return points[i].cubic_interpolate(points[i+1],points[maxi(i-1,0)],points[mini(i+2,last)],clampf(u-float(i),0.0,1.0))
+
+func _draw_ribbon(item: Dictionary) -> void:
+	var points: Array = item.points
+	var head: float = (float(item.duration)-float(item.life))/float(item.swing)*float(points.size())-0.5
+	var tail: float = float(item.tail)
+	var from: float = maxf(1.0,head-tail)
+	var to: float = minf(head,float(points.size()-1))
+	if to <= from:
+		return
+	var max_width: float = float(Config.tuning.juice.swoosh_width)
+	var steps: int = int(ceil((to-from)*10.0))
+	var previous: Vector2 = _ribbon_point(points,from).round()
+	for step: int in range(1,steps+1):
+		var u: float = lerpf(from,to,float(step)/float(steps))
+		var at: Vector2 = _ribbon_point(points,u).round()
+		var along: float = clampf((u-(head-tail))/tail,0.0,1.0)
+		var color := Color(1.0,1.0,1.0) if along > 0.8 else (Color("fff4da") if along > 0.45 else Color("bfe3ee"))
+		color.a = 0.25+0.7*along
+		draw_line(previous,at,color,maxf(1.0,roundf(max_width*along)))
+		previous = at
+
+## The broom lands on the sand: dust rolling out both ways, a sand puff, wind along the floor and a small shake.
+func ground_slam(at: Vector2, facing: float) -> void:
+	if not bool(Config.tuning.juice.particles):
+		return
+	var t: Dictionary = Config.tuning.juice
+	var base := Vector2(at.x,float(Config.tuning.world.ground))
+	if base.x < float(Config.tuning.world.promenade_start):
+		pixelfx("pixelfx_heavy_landing",base,Vector2(facing,0.0),null,float(t.slam_scale))
+		sand_puff(base,true)
+	for side: float in [-1.0,1.0]:
+		wind_stripes(base+Vector2(side*3.0,-2.0),Vector2(side,0.0),2,9.0,2.0)
+	if bool(t.shake) and GameState.options.shake:
+		shake = maxf(shake,float(t.slam_shake))
+
+## A landed swat: the usual hit spark where the gull was caught and stripes streaming behind its launch.
+func swat_hit(at: Vector2, heading: Vector2) -> void:
+	pixelfx_hit_spark(at,heading)
+	wind_stripes(at,heading,4,12.0,4.0)
+
+## Sand kicked up and a stripe dragged behind the bristles on a brush stroke.
+func brush_dust(at: Vector2, push_dir: float) -> void:
+	if not bool(Config.tuning.juice.particles):
+		return
+	if at.x < float(Config.tuning.world.promenade_start):
+		for i: int in 2:
+			var life: float = feather_rng.randf_range(0.22,0.34)
+			particles.append({"at":at+Vector2(push_dir*feather_rng.randf_range(0.0,3.0),-1),"v":Vector2(push_dir*feather_rng.randf_range(14.0,34.0),-feather_rng.randf_range(8.0,22.0)),"life":life,"duration":life,"color":Color("d4ad78"),"size":Vector2(2,1) if i == 0 else Vector2(1,1),"sand":true})
+	wind_stripes(at+Vector2(-push_dir*3.0,-3.0),Vector2(push_dir,0.0),1,8.0,0.0)
+
 func sand_puff(at: Vector2, taking_off: bool = false) -> void:
 	if not bool(Config.tuning.juice.particles) or at.x >= float(Config.tuning.world.promenade_start):
 		return
@@ -312,6 +388,10 @@ func tick(delta: float) -> void:
 			texts.remove_at(i)
 	for i: int in range(particles.size()-1,-1,-1):
 		particles[i].life -= delta
+		if particles[i].get("ribbon",false):
+			if particles[i].life <= 0.0:
+				particles.remove_at(i)
+			continue
 		if particles[i].get("feather",false):
 			var item: Dictionary = particles[i]
 			item.v.x *= exp(-2.2*delta)
@@ -364,6 +444,9 @@ func _draw() -> void:
 			draw_rect(Rect2(at-Vector2(2,8),Vector2(width+4,11)),backing)
 		draw_string(font,at,item.text,HORIZONTAL_ALIGNMENT_LEFT,-1,8,lettering)
 	for item: Dictionary in particles:
+		if item.get("ribbon",false):
+			_draw_ribbon(item)
+			continue
 		if item.get("feather",false):
 			var alpha: float = clampf(float(item.life)/0.4,0.0,1.0)
 			var flutter: float = sin((float(item.duration)-float(item.life))*9.0+float(item.phase))
