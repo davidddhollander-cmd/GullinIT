@@ -179,9 +179,9 @@ func _spray_litter(content_position: Vector2, wheelie: bool) -> void:
 	for i: int in int(t.bin_litter_wheelie if wheelie else t.bin_litter):
 		var kind: String = LITTER_KINDS[visual_rng.randi_range(0,LITTER_KINDS.size()-1)]
 		var direction: float = -1.0 if visual_rng.randf() < 0.5 else 1.0
-		var rest_limit: float = 0.52 if kind == "wrapper" else 0.34
+		var rest_limit: float = PI
 		items.append({"owner":null,"source":"bin","food_id":"","garbage":true,"garbage_kind":kind,"extra":true,"position":content_position+Vector2(visual_rng.randf_range(-4,4),6),
-			"velocity":Vector2(direction*visual_rng.randf_range(25,90),-visual_rng.randf_range(65,125)),"grounded":false,"age":0.0,
+			"velocity":Vector2(direction*visual_rng.randf_range(6,22),-visual_rng.randf_range(65,125)),"grounded":false,"age":0.0,
 			"rotation":visual_rng.randf_range(-0.18,0.18),"angular_velocity":-direction*visual_rng.randf_range(float(j.trash_spin_min),float(j.trash_spin_max)),
 			"rest_angle":visual_rng.randf_range(-rest_limit,rest_limit)})
 	# Cap resting litter so a busy bin doesn't pile up forever: drop the oldest.
@@ -226,7 +226,8 @@ func _peck_bin(bin: Dictionary) -> bool:
 			var direction: float = -1.0 if i%2 == 0 else 1.0
 			var item: Dictionary = {"owner":null,"source":"bin","bin_x":float(bin.x),"food_id":kind if is_food else "","garbage":not is_food,"garbage_kind":kind,"position":content_position+Vector2(0,6),"velocity":Vector2(direction*rng.randf_range(35,65),-rng.randf_range(65,95)),"grounded":false,"age":0.0}
 			if not is_food:
-				var rest_limit: float = 0.52 if kind == "wrapper" else 0.34
+				var rest_limit: float = PI
+				item.velocity.x *= 0.3 # same height, falls nearer the bin
 				item.rotation = visual_rng.randf_range(-0.18,0.18)
 				item.angular_velocity = -direction*visual_rng.randf_range(float(Config.tuning.juice.trash_spin_min),float(Config.tuning.juice.trash_spin_max))
 				item.rest_angle = visual_rng.randf_range(-rest_limit,rest_limit)

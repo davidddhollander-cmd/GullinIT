@@ -54,6 +54,7 @@ var stash_active: bool = false
 var stash_standing: bool = false
 const BAG_SQUISH_TIME: float = 0.18
 const BAG_PIVOT: Vector2 = Vector2(0, 8)
+const BAG_SCALE: float = 0.55
 const BAG_TEXTURES: Array[Texture2D] = [
 	preload("res://assets/sprites/retro-picnic-bag-coral-32bit.png"),
 	preload("res://assets/sprites/retro-picnic-bag-teal-32bit.png"),
@@ -984,12 +985,13 @@ func _draw() -> void:
 		var bag: Vector2 = -BAG_PIVOT
 		# The 32x24 sprite's bottom-centre sits on the old bag's base, so pecks squish it the same way.
 		var bag_tex: Texture2D = BAG_TEXTURES[bag_variant]
-		var bag_at: Vector2 = bag+Vector2(-floorf(bag_tex.get_width()*0.5),9-bag_tex.get_height())
-		draw_texture(bag_tex,bag_at)
+		var bag_size: Vector2 = bag_tex.get_size()*BAG_SCALE ## bag art keeps full pixel detail, drawn small
+		var bag_at: Vector2 = bag+Vector2(-floorf(bag_size.x*0.5),9.0-bag_size.y)
+		draw_texture_rect(bag_tex,Rect2(bag_at,bag_size),false)
 		if stash_remaining > 0:
 			var glint: Texture2D = PickupShine.overlay(BAG_TEXTURES[bag_variant],shine_time,stash_home_x*0.37)
 			if glint != null:
-				draw_texture(glint,bag_at)
+				draw_texture_rect(glint,Rect2(bag_at,bag_size),false)
 		if stash_remaining > 0:
 			draw_rect(Rect2(bag+Vector2(-5,1),Vector2(stash_remaining*3+1,4)),Color("183b4e"))
 		for i: int in stash_remaining:

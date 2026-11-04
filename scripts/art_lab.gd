@@ -150,6 +150,10 @@ func _select(i: int) -> void:
 		species = [str(Config.sprites[str(entry.current)].get("species", "")), "lab_%d" % index]
 	var current_id: String = "lab_current_%d" % index if entry.has("current_override") else str(entry.current)
 	sides = [_make(current_id, species[0], gulls, motion), _make(candidate_ids[index], species[1], gulls, motion)]
+	if entry.has("current_size") and sides[0].node is AnimatedSprite2D: # live art at its own px size beside a resized candidate
+		var live: AnimatedSprite2D = sides[0].node
+		var live_def: Dictionary = Config.sprites[current_id]
+		live.scale = Vector2(entry.current_size[0], entry.current_size[1]) / Vector2(float(live_def.frame_w), float(live_def.frame_h))
 	reference_side = {}
 	if entry.has("reference") and not gulls:
 		reference_side = _make(str(entry.reference), "", false, motion)
