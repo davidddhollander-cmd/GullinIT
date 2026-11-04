@@ -2,7 +2,7 @@ class_name BeachStashRaids
 extends Node2D
 ## Scattered items remain owned by their source until the gull or owner claims them.
 signal collected(position: Vector2, food_id: String, scrap: bool)
-signal bag_collected
+signal bag_burst ## the final peck split a sunbather's bag
 signal bin_opened(bin_type: String)
 signal bin_emptied(bin_type: String)
 const BIN_SPILL_SPREAD: float = 90.0
@@ -16,6 +16,7 @@ var raids: Dictionary = {}
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var visual_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var peck_cooldown: float = 0.0
+var reach_bonus: float = 0.0 ## training widens the bag peck reach so a near miss still lands
 var bins: Array[Dictionary] = []
 var shine_clock: float = 0.0
 var actor: BeachGull ## set while a rival pecks, so the player's code path serves any gull
@@ -95,7 +96,7 @@ func nearby_stash(include_empty: bool = false) -> BeachTarget:
 	if _gull().state != BeachGull.State.GROUNDED:
 		return null
 	var nearest: BeachTarget
-	var distance: float = float(Config.tuning.world.peck_reach)
+	var distance: float = float(Config.tuning.world.peck_reach) + reach_bonus
 	for target: BeachTarget in game.spawner.targets:
 		if target.kind != "sunbather" or (target.stash_remaining <= 0 and not include_empty):
 			continue
@@ -146,6 +147,7 @@ func peck() -> bool:
 	Audio.play("bag_thump",0.88+0.22*progress)
 	if final_hit:
 		raid.pecks = 0
+		bag_burst.emit()
 		var count: int = mini(owner.stash_remaining,int(t.stash_burst))
 		if count > 0:
 			game.effects.release_burst(owner.stash_position()-Vector2(0,4))
@@ -340,8 +342,6 @@ func tick(delta: float) -> void:
 					game._quest_event("abandoned_looted")
 			else:
 				collected.emit(item.position,item.food_id,item.get("source","") == "bin")
-				if is_instance_valid(item.get("owner")) and item.owner.kind == "sunbather":
-					bag_collected.emit()
 	for owner: BeachTarget in raids.keys():
 		if not is_instance_valid(owner):
 			raids.erase(owner)

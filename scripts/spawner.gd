@@ -269,31 +269,35 @@ func _free_offset(target: BeachTarget, placed: Dictionary, lane_y: float = NAN) 
 			return candidate
 	return null
 
+## Benches, and sunbathers lying down, keep their place: whoever walks past steps around them.
+func _holds_place(target: BeachTarget) -> bool:
+	return target.bench_visit.anchored() or (target.kind == "sunbather" and target.sleep_state != BeachTarget.SleepState.AWAKE)
+
 func apply_spacing(delta: float) -> void:
 	var placed: Dictionary = {}
 	var ordered: Array[BeachTarget] = []
 	# People standing still hold their place; walkers and chasers step around.
 	for target: BeachTarget in targets:
-		if is_instance_valid(target) and target.bench_visit.anchored():
+		if is_instance_valid(target) and _holds_place(target):
 			ordered.append(target)
 	# Place parents then children before walkers, so other people go around the
 	# family instead of splitting it between depth lanes.
 	for kind: String in ["picnic_family","toddler"]:
 		for target: BeachTarget in targets:
-			if is_instance_valid(target) and target.kind==kind and not target.bench_visit.anchored():
+			if is_instance_valid(target) and target.kind==kind and not _holds_place(target):
 				ordered.append(target)
 	for target: BeachTarget in targets:
-		if is_instance_valid(target) and not _ground_lane_family(target) and not target.bench_visit.anchored() and absf(target.position.x-float(previous_x.get(target,target.position.x))) <= 0.1:
+		if is_instance_valid(target) and not _ground_lane_family(target) and not _holds_place(target) and absf(target.position.x-float(previous_x.get(target,target.position.x))) <= 0.1:
 			ordered.append(target)
 	for target: BeachTarget in targets:
-		if is_instance_valid(target) and not _ground_lane_family(target) and not target.bench_visit.anchored() and absf(target.position.x-float(previous_x.get(target,target.position.x))) > 0.1:
+		if is_instance_valid(target) and not _ground_lane_family(target) and not _holds_place(target) and absf(target.position.x-float(previous_x.get(target,target.position.x))) > 0.1:
 			ordered.append(target)
 	for target: BeachTarget in ordered:
 		var desired: Vector2 = Vector2.ZERO
 		if _ground_lane_family(target):
 			placed[target] = _family_offset(target,placed)
 			continue
-		if target.service_locked or target.bench_visit.anchored():
+		if target.service_locked or _holds_place(target):
 			placed[target] = desired
 			continue
 		if target.panic.state != CrowdPanic.State.NONE:

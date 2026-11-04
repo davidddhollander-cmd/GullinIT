@@ -43,7 +43,11 @@ const SECOND_SWOOP_LESSON: int = 6
 const BUMP_LESSON: int = 7 ## dive into the empty-beaked dummy gull
 const MUG_LESSON: int = 8 ## the dummy now carries food: dive through it
 const DUMMY_FOOD: String = "crisps_bag"
-const TRAINER_DELAY: float = 1.6 ## seconds between a lesson's toast and the next pop-up
+const RING_LESSON_1: Vector2 = Vector2(145,65) ## the takeoff ring, above the first palm
+const TRAINER_DELAY: float = 1.4 ## seconds between a lesson's toast and the next pop-up or banner
+const BANNER_CUE_TIME: float = 1.4 ## talk animation and pulse when the live banner appears or changes
+var banner_delay: float = 0.0 ## counts down to the next live banner
+var banner_cue: float = 0.0
 ## Screeches McCrumbs' pop-ups. Off in the lesson-logic tests, which drive lessons without dismissing cards.
 static var trainer_cards: bool = true
 var trainer_open: bool = false
@@ -230,7 +234,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 			Audio.play("snatch",1+score.tier*0.08)
 			player.digestion.collect(food_id)
 	)
-	stash_raids.bag_collected.connect(func() -> void:
+	stash_raids.bag_burst.connect(func() -> void:
 		if training and lesson == 3 and training_raid_started:
 			_training_advance()
 	)
@@ -635,7 +639,10 @@ func dismiss_intro() -> void:
 	input.enabled = true
 	overlay.intro_panel.hide()
 	if trainer_cards and training:
-		open_trainer(_trainer_entry("training", lesson))
+		if banner_lesson(lesson):
+			_cue_banner()
+		else:
+			open_trainer(_trainer_entry("training", lesson))
 	elif trainer_cards and screech_lesson:
 		open_trainer(_trainer_entry("screech", 0))
 	elif trainer_cards and counter_lesson:
@@ -701,7 +708,7 @@ func _peck() -> void:
 			player.show_ground_peck()
 
 func _can_screech() -> bool:
-	return player != null and player.species == "herring" and player.detailed_art and player.state == BeachGull.State.GROUNDED and not player.climb and absf(player.velocity.x) <= 1.0 and Input.get_vector("aim_left","aim_right","aim_up","aim_down").length() <= 0.15 and (input == null or input.touch_stick().length() <= 0.15)
+	return player != null and not training and player.species == "herring" and player.detailed_art and player.state == BeachGull.State.GROUNDED and not player.climb and absf(player.velocity.x) <= 1.0 and Input.get_vector("aim_left","aim_right","aim_up","aim_down").length() <= 0.15 and (input == null or input.touch_stick().length() <= 0.15)
 
 func _advance_screech_hold(delta: float) -> void:
 	if not peck_hold_pending:
@@ -1053,7 +1060,7 @@ func _training_advance() -> void:
 	if lesson < TRAINING_LESSONS:
 		track("lesson_start", {"lesson": lesson + 1})
 	GameState.save_training_step(lesson)
-	effects.message(player.position-Vector2(0,24),_toast(),BeachUI.GOLD)
+	effects.message(player.position-Vector2(0,24),_toast(),BeachUI.GOLD,1.5)
 	if lesson >= BUMP_LESSON and lesson < TRAINING_LESSONS:
 		_training_dummy_setup()
 	if lesson >= TRAINING_LESSONS:
@@ -1061,11 +1068,14 @@ func _training_advance() -> void:
 			var closing: Dictionary = Config.trainer.training.closing
 			var first_time: bool = not bool(GameState.entry(1).get("training_complete", false))
 			var closing_key: String = "first_time_text" if first_time else "text"
-			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing[closing_key], input), "lay_source": "training.closing." + closing_key, "lay_template": closing[closing_key], "button": closing.button}, finish)
+			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing[closing_key], input), "lay_source": "training.closing." + closing_key, "lay_template": closing[closing_key], "button": closing.button, "auto_close": float(closing.get("auto_close", 0.0))}, finish)
 		else:
 			finish()
 	elif trainer_cards:
-		_queue_trainer(_trainer_entry("training", lesson))
+		if banner_lesson(lesson):
+			banner_delay = TRAINER_DELAY
+		else:
+			_queue_trainer(_trainer_entry("training", lesson))
 
 ## The sparring gull for the bump and mug lessons. Spawned once, empty-beaked; the mug lesson hands it food.
 func _training_dummy_setup() -> void:
@@ -1105,6 +1115,18 @@ func open_trainer(entry: Dictionary, then: Callable = Callable()) -> void:
 	input.clear_touch()
 	_freeze_actors(true)
 	overlay.trainer_card.open(entry)
+
+## Simple lessons run as a live banner under the top bar (the world keeps running) instead of a pop-up card.
+## data/trainer.json "live_banners": false puts every lesson back on cards.
+func banner_lesson(index: int) -> bool:
+	return trainer_cards and training and index < TRAINING_LESSONS and bool(Config.trainer.get("live_banners", true)) and Config.trainer.training.lessons[index].has("banner")
+
+func banner_active() -> bool:
+	return banner_lesson(lesson) and banner_delay <= 0.0 and not trainer_open
+
+func _cue_banner() -> void:
+	banner_cue = BANNER_CUE_TIME
+	Audio.play("click")
 
 ## Shows the card after a short beat so the lesson-done toast is seen first.
 func _queue_trainer(entry: Dictionary, then: Callable = Callable()) -> void:
@@ -1154,6 +1176,12 @@ func _end_peck_pause() -> void:
 
 func _training_tick(delta: float) -> void:
 	training_miss_hint = maxf(0.0,training_miss_hint-delta)
+	banner_cue = maxf(0.0,banner_cue-delta)
+	stash_raids.reach_bonus = 14.0 if lesson == 3 else 0.0
+	if banner_delay > 0.0:
+		banner_delay -= delta
+		if banner_delay <= 0.0:
+			_cue_banner()
 	if training_miss_advance > 0.0:
 		training_miss_advance -= delta
 		if training_miss_advance <= 0.0 and lesson == 2:
@@ -1161,9 +1189,11 @@ func _training_tick(delta: float) -> void:
 	_peck_pause_check()
 	if lesson == 0:
 		# Remember takeoff even when the player releases flap before steering.
-		if player.state == BeachGull.State.GLIDE and player.position.y < 110:
+		if player.state == BeachGull.State.GLIDE and player.position.y < 110 and not training_took_off:
 			training_took_off = true
-		if training_took_off and player.state == BeachGull.State.GLIDE and player.position.x > float(level.world.start_x) + 30:
+			if banner_active():
+				_cue_banner()
+		if training_took_off and player.state == BeachGull.State.GLIDE and player.position.x > RING_LESSON_1.x - 10.0:
 			_training_advance()
 	elif lesson in [2,SECOND_SWOOP_LESSON] and training_clean_snatch:
 		training_snatch_age += delta
@@ -1205,7 +1235,7 @@ func training_text() -> String:
 		return TrainerScript.line(live.first_miss, input)
 	var data: Dictionary = Config.trainer.training.lessons[mini(lesson, TRAINING_LESSONS-1)]
 	if lesson == 0 and training_took_off:
-		return TrainerScript.line(data.strip_steer, input)
+		return TrainerScript.line(data.banner_steer if banner_active() else data.strip_steer, input)
 	if lesson in [2, SECOND_SWOOP_LESSON]:
 		if training_clean_snatch:
 			return TrainerScript.line(live.clean, input)
@@ -1221,7 +1251,7 @@ func training_text() -> String:
 		var dummy: RivalPilot = training_dummy()
 		if dummy != null and not player.can_collect_food(DUMMY_FOOD):
 			return TrainerScript.line(live.full_stomach, input)
-	return TrainerScript.line(data.strip, input)
+	return TrainerScript.line(data.banner if banner_active() else data.strip, input)
 
 # The bin used by the bin lessons: the ordinary sand bin, or the wheelie bin.
 func training_bin(wheelie: bool) -> Dictionary:
@@ -1237,7 +1267,7 @@ func training_target() -> Vector2:
 			# The wheelie ring marks its lid, where the gull has to stand.
 			return Vector2(float(bin.x),float(bin.content_y)-6.0 if lesson == WHEELIE_LESSON else float(Config.tuning.world.ground)-18)
 	if lesson == 0:
-		return Vector2(245,75)
+		return RING_LESSON_1
 	if lesson == 1:
 		var nearest: Vector2 = Vector2(60,156)
 		var distance: float = INF

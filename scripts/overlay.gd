@@ -33,6 +33,8 @@ var score_announcement_font_index: int = 0
 const SCORE_ANNOUNCEMENT_HOLD: float = BeachEffects.SCORE_MESSAGE_HOLD
 const SCORE_ANNOUNCEMENT_FADE: float = BeachEffects.SCORE_MESSAGE_FADE
 const TOP_BAR_HEIGHT: int = 17
+const BANNER_PORTRAIT: float = 36.0 ## Screeches in the live lesson banner
+const BANNER_TEXT_WIDTH: float = 262.0 ## widest the text may grow beside him; the panel shrinks to fit shorter lines
 const TOP_BAR_FONT_SIZE: int = 6
 const TIME_WARNING: float = 20.0 ## seconds left when the timer turns red and flashes
 const QUEST_STRIP_HEIGHT: float = 10.0 ## small-font quest row directly under the top bar
@@ -159,7 +161,7 @@ func setup(owner_game: BeachGame) -> void:
 	training_panel.mouse_filter = MOUSE_FILTER_IGNORE
 	var training_row: HBoxContainer = HBoxContainer.new()
 	training_row.mouse_filter = MOUSE_FILTER_IGNORE
-	training_row.add_theme_constant_override("separation",6)
+	training_row.add_theme_constant_override("separation",3)
 	training_panel.add_child(training_row)
 	# Screeches McCrumbs winces and talks beside the strip while the first-miss hint shows.
 	trainer_portrait = TextureRect.new()
@@ -169,7 +171,6 @@ func setup(owner_game: BeachGame) -> void:
 	trainer_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	trainer_portrait.mouse_filter = MOUSE_FILTER_IGNORE
 	trainer_portrait.hide()
-	training_row.add_child(trainer_portrait)
 	var lesson_column: VBoxContainer = VBoxContainer.new()
 	lesson_column.mouse_filter = MOUSE_FILTER_IGNORE
 	lesson_column.add_theme_constant_override("separation",2)
@@ -186,6 +187,7 @@ func setup(owner_game: BeachGame) -> void:
 	lesson_prompt.add_theme_font_override("font", TrainerCard.SPEECH)
 	lesson_prompt.add_theme_font_size_override("font_size", TrainerCard.SPEECH_SIZE)
 	lesson_prompt.custom_minimum_size = Vector2(176, 10)
+	training_row.add_child(trainer_portrait) # Screeches stands to the right of his words
 	var center: CenterContainer = CenterContainer.new()
 	add_child(center)
 	BeachUI.full(center)
@@ -258,11 +260,29 @@ func _draw_peck_prompt(offset: Vector2) -> void:
 	draw_string(font,Vector2(-width * 0.5,4.0),text,HORIZONTAL_ALIGNMENT_LEFT,-1,8,tint)
 	draw_set_transform(Vector2.ZERO,0.0,Vector2.ONE)
 
-# Wince at the miss, then flap the beak while he explains.
+# Wince at the miss, then flap the beak while he explains. The live banner flaps his beak and pulses the panel when it appears or changes.
 func _sync_trainer() -> void:
+	var banner: bool = game.banner_active()
 	var talking: bool = game.training_miss_hint > 0.0
-	trainer_portrait.visible = talking
+	trainer_portrait.visible = talking or banner
+	var px: float = BANNER_PORTRAIT if banner and not talking else 48.0
+	trainer_portrait.custom_minimum_size = Vector2(px,px)
+	var align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_LEFT if banner else HORIZONTAL_ALIGNMENT_CENTER
+	lesson_prompt.horizontal_alignment = align
+	lesson_label.horizontal_alignment = align
+	var wide: float = 0.0
+	for part: String in lesson_prompt.text.split("
+"):
+		wide = maxf(wide,TrainerCard.SPEECH.get_string_size(part,HORIZONTAL_ALIGNMENT_LEFT,-1,TrainerCard.SPEECH_SIZE).x)
+	lesson_prompt.custom_minimum_size.x = minf(ceilf(wide) + 2.0,BANNER_TEXT_WIDTH) if banner else 176.0
+	var pulse: float = game.banner_cue / BeachGame.BANNER_CUE_TIME if banner else 0.0
+	training_panel.self_modulate = Color.WHITE.lerp(Color(1.0,0.86,0.5),pulse * (0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.02)))
 	if not talking:
+		if banner:
+			var cells: Array[ImageTexture] = TrainerCard.portrait_textures()
+			var mood: int = int(TrainerCard.MOODS.get(str(Config.trainer.training.lessons[mini(game.lesson,BeachGame.TRAINING_LESSONS-1)].mood),0))
+			var flap: bool = game.banner_cue > 0.0 and int((BeachGame.BANNER_CUE_TIME - game.banner_cue) / TrainerCard.TALK_STEP) % 2 == 0
+			trainer_portrait.texture = cells[int(TrainerCard.MOODS.talking) if flap else mood]
 		return
 	var since: float = BeachGame.MISS_HINT_TIME - game.training_miss_hint
 	var cells: Array[ImageTexture] = TrainerCard.portrait_textures()
@@ -283,7 +303,7 @@ func _process(delta: float) -> void:
 	wind_label.text = "CALM" if absf(game.player.wind_force) < 0.01 else "%s %d%%" % ["WIND >" if game.player.wind_force > 0 else "< WIND",roundi(absf(game.player.wind_force)*100)]
 	intro_panel.visible = game.intro > 0 and not trainer_intro
 	# The frozen prompt sits high above the gull; the lesson strip and quest row would cover it.
-	training_panel.visible = game.lesson_active() and game.running and game.intro <= 0 and not game.trainer_open and not game.peck_pause
+	training_panel.visible = game.lesson_active() and game.running and game.intro <= 0 and not game.trainer_open and not game.peck_pause and not (game.banner_delay > 0.0 and game.training_miss_hint <= 0.0)
 	if game.training:
 		lesson_label.text = "LESSON %d/%d" % [mini(game.lesson + 1, BeachGame.TRAINING_LESSONS), BeachGame.TRAINING_LESSONS]
 		lesson_prompt.text = game.training_text()
@@ -479,6 +499,12 @@ func _draw() -> void:
 			if training_target.x >= 4 and training_target.x <= 316 and training_target.y >= 28 and training_target.y <= 165:
 				draw_arc(training_target,12,0,TAU,24,BeachUI.GOLD,2)
 				draw_arc(training_target,16,0,TAU,24,Color(1.0,0.95,0.7,0.55),1)
+			elif game.training_target().x > -900.0 and (training_target.x < 4 or training_target.x > 316) and Time.get_ticks_msec() % 700 < 450:
+				# The lesson target is on another part of the beach: flash an edge arrow toward it.
+				var side: float = -1.0 if training_target.x < 4 else 1.0
+				var tip: Vector2 = Vector2(6.0 if side < 0 else 314.0,clampf(training_target.y,70.0,150.0))
+				draw_colored_polygon(PackedVector2Array([tip,tip+Vector2(-side*10.0,-8.0),tip+Vector2(-side*10.0,8.0)]),BeachUI.GOLD)
+				draw_polyline(PackedVector2Array([tip+Vector2(-side*10.0,-8.0),tip,tip+Vector2(-side*10.0,8.0)]),BeachUI.INK,1)
 		elif game.screech_lesson or game.counter_lesson:
 			var lesson_target: Vector2 = (game.screech_lesson_target() if game.screech_lesson else game.counter_lesson_target()) - offset
 			if lesson_target.x >= 4 and lesson_target.x <= 316 and lesson_target.y >= 28 and lesson_target.y <= 165:

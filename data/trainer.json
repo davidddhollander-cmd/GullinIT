@@ -57,7 +57,8 @@
       "mood": "proud",
       "text": "Not bad, gullster. Not bad at all. You can swoop, raid bins, bump rivals and mug them blind. Now get out there and fleece that beach.",
       "first_time_text": "Not bad, gullster. Not bad at all.\n\nYou can swoop, raid bins, bump rivals and mug them blind. Here's a feather for your trouble.\n\nNow get out there and fleece that beach.",
-      "button": "To the beach!"
+      "button": "To the beach!",
+      "auto_close": 4.0
     },
     "lessons": [
       {
@@ -74,7 +75,12 @@
           "default": "Hold {flap} to take off, then steer right",
           "realistic": "Tap {flap} to take off, then steer right"
         },
-        "strip_steer": "Steer right with {steer} to the ring"
+        "strip_steer": "Steer right with {steer} to the ring",
+        "banner": {
+          "default": "Hold {flap} to flap and climb.\nFly right through the golden ring.",
+          "realistic": "Tap {flap} over and over to climb.\nFly right through the golden ring."
+        },
+        "banner_steer": "Now steer right with {steer}.\nFly through the golden ring."
       },
       {
         "mood": "neutral",
@@ -86,6 +92,10 @@
         "strip": {
           "default": "Let go of {flap}, aim down and land",
           "realistic": "Stop tapping {flap}, aim down and land"
+        },
+        "banner": {
+          "default": "Let go of {flap}, aim down and land.\nThen walk over a golden crumb.",
+          "realistic": "Stop tapping {flap}, aim down and land.\nThen walk over a golden crumb."
         }
       },
       {
@@ -103,8 +113,9 @@
       {
         "mood": "amused",
         "lay": "Now for something simple. That sunbather is fast asleep and the picnic bag beside them is unguarded. Human bags hold food...",
-        "how": "Land next to the bag. Tap {peck} three times to burst it open, then walk over the food that spills out.",
-        "strip": "Land by the bag and tap {peck} three times"
+        "how": "Land next to the bag and tap {peck} three times to burst it open.",
+        "strip": "Land by the bag and tap {peck} three times",
+        "banner": "Land by the picnic bag.\nTap {peck} three times to burst it open."
       },
       {
         "mood": "neutral",
@@ -116,7 +127,8 @@
         "mood": "amused",
         "lay": "Posh wheelie bins have lids you can't open from the sand, but the grub inside is much better. The green one at the end of the beach is full.",
         "how": "Fly up and land on top of the lid. Tap {peck} {n} times from up there to burst it open.",
-        "strip": "Land on the wheelie bin lid, tap {peck} {n} times"
+        "strip": "Land on the wheelie bin lid, tap {peck} {n} times",
+        "banner": "Fly up and land on the wheelie bin lid.\nTap {peck} {n} times up there to burst it."
       },
       {
         "mood": "neutral",
@@ -128,19 +140,24 @@
         "strip": {
           "default": "Dive at any snack, peck it, then climb away",
           "casual": "Dive at any snack, then climb away"
+        },
+        "banner": {
+          "default": "Let's try another proper dive.\nDive with {dive}, tap {peck}, then climb.",
+          "casual": "Let's try another proper dive.\nDive with {dive}. Your beak does the pecking."
         }
       },
       {
         "mood": "amused",
-        "lay": "Time to meet the competition. This dummy is a rival gull. You better show who's boss. Give him a little push for me will ya?",
-        "how": "Climb above the dummy. Dive with {dive} and fly right into it. A bonk means it worked.",
+        "lay": "Time to meet the competition. This dummy is a rival gull. You better show who's boss. Give him a little push for me will ya?\n\nOnce he's nicked a snack he's fair game: a rival carrying food can be mugged, the best steal in the game. Careful though, rivals can mug you too.",
+        "how": "Climb above the dummy. Dive with {dive} and fly right into it to bump him. Then dive straight through him to take his snack.",
         "strip": "Dive with {dive} into the dummy gull"
       },
       {
         "mood": "amused",
         "lay": "Now the dummy has nicked a snack. A rival carrying food can be mugged, and that's the best steal in the game. Careful though: rivals can mug you too while you're holding food.",
         "how": "Dive with {dive} and fly straight through the dummy. The snack changes beaks, and it's yours.",
-        "strip": "Dive with {dive} straight through the dummy"
+        "strip": "Dive with {dive} straight through the dummy",
+        "banner": "Mug the dummy: dive straight through him.\nUse {dive}. The snack changes beaks."
       }
     ]
   },
@@ -208,5 +225,6 @@
         }
       }
     ]
-  }
+  },
+  "live_banners": true
 }
