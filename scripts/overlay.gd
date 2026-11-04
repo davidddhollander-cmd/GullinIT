@@ -14,6 +14,10 @@ var training_panel: PanelContainer
 var lesson_label: Label
 var lesson_prompt: Label
 var pause_button: Button
+var rival_popup: PanelContainer
+var rival_popup_head: TextureRect
+var rival_popup_name: Label
+var rival_popup_text: Label
 var top: HBoxContainer
 var quest_panel: PanelContainer
 var quest_box: HBoxContainer
@@ -188,6 +192,7 @@ func setup(owner_game: BeachGame) -> void:
 	lesson_prompt.add_theme_font_size_override("font_size", TrainerCard.SPEECH_SIZE)
 	lesson_prompt.custom_minimum_size = Vector2(176, 10)
 	training_row.add_child(trainer_portrait) # Screeches stands to the right of his words
+	_build_rival_popup()
 	var center: CenterContainer = CenterContainer.new()
 	add_child(center)
 	BeachUI.full(center)
@@ -259,6 +264,46 @@ func _draw_peck_prompt(offset: Vector2) -> void:
 	draw_set_transform(Vector2(left + box.x * 0.5,top + box.y * 0.5),0.0,Vector2(scale,scale))
 	draw_string(font,Vector2(-width * 0.5,4.0),text,HORIZONTAL_ALIGNMENT_LEFT,-1,8,tint)
 	draw_set_transform(Vector2.ZERO,0.0,Vector2.ONE)
+
+# Rival shout-out: head cropped from the rival's own sprite sheet (shouting frame) beside a line of speech.
+func _build_rival_popup() -> void:
+	var center: CenterContainer = CenterContainer.new()
+	add_child(center)
+	BeachUI.full(center)
+	center.offset_top = TOP_BAR_HEIGHT + 4
+	center.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	center.mouse_filter = MOUSE_FILTER_IGNORE
+	rival_popup = BeachUI.panel(center,Color(0.094,0.23,0.30,0.95))
+	rival_popup.mouse_filter = MOUSE_FILTER_IGNORE
+	var row: HBoxContainer = HBoxContainer.new()
+	row.mouse_filter = MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation",6)
+	rival_popup.add_child(row)
+	rival_popup_head = TextureRect.new()
+	rival_popup_head.custom_minimum_size = Vector2(40,40)
+	rival_popup_head.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rival_popup_head.stretch_mode = TextureRect.STRETCH_SCALE
+	rival_popup_head.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	rival_popup_head.mouse_filter = MOUSE_FILTER_IGNORE
+	row.add_child(rival_popup_head)
+	var column: VBoxContainer = VBoxContainer.new()
+	column.mouse_filter = MOUSE_FILTER_IGNORE
+	column.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(column)
+	rival_popup_name = BeachUI.label(column,"",8,BeachUI.GOLD)
+	rival_popup_text = BeachUI.label(column,"",8,BeachUI.CREAM)
+	rival_popup_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	rival_popup_text.custom_minimum_size = Vector2(176,0)
+	rival_popup.hide()
+
+func show_rival_popup(rival_name: String, head: Texture2D, text: String, seconds: float) -> void:
+	rival_popup_head.texture = head
+	rival_popup_name.text = rival_name.to_upper()
+	rival_popup_text.text = text
+	rival_popup.show()
+	var tween: Tween = create_tween()
+	tween.tween_interval(seconds)
+	tween.tween_callback(rival_popup.hide)
 
 # Wince at the miss, then flap the beak while he explains. The live banner flaps his beak and pulses the panel when it appears or changes.
 func _sync_trainer() -> void:

@@ -68,6 +68,12 @@ var training_miss_advance: float = 0.0  # counts down to the next card after a f
 var training_raid_started: bool = false
 var training_reset_clock: float = 0.0
 var pending_rivals: Array = []
+const FLY_IN_SPEED: float = 1.5
+const FLY_IN_BUMP_RANGE: float = 14.0
+const FLY_IN_TIMEOUT: float = 6.0
+var entry_pilot: RivalPilot ## rival currently flying in to bump the player (scripted, not AI-driven)
+var entry_profile: Dictionary
+var entry_age: float = 0.0
 var taunt_wait: float = -1.0
 var taunt_rival: String = ""
 var taunt_text: String = ""
@@ -325,6 +331,44 @@ func _rival_taunt(step: float) -> void:
 	var at: Vector2 = Vector2(clampf(from.x,camera_x-160.0+half,camera_x+160.0-half),from.y+22.0)
 	effects.message(at,taunt_text,BeachUI.GOLD,float(Config.tuning.juice.taunt_time),0.0)
 
+## Gary's debut: he flies in from off-screen, barges the player, then a head-and-speech pop-up delivers his line.
+func _start_fly_in(profile: Dictionary) -> void:
+	for pilot: RivalPilot in pilots:
+		if pilot.gull.rival_name == str(profile.name):
+			entry_pilot = pilot
+	if entry_pilot == null:
+		return
+	entry_profile = profile
+	entry_age = 0.0
+	var side: float = 1.0 if camera_x + 190.0 <= float(Config.tuning.world.width) else -1.0
+	entry_pilot.gull.position = Vector2(camera_x + side * 190.0,clampf(player.position.y - 10.0,30.0,110.0))
+	entry_pilot.gull.speed_factor = FLY_IN_SPEED
+
+func _rival_head() -> AtlasTexture:
+	var head: AtlasTexture = AtlasTexture.new()
+	head.atlas = preload("res://assets/sprites/gull-great-black-backed-carry-v1.png")
+	head.region = Rect2(104,80,48,48)
+	return head
+
+func _fly_in_step(step: float) -> void:
+	var gull: BeachGull = entry_pilot.gull
+	entry_age += step
+	gull.aim = player.position
+	gull.climb = gull.position.y > player.position.y
+	gull.tick(step,wind.direction,wind.strength)
+	var hit: bool = gull.position.distance_to(player.position) < FLY_IN_BUMP_RANGE
+	if not hit and entry_age < FLY_IN_TIMEOUT:
+		return
+	gull.speed_factor = float(entry_profile.speed)
+	if hit:
+		player.stun(Config.tuning.rival.mug_stun,gull.position)
+		effects.message(player.position-Vector2(0,20),"BUMP!",Color("ef725c"))
+		Audio.play("snatch")
+	entry_pilot.cooldown = 2.0
+	entry_pilot.mode = RivalPilot.Mode.RECOVER
+	overlay.show_rival_popup(str(entry_profile.name),_rival_head(),str(entry_profile.entry_text),float(Config.tuning.juice.taunt_time) * 1.5)
+	entry_pilot = null
+
 func _release_rivals() -> void:
 	for profile: Dictionary in pending_rivals:
 		var rival: BeachGull = BeachGull.new()
@@ -554,6 +598,9 @@ func _physics_process(delta: float) -> void:
 		carriers.append(player)
 	for pilot: RivalPilot in pilots:
 		pilot.prey = carriers
+		if pilot == entry_pilot:
+			_fly_in_step(step)
+			continue
 		pilot.tick(step,food_targets,claims,wind,player.position)
 	for target: BeachTarget in spawner.targets.duplicate():
 		target.tick(step,gulls)
@@ -914,7 +961,9 @@ func _swallowed(snack: Dictionary) -> void:
 				if profile.has("taunt"):
 					taunter = profile
 			_release_rivals()
-			if not taunter.is_empty():
+			if str(taunter.get("entry","")) == "fly_in":
+				_start_fly_in(taunter)
+			elif not taunter.is_empty():
 				taunt_rival = str(taunter.name)
 				taunt_text = str(taunter.taunt)
 				taunt_wait = float(Config.tuning.juice.taunt_delay)

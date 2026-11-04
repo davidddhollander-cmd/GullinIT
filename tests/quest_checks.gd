@@ -256,26 +256,20 @@ static func run_game(suite: Node, check: Callable) -> void:
 	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return str(t.text).begins_with("FLY INTO THE WIND")) and not ("upwind" in GameState.options.tips), "level 2 has no wind, so no upwind tip")
 	game = _play(main, 2)
 	game._swallowed({"id": "hotdog"})
-	var is_taunt: Callable = func(t: Dictionary) -> bool: return t.text == "GARY: OI! THAT'S MY LUNCH!"
-	check.call(not game.effects.texts.any(is_taunt) and game.taunt_wait > 0.0, "level 2 taunt waits after Gary is released")
-	game.effects.freeze = 0.0
-	game.taunt_wait = 0.0
-	check.call(game.overlay.score_announcement.visible, "score announcement is up after the first swallow")
-	game._physics_process(1.0 / 60)
-	check.call(not game.effects.texts.any(is_taunt), "taunt is not shown while the score announcement is visible")
-	game.overlay.score_announcement.hide()
-	game._physics_process(1.0 / 60)
-	check.call(not game.effects.texts.any(is_taunt), "taunt also waits for floating score text")
-	game.effects.texts.clear()
-	game._physics_process(1.0 / 60)
-	var taunt: Array = game.effects.texts.filter(is_taunt)
-	check.call(taunt.size() == 1 and float(taunt[0].life) >= 1.9, "level 2 releasing Gary shows a 2 s taunt")
-	if taunt.size() == 1:
-		var taunt_rect: Rect2 = _text_rect(game, taunt[0])
-		var gary: Vector2 = game.pilots[0].gull.position
-		check.call(not taunt_rect.intersects(Rect2(gary - Vector2(12, 28), Vector2(24, 36))), "taunt covers neither Gary nor his name tag")
-		check.call(taunt_rect.position.x >= game.camera_x - 160.0 and taunt_rect.end.x <= game.camera_x + 160.0, "taunt stays on screen")
-	await suite.snapshot("level2-gary-taunt")
+	var gary_gull: BeachGull = game.pilots[0].gull
+	check.call(game.entry_pilot != null and not game.overlay.rival_popup.visible, "level 2: Gary flies in first, no pop-up yet")
+	check.call(absf(gary_gull.position.x - game.camera_x) >= 160.0, "Gary starts off-screen")
+	game.player.invulnerable = 0.0
+	var bumped: bool = false
+	for _i: int in 600:
+		game._physics_process(1.0 / 60)
+		if game.entry_pilot == null:
+			bumped = true
+			break
+	check.call(bumped, "Gary reaches the player")
+	check.call(game.overlay.rival_popup.visible and "NOSH" in game.overlay.rival_popup_text.text, "Gary's head pop-up shows his line after the bump")
+	check.call(game.player.state == BeachGull.State.STUNNED, "Gary's entry bumps the player")
+	await suite.snapshot("level2-gary-entry")
 	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == "GARY JOINS THE LUNCH RUSH!"), "level 2 no longer shows the generic join message")
 	check.call(game.pilots.size() == 1 and bool(game.pilots[0].personality.get("loose_only", false)), "Gary is loose-only")
 	# Task 007: customer bite window and the mid-air bite quest (level 1 replay).
