@@ -7,6 +7,7 @@ var current_level: int = 1
 var screen: String = "title"
 var quitting: bool = false
 var _pagehide: JavaScriptObject
+var _visibility: JavaScriptObject
 
 func _ready() -> void:
 	GullInput.register_actions()
@@ -59,9 +60,17 @@ func _ready() -> void:
 	get_tree().auto_accept_quit = false
 	get_tree().root.close_requested.connect(_quit)
 	if OS.has_feature("web"):
+		# The page stops reporting page_left and page_error now that session_start has taken over.
+		JavaScriptBridge.eval("window.gullPageReady = true")
 		# Closing the tab never raises close_requested; pagehide is the last chance to report it.
 		_pagehide = JavaScriptBridge.create_callback(func(_args: Array) -> void: _abandon())
 		JavaScriptBridge.get_interface("window").addEventListener("pagehide", _pagehide)
+		# Phones often kill a backgrounded tab without pagehide; hiding is the last event they reliably raise.
+		_visibility = JavaScriptBridge.create_callback(func(_args: Array) -> void:
+			if bool(JavaScriptBridge.get_interface("document").hidden) and is_instance_valid(game):
+				game.track_hidden()
+		)
+		JavaScriptBridge.get_interface("document").addEventListener("visibilitychange", _visibility)
 	if OS.get_cmdline_user_args().has("--smoke"):
 		_navigate("start",1)
 

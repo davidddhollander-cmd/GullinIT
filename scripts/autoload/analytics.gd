@@ -7,6 +7,7 @@ var in_flight: bool = false
 var input_kind: String = ""  # set by the game once real input is known
 var seq: int = 0
 var page_host: String = ""
+var page_id: String = ""
 # Replaceable in tests: sender.call(url: String, body: String, done: Callable(ok: bool)).
 var sender: Callable = _http_send
 var _http: HTTPRequest
@@ -24,6 +25,8 @@ func _ready() -> void:
 	# The page hosting a web build: html-classic.itch.zone on itch, localhost for local tests.
 	if OS.has_feature("web"):
 		page_host = str(JavaScriptBridge.eval("location.hostname", true))
+		# Links game events to the page_open sent by html/head_include in export_presets.cfg, which also holds a copy of the project key.
+		page_id = str(JavaScriptBridge.eval("window.gullPageId || ''", true))
 
 func active() -> bool:
 	return bool(config.get("enabled", false)) and not str(config.get("project_key", "")).is_empty() and bool(GameState.options.get("stats", true))
@@ -39,10 +42,12 @@ func track(event: String, props: Dictionary = {}, urgent: bool = false) -> void:
 		properties.input = input_kind
 	seq += 1
 	properties.seq = seq
-	properties.schema = 2
-	properties.dev = OS.is_debug_build()
+	properties.schema = 3
+	properties.dev = OS.is_debug_build() or bool(GameState.options.get("dev_player", false))
 	if not page_host.is_empty():
 		properties.host = page_host
+	if not page_id.is_empty():
+		properties.page_id = page_id
 	properties["$process_person_profile"] = false
 	var body: String = JSON.stringify({
 		"api_key": config.project_key, "event": event, "distinct_id": GameState.anon_id(),

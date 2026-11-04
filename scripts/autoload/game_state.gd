@@ -2,7 +2,7 @@ extends Node
 const SAVE_VERSION: int = 2
 var progress: Dictionary = {}
 var wallet: Dictionary = {"feathers": 0}
-var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false, "stats": true, "tips": [], "gull": "herring"}
+var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false, "stats": true, "tips": [], "gull": "herring", "dev_player": false}
 var _anon_id: String = ""
 var save_path: String = "user://save.json"
 var save_error: String = ""
@@ -76,6 +76,10 @@ func save_progress() -> void:
 	file.close()
 	var error: Error = DirAccess.rename_absolute(save_path + ".tmp", save_path)
 	save_error = "" if error == OK else "Progress could not be saved."
+	# The page sends page_open before the save can load, so it reads this copy of the player's choice.
+	if OS.has_feature("web"):
+		var ping: String = "on" if bool(options.get("stats", true)) and not bool(options.get("dev_player", false)) else "off"
+		JavaScriptBridge.eval("try { localStorage.setItem('gull_page_ping', '%s') } catch (e) {}" % ping)
 
 func record(id: int, score: int, stars: int, casual_time: float = -1.0) -> void:
 	var previous: Dictionary = entry(id)

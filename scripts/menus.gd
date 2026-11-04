@@ -53,6 +53,19 @@ func hint(parent: Control, text: String) -> void:
 	node.custom_minimum_size.x = 150
 
 const GLINT: Shader = preload("res://assets/shaders/title_glint.gdshader")
+const DEV_TAPS: int = 7
+var logo_taps: int = 0
+
+# Hidden switch: tapping the logo DEV_TAPS times marks this install as the developer's, so analytics can leave it out.
+func _logo_tapped(tagline: Label) -> void:
+	logo_taps += 1
+	if logo_taps < DEV_TAPS:
+		return
+	logo_taps = 0
+	GameState.options.dev_player = true
+	GameState.save_progress()
+	Analytics.track("dev_device")
+	tagline.text = "DEV DEVICE: NOT COUNTED"
 
 func title() -> void:
 	for child: Node in get_children():
@@ -83,6 +96,10 @@ func title() -> void:
 	tween.tween_property(logo,"position:y",0.0,1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	var tagline: Label = BeachUI.label(column,"The No. 1 Seagull Simulator",BeachUI.FONT_NATIVE,BeachUI.GOLD)
 	tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	logo.gui_input.connect(func(event: InputEvent) -> void:
+		if event.is_pressed() and (event is InputEventMouseButton or event is InputEventScreenTouch):
+			_logo_tapped(tagline)
+	)
 	# The bitmap font ignores outlines; a 1 px ink shadow lifts the gold off the sunset sky.
 	tagline.add_theme_color_override("font_shadow_color",BeachUI.INK)
 	tagline.add_theme_constant_override("shadow_offset_x",1)
