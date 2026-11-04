@@ -71,6 +71,7 @@ func setup(actor: BeachGull, profile: Dictionary, random: RandomNumberGenerator)
 	if dummy:
 		var span: Array = profile.get("range",[dummy_range.x,dummy_range.y])
 		dummy_range = Vector2(float(span[0]),float(span[1]))
+		dummy_cruise = float(profile.get("cruise_y",0.0))
 	gull.loose_only = bool(profile.get("loose_only",false))
 	gull.species = str(profile.get("species","great-black-backed"))
 	gull.body_scale = float(profile.get("scale",1.0))
@@ -86,8 +87,10 @@ func world_width() -> float:
 func edge_margin() -> float:
 	return float(Config.tuning.rival.edge_margin)
 
+var dummy_cruise: float = 0.0 ## the training dummy flies lower so the lesson banner never covers him
+
 func cruise() -> float:
-	return float(Config.tuning.rival.cruise_y)
+	return dummy_cruise if dummy and dummy_cruise > 0.0 else float(Config.tuning.rival.cruise_y)
 
 func tick(delta: float, targets: Array[BeachTarget], claims: Dictionary, wind: BeachWind, threat: Vector2 = Vector2(-1, -1)) -> void:
 	gull.mug_cue = carry_window > 0.0 and carried > 0 and threat.x >= 0.0 and gull.position.distance_to(threat) <= mug_range()
@@ -350,7 +353,7 @@ func escape() -> void:
 
 func needs_height() -> bool:
 	# Look a quarter second ahead so flapping stops before the climb overshoots cruise height.
-	return gull.position.y + gull.velocity.y * 0.25 > float(Config.tuning.rival.cruise_y)
+	return gull.position.y + gull.velocity.y * 0.25 > cruise()
 
 func took_food(value: int) -> void:
 	carried = value
