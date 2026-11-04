@@ -54,7 +54,7 @@ var stash_active: bool = false
 var stash_standing: bool = false
 const BAG_SQUISH_TIME: float = 0.18
 const BAG_PIVOT: Vector2 = Vector2(0, 8)
-const BAG_SCALE: float = 0.55
+const BAG_SCALE: float = 0.62
 const BAG_TEXTURES: Array[Texture2D] = [
 	preload("res://assets/sprites/retro-picnic-bag-coral-32bit.png"),
 	preload("res://assets/sprites/retro-picnic-bag-teal-32bit.png"),

@@ -261,8 +261,8 @@
     "bin_pecks": 4,
     "bin_burst": 3,
     "bin_litter": 8,
-    "bin_litter_wheelie": 14,
-    "litter_cap": 60,
+    "bin_litter_wheelie": 26,
+    "litter_cap": 90,
     "wheelie_bin_scatter": ["half_eaten_pizza", "single_chip", "half_eaten_sandwich", "wrapper", "half_eaten_doughnut", "crisps_bag", "half_eaten_pizza", "single_chip", "cardboard"],
     "bin_scatter": [
       "crumbs",
