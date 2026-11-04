@@ -835,7 +835,7 @@ func _wire_sweeper(sweeper: BeachSweeper) -> void:
 	_sweeper_says(sweeper,"arrive")
 	Audio.play("click")
 	_quest_event("sweeper_arrived")
-	sweeper.said.connect(_sweeper_says.bind(sweeper))
+	sweeper.said.connect(func(key: String) -> void: _sweeper_says(sweeper,key))
 	sweeper.warned.connect(func() -> void: _quest_event("sweeper_warned"))
 	sweeper.swatted.connect(func(_gull: BeachGull) -> void:
 		_sweeper_says(sweeper,"hit")
