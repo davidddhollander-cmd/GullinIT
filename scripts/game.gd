@@ -87,6 +87,10 @@ var dive_side: float = 0.0
 var first_steal_sent: bool = false
 var end_tracked: bool = false
 var lesson_started: float = 0.0
+# Counters when the current lesson began, so analytics can report what happened in that lesson alone.
+var lesson_base: Dictionary = {"dives":0,"dive_pecks":0,"dive_snatches":0,"dive_overshoots":0,"crashes":0}
+# Time played since the level began; unlike elapsed it keeps running during first-play lessons.
+var play_clock: float = 0.0
 var perk_id: String = ""
 var bullet_meter: float = 0.0
 var slowmo_end_msec: int = -1 ## real-clock end of bullet time (-1 = off); Engine.time_scale slows delta, so never count it
@@ -538,6 +542,7 @@ func _physics_process(delta: float) -> void:
 		return
 	var step: float = delta * (float(Config.tuning.juice.slow_scale) if effects.slow > 0 else 1.0)
 	spawner.reset_spacing()
+	play_clock += step
 	if not screech_lesson and not counter_lesson:
 		elapsed += step
 	wind.tick(step)
@@ -656,7 +661,23 @@ func track_end(outcome: String, result: Dictionary = {}, urgent: bool = false) -
 	if end_tracked or intro_dismissed_elapsed < 0.0:
 		return
 	end_tracked = true
-	track("level_end", {"level": int(level.id), "mode": mode_name(), "score": int(result.get("score", score.points)), "stars": int(result.get("stars", 0)), "seconds": snappedf(elapsed, 0.1), "crashes": crashes, "outcome": outcome, "lesson": mini(lesson + 1, TRAINING_LESSONS) if training else 0}.merged(dive_stats), urgent)
+	track("level_end", _run_stats().merged({"score": int(result.get("score", score.points)), "stars": int(result.get("stars", 0)), "outcome": outcome}), urgent)
+
+# The run so far; a tab hidden on a phone may never come back, so this is reported then too.
+func track_hidden() -> void:
+	if not end_tracked and intro_dismissed_elapsed >= 0.0:
+		track("game_hidden", _run_stats(), true)
+
+func _run_stats() -> Dictionary:
+	var stats: Dictionary = {"level": int(level.id), "mode": mode_name(), "seconds": snappedf(elapsed, 0.1), "play_seconds": snappedf(play_clock, 0.1), "crashes": crashes, "lesson": mini(lesson + 1, TRAINING_LESSONS) if training else 0}.merged(dive_stats)
+	return stats.merged(_lesson_stats()) if training else stats
+
+func _lesson_stats() -> Dictionary:
+	return {"lesson_seconds": snappedf(elapsed - lesson_started, 0.1), "lesson_dives": dive_stats.dives - lesson_base.dives, "lesson_pecks": dive_stats.dive_pecks - lesson_base.dive_pecks, "lesson_snatches": dive_stats.dive_snatches - lesson_base.dive_snatches, "lesson_overshoots": dive_stats.dive_overshoots - lesson_base.dive_overshoots, "lesson_crashes": crashes - lesson_base.crashes}
+
+func _begin_lesson_stats() -> void:
+	lesson_started = elapsed
+	lesson_base = dive_stats.merged({"crashes": crashes})
 
 func _dive_began() -> void:
 	dive_stats.dives += 1
@@ -676,7 +697,8 @@ func _dive_tick() -> void:
 		dive_stats.dive_overshoots += 1
 
 func dismiss_intro() -> void:
-	lesson_started = elapsed
+	_begin_lesson_stats()
+	play_clock = 0.0
 	track("level_start", {"level": int(level.id), "mode": mode_name()})
 	if training:
 		track("lesson_start", {"lesson": lesson + 1})
@@ -1115,8 +1137,8 @@ func _training_advance() -> void:
 		for bin: Dictionary in stash_raids.bins:
 			bin.remaining = int(bin.get("capacity",Config.tuning.world.bin_stash_size))
 			bin.pecks = 0
-	track("lesson_complete", {"lesson": lesson, "seconds": snappedf(elapsed - lesson_started, 0.1)})
-	lesson_started = elapsed
+	track("lesson_complete", _lesson_stats().merged({"lesson": lesson, "seconds": snappedf(elapsed - lesson_started, 0.1)}))
+	_begin_lesson_stats()
 	if lesson < TRAINING_LESSONS:
 		track("lesson_start", {"lesson": lesson + 1})
 	GameState.save_training_step(lesson)

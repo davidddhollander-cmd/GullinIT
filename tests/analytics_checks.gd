@@ -105,9 +105,41 @@ static func run(suite: Node, check: Callable) -> void:
 	game.dismiss_intro()
 	check.call(rec.last("level_start").mode == "training", "training level_start mode")
 	game.elapsed = 5.0
+	game._dive_began()
+	game._crashed()
 	game._training_advance()
 	check.call(rec.last("lesson_complete").lesson == 1 and is_equal_approx(rec.last("lesson_complete").seconds, 5.0), "lesson_complete fires with lesson and seconds")
+	check.call(rec.last("lesson_complete").lesson_dives == 1 and rec.last("lesson_complete").lesson_crashes == 1, "lesson_complete reports that lesson's dives and crashes")
+	game._dive_began()
+	game.play_clock = 7.0
+	game.track_hidden()
+	var hidden: Dictionary = rec.last("game_hidden")
+	check.call(hidden.lesson == 2 and hidden.lesson_dives == 1 and hidden.lesson_crashes == 0 and hidden.dives == 2 and is_equal_approx(hidden.play_seconds, 7.0), "game_hidden reports the current lesson only, and true play time")
 	main.clear_game()
+	check.call(rec.last("level_end").outcome == "quit" and rec.last("level_end").lesson_dives == 1 and is_equal_approx(rec.last("level_end").play_seconds, 7.0), "level_end reports the lesson the player stopped on")
+	var hidden_count: int = rec.names().count("game_hidden")
+	main.start_level(1, true)
+	main.game.track_hidden()
+	main.clear_game()
+	check.call(rec.names().count("game_hidden") == hidden_count, "hiding the tab before the level starts reports nothing")
+	check.call(rec.sent[0].properties.schema == 3 and rec.sent[0].properties.has("dev"), "events carry schema and dev marker")
+	Analytics.page_id = "page123"
+	Analytics.track("level_start")
+	check.call(rec.last("level_start").page_id == "page123", "game events link to the page_open that loaded them")
+	Analytics.page_id = ""
+	var presets: String = FileAccess.get_file_as_string("res://export_presets.cfg")
+	check.call(presets.contains("send('page_open')") and presets.contains(str(saved_config.get("project_key", "missing"))) and presets.contains(str(saved_config.get("host", "missing")).rstrip("/") + "/i/v0/e/"), "the web page reports page_open to the same PostHog project as the game")
+	var saved_save: String = GameState.save_path
+	GameState.save_path = "res://test-output/analytics-save.json"
+	var tagline := Label.new()
+	for _tap: int in BeachMenus.DEV_TAPS - 1:
+		main.menus._logo_tapped(tagline)
+	check.call(not bool(GameState.options.dev_player) and not rec.names().has("dev_device"), "a few logo taps do not mark a dev device")
+	main.menus._logo_tapped(tagline)
+	check.call(bool(GameState.options.dev_player) and rec.last("dev_device").dev == true and tagline.text != "", "seven logo taps mark this install as a dev device")
+	tagline.free()
+	GameState.options.dev_player = false
+	GameState.save_path = saved_save
 	main.screen = "select"
 	main._navigate("feedback")
 	check.call(rec.last("feedback_click").screen == "level_select", "feedback_click from level select")
