@@ -52,6 +52,7 @@ var banner_cue: float = 0.0
 static var trainer_cards: bool = true
 var trainer_open: bool = false
 var trainer_queue: Dictionary = {}
+var training_feather: bool = false ## the first-time feather was already paid out when the player chose to keep practicing
 var trainer_then: Callable = Callable()
 ## The first swoop freezes just before the beak reaches the snack until the player presses peck.
 var peck_pause: bool = false
@@ -1032,7 +1033,7 @@ func finish() -> void:
 			running = true
 			input.enabled = true
 			return
-		if GameState.complete_training():
+		if GameState.complete_training() or training_feather:
 			result.feathers_earned = 1
 		result.training = true
 		result.success = true
@@ -1068,7 +1069,7 @@ func _training_advance() -> void:
 			var closing: Dictionary = Config.trainer.training.closing
 			var first_time: bool = not bool(GameState.entry(1).get("training_complete", false))
 			var closing_key: String = "first_time_text" if first_time else "text"
-			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing[closing_key], input), "lay_source": "training.closing." + closing_key, "lay_template": closing[closing_key], "button": closing.button, "auto_close": float(closing.get("auto_close", 0.0))}, finish)
+			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing[closing_key], input), "lay_source": "training.closing." + closing_key, "lay_template": closing[closing_key], "button": closing.button, "button_alt": closing.get("button_alt", ""), "auto_close": float(closing.get("auto_close", 0.0))}, _training_closed, float(closing.get("delay", TRAINER_DELAY)))
 		else:
 			finish()
 	elif trainer_cards:
@@ -1129,8 +1130,15 @@ func _cue_banner() -> void:
 	Audio.play("click")
 
 ## Shows the card after a short beat so the lesson-done toast is seen first.
-func _queue_trainer(entry: Dictionary, then: Callable = Callable()) -> void:
-	trainer_queue = {"entry": entry, "delay": TRAINER_DELAY, "then": then}
+func _queue_trainer(entry: Dictionary, then: Callable = Callable(), delay: float = TRAINER_DELAY) -> void:
+	trainer_queue = {"entry": entry, "delay": delay, "then": then}
+
+## Closing card: the main button ends training, the alt button keeps the gull flying (the course counts as done now).
+func _training_closed() -> void:
+	if overlay.trainer_card.chose_alt:
+		training_feather = GameState.complete_training()
+	else:
+		finish()
 
 func _on_trainer_dismissed() -> void:
 	trainer_open = false
@@ -1198,7 +1206,8 @@ func _training_tick(delta: float) -> void:
 	elif lesson in [2,SECOND_SWOOP_LESSON] and training_clean_snatch:
 		training_snatch_age += delta
 		# Climbing is the goal, but a gull that landed or stalled after a clean snatch still passes.
-		if training_snatch_age > 4.0 or (player.position.y < 100 and player.velocity.y <= 0 and player.state in [BeachGull.State.GLIDE,BeachGull.State.STRIKE]):
+		# Only the first dive lesson also passes on a timer; the second one needs the real climb-away.
+		if (lesson == 2 and training_snatch_age > 4.0) or (player.position.y < 100 and player.velocity.y <= 0 and player.state in [BeachGull.State.GLIDE,BeachGull.State.STRIKE]):
 			_training_advance()
 	# Lessons cannot run out of food. Restore only after all loose food clears,
 	# so a missed peck never duplicates an item still lying on the beach.
@@ -1233,6 +1242,8 @@ func training_text() -> String:
 		return TrainerScript.line(live.crash, input)
 	if training_miss_hint > 0.0:
 		return TrainerScript.line(live.first_miss, input)
+	if lesson >= TRAINING_LESSONS:
+		return TrainerScript.line(live.practice, input)
 	var data: Dictionary = Config.trainer.training.lessons[mini(lesson, TRAINING_LESSONS-1)]
 	if lesson == 0 and training_took_off:
 		return TrainerScript.line(data.banner_steer if banner_active() else data.strip_steer, input)

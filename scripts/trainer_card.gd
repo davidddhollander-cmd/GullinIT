@@ -21,6 +21,8 @@ static var portraits: Array[ImageTexture] = []
 
 var frame: PanelContainer
 var button: Button
+var button_alt: Button ## entry "button_alt": a second choice left of the main button; chose_alt tells the dismiss handler which was pressed
+var chose_alt: bool = false
 var portrait: TextureRect
 var lay_label: RichTextLabel
 var how_label: RichTextLabel
@@ -81,6 +83,10 @@ func _init() -> void:
 	footer.alignment = BoxContainer.ALIGNMENT_END
 	footer.mouse_filter = MOUSE_FILTER_IGNORE
 	column.add_child(footer)
+	footer.add_theme_constant_override("separation",4)
+	button_alt = BeachUI.button(footer,"",func() -> void:
+		chose_alt = true
+		dismiss())
 	button = BeachUI.button(footer,"GOT IT",dismiss)
 	# Head on the right, his name centred underneath it.
 	var face: VBoxContainer = VBoxContainer.new()
@@ -139,6 +145,9 @@ func open(entry: Dictionary) -> void:
 	counter_label.text = str(entry.get("counter",""))
 	counter_label.visible = not counter_label.text.is_empty()
 	button.text = str(entry.get("button","GOT IT")).to_upper()
+	chose_alt = false
+	button_alt.text = str(entry.get("button_alt","")).to_upper()
+	button_alt.visible = not button_alt.text.is_empty()
 	talk_left = clampf((str(entry.get("lay","")).length()+str(entry.get("how","")).length())*0.02,0.8,2.6)
 	talk_clock = 0.0
 	auto_close = float(entry.get("auto_close",0.0))

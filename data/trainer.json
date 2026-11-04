@@ -45,7 +45,8 @@
     "first_miss": "First miss is normal! Scoop it off the floor later",
     "wheelie_low": "Too low, gullster. Land on the lid.",
     "full_stomach": "Finish your snack first, greedy guts.",
-    "crash_toast": "Ouch! Dust yourself off."
+    "practice": "Pause, then level select, to progress",
+    "crash_toast":"Ouch! Dust yourself off."
   },
   "training": {
     "opening": {
@@ -57,8 +58,9 @@
       "mood": "proud",
       "text": "Not bad, gullster. Not bad at all. You can swoop, raid bins, bump rivals and mug them blind. Now get out there and fleece that beach.",
       "first_time_text": "Not bad, gullster. Not bad at all.\n\nYou can swoop, raid bins, bump rivals and mug them blind. Here's a feather for your trouble.\n\nNow get out there and fleece that beach.",
-      "button": "To the beach!",
-      "auto_close": 4.0
+      "button": "Progress to next level",
+      "button_alt": "Keep practicing",
+      "delay": 3.0
     },
     "lessons": [
       {
@@ -100,7 +102,7 @@
       },
       {
         "mood": "amused",
-        "lay": "Now let's get you a proper challenge.\nSee the fella with the ice cream? That's yours. A real gull steals with a swoop: dive from above, snatch, then climb up quick sticks! Timing is everything...",
+        "lay": "Now let's get you a proper challenge.\nSee the fella with the ice cream? That's yours. Timing is everything...",
         "how": {
           "default": "Climb above your target. Hold {dive} to dive and then tap {peck} right when your beak reaches the delicious target.",
           "casual": "Climb above him and hold {dive} to dive. Casual mode does the pecking, so just fly your beak into the cone. Then aim up and climb away."
@@ -148,7 +150,7 @@
       },
       {
         "mood": "amused",
-        "lay": "Time to meet the competition. This dummy is a rival gull. You better show who's boss. Give him a little push for me will ya?\n\nOnce he's nicked a snack he's fair game: a rival carrying food can be mugged, the best steal in the game. Careful though, rivals can mug you too.",
+        "lay": "Time to meet the competition. This dummy is a rival gull. You better show who's boss. Give him a little push for me will ya?",
         "how": "Climb above the dummy. Dive with {dive} and fly right into it to bump him. Then dive straight through him to take his snack.",
         "strip": "Dive with {dive} into the dummy gull"
       },

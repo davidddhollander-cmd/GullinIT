@@ -305,7 +305,7 @@ func _process(delta: float) -> void:
 	# The frozen prompt sits high above the gull; the lesson strip and quest row would cover it.
 	training_panel.visible = game.lesson_active() and game.running and game.intro <= 0 and not game.trainer_open and not game.peck_pause and not (game.banner_delay > 0.0 and game.training_miss_hint <= 0.0)
 	if game.training:
-		lesson_label.text = "LESSON %d/%d" % [mini(game.lesson + 1, BeachGame.TRAINING_LESSONS), BeachGame.TRAINING_LESSONS]
+		lesson_label.text = "PRACTICE" if game.lesson >= BeachGame.TRAINING_LESSONS else "LESSON %d/%d" % [game.lesson + 1, BeachGame.TRAINING_LESSONS]
 		lesson_prompt.text = game.training_text()
 		_sync_trainer()
 	elif game.screech_lesson:
@@ -375,7 +375,9 @@ func show_score_announcement(food_id: String, earned: int) -> void:
 	var food: Dictionary = Config.foods[food_id]
 	score_announcement.add_theme_font_override("font",score_announcement_fonts[score_announcement_font_index])
 	score_announcement_font_index = (score_announcement_font_index + 1) % score_announcement_fonts.size()
-	score_announcement.text = "%s +%d" % [str(food.name).to_upper(),earned]
+	# Every ice cream flavour reads as plain "Ice cream".
+	var shown: String = str(Config.foods["ice_cream"].name) if str(food.get("family","")) == "ice_cream" else str(food.name)
+	score_announcement.text = "%s +%d" % [shown.to_upper(),earned]
 	# Training text occupies the normal top-center slot, so shift the transient
 	# callout below it rather than covering the current instruction.
 	var row: Control = score_announcement.get_parent() as Control
