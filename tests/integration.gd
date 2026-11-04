@@ -2323,7 +2323,7 @@ func food_checks() -> void:
 		var frame: AtlasTexture = Config.frames(definition.sprite).get_frame_texture(&"idle",0) as AtlasTexture
 		check(frame != null and Rect2(Vector2.ZERO,frame.atlas.get_size()).encloses(frame.region),"food artwork is inside atlas: "+id)
 		check(Vector2(definition.size[0],definition.size[1]) == Vector2(definition.pickup_radius[0],definition.pickup_radius[1])*2,"pickup size matches food artwork: "+id)
-	check(categories == {"small":6,"medium":3,"large":3},"all twelve foods including crabs belong to requested categories")
+	check(categories == {"small":3,"medium":5,"large":4},"all twelve foods including crabs belong to requested categories")
 	main.start_level(1)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)

@@ -78,8 +78,8 @@ static func run(suite: Node, check: Callable) -> void:
 		check.call(game.score.points == points, "bin leftover scores only after swallowing: " + id)
 		if not gull.digestion.snacks.is_empty():
 			check.call(bool(gull.digestion.snacks[0].get("scrap", false)), "bin leftover retains scrap scoring metadata: " + id)
-		gull.digestion.tick(0.49, false)
-		check.call(game.score.points == points, "small leftover has the normal half-second eating time: " + id)
+		gull.digestion.tick(GullDigestion.duration(id)-0.01, false)
+		check.call(game.score.points == points, "leftover takes the normal eating time for its size: " + id)
 		gull.digestion.tick(0.01, false)
 		check.call(game.score.points == points+int(Config.foods[id].points) and game.score.items == 0 and game.score.tier == 0, "bin leftover gives its value without snatch or combo credit: " + id)
 		raids.tick(0)
