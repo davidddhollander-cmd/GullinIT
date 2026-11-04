@@ -582,7 +582,7 @@ func _physics_process(delta: float) -> void:
 	crabs.tick(step,camera_x,not training,gulls)
 	sweeper_visits.tick(step,not training)
 	if is_instance_valid(sweeper_visits.sweeper):
-		sweeper_visits.sweeper.tick(step,player)
+		sweeper_visits.sweeper.tick(step,_sweeper_mark(sweeper_visits.sweeper))
 		sweeper_visits.sweeper.z_index = spawner.depth_z(sweeper_visits.sweeper.position,2)
 	var food_targets: Array[BeachTarget] = stalls.portions.duplicate()
 	food_targets.append_array(spawner.targets)
@@ -879,15 +879,25 @@ func _sweeper_says(sweeper: BeachSweeper, key: String) -> void:
 	var lines: Array = Config.quips.sweeper[key]
 	effects.message(sweeper.position-Vector2(0,54),str(lines[rng.randi_range(0,lines.size()-1)]),BeachUI.GOLD,1.3,6.0)
 
+## The player when low enough to be noticed, otherwise the first low rival; the sweeper treats all gulls alike.
+func _sweeper_mark(sweeper: BeachSweeper) -> BeachGull:
+	if sweeper.gull_low(player):
+		return player
+	for pilot: RivalPilot in pilots:
+		if sweeper.gull_low(pilot.gull):
+			return pilot.gull
+	return player
+
 func _wire_sweeper(sweeper: BeachSweeper) -> void:
 	_sweeper_says(sweeper,"arrive")
 	Audio.play("click")
 	_quest_event("sweeper_arrived")
 	sweeper.said.connect(func(key: String) -> void: _sweeper_says(sweeper,key))
 	sweeper.warned.connect(func() -> void: _quest_event("sweeper_warned"))
-	sweeper.swatted.connect(func(_gull: BeachGull) -> void:
+	sweeper.swatted.connect(func(hit: BeachGull) -> void:
 		_sweeper_says(sweeper,"hit")
-		_quest_event("sweeper_swatted")
+		if hit == player:
+			_quest_event("sweeper_swatted")
 	)
 	sweeper.dumped.connect(func(count: int) -> void:
 		_sweeper_says(sweeper,"dump")

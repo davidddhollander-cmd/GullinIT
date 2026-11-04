@@ -94,6 +94,22 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(hit[0] and gull.state == BeachGull.State.STUNNED,"a swing that connects stuns the gull through the normal stun")
 	check.call(absf(gull.velocity.x) >= float(t.knock_speed)*0.9 and gull.velocity.y < 0.0,"a hit knocks the gull back much harder than a normal tumble")
 	check.call(sweeper.cooldown > 0.0,"after a hit his cooldown starts")
+	# Rivals are marks too: a low rival is warned and swatted while the player stays high.
+	game = _start(suite,2)
+	game._release_rivals()
+	var rival: BeachGull = game.pilots[0].gull
+	game.player.position = Vector2(700.0,40.0)
+	rival.position = Vector2(300.0,rival.ground_y())
+	rival.land()
+	sweeper = _spawn(game,350.0)
+	check.call(game._sweeper_mark(sweeper) == rival,"a low rival is his mark when the player is out of notice height")
+	sweeper.tick(0.05,rival)
+	check.call(sweeper.state == BeachSweeper.State.WARN and sweeper.prey == rival,"he warns a low rival")
+	_until(sweeper,rival,BeachSweeper.State.WINDUP)
+	rival.position.x = sweeper.position.x+sweeper.facing*18.0
+	_until(sweeper,game.player,BeachSweeper.State.SWAT)
+	_run_for(sweeper,game.player,0.7)
+	check.call(rival.state == BeachGull.State.STUNNED and game.player.state != BeachGull.State.STUNNED,"his swing lands on the rival he chased, not on the far-off player")
 	# Rising out of reach during the windup avoids the swing.
 	game = _start(suite,2)
 	gull = game.player

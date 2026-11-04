@@ -1,6 +1,6 @@
 class_name BeachSweeper
 extends Node2D
-## Beach cleaner. Runs onto the sand, warns and swings his broom at a low gull (the player only), and in between
+## Beach cleaner. Runs onto the sand, warns and swings his broom at a low gull (the player or a rival), and in between
 ## brushes unowned food and litter into the closest bin. A hit is the same stun every adult swat gives, so the
 ## existing drop-snack and -5 penalty apply. He never eats, steals or carries food himself.
 signal warned
@@ -265,7 +265,7 @@ func tick(delta: float, gull: BeachGull) -> void:
 			clip = &"swat"
 			timer -= delta
 			_swing_fx()
-			_swing_check(gull)
+			_swing_check(prey if is_instance_valid(prey) else gull)
 			if timer <= 0.0:
 				if landed_hit:
 					cooldown = float(t.cooldown)
