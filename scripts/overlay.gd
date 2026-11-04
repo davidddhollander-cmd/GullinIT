@@ -270,8 +270,9 @@ func _build_rival_popup() -> void:
 	var center: CenterContainer = CenterContainer.new()
 	add_child(center)
 	BeachUI.full(center)
-	center.offset_top = TOP_BAR_HEIGHT + 4
-	center.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	center.anchor_bottom = 0.0
+	center.offset_top = TOP_BAR_HEIGHT
+	center.offset_bottom = TOP_BAR_HEIGHT
 	center.mouse_filter = MOUSE_FILTER_IGNORE
 	rival_popup = BeachUI.panel(center,Color(0.094,0.23,0.30,0.95))
 	rival_popup.mouse_filter = MOUSE_FILTER_IGNORE
