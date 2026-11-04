@@ -100,15 +100,15 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(game.overlay.trainer_portrait.visible and game.overlay.trainer_portrait.texture != null,"first-miss hint shows the trainer portrait")
 	game.training_miss_hint = 0.0
 	game.stash_raids.items.clear()
-	game.stash_raids.bag_collected.emit()
+	game.stash_raids.bag_burst.emit()
 	check.call(game.lesson == 3,"picnic lesson requires starting a bag raid")
 	game.training_raid_started = true
 	game._training_tick(0.0)
 	check.call(game.stash_raids.reach_bonus > 0.0,"the picnic lesson widens the bag reach")
 	game.stash_raids.collected.emit(Vector2.ZERO,"crumbs",true)
 	check.call(game.lesson == 3,"bin scrap cannot satisfy picnic bag lesson")
-	game.stash_raids.bag_collected.emit()
-	check.call(game.lesson == 4,"bag food collection advances to bin lesson")
+	game.stash_raids.bag_burst.emit()
+	check.call(game.lesson == 4,"bursting the bag advances to bin lesson")
 	check.call(game.training_text().contains("bin"),"bin lesson explains the new action")
 	game._scrap_collected(Vector2.ZERO,"crumbs")
 	check.call(game.lesson == 4,"ordinary scraps cannot skip the bin lesson")

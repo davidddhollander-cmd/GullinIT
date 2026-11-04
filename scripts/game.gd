@@ -43,6 +43,7 @@ const SECOND_SWOOP_LESSON: int = 6
 const BUMP_LESSON: int = 7 ## dive into the empty-beaked dummy gull
 const MUG_LESSON: int = 8 ## the dummy now carries food: dive through it
 const DUMMY_FOOD: String = "crisps_bag"
+const RING_LESSON_1: Vector2 = Vector2(145,65) ## the takeoff ring, above the first palm
 const TRAINER_DELAY: float = 0.8 ## seconds between a lesson's toast and the next pop-up or banner
 const BANNER_CUE_TIME: float = 1.4 ## talk animation and pulse when the live banner appears or changes
 var banner_delay: float = 0.0 ## counts down to the next live banner
@@ -233,7 +234,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 			Audio.play("snatch",1+score.tier*0.08)
 			player.digestion.collect(food_id)
 	)
-	stash_raids.bag_collected.connect(func() -> void:
+	stash_raids.bag_burst.connect(func() -> void:
 		if training and lesson == 3 and training_raid_started:
 			_training_advance()
 	)
@@ -1192,7 +1193,7 @@ func _training_tick(delta: float) -> void:
 			training_took_off = true
 			if banner_active():
 				_cue_banner()
-		if training_took_off and player.state == BeachGull.State.GLIDE and player.position.x > float(level.world.start_x) + 30:
+		if training_took_off and player.state == BeachGull.State.GLIDE and player.position.x > RING_LESSON_1.x - 10.0:
 			_training_advance()
 	elif lesson in [2,SECOND_SWOOP_LESSON] and training_clean_snatch:
 		training_snatch_age += delta
@@ -1266,7 +1267,7 @@ func training_target() -> Vector2:
 			# The wheelie ring marks its lid, where the gull has to stand.
 			return Vector2(float(bin.x),float(bin.content_y)-6.0 if lesson == WHEELIE_LESSON else float(Config.tuning.world.ground)-18)
 	if lesson == 0:
-		return Vector2(245,75)
+		return RING_LESSON_1
 	if lesson == 1:
 		var nearest: Vector2 = Vector2(60,156)
 		var distance: float = INF

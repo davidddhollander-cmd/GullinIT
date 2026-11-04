@@ -499,6 +499,12 @@ func _draw() -> void:
 			if training_target.x >= 4 and training_target.x <= 316 and training_target.y >= 28 and training_target.y <= 165:
 				draw_arc(training_target,12,0,TAU,24,BeachUI.GOLD,2)
 				draw_arc(training_target,16,0,TAU,24,Color(1.0,0.95,0.7,0.55),1)
+			elif game.training_target().x > -900.0 and (training_target.x < 4 or training_target.x > 316) and Time.get_ticks_msec() % 700 < 450:
+				# The lesson target is on another part of the beach: flash an edge arrow toward it.
+				var side: float = -1.0 if training_target.x < 4 else 1.0
+				var tip: Vector2 = Vector2(6.0 if side < 0 else 314.0,clampf(training_target.y,70.0,150.0))
+				draw_colored_polygon(PackedVector2Array([tip,tip+Vector2(-side*10.0,-8.0),tip+Vector2(-side*10.0,8.0)]),BeachUI.GOLD)
+				draw_polyline(PackedVector2Array([tip+Vector2(-side*10.0,-8.0),tip,tip+Vector2(-side*10.0,8.0)]),BeachUI.INK,1)
 		elif game.screech_lesson or game.counter_lesson:
 			var lesson_target: Vector2 = (game.screech_lesson_target() if game.screech_lesson else game.counter_lesson_target()) - offset
 			if lesson_target.x >= 4 and lesson_target.x <= 316 and lesson_target.y >= 28 and lesson_target.y <= 165:

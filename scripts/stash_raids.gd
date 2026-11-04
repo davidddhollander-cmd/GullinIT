@@ -2,7 +2,7 @@ class_name BeachStashRaids
 extends Node2D
 ## Scattered items remain owned by their source until the gull or owner claims them.
 signal collected(position: Vector2, food_id: String, scrap: bool)
-signal bag_collected
+signal bag_burst ## the final peck split a sunbather's bag
 signal bin_opened(bin_type: String)
 signal bin_emptied(bin_type: String)
 const BIN_SPILL_SPREAD: float = 90.0
@@ -137,6 +137,7 @@ func peck() -> bool:
 	Audio.play("bag_thump",0.88+0.22*progress)
 	if final_hit:
 		raid.pecks = 0
+		bag_burst.emit()
 		var count: int = mini(owner.stash_remaining,int(t.stash_burst))
 		if count > 0:
 			game.effects.release_burst(owner.stash_position()-Vector2(0,4))
@@ -307,8 +308,6 @@ func tick(delta: float) -> void:
 					game._quest_event("abandoned_looted")
 			else:
 				collected.emit(item.position,item.food_id,item.get("source","") == "bin")
-				if is_instance_valid(item.get("owner")) and item.owner.kind == "sunbather":
-					bag_collected.emit()
 	for owner: BeachTarget in raids.keys():
 		if not is_instance_valid(owner):
 			raids.erase(owner)

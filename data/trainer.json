@@ -113,9 +113,9 @@
       {
         "mood": "amused",
         "lay": "Now for something simple. That sunbather is fast asleep and the picnic bag beside them is unguarded. Human bags hold food...",
-        "how": "Land next to the bag. Tap {peck} three times to burst it open, then walk over the food that spills out.",
+        "how": "Land next to the bag and tap {peck} three times to burst it open.",
         "strip": "Land by the bag and tap {peck} three times",
-        "banner": "Land by the bag and tap {peck} three times.\nThen walk over the food that spills out."
+        "banner": "Land by the picnic bag.\nTap {peck} three times to burst it open."
       },
       {
         "mood": "neutral",
