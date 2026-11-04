@@ -366,7 +366,7 @@ func _fly_in_step(step: float) -> void:
 		Audio.play("snatch")
 	entry_pilot.cooldown = 2.0
 	entry_pilot.mode = RivalPilot.Mode.RECOVER
-	overlay.show_rival_popup(str(entry_profile.name),_rival_head(),str(entry_profile.entry_text),float(Config.tuning.juice.taunt_time) * 1.5)
+	overlay.show_rival_popup(str(entry_profile.name),_rival_head(),str(entry_profile.entry_text),float(Config.tuning.juice.taunt_time) * 2.5)
 	entry_pilot = null
 
 func _release_rivals() -> void:
