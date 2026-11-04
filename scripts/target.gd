@@ -983,11 +983,13 @@ func _draw() -> void:
 		draw_set_transform(bag_anchor+BAG_PIVOT, 0.0, Vector2(1.0+stretch*0.55,1.0-stretch))
 		var bag: Vector2 = -BAG_PIVOT
 		# The 32x24 sprite's bottom-centre sits on the old bag's base, so pecks squish it the same way.
-		draw_texture(BAG_TEXTURES[bag_variant],bag+Vector2(-16,-15))
+		var bag_tex: Texture2D = BAG_TEXTURES[bag_variant]
+		var bag_at: Vector2 = bag+Vector2(-floorf(bag_tex.get_width()*0.5),9-bag_tex.get_height())
+		draw_texture(bag_tex,bag_at)
 		if stash_remaining > 0:
 			var glint: Texture2D = PickupShine.overlay(BAG_TEXTURES[bag_variant],shine_time,stash_home_x*0.37)
 			if glint != null:
-				draw_texture(glint,bag+Vector2(-16,-15))
+				draw_texture(glint,bag_at)
 		if stash_remaining > 0:
 			draw_rect(Rect2(bag+Vector2(-5,1),Vector2(stash_remaining*3+1,4)),Color("183b4e"))
 		for i: int in stash_remaining:

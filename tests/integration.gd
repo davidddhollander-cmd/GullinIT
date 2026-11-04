@@ -1884,12 +1884,12 @@ func stash_raid_checks() -> void:
 		if tap_index < int(Config.tuning.world.bin_pecks)-1:
 			raids.tick(float(Config.tuning.world.peck_cooldown))
 			eat_pending(game)
-	check(raids.items.size() == int(Config.tuning.world.bin_burst) and int(bin.remaining) == bin_stock-int(Config.tuning.world.bin_burst),"four bin pecks eject one finite three-object burst")
+	check(raids.items.filter(func(i: Dictionary) -> bool: return not bool(i.get("extra",false))).size() == int(Config.tuning.world.bin_burst) and raids.items.size() > int(Config.tuning.world.bin_burst) and int(bin.remaining) == bin_stock-int(Config.tuning.world.bin_burst),"four bin pecks eject one finite three-object burst")
 	check(game.beach.bin_wobble_strength.max() > first_bin_strength and game.beach.bin_release_bounce.has(true),"bin wobble grows and final hit bounces")
 	check((Audio.get_children().back() as AudioStreamPlayer).stream == Audio.streams.release_accent and first_bin_pitch < 1.0,"bin taps rise in pitch before release accent")
 	var crumb_count: int = 0
 	var rubbish_count: int = 0
-	for item: Dictionary in raids.items:
+	for item: Dictionary in raids.items.filter(func(i: Dictionary) -> bool: return not bool(i.get("extra",false))):
 		if bool(item.get("garbage",false)):
 			rubbish_count += 1
 		else:

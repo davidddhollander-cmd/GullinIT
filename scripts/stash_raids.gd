@@ -6,6 +6,10 @@ signal bag_collected
 signal bin_opened(bin_type: String)
 signal bin_emptied(bin_type: String)
 const BIN_SPILL_SPREAD: float = 90.0
+const LITTER_KINDS: PackedStringArray = ["apple_core","fishbone","paper_ball","can_red","can_blue","can_green","can_yellow","bottle_water","bottle_clear","styrofoam"] ## random bin litter
+const SCATTER_LITTER: PackedStringArray = ["wrapper","cardboard"] ## named by bin_scatter
+const LITTER_SCALE: float = 0.35 ## props keep full pixel detail, no outline; drawn small by scale
+static var litter_textures: Dictionary = {}
 var game: BeachGame
 var items: Array[Dictionary] = []
 var raids: Dictionary = {}
@@ -15,6 +19,12 @@ var peck_cooldown: float = 0.0
 var bins: Array[Dictionary] = []
 var shine_clock: float = 0.0
 var actor: BeachGull ## set while a rival pecks, so the player's code path serves any gull
+
+static func litter_texture(kind: String) -> Texture2D:
+	if litter_textures.is_empty():
+		for k: String in LITTER_KINDS+SCATTER_LITTER:
+			litter_textures[k] = load("res://assets/sprites/retro-trash-%s.png" % k)
+	return litter_textures.get(kind) as Texture2D
 
 func _gull() -> BeachGull:
 	return actor if actor != null else game.player
@@ -160,6 +170,28 @@ func _peck_toddler(toddler: BeachTarget) -> bool:
 	queue_redraw()
 	return true
 
+## Purely cosmetic rubbish on top of the food burst; uses visual_rng so food trajectories are unchanged.
+func _spray_litter(content_position: Vector2, wheelie: bool) -> void:
+	var t: Dictionary = Config.tuning.world
+	var j: Dictionary = Config.tuning.juice
+	for i: int in int(t.bin_litter_wheelie if wheelie else t.bin_litter):
+		var kind: String = LITTER_KINDS[visual_rng.randi_range(0,LITTER_KINDS.size()-1)]
+		var direction: float = -1.0 if visual_rng.randf() < 0.5 else 1.0
+		var rest_limit: float = 0.52 if kind == "wrapper" else 0.34
+		items.append({"owner":null,"source":"bin","food_id":"","garbage":true,"garbage_kind":kind,"extra":true,"position":content_position+Vector2(visual_rng.randf_range(-4,4),6),
+			"velocity":Vector2(direction*visual_rng.randf_range(25,90),-visual_rng.randf_range(65,125)),"grounded":false,"age":0.0,
+			"rotation":visual_rng.randf_range(-0.18,0.18),"angular_velocity":-direction*visual_rng.randf_range(float(j.trash_spin_min),float(j.trash_spin_max)),
+			"rest_angle":visual_rng.randf_range(-rest_limit,rest_limit)})
+	# Cap resting litter so a busy bin doesn't pile up forever: drop the oldest.
+	var cap: int = int(t.litter_cap)
+	var count: int = items.reduce(func(n: int, it: Dictionary) -> int: return n+(1 if bool(it.get("garbage",false)) else 0),0)
+	for index: int in items.size():
+		if count <= cap:
+			break
+		if bool(items[index].get("garbage",false)) and bool(items[index].grounded):
+			items[index].recovered = true # swept next update
+			count -= 1
+
 func _peck_bin(bin: Dictionary) -> bool:
 	var t: Dictionary = Config.tuning.world
 	var content_position: Vector2 = _bin_content_position(bin)
@@ -198,6 +230,7 @@ func _peck_bin(bin: Dictionary) -> bool:
 				item.rest_angle = visual_rng.randf_range(-rest_limit,rest_limit)
 			items.append(item)
 		if count > 0:
+			_spray_litter(content_position,wheelie)
 			bin_opened.emit(str(bin.type))
 			if int(bin.remaining) <= 0:
 				bin_emptied.emit(str(bin.type))
@@ -254,7 +287,8 @@ func tick(delta: float) -> void:
 				item.velocity.x *= -0.5
 				if is_garbage:
 					item.angular_velocity = -float(item.get("angular_velocity",0.0))*0.55
-			var item_height: float = 5.0 if is_garbage else float(definition.size[1])
+			var litter_tex: Texture2D = litter_texture(str(item.get("garbage_kind",""))) if is_garbage else null
+			var item_height: float = float(litter_tex.get_height())*LITTER_SCALE if litter_tex != null else (5.0 if is_garbage else float(definition.size[1]))
 			var floor_y: float = float(t.ground)-item_height*0.5
 			if item.position.y >= floor_y:
 				item.position.y = floor_y
@@ -442,12 +476,13 @@ func _draw() -> void:
 		if bool(item.get("garbage",false)):
 			var at := Vector2(roundf(float(item.position.x)),roundf(float(item.position.y)))
 			draw_set_transform(at,float(item.get("rotation",0.0)))
-			if item.get("garbage_kind","") == "wrapper":
+			var tex: Texture2D = litter_texture(str(item.get("garbage_kind","")))
+			if tex != null:
+				draw_texture_rect(tex,Rect2(-tex.get_size()*LITTER_SCALE*0.5,tex.get_size()*LITTER_SCALE),false)
+			elif item.get("garbage_kind","") == "wrapper":
 				draw_colored_polygon(PackedVector2Array([Vector2(-4,-2),Vector2(3,-3),Vector2(4,2),Vector2(-3,3)]),Color("8bc6b4"))
-				draw_line(Vector2(-3,0),Vector2(3,-1),Color("fff1cc"),1)
 			else:
 				draw_rect(Rect2(Vector2(-2,-3),Vector2(4,6)),Color("d7d9cf"))
-				draw_line(Vector2(-2,-2),Vector2(2,2),Color("7993a3"),1)
 			draw_set_transform(Vector2.ZERO)
 		else:
 			var definition: Dictionary = Config.foods[item.food_id]

@@ -2851,6 +2851,316 @@
         9.0
       ],
       "category": "food"
+    },
+    {
+      "title": "RUBBISH APPLE CORE",
+      "description": "BIN LITTER, SAME ART RESIZED IN GAME. SIZE REF: CRISPS BOX",
+      "current": "food_crisps_box",
+      "candidate": {
+        "clone": "food_crisps_box",
+        "file": "res://assets/sprites/retro-trash-apple_core.png",
+        "frame_w": 11,
+        "frame_h": 14,
+        "regions": [
+          {
+            "region": [
+              0,
+              0,
+              11,
+              14
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        3.8499999999999996,
+        4.8999999999999995
+      ],
+      "category": "rubbish"
+    },
+    {
+      "title": "RUBBISH FISHBONE",
+      "description": "BIN LITTER, SAME ART RESIZED IN GAME. SIZE REF: CRISPS BOX",
+      "current": "food_crisps_box",
+      "candidate": {
+        "clone": "food_crisps_box",
+        "file": "res://assets/sprites/retro-trash-fishbone.png",
+        "frame_w": 18,
+        "frame_h": 14,
+        "regions": [
+          {
+            "region": [
+              0,
+              0,
+              18,
+              14
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        6.3,
+        4.8999999999999995
+      ],
+      "category": "rubbish"
+    },
+    {
+      "title": "RUBBISH PAPER BALL",
+      "description": "BIN LITTER, SAME ART RESIZED IN GAME. SIZE REF: CRISPS BOX",
+      "current": "food_crisps_box",
+      "candidate": {
+        "clone": "food_crisps_box",
+        "file": "res://assets/sprites/retro-trash-paper_ball.png",
+        "frame_w": 14,
+        "frame_h": 13,
+        "regions": [
+          {
+            "region": [
+              0,
+              0,
+              14,
+              13
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        4.8999999999999995,
+        4.55
+      ],
+      "category": "rubbish"
+    },
+    {
+      "title": "RUBBISH CAN RED",
+      "description": "BIN LITTER, SAME ART RESIZED IN GAME. SIZE REF: CRISPS BOX",
+      "current": "food_crisps_box",
+      "candidate": {
+        "clone": "food_crisps_box",
+        "file": "res://assets/sprites/retro-trash-can_red.png",
+        "frame_w": 16,
+        "frame_h": 18,
+        "regions": [
+          {
+            "region": [
+              0,
+              0,
+              16,
+              18
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        5.6,
+        6.3
+      ],
+      "category": "rubbish"
+    },
+    {
+      "title": "RUBBISH CAN BLUE",
+      "description": "BIN LITTER, SAME ART RESIZED IN GAME. SIZE REF: CRISPS BOX",
+      "current": "food_crisps_box",
+      "candidate": {
+        "clone": "food_crisps_box",
+        "file": "res://assets/sprites/retro-trash-can_blue.png",
+        "frame_w": 15,
+        "frame_h": 18,
+        "regions": [
+          {
+            "region": [
+              0,
+              0,
+              15,
+              18
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        5.25,
+        6.3
+      ],
+      "category": "rubbish"
+    },
+    {
+      "title": "RUBBISH CAN GREEN",
+      "description": "BIN LITTER, SAME ART RESIZED IN GAME. SIZE REF: CRISPS BOX",
+      "current": "food_crisps_box",
+      "candidate": {
+        "clone": "food_crisps_box",
+        "file": "res://assets/sprites/retro-trash-can_green.png",
+        "frame_w": 14,
+        "frame_h": 18,
+        "regions": [
+          {
+            "region": [
+              0,
+              0,
+              14,
+              18
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        4.8999999999999995,
+        6.3
+      ],
+      "category": "rubbish"
+    },
+    {
+      "title": "RUBBISH CAN YELLOW",
+      "description": "BIN LITTER, SAME ART RESIZED IN GAME. SIZE REF: CRISPS BOX",
+      "current": "food_crisps_box",
+      "candidate": {
+        "clone": "food_crisps_box",
+        "file": "res://assets/sprites/retro-trash-can_yellow.png",
+        "frame_w": 16,
+        "frame_h": 18,
+        "regions": [
+          {
+            "region": [
+              0,
+              0,
+              16,
+              18
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        5.6,
+        6.3
+      ],
+      "category": "rubbish"
+    },
+    {
+      "title": "RUBBISH BOTTLE WATER",
+      "description": "BIN LITTER, SAME ART RESIZED IN GAME. SIZE REF: CRISPS BOX",
+      "current": "food_crisps_box",
+      "candidate": {
+        "clone": "food_crisps_box",
+        "file": "res://assets/sprites/retro-trash-bottle_water.png",
+        "frame_w": 17,
+        "frame_h": 22,
+        "regions": [
+          {
+            "region": [
+              0,
+              0,
+              17,
+              22
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        5.949999999999999,
+        7.699999999999999
+      ],
+      "category": "rubbish"
+    },
+    {
+      "title": "RUBBISH BOTTLE_CLEAR",
+      "description": "BIN LITTER, SAME ART RESIZED IN GAME. SIZE REF: CRISPS BOX",
+      "current": "food_crisps_box",
+      "candidate": {
+        "clone": "food_crisps_box",
+        "file": "res://assets/sprites/retro-trash-bottle_clear.png",
+        "frame_w": 14,
+        "frame_h": 22,
+        "regions": [
+          {
+            "region": [
+              0,
+              0,
+              14,
+              22
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        4.8999999999999995,
+        7.699999999999999
+      ],
+      "category": "rubbish"
+    },
+    {
+      "title": "RUBBISH STYROFOAM",
+      "description": "BIN LITTER, SAME ART RESIZED IN GAME. SIZE REF: CRISPS BOX",
+      "current": "food_crisps_box",
+      "candidate": {
+        "clone": "food_crisps_box",
+        "file": "res://assets/sprites/retro-trash-styrofoam.png",
+        "frame_w": 20,
+        "frame_h": 20,
+        "regions": [
+          {
+            "region": [
+              0,
+              0,
+              20,
+              20
+            ],
+            "offset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "motion": "on_sand",
+      "size": [
+        7.0,
+        7.0
+      ],
+      "category": "rubbish"
     }
   ]
 }
