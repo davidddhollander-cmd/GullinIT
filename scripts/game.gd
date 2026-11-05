@@ -48,6 +48,7 @@ const DUMMY_FOOD: String = "crisps_bag"
 const RING_LESSON_1: Vector2 = Vector2(145,65) ## the takeoff ring, above the first palm
 const TRAINER_DELAY: float = 1.4 ## seconds between a screech or counter lesson's toast and the next pop-up
 const TRAINING_DELAY: float = 3.0 ## the same gap in Training Day: the lesson-done toast gets its moment before the next lesson starts
+const DUMMY_LEAD: float = 1.0 ## seconds before the mug lesson's card opens that the sparring gull arrives, so the card talks about a gull already in view
 const BANNER_CUE_TIME: float = 1.4 ## talk animation and pulse when the live banner appears or changes
 var banner_delay: float = 0.0 ## counts down to the next live banner
 var advance_pending: bool = false ## a lesson's goal was met during the pause before its own card or banner: counts once that has been seen
@@ -544,6 +545,8 @@ func _physics_process(delta: float) -> void:
 		return
 	if not trainer_queue.is_empty():
 		trainer_queue.delay -= delta
+		if training and lesson == MUG_LESSON and trainer_queue.delay <= DUMMY_LEAD:
+			_training_dummy_setup() # no-op once the dummy exists
 		if trainer_queue.delay <= 0.0:
 			var queued: Dictionary = trainer_queue
 			trainer_queue = {}
@@ -1182,8 +1185,8 @@ func _training_advance() -> void:
 		track("lesson_start", {"lesson": lesson + 1})
 	GameState.save_training_step(lesson)
 	effects.message(player.position-Vector2(0,24),_toast(),BeachUI.GOLD,TRAINING_DELAY)
-	if lesson == MUG_LESSON:
-		_training_dummy_setup()
+	if lesson == MUG_LESSON and not trainer_cards:
+		_training_dummy_setup() # with cards, _process spawns it DUMMY_LEAD before the card opens
 	if lesson >= TRAINING_LESSONS:
 		if trainer_cards:
 			var closing: Dictionary = Config.trainer.training.closing
@@ -1243,7 +1246,7 @@ func banner_lesson(index: int) -> bool:
 	return trainer_cards and training and index < TRAINING_LESSONS and bool(Config.trainer.get("live_banners", true)) and Config.trainer.training.lessons[index].has("banner")
 
 func banner_active() -> bool:
-	return banner_lesson(lesson) and banner_delay <= 0.0 and not trainer_open
+	return banner_lesson(lesson) and banner_delay <= 0.0 and not trainer_open and trainer_queue.is_empty()
 
 func _cue_banner() -> void:
 	banner_cue = BANNER_CUE_TIME
