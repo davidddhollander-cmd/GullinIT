@@ -83,7 +83,8 @@ func _add_way(parent: Control, way: Dictionary) -> void:
 	_text(box, str(way.title), BeachUI.CREAM, TITLE_H)
 	var frame := TextureRect.new()
 	frame.custom_minimum_size = STILL_SIZE
-	frame.stretch_mode = TextureRect.STRETCH_KEEP
+	frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE # stills are 4x (296x168) and scale 1:1 onto screen pixels at 1280x720
+	frame.stretch_mode = TextureRect.STRETCH_SCALE
 	frame.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	frame.texture = load(STILL_DIR + str(way.still) + ".png")

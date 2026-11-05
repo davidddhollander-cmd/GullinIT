@@ -46,9 +46,11 @@ const MUG_RESCUE_MISSES: int = 3 ## missed dives before the dummy hovers still
 const BIN_TIP_RANGE: float = 28.0 ## how near a bin a useless peck has to be to earn a tip
 const DUMMY_FOOD: String = "crisps_bag"
 const RING_LESSON_1: Vector2 = Vector2(145,65) ## the takeoff ring, above the first palm
-const TRAINER_DELAY: float = 1.4 ## seconds between a lesson's toast and the next pop-up or banner
+const TRAINER_DELAY: float = 1.4 ## seconds between a screech or counter lesson's toast and the next pop-up
+const TRAINING_DELAY: float = 3.0 ## the same gap in Training Day: the lesson-done toast gets its moment before the next lesson starts
 const BANNER_CUE_TIME: float = 1.4 ## talk animation and pulse when the live banner appears or changes
 var banner_delay: float = 0.0 ## counts down to the next live banner
+var advance_pending: bool = false ## a lesson's goal was met during the pause before its own card or banner: counts once that has been seen
 var banner_cue: float = 0.0
 ## Screeches McCrumbs' pop-ups. Off in the lesson-logic tests, which drive lessons without dismissing cards.
 static var trainer_cards: bool = true
@@ -563,13 +565,15 @@ func _physics_process(delta: float) -> void:
 	_advance_screech_hold(step)
 	if input.touch_dive:
 		input.touch_dive = false
-		player.dive(wind.direction)
+		if not training_card_pending():
+			player.dive(wind.direction)
 	_aim_pause_check()
 	if aim_pause:
 		return
 	if input.touch_peck:
 		input.touch_peck = false
-		peck_hold_touch = _peck_pressed()
+		if not training_card_pending():
+			peck_hold_touch = _peck_pressed()
 	if peck_hold_touch and not input.peck_held:
 		peck_hold_touch = false
 		_peck_released()
@@ -732,8 +736,15 @@ func dismiss_intro() -> void:
 	elif trainer_cards and counter_lesson:
 		open_trainer(_trainer_entry("counter", 0))
 
+## True while a Training Day card is queued behind a lesson toast. Dive and peck wait for the card, so the player cannot start
+## (or finish) the lesson it is about to explain, and the aim and peck freezes never fire ahead of the card.
+func training_card_pending() -> bool:
+	return training and not trainer_queue.is_empty()
+
 func _unhandled_input(event: InputEvent) -> void:
 	if trainer_open:
+		return
+	if training_card_pending() and (event.is_action_pressed("dive") or event.is_action_pressed("peck")):
 		return
 	if peck_pause:
 		if not event.is_action_pressed(prompt_action) or event.is_echo():
@@ -1155,6 +1166,9 @@ func _training_snatch(_target: BeachTarget) -> void:
 		training_snatch_age = 0.0
 
 func _training_advance() -> void:
+	if not trainer_queue.is_empty() or banner_delay > 0.0:
+		advance_pending = true
+		return
 	lesson += 1
 	training_clean_snatch = false
 	if lesson == BIN_LESSON:
@@ -1167,7 +1181,7 @@ func _training_advance() -> void:
 	if lesson < TRAINING_LESSONS:
 		track("lesson_start", {"lesson": lesson + 1})
 	GameState.save_training_step(lesson)
-	effects.message(player.position-Vector2(0,24),_toast(),BeachUI.GOLD,1.5)
+	effects.message(player.position-Vector2(0,24),_toast(),BeachUI.GOLD,TRAINING_DELAY)
 	if lesson == MUG_LESSON:
 		_training_dummy_setup()
 	if lesson >= TRAINING_LESSONS:
@@ -1175,14 +1189,14 @@ func _training_advance() -> void:
 			var closing: Dictionary = Config.trainer.training.closing
 			var first_time: bool = not bool(GameState.entry(1).get("training_complete", false))
 			var closing_key: String = "first_time_text" if first_time else "text"
-			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing[closing_key], input), "lay_source": "training.closing." + closing_key, "lay_template": closing[closing_key], "button": closing.button, "button_alt": closing.get("button_alt", ""), "auto_close": float(closing.get("auto_close", 0.0))}, _training_closed, float(closing.get("delay", TRAINER_DELAY)))
+			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing[closing_key], input), "lay_source": "training.closing." + closing_key, "lay_template": closing[closing_key], "button": closing.button, "button_alt": closing.get("button_alt", ""), "auto_close": float(closing.get("auto_close", 0.0))}, _training_closed, float(closing.get("delay", TRAINING_DELAY)))
 		else:
 			finish()
 	elif trainer_cards:
 		if banner_lesson(lesson):
-			banner_delay = TRAINER_DELAY
+			banner_delay = TRAINING_DELAY
 		else:
-			_queue_trainer(_trainer_entry("training", lesson))
+			_queue_trainer(_trainer_entry("training", lesson), Callable(), TRAINING_DELAY)
 
 ## The sparring gull for the mug lesson, spawned once and handed the snack to steal.
 func _training_dummy_setup() -> void:
@@ -1251,6 +1265,9 @@ func _on_trainer_dismissed() -> void:
 	_freeze_actors(false)
 	input.clear_touch()
 	input.enabled = running and intro <= 0
+	if advance_pending and training:
+		advance_pending = false
+		_training_advance()
 	var then: Callable = trainer_then
 	trainer_then = Callable()
 	if then.is_valid():
@@ -1387,6 +1404,9 @@ func _training_tick(delta: float) -> void:
 		banner_delay -= delta
 		if banner_delay <= 0.0:
 			_cue_banner()
+			if advance_pending:
+				advance_pending = false
+				_training_advance()
 	if training_miss_advance > 0.0:
 		training_miss_advance -= delta
 		if training_miss_advance <= 0.0 and lesson == DIVE_LESSON:

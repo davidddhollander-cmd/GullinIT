@@ -691,7 +691,7 @@ func input_word(kind: String) -> String:
 		return kind.to_upper()
 	match kind:
 		"flap":
-			return "A" if game.input.gamepad else "SPACE"
+			return "A" if game.input.gamepad else "UP ARROW"
 		"peck":
 			return "X" if game.input.gamepad else "E"
 	return kind.to_upper()
