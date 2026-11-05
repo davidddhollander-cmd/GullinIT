@@ -93,9 +93,9 @@ static func _copy_checks(check: Callable) -> void:
 	GameState.options.control_mode = "realistic"
 	_set_device(input,"keyboard")
 	var realistic_how: String = TrainerScript.line(trainer.training.lessons[0].how,input)
-	check.call(realistic_how.contains("Tap Up arrow") and not realistic_how.contains("Hold Up arrow"),"Realistic takeoff card says tap, not hold: " + realistic_how)
+	check.call(realistic_how.contains("Tap Space") and not realistic_how.contains("Hold Space"),"Realistic takeoff card says tap, not hold: " + realistic_how)
 	check.call(TrainerScript.line(trainer.training.lessons[1].how,input).contains("Stop tapping"),"Realistic landing card says stop tapping")
-	check.call(TrainerScript.line(trainer.live.crash,input).contains("Tap Up arrow"),"Realistic crash warning says tap")
+	check.call(TrainerScript.line(trainer.live.crash,input).contains("Tap Space"),"Realistic crash warning says tap")
 	GameState.options.control_mode = "casual"
 	for index: int in [BeachGame.DIVE_LESSON]:
 		var how: String = TrainerScript.line(trainer.training.lessons[index].how,input)
