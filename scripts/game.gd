@@ -1023,20 +1023,20 @@ func _swallowed(snack: Dictionary) -> void:
 			bullet_meter = minf(1.0,bullet_meter+float(perk_value("fill_per_clean_snatch",0.34)))
 		var earned: int = _award(value,snack.get("risky",false),snack.get("upwind",false),snack.get("mugged",false),snack.get("handover",false),str(snack.id))
 		overlay.show_score_announcement(str(snack.id),earned)
-		if not pending_rivals.is_empty():
-			var taunter: Dictionary = {}
-			for profile: Dictionary in pending_rivals:
-				if profile.has("taunt"):
-					taunter = profile
-			_release_rivals()
-			if str(taunter.get("entry","")) == "fly_in":
-				_start_fly_in(taunter)
-			elif not taunter.is_empty():
-				taunt_rival = str(taunter.name)
-				taunt_text = str(taunter.taunt)
-				taunt_wait = float(Config.tuning.juice.taunt_delay)
-			else:
-				effects.message(player.position-Vector2(0,22),"GARY JOINS THE LUNCH RUSH!",BeachUI.GOLD)
+	if not pending_rivals.is_empty() and not (screech_lesson and snack.get("scrap",false)): # any snack releases held rivals; crumbs don't during the screech lesson
+		var taunter: Dictionary = {}
+		for profile: Dictionary in pending_rivals:
+			if profile.has("taunt"):
+				taunter = profile
+		_release_rivals()
+		if str(taunter.get("entry","")) == "fly_in":
+			_start_fly_in(taunter)
+		elif not taunter.is_empty():
+			taunt_rival = str(taunter.name)
+			taunt_text = str(taunter.taunt)
+			taunt_wait = float(Config.tuning.juice.taunt_delay)
+		else:
+			effects.message(player.position-Vector2(0,22),"GARY JOINS THE LUNCH RUSH!",BeachUI.GOLD)
 
 func _cry(source: BeachTarget) -> void:
 	if source.kind == "toddler":
