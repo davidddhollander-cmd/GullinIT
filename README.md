@@ -16,8 +16,8 @@ Import `project.godot` into Godot and press F6 on `scenes/main.tscn`, or F5 to r
 
 | Action | Mouse / keyboard | Controller |
 | --- | --- | --- |
-| Aim | Mouse, WASD, or arrow keys | Left stick |
-| Climb | Hold left mouse or Space | Hold A |
+| Aim | Mouse, WASD, or Left/Right/Down arrows (W aims up; Up arrow flaps) | Left stick |
+| Climb | Hold Up arrow or left mouse | Hold A |
 | Dive | Right mouse or Shift | B |
 | Peck during a dive / nearby stash or toddler food on foot | Tap E | Tap X |
 | Pause / resume | Escape or HUD pause button | Start |
@@ -25,9 +25,9 @@ Import `project.godot` into Godot and press F6 on `scenes/main.tscn`, or F5 to r
 | Fullscreen | F11 | Options menu |
 | Debug overlay / reload JSON | F1 / F2 | — |
 
-Touch: press anywhere on the beach below the top bar and drag to steer with a floating stick (a faint ring marks where your thumb landed; the reticle sits ahead of the gull, never under your thumb), hold FLAP with the right thumb, and tap DIVE. Enable the touch overlay in Options when previewing on desktop. The first level waits for **LET'S GULL IT** at the bottom of its opening panel; click, tap, or confirm the focused button to begin. Other level introductions dismiss on the first button press or after two seconds. Controller A, Space, or left mouse flaps; keyboard A remains leftward aiming.
+Touch: press anywhere on the beach below the top bar and drag to steer with a floating stick (a faint ring marks where your thumb landed; the reticle sits ahead of the gull, never under your thumb), hold FLAP with the right thumb, and tap DIVE. Enable the touch overlay in Options when previewing on desktop. The first level waits for **LET'S GULL IT** at the bottom of its opening panel; click, tap, or confirm the focused button to begin. Other level introductions dismiss on the first button press or after two seconds. Controller A, the Up arrow, or left mouse flaps; keyboard A remains leftward aiming.
 
-**Control modes.** The PICK YOUR GULL screen has a 3-step slider (saved as `options.control_mode`, default `normal`, applies to the player gull only). **Realistic**: every wingbeat is its own tap (mouse, Space, pad A or touch FLAP finger-down); holding does nothing, and taps closer together than `control_modes.realistic_tap_interval` in `data/tuning.json` (seconds, default 0.15) are ignored. **Normal**: hold to flap, tap peck in dives. **Casual**: Normal plus an automatic peck for the whole dive (ground pecks still need the button). Rivals ignore the mode. `tests/control_mode_checks.gd` covers it.
+**Control modes.** The PICK YOUR GULL screen has a 3-step slider (saved as `options.control_mode`, default `normal`, applies to the player gull only). **Realistic**: every wingbeat is its own tap (mouse, Up arrow, pad A or touch FLAP finger-down); holding does nothing, and taps closer together than `control_modes.realistic_tap_interval` in `data/tuning.json` (seconds, default 0.15) are ignored. **Normal**: hold to flap, tap peck in dives. **Casual**: Normal plus an automatic peck for the whole dive (ground pecks still need the button). Rivals ignore the mode. `tests/control_mode_checks.gd` covers it.
 
 Touch tuning lives in the `touch` block of `data/tuning.json`: `stick_radius` (logical px of thumb travel for full deflection; the anchor follows a thumb dragged further), `stick_deadzone` (0-1), `assist_range` (px) and `assist_angle` (degrees) for the touch-only aim assist, `assist_strength` (0-1, 0 turns assist off) which blends the dive aim toward the nearest snatchable snack inside that cone at dive start and during the swoop (never for rivals, mouse or gamepad), and `mouse_ignore_after_touch` (seconds) during which mouse motion is ignored after a touch so iOS emulated mouse events cannot switch the aim source.
 
