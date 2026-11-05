@@ -48,6 +48,7 @@ var mugs: int = 0
 var dummy: bool = false
 var dummy_food: String = ""
 var dummy_range: Vector2 = Vector2(110.0,520.0)
+var dummy_hold: Vector2 = Vector2.INF ## after repeated misses the dummy hovers here
 # Counters for tests and tuning.
 var dives: int = 0
 var thefts: int = 0
@@ -150,6 +151,13 @@ func dummy_step(delta: float, wind: BeachWind) -> void:
 		gull.aim = Vector2(waypoint, cruise())
 		gull.climb = gull.state in [BeachGull.State.GLIDE, BeachGull.State.GROUNDED] and needs_height()
 	gull.tick(delta, wind.direction, wind.strength)
+	if dummy_hold != Vector2.INF and gull.state != BeachGull.State.STUNNED:
+		gull.position = dummy_hold
+		gull.velocity = Vector2.ZERO
+
+func hold_still() -> void:
+	if dummy_hold == Vector2.INF:
+		dummy_hold = Vector2(gull.position.x, cruise())
 
 func hunt(delta: float, targets: Array[BeachTarget], claims: Dictionary, wind: BeachWind) -> void:
 	retarget_timer -= delta

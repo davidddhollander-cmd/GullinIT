@@ -11,6 +11,7 @@ var trainer_portrait: TextureRect
 var trainer_card: TrainerCard
 var trainer_intro: bool = false ## Training Day opens with the trainer card instead of the intro panel
 var training_panel: PanelContainer
+var training_center: CenterContainer
 var lesson_label: Label
 var lesson_prompt: Label
 var pause_button: Button
@@ -38,6 +39,9 @@ const SCORE_ANNOUNCEMENT_HOLD: float = BeachEffects.SCORE_MESSAGE_HOLD
 const SCORE_ANNOUNCEMENT_FADE: float = BeachEffects.SCORE_MESSAGE_FADE
 const TOP_BAR_HEIGHT: int = 17
 const BANNER_PORTRAIT: float = 36.0 ## Screeches in the live lesson banner
+const AIM_LINE_LENGTH: float = 240.0
+const AIM_STRIP_WIDTH: float = 118.0 ## the frozen first dive's strip is narrow so it can sit beside the gull
+const AIM_STRIP_SHIFT: float = 90.0
 const BANNER_TEXT_WIDTH: float = 262.0 ## widest the text may grow beside him; the panel shrinks to fit shorter lines
 const TOP_BAR_FONT_SIZE: int = 6
 const TIME_WARNING: float = 20.0 ## seconds left when the timer turns red and flashes
@@ -147,7 +151,7 @@ func setup(owner_game: BeachGame) -> void:
 		row.add_theme_constant_override("shadow_offset_x",1)
 		row.add_theme_constant_override("shadow_offset_y",1)
 		quest_labels.append(row)
-	var training_center: CenterContainer = CenterContainer.new()
+	training_center = CenterContainer.new()
 	add_child(training_center)
 	BeachUI.full(training_center)
 	training_center.anchor_bottom = 0.0
@@ -203,7 +207,7 @@ func setup(owner_game: BeachGame) -> void:
 	intro_panel.add_child(intro)
 	BeachUI.label(intro,"TRAINING DAY" if game.training else "%02d / %s" % [game.level.id,game.level.name.to_upper()],8,BeachUI.GOLD)
 	if game.training:
-		BeachUI.label(intro,"NINE SHORT LESSONS. TAKE YOUR TIME.")
+		BeachUI.label(intro,"FIVE SHORT LESSONS. TAKE YOUR TIME.")
 		BeachUI.label(intro,"NO TIMER. NO SCORE. NO MANNERS.",8,Color("80bcb8"))
 		BeachUI.label(intro,"FOLLOW THE GOLDEN RING.",8,BeachUI.GOLD)
 	else:
@@ -265,6 +269,15 @@ func _draw_peck_prompt(offset: Vector2) -> void:
 	draw_string(font,Vector2(-width * 0.5,4.0),text,HORIZONTAL_ALIGNMENT_LEFT,-1,8,tint)
 	draw_set_transform(Vector2.ZERO,0.0,Vector2.ONE)
 
+## The frozen first dive: a dashed line along the dive, gold once it reaches the snack.
+func _draw_aim_line(offset: Vector2) -> void:
+	var from: Vector2 = game.player.position - offset
+	var direction: Vector2 = game.player.direction
+	var ground: float = float(Config.tuning.world.ground)
+	var length: float = (ground - from.y) / direction.y if direction.y > 0.05 else AIM_LINE_LENGTH
+	var color: Color = BeachUI.GOLD if game.aim_lines_up() else BeachUI.CREAM
+	draw_dashed_line(from,from + direction * minf(length,AIM_LINE_LENGTH),color,1.0,4.0)
+
 # Rival shout-out: head cropped from the rival's own sprite sheet (shouting frame) beside a line of speech.
 func _build_rival_popup() -> void:
 	var center: CenterContainer = CenterContainer.new()
@@ -306,6 +319,16 @@ func show_rival_popup(rival_name: String, head: Texture2D, text: String, seconds
 	tween.tween_interval(seconds)
 	tween.tween_callback(rival_popup.hide)
 
+## While the first dive is frozen the strip steps to the side away from the gull, so the gull and the dashed line stay in view.
+func _place_aim_strip() -> void:
+	var shift: float = 0.0
+	training_panel.custom_minimum_size.x = 0.0 if game.aim_pause else 192.0
+	if game.aim_pause:
+		lesson_prompt.custom_minimum_size.x = AIM_STRIP_WIDTH
+		shift = AIM_STRIP_SHIFT if game.player.position.x - (game.camera_x - 160.0) < 160.0 else -AIM_STRIP_SHIFT
+	training_center.offset_left = shift
+	training_center.offset_right = shift
+
 # Wince at the miss, then flap the beak while he explains. The live banner flaps his beak and pulses the panel when it appears or changes.
 func _sync_trainer() -> void:
 	var banner: bool = game.banner_active()
@@ -335,7 +358,7 @@ func _sync_trainer() -> void:
 	trainer_portrait.texture = cells[int(TrainerCard.MOODS.wince)] if since < 0.8 else cells[int(TrainerCard.MOODS.talking) if int(since / TrainerCard.TALK_STEP) % 2 == 0 else int(TrainerCard.MOODS.neutral)]
 
 func _process(delta: float) -> void:
-	if game.peck_pause:
+	if game.peck_pause or game.aim_pause:
 		queue_redraw()
 	var counting: bool = shown_score < game.score.points
 	shown_score = move_toward(shown_score,game.score.points,maxf(20.0,(game.score.points-shown_score)*4.0)*delta) if counting else float(game.score.points)
@@ -354,6 +377,7 @@ func _process(delta: float) -> void:
 		lesson_label.text = "PRACTICE" if game.lesson >= BeachGame.TRAINING_LESSONS else "LESSON %d/%d" % [game.lesson + 1, BeachGame.TRAINING_LESSONS]
 		lesson_prompt.text = game.training_text()
 		_sync_trainer()
+		_place_aim_strip()
 	elif game.screech_lesson:
 		lesson_label.text = "LESSON %d/%d" % [mini(game.screech_step + 1, BeachGame.SCREECH_STEPS), BeachGame.SCREECH_STEPS]
 		lesson_prompt.text = game.screech_lesson_text()
@@ -540,6 +564,8 @@ func _draw() -> void:
 			_draw_points()
 	if game.peck_pause:
 		_draw_peck_prompt(offset)
+	if game.aim_pause:
+		_draw_aim_line(offset)
 	var aim: Vector2 = game.player.aim-offset
 	if game.running:
 		if game.training:

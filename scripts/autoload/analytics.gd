@@ -42,7 +42,7 @@ func track(event: String, props: Dictionary = {}, urgent: bool = false) -> void:
 		properties.input = input_kind
 	seq += 1
 	properties.seq = seq
-	properties.schema = 3
+	properties.schema = 4
 	properties.dev = OS.is_debug_build() or bool(GameState.options.get("dev_player", false))
 	if not page_host.is_empty():
 		properties.host = page_host

@@ -1,5 +1,5 @@
 extends RefCounted
-## SCORE RULES card: pause menu entry, result-sign link and end-of-training popup.
+## SCORE RULES card (pause menu entry, result-sign link) and the end-of-training HOW TO SCORE card.
 
 static func _card(node: Node) -> ScoreRulesCard:
 	for child: Node in node.find_children("*", "ScoreRulesCard", true, false):
@@ -55,14 +55,27 @@ static func run(suite: Node, check: Callable) -> void:
 	main.game.lesson = BeachGame.TRAINING_LESSONS
 	main.game.finish()
 	await suite.settle()
-	var training_card: ScoreRulesCard = _card(main.menus)
-	check.call(training_card != null and training_card.close_button.text == "GOT IT", "finishing training pops up the score rules with GOT IT")
+	var ways: Array[Node] = main.menus.find_children("*", "ScoreWaysCard", true, false)
+	check.call(ways.size() == 1 and _card(main.menus) == null, "finishing training shows HOW TO SCORE, not the full rules")
+	await suite.snapshot("score-ways")
 	suite.layout(main.menus)
 	suite.menu_font_grid(main.menus)
-	if training_card != null:
+	if ways.size() == 1:
+		var training_card: ScoreWaysCard = ways[0]
+		var score_lines: Array[String] = []
+		for way: Dictionary in Config.trainer.score_ways:
+			score_lines.append(ScoreWaysCard.score_text(way))
+		check.call(score_lines[1].contains("X%d" % int(Config.tuning.score.tiers[-1])) and score_lines[2].contains("%d%%" % roundi(float(Config.tuning.score.handover) * 100.0)) and score_lines[3].contains("%d%%" % roundi(float(Config.tuning.score.mugged) * 100.0)), "HOW TO SCORE reads its values from tuning: " + str(score_lines))
+		var panel_rect: Rect2 = Rect2(Vector2.ZERO, Vector2(320, 180))
+		for label: Label in training_card.find_children("*", "Label", true, false):
+			check.call(panel_rect.encloses(label.get_global_rect()) and label.get_global_rect().size.y >= label.get_minimum_size().y, "HOW TO SCORE text fits: " + label.text)
+		var still_ok: bool = training_card.stills.size() == 4
+		for still: TextureRect in training_card.stills:
+			still_ok = still_ok and still.texture != null and still.texture.get_size() == Vector2(ScoreWaysCard.STILL_SIZE) and still.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST
+		check.call(still_ok, "HOW TO SCORE shows four native-size stills")
 		training_card.close_button.pressed.emit()
 		await suite.settle()
 		var training_board: ResultBoard = main.menus.get_child(0) as ResultBoard
-		check.call(_card(main.menus) == null and not training_board.buttons.is_empty() and training_board.buttons[0].has_focus(), "GOT IT reveals the training-complete sign")
+		check.call(main.menus.find_children("*", "ScoreWaysCard", true, false).is_empty() and not training_board.buttons.is_empty() and training_board.buttons[0].has_focus(), "GOT IT reveals the training-complete sign")
 	main.clear_game()
 	await suite.settle()

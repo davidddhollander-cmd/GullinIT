@@ -44,10 +44,26 @@
     "missed": "Missed! Pull up and dive again",
     "first_miss": "First miss is normal! Scoop it off the floor later",
     "wheelie_low": "Too low, gullster. Land on the lid.",
+    "bin_closer": "Closer, gullster! Land right beside the bin.",
+    "mug_miss": "Missed! Climb above him and dive straight through. No peck needed.",
+    "mug_rescue": "He's holding still for you. Climb above him and dive straight through.",
+    "aim_freeze": "Steer with {steer}. Line up the snack.\nPress {dive} to go.",
+    "dive_nudge": "Climb above him, then press {dive}",
     "full_stomach": "Finish your snack first, greedy guts.",
     "practice": "Pause, then level select, to progress",
     "crash_toast":"Ouch! Dust yourself off."
   },
+  "tips": {
+    "mug_miss": "MISSED THE MUG! DIVE STRAIGHT THROUGH HIM",
+    "wheelie_low": "TOO LOW! LAND ON THE BIN LID",
+    "bin_closer": "CLOSER! LAND RIGHT BESIDE THE BIN"
+  },
+  "score_ways": [
+    {"title": "GROUND GRUB", "text": "CRUMBS AND BIN SCRAPS. SAFE.", "score": "FOOD POINTS NO COMBO", "still": "ground"},
+    {"title": "THE SNATCH", "text": "THE PROPER WAY. DIVE THEN PECK.", "score": "COMBO UP TO X{combo}", "still": "snatch"},
+    {"title": "COUNTER GRAB", "text": "PECK IT AS IT LANDS ON THE STALL.", "score": "+{handover}% POINTS", "still": "counter"},
+    {"title": "THE MUG", "text": "DIVE THROUGH A RIVAL WITH FOOD.", "score": "+{mugged}% POINTS", "still": "mug"}
+  ],
   "training": {
     "opening": {
       "mood": "neutral",
@@ -104,8 +120,8 @@
         "mood": "amused",
         "lay": "Now let's get you a proper challenge.\nSee the fella with the ice cream? That's yours. Timing is everything...",
         "how": {
-          "default": "Climb above your target. Hold {dive} to dive and then tap {peck} right when your beak reaches the delicious target.",
-          "casual": "Climb above him and hold {dive} to dive. Casual mode does the pecking, so just fly your beak into the cone. Then aim up and climb away."
+          "default": "Climb above your target. Press {dive} to dive and then tap {peck} right when your beak reaches the delicious target.",
+          "casual": "Climb above him and press {dive} to dive. Casual mode does the pecking, so just fly your beak into the cone. Then aim up and climb away."
         },
         "strip": {
           "default": "Aim at the snack, {dive} to dive, then tap {peck}",
@@ -113,53 +129,16 @@
         }
       },
       {
-        "mood": "amused",
-        "lay": "Now for something simple. That sunbather is fast asleep and the picnic bag beside them is unguarded. Human bags hold food...",
-        "how": "Land next to the bag and tap {peck} three times to burst it open.",
-        "strip": "Land by the bag and tap {peck} three times",
-        "banner": "Land by the picnic bag.\nTap {peck} three times to burst it open."
-      },
-      {
         "mood": "neutral",
         "lay": "Bins are a proper buffet. Peck one open and everything inside spills onto the sand. Scraps are grub. Wrappers are rubbish, so leave them.",
-        "how": "Land beside the bin and tap {peck} {n} times.",
+        "how": "Land beside the bin and tap {peck} {n} times. Picnic bags burst the same way.",
         "strip": "Land by the bin and tap {peck} {n} times"
       },
       {
         "mood": "amused",
-        "lay": "Posh wheelie bins have lids you can't open from the sand, but the grub inside is much better. The green one at the end of the beach is full.",
-        "how": "Fly up and land on top of the lid. Tap {peck} {n} times from up there to burst it open.",
-        "strip": "Land on the wheelie bin lid, tap {peck} {n} times",
-        "banner": "Fly up and land on the wheelie bin lid.\nTap {peck} {n} times up there to burst it."
-      },
-      {
-        "mood": "neutral",
-        "lay": "Time to practice your dive one more time gullster. No golden ring. You pick the target. Anyone holding food is fair game.",
-        "how": {
-          "default": "Dive with {dive}, tap {peck} at the snack, then aim up and climb. Mind the sand.",
-          "casual": "Dive with {dive} and fly into the snack. Your beak pecks for you. Then aim up and climb. Mind the sand."
-        },
-        "strip": {
-          "default": "Dive at any snack, peck it, then climb away",
-          "casual": "Dive at any snack, then climb away"
-        },
-        "banner": {
-          "default": "Let's try another proper dive.\nDive with {dive}, tap {peck}, then climb.",
-          "casual": "Let's try another proper dive.\nDive with {dive}. Your beak does the pecking."
-        }
-      },
-      {
-        "mood": "amused",
-        "lay": "Time to meet the competition. This dummy is a rival gull. You better show who's boss. Give him a little push for me will ya?",
-        "how": "Climb above the dummy. Dive with {dive} and fly right into it to bump him. Then dive straight through him to take his snack.",
-        "strip": "Dive with {dive} into the dummy gull"
-      },
-      {
-        "mood": "amused",
-        "lay": "Now the dummy has nicked a snack. A rival carrying food can be mugged, and that's the best steal in the game. Careful though: rivals can mug you too while you're holding food.",
-        "how": "Dive with {dive} and fly straight through the dummy. The snack changes beaks, and it's yours.",
-        "strip": "Dive with {dive} straight through the dummy",
-        "banner": "Mug the dummy: dive straight through him.\nUse {dive}. The snack changes beaks."
+        "lay": "Time to meet the competition. This dummy is a rival gull, and he's nicked a snack. Mugging a rival is the best steal in the game. Careful though: rivals can mug you too.",
+        "how": "Climb above him. Dive with {dive} and fly straight through him, no peck needed. The snack changes beaks. Full belly? Then you just bump him, and that counts too.",
+        "strip": "Dive with {dive} straight through the dummy"
       }
     ]
   },

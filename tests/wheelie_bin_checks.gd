@@ -83,7 +83,7 @@ static func run(suite: Node, check: Callable) -> void:
 		check.call(raids.items.filter(func(i: Dictionary) -> bool: return not bool(i.get("extra",false))).size()==int(Config.tuning.world.bin_burst),"wheelie bin uses the normal scatter count")
 		check.call(not raids.items.is_empty() and is_equal_approx(float(raids.items[0].position.y),float(wheelie.content_y)+6.0),"wheelie contents emerge from its raised lid")
 		wheelie.remaining = 1
-		game.lesson = 3
+		game.lesson = BeachGame.BIN_LESSON - 1
 		game._training_advance()
 		check.call(int(wheelie.remaining)==wheelie_capacity,"tutorial reset restores the wheelie bin's larger capacity")
 

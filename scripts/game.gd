@@ -36,12 +36,14 @@ var lesson: int = 0
 var quests: BeachQuests = BeachQuests.new()
 var feathers_earned: int = 0
 var mugged_rivals: Dictionary = {}
-const TRAINING_LESSONS: int = 9
-const BIN_LESSON: int = 4
-const WHEELIE_LESSON: int = 5
-const SECOND_SWOOP_LESSON: int = 6
-const BUMP_LESSON: int = 7 ## dive into the empty-beaked dummy gull
-const MUG_LESSON: int = 8 ## the dummy now carries food: dive through it
+const TRAINING_LESSONS: int = 5
+const DIVE_LESSON: int = 2
+const BIN_LESSON: int = 3
+const MUG_LESSON: int = 4 ## the dummy carries food: dive through it. A bump (full stomach) passes too.
+const AIM_PAUSES: int = 2 ## how many dives of the first dive lesson freeze for steering
+const DIVE_NUDGE_TIME: float = 10.0 ## seconds without a dive before the first dive lesson says how again
+const MUG_RESCUE_MISSES: int = 3 ## missed dives before the dummy hovers still
+const BIN_TIP_RANGE: float = 28.0 ## how near a bin a useless peck has to be to earn a tip
 const DUMMY_FOOD: String = "crisps_bag"
 const RING_LESSON_1: Vector2 = Vector2(145,65) ## the takeoff ring, above the first palm
 const TRAINER_DELAY: float = 1.4 ## seconds between a lesson's toast and the next pop-up or banner
@@ -57,15 +59,24 @@ var trainer_then: Callable = Callable()
 ## The first swoop freezes just before the beak reaches the snack until the player presses peck.
 var peck_pause: bool = false
 var peck_pause_armed: bool = true
+## The first dives also freeze at the start of the wind-up so the player can steer, then press dive to go.
+var aim_pause: bool = false
+var aim_pause_armed: bool = true
+var aim_pauses_left: int = AIM_PAUSES
+var dive_nudge_clock: float = 0.0
 var prompt_action: String = "peck" ## the press the frozen prompt waits for: peck (lesson 3) or dive (the counter lesson)
 var training_took_off: bool = false
 var training_clean_snatch: bool = false
 var training_snatch_age: float = 0.0
 const MISS_HINT_TIME: float = 5.0
 var training_miss_hint: float = 0.0
+var training_miss_line: String = "first_miss" ## the data/trainer.json "live" line the miss hint shows
+var mug_misses: int = 0
+var was_striking: bool = false
+var strike_near_carrier: bool = false ## this dive passed a rival holding food
+var tip_ready_at: float = 0.0 ## repeating tips wait out their own display time
 const MISS_ADVANCE_DELAY: float = 3.5
 var training_miss_advance: float = 0.0  # counts down to the next card after a first miss
-var training_raid_started: bool = false
 var training_reset_clock: float = 0.0
 var pending_rivals: Array = []
 const FLY_IN_SPEED: float = 1.5
@@ -245,15 +256,10 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 			Audio.play("snatch",1+score.tier*0.08)
 			player.digestion.collect(food_id)
 	)
-	stash_raids.bag_burst.connect(func() -> void:
-		if training and lesson == 3 and training_raid_started:
-			_training_advance()
-	)
 	stash_raids.bin_emptied.connect(func(_bin_type: String) -> void: _quest_event("bin_emptied"))
 	stash_raids.bin_opened.connect(func(bin_type: String) -> void:
-		if not training:
-			return
-		if (lesson == BIN_LESSON and bin_type != BeachBackdrop.WHEELIE_BIN_TYPE) or (lesson == WHEELIE_LESSON and bin_type == BeachBackdrop.WHEELIE_BIN_TYPE):
+		_learned("wheelie_low" if bin_type == BeachBackdrop.WHEELIE_BIN_TYPE else "bin_closer")
+		if training and lesson == BIN_LESSON and bin_type != BeachBackdrop.WHEELIE_BIN_TYPE:
 			_training_advance()
 	)
 	pending_rivals = level.rivals.duplicate(true)
@@ -291,7 +297,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		if lesson >= 2:
 			player.position = Vector2(180,70)
 			player.state = BeachGull.State.GLIDE
-		if lesson >= BUMP_LESSON:
+		if lesson >= MUG_LESSON:
 			_training_dummy_setup()
 		if trainer_cards:
 			var opening: Dictionary = Config.trainer.training.opening
@@ -419,7 +425,8 @@ func _wire_target(target: BeachTarget) -> void:
 
 func _food_knocked(target: BeachTarget, food_id: String, at: Vector2, impulse: Vector2) -> void:
 	# Dive lesson: a dropped snack counts as a pass, so a first miss never blocks the lesson.
-	if training and lesson == 2 and player.state == BeachGull.State.STRIKE:
+	if training and lesson == DIVE_LESSON and player.state == BeachGull.State.STRIKE:
+		training_miss_line = "first_miss"
 		training_miss_hint = MISS_HINT_TIME
 		training_miss_advance = MISS_ADVANCE_DELAY
 	stash_raids.add_knocked_food(target,food_id,at,impulse)
@@ -521,6 +528,9 @@ func _physics_process(delta: float) -> void:
 		if (prompt_action == "peck" and input.touch_peck) or (prompt_action == "dive" and input.touch_dive):
 			_end_peck_pause()
 		return
+	if aim_pause:
+		_aim_pause_tick()
+		return
 	if intro > 0 and int(level.id) != 1:
 		intro -= delta
 		if intro <= 0:
@@ -554,6 +564,9 @@ func _physics_process(delta: float) -> void:
 	if input.touch_dive:
 		input.touch_dive = false
 		player.dive(wind.direction)
+	_aim_pause_check()
+	if aim_pause:
+		return
 	if input.touch_peck:
 		input.touch_peck = false
 		peck_hold_touch = _peck_pressed()
@@ -624,6 +637,7 @@ func _physics_process(delta: float) -> void:
 		BeachBoss.shove(self)
 	BeachBoss.shove_player(self)
 	_mugging()
+	_mug_miss_check()
 	_rival_mugging()
 	_near_misses()
 	spawner.camera_x = camera_x
@@ -725,6 +739,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		if not event.is_action_pressed(prompt_action) or event.is_echo():
 			return
 		_end_peck_pause() # the same press then pecks or dives, below
+	if aim_pause:
+		if event.is_action_pressed("dive") and not event.is_echo():
+			_end_aim_pause()
+		return
 	if intro > 0:
 		if int(level.id) != 1 and event.is_pressed() and not event is InputEventMouseMotion:
 			dismiss_intro()
@@ -772,10 +790,10 @@ func _peck() -> void:
 		if crabs.peck(player) or crabs.peck_attempted:
 			player.show_ground_peck()
 			return
-		if training and lesson == 3 and stash_raids.nearby_stash() != null:
-			training_raid_started = true
 		if stash_raids.peck():
 			player.show_ground_peck()
+		else:
+			_bin_peck_tip()
 
 func _can_screech() -> bool:
 	return player != null and not training and player.species == "herring" and player.detailed_art and player.state == BeachGull.State.GROUNDED and not player.climb and absf(player.velocity.x) <= 1.0 and Input.get_vector("aim_left","aim_right","aim_up","aim_down").length() <= 0.15 and (input == null or input.touch_stick().length() <= 0.15)
@@ -822,16 +840,19 @@ func set_paused(value: bool) -> void:
 	set_process_unhandled_input(not value)
 	input.enabled = not value and running and intro <= 0 and not trainer_open
 	input.clear_touch()
+	var frozen: bool = value or trainer_open # an open card keeps the world still after a pause too
 	for gull: BeachGull in gulls:
-		gull.sprite.speed_scale = 0 if value else 1
+		gull.sprite.speed_scale = 0 if frozen else 1
 	for target: BeachTarget in spawner.targets:
-		target.sprite.speed_scale = 0 if value else 1
+		target.sprite.speed_scale = 0 if frozen else 1
 	for dog: OffLeadDog in dogs:
-		dog.paused = value
+		dog.paused = frozen
 	for teen: WatergunTeen in teens:
-		teen.paused = value
+		teen.paused = frozen
 	if is_instance_valid(sweeper_visits.sweeper):
-		sweeper_visits.sweeper.paused = value
+		sweeper_visits.sweeper.paused = frozen
+	if not value and trainer_open and overlay.trainer_card.is_open():
+		overlay.trainer_card.button.grab_focus.call_deferred() # the pause menu took the focus: give the card its button back
 
 func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 	if gull == player:
@@ -846,6 +867,7 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 		if dive_live and target.last_theft_direct and not dive_hit:
 			dive_hit = true
 			dive_stats.dive_snatches += 1
+		strike_near_carrier = false
 		player.digestion.collect(target.food_id,{"risky":risky,"upwind":player.upwind,"handover":handover})
 		if target.info.twist == "umbrella" and not target.is_loose():
 			_quest_event("umbrella_snatch")
@@ -1030,13 +1052,14 @@ func _mugging() -> void:
 				return
 			if not carrying:
 				# A dive peck into a rival with nothing to steal still sends it tumbling.
+				strike_near_carrier = false
 				pilot.bump(player.position)
 				effects.snatch_contact(pilot.gull.position,player.velocity,false)
 				effects.message(pilot.gull.position-Vector2(0,20),"BONK!",BeachUI.GOLD)
 				Audio.play("snatch",1+score.tier*0.08)
 				brash.add(float(Config.tuning.brash.bump))
 				_quest_event("rival_bumped",{"name":pilot.gull.rival_name})
-				if training and lesson == BUMP_LESSON and pilot.dummy:
+				if training and lesson == MUG_LESSON and pilot.dummy:
 					_training_advance()
 				return
 			var value: int = pilot.mug(player.position)
@@ -1048,6 +1071,8 @@ func _mugging() -> void:
 				Audio.play("snatch",1+score.tier*0.08)
 				player.digestion.collect(pilot.carried_food_id,{"value":value,"upwind":player.upwind,"mugged":true,"mugged_from":pilot.gull.rival_name})
 				brash.add(float(Config.tuning.brash.mug))
+				strike_near_carrier = false
+				_learned("mug_miss")
 				if training and lesson == MUG_LESSON and pilot.dummy:
 					_training_advance()
 				return
@@ -1125,14 +1150,14 @@ func finish() -> void:
 	level_finished.emit(result)
 
 func _training_snatch(_target: BeachTarget) -> void:
-	if lesson in [2,SECOND_SWOOP_LESSON]:
+	if lesson == DIVE_LESSON:
 		training_clean_snatch = true
 		training_snatch_age = 0.0
 
 func _training_advance() -> void:
 	lesson += 1
 	training_clean_snatch = false
-	if lesson in [BIN_LESSON,WHEELIE_LESSON]:
+	if lesson == BIN_LESSON:
 		# A bin explored earlier must still support a complete practice attempt.
 		for bin: Dictionary in stash_raids.bins:
 			bin.remaining = int(bin.get("capacity",Config.tuning.world.bin_stash_size))
@@ -1143,7 +1168,7 @@ func _training_advance() -> void:
 		track("lesson_start", {"lesson": lesson + 1})
 	GameState.save_training_step(lesson)
 	effects.message(player.position-Vector2(0,24),_toast(),BeachUI.GOLD,1.5)
-	if lesson >= BUMP_LESSON and lesson < TRAINING_LESSONS:
+	if lesson == MUG_LESSON:
 		_training_dummy_setup()
 	if lesson >= TRAINING_LESSONS:
 		if trainer_cards:
@@ -1159,13 +1184,13 @@ func _training_advance() -> void:
 		else:
 			_queue_trainer(_trainer_entry("training", lesson))
 
-## The sparring gull for the bump and mug lessons. Spawned once, empty-beaked; the mug lesson hands it food.
+## The sparring gull for the mug lesson, spawned once and handed the snack to steal.
 func _training_dummy_setup() -> void:
 	if training_dummy() == null and level.has("training_dummy"):
 		pending_rivals = [level.training_dummy.duplicate(true)]
 		_release_rivals()
 	var dummy: RivalPilot = training_dummy()
-	if dummy != null and lesson == MUG_LESSON:
+	if dummy != null:
 		dummy.dummy_food = DUMMY_FOOD
 
 func training_dummy() -> RivalPilot:
@@ -1243,7 +1268,7 @@ func _freeze_actors(value: bool) -> void:
 ## beak reaches the snack so the player sees when to press peck. Once per dive, and not in Casual, where the
 ## beak pecks by itself.
 func _peck_pause_check() -> void:
-	if not trainer_cards or lesson != 2 or trainer_open or player.auto_peck():
+	if not trainer_cards or lesson != DIVE_LESSON or trainer_open or player.auto_peck():
 		return
 	if player.state != BeachGull.State.STRIKE:
 		peck_pause_armed = true
@@ -1263,17 +1288,108 @@ func _end_peck_pause() -> void:
 	peck_pause = false
 	_freeze_actors(false)
 
+## Freezes the first dives as the wind-up starts: how a dive aims depends on the controls, so let the player try it.
+func _aim_pause_check() -> void:
+	if player.state not in [BeachGull.State.WINDUP,BeachGull.State.STRIKE]:
+		aim_pause_armed = true
+		return
+	if not (training and trainer_cards and lesson == DIVE_LESSON) or player.state != BeachGull.State.WINDUP or not aim_pause_armed or aim_pauses_left <= 0:
+		return
+	aim_pause = true
+	aim_pause_armed = false
+	aim_pauses_left -= 1
+	_freeze_actors(true)
+
+func _aim_pause_tick() -> void:
+	input.update_player(player,camera_x)
+	# Steering sets the dive's direction, so a keyboard or stick player can let go and keep their aim.
+	var offset: Vector2 = player.aim - player.position
+	if offset.length() > float(Config.tuning.dive.aim_deadzone):
+		player.direction = offset.normalized()
+	if input.touch_dive:
+		_end_aim_pause()
+	overlay.queue_redraw()
+
+func _end_aim_pause() -> void:
+	aim_pause = false
+	input.touch_dive = false
+	_freeze_actors(false)
+
+## True when the frozen dive's line reaches the snack, so the overlay can turn it gold.
+func aim_lines_up() -> bool:
+	var snack: Vector2 = training_target()
+	var to_snack: Vector2 = snack - player.position
+	var along: float = to_snack.dot(player.direction)
+	return along > 0.0 and absf(to_snack.cross(player.direction)) <= float(Config.tuning.dive.aim_deadzone)
+
+## A dive that ends without touching the rival gets told how, every time.
+func _mug_miss_check() -> void:
+	var striking: bool = player.state == BeachGull.State.STRIKE
+	if striking:
+		for pilot: RivalPilot in pilots:
+			strike_near_carrier = strike_near_carrier or (pilot.gull.mug_cue and not pilot.dummy)
+	var ended: bool = was_striking and not striking
+	was_striking = striking
+	if not ended:
+		return
+	if training:
+		if lesson == MUG_LESSON:
+			mug_misses += 1
+			var dummy: RivalPilot = training_dummy()
+			if mug_misses >= MUG_RESCUE_MISSES and dummy != null:
+				dummy.hold_still()
+			_training_hint("mug_rescue" if mug_misses >= MUG_RESCUE_MISSES else "mug_miss")
+	elif strike_near_carrier:
+		_show_tip("mug_miss")
+	strike_near_carrier = false
+
+## A peck on the sand that reached nothing: says so if the gull was near a bin.
+func _bin_peck_tip() -> void:
+	var reach: float = float(Config.tuning.world.peck_reach)
+	for bin: Dictionary in stash_raids.bins:
+		var gap: float = absf(float(bin.x)-player.beak().x)
+		var line: String = ""
+		if bool(bin.get("requires_top_landing",false)):
+			if gap < BIN_TIP_RANGE and not player.is_supported_by(str(bin.type),float(bin.x)):
+				line = "wheelie_low"
+		elif gap > reach and gap < reach + BIN_TIP_RANGE:
+			line = "bin_closer"
+		if line.is_empty():
+			continue
+		if training:
+			if lesson == BIN_LESSON:
+				_training_hint(line)
+		else:
+			_show_tip(line)
+		return
+
+func _training_hint(line: String) -> void:
+	training_miss_line = line
+	training_miss_hint = MISS_HINT_TIME
+
+## Real levels repeat a tip on every failed try, until the player has managed that move once.
+func _show_tip(line: String) -> void:
+	if line in GameState.options.tips or elapsed < tip_ready_at:
+		return
+	var seconds: float = float(Config.tuning.juice.tip_time)
+	tip_ready_at = elapsed + seconds
+	effects.message(Vector2(camera_x,84.0),str(Config.trainer.tips[line]),BeachUI.GOLD,seconds,0.0)
+
+func _learned(line: String) -> void:
+	if line not in GameState.options.tips:
+		GameState.options.tips.append(line)
+		GameState.save_progress()
+
 func _training_tick(delta: float) -> void:
 	training_miss_hint = maxf(0.0,training_miss_hint-delta)
 	banner_cue = maxf(0.0,banner_cue-delta)
-	stash_raids.reach_bonus = 14.0 if lesson == 3 else 0.0
 	if banner_delay > 0.0:
 		banner_delay -= delta
 		if banner_delay <= 0.0:
 			_cue_banner()
 	if training_miss_advance > 0.0:
 		training_miss_advance -= delta
-		if training_miss_advance <= 0.0 and lesson == 2:
+		if training_miss_advance <= 0.0 and lesson == DIVE_LESSON:
 			_training_advance()
 	_peck_pause_check()
 	if lesson == 0:
@@ -1284,12 +1400,15 @@ func _training_tick(delta: float) -> void:
 				_cue_banner()
 		if training_took_off and player.state == BeachGull.State.GLIDE and player.position.x > RING_LESSON_1.x - 10.0:
 			_training_advance()
-	elif lesson in [2,SECOND_SWOOP_LESSON] and training_clean_snatch:
+	elif lesson == DIVE_LESSON and training_clean_snatch:
 		training_snatch_age += delta
 		# Climbing is the goal, but a gull that landed or stalled after a clean snatch still passes.
-		# Only the first dive lesson also passes on a timer; the second one needs the real climb-away.
-		if (lesson == 2 and training_snatch_age > 4.0) or (player.position.y < 100 and player.velocity.y <= 0 and player.state in [BeachGull.State.GLIDE,BeachGull.State.STRIKE]):
+		if training_snatch_age > 4.0 or (player.position.y < 100 and player.velocity.y <= 0 and player.state in [BeachGull.State.GLIDE,BeachGull.State.STRIKE]):
 			_training_advance()
+	if lesson == DIVE_LESSON and player.state not in [BeachGull.State.WINDUP,BeachGull.State.STRIKE]:
+		dive_nudge_clock += delta
+	else:
+		dive_nudge_clock = 0.0
 	# Lessons cannot run out of food. Restore only after all loose food clears,
 	# so a missed peck never duplicates an item still lying on the beach.
 	training_reset_clock += delta
@@ -1319,26 +1438,26 @@ func _training_tick(delta: float) -> void:
 ## The short reminder on the strip while a lesson runs; the pop-up card does the explaining.
 func training_text() -> String:
 	var live: Dictionary = Config.trainer.live
+	if aim_pause:
+		return TrainerScript.line(live.aim_freeze, input)
 	if player.crash_warning():
 		return TrainerScript.line(live.crash, input)
 	if training_miss_hint > 0.0:
-		return TrainerScript.line(live.first_miss, input)
+		return TrainerScript.line(live[training_miss_line], input)
 	if lesson >= TRAINING_LESSONS:
 		return TrainerScript.line(live.practice, input)
 	var data: Dictionary = Config.trainer.training.lessons[mini(lesson, TRAINING_LESSONS-1)]
 	if lesson == 0 and training_took_off:
 		return TrainerScript.line(data.banner_steer if banner_active() else data.strip_steer, input)
-	if lesson in [2, SECOND_SWOOP_LESSON]:
+	if lesson == DIVE_LESSON:
 		if training_clean_snatch:
 			return TrainerScript.line(live.clean, input)
 		if player.state == BeachGull.State.STRIKE and not player.peck_used:
 			return TrainerScript.line(live.peck_now, input)
-		if lesson == 2 and player.state == BeachGull.State.STRIKE and player.peck_used and not player.auto_peck():
+		if player.state == BeachGull.State.STRIKE and player.peck_used and not player.auto_peck():
 			return TrainerScript.line(live.missed, input)
-	if lesson == WHEELIE_LESSON:
-		var wheelie: Dictionary = training_bin(true)
-		if player.state == BeachGull.State.GROUNDED and not wheelie.is_empty() and player.support.is_empty() and absf(player.position.x-float(wheelie.x)) < 28.0:
-			return TrainerScript.line(live.wheelie_low, input)
+		if dive_nudge_clock >= DIVE_NUDGE_TIME:
+			return TrainerScript.line(live.dive_nudge, input)
 	if lesson == MUG_LESSON:
 		var dummy: RivalPilot = training_dummy()
 		if dummy != null and not player.can_collect_food(DUMMY_FOOD):
@@ -1353,11 +1472,10 @@ func training_bin(wheelie: bool) -> Dictionary:
 	return {}
 
 func training_target() -> Vector2:
-	if lesson in [BIN_LESSON,WHEELIE_LESSON]:
-		var bin: Dictionary = training_bin(lesson == WHEELIE_LESSON)
+	if lesson == BIN_LESSON:
+		var bin: Dictionary = training_bin(false)
 		if not bin.is_empty():
-			# The wheelie ring marks its lid, where the gull has to stand.
-			return Vector2(float(bin.x),float(bin.content_y)-6.0 if lesson == WHEELIE_LESSON else float(Config.tuning.world.ground)-18)
+			return Vector2(float(bin.x),float(Config.tuning.world.ground)-18)
 	if lesson == 0:
 		return RING_LESSON_1
 	if lesson == 1:
@@ -1368,16 +1486,14 @@ func training_target() -> Vector2:
 				nearest = Vector2(float(crumb.x),156)
 				distance = absf(nearest.x-player.position.x)
 		return nearest
-	if lesson in [BUMP_LESSON,MUG_LESSON]:
+	if lesson == MUG_LESSON:
 		var dummy: RivalPilot = training_dummy()
 		if dummy != null:
 			return dummy.gull.position
-	if lesson in [2,3]:
+	if lesson == DIVE_LESSON:
 		for target: BeachTarget in spawner.targets:
-			if lesson == 2 and target.kind == "kiosk_customer":
+			if target.kind == "kiosk_customer":
 				return target.food_position()
-			if lesson == 3 and target.kind == "sunbather":
-				return target.stash_position()
 	return Vector2(-1000,-1000)
 
 # --- Level 2 screech lesson (first herring play) -------------------------------------------

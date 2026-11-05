@@ -122,7 +122,7 @@ static func run(suite: Node, check: Callable) -> void:
 	main.game.track_hidden()
 	main.clear_game()
 	check.call(rec.names().count("game_hidden") == hidden_count, "hiding the tab before the level starts reports nothing")
-	check.call(rec.sent[0].properties.schema == 3 and rec.sent[0].properties.has("dev"), "events carry schema and dev marker")
+	check.call(rec.sent[0].properties.schema == 4 and rec.sent[0].properties.has("dev"), "events carry schema and dev marker")
 	Analytics.page_id = "page123"
 	Analytics.track("level_start")
 	check.call(rec.last("level_start").page_id == "page123", "game events link to the page_open that loaded them")
