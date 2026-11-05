@@ -35,7 +35,7 @@ func _prepare(level: Dictionary) -> void:
 	GameState.options.merge({"stats": false, "touch": false, "shake": false, "tips": ["teen", "squall", "dogs"], "control_mode": "normal"}, true)
 	GullInput.register_actions()
 	BeachGame.trainer_cards = false
-	get_window().size = Vector2i(320, 180)
+	get_window().size = Vector2i(1280, 720) # the game's own window: canvas_items stretch draws sprites at 4x, which is why the stills are sharp
 	get_window().content_scale_size = Vector2i(320, 180)
 	get_window().content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
 	game = BeachGame.new()
@@ -63,7 +63,8 @@ func _clear_except(keep: Array) -> void:
 			target.position.x = -2000.0
 			target.leaving = true
 
-const STILL_SIZE: Vector2i = Vector2i(74, 42)
+const SCALE: int = 4 ## window pixels per logical pixel
+const STILL_SIZE: Vector2i = Vector2i(74, 42) * SCALE ## the same 74x42 framing, captured at 4x
 const GAP: float = 9.0 ## px between the beak and its food: just before contact
 
 func _step(count: int) -> void:
@@ -120,7 +121,7 @@ func _run() -> void:
 	screen.convert(Image.FORMAT_RGBA8)
 	if OS.get_cmdline_user_args().has("--full"):
 		screen.save_png(ProjectSettings.globalize_path("res://test-output/score-ways/full-" + way + ".png"))
-	var corner := Vector2i(roundi(center.x - game.camera.position.x + 160.0) - STILL_SIZE.x / 2, roundi(center.y) - STILL_SIZE.y / 2)
+	var corner := Vector2i(roundi((center.x - game.camera.position.x + 160.0) * SCALE) - STILL_SIZE.x / 2, roundi(center.y * SCALE) - STILL_SIZE.y / 2)
 	corner = corner.clamp(Vector2i.ZERO, screen.get_size() - STILL_SIZE)
 	var still: Image = screen.get_region(Rect2i(corner, STILL_SIZE))
 	var path: String = ProjectSettings.globalize_path(OUTPUT_DIR + way + ".png")

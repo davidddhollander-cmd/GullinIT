@@ -71,8 +71,8 @@ static func run(suite: Node, check: Callable) -> void:
 			check.call(panel_rect.encloses(label.get_global_rect()) and label.get_global_rect().size.y >= label.get_minimum_size().y, "HOW TO SCORE text fits: " + label.text)
 		var still_ok: bool = training_card.stills.size() == 4
 		for still: TextureRect in training_card.stills:
-			still_ok = still_ok and still.texture != null and still.texture.get_size() == Vector2(ScoreWaysCard.STILL_SIZE) and still.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST
-		check.call(still_ok, "HOW TO SCORE shows four native-size stills")
+			still_ok = still_ok and still.texture != null and still.texture.get_size() == Vector2(ScoreWaysCard.STILL_SIZE * 4) and still.custom_minimum_size == Vector2(ScoreWaysCard.STILL_SIZE) and still.expand_mode == TextureRect.EXPAND_IGNORE_SIZE and still.stretch_mode == TextureRect.STRETCH_SCALE and still.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST
+		check.call(still_ok, "HOW TO SCORE shows four 4x stills in a 74x42 box")
 		training_card.close_button.pressed.emit()
 		await suite.settle()
 		var training_board: ResultBoard = main.menus.get_child(0) as ResultBoard

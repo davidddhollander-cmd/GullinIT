@@ -68,10 +68,23 @@ static func _input(host: Node, check: Callable) -> void:
 	input.enabled = true
 	var gull: BeachGull = _airborne(host, "realistic")
 	var press: InputEventKey = InputEventKey.new()
-	press.physical_keycode = KEY_SPACE
+	press.physical_keycode = KEY_UP
 	press.pressed = true
 	input._input(press)
 	check.call(input.flap_tap, "a flap key press latches in _input")
+	input.flap_tap = false
+	var space: InputEventKey = InputEventKey.new()
+	space.physical_keycode = KEY_SPACE
+	space.keycode = KEY_SPACE
+	space.pressed = true
+	input._input(space)
+	check.call(not input.flap_tap and not space.is_action("climb") and space.is_action("ui_accept"), "Space no longer flaps but still accepts menus")
+	var up_only: InputEventKey = InputEventKey.new()
+	up_only.physical_keycode = KEY_UP
+	var w_key: InputEventKey = InputEventKey.new()
+	w_key.physical_keycode = KEY_W
+	check.call(up_only.is_action("climb") and not up_only.is_action("aim_up") and w_key.is_action("aim_up") and not w_key.is_action("climb"), "Up is flap only and W is aim up only")
+	input._input(press)
 	input.update_player(gull, 0.0)
 	check.call(gull.flap_tap_pending and not input.flap_tap, "update_player hands the latched tap to the gull once")
 	var echo: InputEventKey = press.duplicate() as InputEventKey

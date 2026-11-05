@@ -93,9 +93,9 @@ static func _copy_checks(check: Callable) -> void:
 	GameState.options.control_mode = "realistic"
 	_set_device(input,"keyboard")
 	var realistic_how: String = TrainerScript.line(trainer.training.lessons[0].how,input)
-	check.call(realistic_how.contains("Tap Space") and not realistic_how.contains("Hold Space"),"Realistic takeoff card says tap, not hold: " + realistic_how)
+	check.call(realistic_how.contains("Tap Up arrow") and not realistic_how.contains("Hold Up arrow"),"Realistic takeoff card says tap, not hold: " + realistic_how)
 	check.call(TrainerScript.line(trainer.training.lessons[1].how,input).contains("Stop tapping"),"Realistic landing card says stop tapping")
-	check.call(TrainerScript.line(trainer.live.crash,input).contains("Tap Space"),"Realistic crash warning says tap")
+	check.call(TrainerScript.line(trainer.live.crash,input).contains("Tap Up arrow"),"Realistic crash warning says tap")
 	GameState.options.control_mode = "casual"
 	for index: int in [BeachGame.DIVE_LESSON]:
 		var how: String = TrainerScript.line(trainer.training.lessons[index].how,input)
@@ -196,7 +196,7 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	game._training_advance()
 	game.overlay._process(0)
 	check.call(not game.trainer_open and game.trainer_queue.is_empty() and game.lesson == 1 and game.banner_delay > 0.0 and not game.overlay.training_panel.visible,"a converted lesson waits a beat after the toast, with no card queued")
-	game._physics_process(BeachGame.TRAINER_DELAY + 0.1)
+	game._physics_process(BeachGame.TRAINING_DELAY + 0.1)
 	game.overlay._process(0)
 	check.call(game.banner_active() and game.overlay.lesson_prompt.text.contains("aim down") and game.banner_cue > 0.0,"the next banner appears with a cue and its own text")
 	BeachGame.trainer_cards = false
@@ -213,7 +213,7 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	# Finishing a lesson shows a toast first, then the next card after a short beat.
 	game._training_advance()
 	check.call(not game.trainer_open and not game.trainer_queue.is_empty() and game.lesson == 2,"the next card waits a beat after the lesson-done toast")
-	game._physics_process(BeachGame.TRAINER_DELAY + 0.1)
+	game._physics_process(BeachGame.TRAINING_DELAY + 0.1)
 	check.call(game.trainer_open and card.counter_label.text == "Lesson 3/%d" % BeachGame.TRAINING_LESSONS,"the first dive keeps its card")
 	var before: Vector2 = game.player.position
 	var clock: float = game.elapsed
@@ -224,6 +224,26 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	card.button.pressed.emit()
 	check.call(dismissed.size() == 1 and not game.trainer_open and not card.visible and game.input.enabled,"the card button resumes the game and its controls")
 	card.button.pressed.emit()
+	# The pause is the full Training Day beat, and a goal met inside it waits for its own card instead of skipping the lesson.
+	game.lesson = 1
+	game._training_advance()
+	game._physics_process(BeachGame.TRAINING_DELAY - 0.5)
+	check.call(not game.trainer_open and not game.trainer_queue.is_empty(),"the next card is still waiting 2.5 s after the toast")
+	game.player.state = BeachGull.State.GLIDE
+	game.player.cooldown = 0.0
+	game.player.aim = game.player.position + Vector2(20,20)
+	var dive_press: InputEventAction = InputEventAction.new()
+	dive_press.action = "dive"
+	dive_press.pressed = true
+	game._unhandled_input(dive_press)
+	check.call(game.training_card_pending() and game.player.state == BeachGull.State.GLIDE,"a dive pressed while the next card is queued is ignored")
+	game._training_advance()
+	check.call(game.lesson == 2 and game.advance_pending,"a goal met before its card shows is held, not counted")
+	game._physics_process(0.6)
+	check.call(game.trainer_open and game.lesson == 2,"the card still opens for the lesson that was just reached")
+	card.button.pressed.emit()
+	check.call(game.lesson == 3 and not game.advance_pending,"the held goal counts once its card is dismissed")
+	game.trainer_queue = {}
 	# The last lesson ends with the closing card; the result waits until it is dismissed.
 	game.lesson = BeachGame.MUG_LESSON
 	var results: Array[Dictionary] = []
@@ -327,7 +347,7 @@ static func _focus_loss_flow(host: Node, check: Callable) -> void:
 	host.main._navigate("resume")
 	await host.settle()
 	check.call(not game.trainer_queue.is_empty() and not game.trainer_open and game.is_physics_processing(),"resuming leaves the queued card waiting and the world ticking")
-	game._physics_process(BeachGame.TRAINER_DELAY + 0.1)
+	game._physics_process(BeachGame.TRAINING_DELAY + 0.1)
 	check.call(game.trainer_open and card.button.has_focus(),"the queued card opens after the pause")
 	card.button.pressed.emit()
 	check.call(not game.trainer_open and game.input.enabled,"the queued card dismisses and play continues")

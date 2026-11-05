@@ -155,7 +155,7 @@ static func _hint_checks(suite: Node, check: Callable) -> void:
 	await suite.settle()
 	_top_bar_checks(overlay,check)
 	var hint: Dictionary = overlay.context_hint()
-	check.call(not hint.is_empty() and "SPACE" in str(hint.text), "grounded hint uses keyboard wording: " + str(hint))
+	check.call(not hint.is_empty() and "UP ARROW" in str(hint.text), "grounded hint uses keyboard wording: " + str(hint))
 	game.input.touch_visible = true
 	check.call("FLAP" in str(overlay.context_hint().text), "grounded hint uses touch wording")
 	game.input.touch_visible = false
@@ -164,7 +164,7 @@ static func _hint_checks(suite: Node, check: Callable) -> void:
 	var signs: Array[Rect2] = []
 	for sign: Dictionary in game.beach.sign_layouts():
 		signs.append(sign.rect)
-	for text: String in ["WALK FOR SCRAPS / HOLD SPACE TO FLY", "LANDING / HOLD SPACE TO CLIMB", "PECK SPENT - DIVE AGAIN", "TAP E AT THE SNACK", "TAP PECK AT TODDLER", "PULL UP! CRASH AHEAD"]:
+	for text: String in ["WALK FOR SCRAPS / HOLD UP ARROW TO FLY", "LANDING / HOLD UP ARROW TO CLIMB", "PECK SPENT - DIVE AGAIN", "TAP E AT THE SNACK", "TAP PECK AT TODDLER", "PULL UP! CRASH AHEAD"]:
 		var box: Rect2 = overlay.hint_rect(text)
 		check.call(box.position.x >= 0 and box.end.x <= 320 and box.position.y >= BeachOverlay.TOP_BAR_HEIGHT, "hint stays on screen below the HUD: " + text)
 		check.call(not box.intersects(GOAL_PANEL), "hint clears the goal panel: " + text + " " + str(box))
@@ -186,7 +186,7 @@ static func _hint_checks(suite: Node, check: Callable) -> void:
 	await suite.settle()
 	var panel: Rect2 = overlay.training_panel.get_global_rect()
 	_top_bar_checks(overlay,check)
-	var box: Rect2 = overlay.hint_rect("WALK FOR SCRAPS / HOLD SPACE TO FLY")
+	var box: Rect2 = overlay.hint_rect("WALK FOR SCRAPS / HOLD UP ARROW TO FLY")
 	check.call(panel.size.y > 0 and box.position.y >= panel.end.y and not box.intersects(panel), "training hint sits below the lesson panel: " + str(box) + " panel " + str(panel))
 	var training_signs: bool = true
 	for sign: Dictionary in game.beach.sign_layouts():
