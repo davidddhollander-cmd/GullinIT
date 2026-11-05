@@ -272,6 +272,11 @@ static func run_game(suite: Node, check: Callable) -> void:
 	await suite.snapshot("level2-gary-entry")
 	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == "GARY JOINS THE LUNCH RUSH!"), "level 2 no longer shows the generic join message")
 	check.call(game.pilots.size() == 1 and bool(game.pilots[0].personality.get("loose_only", false)), "Gary is loose-only")
+	game = _play(main, 2)
+	game._swallowed({"id": "hotdog", "scrap": true})
+	check.call(game.entry_pilot != null and game.pending_rivals.is_empty() and game.pilots.size() == 1, "level 2: Gary arrives after a ground scrap too, exactly once")
+	game._swallowed({"id": "hotdog", "scrap": true})
+	check.call(game.pilots.size() == 1, "level 2: a second scrap does not spawn Gary again")
 	# Task 007: customer bite window and the mid-air bite quest (level 1 replay).
 	GameState.complete_training()
 	main._navigate("start", 1)
