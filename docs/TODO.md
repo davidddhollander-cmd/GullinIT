@@ -1,13 +1,12 @@
 # TODO
 
+**Current priorities until mid-December 2026 are in `PRIORITIES.md`.** Items below are parked unless listed there.
+
 Parked work that is agreed but not yet scheduled. When an item is ready, Opus turns it into a task in `tasks/inbox/`.
 
 ## Features
 
-- **High score entry and online leaderboard** (parked 2026-10-25). Today the result sign shows made-up starter names from `data/leaderboards.json` plus "YOU" with this device's best; there is no name entry and nothing is shared between players. Options:
-  1. Local name entry (3-8 letters at level end, saved in the player's browser). Small Sonnet task, no backend.
-  2. Online leaderboard. itch.io has none for HTML games, so it needs a service (Talo, SilentWolf, LootLocker or a Supabase table) with a name filter, basic score sanity checks against faked browser scores, and a privacy note on the itch page.
-  Decision needed: which option, and which service for 2.
+- ~~High score entry and online leaderboard~~ Done 2026-10-30: Talo boards per level with name entry (`scripts/autoload/online_scores.gd`). VS boards are planned in `PRIORITIES.md` (P3).
 
 ## From player feedback (`docs/PLAYER_FEEDBACK.md`)
 
