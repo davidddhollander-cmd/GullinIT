@@ -1,8 +1,8 @@
 class_name ScoreRulesCard
 extends Control
 ## Modal "SCORE RULES" reference: every multiplier and penalty in one card.
-## Opened from the pause menu, the result sign's bonus line and the end of
-## Training Day. Values come from data/tuning.json so the card never drifts.
+## Opened from the pause menu and the result sign's bonus line. Values come
+## from data/tuning.json so the card never drifts.
 
 signal closed
 

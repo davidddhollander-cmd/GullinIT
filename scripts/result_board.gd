@@ -88,8 +88,11 @@ func _build_training() -> void:
 	_add_button(actions,"LEVELS","select")
 	if not buttons.is_empty():
 		buttons[0].grab_focus()
-	# Graduates get the full scoring reference before their first real beach.
-	open_score_rules("GOT IT")
+	# Graduates see the ways to score before their first real beach; the full rules stay behind the "?" and in the pause menu.
+	var ways := ScoreWaysCard.open(self)
+	ways.closed.connect(func() -> void:
+		if not buttons.is_empty():
+			buttons[0].grab_focus())
 
 func _build() -> void:
 	title_label = BeachUI.label(self, ("BEACH BOSS!" if bool(result.won) else "OUT-EATEN!") if result.has("boss") else "", BeachUI.FONT_DISPLAY, CREAM)

@@ -76,7 +76,7 @@ static func run(host: Node, check: Callable) -> void:
 	game.player.position.y = 80
 	game.player.velocity.y = -25
 	game._training_tick(0.1)
-	check.call(game.lesson == 3,"clean swoop and safe pullup advance to picnic bag")
+	check.call(game.lesson == 3,"clean swoop and safe pullup advance to the bin")
 	# A landed gull after a clean snatch still passes after a few seconds.
 	game.lesson = 2
 	game.training_clean_snatch = true
@@ -100,58 +100,32 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(game.overlay.trainer_portrait.visible and game.overlay.trainer_portrait.texture != null,"first-miss hint shows the trainer portrait")
 	game.training_miss_hint = 0.0
 	game.stash_raids.items.clear()
-	game.stash_raids.bag_burst.emit()
-	check.call(game.lesson == 3,"picnic lesson requires starting a bag raid")
-	game.training_raid_started = true
-	game._training_tick(0.0)
-	check.call(game.stash_raids.reach_bonus > 0.0,"the picnic lesson widens the bag reach")
-	game.stash_raids.collected.emit(Vector2.ZERO,"crumbs",true)
-	check.call(game.lesson == 3,"bin scrap cannot satisfy picnic bag lesson")
-	game.stash_raids.bag_burst.emit()
-	check.call(game.lesson == 4,"bursting the bag advances to bin lesson")
+	check.call(game.lesson == BeachGame.BIN_LESSON,"the first dive leads straight to the bin lesson")
 	check.call(game.training_text().contains("bin"),"bin lesson explains the new action")
 	game._scrap_collected(Vector2.ZERO,"crumbs")
-	check.call(game.lesson == 4,"ordinary scraps cannot skip the bin lesson")
+	check.call(game.lesson == BeachGame.BIN_LESSON,"ordinary scraps cannot skip the bin lesson")
 	game.player.state = BeachGull.State.GROUNDED
-	game.player.position = Vector2(float(game.stash_raids.bins[0].x),game.player.ground_y())
+	var plain_bin: Dictionary = game.training_bin(false)
+	game.player.position = Vector2(float(plain_bin.x),game.player.ground_y())
+	game.player.position.x += game.player.position.x - game.player.beak().x + float(Config.tuning.world.peck_reach) + 10.0
+	for attempt: int in range(2):
+		game.training_miss_hint = 0.0
+		game.stash_raids.peck_cooldown = 0
+		game._peck()
+		check.call(game.lesson == BeachGame.BIN_LESSON and game.training_text().contains("Closer"),"a peck just out of the bin's reach says land closer, try %d" % (attempt+1))
+	game.training_miss_hint = 0.0
+	game.player.position = Vector2(float(plain_bin.x),game.player.ground_y())
 	for tap: int in range(int(Config.tuning.world.bin_pecks)):
 		game.stash_raids.peck_cooldown = 0
 		game._peck()
-		check.call(game.lesson == (5 if tap == int(Config.tuning.world.bin_pecks)-1 else 4),"bin lesson waits for the full peck sequence")
+		check.call(game.lesson == (BeachGame.MUG_LESSON if tap == int(Config.tuning.world.bin_pecks)-1 else BeachGame.BIN_LESSON),"bin lesson waits for the full peck sequence")
 	check.call(not game.stash_raids.items.is_empty(),"bin lesson releases real scraps and litter")
 	game.stash_raids.items.clear()
-	# Wheelie bin lesson: pecking from the sand does nothing; the lid unlocks better trash.
-	var wheelie: Dictionary = game.training_bin(true)
-	check.call(not wheelie.is_empty() and float(wheelie.x) > 756.0 and float(wheelie.x) < float(game.level.world.width) - 12.0,"training wheelie bin stands right of the stand by the screen edge: "+str(wheelie.get("x")))
-	check.call(game.lesson == BeachGame.WHEELIE_LESSON and game.training_text().contains("wheelie"),"wheelie lesson follows the ordinary bin lesson")
-	check.call(game.training_target().y < float(Config.tuning.world.ground) - 25.0,"wheelie lesson ring marks the raised lid")
-	game.player.support = {}
-	game.player.state = BeachGull.State.GROUNDED
-	game.player.position = Vector2(float(wheelie.x) - 10.0,game.player.ground_y())
-	check.call(game.training_text().contains("Too low"),"standing beside the wheelie bin explains the lid rule")
-	for tap: int in range(int(Config.tuning.world.bin_pecks)):
-		game.stash_raids.peck_cooldown = 0
-		game._peck()
-	check.call(game.lesson == BeachGame.WHEELIE_LESSON and game.stash_raids.items.is_empty(),"wheelie lesson cannot be passed from the sand")
-	var lid: Dictionary = {}
-	for surface: Dictionary in game.player.perch_surfaces:
-		if str(surface.get("prop_type","")) == "wheelie_bin":
-			lid = surface
-	game.player.support = lid
-	game.player.state = BeachGull.State.GLIDE
-	game.player.position = Vector2(float(lid.x),float(lid.y) - float(Config.tuning.flight.feet_offset))
-	game.player.land()
-	for tap: int in range(int(Config.tuning.world.bin_pecks)):
-		game.stash_raids.peck_cooldown = 0
-		game._peck()
-		check.call(game.lesson == (BeachGame.SECOND_SWOOP_LESSON if tap == int(Config.tuning.world.bin_pecks)-1 else BeachGame.WHEELIE_LESSON),"wheelie lesson waits for the full lid peck sequence")
-	check.call(game.training_dummy() == null and game.pilots.is_empty(),"no dummy gull appears before the bump lesson")
-	var wheelie_food: int = 0
-	for item: Dictionary in game.stash_raids.items:
-		if not bool(item.get("garbage",false)):
-			wheelie_food += 1
-	check.call(wheelie_food >= 2,"wheelie bin burst is mostly food: %d of %d" % [wheelie_food,game.stash_raids.items.size()])
-	game.stash_raids.items.clear()
+	var dummy: RivalPilot = game.training_dummy()
+	check.call(dummy != null and dummy.dummy and game.pilots.size() == 1 and dummy.dummy_food == BeachGame.DUMMY_FOOD,"the mug lesson spawns one dummy gull holding food")
+	game.player.digestion.tick(30,false) # the earlier snacks are digested: a full belly shows the full-stomach line instead
+	game.overlay._process(0)
+	check.call(game.overlay.lesson_label.text.contains("LESSON 5/5") and game.training_text().contains("through the dummy") and game.training_target() == dummy.gull.position,"mug lesson names the action and rings the dummy")
 	game.player.support = {}
 	game.player.state = BeachGull.State.GLIDE
 	customer.food = false
@@ -168,16 +142,6 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(sunbather.stash_remaining == int(Config.tuning.world.sunbather_stash_size),"training restores exhausted bag after loose food clears")
 	var results: Array[Dictionary] = []
 	game.level_finished.connect(func(result: Dictionary) -> void: results.append(result))
-	game.player.state = BeachGull.State.STRIKE
-	game.player.position.y = 80
-	game.player.velocity.y = -20
-	game._training_snatch(customer)
-	game._training_tick(0.1)
-	check.call(game.lesson == BeachGame.BUMP_LESSON and game.running and results.is_empty(),"second clean swoop leads on to the bump lesson")
-	var dummy: RivalPilot = game.training_dummy()
-	check.call(dummy != null and dummy.dummy and game.pilots.size() == 1 and dummy.carry_window <= 0.0,"bump lesson spawns one empty-beaked dummy gull")
-	game.overlay._process(0)
-	check.call(game.overlay.lesson_label.text.contains("LESSON 8/9") and game.training_text().contains("dummy gull") and game.training_target() == dummy.gull.position,"bump lesson names the action and rings the dummy")
 	# The dummy only patrols its lap: it never hunts, dives, steals or mugs.
 	for frame: int in range(240):
 		dummy.tick(1.0/60,[customer],{},game.wind)
@@ -190,16 +154,8 @@ static func run(host: Node, check: Callable) -> void:
 	game.player.previous_beak = hit_from - Vector2(0,10)
 	game.player.sweep_beak = hit_from + Vector2(0,10)
 	game._mugging()
-	check.call(game.lesson == BeachGame.BUMP_LESSON,"flying through the dummy without diving does not bump it")
-	game.player.state = BeachGull.State.STRIKE
-	game._mugging()
-	check.call(game.lesson == BeachGame.MUG_LESSON and dummy.gull.state == BeachGull.State.STUNNED and int(GameState.entry(1).get("training_step",0)) == BeachGame.MUG_LESSON,"dive into the empty-beaked dummy bumps it and advances to the mug lesson")
-	game.player.digestion.snacks.clear()
-	game.player.digestion.rest = 0.0
-	check.call(game.training_text().contains("through the dummy") and dummy.dummy_food == BeachGame.DUMMY_FOOD,"mug lesson arms the dummy with food")
-	# The mug window stays open only while the dummy is flying again.
-	dummy.tick(1.0/60,[],{},game.wind)
-	check.call(dummy.carry_window <= 0.0 or dummy.gull.state != BeachGull.State.STUNNED,"a tumbling dummy is not muggable yet")
+	check.call(game.lesson == BeachGame.MUG_LESSON,"flying through the dummy without diving does not count")
+	# The mug window stays open while the dummy flies.
 	dummy.gull.state = BeachGull.State.GLIDE
 	dummy.tick(1.0/60,[],{},game.wind)
 	check.call(dummy.carry_window > 0.0 and dummy.carried > 0 and dummy.gull.carry_source.call() == BeachGame.DUMMY_FOOD,"recovered dummy visibly carries a muggable snack")
@@ -255,17 +211,59 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(GameState.entry(1) == completed_entry,"replaying tips preserves completed progress and existing records")
 	host.main._navigate("restart")
 	check.call(host.main.game.training and host.main.game.lesson == 0,"restarting a replay keeps tutorial tips enabled")
-	# A save stopped at the bump or mug lesson resumes with the dummy gull already flying.
-	GameState.progress = {"1":{"training_step":BeachGame.BUMP_LESSON}}
-	host.main.start_level(1)
+	# A save stopped at the mug lesson resumes with the dummy flying; old saves from the longer course land here too.
+	for old_step: int in [BeachGame.MUG_LESSON,7,8]:
+		GameState.progress = {"1":{"training_step":old_step}}
+		host.main.start_level(1)
+		game = host.main.game
+		game.set_physics_process(false)
+		check.call(game.lesson == BeachGame.MUG_LESSON and game.training_dummy() != null and game.training_dummy().dummy_food == BeachGame.DUMMY_FOOD,"a save at step %d resumes the mug lesson with the dummy carrying food" % old_step)
+	# Missing the dummy repeats the tip; after three misses it hovers still.
+	dummy = game.training_dummy()
+	for miss: int in range(1,BeachGame.MUG_RESCUE_MISSES+1):
+		game.training_miss_hint = 0.0
+		game.player.state = BeachGull.State.STRIKE
+		game._mug_miss_check()
+		game.player.state = BeachGull.State.GLIDE
+		game._mug_miss_check()
+		check.call(game.lesson == BeachGame.MUG_LESSON and game.training_miss_hint > 0.0 and game.training_text().contains("dive straight through"),"missed dive %d repeats the mug tip" % miss)
+		check.call((dummy.dummy_hold != Vector2.INF) == (miss == BeachGame.MUG_RESCUE_MISSES),"the dummy only hovers after %d misses" % BeachGame.MUG_RESCUE_MISSES)
+	dummy.gull.state = BeachGull.State.GLIDE
+	var hover: Vector2 = dummy.dummy_hold
+	for frame: int in range(30):
+		dummy.tick(1.0/60,[],{},game.wind)
+	check.call(dummy.gull.position == hover,"the rescued dummy hovers in place")
+	# With nothing to steal (a full belly behaves the same), a bump passes the lesson as well.
+	dummy.dummy_food = ""
+	dummy.carry_window = 0.0
+	dummy.gull.state = BeachGull.State.GLIDE
+	dummy.gull.invulnerable = 0.0
+	game.player.state = BeachGull.State.STRIKE
+	game.player.previous_beak = hover - Vector2(0,10)
+	game.player.sweep_beak = hover + Vector2(0,10)
+	game._mugging()
+	check.call(game.lesson == BeachGame.TRAINING_LESSONS,"bumping the dummy also finishes the mug lesson")
+	# Real levels repeat the bin and mug tips until the player has managed the move once.
+	GameState.options.tips = []
+	host.main.start_level(2)
 	game = host.main.game
 	game.set_physics_process(false)
-	check.call(game.training and game.lesson == BeachGame.BUMP_LESSON and game.training_dummy() != null and game.training_dummy().dummy_food.is_empty(),"retry at the bump lesson resumes with an empty-beaked dummy")
-	GameState.progress = {"1":{"training_step":BeachGame.MUG_LESSON}}
-	host.main.start_level(1)
-	game = host.main.game
-	game.set_physics_process(false)
-	check.call(game.lesson == BeachGame.MUG_LESSON and game.training_dummy() != null and game.training_dummy().dummy_food == BeachGame.DUMMY_FOOD,"retry at the mug lesson resumes with the dummy carrying food")
+	var lid_bin: Dictionary = game.training_bin(true)
+	game.player.state = BeachGull.State.GROUNDED
+	game.player.support = {}
+	game.player.position = Vector2(float(lid_bin.x)-10.0,game.player.ground_y())
+	var tip_count: Callable = func(text: String) -> int: return game.effects.texts.filter(func(entry: Dictionary) -> bool: return str(entry.text) == text).size()
+	var low_tip: String = str(Config.trainer.tips.wheelie_low)
+	game._peck()
+	check.call(tip_count.call(low_tip) == 1,"pecking beside a wheelie bin shows the lid tip in a real level")
+	game.elapsed += float(Config.tuning.juice.tip_time) + 0.1
+	game._peck()
+	check.call(tip_count.call(low_tip) == 2,"the lid tip repeats on the next failed peck")
+	game.stash_raids.bin_opened.emit(str(lid_bin.type))
+	game.elapsed += float(Config.tuning.juice.tip_time) + 0.1
+	game._peck()
+	check.call(tip_count.call(low_tip) == 2,"the lid tip stops once a wheelie bin has been opened")
+	GameState.options.tips = []
 	host.main.start_level(2)
 	game = host.main.game
 	game.set_physics_process(false)

@@ -21,6 +21,7 @@ static func run(host: Node, check: Callable) -> void:
 	await _replay_flow(host,check)
 	await _peck_pause_flow(host,check)
 	await _counter_flow(host,check)
+	await _focus_loss_flow(host,check)
 	BeachGame.trainer_cards = false
 	GameState.options.erase("control_mode")
 	GameState.progress = {}
@@ -34,6 +35,7 @@ static func _copy_checks(check: Callable) -> void:
 	var worst_strip: int = 0
 	var worst_banner: int = 0
 	var longest_banner_line: int = 0
+	var longest_banner_text: String = ""
 	var banner_count: int = 0
 	var unresolved: int = 0
 	var uppercase_blocks: int = 0
@@ -69,7 +71,9 @@ static func _copy_checks(check: Callable) -> void:
 				worst_banner = maxi(worst_banner,_lines(banner,BeachOverlay.BANNER_TEXT_WIDTH))
 				for part: String in banner.split("
 "):
-					longest_banner_line = maxi(longest_banner_line,part.length())
+					if part.length() > longest_banner_line:
+						longest_banner_line = part.length()
+						longest_banner_text = part
 			for text: String in texts + pairs + strips + banners:
 				if text.contains("{") or text.contains("}"):
 					unresolved += 1
@@ -84,7 +88,7 @@ static func _copy_checks(check: Callable) -> void:
 	check.call(unresolved == 0,"no unresolved {tokens} on any device or control mode")
 	check.call(worst_card <= MAX_CARD_LINES,"every trainer card fits %d lines (worst %d)" % [MAX_CARD_LINES,worst_card])
 	check.call(worst_strip <= MAX_STRIP_LINES,"every strip line fits %d lines (worst %d)" % [MAX_STRIP_LINES,worst_strip])
-	check.call(banner_count == 7 and worst_banner <= MAX_STRIP_LINES and longest_banner_line <= 70,"every live banner fits two lines of 70 characters (%d banners, worst %d lines, longest %d chars)" % [banner_count,worst_banner,longest_banner_line])
+	check.call(banner_count == 3 and worst_banner <= MAX_STRIP_LINES and longest_banner_line <= 70,"every live banner fits two lines of 70 characters (%d banners, worst %d lines, longest %d chars: %s)" % [banner_count,worst_banner,longest_banner_line,longest_banner_text])
 	# Control-mode variants explain the controls that mode really has.
 	GameState.options.control_mode = "realistic"
 	_set_device(input,"keyboard")
@@ -93,7 +97,7 @@ static func _copy_checks(check: Callable) -> void:
 	check.call(TrainerScript.line(trainer.training.lessons[1].how,input).contains("Stop tapping"),"Realistic landing card says stop tapping")
 	check.call(TrainerScript.line(trainer.live.crash,input).contains("Tap Space"),"Realistic crash warning says tap")
 	GameState.options.control_mode = "casual"
-	for index: int in [2,BeachGame.SECOND_SWOOP_LESSON]:
+	for index: int in [BeachGame.DIVE_LESSON]:
 		var how: String = TrainerScript.line(trainer.training.lessons[index].how,input)
 		check.call((how.contains("pecks for you") or how.contains("does the pecking")) and not how.contains("tap E"),"Casual swoop card %d says the beak pecks for you" % index)
 	check.call(TrainerScript.line(trainer.live.peck_now,input).contains("Auto peck"),"Casual peck callout says auto peck")
@@ -104,6 +108,70 @@ static func _copy_checks(check: Callable) -> void:
 	check.call(uppercase_blocks == 0,"trainer copy is written in normal case")
 	GameState.options.erase("control_mode")
 	input.free()
+
+## The first dive lesson's steering freeze: the first two dives stop at the wind-up until dive is pressed again.
+static func _aim_pause(host: Node, check: Callable, game: BeachGame) -> void:
+	game.lesson = BeachGame.DIVE_LESSON
+	game.player.cooldown = 0.0
+	game.input.touch_active = false
+	game.input.key_aim = true
+	game.player.state = BeachGull.State.GLIDE
+	game.player.position = Vector2(200,60)
+	game.player.velocity = Vector2(80,0)
+	game._aim_pause_check()
+	check.call(not game.aim_pause,"flying level does not freeze")
+	game.player.dive(0)
+	game._physics_process(1.0/60.0)
+	check.call(game.aim_pause and game.player.state == BeachGull.State.WINDUP,"pressing dive freezes the first dive at the wind-up")
+	check.call(game.training_text().contains("Line up the snack"),"the freeze says how to steer: "+game.training_text())
+	var frozen_at: Vector2 = game.player.position
+	var flat: Vector2 = game.player.direction
+	Input.action_press("aim_down")
+	game._physics_process(1.0/60.0)
+	Input.action_release("aim_down")
+	check.call(game.player.position == frozen_at and game.player.state == BeachGull.State.WINDUP,"the gull holds still while frozen")
+	check.call(game.player.direction.y > 0.9 and game.player.direction != flat,"steering turns the frozen dive straight away")
+	var chosen: Vector2 = game.player.direction
+	game._physics_process(1.0/60.0)
+	check.call(game.player.direction == chosen,"letting go keeps the chosen direction")
+	game.overlay.queue_redraw()
+	await host.snapshot("trainer-aim-freeze")
+	var snack: Vector2 = game.training_target()
+	game.player.direction = (snack - game.player.position).normalized()
+	check.call(game.aim_lines_up(),"the line turns gold when it reaches the snack")
+	game.player.direction = -game.player.direction
+	check.call(not game.aim_lines_up(),"a line pointing away does not")
+	game.player.direction = chosen
+	var press: InputEventKey = InputEventKey.new()
+	press.physical_keycode = KEY_SHIFT
+	press.pressed = true
+	game._unhandled_input(press)
+	check.call(not game.aim_pause,"pressing dive again launches")
+	game._physics_process(float(Config.tuning.dive.windup) + 0.02)
+	check.call(game.player.state == BeachGull.State.STRIKE and game.player.direction.y > 0.9,"the dive launches where it was steered")
+	game.player.state = BeachGull.State.GLIDE
+	game._physics_process(1.0/60.0)
+	game.player.cooldown = 0.0
+	game.player.dive(0)
+	game._physics_process(1.0/60.0)
+	check.call(game.aim_pause,"the second dive freezes too")
+	game.input.touch_dive = true
+	game._physics_process(1.0/60.0)
+	check.call(not game.aim_pause,"the touch DIVE button also launches")
+	game.player.state = BeachGull.State.GLIDE
+	game._physics_process(1.0/60.0)
+	game.player.cooldown = 0.0
+	game.player.dive(0)
+	game._physics_process(1.0/60.0)
+	check.call(not game.aim_pause,"the third dive flies straight through")
+	# Ten seconds without a dive, the strip says how again.
+	game.player.state = BeachGull.State.GLIDE
+	game.dive_nudge_clock = 0.0
+	game._training_tick(BeachGame.DIVE_NUDGE_TIME + 0.1)
+	check.call(game.training_text().contains("then press"),"the lesson nudges a player who has not dived: "+game.training_text())
+	game.player.state = BeachGull.State.WINDUP
+	game._training_tick(0.016)
+	check.call(game.dive_nudge_clock == 0.0,"diving clears the nudge")
 
 static func _training_flow(host: Node, check: Callable) -> void:
 	BeachGame.trainer_cards = true
@@ -141,7 +209,7 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	for index: int in BeachGame.TRAINING_LESSONS:
 		if not game.banner_lesson(index):
 			card_lessons.append(index)
-	check.call(card_lessons == [2,BeachGame.BIN_LESSON,BeachGame.BUMP_LESSON],"only the first dive, bins and the rival dummy keep cards: "+str(card_lessons))
+	check.call(card_lessons == [BeachGame.DIVE_LESSON,BeachGame.BIN_LESSON,BeachGame.MUG_LESSON],"only the first dive, the bin and the rival dummy keep cards: "+str(card_lessons))
 	# Finishing a lesson shows a toast first, then the next card after a short beat.
 	game._training_advance()
 	check.call(not game.trainer_open and not game.trainer_queue.is_empty() and game.lesson == 2,"the next card waits a beat after the lesson-done toast")
@@ -161,18 +229,20 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	var results: Array[Dictionary] = []
 	game.level_finished.connect(func(result: Dictionary) -> void: results.append(result))
 	game._training_advance()
-	game._physics_process(BeachGame.TRAINER_DELAY + 0.1)
+	var closing: Dictionary = Config.trainer.training.closing
+	game._physics_process(float(closing.delay) + 0.1)
 	check.call(game.trainer_open and results.is_empty() and card.lay_label.get_parsed_text().contains("feather"),"first completion shows the closing card with the Feather line")
-	check.call(card.button.text == "TO THE BEACH!","the closing button says to the beach")
+	check.call(card.button.text == str(closing.button).to_upper() and card.button_alt.text == str(closing.button_alt).to_upper(),"the closing card offers the next level or more practice")
 	await host.snapshot("trainer-closing")
 	var press: InputEventKey = InputEventKey.new()
 	press.pressed = true
 	press.keycode = KEY_SPACE
 	card._input(press)
-	check.call(game.trainer_open,"a button still mashed from the last lesson does not skip the closing card")
 	card._process(0.7)
 	card._input(press)
-	check.call(results.size() == 1 and not game.trainer_open,"any button press dismisses the closing card")
+	check.call(game.trainer_open,"a stray key press does not skip the closing card")
+	card.button.pressed.emit()
+	check.call(results.size() == 1 and not game.trainer_open,"the closing button dismisses the card")
 	check.call(results.size() == 1 and not game.running and int(results[0].get("feathers_earned",0)) == 1,"dismissing the closing card ends training and pays the Feather")
 	# A replay of the lessons does not mention the Feather.
 	host.main.start_level(1,true)
@@ -182,20 +252,18 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	game.overlay.trainer_card.button.pressed.emit()
 	game.lesson = BeachGame.MUG_LESSON
 	game._training_advance()
-	game._physics_process(BeachGame.TRAINER_DELAY + 0.1)
+	game._physics_process(float(closing.delay) + 0.1)
 	check.call(game.trainer_open and not game.overlay.trainer_card.lay_label.get_parsed_text().contains("feather"),"the closing card on a replay has no Feather line")
-	game.overlay.trainer_card._process(3.0)
-	check.call(game.trainer_open,"the closing card waits out most of its four seconds")
-	game.overlay.trainer_card._process(1.1)
-	check.call(not game.trainer_open,"the closing card dismisses itself after four seconds")
+	game.overlay.trainer_card.button_alt.pressed.emit()
+	check.call(not game.trainer_open and game.running and game.lesson == BeachGame.TRAINING_LESSONS,"keep practicing stays on the beach")
 	# A saved checkpoint resumes with that lesson's card, not the first.
-	GameState.progress = {"1": {"training_step": BeachGame.BUMP_LESSON}}
+	GameState.progress = {"1": {"training_step": BeachGame.MUG_LESSON}}
 	host.main.start_level(1)
 	game = host.main.game
 	game.set_physics_process(false)
 	game.overlay.start_button.pressed.emit()
-	check.call(game.trainer_open and game.overlay.trainer_card.counter_label.text == "Lesson %d/%d" % [BeachGame.BUMP_LESSON+1,BeachGame.TRAINING_LESSONS] and game.overlay.trainer_card.how_label.get_parsed_text().contains("dummy"),"resuming at the bump lesson shows the bump card")
-	await host.snapshot("trainer-lesson-8-bump")
+	check.call(game.trainer_open and game.overlay.trainer_card.counter_label.text == "Lesson %d/%d" % [BeachGame.MUG_LESSON+1,BeachGame.TRAINING_LESSONS] and game.overlay.trainer_card.how_label.get_parsed_text().contains("through him"),"resuming at the mug lesson shows the mug card")
+	await host.snapshot("trainer-lesson-5-mug")
 	host.main.clear_game()
 
 static func _screech_flow(host: Node, check: Callable) -> void:
@@ -235,6 +303,35 @@ static func _has_button(host: Node, text: String) -> bool:
 	return false
 
 ## A finished Level 2 lesson is replayed from Level 2's pause menu (herring gull only).
+## Alt-tabbing pauses the game (main.gd focus-out). A card that was open, or queued, must still show and dismiss after resuming.
+static func _focus_loss_flow(host: Node, check: Callable) -> void:
+	BeachGame.trainer_cards = true
+	GameState.progress = {}
+	host.main.start_level(1)
+	var game: BeachGame = host.main.game
+	var card: TrainerCard = game.overlay.trainer_card
+	check.call(game.trainer_open and card.button.has_focus(),"the opening card has keyboard focus")
+	host.main._notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
+	check.call(host.main.screen == "pause","losing window focus pauses the game")
+	await host.settle()
+	host.main._navigate("resume")
+	await host.settle()
+	check.call(game.trainer_open and card.visible and card.button.has_focus(),"after resuming from a focus-loss pause the open card has focus again")
+	card.button.pressed.emit()
+	check.call(not game.trainer_open and game.running and game.input.enabled,"the card dismisses after the pause and the lesson runs")
+	# A card queued behind a lesson toast still opens after a pause.
+	game.lesson = 1
+	game._training_advance()
+	check.call(not game.trainer_queue.is_empty() and not game.trainer_open,"the next card is queued")
+	host.main._notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
+	host.main._navigate("resume")
+	await host.settle()
+	check.call(not game.trainer_queue.is_empty() and not game.trainer_open and game.is_physics_processing(),"resuming leaves the queued card waiting and the world ticking")
+	game._physics_process(BeachGame.TRAINER_DELAY + 0.1)
+	check.call(game.trainer_open and card.button.has_focus(),"the queued card opens after the pause")
+	card.button.pressed.emit()
+	check.call(not game.trainer_open and game.input.enabled,"the queued card dismisses and play continues")
+
 static func _replay_flow(host: Node, check: Callable) -> void:
 	BeachGame.trainer_cards = true
 	GameState.options.gull = "herring"
@@ -331,10 +428,11 @@ static func _peck_pause_flow(host: Node, check: Callable) -> void:
 	# Only the first swoop lesson pauses.
 	game.player.state = BeachGull.State.GLIDE
 	game._training_tick(0.016)
-	game.lesson = BeachGame.SECOND_SWOOP_LESSON
+	game.lesson = BeachGame.MUG_LESSON
 	_set_strike(game,customer,true)
 	game._training_tick(0.016)
-	check.call(not game.peck_pause,"the second swoop lesson does not pause")
+	check.call(not game.peck_pause,"the mug lesson does not pause")
+	await _aim_pause(host,check,game)
 	BeachGame.trainer_cards = false
 	game.lesson = 2
 	game.player.state = BeachGull.State.GLIDE
