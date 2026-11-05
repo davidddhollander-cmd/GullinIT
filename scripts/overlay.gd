@@ -372,7 +372,7 @@ func _process(delta: float) -> void:
 	wind_label.text = "CALM" if absf(game.player.wind_force) < 0.01 else "%s %d%%" % ["WIND >" if game.player.wind_force > 0 else "< WIND",roundi(absf(game.player.wind_force)*100)]
 	intro_panel.visible = game.intro > 0 and not trainer_intro
 	# The frozen prompt sits high above the gull; the lesson strip and quest row would cover it.
-	training_panel.visible = game.lesson_active() and game.running and game.intro <= 0 and not game.trainer_open and not game.peck_pause and not (game.banner_delay > 0.0 and game.training_miss_hint <= 0.0)
+	training_panel.visible = game.lesson_active() and game.running and game.intro <= 0 and not game.trainer_open and not game.peck_pause and not ((game.banner_delay > 0.0 or game.training_card_pending()) and game.training_miss_hint <= 0.0)
 	if game.training:
 		lesson_label.text = "PRACTICE" if game.lesson >= BeachGame.TRAINING_LESSONS else "LESSON %d/%d" % [game.lesson + 1, BeachGame.TRAINING_LESSONS]
 		lesson_prompt.text = game.training_text()

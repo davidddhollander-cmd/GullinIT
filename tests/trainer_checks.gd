@@ -276,6 +276,24 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	check.call(game.trainer_open and not game.overlay.trainer_card.lay_label.get_parsed_text().contains("feather"),"the closing card on a replay has no Feather line")
 	game.overlay.trainer_card.button_alt.pressed.emit()
 	check.call(not game.trainer_open and game.running and game.lesson == BeachGame.TRAINING_LESSONS,"keep practicing stays on the beach")
+	# The live strip stays hidden between a finished lesson and the next card; the sparring gull arrives DUMMY_LEAD before the mug card.
+	game.trainer_queue = {}
+	game.lesson = BeachGame.BIN_LESSON
+	game._training_advance()
+	game.overlay._process(0)
+	check.call(game.lesson == BeachGame.MUG_LESSON and game.training_dummy() == null and not game.overlay.training_panel.visible,"after the bin lesson there is no dummy and no live strip yet")
+	game._physics_process(BeachGame.TRAINING_DELAY - BeachGame.DUMMY_LEAD - 0.2)
+	game.overlay._process(0)
+	check.call(game.training_dummy() == null and not game.trainer_open and not game.overlay.training_panel.visible,"the dummy still waits until the last second of the pause")
+	game._physics_process(0.3)
+	var dummy_seen: RivalPilot = game.training_dummy()
+	check.call(dummy_seen != null and not game.trainer_open and dummy_seen.dummy_food == BeachGame.DUMMY_FOOD,"the dummy arrives about a second before the mug card")
+	game._physics_process(BeachGame.DUMMY_LEAD)
+	game.overlay._process(0)
+	check.call(game.trainer_open and game.training_dummy() == dummy_seen and not game.overlay.training_panel.visible,"the mug card opens over the same single dummy, strip still hidden")
+	game.overlay.trainer_card.button.pressed.emit()
+	game.overlay._process(0)
+	check.call(game.overlay.training_panel.visible and game.overlay.lesson_prompt.text.length() > 0,"the live strip appears once the card closes")
 	# A saved checkpoint resumes with that lesson's card, not the first.
 	GameState.progress = {"1": {"training_step": BeachGame.MUG_LESSON}}
 	host.main.start_level(1)
