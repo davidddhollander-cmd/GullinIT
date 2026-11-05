@@ -12,6 +12,8 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 	check.call(level.quests.size() == 2 and level.quests[0].id == "l5_fish" and int(level.quests[0].count) == 2 and level.quests[1].id == "l5_mug_chip" and level.quests[1].filter.mugged_from == "Chip" and level.has("random_quest"), "level 5 quests are fish x2, mug Chip plus random")
 	var offered: Dictionary = {}
 	for spawn: Dictionary in level.spawns:
+		if spawn.type == "off_lead_dog":
+			continue # dogs are hazards, not food targets
 		offered[str(spawn.get("food_id", ""))] = true
 		for food: String in Config.targets[spawn.type].foods:
 			offered[food] = true
@@ -54,6 +56,8 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 	await host.snapshot("level5-chip-intro")
 	# Mugging Chip completes l5_mug_chip.
 	var chip_pilot: RivalPilot = game.pilots[1]
+	# Chip is released on top of Gary and _mugging() takes the first pilot hit, so move Gary clear to target Chip.
+	game.pilots[0].gull.position += Vector2(200, 0)
 	chip_pilot.carried_food_id = "hotdog"
 	chip_pilot.took_food(25)
 	game.player.position = chip_pilot.gull.position
