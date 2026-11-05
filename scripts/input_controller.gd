@@ -39,7 +39,7 @@ static func touch_button_at(point: Vector2) -> String:
 	return ""
 
 static func register_actions() -> void:
-	var keys: Dictionary = {"climb":[KEY_UP],"dive":[KEY_SHIFT],"pause":[KEY_ESCAPE],"restart":[KEY_R],"slowmo":[KEY_Q],"fullscreen":[KEY_F11],"debug":[KEY_F1],"reload":[KEY_F2],"aim_left":[KEY_A,KEY_LEFT],"aim_right":[KEY_D,KEY_RIGHT],"aim_up":[KEY_W],"aim_down":[KEY_S,KEY_DOWN]}
+	var keys: Dictionary = {"climb":[KEY_SPACE],"dive":[KEY_SHIFT],"pause":[KEY_ESCAPE],"restart":[KEY_R],"slowmo":[KEY_Q],"fullscreen":[KEY_F11],"debug":[KEY_F1],"reload":[KEY_F2],"aim_left":[KEY_A,KEY_LEFT],"aim_right":[KEY_D,KEY_RIGHT],"aim_up":[KEY_W,KEY_UP],"aim_down":[KEY_S,KEY_DOWN]}
 	for action: String in keys:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action,0.2)
