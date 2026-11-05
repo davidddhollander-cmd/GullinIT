@@ -154,7 +154,7 @@ static func run(host: Node, check: Callable) -> void:
 				step(game,0.1)
 				check.call(diner.position.x==before and diner.sprite.animation==&"surprise","reaction temporarily interrupts meal return")
 				var returned: bool = false
-				for frame: int in 900:
+				for frame: int in 1800:
 					step(game,0.02)
 					if diner.reaction.mode.is_empty() and is_equal_approx(diner.position.x,home) and diner.routine.phase==BeachRoutine.Phase.PAUSE:
 						returned = true

@@ -10,7 +10,12 @@ var start_button: Button
 var training_panel: PanelContainer
 var lesson_label: Label
 var lesson_prompt: Label
+var trainer_portrait: TextureRect
 var pause_button: Button
+var rival_popup: PanelContainer
+var rival_popup_head: TextureRect
+var rival_popup_name: Label
+var rival_popup_text: Label
 var top: HBoxContainer
 var quest_panel: PanelContainer
 var quest_box: VBoxContainer
@@ -29,6 +34,10 @@ var score_announcement_font_index: int = 0
 const SCORE_ANNOUNCEMENT_HOLD: float = BeachEffects.SCORE_MESSAGE_HOLD
 const SCORE_ANNOUNCEMENT_FADE: float = BeachEffects.SCORE_MESSAGE_FADE
 const TOP_BAR_HEIGHT: int = 17
+const TRAINER_SIZE: int = 56
+const TRAINER_ATLAS: Texture2D = preload("res://assets/sprites/trainer-screeches-portraits-v1.png")
+# Atlas cells: 0 neutral, 1 talking, 2 amused, 3 proud, 4 wince.
+const TRAINER_CELL: int = 256
 const TOP_BAR_FONT_SIZE: int = 6
 const SCORE_CALLOUT_TOP: float = TOP_BAR_HEIGHT + 2.0
 const HUD_FONT: Font = preload("res://assets/fonts/gull_hud.fnt")
@@ -144,10 +153,24 @@ func setup(owner_game: BeachGame) -> void:
 	training_style.content_margin_bottom = 4
 	training_panel.add_theme_stylebox_override("panel",training_style)
 	training_panel.mouse_filter = MOUSE_FILTER_IGNORE
+	var training_row: HBoxContainer = HBoxContainer.new()
+	training_row.mouse_filter = MOUSE_FILTER_IGNORE
+	training_row.add_theme_constant_override("separation",6)
+	training_panel.add_child(training_row)
+	# Screeches McCrumbs: cameo beside the lesson text, shown only while he is talking.
+	trainer_portrait = TextureRect.new()
+	trainer_portrait.custom_minimum_size = Vector2(TRAINER_SIZE,TRAINER_SIZE)
+	trainer_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	trainer_portrait.stretch_mode = TextureRect.STRETCH_SCALE
+	trainer_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	trainer_portrait.mouse_filter = MOUSE_FILTER_IGNORE
+	trainer_portrait.hide()
+	training_row.add_child(trainer_portrait)
 	var lesson_column: VBoxContainer = VBoxContainer.new()
 	lesson_column.mouse_filter = MOUSE_FILTER_IGNORE
 	lesson_column.add_theme_constant_override("separation",2)
-	training_panel.add_child(lesson_column)
+	lesson_column.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	training_row.add_child(lesson_column)
 	lesson_label = BeachUI.label(lesson_column,"LESSON 1/%d" % BeachGame.TRAINING_LESSONS,8,BeachUI.GOLD)
 	lesson_prompt = BeachUI.label(lesson_column,"",8,BeachUI.CREAM)
 	for tip_label: Label in [lesson_label,lesson_prompt]:
@@ -157,6 +180,7 @@ func setup(owner_game: BeachGame) -> void:
 	lesson_prompt.mouse_filter = MOUSE_FILTER_IGNORE
 	lesson_prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lesson_prompt.custom_minimum_size = Vector2(176,12)
+	_build_rival_popup()
 	var center: CenterContainer = CenterContainer.new()
 	add_child(center)
 	BeachUI.full(center)
@@ -183,9 +207,63 @@ func setup(owner_game: BeachGame) -> void:
 	if int(game.level.id) == 1:
 		intro_panel.mouse_filter = MOUSE_FILTER_STOP
 		start_button = BeachUI.button(intro,"LET'S GULL IT",game.dismiss_intro)
+		start_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		start_button.grab_focus()
 	else:
 		BeachUI.label(intro,"ANY BUTTON TO GO",8,BeachUI.GOLD)
+
+# Rival shout-out: head cropped from the rival's own sprite sheet (shouting frame) beside a line of speech.
+func _build_rival_popup() -> void:
+	var center: CenterContainer = CenterContainer.new()
+	add_child(center)
+	BeachUI.full(center)
+	center.offset_top = TOP_BAR_HEIGHT + 4
+	center.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	center.mouse_filter = MOUSE_FILTER_IGNORE
+	rival_popup = BeachUI.panel(center,Color(0.094,0.23,0.30,0.95))
+	rival_popup.mouse_filter = MOUSE_FILTER_IGNORE
+	var row: HBoxContainer = HBoxContainer.new()
+	row.mouse_filter = MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation",6)
+	rival_popup.add_child(row)
+	rival_popup_head = TextureRect.new()
+	rival_popup_head.custom_minimum_size = Vector2(40,40)
+	rival_popup_head.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rival_popup_head.stretch_mode = TextureRect.STRETCH_SCALE
+	rival_popup_head.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	rival_popup_head.mouse_filter = MOUSE_FILTER_IGNORE
+	row.add_child(rival_popup_head)
+	var column: VBoxContainer = VBoxContainer.new()
+	column.mouse_filter = MOUSE_FILTER_IGNORE
+	column.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(column)
+	rival_popup_name = BeachUI.label(column,"",8,BeachUI.GOLD)
+	rival_popup_text = BeachUI.label(column,"",8,BeachUI.CREAM)
+	rival_popup_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	rival_popup_text.custom_minimum_size = Vector2(176,0)
+	rival_popup.hide()
+
+func show_rival_popup(rival_name: String, head: Texture2D, text: String, seconds: float) -> void:
+	rival_popup_head.texture = head
+	rival_popup_name.text = rival_name.to_upper()
+	rival_popup_text.text = text
+	rival_popup.show()
+	var tween: Tween = create_tween()
+	tween.tween_interval(seconds)
+	tween.tween_callback(rival_popup.hide)
+
+# Wince at the miss, then flap the beak while he explains.
+func _sync_trainer() -> void:
+	var talking: bool = game.training_miss_hint > 0.0
+	trainer_portrait.visible = talking
+	if not talking:
+		return
+	var since: float = BeachGame.MISS_HINT_TIME - game.training_miss_hint
+	var frame: int = 4 if since < 0.8 else (1 if int(since / 0.18) % 2 == 0 else 0)
+	var cell: AtlasTexture = AtlasTexture.new()
+	cell.atlas = TRAINER_ATLAS
+	cell.region = Rect2(frame * TRAINER_CELL, 0, TRAINER_CELL, TRAINER_CELL)
+	trainer_portrait.texture = cell
 
 func _process(_delta: float) -> void:
 	score_label.text = "%04d  X%s" % [game.score.points,str(Config.tuning.score.tiers[game.score.tier])]
@@ -196,6 +274,7 @@ func _process(_delta: float) -> void:
 	if game.training:
 		lesson_label.text = "LESSON %d/%d" % [mini(game.lesson + 1, BeachGame.TRAINING_LESSONS), BeachGame.TRAINING_LESSONS]
 		lesson_prompt.text = game.training_text()
+		_sync_trainer()
 	pause_button.visible = game.running
 	sync_quests()
 	if rival_score_labels.size() != game.pilots.size():
@@ -371,7 +450,7 @@ func _draw() -> void:
 			draw_rect(hint_box,Color(0.09,0.20,0.26,0.85))
 			if danger:
 				draw_rect(hint_box,Color("ef725c"),false,1.0)
-			draw_string(font,hint_box.position+Vector2(3,8),str(hint.text),HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("ef725c") if danger else BeachUI.CREAM)
+			draw_string(HUD_FONT,hint_box.position+Vector2(3,7),str(hint.text),HORIZONTAL_ALIGNMENT_LEFT,-1,6,Color("ef725c") if danger else BeachUI.CREAM)
 		if game.player.landing_aim() and game.player.state != BeachGull.State.GROUNDED:
 			var landing_x: float = clampf(aim.x,8,312)
 			draw_line(Vector2(landing_x-6,159),Vector2(landing_x+6,159),BeachUI.CREAM,2)
@@ -396,7 +475,7 @@ func _draw() -> void:
 			var peck_color: Color = BeachUI.GOLD if game.player.peck_time > 0 else (Color("ef725c") if game.player.peck_used else BeachUI.CREAM)
 			draw_arc(beak,6,0,TAU,12,peck_color,2)
 			if game.player.peck_time > 0:
-				draw_line(beak-Vector2(7,10),beak-Vector2(7-14*game.player.peck_time/float(Config.tuning.dive.peck_window),10),peck_color,2)
+				draw_line(beak-Vector2(7,10),beak-Vector2(7-14*game.player.peck_time/(float(Config.tuning.dive.peck_window)*game.player.peck_window_scale),10),peck_color,2)
 	if touch_buttons_visible():
 		_draw_touch_buttons()
 	var left_food: bool = false
@@ -503,9 +582,9 @@ func context_hint() -> Dictionary:
 # Fixed slot: below the score callout (or the lesson panel), left of the goal panel,
 # and above the zone signs, so the hint never crosses world labels.
 func hint_rect(text: String) -> Rect2:
-	var width: float = ceilf(font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x) + 6.0
+	var width: float = ceilf(HUD_FONT.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,6).x) + 6.0
 	var y: float = training_panel.get_global_rect().end.y + 2.0 if game.training else SCORE_CALLOUT_TOP + 26.0
-	return Rect2(4.0,roundf(y),width,11.0)
+	return Rect2(4.0,roundf(y),width,9.0)
 
 func touch_buttons_visible() -> bool:
 	return game != null and game.running and game.input.touch_visible

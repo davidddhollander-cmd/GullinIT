@@ -40,9 +40,18 @@ const WHEELIE_LESSON: int = 5
 const FINAL_LESSON: int = 6
 var training_took_off: bool = false
 var training_clean_snatch: bool = false
+var training_snatch_age: float = 0.0
+const MISS_HINT_TIME: float = 5.0
+var training_miss_hint: float = 0.0
 var training_raid_started: bool = false
 var training_reset_clock: float = 0.0
 var pending_rivals: Array = []
+const FLY_IN_SPEED: float = 1.5
+const FLY_IN_BUMP_RANGE: float = 14.0
+const FLY_IN_TIMEOUT: float = 6.0
+var entry_pilot: RivalPilot ## rival currently flying in to bump the player (scripted, not AI-driven)
+var entry_profile: Dictionary
+var entry_age: float = 0.0
 var taunt_wait: float = -1.0
 var taunt_rival: String = ""
 var taunt_text: String = ""
@@ -53,6 +62,10 @@ var lesson_started: float = 0.0
 var perk_id: String = ""
 var bullet_meter: float = 0.0
 var slowmo_end_msec: int = -1 ## real-clock end of bullet time (-1 = off); Engine.time_scale slows delta, so never count it
+const SCREECH_HOLD_TIME: float = 0.24
+var peck_hold_pending: bool = false
+var peck_hold_elapsed: float = 0.0
+var screech_audio: AudioStreamPlayer
 
 func setup(definition: Dictionary, is_casual: bool, force_training: bool = false) -> void:
 	level = definition
@@ -182,6 +195,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	intro = Config.tuning.world.intro_time
 	intro_dismissed_elapsed = -1.0
 	if training:
+		player.peck_window_scale = 2.5
 		player.position = Vector2(70,player.ground_y())
 		player.state = BeachGull.State.GROUNDED
 		if lesson >= 2:
@@ -216,6 +230,44 @@ func _rival_taunt(step: float) -> void:
 	var half: float = taunt_text.length()*4.2
 	var at: Vector2 = Vector2(clampf(from.x,camera_x-160.0+half,camera_x+160.0-half),from.y+22.0)
 	effects.message(at,taunt_text,BeachUI.GOLD,float(Config.tuning.juice.taunt_time),0.0)
+
+## Gary's debut: he flies in from off-screen, barges the player, then a head-and-speech pop-up delivers his line.
+func _start_fly_in(profile: Dictionary) -> void:
+	for pilot: RivalPilot in pilots:
+		if pilot.gull.rival_name == str(profile.name):
+			entry_pilot = pilot
+	if entry_pilot == null:
+		return
+	entry_profile = profile
+	entry_age = 0.0
+	var side: float = 1.0 if camera_x + 190.0 <= float(Config.tuning.world.width) else -1.0
+	entry_pilot.gull.position = Vector2(camera_x + side * 190.0,clampf(player.position.y - 10.0,30.0,110.0))
+	entry_pilot.gull.speed_factor = FLY_IN_SPEED
+
+func _rival_head() -> AtlasTexture:
+	var head: AtlasTexture = AtlasTexture.new()
+	head.atlas = preload("res://assets/sprites/gull-great-black-backed-carry-v1.png")
+	head.region = Rect2(104,80,48,48)
+	return head
+
+func _fly_in_step(step: float) -> void:
+	var gull: BeachGull = entry_pilot.gull
+	entry_age += step
+	gull.aim = player.position
+	gull.climb = gull.position.y > player.position.y
+	gull.tick(step,wind.direction,wind.strength)
+	var hit: bool = gull.position.distance_to(player.position) < FLY_IN_BUMP_RANGE
+	if not hit and entry_age < FLY_IN_TIMEOUT:
+		return
+	gull.speed_factor = float(entry_profile.speed)
+	if hit:
+		player.stun(Config.tuning.rival.mug_stun,gull.position)
+		effects.message(player.position-Vector2(0,20),"BUMP!",Color("ef725c"))
+		Audio.play("snatch")
+	entry_pilot.cooldown = 2.0
+	entry_pilot.mode = RivalPilot.Mode.RECOVER
+	overlay.show_rival_popup(str(entry_profile.name),_rival_head(),str(entry_profile.entry_text),float(Config.tuning.juice.taunt_time) * 1.5)
+	entry_pilot = null
 
 func _release_rivals() -> void:
 	for profile: Dictionary in pending_rivals:
@@ -260,6 +312,10 @@ func _wire_target(target: BeachTarget) -> void:
 	target.food_knocked.connect(_food_knocked)
 
 func _food_knocked(target: BeachTarget, food_id: String, at: Vector2, impulse: Vector2) -> void:
+	# Dive lesson: a dropped snack counts as a pass, so a first miss never blocks the lesson.
+	if training and lesson == 2 and player.state == BeachGull.State.STRIKE:
+		training_miss_hint = MISS_HINT_TIME
+		_training_advance()
 	stash_raids.add_knocked_food(target,food_id,at,impulse)
 	effects.peck_contact(at,impulse,0.55,"glance")
 	effects.food_crumble(at,impulse)
@@ -281,6 +337,7 @@ func _reload() -> void:
 
 func _exit_tree() -> void:
 	end_slowmo()
+	_stop_screech(false)
 
 func perk_value(key: String, fallback: Variant) -> Variant:
 	return Config.perks.perks.get(perk_id,{}).get(key,fallback)
@@ -348,6 +405,7 @@ func _physics_process(delta: float) -> void:
 	wind.tick(step)
 	score.tick(step)
 	input.update_player(player,camera_x)
+	_advance_screech_hold(step)
 	if input.touch_dive:
 		input.touch_dive = false
 		player.dive(wind.direction)
@@ -380,6 +438,9 @@ func _physics_process(delta: float) -> void:
 		carriers.append(player)
 	for pilot: RivalPilot in pilots:
 		pilot.prey = carriers
+		if pilot == entry_pilot:
+			_fly_in_step(step)
+			continue
 		pilot.tick(step,food_targets,claims,wind,player.position)
 	for target: BeachTarget in spawner.targets.duplicate():
 		target.tick(step,gulls)
@@ -418,20 +479,22 @@ func _physics_process(delta: float) -> void:
 func mode_name() -> String:
 	return "training" if training else ("practice" if casual else "arcade")
 
-func track(event: String, props: Dictionary = {}) -> void:
+func track(event: String, props: Dictionary = {}, urgent: bool = false) -> void:
 	Analytics.input_kind = "touch" if input.touch_visible else ("gamepad" if input.gamepad else "keyboard_mouse")
-	Analytics.track(event, props)
+	Analytics.track(event, props, urgent)
 
-# Once per run; "quit" is reported by main when a started level is abandoned.
-func track_end(outcome: String, result: Dictionary = {}) -> void:
+# Once per run; "quit" is reported by main when a started level is abandoned, "abandoned" on window/tab close.
+func track_end(outcome: String, result: Dictionary = {}, urgent: bool = false) -> void:
 	if end_tracked or intro_dismissed_elapsed < 0.0:
 		return
 	end_tracked = true
-	track("level_end", {"level": int(level.id), "mode": mode_name(), "score": int(result.get("score", score.points)), "stars": int(result.get("stars", 0)), "seconds": snappedf(elapsed, 0.1), "crashes": crashes, "outcome": outcome})
+	track("level_end", {"level": int(level.id), "mode": mode_name(), "score": int(result.get("score", score.points)), "stars": int(result.get("stars", 0)), "seconds": snappedf(elapsed, 0.1), "crashes": crashes, "outcome": outcome, "lesson": mini(lesson + 1, TRAINING_LESSONS) if training else 0}, urgent)
 
 func dismiss_intro() -> void:
 	lesson_started = elapsed
 	track("level_start", {"level": int(level.id), "mode": mode_name()})
+	if training:
+		track("lesson_start", {"lesson": lesson + 1})
 	intro = 0.0
 	intro_dismissed_elapsed = 0.0
 	input.clear_touch()
@@ -451,7 +514,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("slowmo") and not event.is_echo():
 		start_slowmo()
 	if running and event.is_action_pressed("peck") and not event.is_echo():
-		_peck()
+		if event is InputEventKey and _can_screech():
+			peck_hold_pending = true
+			peck_hold_elapsed = 0.0
+		else:
+			_peck()
+	elif event is InputEventKey and event.is_action_released("peck") and peck_hold_pending:
+		peck_hold_pending = false
+		if player.screech_held:
+			_stop_screech()
+		elif running:
+			_peck()
 	if event.is_action_pressed("debug"):
 		debug = not debug
 	if event.is_action_pressed("reload"):
@@ -470,9 +543,41 @@ func _peck() -> void:
 		if stash_raids.peck():
 			player.show_ground_peck()
 
+func _can_screech() -> bool:
+	return player != null and player.species == "herring" and player.detailed_art and player.state == BeachGull.State.GROUNDED and not player.climb and absf(player.velocity.x) <= 1.0 and Input.get_vector("aim_left","aim_right","aim_up","aim_down").length() <= 0.15
+
+func _advance_screech_hold(delta: float) -> void:
+	if not peck_hold_pending:
+		return
+	if not _can_screech():
+		if player.screech_held:
+			_stop_screech(false)
+		else:
+			_peck()
+		peck_hold_pending = false
+		return
+	# Ground movement follows aim; pin it while E is held so mouse position
+	# cannot make an otherwise stationary gull walk out of its call.
+	player.aim = player.position
+	if player.screech_held:
+		return
+	peck_hold_elapsed += delta
+	if peck_hold_elapsed >= SCREECH_HOLD_TIME and player.start_screech():
+		screech_audio = Audio.play("gull_call",1.0,-8.0)
+
+func _stop_screech(recover: bool = true) -> void:
+	if is_instance_valid(player):
+		player.stop_screech(recover)
+	if is_instance_valid(screech_audio):
+		screech_audio.stop()
+		screech_audio.queue_free()
+	screech_audio = null
+
 func set_paused(value: bool) -> void:
 	if value:
 		end_slowmo()
+		peck_hold_pending = false
+		_stop_screech(false)
 	set_physics_process(not value)
 	set_process_unhandled_input(not value)
 	input.enabled = not value and running and intro <= 0
@@ -568,7 +673,9 @@ func _swallowed(snack: Dictionary) -> void:
 				if profile.has("taunt"):
 					taunter = profile
 			_release_rivals()
-			if not taunter.is_empty():
+			if str(taunter.get("entry","")) == "fly_in":
+				_start_fly_in(taunter)
+			elif not taunter.is_empty():
 				taunt_rival = str(taunter.name)
 				taunt_text = str(taunter.taunt)
 				taunt_wait = float(Config.tuning.juice.taunt_delay)
@@ -650,6 +757,8 @@ func _near_misses() -> void:
 func finish() -> void:
 	if not running:
 		return
+	peck_hold_pending = false
+	_stop_screech(false)
 	var boss: bool = level.has("boss") and not casual
 	if boss:
 		BeachBoss.conclude(self)
@@ -681,6 +790,7 @@ func finish() -> void:
 func _training_snatch(_target: BeachTarget) -> void:
 	if lesson in [2,FINAL_LESSON]:
 		training_clean_snatch = true
+		training_snatch_age = 0.0
 
 func _training_advance() -> void:
 	lesson += 1
@@ -692,20 +802,26 @@ func _training_advance() -> void:
 			bin.pecks = 0
 	track("lesson_complete", {"lesson": lesson, "seconds": snappedf(elapsed - lesson_started, 0.1)})
 	lesson_started = elapsed
+	if lesson < TRAINING_LESSONS:
+		track("lesson_start", {"lesson": lesson + 1})
 	GameState.save_training_step(lesson)
 	effects.message(player.position-Vector2(0,24),"LESSON COMPLETE",BeachUI.GOLD)
 	if lesson >= TRAINING_LESSONS:
 		finish()
 
 func _training_tick(delta: float) -> void:
+	training_miss_hint = maxf(0.0,training_miss_hint-delta)
 	if lesson == 0:
 		# Remember takeoff even when the player releases flap before steering.
 		if player.state == BeachGull.State.GLIDE and player.position.y < 110:
 			training_took_off = true
 		if training_took_off and player.state == BeachGull.State.GLIDE and player.position.x > float(level.world.start_x) + 30:
 			_training_advance()
-	elif lesson in [2,FINAL_LESSON] and training_clean_snatch and player.position.y < 100 and player.velocity.y <= 0 and player.state in [BeachGull.State.GLIDE,BeachGull.State.STRIKE]:
-		_training_advance()
+	elif lesson in [2,FINAL_LESSON] and training_clean_snatch:
+		training_snatch_age += delta
+		# Climbing is the goal, but a gull that landed or stalled after a clean snatch still passes.
+		if training_snatch_age > 4.0 or (player.position.y < 100 and player.velocity.y <= 0 and player.state in [BeachGull.State.GLIDE,BeachGull.State.STRIKE]):
+			_training_advance()
 	# Lessons cannot run out of food. Restore only after all loose food clears,
 	# so a missed peck never duplicates an item still lying on the beach.
 	training_reset_clock += delta
@@ -742,6 +858,8 @@ func training_text() -> String:
 		peck_key = "PECK"
 	if player.crash_warning():
 		return "PULL UP! AIM UP TO AVOID A CRASH\nHOLD %s TO RECOVER" % flap
+	if training_miss_hint > 0.0:
+		return "FIRST MISS IS NORMAL!\nSCOOP IT OFF THE FLOOR LATER"
 	match lesson:
 		0:
 			if training_took_off:
@@ -753,7 +871,9 @@ func training_text() -> String:
 				return "SNACK TAKEN! AIM UP AND CLIMB"
 			if player.state == BeachGull.State.STRIKE and not player.peck_used:
 				return "NOW! TAP %s AT THE SNACK" % peck_key
-			return "DIVE: %s\nTAP %s AT THE SNACK. THEN AIM UP" % [dive_key,peck_key]
+			if player.state == BeachGull.State.STRIKE:
+				return "MISSED! PULL UP AND DIVE AGAIN"
+			return "AIM AT THE SNACK IN THE RING\nPRESS %s TO DIVE, THEN TAP %s" % [dive_key,peck_key]
 		3: return "LAND BESIDE THE PICNIC BAG\nTAP %s THREE TIMES. COLLECT FOOD" % peck_key
 		4: return "LAND BY THE BIN. TAP %s %d TIMES\nSCRAPS ARE FOOD. WRAPPERS ARE NOT" % [peck_key,int(Config.tuning.world.bin_pecks)]
 		5:

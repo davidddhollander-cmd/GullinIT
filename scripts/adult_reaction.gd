@@ -44,7 +44,7 @@ func theft(owner: BeachTarget, gull: BeachGull, perfect: bool = false) -> void:
 	elif mode == "surprise":
 		timer = THEFT_SURPRISE_TIME
 	else:
-		timer = float(Config.tuning.world.snatch_chase_time) if committed else 3.0
+		timer = float(Config.tuning.world.snatch_chase_time) if committed else 5.0
 	swat_timer = -1.0
 	window = 5
 

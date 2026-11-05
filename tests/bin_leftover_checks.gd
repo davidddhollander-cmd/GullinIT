@@ -28,10 +28,10 @@ static func run(suite: Node, check: Callable) -> void:
 		raids.peck_cooldown = 0
 		check.call(raids.peck(), "bin releases mixed leftovers through normal peck input")
 		taps += 1
-	check.call(taps == 12 and raids.items.size() == 9, "nine bin objects still take three four-peck bursts")
+	check.call(taps == 12 and raids.items.filter(func(i: Dictionary) -> bool: return not bool(i.get("extra",false))).size() == 9, "nine bin objects still take three four-peck bursts")
 	var counts: Dictionary = {}
 	var rubbish: int = 0
-	for item: Dictionary in raids.items:
+	for item: Dictionary in raids.items.filter(func(i: Dictionary) -> bool: return not bool(i.get("extra",false))):
 		if bool(item.garbage):
 			rubbish += 1
 		else:

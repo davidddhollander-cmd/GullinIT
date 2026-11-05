@@ -335,6 +335,13 @@
         "fps": 1.0,
         "loop": true,
         "source_left": false
+      },
+      "screech": {
+        "frames": [0, 1, 2, 3, 4, 5],
+        "fps": 7,
+        "loop": false,
+        "source_left": false,
+        "file": "res://assets/sprites/gull-herring-screech-v1.png"
       }
     }
   },
@@ -3739,6 +3746,13 @@
         "fps": 1.0,
         "loop": true,
         "source_left": false
+      },
+      "screech": {
+        "frames": [0, 1, 2, 3, 4, 5],
+        "fps": 7,
+        "loop": false,
+        "source_left": false,
+        "file": "res://assets/sprites/gull-herring-screech-v1.png"
       }
     }
   },

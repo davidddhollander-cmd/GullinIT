@@ -24,6 +24,7 @@ var sweep_state: State = State.GLIDE
 var grounded_sweep: bool = false
 var peck_used: bool = false
 var peck_time: float = 0.0
+var peck_window_scale: float = 1.0  # training widens the one-shot peck window
 var peck_sweep_active: bool = false
 var peck_near_target: BeachTarget
 var direction: Vector2 = Vector2.DOWN
@@ -42,6 +43,9 @@ var art_id: String = "player_gull"
 var art_entry: Dictionary = {}
 var art_event: StringName = &""
 var art_event_left: float = 0.0
+var screech_held: bool = false
+var screech_elapsed: float = 0.0
+var screech_recover_left: float = 0.0
 var rival_name: String = "RIVAL"
 var rival_tint: Color = Color("a5c7e6")
 var rival_label: Label
@@ -181,8 +185,8 @@ func _ready() -> void:
 		rival_label.position = Vector2(-22,-30)
 		rival_label.size = Vector2(44,10)
 		rival_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		rival_label.add_theme_font_override("font",preload("res://assets/fonts/gull_pixel.fnt"))
-		rival_label.add_theme_font_size_override("font_size",8)
+		rival_label.add_theme_font_override("font",preload("res://assets/fonts/gull_hud.fnt"))
+		rival_label.add_theme_font_size_override("font_size",6)
 		add_child(rival_label)
 	refresh_art()
 	Config.reloaded.connect(refresh_art)
@@ -234,6 +238,22 @@ func show_ground_peck() -> void:
 	art_event = &"peck"
 	art_event_left = 0.14
 
+func start_screech() -> bool:
+	if not detailed_art or state != State.GROUNDED or not sprite.sprite_frames.has_animation(&"screech"):
+		return false
+	screech_held = true
+	screech_elapsed = 0.0
+	screech_recover_left = 0.0
+	art_event_left = 0.0
+	return true
+
+func stop_screech(recover: bool = true) -> void:
+	if screech_held and recover:
+		screech_recover_left = 1.0 / sprite.sprite_frames.get_animation_speed(&"screech")
+	else:
+		screech_recover_left = 0.0
+	screech_held = false
+
 func ground_y() -> float:
 	if not support.is_empty():
 		return float(support.y)-float(Config.tuning.flight.feet_offset)
@@ -283,7 +303,7 @@ func attempt_peck() -> bool:
 	if state != State.STRIKE or peck_used:
 		return false
 	peck_used = true
-	peck_time = float(Config.tuning.dive.peck_window)
+	peck_time = float(Config.tuning.dive.peck_window) * peck_window_scale
 	peck_started.emit()
 	return true
 
@@ -436,12 +456,23 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 	sweep_state = started_state
 	sweep_beak = beak_for_state(started_state)
 	grounded_sweep = started_state == State.GROUNDED and state == State.GROUNDED
+	if (screech_held or screech_recover_left > 0.0) and (state != State.GROUNDED or climb or absf(velocity.x) > 1.0):
+		stop_screech(false)
 	sprite.flip_h = facing < 0
 	sprite.visible = detailed_art or state != State.GROUNDED
 	if detailed_art:
 		sprite.scale *= art_scale
 		if state == State.GROUNDED:
-			if absf(velocity.x) > 1:
+			if screech_held or screech_recover_left > 0.0:
+				sprite.animation = &"screech"
+				sprite.pause()
+				if screech_held:
+					screech_elapsed += delta
+					sprite.frame = mini(4, int(screech_elapsed * sprite.sprite_frames.get_animation_speed(&"screech")))
+				else:
+					sprite.frame = 5
+					screech_recover_left = maxf(0.0, screech_recover_left - delta)
+			elif absf(velocity.x) > 1:
 				# Tie footfalls to distance, so feet stop immediately at rest.
 				sprite.animation = &"walk"
 				sprite.pause()
@@ -450,7 +481,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 				sprite.flip_h = (facing < 0) != bool(art_entry.animations.walk.get("source_left",false))
 			else:
 				sprite.play(&"idle")
-		if art_event_left > 0.0 and sprite.sprite_frames.has_animation(art_event):
+		if not screech_held and screech_recover_left <= 0.0 and art_event_left > 0.0 and sprite.sprite_frames.has_animation(art_event):
 			if (state == State.GROUNDED and art_event in [&"landing",&"peck"]) or (state == State.GLIDE and not climb and art_event == &"pullup"):
 				sprite.play(art_event)
 		if art_entry.has("frame_beaks"):
@@ -650,6 +681,7 @@ func begin_tumble(duration: float = -1.0, attacker: Vector2 = Vector2.INF) -> vo
 	consume_peck()
 	peck_used = true
 	art_event_left = 0.0
+	stop_screech(false)
 	stroke_left = 0.0
 	timer = (float(t.duration) if duration < 0.0 else maxf(duration,float(t.recovery_time))) * stun_mult
 	velocity = Vector2(away*float(t.launch_speed),-float(t.launch_up))

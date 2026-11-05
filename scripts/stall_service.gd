@@ -54,6 +54,12 @@ func request_family(buyer: BeachTarget) -> bool:
 	_begin(stand,buyer,orders,true)
 	return true
 
+func serving(buyer: BeachTarget) -> bool:
+	for request: Dictionary in requests.values():
+		if request.owner == buyer:
+			return true
+	return false
+
 func request_shopper(buyer: BeachTarget) -> bool:
 	var type: String = buyer.purchase_stall_type()
 	var stand: FoodStall = find_stall(buyer,type)

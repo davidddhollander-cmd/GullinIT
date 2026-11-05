@@ -108,6 +108,7 @@ func run() -> void:
 	# Legacy mechanics exercise an ordinary run after training has been completed.
 	GameState.progress["1"] = {"training_step":5,"training_complete":true}
 	await input_checks()
+	await screech_checks()
 	await mechanics_checks()
 	await peck_checks()
 	await grounded_toddler_peck_checks()
@@ -1225,6 +1226,58 @@ func input_checks() -> void:
 	main.clear_game()
 	await settle()
 
+func screech_checks() -> void:
+	main.start_level(1)
+	var game: BeachGame = main.game
+	game.set_physics_process(false)
+	game.intro = 0.0
+	game.running = true
+	var gull: BeachGull = game.player
+	gull.land()
+	gull.position = Vector2(160, gull.ground_y())
+	gull.velocity = Vector2.ZERO
+	gull.aim = gull.position
+	gull.climb = false
+	var press := InputEventKey.new()
+	press.physical_keycode = KEY_E
+	press.pressed = true
+	var release := InputEventKey.new()
+	release.physical_keycode = KEY_E
+	release.pressed = false
+	game._unhandled_input(press)
+	check(game.peck_hold_pending and not gull.screech_held, "grounded E press waits to distinguish tap from hold")
+	game._advance_screech_hold(0.1)
+	check(not gull.screech_held, "short E press has not started a screech")
+	gull.state = BeachGull.State.STRIKE
+	game._unhandled_input(release)
+	check(gull.peck_used and not game.peck_hold_pending, "tap E keeps the existing peck action")
+	gull.land()
+	gull.position = Vector2(160, gull.ground_y())
+	gull.velocity = Vector2.ZERO
+	gull.aim = gull.position + Vector2(50, 0)
+	game._unhandled_input(press)
+	game._advance_screech_hold(BeachGame.SCREECH_HOLD_TIME)
+	check(gull.screech_held and gull.sprite.sprite_frames.has_animation(&"screech") and gull.aim == gull.position, "holding E starts the herring screech and plants the gull")
+	gull.tick(0.7, 0, 0)
+	check(gull.sprite.animation == &"screech" and gull.sprite.frame == 4, "screech raises and holds the head at the peak")
+	gull.tick(0.3, 0, 0)
+	check(gull.sprite.frame == 4, "continued hold keeps the raised-head pose")
+	game._unhandled_input(release)
+	gull.tick(0.0, 0, 0)
+	check(not gull.screech_held and gull.sprite.frame == 5, "E release shows the recovery pose")
+	gull.tick(0.2, 0, 0)
+	gull.tick(0.0, 0, 0)
+	check(gull.sprite.animation == &"idle", "screech recovery returns to idle")
+	game._unhandled_input(press)
+	game._advance_screech_hold(BeachGame.SCREECH_HOLD_TIME)
+	Input.action_press("aim_right")
+	game._advance_screech_hold(0.01)
+	Input.action_release("aim_right")
+	check(not gull.screech_held and not game.peck_hold_pending, "aimed movement cancels the held screech")
+	game._unhandled_input(release)
+	main.clear_game()
+	await settle()
+
 func target_checks(game: BeachGame) -> void:
 	eat_pending(game)
 	var target: BeachTarget = game.spawner.create("kiosk_customer",300)
@@ -1565,12 +1618,12 @@ func stash_raid_checks() -> void:
 		if tap_index < int(Config.tuning.world.bin_pecks)-1:
 			raids.tick(float(Config.tuning.world.peck_cooldown))
 			eat_pending(game)
-	check(raids.items.size() == int(Config.tuning.world.bin_burst) and int(bin.remaining) == bin_stock-int(Config.tuning.world.bin_burst),"four bin pecks eject one finite three-object burst")
+	check(raids.items.filter(func(i: Dictionary) -> bool: return not bool(i.get("extra",false))).size() == int(Config.tuning.world.bin_burst) and raids.items.size() > int(Config.tuning.world.bin_burst) and int(bin.remaining) == bin_stock-int(Config.tuning.world.bin_burst),"four bin pecks eject one finite three-object burst")
 	check(game.beach.bin_wobble_strength.max() > first_bin_strength and game.beach.bin_release_bounce.has(true),"bin wobble grows and final hit bounces")
 	check((Audio.get_children().back() as AudioStreamPlayer).stream == Audio.streams.release_accent and first_bin_pitch < 1.0,"bin taps rise in pitch before release accent")
 	var crumb_count: int = 0
 	var rubbish_count: int = 0
-	for item: Dictionary in raids.items:
+	for item: Dictionary in raids.items.filter(func(i: Dictionary) -> bool: return not bool(i.get("extra",false))):
 		if bool(item.get("garbage",false)):
 			rubbish_count += 1
 		else:
@@ -2434,7 +2487,7 @@ func beachgoer_art_checks() -> void:
 	customer.tick(0.1,[])
 	check(customer.position.x != before and customer.sprite.animation == &"run","robbed customer uses the existing chase run after surprise")
 	await snapshot("polished-customer-theft")
-	customer.tick(2.2,[])
+	customer.tick(float(Config.tuning.world.snatch_chase_time),[])
 	check(customer.reaction.mode == "give_up" and customer.sprite.animation == &"fist_shake","robbed original shopper gives up with the planted fist shake")
 	customer.tick(AdultReaction.FAILED_CHASE_ANGER_TIME+0.01,[])
 	check(customer.reaction.mode.is_empty(),"robbed customer resumes strolling after giving up")

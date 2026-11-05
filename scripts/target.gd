@@ -77,6 +77,8 @@ var family_trip: FamilyTrip = FamilyTrip.IDLE
 var family_home: float = 0.0
 var family_kiosk_x: float = 520.0
 var family_trip_timer: float = 0.0
+var family_buy_wait: float = 0.0
+const FAMILY_BUY_PATIENCE: float = 6.0
 var family_trip_serial: int = 0
 var purchased_on_trip: int = 0
 var purchase_trip_serial: int = -1
@@ -670,7 +672,14 @@ func _tick_family_trip(delta: float) -> void:
 				family_trip_timer = float(Config.tuning.world.family_purchase_pause)
 		FamilyTrip.BUY:
 			if stall_service != null:
-				stall_service.request_family(self)
+				if stall_service.request_family(self) or stall_service.serving(self):
+					family_buy_wait = 0.0
+				else:
+					# A busy or missing stand must not strand the family on a BUY cue.
+					family_buy_wait += delta
+					if family_buy_wait > FAMILY_BUY_PATIENCE:
+						family_buy_wait = 0.0
+						family_trip = FamilyTrip.RETREAT
 				return
 			family_trip_timer -= delta
 			if family_trip_timer <= 0:
@@ -911,7 +920,7 @@ func _draw() -> void:
 		fill = clampf(1.0-reaction.timer/((notice_time if kind == "sunbather" else 0.35)*reaction_delay),0.05,1.0)
 	elif reaction.mode == "chase":
 		awareness_cue = "CHASE"
-		fill = clampf(reaction.timer/(float(Config.tuning.world.snatch_chase_time) if reaction.committed else 3.0),0.0,1.0)
+		fill = clampf(reaction.timer/(float(Config.tuning.world.snatch_chase_time) if reaction.committed else 5.0),0.0,1.0)
 		color = Color("ef725c")
 	elif reaction.mode == "give_up":
 		awareness_cue = "GONE!"
@@ -939,7 +948,7 @@ func _draw() -> void:
 			var tag_color: Color = color
 			tag_color.a = tag_alpha
 			draw_rect(Rect2(-16,marker_y-9,32,9),Color(0.094,0.231,0.306,tag_alpha))
-			draw_string(preload("res://assets/fonts/gull_pixel.fnt"),Vector2(-14,marker_y-2),awareness_cue,HORIZONTAL_ALIGNMENT_LEFT,-1,8,tag_color)
+			draw_string(preload("res://assets/fonts/gull_hud.fnt"),Vector2(-14,marker_y-2),awareness_cue,HORIZONTAL_ALIGNMENT_LEFT,-1,6,tag_color)
 		draw_rect(Rect2(-16,marker_y,32,3),Color("397a85"))
 		draw_rect(Rect2(-16,marker_y,32*clampf(fill,0.0,1.0),3),color)
 	if kind == "sunbather":
@@ -951,12 +960,14 @@ func _draw() -> void:
 		var stretch: float = bag_squish_strength*squish-rebound
 		draw_set_transform(bag_anchor+BAG_PIVOT, 0.0, Vector2(1.0+stretch*0.55,1.0-stretch))
 		var bag: Vector2 = -BAG_PIVOT
-		# The 32x24 sprite's bottom-centre sits on the old bag's base, so pecks squish it the same way.
-		draw_texture(BAG_TEXTURES[bag_variant],bag+Vector2(-16,-15))
+		# The cropped sprite's bottom-centre sits on the old bag's base, so pecks squish it the same way.
+		var bag_tex: Texture2D = BAG_TEXTURES[bag_variant]
+		var bag_at: Vector2 = bag+Vector2(-floorf(bag_tex.get_width()*0.5),9-bag_tex.get_height())
+		draw_texture(bag_tex,bag_at)
 		if stash_remaining > 0:
 			var glint: Texture2D = PickupShine.overlay(BAG_TEXTURES[bag_variant],shine_time,stash_home_x*0.37)
 			if glint != null:
-				draw_texture(glint,bag+Vector2(-16,-15))
+				draw_texture(glint,bag_at)
 		if stash_remaining > 0:
 			draw_rect(Rect2(bag+Vector2(-5,1),Vector2(stash_remaining*3+1,4)),Color("183b4e"))
 		for i: int in stash_remaining:
@@ -971,4 +982,4 @@ func _draw() -> void:
 			draw_line(Vector2(0,-18),Vector2(facing*10,-14),Color("ffc65c"),2)
 		if family_trip != FamilyTrip.IDLE:
 			var cue: String = ["","GATHER","KIOSK","BUY","HOME","RETREAT","WAIT"][int(family_trip)]
-			draw_string(preload("res://assets/fonts/gull_pixel.fnt"),Vector2(-18,-art_height()-11),cue,HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("183b4e"))
+			draw_string(preload("res://assets/fonts/gull_hud.fnt"),Vector2(-18,-art_height()-11),cue,HORIZONTAL_ALIGNMENT_LEFT,-1,6,Color("183b4e"))

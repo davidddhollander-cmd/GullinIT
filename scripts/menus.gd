@@ -43,12 +43,12 @@ func title() -> void:
 	logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	logo.stretch_mode = TextureRect.STRETCH_SCALE
-	logo.size = Vector2(175,26)
-	logo.position.y = 1.5
+	logo.size = Vector2(112,28)
+	logo.position = Vector2(31.5,1.0)
 	logo.material = ShaderMaterial.new()
 	logo.material.shader = GLINT
 	var slot: Control = Control.new()
-	slot.custom_minimum_size = Vector2(175,29)
+	slot.custom_minimum_size = Vector2(175,30)
 	slot.add_child(logo)
 	content.add_child(slot)
 	content.move_child(slot,0)
@@ -113,8 +113,8 @@ func level_select(casual: bool) -> void:
 	content.add_child(actions)
 	var with_feedback: bool = not GameState.feedback_url().is_empty()
 	var action_width: int = 86 if with_feedback else 100
-	if trained:
-		BeachUI.button(actions,"TRAIN AGAIN",func() -> void: choose("train_again"),action_width)
+	if trained or int(GameState.entry(1).get("training_step",0)) > 0:
+		BeachUI.button(actions,"TRAIN AGAIN" if trained else "RESTART LESSONS",func() -> void: choose("train_again"),action_width)
 	if with_feedback:
 		BeachUI.button(actions,"FEEDBACK",func() -> void: choose("feedback"),action_width)
 	BeachUI.button(actions,"< BACK",func() -> void: choose("title"),action_width)

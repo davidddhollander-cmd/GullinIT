@@ -9,3 +9,4 @@ export_credentials.cfg
 .playwright-mcp/
 tasks/LOCK
 .claude/worktrees/
+captures/raw/
