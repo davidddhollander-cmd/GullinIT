@@ -388,8 +388,8 @@ func _process(delta: float) -> void:
 	sync_quests()
 	if rival_score_labels.size() != game.pilots.size():
 		sync_rival_scores()
-	# A one-rival level doesn't need a board; the points bar covers the target.
-	rival_score_panel.visible = game.pilots.size() >= 2 and not game.lesson_active() and game.running and game.intro <= 0.0
+	# Show the comparison board as soon as any rival is on the beach.
+	rival_score_panel.visible = game.pilots.size() >= 1 and not game.lesson_active() and game.running and game.intro <= 0.0
 	for i: int in rival_score_labels.size():
 		var pilot: RivalPilot = game.pilots[i]
 		rival_score_labels[i].text = "%03d" % pilot.score

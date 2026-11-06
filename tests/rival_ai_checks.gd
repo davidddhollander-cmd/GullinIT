@@ -96,7 +96,7 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 		print("RIVAL SIM level %d: %s" % [level,str(r)])
 		var need_thefts: int = 2 if level == 7 else 1
 		check.call(r.pilots == (3 if level == 7 else 1),"level %d rival count" % level)
-		check.call(r.hud_visible == (r.pilots >= 2) and r.hud_rows == r.pilots,"level %d shows the rival board only with 2+ rivals, one row per rival" % level)
+		check.call(r.hud_visible == (r.pilots >= 1) and r.hud_rows == r.pilots,"level %d shows the rival board with any rival, one row per rival" % level)
 		check.call(r.pilots < 2 or (r.hud_rect as Rect2).end.x <= 316.0 and (r.hud_rect as Rect2).size.x <= 84.0 and (r.hud_rect as Rect2).position.y >= 17.0 and not (r.hud_rect as Rect2).intersects(r.quest_rect) and (r.hud_rect as Rect2).position.y >= 29.0,"level %d rival score meter scoreboard sits top-right under the quest strip" % level)
 		for i: int in r.pilots:
 			check.call(r.dives[i] >= 3 or main.game.pilots[i].gull.loose_only,"level %d rival %d dives at least 3 times (%d)" % [level,i,r.dives[i]])
@@ -384,7 +384,7 @@ static func ground_checks(host: Node, main: Node, check: Callable) -> void:
 	# Bin: land, peck bin_pecks times, scraps spill (the bin stays emptied), eat food but not garbage.
 	game = await fresh(host, main, 2)
 	gary = isolate(game, {"scraps": 1.0, "bins": 1.0}, 360.0)
-	var bin: Dictionary = game.stash_raids.bins[0]
+	var bin: Dictionary = game.stash_raids.bins.filter(func(b: Dictionary) -> bool: return absf(float(b.x) - 360.0) < 300.0)[0]
 	var capacity: int = int(bin.remaining)
 	steps = step(game, 60 * 40, func() -> bool: return gary.stats.bins > 0 and gary.ground_eats > 0)
 	var eaten: bool = Config.foods.has(gary.carried_food_id) and gary.score > 0

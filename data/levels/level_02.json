@@ -1,7 +1,7 @@
 {
   "id": 2,
   "crabs": {"enabled": true},
-  "sweeper": {"enabled": true},
+  "sweeper": {"enabled": true, "range": [24, 1010]},
   "name": "Family Picnic",
   "seed": 7102,
   "time_limit": 120,
@@ -35,6 +35,7 @@
     {"type": "kiosk_customer", "x": 865, "food_id": "ice_cream", "appearance": "shopper_mullet", "station": "ice_cream", "patrol_radius": 10}
   ],
   "props": [
+    {"type": "bin", "x": 22},
     {"type": "beach_palm", "x": 70, "y": 148},
     {"type": "beach_parasol_blue", "x": 150, "y": 143},
     {"type": "kiosk", "x": 240, "customer_x": 290},
