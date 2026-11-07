@@ -1,7 +1,6 @@
 class_name GullInput
 extends Node
 var game: BeachGame ## set by the game; supplies targets for touch aim assist
-var stick_anchor: Vector2 = FLY_STICK_CENTER ## the FLY ring centre: its resting spot, or where a finger outside it landed (logical px)
 var stick_pos: Vector2 = FLY_STICK_CENTER ## current stick finger (logical px)
 var touch_active: bool = false ## touch is the aim source until real mouse motion or a gamepad takes over
 var touch_down: Dictionary = {} ## every finger currently on screen
@@ -83,26 +82,7 @@ static func register_actions() -> void:
 static var touch_explained: bool = false ## the touch-controls card has been shown this app session
 static var touch_blocked: bool = false ## the rotate-phone hint is up: ignore fingers
 
-# Touch diagnostics for the -test build readout (overlay.gd).
-var dbg_counts: Dictionary = {"T+":0,"T-":0,"D":0,"MB":0,"MM":0,"blk":0,"off":0}
-var dbg_last: String = "-"
-
 func _input(event: InputEvent) -> void:
-	if event is InputEventScreenTouch:
-		dbg_counts["T+" if event.pressed else "T-"] += 1
-		dbg_last = ("T+ i%d %d,%d" % [event.index,event.position.x,event.position.y]) if event.pressed else "T- i%d" % event.index
-	elif event is InputEventScreenDrag:
-		dbg_counts["D"] += 1
-		dbg_last = "D i%d %d,%d" % [event.index,event.position.x,event.position.y]
-	elif event is InputEventMouseButton:
-		dbg_counts["MB"] += 1
-	elif event is InputEventMouseMotion:
-		dbg_counts["MM"] += 1
-	if event is InputEventScreenTouch or event is InputEventScreenDrag:
-		if touch_blocked:
-			dbg_counts["blk"] += 1
-		if not enabled:
-			dbg_counts["off"] += 1
 	if touch_blocked and (event is InputEventScreenTouch or event is InputEventScreenDrag):
 		return
 	if event is InputEventScreenTouch or event is InputEventScreenDrag:
@@ -149,7 +129,6 @@ func _input(event: InputEvent) -> void:
 				peck_finger = NO_FINGER
 			if event.index == aim_finger:
 				aim_finger = NO_FINGER
-				stick_anchor = FLY_STICK_CENTER
 				stick_pos = FLY_STICK_CENTER
 			if event.index == dive_finger:
 				if not dive_held and Time.get_ticks_msec() - dive_down_msec <= int(float(Config.tuning.touch.dive_tap_time) * 1000.0):
@@ -161,19 +140,14 @@ func _input(event: InputEvent) -> void:
 		dive_pos = event.position
 	elif event is InputEventScreenDrag and event.index == aim_finger:
 		stick_pos = event.position
-		var pull: Vector2 = stick_pos - stick_anchor
-		var radius: float = float(Config.tuning.touch.stick_radius)
-		if pull.length() > radius:
-			stick_anchor = stick_pos - pull.normalized() * radius ## the anchor follows so the stick never stalls
 		_update_fly_flap()
 	elif event is InputEventScreenDrag and event.index != peck_finger and aim_finger == NO_FINGER and in_fly_zone(event.position):
 		_grab_fly_stick(event.index,event.position) ## a finger that landed while input was off (a card closing) still steers once it moves
 
-## Inside the resting ring the deflection is measured from its centre; anywhere else in the zone the ring re-anchors at the finger.
+## Fixed stick: anywhere in the zone grabs it, deflection is always measured from FLY_STICK_CENTER.
 func _grab_fly_stick(index: int, point: Vector2) -> void:
 	aim_finger = index
 	stick_pos = point
-	stick_anchor = FLY_STICK_CENTER if point.distance_to(FLY_STICK_CENTER) <= float(Config.tuning.touch.stick_radius) + TOUCH_SLOP else point
 	touch_active = true
 	_update_fly_flap()
 
@@ -188,11 +162,11 @@ func _update_fly_flap() -> void:
 func touch_recent() -> bool:
 	return not touch_down.is_empty() or Time.get_ticks_msec() - touch_last_msec < int(float(Config.tuning.touch.mouse_ignore_after_touch) * 1000.0)
 
-## Floating-stick deflection, up to 1 long; zero while released or inside the deadzone.
+## Fixed-stick deflection, up to 1 long; zero while released or inside the deadzone.
 func touch_stick() -> Vector2:
 	if aim_finger == NO_FINGER:
 		return Vector2.ZERO
-	var stick: Vector2 = ((stick_pos - stick_anchor) / float(Config.tuning.touch.stick_radius)).limit_length(1.0)
+	var stick: Vector2 = ((stick_pos - FLY_STICK_CENTER) / float(Config.tuning.touch.stick_radius)).limit_length(1.0)
 	return stick if stick.length() > float(Config.tuning.touch.stick_deadzone) else Vector2.ZERO
 
 ## Fixed dive-stick deflection, up to 1 long; zero while released or inside the deadzone.
@@ -280,7 +254,6 @@ func clear_touch() -> void:
 	flap_tap = false
 	touch_dive = false
 	aim_finger = NO_FINGER
-	stick_anchor = FLY_STICK_CENTER
 	stick_pos = FLY_STICK_CENTER
 	dive_finger = NO_FINGER
 	dive_held = false

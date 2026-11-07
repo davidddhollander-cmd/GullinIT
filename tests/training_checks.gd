@@ -26,8 +26,7 @@ static func run(host: Node, check: Callable) -> void:
 	# Take off first, then release flap and steer: the actions need not overlap.
 	game.input.touch_active = true
 	game.input.aim_finger = 7
-	game.input.stick_anchor = Vector2(100,100)
-	game.input.stick_pos = Vector2(100,84)
+	game.input.stick_pos = GullInput.FLY_STICK_CENTER + Vector2(0,-16)
 	game.input.touch_climb = true
 	for frame: int in range(90):
 		game._physics_process(1.0/60)
