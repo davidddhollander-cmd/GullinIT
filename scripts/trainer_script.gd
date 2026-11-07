@@ -1,7 +1,7 @@
 class_name TrainerScript
 extends RefCounted
 ## Looks up Screeches McCrumbs' copy in data/trainer.json for the player's input device and control mode.
-## A copy value is a string or {default, realistic, casual}; {flap} {dive} {peck} {steer} {call} {n} are filled in.
+## A copy value is a string or {default, realistic, casual, touch, touch_casual}; {flap} {dive} {peck} {steer} {call} {n} are filled in.
 
 static func device(input: GullInput) -> String:
 	if input.touch_visible:
@@ -20,4 +20,11 @@ static func fill(text: String, input: GullInput) -> String:
 	return text.replace("{n}",str(int(Config.tuning.world.bin_pecks)))
 
 static func line(value: Variant, input: GullInput) -> String:
+	if value is Dictionary and device(input) == "touch":
+		# Touch copy names the FLY stick and the DIVE circle: "touch_<mode>" first, then "touch".
+		var mode: String = "touch_" + GameState.control_mode()
+		if value.has(mode):
+			return fill(str(value[mode]),input)
+		if value.has("touch"):
+			return fill(str(value.touch),input)
 	return fill(pick(value),input)

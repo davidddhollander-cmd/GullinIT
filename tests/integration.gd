@@ -1401,13 +1401,17 @@ func input_checks() -> void:
 	check(main.game.running and main.game.player.state == BeachGull.State.GLIDE,"keyboard and controller confirmation activate focused start button")
 	var touch: InputEventScreenTouch = InputEventScreenTouch.new()
 	touch.index = 0
-	touch.position = (GullInput.TOUCH_BUTTONS.flap as Rect2).get_center()
+	touch.position = GullInput.FLY_STICK_CENTER
 	touch.pressed = true
 	get_viewport().push_input(touch, true)
-	check(main.game.input.touch_climb,"touch climb press")
+	var fly_drag: InputEventScreenDrag = InputEventScreenDrag.new()
+	fly_drag.index = 0
+	fly_drag.position = GullInput.FLY_STICK_CENTER + Vector2(0,-float(Config.tuning.touch.stick_radius))
+	get_viewport().push_input(fly_drag, true)
+	check(main.game.input.touch_climb,"touch climb press: FLY stick pushed up")
 	touch = InputEventScreenTouch.new()
 	touch.index = 0
-	touch.position = (GullInput.TOUCH_BUTTONS.flap as Rect2).get_center()
+	touch.position = fly_drag.position
 	touch.pressed = false
 	get_viewport().push_input(touch, true)
 	check(not main.game.input.touch_climb,"touch climb release")
@@ -1953,7 +1957,7 @@ func stash_raid_checks() -> void:
 	tap.position = (GullInput.TOUCH_BUTTONS.peck as Rect2).get_center()
 	tap.pressed = true
 	game.input._input(tap)
-	check(game.input.touch_peck and not game.input.touch_climb,"separate touch peck does not flap")
+	check(game.input.touch_peck and not game.input.touch_climb,"touch peck does not flap")
 	game.set_paused(true)
 	check(not game.input.touch_peck,"pause clears queued peck")
 	main.start_level(1)

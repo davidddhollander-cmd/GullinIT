@@ -156,7 +156,7 @@ static func _hint_checks(suite: Node, check: Callable) -> void:
 	var hint: Dictionary = overlay.context_hint()
 	check.call(not hint.is_empty() and "SPACE" in str(hint.text), "grounded hint uses keyboard wording: " + str(hint))
 	game.input.touch_visible = true
-	check.call("FLAP" in str(overlay.context_hint().text), "grounded hint uses touch wording")
+	check.call("FLY UP" in str(overlay.context_hint().text), "grounded hint uses touch wording")
 	game.input.touch_visible = false
 	var row: Control = overlay.score_announcement.get_parent() as Control
 	var callout := Rect2(0, row.offset_top, 320, row.offset_bottom - row.offset_top)
@@ -240,7 +240,7 @@ static func _touch_checks(suite: Node, check: Callable) -> void:
 	game.intro = 0
 	game.running = true
 	game.input.enabled = true
-	for pair: Array in [["peck", "touch_peck"], ["flap", "touch_climb"]]:
+	for pair: Array in [["peck", "touch_peck"]]:
 		game.input.clear_touch()
 		game.input.touch_dive = false
 		var tap := InputEventScreenTouch.new()
@@ -258,13 +258,13 @@ static func _touch_checks(suite: Node, check: Callable) -> void:
 		tap.position = (GullInput.TOUCH_BUTTONS[pair[0]] as Rect2).get_center()
 		tap.pressed = false
 		game.input._input(tap)
-	check.call(not game.input.touch_climb, "releasing FLAP stops climbing")
+	check.call(not game.input.touch_climb, "no FLAP button: touch_climb only comes from the FLY stick")
 	var aim_tap := InputEventScreenTouch.new()
 	aim_tap.index = 3
-	aim_tap.position = Vector2(160, 160)
+	aim_tap.position = Vector2(120, 100)
 	aim_tap.pressed = true
 	game.input._input(aim_tap)
-	check.call(game.input.touch_active and game.input.aim_finger == 3 and game.input.stick_anchor == Vector2(160, 160), "former PECK position now starts the stick")
+	check.call(game.input.touch_active and game.input.aim_finger == 3 and game.input.stick_anchor == Vector2(120, 100), "a touch in the left zone starts the stick")
 	game.input.clear_touch()
 	game.input.touch_dive = false
 	game.input.touch_visible = true

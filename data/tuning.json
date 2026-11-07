@@ -46,7 +46,9 @@
     "miss_range": 28.0
   },
   "touch": {
-    "stick_radius": 24,
+    "stick_radius": 30,
+    "flap_up_threshold": 0.5,
+    "dive_tap_time": 0.35,
     "stick_deadzone": 0.15,
     "assist_range": 140,
     "assist_angle": 25,

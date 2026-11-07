@@ -25,6 +25,7 @@ static func _mouse_move(input: GullInput) -> void:
 static func run(host: Node, check: Callable) -> void:
 	var hint: Callable = Callable(host.main,"should_show_rotate_hint")
 	check.call(hint.call(Vector2i(390,844),true) and not hint.call(Vector2i(844,390),true) and not hint.call(Vector2i(390,844),false),"rotate hint shows for portrait touch only")
+	await _rework_checks(host, check)
 	host.main.start_level(1)
 	var game: BeachGame = host.main.game
 	game.set_physics_process(false)
@@ -40,18 +41,18 @@ static func run(host: Node, check: Callable) -> void:
 	gull.state = BeachGull.State.GLIDE
 	gull.velocity = Vector2.ZERO
 	var radius: float = float(Config.tuning.flight.cursor_radius)
+	var stick_radius: float = float(Config.tuning.touch.stick_radius)
 	var approach: float = float(Config.tuning.touch.approach_assist_strength)
 	Config.tuning.touch.approach_assist_strength = 0.0 # keep the plain stick checks exact; restored for the approach checks
-	var stick_radius: float = float(Config.tuning.touch.stick_radius)
 	# Stick geometry.
 	_touch(input, 1, Vector2(100, 100), true)
 	check.call(input.aim_finger == 1 and input.touch_active and input.stick_anchor == Vector2(100, 100), "touch on the beach starts the floating stick at the landing point")
-	_drag(input, 1, Vector2(112, 100))
+	_drag(input, 1, Vector2(100 + stick_radius * 0.5, 100))
 	input.update_player(gull, 160)
 	check.call(_near(gull.aim, gull.position + Vector2(0.5, 0) * radius), "stick right gives half deflection aim (%s)" % gull.aim)
-	_touch(input, 1, Vector2(112, 100), false)
+	_touch(input, 1, Vector2(100 + stick_radius * 0.5, 100), false)
 	_touch(input, 1, Vector2(100, 100), true)
-	_drag(input, 1, Vector2(88, 112))
+	_drag(input, 1, Vector2(100 - stick_radius * 0.5, 100 + stick_radius * 0.5))
 	input.update_player(gull, 160)
 	check.call(_near(gull.aim, gull.position + Vector2(-0.5, 0.5) * radius), "stick down-left aims down-left (%s)" % gull.aim)
 	_drag(input, 1, Vector2(200, 100))
@@ -85,8 +86,8 @@ static func run(host: Node, check: Callable) -> void:
 	gull.state = BeachGull.State.GLIDE
 	gull.velocity = Vector2.ZERO
 	_touch(input, 1, Vector2(100, 100), true)
-	_drag(input, 1, Vector2(100, 112))
-	for pair: Array in [["flap", "touch_climb"], ["peck", "touch_peck"]]:
+	_drag(input, 1, Vector2(100, 100 + stick_radius * 0.5))
+	for pair: Array in [["peck", "touch_peck"]]:
 		_touch(input, 2, (GullInput.TOUCH_BUTTONS[pair[0]] as Rect2).get_center(), true)
 		input.update_player(gull, 160)
 		check.call(bool(input.get(pair[1])) and input.aim_finger == 1 and _near(gull.aim, gull.position + Vector2(0, 0.5) * radius), "stick and %s work with two fingers" % pair[0])
@@ -110,7 +111,7 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(input.dive_held and not _near(gull.aim, gull.position + Vector2(0, -1) * radius), "recentring the dive stick keeps its ownership of the aim")
 	_touch(input, 2, circle, false)
 	input.update_player(gull, 160)
-	check.call(not input.dive_held and input.dive_finger == -1 and _near(gull.aim, gull.position + Vector2(0, -10.0 / 24.0) * radius), "releasing the dive stick returns aim to the left stick")
+	check.call(not input.dive_held and input.dive_finger == -1 and _near(gull.aim, gull.position + Vector2(0, -10.0 / stick_radius) * radius), "releasing the dive stick returns aim to the left stick")
 	_drag(input, 1, Vector2(100, 112))
 	_touch(input, 3, circle, true)
 	check.call(input.aim_finger == 1 and input.dive_finger == 3, "dive circle touch never starts the left stick")
@@ -131,7 +132,7 @@ static func run(host: Node, check: Callable) -> void:
 	input.clear_touch()
 	_touch(input, 1, Vector2(100, 20), true)
 	check.call(input.aim_finger == -1, "touch in the top bar does not start the stick")
-	_touch(input, 1, (GullInput.TOUCH_BUTTONS.flap as Rect2).get_center(), true)
+	_touch(input, 1, (GullInput.TOUCH_BUTTONS.peck as Rect2).get_center(), true)
 	check.call(input.aim_finger == -1, "touch on a button does not start the stick")
 	input.clear_touch()
 	# Assist.
@@ -152,7 +153,7 @@ static func run(host: Node, check: Callable) -> void:
 	gull.direction = Vector2(1, 0)
 	gull.velocity = Vector2.ZERO
 	_touch(input, 1, Vector2(100, 100), true)
-	_drag(input, 1, Vector2(124, 100))
+	_drag(input, 1, Vector2(140, 100))
 	var plain: Vector2 = gull.position + Vector2(1, 0) * radius
 	var strength: float = float(Config.tuning.touch.assist_strength)
 	_place_target(target, gull.position + Vector2(100, 20))
@@ -188,6 +189,8 @@ static func run(host: Node, check: Callable) -> void:
 	# Approach assist: gliding down with the left stick bends the aim by approach_assist_strength.
 	Config.tuning.touch.approach_assist_strength = approach
 	check.call(is_equal_approx(approach, 0.25), "approach assist strength is 0.25")
+	_touch(input, 1, Vector2(100, 100), false)
+	_touch(input, 1, Vector2(100, 100), true)
 	_drag(input, 1, Vector2(118, 106))
 	gull.state = BeachGull.State.GLIDE
 	var stick_angle: float = Vector2(18, 6).angle()
@@ -197,7 +200,7 @@ static func run(host: Node, check: Callable) -> void:
 	_drag(input, 1, Vector2(118, 94))
 	input.update_player(gull, 160)
 	check.call(absf((gull.aim - gull.position).angle() - Vector2(18, -6).angle()) < 0.001, "no approach assist while gliding upward")
-	_drag(input, 1, Vector2(124, 100))
+	_drag(input, 1, Vector2(140, 100))
 	# Mouse and gamepad stay exact.
 	gull.state = BeachGull.State.STRIKE
 	input.clear_touch()
@@ -287,3 +290,162 @@ static func run(host: Node, check: Callable) -> void:
 
 static func _place_target(target: BeachTarget, at: Vector2) -> void:
 	target.position += at - target.food_position()
+
+
+static func _push(host: Node, event: InputEvent) -> void:
+	host.get_viewport().push_input(event)
+
+static func _vtouch(host: Node, index: int, pos: Vector2, pressed: bool) -> void:
+	var event := InputEventScreenTouch.new()
+	event.index = index
+	event.position = pos
+	event.pressed = pressed
+	_push(host, event)
+
+static func _vdrag(host: Node, index: int, pos: Vector2) -> void:
+	var event := InputEventScreenDrag.new()
+	event.index = index
+	event.position = pos
+	_push(host, event)
+
+## Task 064: FLY stick (steer + flap-up), DIVE tap vs drag, the explainer card, and the "cannot steer" root cause.
+static func _rework_checks(host: Node, check: Callable) -> void:
+	var sr: float = float(Config.tuning.touch.stick_radius)
+	var thr: float = float(Config.tuning.touch.flap_up_threshold)
+	var rest: Vector2 = GullInput.FLY_STICK_CENTER
+	# Layout: the resting ring and every button fit the 320x180 canvas, clear of the HUD bar, DIVE circle and each other.
+	var ring := Rect2(rest - Vector2(sr, sr), Vector2(sr, sr) * 2.0)
+	check.call(Rect2(8, 28, 304, 144).encloses(ring), "FLY ring fits the canvas with margin below the HUD bar: %s" % ring)
+	var dive_ring := Rect2(GullInput.DIVE_STICK_CENTER - Vector2(20, 20), Vector2(40, 40))
+	var boxes: Array[Rect2] = [GullInput.SLOWMO_BUTTON]
+	for kind: String in GullInput.TOUCH_BUTTONS:
+		boxes.append(GullInput.TOUCH_BUTTONS[kind])
+	for index: int in boxes.size():
+		check.call(boxes[index].size.x >= 52 and boxes[index].size.y >= 30 and not boxes[index].intersects(ring) and not boxes[index].intersects(dive_ring) and Rect2(0, 28, 320, 152).encloses(boxes[index]), "touch button %d is thumb sized and clear of both circles" % index)
+	check.call(boxes.size() == 2 and not boxes[0].intersects(boxes[1]) and not GullInput.TOUCH_BUTTONS.has("flap"), "no FLAP button; SLOW-MO and PECK do not overlap")
+	check.call(not ring.intersects(dive_ring), "the FLY and DIVE circles never overlap")
+	BeachGame.trainer_cards = false
+	host.main.start_level(2)
+	await host.settle()
+	var game: BeachGame = host.main.game
+	game.set_physics_process(false)
+	game.intro = 0
+	game.running = true
+	var input: GullInput = game.input
+	input.enabled = true
+	input.touch_visible = true
+	input.clear_touch()
+	var gull: BeachGull = game.player
+	gull.position = Vector2(200, 80)
+	gull.state = BeachGull.State.GLIDE
+	gull.velocity = Vector2.ZERO
+	var radius: float = float(Config.tuning.flight.cursor_radius)
+	# Root cause of "cannot steer with the left thumb": a finger on the stick lost to stale key/pad/mouse state and to a dive stick latch.
+	input.gamepad = true
+	input.key_aim = true
+	input.dive_held = true
+	input.touch_active = false
+	_vtouch(host, 1, Vector2(100, 100), true)
+	_vdrag(host, 1, Vector2(100 + sr, 100))
+	input.update_player(gull, 160)
+	check.call(input.aim_finger == 1 and gull.aim.x > gull.position.x + radius * 0.9, "left drag steers even with stale pad, key and dive-latch state (aim %s)" % gull.aim)
+	_vdrag(host, 1, Vector2(100 - sr, 100))
+	input.update_player(gull, 160)
+	check.call(gull.aim.x < gull.position.x - radius * 0.9, "left drag back the other way turns the aim")
+	# Flap-up: threshold, tap, leaving the zone.
+	_vtouch(host, 1, Vector2(100, 100), false)
+	input.flap_tap = false
+	_vtouch(host, 1, Vector2(100, 100), true)
+	_vdrag(host, 1, Vector2(100, 100 - sr * (thr - 0.1)))
+	input.update_player(gull, 160)
+	check.call(not gull.climb and not input.flap_tap and not gull.flap_tap_pending, "FLY below the up threshold does not flap")
+	_vdrag(host, 1, Vector2(100, 100 - sr * (thr + 0.2)))
+	check.call(input.flap_tap and input.touch_climb, "FLY past the up threshold latches a flap tap")
+	input.update_player(gull, 160)
+	check.call(gull.climb and gull.flap_tap_pending and not input.flap_tap, "FLY up climbs and hands the tap to the gull")
+	gull.flap_tap_pending = false
+	_vdrag(host, 1, Vector2(100, 100 - sr * (thr + 0.3)))
+	input.update_player(gull, 160)
+	check.call(not gull.flap_tap_pending, "staying in the zone is one tap, not a stream")
+	_vdrag(host, 1, Vector2(100 + sr, 100))
+	input.update_player(gull, 160)
+	check.call(not gull.climb, "pointing sideways stops climbing")
+	_vtouch(host, 1, Vector2(100 + sr, 100), false)
+	check.call(input.stick_anchor == rest and input.aim_finger == -1 and not input.touch_climb, "release returns the ring to rest")
+	# Starting inside the resting ring measures from its centre; outside re-anchors.
+	_vtouch(host, 2, rest + Vector2(sr * 0.5, 0), true)
+	check.call(input.stick_anchor == rest and input.touch_stick().x > 0.45, "a touch inside the ring measures from its centre")
+	_vtouch(host, 2, rest, false)
+	_vtouch(host, 2, Vector2(120, 60), true)
+	check.call(input.stick_anchor == Vector2(120, 60), "a touch elsewhere in the left zone re-anchors the ring")
+	_vtouch(host, 2, Vector2(120, 60), false)
+	_vtouch(host, 2, Vector2(160, 100), true)
+	check.call(input.aim_finger == -1, "the right side of the screen does not grab the FLY stick")
+	_vtouch(host, 2, Vector2(160, 100), false)
+	# A finger that landed while input was off (a card closing) still steers once it drags.
+	_vdrag(host, 5, Vector2(90, 100))
+	check.call(input.aim_finger == 5, "a drag from an unseen finger in the left zone grabs the stick")
+	_vtouch(host, 5, Vector2(90, 100), false)
+	# DIVE circle: a tap dives along the heading with assist; a drag aims; a slow press does nothing.
+	var circle: Vector2 = GullInput.DIVE_STICK_CENTER
+	input.touch_dive = false
+	_vtouch(host, 3, circle, true)
+	_vtouch(host, 3, circle, false)
+	check.call(input.touch_dive and not input.dive_held, "a quick tap in the DIVE circle starts a dive")
+	gull.velocity = Vector2(60, 0)
+	input.update_player(gull, 160)
+	check.call(absf((gull.aim - gull.position).angle()) < 0.01, "a tap dive follows the current heading")
+	input.touch_dive = false
+	_vtouch(host, 3, circle, true)
+	input.dive_down_msec -= int(float(Config.tuning.touch.dive_tap_time) * 1000.0) + 100
+	_vtouch(host, 3, circle, false)
+	check.call(not input.touch_dive, "a slow press in the DIVE circle is not a tap")
+	_vtouch(host, 3, circle, true)
+	_vdrag(host, 3, circle + Vector2(0, 20))
+	input.update_player(gull, 160)
+	_vtouch(host, 3, circle + Vector2(0, 20), false)
+	check.call(input.touch_dive and gull.aim.y > gull.position.y + radius * 0.9 and not input.dive_held, "dragging from the DIVE circle dives in the drag direction, release ends it")
+	input.touch_dive = false
+	# Real-flow steering through physics: the gull turns when the left thumb drags.
+	game.set_physics_process(true)
+	gull.state = BeachGull.State.GLIDE
+	gull.position = Vector2(200, 80)
+	gull.velocity = Vector2.ZERO
+	input.clear_touch()
+	input.touch_active = false
+	_vtouch(host, 6, Vector2(100, 100), true)
+	_vdrag(host, 6, Vector2(100 - sr, 100))
+	for i: int in 10:
+		await host.get_tree().physics_frame
+	check.call(gull.velocity.x < -5.0, "a left drag turns the gull left in the running game (vx %.1f)" % gull.velocity.x)
+	_vtouch(host, 6, Vector2(100 - sr, 100), false)
+	# Touch explainer: once per session, touch only.
+	game.set_physics_process(false)
+	host.main.clear_game()
+	GullInput.touch_explained = false
+	host.main.start_level(2)
+	await host.settle()
+	game = host.main.game
+	game.input.touch_visible = false
+	game.dismiss_intro()
+	check.call(not game.trainer_open and not GullInput.touch_explained, "desktop never shows the touch explainer")
+	host.main.clear_game()
+	host.main.start_level(2)
+	await host.settle()
+	game = host.main.game
+	game.input.touch_visible = true
+	game.dismiss_intro()
+	var lay: String = game.overlay.trainer_card.lay_label.text
+	check.call(game.trainer_open and GullInput.touch_explained and lay.contains("FLY") and lay.contains("DIVE") and game.overlay.trainer_card.how_label.text.contains("PECK"), "touch shows the explainer card after the intro")
+	check.call(not game.input.enabled, "the explainer pauses play")
+	game.overlay.trainer_card.dismiss()
+	check.call(not game.trainer_open and game.input.enabled, "tapping the card continues")
+	host.main.clear_game()
+	host.main.start_level(2)
+	await host.settle()
+	game = host.main.game
+	game.input.touch_visible = true
+	game.dismiss_intro()
+	check.call(not game.trainer_open, "the explainer shows only once per session")
+	host.main.clear_game()
+	await host.settle()

@@ -539,7 +539,7 @@ static func _counter_flow(host: Node, check: Callable) -> void:
 	_set_device(input,"gamepad")
 	check.call(game.overlay.prompt_text() == "DIVE! B","the gamepad prompt names B")
 	_set_device(input,"touch")
-	check.call(game.overlay.prompt_text() == "DIVE! THE RIGHT STICK","the touch prompt names the right stick")
+	check.call(game.overlay.prompt_text() == "DIVE!","the touch prompt just says DIVE (the circle is labelled)")
 	_set_device(input,"keyboard")
 	var stray: InputEventKey = InputEventKey.new()
 	stray.physical_keycode = KEY_E

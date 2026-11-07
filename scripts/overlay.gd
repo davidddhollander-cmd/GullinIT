@@ -634,6 +634,8 @@ func _draw() -> void:
 			right_food = right_food or target.food
 			right_threat = right_threat or target.defense > 0
 	var arrow_y: float = maxf(116.0,training_panel.get_rect().end.y+22.0) if game.training else 108.0
+	if game.input.touch_visible:
+		arrow_y = maxf(60.0,training_panel.get_rect().end.y+8.0) if game.training else 80.0 # lift the arrows clear of the FLY ring and the PECK button
 	var right_food_x: float = 280.0
 	var right_threat_x: float = 302.0
 	for item: Array in [[left_food,Vector2(3,arrow_y),"< FOOD",BeachUI.GOLD],[right_food,Vector2(right_food_x,arrow_y),"FOOD >",BeachUI.GOLD],[left_threat,Vector2(3,arrow_y+11),"< !",Color("ef725c")],[right_threat,Vector2(right_threat_x,arrow_y+11),"! >",Color("ef725c")]]:
@@ -711,6 +713,8 @@ func context_hint() -> Dictionary:
 			return {"text":"TAP %s AT TODDLER" % peck}
 		if game.stash_raids.has_nearby_source():
 			return {"text":"TAP %s TO SEARCH" % peck}
+		if game.input.touch_visible:
+			return {"text":"WALK FOR SCRAPS / PUSH FLY UP TO TAKE OFF"}
 		return {"text":"WALK FOR SCRAPS / %s %s TO FLY" % ["TAP" if game.player.control_mode == "realistic" else "HOLD",flap]}
 	if game.player.state == BeachGull.State.STRIKE:
 		if game.player.crash_warning():
@@ -721,7 +725,7 @@ func context_hint() -> Dictionary:
 			return {} if game.training else {"text":"TAP %s AT THE SNACK" % peck}
 		return {"text":"PECK ACTIVE" if game.player.peck_time > 0 else "PECK SPENT - DIVE AGAIN"}
 	if game.player.landing_aim():
-		return {"text":"LANDING / HOLD %s TO CLIMB" % flap}
+		return {"text":"LANDING / PUSH FLY UP TO CLIMB" if game.input.touch_visible else "LANDING / HOLD %s TO CLIMB" % flap}
 	return {}
 
 # Fixed slot: below the score callout (or the lesson panel), left of the goal panel,
@@ -738,29 +742,38 @@ func peck_available() -> bool:
 	return game.player.state in [BeachGull.State.GROUNDED,BeachGull.State.WINDUP,BeachGull.State.STRIKE]
 
 func _draw_touch_buttons() -> void:
-	if game.input.aim_finger >= 0:
-		draw_arc(game.input.stick_anchor,float(Config.tuning.touch.stick_radius),0,TAU,24,Color(1.0,0.96,0.85,0.28),1.0)
-		draw_circle(game.input.stick_pos,4.0,Color(1.0,0.96,0.85,0.55))
+	var cream: Color = Color(1.0,0.96,0.85)
+	var fly_radius: float = float(Config.tuning.touch.stick_radius)
+	var fly_held: bool = game.input.aim_finger >= 0
+	var fly_center: Vector2 = game.input.stick_anchor if fly_held else GullInput.FLY_STICK_CENTER
+	_draw_stick(fly_center,fly_radius,game.input.stick_pos if fly_held else fly_center,fly_held,"FLY",GullInput.FLY_STICK_CENTER,cream)
 	var dive_radius: float = float(Config.tuning.touch.dive_stick_radius)
 	var dive_center: Vector2 = GullInput.DIVE_STICK_CENTER
-	draw_circle(dive_center,dive_radius,Color(0.14,0.33,0.41,0.3 if game.input.dive_finger < 0 else 0.5))
-	draw_arc(dive_center,dive_radius,0,TAU,32,Color(1.0,0.96,0.85,0.55),1.0)
-	var knob: Vector2 = dive_center + (game.input.dive_pos - dive_center).limit_length(dive_radius) if game.input.dive_finger >= 0 else dive_center
-	draw_circle(knob,4.0,Color(1.0,0.96,0.85,0.7))
+	_draw_stick(dive_center,dive_radius,game.input.dive_pos if game.input.dive_finger >= 0 else dive_center,game.input.dive_finger >= 0,"DIVE",dive_center,cream)
 	if game.input.slowmo_ready:
 		var slow_box: Rect2 = GullInput.SLOWMO_BUTTON
 		draw_rect(slow_box,Color(0.78,0.6,0.1,0.6))
 		draw_rect(slow_box,Color(1.0,0.96,0.85,0.8),false,1.0)
-		draw_string(font,Vector2(slow_box.position.x+12,slow_box.position.y+19),"SLOW" if game.perk_id == "bullet_time" else "CALL",HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color(1.0,0.96,0.85))
+		var slow_caption: String = "SLOW" if game.perk_id == "bullet_time" else "CALL"
+		var slow_width: float = font.get_string_size(slow_caption,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x
+		draw_string(font,Vector2(roundf(slow_box.position.x+(slow_box.size.x-slow_width)*0.5),slow_box.position.y+19),slow_caption,HORIZONTAL_ALIGNMENT_LEFT,-1,8,cream)
 	for kind: String in GullInput.TOUCH_BUTTONS:
 		var box: Rect2 = GullInput.TOUCH_BUTTONS[kind]
-		var held: bool = (kind == "flap" and game.input.touch_climb)
-		var alpha: float = 0.35 if kind == "peck" and not peck_available() else 1.0
-		draw_rect(box,Color(0.14,0.33,0.41,(0.7 if held else 0.42)*alpha))
-		draw_rect(box,Color(1.0,0.96,0.85,0.55*alpha),false,1.0)
+		var alpha: float = 0.45 if kind == "peck" and not peck_available() else 1.0
+		var held: bool = kind == "peck" and game.input.peck_held
+		draw_rect(box,Color(0.14,0.33,0.41,(0.9 if held else 0.78)*alpha))
+		draw_rect(box,Color(1.0,0.96,0.85,0.85*alpha),false,1.0)
 		var caption: String = kind.to_upper()
 		var text_width: float = font.get_string_size(caption,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x
-		draw_string(font,Vector2(roundf(box.position.x+(box.size.x-text_width)*0.5),roundf(box.position.y+box.size.y*0.5+3)),caption,HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color(1.0,0.96,0.85,0.9*alpha))
+		draw_string(font,Vector2(roundf(box.position.x+(box.size.x-text_width)*0.5),roundf(box.position.y+box.size.y*0.5+3)),caption,HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color(1.0,0.96,0.85,alpha))
+
+## Ring + knob + an 8 px label that always sits inside the resting ring, so the controls explain themselves.
+func _draw_stick(center: Vector2, radius: float, knob_point: Vector2, held: bool, label: String, rest: Vector2, cream: Color) -> void:
+	draw_circle(center,radius,Color(0.14,0.33,0.41,0.5 if held else 0.38))
+	draw_arc(center,radius,0,TAU,40,Color(1.0,0.96,0.85,0.75 if held else 0.6),1.0)
+	draw_circle(center + (knob_point - center).limit_length(radius),4.0,Color(1.0,0.96,0.85,0.85 if held else 0.7))
+	var label_width: float = font.get_string_size(label,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x
+	draw_string(font,Vector2(roundf(rest.x-label_width*0.5),rest.y+radius-6.0),label,HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color(cream.r,cream.g,cream.b,0.55 if held else 0.9))
 
 # During lessons the panel and hint fill the top slot, so the callout drops just
 # below the zone sign boards (over the sea) instead of covering them.
