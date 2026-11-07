@@ -11,8 +11,8 @@ var _visibility: JavaScriptObject
 
 func _ready() -> void:
 	GullInput.register_actions()
-	if OS.has_feature("web") and DisplayServer.is_touchscreen_available():
-		get_tree().root.content_scale_stretch = Window.CONTENT_SCALE_STRETCH_FRACTIONAL ## fill phone screens; desktop keeps crisp integer scaling
+	if OS.has_feature("web"):
+		get_tree().root.content_scale_stretch = Window.CONTENT_SCALE_STRETCH_FRACTIONAL ## fill the itch frame with no black border; native runs keep crisp integer scaling
 	if OS.is_debug_build():
 		add_child(TextEditTool.new()) # F3: edit any on-screen text and copy the changes
 	background = BeachBackdrop.new()
