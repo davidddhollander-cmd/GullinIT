@@ -556,7 +556,7 @@ func _draw() -> void:
 	draw_rect(Rect2(0,0,320,TOP_BAR_HEIGHT),Color("183b4e"))
 	draw_rect(Rect2(5,TOP_BAR_HEIGHT-3,85,2),Color("397a85"))
 	draw_rect(Rect2(5,TOP_BAR_HEIGHT-3,85*game.score.window/float(Config.tuning.score.combo_window),2),BeachUI.GOLD)
-	var offset: Vector2 = Vector2(game.camera_x-160,0)
+	var offset: Vector2 = Vector2(game.camera_x-160,game.camera_y-90)
 	_draw_digestion()
 	if game.running:
 		_draw_perks(offset)
@@ -670,7 +670,7 @@ func you_marker_rect(pos: Vector2) -> Rect2:
 		obstacles.append(hint_rect(str(hint.text)).grow(1))
 	for sign: Dictionary in game.beach.sign_layouts():
 		var board: Rect2 = sign.rect
-		board.position.x -= game.camera_x-160
+		board.position -= Vector2(game.camera_x-160,game.camera_y-90)
 		obstacles.append(board.grow(2))
 	# Try the preferred height first, then other clear rows above the bird.
 	var rows: Array[float] = [initial.y]

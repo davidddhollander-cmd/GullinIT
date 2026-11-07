@@ -158,7 +158,7 @@ func touch_stick() -> Vector2:
 	var stick: Vector2 = ((stick_pos - FLY_STICK_CENTER) / float(Config.tuning.touch.stick_radius)).limit_length(1.0)
 	return stick if stick.length() > float(Config.tuning.touch.stick_deadzone) else Vector2.ZERO
 
-func update_player(gull: BeachGull, camera_x: float) -> void:
+func update_player(gull: BeachGull, camera_x: float, camera_y: float = 90.0) -> void:
 	var stick: Vector2 = Input.get_vector("aim_left","aim_right","aim_up","aim_down")
 	if touch_active and (aim_finger != NO_FINGER or dive_finger != NO_FINGER):
 		_aim_with_touch(gull) ## a thumb on a stick beats stray key, pad or mouse state
@@ -170,7 +170,7 @@ func update_player(gull: BeachGull, camera_x: float) -> void:
 	elif touch_active:
 		_aim_with_touch(gull)
 	else:
-		gull.aim = get_viewport().get_mouse_position() + Vector2(camera_x-160,0)
+		gull.aim = get_viewport().get_mouse_position() + Vector2(camera_x-160,camera_y-90)
 	gull.climb = Input.is_action_pressed("climb") or touch_climb
 	gull.flap_tap_pending = gull.flap_tap_pending or flap_tap
 	flap_tap = false
