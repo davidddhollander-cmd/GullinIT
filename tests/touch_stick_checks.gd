@@ -23,6 +23,8 @@ static func _mouse_move(input: GullInput) -> void:
 	input._input(motion)
 
 static func run(host: Node, check: Callable) -> void:
+	var hint: Callable = Callable(host.main,"should_show_rotate_hint")
+	check.call(hint.call(Vector2i(390,844),true) and not hint.call(Vector2i(844,390),true) and not hint.call(Vector2i(390,844),false),"rotate hint shows for portrait touch only")
 	host.main.start_level(1)
 	var game: BeachGame = host.main.game
 	game.set_physics_process(false)

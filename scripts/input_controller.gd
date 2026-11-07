@@ -75,7 +75,11 @@ static func register_actions() -> void:
 		event.axis_value = pair[2]
 		InputMap.action_add_event(pair[0],event)
 
+static var touch_blocked: bool = false ## the rotate-phone hint is up: ignore fingers
+
 func _input(event: InputEvent) -> void:
+	if touch_blocked and (event is InputEventScreenTouch or event is InputEventScreenDrag):
+		return
 	if event is InputEventScreenTouch or event is InputEventScreenDrag:
 		touch_last_msec = Time.get_ticks_msec()
 		if event is InputEventScreenDrag or event.pressed:
