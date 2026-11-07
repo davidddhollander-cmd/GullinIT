@@ -463,6 +463,18 @@ func options(from_pause: bool) -> void:
 		slider.value_changed.connect(func(value: float) -> void:
 			GameState.options[bus] = value
 			Audio.apply_options())
+	var steer_row: HBoxContainer = HBoxContainer.new()
+	content.add_child(steer_row)
+	BeachUI.label(steer_row,"DIVE STEER").custom_minimum_size.x = 55
+	var steer: HSlider = HSlider.new()
+	steer.size_flags_horizontal = SIZE_EXPAND_FILL
+	steer.min_value = 0.3
+	steer.max_value = 1.0
+	steer.step = 0.05
+	steer.value = GameState.dive_steer()
+	steer.custom_minimum_size.y = 12
+	steer_row.add_child(steer)
+	steer.value_changed.connect(func(value: float) -> void: GameState.options["dive_steer"] = value)
 	var toggles: HBoxContainer = HBoxContainer.new()
 	content.add_child(toggles)
 	for key: String in ["shake","touch","stats"]:

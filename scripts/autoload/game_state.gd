@@ -4,6 +4,11 @@ var progress: Dictionary = {}
 var wallet: Dictionary = {"feathers": 0}
 var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false, "stats": true, "tips": [], "gull": "herring", "dev_player": false}
 var _anon_id: String = ""
+
+## Touch dive steering multiplier (0.3-1.0); old saves lack the key and get the tuning default.
+func dive_steer() -> float:
+	return clampf(float(options.get("dive_steer", Config.tuning.touch.dive_steer_default)), 0.3, 1.0)
+
 var save_path: String = "user://save.json"
 var save_error: String = ""
 # Playtest build: every level is selectable. Set to false to restore normal progression.

@@ -35,6 +35,7 @@ var timer: float = 0.0
 var cooldown: float = 0.0
 var invulnerable: float = 0.0
 var climb: bool = false
+var dive_turn_scale: float = 1.0 ## player touch steering damping; rivals stay 1.0
 var speed_factor: float = 1.0
 var rival: bool = false
 # Rival that only goes for loose food (Gary): never touches food a person holds.
@@ -520,7 +521,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 		State.STRIKE:
 			var offset: Vector2 = aim - position
 			if offset.length() > float(d.aim_deadzone):
-				direction = Vector2.from_angle(rotate_toward(direction.angle(), offset.angle(), float(d.turn_rate) * delta))
+				direction = Vector2.from_angle(rotate_toward(direction.angle(), offset.angle(), float(d.turn_rate) * dive_turn_scale * delta))
 			# Climbing spends momentum faster than descending builds it.
 			# A tailwind pushes the swoop along; a headwind drags it in proportion to speed, mostly on shallow angles.
 			var tail: float = tailwind(direction.x)

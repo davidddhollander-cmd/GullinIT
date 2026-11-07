@@ -54,6 +54,7 @@
     "assist_strength": 0.5,
     "approach_assist_strength": 0.25,
     "dive_stick_radius": 20,
+    "dive_steer_default": 0.55,
     "mouse_ignore_after_touch": 0.5
   },
   "control_modes": {
@@ -173,6 +174,7 @@
     "camera_lerp": 0.15,
     "camera_y_lerp": 0.15,
     "sky_extra": 60,
+    "camera_follow_start_y": 70,
     "start_x": 40,
     "start_y": 75,
     "food_offset_x": 10,
