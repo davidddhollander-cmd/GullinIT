@@ -741,11 +741,17 @@ func _draw_touch_buttons() -> void:
 	if game.input.aim_finger >= 0:
 		draw_arc(game.input.stick_anchor,float(Config.tuning.touch.stick_radius),0,TAU,24,Color(1.0,0.96,0.85,0.28),1.0)
 		draw_circle(game.input.stick_pos,4.0,Color(1.0,0.96,0.85,0.55))
+	var dive_radius: float = float(Config.tuning.touch.dive_stick_radius)
+	var dive_center: Vector2 = GullInput.DIVE_STICK_CENTER
+	draw_circle(dive_center,dive_radius,Color(0.14,0.33,0.41,0.3 if game.input.dive_finger < 0 else 0.5))
+	draw_arc(dive_center,dive_radius,0,TAU,32,Color(1.0,0.96,0.85,0.55),1.0)
+	var knob: Vector2 = dive_center + (game.input.dive_pos - dive_center).limit_length(dive_radius) if game.input.dive_finger >= 0 else dive_center
+	draw_circle(knob,4.0,Color(1.0,0.96,0.85,0.7))
 	if game.input.slowmo_ready:
 		var slow_box: Rect2 = GullInput.SLOWMO_BUTTON
 		draw_rect(slow_box,Color(0.78,0.6,0.1,0.6))
 		draw_rect(slow_box,Color(1.0,0.96,0.85,0.8),false,1.0)
-		draw_string(font,Vector2(slow_box.position.x+5,slow_box.position.y+14),"SLOW" if game.perk_id == "bullet_time" else "CALL",HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color(1.0,0.96,0.85))
+		draw_string(font,Vector2(slow_box.position.x+12,slow_box.position.y+19),"SLOW" if game.perk_id == "bullet_time" else "CALL",HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color(1.0,0.96,0.85))
 	for kind: String in GullInput.TOUCH_BUTTONS:
 		var box: Rect2 = GullInput.TOUCH_BUTTONS[kind]
 		var held: bool = (kind == "flap" and game.input.touch_climb)

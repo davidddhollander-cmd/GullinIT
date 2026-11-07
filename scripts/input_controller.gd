@@ -15,22 +15,28 @@ var peck_finger: int = -1
 var touch_slowmo: bool = false
 var slowmo_ready: bool = false ## set by the game; the touch button only exists while true
 var aim_finger: int = -1
+var dive_finger: int = -1 ## finger on the right-thumb dive stick
+var dive_pos: Vector2 = DIVE_STICK_CENTER
+var dive_held: bool = false ## the dive stick was pushed past its deadzone and owns the aim until released
 var climb_fingers: Dictionary = {}
 var gamepad: bool = false ## last device used was a pad; prompts show pad buttons
 var key_aim: bool = false ## WASD/arrows steer like a stick until the mouse or a touch takes over
 const PAD_DEADZONE: float = 0.3 ## stick drift below this never claims the prompts
 var touch_visible: bool = false
 var enabled: bool = false
-# Compact right-thumb cluster (logical 320x180 coordinates). FLAP sits in the
-# corner, DIVE above it and PECK beside it, so the right thumb can peck mid-dive
-# while the left thumb keeps steering. The overlay draws these same rects.
+# Right-thumb cluster (logical 320x180 coordinates): the fixed dive stick sits in
+# the bottom-right corner, PECK just above it, FLAP to its left and SLOW-MO above
+# FLAP. The overlay draws these same rects and the dive circle.
+const DIVE_STICK_CENTER: Vector2 = Vector2(296,152)
 const TOUCH_BUTTONS: Dictionary = {
-	"peck": Rect2(226,149,42,22),
-	"flap": Rect2(272,149,44,22),
-	"dive": Rect2(272,124,44,21),
+	"peck": Rect2(264,98,52,30),
+	"flap": Rect2(218,142,52,30),
 }
-const SLOWMO_BUTTON: Rect2 = Rect2(226,124,42,21)
+const SLOWMO_BUTTON: Rect2 = Rect2(208,106,52,30)
 const TOUCH_SLOP: float = 2.0
+
+static func on_dive_stick(point: Vector2) -> bool:
+	return point.distance_to(DIVE_STICK_CENTER) <= float(Config.tuning.touch.dive_stick_radius) + TOUCH_SLOP
 
 static func touch_button_at(point: Vector2) -> String:
 	for kind: String in TOUCH_BUTTONS:
@@ -104,8 +110,10 @@ func _input(event: InputEvent) -> void:
 			elif button == "flap":
 				climb_fingers[event.index] = true
 				flap_tap = true
-			elif button == "dive":
-				touch_dive = true
+			elif on_dive_stick(event.position) and dive_finger < 0:
+				dive_finger = event.index
+				dive_pos = event.position
+				touch_active = true
 			elif event.position.y > 28 and aim_finger < 0:
 				aim_finger = event.index
 				stick_anchor = event.position
@@ -118,7 +126,12 @@ func _input(event: InputEvent) -> void:
 				peck_finger = -1
 			if event.index == aim_finger:
 				aim_finger = -1
+			if event.index == dive_finger:
+				dive_finger = -1
+				dive_held = false
 		touch_climb = not climb_fingers.is_empty()
+	elif event is InputEventScreenDrag and event.index == dive_finger:
+		dive_pos = event.position
 	elif event is InputEventScreenDrag and event.index == aim_finger:
 		stick_pos = event.position
 		var pull: Vector2 = stick_pos - stick_anchor
@@ -137,6 +150,13 @@ func touch_stick() -> Vector2:
 	var stick: Vector2 = ((stick_pos - stick_anchor) / float(Config.tuning.touch.stick_radius)).limit_length(1.0)
 	return stick if stick.length() > float(Config.tuning.touch.stick_deadzone) else Vector2.ZERO
 
+## Fixed dive-stick deflection, up to 1 long; zero while released or inside the deadzone.
+func dive_stick() -> Vector2:
+	if dive_finger < 0:
+		return Vector2.ZERO
+	var stick: Vector2 = ((dive_pos - DIVE_STICK_CENTER) / float(Config.tuning.touch.dive_stick_radius)).limit_length(1.0)
+	return stick if stick.length() > float(Config.tuning.touch.dive_stick_deadzone) else Vector2.ZERO
+
 func update_player(gull: BeachGull, camera_x: float) -> void:
 	var stick: Vector2 = Input.get_vector("aim_left","aim_right","aim_up","aim_down")
 	if stick.length() > 0.15:
@@ -145,12 +165,20 @@ func update_player(gull: BeachGull, camera_x: float) -> void:
 	elif gamepad or key_aim:
 		_aim_without_stick(gull)
 	elif touch_active:
-		var touch_vec: Vector2 = touch_stick()
-		if touch_vec == Vector2.ZERO:
+		var dive_vec: Vector2 = dive_stick()
+		if dive_vec != Vector2.ZERO and not dive_held:
+			dive_held = true
+			touch_dive = true ## pushing the dive stick starts the dive; the game consumes this after aiming below
+		var touch_vec: Vector2 = dive_vec if dive_held else touch_stick()
+		if dive_held and dive_vec == Vector2.ZERO:
+			_aim_without_stick(gull) ## dive stick recentred: keep the heading, left stick stays ignored
+		elif touch_vec == Vector2.ZERO:
 			_aim_without_stick(gull)
 		else:
 			_aim_with_stick(gull,touch_vec)
 			_assist_aim(gull)
+			if not dive_held and gull.state == BeachGull.State.GLIDE and touch_vec.y > 0.0:
+				_bend_toward_target(gull,float(Config.tuning.touch.approach_assist_strength)) ## approach assist while gliding down
 	else:
 		gull.aim = get_viewport().get_mouse_position() + Vector2(camera_x-160,0)
 	gull.climb = Input.is_action_pressed("climb") or touch_climb
@@ -173,11 +201,14 @@ func _aim_without_stick(gull: BeachGull) -> void:
 ## Touch only: at dive start and through the swoop, bend the aim toward the snack
 ## nearest the aimed direction, if one lies inside the assist cone.
 func _assist_aim(gull: BeachGull) -> void:
-	var t: Dictionary = Config.tuning.touch
-	var strength: float = clampf(float(t.assist_strength),0.0,1.0)
-	if game == null or strength <= 0.0 or gull.rival:
-		return
 	if not (gull.state in [BeachGull.State.WINDUP,BeachGull.State.STRIKE] or (gull.state == BeachGull.State.GLIDE and touch_dive)):
+		return
+	_bend_toward_target(gull,float(Config.tuning.touch.assist_strength))
+
+func _bend_toward_target(gull: BeachGull, strength: float) -> void:
+	var t: Dictionary = Config.tuning.touch
+	strength = clampf(strength,0.0,1.0)
+	if game == null or strength <= 0.0 or gull.rival:
 		return
 	var dir: Vector2 = (gull.aim - gull.position).normalized()
 	var target: BeachTarget = game.assist_target(gull.position,dir,float(t.assist_range),deg_to_rad(float(t.assist_angle)))
@@ -195,5 +226,7 @@ func clear_touch() -> void:
 	flap_tap = false
 	touch_dive = false
 	aim_finger = -1
+	dive_finger = -1
+	dive_held = false
 	climb_fingers.clear()
 	touch_down.clear()

@@ -51,6 +51,9 @@
     "assist_range": 140,
     "assist_angle": 25,
     "assist_strength": 0.5,
+    "approach_assist_strength": 0.25,
+    "dive_stick_radius": 20,
+    "dive_stick_deadzone": 0.35,
     "mouse_ignore_after_touch": 0.5
   },
   "control_modes": {

@@ -26,6 +26,12 @@ static func _fly(gull: BeachGull, seconds: float, taps: Array[float], hold: bool
 static func _setting(check: Callable) -> void:
 	GameState.options.erase("control_mode")
 	check.call(GameState.control_mode() == "normal", "control mode defaults to NORMAL")
+	GameState.options.touch = true
+	check.call(GameState.control_mode() == "casual", "a fresh save on a touch device defaults to CASUAL")
+	GameState.options.control_mode = "normal"
+	check.call(GameState.control_mode() == "normal", "an explicit NORMAL choice wins on touch")
+	GameState.options.erase("control_mode")
+	GameState.options.touch = false
 	GameState.options.control_mode = "bogus"
 	check.call(GameState.control_mode() == "normal", "an invalid saved control mode falls back to NORMAL")
 	var saved_path: String = GameState.save_path
