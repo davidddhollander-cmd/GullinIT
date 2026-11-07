@@ -98,9 +98,15 @@ static func _input(host: Node, check: Callable) -> void:
 	var touch: InputEventScreenTouch = InputEventScreenTouch.new()
 	touch.pressed = true
 	touch.index = 3
-	touch.position = (GullInput.TOUCH_BUTTONS.flap as Rect2).get_center()
+	touch.position = Vector2(100,110)
+	input.enabled = true
 	input._input(touch)
-	check.call(input.flap_tap, "a touch FLAP finger-down latches a tap")
+	var up_drag := InputEventScreenDrag.new()
+	up_drag.index = 3
+	up_drag.position = Vector2(100,110 - float(Config.tuning.touch.stick_radius))
+	input.flap_tap = false
+	input._input(up_drag)
+	check.call(input.flap_tap and input.touch_climb, "pushing the FLY stick up latches a flap tap")
 	gull.queue_free()
 	input.queue_free()
 

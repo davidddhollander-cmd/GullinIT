@@ -17,12 +17,19 @@
       "call": "RB"
     },
     "touch": {
-      "flap": "FLAP",
-      "dive": "the right stick",
+      "flap": "FLY up",
+      "dive": "DIVE",
       "peck": "PECK",
       "steer": "your thumb",
       "call": "CALL"
     }
+  },
+  "touch_explainer": {
+    "mood": "proud",
+    "counter": "Touch controls",
+    "lay": "**FLY** (left): push to steer, push up to flap.\n**DIVE** (right): tap to dive, drag to aim the dive.",
+    "how": "**PECK**: bins, hold to screech.",
+    "button": "Got it"
   },
   "toasts": [
     "Nice one!",
@@ -34,7 +41,8 @@
   "live": {
     "crash": {
       "default": "Pull up, you daft gull! Hold {flap}!",
-      "realistic": "Pull up, you daft gull! Tap {flap} fast!"
+      "realistic": "Pull up, you daft gull! Tap {flap} fast!",
+      "touch": "Pull up, you daft gull! Push FLY up!"
     },
     "peck_now": {
       "default": "Now! Tap {peck}!",
@@ -47,11 +55,17 @@
     "bin_closer": "Closer, gullster! Land right beside the bin.",
     "mug_miss": "Missed! Climb above him and dive straight through. No peck needed.",
     "mug_rescue": "He's holding still for you. Climb above him and dive straight through.",
-    "aim_freeze": "Steer with {steer}. Line up the snack.\nPress {dive} to go.",
-    "dive_nudge": "Climb above him, then press {dive}",
+    "aim_freeze": {
+      "default": "Steer with {steer}. Line up the snack.\nPress {dive} to go.",
+      "touch": "Steer with {steer}. Line up the snack.\nTap DIVE to go."
+    },
+    "dive_nudge": {
+      "default": "Climb above him, then press {dive}",
+      "touch": "Climb above him, then tap DIVE"
+    },
     "full_stomach": "Finish your snack first, greedy guts.",
     "practice": "Pause, then level select, to progress",
-    "crash_toast":"Ouch! Dust yourself off."
+    "crash_toast": "Ouch! Dust yourself off."
   },
   "tips": {
     "mug_miss": "MISSED THE MUG! DIVE STRAIGHT THROUGH HIM",
@@ -59,10 +73,30 @@
     "bin_closer": "CLOSER! LAND RIGHT BESIDE THE BIN"
   },
   "score_ways": [
-    {"title": "GROUND GRUB", "text": "CRUMBS AND BIN SCRAPS. SAFE.", "score": "FOOD POINTS NO COMBO", "still": "ground"},
-    {"title": "THE SNATCH", "text": "THE PROPER WAY. DIVE THEN PECK.", "score": "COMBO UP TO X{combo}", "still": "snatch"},
-    {"title": "COUNTER GRAB", "text": "PECK IT AS IT LANDS ON THE STALL.", "score": "+{handover}% POINTS", "still": "counter"},
-    {"title": "THE MUG", "text": "DIVE THROUGH A RIVAL WITH FOOD.", "score": "+{mugged}% POINTS", "still": "mug"}
+    {
+      "title": "GROUND GRUB",
+      "text": "CRUMBS AND BIN SCRAPS. SAFE.",
+      "score": "FOOD POINTS NO COMBO",
+      "still": "ground"
+    },
+    {
+      "title": "THE SNATCH",
+      "text": "THE PROPER WAY. DIVE THEN PECK.",
+      "score": "COMBO UP TO X{combo}",
+      "still": "snatch"
+    },
+    {
+      "title": "COUNTER GRAB",
+      "text": "PECK IT AS IT LANDS ON THE STALL.",
+      "score": "+{handover}% POINTS",
+      "still": "counter"
+    },
+    {
+      "title": "THE MUG",
+      "text": "DIVE THROUGH A RIVAL WITH FOOD.",
+      "score": "+{mugged}% POINTS",
+      "still": "mug"
+    }
   ],
   "training": {
     "opening": {
@@ -87,16 +121,19 @@
         },
         "how": {
           "default": "Hold {flap} to flap and climb. Steer with {steer} to head right. Fly through the golden ring.",
-          "realistic": "Tap {flap} over and over to climb, about four or five taps a second. Steer with {steer} to head right. Fly through the golden ring."
+          "realistic": "Tap {flap} over and over to climb, about four or five taps a second. Steer with {steer} to head right. Fly through the golden ring.",
+          "touch": "Push FLY up to flap and climb. Steer with {steer} to head right. Fly through the golden ring."
         },
         "strip": {
           "default": "Hold {flap} to take off, then steer right",
-          "realistic": "Tap {flap} to take off, then steer right"
+          "realistic": "Tap {flap} to take off, then steer right",
+          "touch": "Push FLY up to take off, then steer right"
         },
         "strip_steer": "Steer right with {steer} to the ring",
         "banner": {
           "default": "Hold {flap} to flap and climb.\nFly right through the golden ring.",
-          "realistic": "Tap {flap} over and over to climb.\nFly right through the golden ring."
+          "realistic": "Tap {flap} over and over to climb.\nFly right through the golden ring.",
+          "touch": "Push FLY up to flap and climb.\nFly right through the golden ring."
         },
         "banner_steer": "Now steer right with {steer}.\nFly through the golden ring."
       },
@@ -105,15 +142,18 @@
         "lay": "What goes up must come down, mate. Stop flapping and you glide, and gliding means sinking. Golden crumbs on the sand are free grub.",
         "how": {
           "default": "Let go of {flap}, aim down and land. Then walk over a golden crumb to eat it.",
-          "realistic": "Stop tapping {flap}, aim down and land. Then walk over a golden crumb to eat it."
+          "realistic": "Stop tapping {flap}, aim down and land. Then walk over a golden crumb to eat it.",
+          "touch": "Stop pushing FLY up, aim down and land. Then walk over a golden crumb to eat it."
         },
         "strip": {
           "default": "Let go of {flap}, aim down and land",
-          "realistic": "Stop tapping {flap}, aim down and land"
+          "realistic": "Stop tapping {flap}, aim down and land",
+          "touch": "Stop pushing FLY up, aim down and land"
         },
         "banner": {
           "default": "Let go of {flap}, aim down and land.\nThen walk over a golden crumb.",
-          "realistic": "Stop tapping {flap}, aim down and land.\nThen walk over a golden crumb."
+          "realistic": "Stop tapping {flap}, aim down and land.\nThen walk over a golden crumb.",
+          "touch": "Stop pushing FLY up, aim down and land.\nThen walk over a golden crumb."
         }
       },
       {
@@ -121,11 +161,15 @@
         "lay": "Now let's get you a proper challenge.\nSee the fella with the ice cream? That's yours. Timing is everything...",
         "how": {
           "default": "Climb above your target. Press {dive} to dive and then tap {peck} right when your beak reaches the delicious target.",
-          "casual": "Climb above him and press {dive} to dive. Casual mode does the pecking, so just fly your beak into the cone. Then aim up and climb away."
+          "casual": "Climb above him and press {dive} to dive. Casual mode does the pecking, so just fly your beak into the cone. Then aim up and climb away.",
+          "touch": "Climb above your target. Tap DIVE to dive and then tap {peck} right when your beak reaches the delicious target.",
+          "touch_casual": "Climb above him and tap DIVE to dive. Casual mode does the pecking, so just fly your beak into the cone. Then aim up and climb away."
         },
         "strip": {
           "default": "Aim at the snack, {dive} to dive, then tap {peck}",
-          "casual": "Dive with {dive}, your beak pecks for you"
+          "casual": "Dive with {dive}, your beak pecks for you",
+          "touch": "Aim at the snack, tap DIVE, then tap {peck}",
+          "touch_casual": "Tap DIVE, your beak pecks for you"
         }
       },
       {
@@ -137,8 +181,14 @@
       {
         "mood": "amused",
         "lay": "Time to meet the competition. This dummy is a rival gull, and he's nicked a snack. Mugging a rival is the best steal in the game. Careful though: rivals can mug you too.",
-        "how": "Climb above him. Dive with {dive} and fly straight through him, no peck needed. The snack changes beaks. Full belly? Then you just bump him, and that counts too.",
-        "strip": "Dive with {dive} straight through the dummy"
+        "how": {
+          "default": "Climb above him. Dive with {dive} and fly straight through him, no peck needed. The snack changes beaks. Full belly? Then you just bump him, and that counts too.",
+          "touch": "Climb above him. Tap DIVE and fly straight through him, no peck needed. The snack changes beaks. Full belly? Then you just bump him, and that counts too."
+        },
+        "strip": {
+          "default": "Dive with {dive} straight through the dummy",
+          "touch": "Tap DIVE straight through the dummy"
+        }
       }
     ]
   },
@@ -151,7 +201,8 @@
     "strips": [
       {
         "default": "Land on the ice cream sign",
-        "realistic": "Land on the ice cream sign, stop tapping {flap}"
+        "realistic": "Land on the ice cream sign, stop tapping {flap}",
+        "touch": "Land on the ice cream sign"
       },
       "Hold {peck} to screech. Higher is louder",
       "Brash is full! Screech again or press {call}",
@@ -163,7 +214,8 @@
         "lay": "Level two, gullster, and a new trick. A screech is a gull's best weapon, and it's louder from up high. That ice cream stand has a sign on its roof, and that's your stage.",
         "how": {
           "default": "Fly above the ice cream sign, let go of {flap} and drop onto it.",
-          "realistic": "Fly above the ice cream sign, stop tapping {flap} and drop onto it."
+          "realistic": "Fly above the ice cream sign, stop tapping {flap} and drop onto it.",
+          "touch": "Fly above the ice cream sign, stop pushing FLY up and drop onto it."
         }
       },
       {
@@ -182,7 +234,8 @@
     "strips": [
       {
         "default": "Land on top of the ice cream stand",
-        "realistic": "Land on the ice cream stand, stop tapping {flap}"
+        "realistic": "Land on the ice cream stand, stop tapping {flap}",
+        "touch": "Land on top of the ice cream stand"
       },
       "Wait for the yellow target, then dive"
     ],
@@ -193,7 +246,8 @@
         "lay": "One last lesson, gullster, and it's the big one: the perfect steal. Any gull can nick a snack off the sand. A true professional takes it straight off the counter.",
         "how": {
           "default": "Fly above the ice cream stand, let go of {flap} and drop onto the roof. Stay above the dogs.",
-          "realistic": "Fly above the ice cream stand, stop tapping {flap} and drop onto the roof. Stay above the dogs."
+          "realistic": "Fly above the ice cream stand, stop tapping {flap} and drop onto the roof. Stay above the dogs.",
+          "touch": "Fly above the ice cream stand, stop pushing FLY up and drop onto the roof. Stay above the dogs."
         }
       },
       {
@@ -202,7 +256,9 @@
         "lay": "Listen close. There's only a small window for a spotless theft. The moment the ice cream lands on the counter, that's your cue...",
         "how": {
           "default": "When the yellow target shows, aim at it, dive with {dive} and tap {peck} as your beak reaches the food.",
-          "casual": "When the yellow target shows, aim at it and dive with {dive}. Your beak does the pecking."
+          "casual": "When the yellow target shows, aim at it and dive with {dive}. Your beak does the pecking.",
+          "touch": "When the yellow target shows, aim at it, tap DIVE and tap {peck} as your beak reaches the food.",
+          "touch_casual": "When the yellow target shows, aim at it and tap DIVE. Your beak does the pecking."
         }
       }
     ]

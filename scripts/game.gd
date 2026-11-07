@@ -729,6 +729,13 @@ func dismiss_intro() -> void:
 	running = true
 	input.enabled = true
 	overlay.intro_panel.hide()
+	if input.touch_visible and not GullInput.touch_explained:
+		GullInput.touch_explained = true ## once per app session, right after the first intro card
+		open_trainer(Config.trainer.touch_explainer,_open_intro_cards)
+	else:
+		_open_intro_cards()
+
+func _open_intro_cards() -> void:
 	if trainer_cards and training:
 		if banner_lesson(lesson):
 			_cue_banner()

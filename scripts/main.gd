@@ -239,7 +239,8 @@ func _touch_to_gui(event: InputEventScreenTouch) -> void:
 	if GullInput.touch_blocked:
 		return
 	if event.pressed:
-		if screen == "game" and event.position.y > TOP_BAR_TOUCH_Y:
+		var card_up: bool = is_instance_valid(game) and (game.trainer_open or game.intro > 0.0) ## cards and the start button are tapped anywhere
+		if screen == "game" and event.position.y > TOP_BAR_TOUCH_Y and not card_up:
 			return
 		gui_fingers[event.index] = true
 	elif not gui_fingers.erase(event.index):
