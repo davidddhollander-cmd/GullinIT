@@ -9,7 +9,7 @@ var running: bool = false
 var intro: float = 0.0
 var intro_dismissed_elapsed: float = -1.0
 var camera_x: float = 160.0
-var camera_y: float = 90.0 ## rises above 90 only while the gull is above the old ceiling (y 20)
+var camera_y: float = 90.0 ## rises above 90 only while the gull is above world.camera_follow_start_y
 var debug: bool = false
 var player: BeachGull
 var gulls: Array[BeachGull] = []
@@ -345,9 +345,9 @@ func _rival_taunt(step: float) -> void:
 	var at: Vector2 = Vector2(clampf(from.x,camera_x-160.0+half,camera_x+160.0-half),from.y+22.0)
 	effects.message(at,taunt_text,BeachUI.GOLD,float(Config.tuning.juice.taunt_time),0.0)
 
-## Camera centre y: 90 while the gull is at or below the old ceiling, rising with it above, never showing past -sky_extra.
+## Camera centre y: 90 while the gull is at or below camera_follow_start_y, rising 1:1 with it above, never showing past -sky_extra.
 func camera_target_y() -> float:
-	return maxf(90.0-float(Config.tuning.world.sky_extra),90.0+minf(0.0,player.position.y-20.0))
+	return maxf(90.0-float(Config.tuning.world.sky_extra),90.0+minf(0.0,player.position.y-float(Config.tuning.world.camera_follow_start_y)))
 
 ## Gary's debut: he flies in from off-screen, barges the player, then a head-and-speech pop-up delivers his line.
 func _start_fly_in(profile: Dictionary) -> void:

@@ -159,6 +159,7 @@ func touch_stick() -> Vector2:
 	return stick if stick.length() > float(Config.tuning.touch.stick_deadzone) else Vector2.ZERO
 
 func update_player(gull: BeachGull, camera_x: float, camera_y: float = 90.0) -> void:
+	gull.dive_turn_scale = GameState.dive_steer() if touch_active else 1.0
 	var stick: Vector2 = Input.get_vector("aim_left","aim_right","aim_up","aim_down")
 	if touch_active and (aim_finger != NO_FINGER or dive_finger != NO_FINGER):
 		_aim_with_touch(gull) ## a thumb on a stick beats stray key, pad or mouse state
