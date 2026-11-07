@@ -11,11 +11,12 @@ var flap_tap: bool = false ## a flap press latched in _input, handed to the gull
 var touch_dive: bool = false
 var touch_peck: bool = false
 var peck_held: bool = false ## the PECK button is down; a hold screeches
-var peck_finger: int = -1
+const NO_FINGER: int = -(1 << 40) ## iOS touch indices are large negatives, so -1/0 cannot mean "no finger"
+var peck_finger: int = NO_FINGER
 var touch_slowmo: bool = false
 var slowmo_ready: bool = false ## set by the game; the touch button only exists while true
-var aim_finger: int = -1
-var dive_finger: int = -1 ## finger on the right-thumb dive stick
+var aim_finger: int = NO_FINGER
+var dive_finger: int = NO_FINGER ## finger on the right-thumb dive stick
 var dive_pos: Vector2 = DIVE_STICK_CENTER
 var dive_down_msec: int = 0 ## when the dive finger landed, to tell a tap from a drag
 var dive_held: bool = false ## the dive stick was pushed past its deadzone and owns the aim until released
@@ -135,25 +136,25 @@ func _input(event: InputEvent) -> void:
 				touch_peck = true
 				peck_held = true
 				peck_finger = event.index
-			elif on_dive_stick(event.position) and dive_finger < 0:
+			elif on_dive_stick(event.position) and dive_finger == NO_FINGER:
 				dive_finger = event.index
 				dive_pos = event.position
 				dive_down_msec = Time.get_ticks_msec()
 				touch_active = true
-			elif in_fly_zone(event.position) and aim_finger < 0:
+			elif in_fly_zone(event.position) and aim_finger == NO_FINGER:
 				_grab_fly_stick(event.index,event.position)
 		else:
 			if event.index == peck_finger:
 				peck_held = false
-				peck_finger = -1
+				peck_finger = NO_FINGER
 			if event.index == aim_finger:
-				aim_finger = -1
+				aim_finger = NO_FINGER
 				stick_anchor = FLY_STICK_CENTER
 				stick_pos = FLY_STICK_CENTER
 			if event.index == dive_finger:
 				if not dive_held and Time.get_ticks_msec() - dive_down_msec <= int(float(Config.tuning.touch.dive_tap_time) * 1000.0):
 					touch_dive = true ## a quick tap dives along the current heading; update_player adds the aim assist
-				dive_finger = -1
+				dive_finger = NO_FINGER
 				dive_held = false
 		_update_fly_flap()
 	elif event is InputEventScreenDrag and event.index == dive_finger:
@@ -165,7 +166,7 @@ func _input(event: InputEvent) -> void:
 		if pull.length() > radius:
 			stick_anchor = stick_pos - pull.normalized() * radius ## the anchor follows so the stick never stalls
 		_update_fly_flap()
-	elif event is InputEventScreenDrag and event.index != peck_finger and aim_finger < 0 and in_fly_zone(event.position):
+	elif event is InputEventScreenDrag and event.index != peck_finger and aim_finger == NO_FINGER and in_fly_zone(event.position):
 		_grab_fly_stick(event.index,event.position) ## a finger that landed while input was off (a card closing) still steers once it moves
 
 ## Inside the resting ring the deflection is measured from its centre; anywhere else in the zone the ring re-anchors at the finger.
@@ -189,23 +190,23 @@ func touch_recent() -> bool:
 
 ## Floating-stick deflection, up to 1 long; zero while released or inside the deadzone.
 func touch_stick() -> Vector2:
-	if aim_finger < 0:
+	if aim_finger == NO_FINGER:
 		return Vector2.ZERO
 	var stick: Vector2 = ((stick_pos - stick_anchor) / float(Config.tuning.touch.stick_radius)).limit_length(1.0)
 	return stick if stick.length() > float(Config.tuning.touch.stick_deadzone) else Vector2.ZERO
 
 ## Fixed dive-stick deflection, up to 1 long; zero while released or inside the deadzone.
 func dive_stick() -> Vector2:
-	if dive_finger < 0:
+	if dive_finger == NO_FINGER:
 		return Vector2.ZERO
 	var stick: Vector2 = ((dive_pos - DIVE_STICK_CENTER) / float(Config.tuning.touch.dive_stick_radius)).limit_length(1.0)
 	return stick if stick.length() > float(Config.tuning.touch.dive_stick_deadzone) else Vector2.ZERO
 
 func update_player(gull: BeachGull, camera_x: float) -> void:
 	var stick: Vector2 = Input.get_vector("aim_left","aim_right","aim_up","aim_down")
-	if dive_finger < 0:
+	if dive_finger == NO_FINGER:
 		dive_held = false ## a lost release must never leave the dive stick owning the aim
-	if touch_active and (aim_finger >= 0 or dive_finger >= 0):
+	if touch_active and (aim_finger != NO_FINGER or dive_finger != NO_FINGER):
 		_aim_with_touch(gull) ## a thumb on a stick beats stray key, pad or mouse state
 	elif stick.length() > 0.15:
 		key_aim = not gamepad # keys share the aim actions with the pad stick
@@ -273,14 +274,14 @@ func _bend_toward_target(gull: BeachGull, strength: float) -> void:
 func clear_touch() -> void:
 	touch_peck = false
 	peck_held = false
-	peck_finger = -1
+	peck_finger = NO_FINGER
 	touch_slowmo = false
 	touch_climb = false
 	flap_tap = false
 	touch_dive = false
-	aim_finger = -1
+	aim_finger = NO_FINGER
 	stick_anchor = FLY_STICK_CENTER
 	stick_pos = FLY_STICK_CENTER
-	dive_finger = -1
+	dive_finger = NO_FINGER
 	dive_held = false
 	touch_down.clear()
