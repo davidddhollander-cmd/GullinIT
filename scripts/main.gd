@@ -57,6 +57,7 @@ func _ready() -> void:
 	layer.add_child(menus)
 	menus.requested.connect(_navigate)
 	menus.title()
+	_build_rotate_hint()
 	Analytics.track("session_start")
 	Audio.play_music("title", 0.0)
 	get_tree().auto_accept_quit = false
@@ -235,6 +236,8 @@ const TOP_BAR_TOUCH_Y: float = 28.0
 var gui_fingers: Dictionary = {}
 
 func _touch_to_gui(event: InputEventScreenTouch) -> void:
+	if GullInput.touch_blocked:
+		return
 	if event.pressed:
 		if screen == "game" and event.position.y > TOP_BAR_TOUCH_Y:
 			return
@@ -278,3 +281,42 @@ func _input(event: InputEvent) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and screen == "game":
 		_navigate("pause")
+
+## Rotate-phone hint: a full-screen cover while a touch device is held in portrait.
+var rotate_hint: ColorRect
+
+static func should_show_rotate_hint(size: Vector2i, touch: bool) -> bool:
+	return touch and size.y > size.x
+
+func _build_rotate_hint() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 100
+	add_child(layer)
+	rotate_hint = ColorRect.new()
+	rotate_hint.color = Color(0.02,0.05,0.08,0.92)
+	rotate_hint.set_anchors_preset(Control.PRESET_FULL_RECT)
+	rotate_hint.mouse_filter = Control.MOUSE_FILTER_STOP
+	rotate_hint.visible = false
+	layer.add_child(rotate_hint)
+	var column := VBoxContainer.new()
+	column.set_anchors_preset(Control.PRESET_FULL_RECT)
+	column.alignment = BoxContainer.ALIGNMENT_CENTER
+	rotate_hint.add_child(column)
+	for line: Array in [["TURN YOUR PHONE",BeachUI.FONT_DISPLAY,BeachUI.GOLD],["SIDEWAYS",BeachUI.FONT_DISPLAY,BeachUI.GOLD],["BEST PLAYED IN LANDSCAPE",BeachUI.FONT_NATIVE,BeachUI.CREAM]]:
+		var text: Label = BeachUI.label(column,line[0],line[1],line[2])
+		text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	get_tree().root.size_changed.connect(_update_rotate_hint)
+	_update_rotate_hint()
+
+func _update_rotate_hint() -> void:
+	var touch: bool = DisplayServer.is_touchscreen_available() or bool(GameState.options.touch)
+	var show_it: bool = should_show_rotate_hint(get_tree().root.size,touch)
+	if show_it == rotate_hint.visible:
+		return
+	rotate_hint.visible = show_it
+	GullInput.touch_blocked = show_it
+	gui_fingers.clear()
+	if show_it and is_instance_valid(game):
+		game.input.clear_touch()
+		if screen == "game":
+			_navigate("pause")
