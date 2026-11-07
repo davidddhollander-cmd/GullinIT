@@ -9,6 +9,7 @@ var running: bool = false
 var intro: float = 0.0
 var intro_dismissed_elapsed: float = -1.0
 var camera_x: float = 160.0
+var camera_y: float = 90.0 ## rises above 90 only while the gull is above the old ceiling (y 20)
 var debug: bool = false
 var player: BeachGull
 var gulls: Array[BeachGull] = []
@@ -344,6 +345,10 @@ func _rival_taunt(step: float) -> void:
 	var at: Vector2 = Vector2(clampf(from.x,camera_x-160.0+half,camera_x+160.0-half),from.y+22.0)
 	effects.message(at,taunt_text,BeachUI.GOLD,float(Config.tuning.juice.taunt_time),0.0)
 
+## Camera centre y: 90 while the gull is at or below the old ceiling, rising with it above, never showing past -sky_extra.
+func camera_target_y() -> float:
+	return maxf(90.0-float(Config.tuning.world.sky_extra),90.0+minf(0.0,player.position.y-20.0))
+
 ## Gary's debut: he flies in from off-screen, barges the player, then a head-and-speech pop-up delivers his line.
 func _start_fly_in(profile: Dictionary) -> void:
 	for pilot: RivalPilot in pilots:
@@ -564,7 +569,7 @@ func _physics_process(delta: float) -> void:
 	if squall != null:
 		squall.tick(step)
 	score.tick(step)
-	input.update_player(player,camera_x)
+	input.update_player(player,camera_x,camera_y)
 	_advance_screech_hold(step)
 	if input.touch_dive:
 		input.touch_dive = false
@@ -651,14 +656,15 @@ func _physics_process(delta: float) -> void:
 	spawner.tick(step,elapsed)
 	spawner.apply_spacing(step)
 	camera_x = lerpf(camera_x,clampf(player.position.x,160,float(Config.tuning.world.width)-160),1-pow(1-float(Config.tuning.world.camera_lerp),step*60))
-	camera.position = Vector2(roundf(camera_x),90)
+	camera_y = lerpf(camera_y,camera_target_y(),1-pow(1-float(Config.tuning.world.camera_y_lerp),step*60))
+	camera.position = Vector2(roundf(camera_x),roundf(camera_y))
 	camera.offset = Vector2(sin(effects.clock*65),cos(effects.clock*73))*effects.shake+effects.kick
 	if player.state == BeachGull.State.STRIKE:
 		effects.dive_trail(player.beak(),player.direction,player.dive_speed,step)
 	beach.camera_x = camera_x
 	beach.wind_dir = int(signf(player.wind_force))
 	beach.strength = absf(player.wind_force)
-	effects.wind_tick(step,camera_x,player)
+	effects.wind_tick(step,camera_x,player,camera_y)
 	beach.tick(step)
 	overlay.queue_redraw()
 	if training:
@@ -770,7 +776,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		return
 	if running and event.is_action_pressed("dive"):
-		input.update_player(player,camera_x)
+		input.update_player(player,camera_x,camera_y)
 		player.dive(wind.direction)
 	if event.is_action_pressed("slowmo") and not event.is_echo():
 		start_slowmo()
@@ -1328,7 +1334,7 @@ func _aim_pause_check() -> void:
 	_freeze_actors(true)
 
 func _aim_pause_tick() -> void:
-	input.update_player(player,camera_x)
+	input.update_player(player,camera_x,camera_y)
 	# Steering sets the dive's direction, so a keyboard or stick player can let go and keep their aim.
 	var offset: Vector2 = player.aim - player.position
 	if offset.length() > float(Config.tuning.dive.aim_deadzone):

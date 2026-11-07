@@ -149,7 +149,7 @@ func dive_trail(beak: Vector2, heading: Vector2, speed: float, delta: float) -> 
 
 ## Wind made visible: faint gust lines across the screen, sand skating along the ground, and brighter lines
 ## around a flying gull that the wind is helping. Everything scales with the gull's smoothed wind force.
-func wind_tick(delta: float, camera_x: float, gull: BeachGull) -> void:
+func wind_tick(delta: float, camera_x: float, gull: BeachGull, camera_y: float = 90.0) -> void:
 	var t: Dictionary = Config.tuning.juice
 	if not bool(t.particles) or not bool(t.wind_streaks):
 		return
@@ -161,7 +161,7 @@ func wind_tick(delta: float, camera_x: float, gull: BeachGull) -> void:
 	var interval: float = 1.0/(float(t.wind_rate)*strength)
 	while wind_clock >= interval:
 		wind_clock -= interval
-		var at := Vector2(camera_x+feather_rng.randf_range(-170.0,170.0),feather_rng.randf_range(14.0,float(Config.tuning.world.ground)-8.0))
+		var at := Vector2(camera_x+feather_rng.randf_range(-170.0,170.0),feather_rng.randf_range(14.0+camera_y-90.0,float(Config.tuning.world.ground)-8.0))
 		var life: float = feather_rng.randf_range(0.5,0.9)
 		particles.append({"streak":true,"at":at,"dir":heading,"length":6.0+feather_rng.randf()*8.0+8.0*strength,"v":heading*(70.0+60.0*strength),"gravity":0.0,"life":life,"duration":life,"color":Color(1.0,0.96,0.85,0.32)})
 		if strength >= float(t.wind_sand_min) and at.x < float(Config.tuning.world.promenade_start):

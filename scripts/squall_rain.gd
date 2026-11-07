@@ -47,10 +47,10 @@ func strike() -> void:
 		at += Vector2(rng.randf_range(-9.0, 9.0), rng.randf_range(5.0, 11.0))
 		bolt.append(at.round())
 
-func tick(delta: float, amount: float, wind_slant: float, camera_x: float) -> void:
+func tick(delta: float, amount: float, wind_slant: float, camera_x: float, camera_y: float = 90.0) -> void:
 	intensity = amount
 	slant = wind_slant
-	position = Vector2(camera_x - 160.0, 0.0)
+	position = Vector2(camera_x - 160.0, camera_y - 90.0)
 	var drift: float = slant / 12.0
 	var splashing: bool = bool(Config.tuning.juice.particles)
 	for i: int in int(rain.size() * intensity):

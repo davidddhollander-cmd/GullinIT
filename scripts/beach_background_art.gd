@@ -70,7 +70,8 @@ func update(camera_x: float, time: float) -> void:
 
 func _draw() -> void:
 	# The sky plate is 80 px tall; flat sky fills the strip above it.
-	draw_rect(Rect2(0, 0, 320, SKY_Y), top_color)
+	var extra: float = float(Config.tuning.world.sky_extra)
+	draw_rect(Rect2(0, -extra, 320, SKY_Y + extra), top_color)
 
 func _draw_glint(canvas: Node2D) -> void:
 	var centre: float = SUN_DUSK_POS.x + sun.texture.get_width() / 2.0

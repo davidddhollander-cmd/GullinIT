@@ -181,7 +181,7 @@ func _draw() -> void:
 	var left: float = camera_x - 160
 	# With background art on, it draws the sky, sun and sea behind this node instead.
 	if background_art == null:
-		draw_rect(Rect2(left-4,0,328,96), Color("edb98b") if sunset else Color("a9d7d2"))
+		draw_rect(Rect2(left-4,-float(Config.tuning.world.sky_extra),328,96+float(Config.tuning.world.sky_extra)), Color("edb98b") if sunset else Color("a9d7d2"))
 		draw_rect(Rect2(left-4,65,328,31), Color("f4cf9f") if sunset else Color("c8e4ce"))
 		draw_circle(Vector2(left+250,43), 18, Color("fff1bb"))
 		for i: int in range(8):

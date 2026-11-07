@@ -1,6 +1,6 @@
 # 063 — High sky layer with vertical camera follow
 
-Status: inbox
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -47,7 +47,15 @@ Every level gains about 60 px (a third of the 180 px screen) of open sky above t
 - [ ] Two `-Capture`-style screenshots in the report: normal framing, and fully raised at the ceiling.
 
 ## Report
-<!-- Filled in by the implementer. -->
+Branch `sonnet/063-high-sky-layer`.
+- Tuning: `world.sky_extra` 60, `world.camera_y_lerp` 0.15, `flight.min_y` 20 -> -40 (a test asserts min_y == 20 - sky_extra).
+- `game.gd`: `camera_y` var, `camera_target_y()` (90 until gull y < 20, then follows, clamped to 90 - sky_extra), frame-rate-independent lerp, rounded; `update_player` and `wind_tick` get `camera_y`.
+- `input_controller.gd` (mouse aim), `overlay.gd` (offset + sign board shift), `squall_rain.gd`/`squall.gd` (rain band follows camera y), `effects.gd` (wind feathers span the raised view), `beach_background_art.gd` and `beach.gd` (sky fills from -sky_extra).
+- Touch/stick/pad aim are gull-relative, so need no conversion. Aim-strip shift in overlay only uses x, left unchanged. Respawn/landing needs no explicit reset: camera_y follows the gull back to 90.
+- Tests: new `tests/sky_layer_checks.gd` wired into `tests/integration.gd` (9 checks: ceiling, follow, clamp, aim offset, rain band) plus two snapshot calls.
+- Results: baseline 16674 checks, 3 failures; after 16683 checks, same 3 pre-existing failures (card 1 perfect steal, nobody teleports while running off, demo.json demo lock).
+- Screenshots (gitignored, in worktree): `test-output/sky-layer-normal.png`, `test-output/sky-layer-raised.png`.
+- Not done: no dusk-level screenshot (dusk uses the same extended top_color fill); no high-dive bonus (out of scope).
 
 ## Review notes
 <!-- Filled in by the reviewer. -->

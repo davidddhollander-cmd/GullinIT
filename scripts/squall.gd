@@ -70,7 +70,7 @@ func tick(delta: float) -> void:
 	var dark: Color = Color(tint[0], tint[1], tint[2])
 	game.beach.modulate = Color.WHITE.lerp(dark, intensity)
 	game.actors.modulate = Color.WHITE.lerp(dark, intensity * 0.5)
-	rain.tick(delta, intensity, game.wind.direction * (4.0 + 8.0 * game.wind.strength), game.camera_x)
+	rain.tick(delta, intensity, game.wind.direction * (4.0 + 8.0 * game.wind.strength), game.camera_x, game.camera_y)
 	var audible: bool = intensity > 0.01 and bool(Config.tuning.juice.audio)
 	if audible != downpour.playing:
 		if audible:
