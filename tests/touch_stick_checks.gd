@@ -45,32 +45,32 @@ static func run(host: Node, check: Callable) -> void:
 	var approach: float = float(Config.tuning.touch.approach_assist_strength)
 	Config.tuning.touch.approach_assist_strength = 0.0 # keep the plain stick checks exact; restored for the approach checks
 	# Stick geometry.
-	_touch(input, 1, Vector2(100, 100), true)
-	check.call(input.aim_finger == 1 and input.touch_active and input.stick_anchor == Vector2(100, 100), "touch on the beach starts the floating stick at the landing point")
-	_drag(input, 1, Vector2(100 + stick_radius * 0.5, 100))
+	_touch(input, 1, Vector2(38, 140), true)
+	check.call(input.aim_finger == 1 and input.touch_active, "touch in the fly zone grabs the fixed stick")
+	_drag(input, 1, Vector2(38 + stick_radius * 0.5, 140))
 	input.update_player(gull, 160)
 	check.call(_near(gull.aim, gull.position + Vector2(0.5, 0) * radius), "stick right gives half deflection aim (%s)" % gull.aim)
-	_touch(input, 1, Vector2(100 + stick_radius * 0.5, 100), false)
-	_touch(input, 1, Vector2(100, 100), true)
-	_drag(input, 1, Vector2(100 - stick_radius * 0.5, 100 + stick_radius * 0.5))
+	_touch(input, 1, Vector2(38 + stick_radius * 0.5, 140), false)
+	_touch(input, 1, Vector2(38, 140), true)
+	_drag(input, 1, Vector2(38 - stick_radius * 0.5, 140 + stick_radius * 0.5))
 	input.update_player(gull, 160)
 	check.call(_near(gull.aim, gull.position + Vector2(-0.5, 0.5) * radius), "stick down-left aims down-left (%s)" % gull.aim)
-	_drag(input, 1, Vector2(200, 100))
+	_drag(input, 1, Vector2(200, 140))
 	input.update_player(gull, 160)
 	check.call(_near(gull.aim, gull.position + Vector2(1, 0) * radius), "stick deflection is capped at the cursor radius")
-	check.call(_near(input.stick_anchor, Vector2(200 - stick_radius, 100)), "anchor follows the finger past the stick radius")
-	_drag(input, 1, Vector2(200 - stick_radius * 0.5, 100))
+	check.call(is_equal_approx(input.touch_stick().length(), 1.0), "a long drag far outside the ring leaves the ring fixed and the stick at length 1")
+	_drag(input, 1, Vector2(38 + stick_radius * 0.5, 140))
 	input.update_player(gull, 160)
-	check.call(_near(gull.aim, gull.position + Vector2(0.5, 0) * radius), "stick keeps responding after the anchor followed")
+	check.call(_near(gull.aim, gull.position + Vector2(0.5, 0) * radius), "stick measures from the fixed centre after a far drag")
 	# Deadzone and release use the gamepad no-input rules.
 	_touch(input, 1, Vector2(0, 0), false)
-	_touch(input, 1, Vector2(100, 100), true)
-	_drag(input, 1, Vector2(102, 100))
+	_touch(input, 1, Vector2(38, 140), true)
+	_drag(input, 1, Vector2(40, 140))
 	gull.aim = Vector2(5, 5)
 	input.update_player(gull, 160)
 	check.call(_near(gull.aim, gull.position + Vector2(gull.facing, 0) * radius), "stick inside the deadzone uses the no-input heading rule")
-	_drag(input, 1, Vector2(124, 100))
-	_touch(input, 1, Vector2(124, 100), false)
+	_drag(input, 1, Vector2(62, 140))
+	_touch(input, 1, Vector2(62, 140), false)
 	check.call(input.aim_finger == GullInput.NO_FINGER and input.touch_active, "releasing the stick keeps touch as the aim source")
 	gull.velocity = Vector2(50, -50)
 	input.update_player(gull, 160)
@@ -85,8 +85,8 @@ static func run(host: Node, check: Callable) -> void:
 	# Two fingers: the stick plus the right-thumb buttons.
 	gull.state = BeachGull.State.GLIDE
 	gull.velocity = Vector2.ZERO
-	_touch(input, 1, Vector2(100, 100), true)
-	_drag(input, 1, Vector2(100, 100 + stick_radius * 0.5))
+	_touch(input, 1, Vector2(38, 140), true)
+	_drag(input, 1, Vector2(38, 140 + stick_radius * 0.5))
 	for pair: Array in [["peck", "touch_peck"]]:
 		_touch(input, 2, (GullInput.TOUCH_BUTTONS[pair[0]] as Rect2).get_center(), true)
 		input.update_player(gull, 160)
@@ -103,7 +103,7 @@ static func run(host: Node, check: Callable) -> void:
 	input.update_player(gull, 160)
 	check.call(input.touch_dive and input.dive_held and _near(gull.aim, gull.position + Vector2(-1, 0) * radius), "pushing the dive stick starts a dive aimed that way")
 	input.touch_dive = false
-	_drag(input, 1, Vector2(100, 90))
+	_drag(input, 1, Vector2(38, 130))
 	input.update_player(gull, 160)
 	check.call(_near(gull.aim, gull.position + Vector2(-1, 0) * radius) and not input.touch_dive, "left stick does not change aim while the dive stick is held")
 	_drag(input, 2, circle)
@@ -112,7 +112,7 @@ static func run(host: Node, check: Callable) -> void:
 	_touch(input, 2, circle, false)
 	input.update_player(gull, 160)
 	check.call(not input.dive_held and input.dive_finger == GullInput.NO_FINGER and _near(gull.aim, gull.position + Vector2(0, -10.0 / stick_radius) * radius), "releasing the dive stick returns aim to the left stick")
-	_drag(input, 1, Vector2(100, 112))
+	_drag(input, 1, Vector2(38, 152))
 	_touch(input, 3, circle, true)
 	check.call(input.aim_finger == 1 and input.dive_finger == 3, "dive circle touch never starts the left stick")
 	input.clear_touch()
@@ -136,10 +136,10 @@ static func run(host: Node, check: Callable) -> void:
 	_touch(input, ios_b, peck_c, false)
 	check.call(held_down and not input.peck_held, "an iOS-index finger holds and releases PECK")
 	input.clear_touch()
-	_touch(input, 1, Vector2(100, 100), true)
-	_drag(input, 1, Vector2(100, 112))
+	_touch(input, 1, Vector2(38, 140), true)
+	_drag(input, 1, Vector2(38, 152))
 	# Review capture: stick ring and knob, reticle ahead of the gull, and the buttons.
-	_drag(input, 1, Vector2(118, 106))
+	_drag(input, 1, Vector2(56, 146))
 	var saved_position: Vector2 = gull.position
 	gull.position = Vector2(game.camera_x - 30, 80)
 	input.touch_visible = true
@@ -148,7 +148,7 @@ static func run(host: Node, check: Callable) -> void:
 	game.overlay.queue_redraw()
 	await host.snapshot("touch-stick")
 	gull.position = saved_position
-	_drag(input, 1, Vector2(100, 112))
+	_drag(input, 1, Vector2(38, 152))
 	input.clear_touch()
 	_touch(input, 1, Vector2(100, 20), true)
 	check.call(input.aim_finger == GullInput.NO_FINGER, "touch in the top bar does not start the stick")
@@ -172,8 +172,8 @@ static func run(host: Node, check: Callable) -> void:
 	gull.state = BeachGull.State.STRIKE
 	gull.direction = Vector2(1, 0)
 	gull.velocity = Vector2.ZERO
-	_touch(input, 1, Vector2(100, 100), true)
-	_drag(input, 1, Vector2(140, 100))
+	_touch(input, 1, Vector2(38, 140), true)
+	_drag(input, 1, Vector2(78, 140))
 	var plain: Vector2 = gull.position + Vector2(1, 0) * radius
 	var strength: float = float(Config.tuning.touch.assist_strength)
 	_place_target(target, gull.position + Vector2(100, 20))
@@ -209,18 +209,18 @@ static func run(host: Node, check: Callable) -> void:
 	# Approach assist: gliding down with the left stick bends the aim by approach_assist_strength.
 	Config.tuning.touch.approach_assist_strength = approach
 	check.call(is_equal_approx(approach, 0.25), "approach assist strength is 0.25")
-	_touch(input, 1, Vector2(100, 100), false)
-	_touch(input, 1, Vector2(100, 100), true)
-	_drag(input, 1, Vector2(118, 106))
+	_touch(input, 1, Vector2(38, 140), false)
+	_touch(input, 1, Vector2(38, 140), true)
+	_drag(input, 1, Vector2(56, 146))
 	gull.state = BeachGull.State.GLIDE
 	var stick_angle: float = Vector2(18, 6).angle()
 	var toward: float = (target.food_position() - gull.position).angle()
 	input.update_player(gull, 160)
 	check.call(absf((gull.aim - gull.position).angle() - lerpf(stick_angle, toward, approach)) < 0.02, "approach assist bends a downward glide toward a target at 0.25")
-	_drag(input, 1, Vector2(118, 94))
+	_drag(input, 1, Vector2(56, 134))
 	input.update_player(gull, 160)
 	check.call(absf((gull.aim - gull.position).angle() - Vector2(18, -6).angle()) < 0.001, "no approach assist while gliding upward")
-	_drag(input, 1, Vector2(140, 100))
+	_drag(input, 1, Vector2(78, 140))
 	# Mouse and gamepad stay exact.
 	gull.state = BeachGull.State.STRIKE
 	input.clear_touch()
@@ -244,10 +244,10 @@ static func run(host: Node, check: Callable) -> void:
 	input.gamepad = false
 	# Emulated mouse events after touches must not switch the aim source.
 	input.clear_touch()
-	_touch(input, 1, Vector2(100, 100), true)
+	_touch(input, 1, Vector2(38, 140), true)
 	_mouse_move(input)
 	check.call(input.touch_active, "mouse motion while a finger is down is ignored")
-	_touch(input, 1, Vector2(100, 100), false)
+	_touch(input, 1, Vector2(38, 140), false)
 	_mouse_move(input)
 	check.call(input.touch_active, "mouse motion just after a touch is ignored")
 	input.touch_last_msec = Time.get_ticks_msec() - int(float(Config.tuning.touch.mouse_ignore_after_touch) * 1000.0) - 100
@@ -365,39 +365,39 @@ static func _rework_checks(host: Node, check: Callable) -> void:
 	input.key_aim = true
 	input.dive_held = true
 	input.touch_active = false
-	_vtouch(host, 1, Vector2(100, 100), true)
-	_vdrag(host, 1, Vector2(100 + sr, 100))
+	_vtouch(host, 1, Vector2(38, 140), true)
+	_vdrag(host, 1, Vector2(38 + sr, 140))
 	input.update_player(gull, 160)
 	check.call(input.aim_finger == 1 and gull.aim.x > gull.position.x + radius * 0.9, "left drag steers even with stale pad, key and dive-latch state (aim %s)" % gull.aim)
-	_vdrag(host, 1, Vector2(100 - sr, 100))
+	_vdrag(host, 1, Vector2(38 - sr, 140))
 	input.update_player(gull, 160)
 	check.call(gull.aim.x < gull.position.x - radius * 0.9, "left drag back the other way turns the aim")
 	# Flap-up: threshold, tap, leaving the zone.
-	_vtouch(host, 1, Vector2(100, 100), false)
+	_vtouch(host, 1, Vector2(38, 140), false)
 	input.flap_tap = false
-	_vtouch(host, 1, Vector2(100, 100), true)
-	_vdrag(host, 1, Vector2(100, 100 - sr * (thr - 0.1)))
+	_vtouch(host, 1, Vector2(38, 140), true)
+	_vdrag(host, 1, Vector2(38, 140 - sr * (thr - 0.1)))
 	input.update_player(gull, 160)
 	check.call(not gull.climb and not input.flap_tap and not gull.flap_tap_pending, "FLY below the up threshold does not flap")
-	_vdrag(host, 1, Vector2(100, 100 - sr * (thr + 0.2)))
+	_vdrag(host, 1, Vector2(38, 140 - sr * (thr + 0.2)))
 	check.call(input.flap_tap and input.touch_climb, "FLY past the up threshold latches a flap tap")
 	input.update_player(gull, 160)
 	check.call(gull.climb and gull.flap_tap_pending and not input.flap_tap, "FLY up climbs and hands the tap to the gull")
 	gull.flap_tap_pending = false
-	_vdrag(host, 1, Vector2(100, 100 - sr * (thr + 0.3)))
+	_vdrag(host, 1, Vector2(38, 140 - sr * (thr + 0.3)))
 	input.update_player(gull, 160)
 	check.call(not gull.flap_tap_pending, "staying in the zone is one tap, not a stream")
-	_vdrag(host, 1, Vector2(100 + sr, 100))
+	_vdrag(host, 1, Vector2(38 + sr, 140))
 	input.update_player(gull, 160)
 	check.call(not gull.climb, "pointing sideways stops climbing")
-	_vtouch(host, 1, Vector2(100 + sr, 100), false)
-	check.call(input.stick_anchor == rest and input.aim_finger == GullInput.NO_FINGER and not input.touch_climb, "release returns the ring to rest")
-	# Starting inside the resting ring measures from its centre; outside re-anchors.
+	_vtouch(host, 1, Vector2(38 + sr, 140), false)
+	check.call(input.stick_pos == rest and input.aim_finger == GullInput.NO_FINGER and not input.touch_climb, "release returns the ring to rest")
+	# The ring is fixed: every touch measures from its centre.
 	_vtouch(host, 2, rest + Vector2(sr * 0.5, 0), true)
-	check.call(input.stick_anchor == rest and input.touch_stick().x > 0.45, "a touch inside the ring measures from its centre")
+	check.call(input.touch_stick().x > 0.45, "a touch inside the ring measures from its centre")
 	_vtouch(host, 2, rest, false)
 	_vtouch(host, 2, Vector2(120, 60), true)
-	check.call(input.stick_anchor == Vector2(120, 60), "a touch elsewhere in the left zone re-anchors the ring")
+	check.call(input.aim_finger == 2 and input.touch_stick().x > 0.45, "a touch right of centre elsewhere in the zone still measures from the fixed centre")
 	_vtouch(host, 2, Vector2(120, 60), false)
 	_vtouch(host, 2, Vector2(160, 100), true)
 	check.call(input.aim_finger == GullInput.NO_FINGER, "the right side of the screen does not grab the FLY stick")
@@ -433,12 +433,12 @@ static func _rework_checks(host: Node, check: Callable) -> void:
 	gull.velocity = Vector2.ZERO
 	input.clear_touch()
 	input.touch_active = false
-	_vtouch(host, 6, Vector2(100, 100), true)
-	_vdrag(host, 6, Vector2(100 - sr, 100))
+	_vtouch(host, 6, Vector2(38, 140), true)
+	_vdrag(host, 6, Vector2(38 - sr, 140))
 	for i: int in 10:
 		await host.get_tree().physics_frame
 	check.call(gull.velocity.x < -5.0, "a left drag turns the gull left in the running game (vx %.1f)" % gull.velocity.x)
-	_vtouch(host, 6, Vector2(100 - sr, 100), false)
+	_vtouch(host, 6, Vector2(38 - sr, 140), false)
 	# Touch explainer: once per session, touch only.
 	game.set_physics_process(false)
 	host.main.clear_game()
