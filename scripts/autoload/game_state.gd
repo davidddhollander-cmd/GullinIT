@@ -207,7 +207,8 @@ const CONTROL_MODES: Array[String] = ["realistic","normal","casual"]
 
 ## How hard flying and snatching are: realistic taps every wingbeat, casual pecks dives for you.
 func control_mode() -> String:
-	var id: String = str(options.get("control_mode","normal"))
+	var touch: bool = DisplayServer.is_touchscreen_available() or bool(options.get("touch",false))
+	var id: String = str(options.get("control_mode","casual" if touch else "normal")) ## touch players start with auto-peck
 	return id if id in CONTROL_MODES else "normal"
 
 func set_control_mode(id: String) -> void:

@@ -138,7 +138,7 @@ static func run(host: Node, check: Callable) -> void:
 	game.input._input(touch)
 	check.call(game.input.touch_slowmo, "slowmo touch button works when full")
 	var screen := Rect2(0, 0, 320, 180)
-	check.call(screen.encloses(GullInput.SLOWMO_BUTTON) and screen.encloses(BeachOverlay.METER_RECT) and not GullInput.SLOWMO_BUTTON.intersects(GullInput.TOUCH_BUTTONS.peck) and not GullInput.SLOWMO_BUTTON.intersects(GullInput.TOUCH_BUTTONS.dive), "slowmo button and meter fit the 320x180 layout without overlapping touch buttons")
+	check.call(screen.encloses(GullInput.SLOWMO_BUTTON) and screen.encloses(BeachOverlay.METER_RECT) and not GullInput.SLOWMO_BUTTON.intersects(GullInput.TOUCH_BUTTONS.peck) and not GullInput.on_dive_stick(GullInput.SLOWMO_BUTTON.get_center()), "slowmo button and meter fit the 320x180 layout without overlapping touch buttons")
 	game.overlay.queue_redraw()
 	await host.snapshot("perk-bullet-touch-button")
 	host.main.clear_game()

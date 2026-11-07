@@ -2,7 +2,6 @@ extends RefCounted
 ## Demo polish: contextual hint slot, compact touch cluster and the levels 1-3 demo lock.
 const GOAL_PANEL := Rect2(232,29,84,43)
 const MINIMAP := Rect2(108,170,106,7)
-const OLD_TOUCH_AREA := 3 * 51 * 27
 
 static func _buttons(node: Node, found: Array[Button]) -> Array[Button]:
 	for child: Node in node.get_children():
@@ -222,18 +221,18 @@ static func _hint_checks(suite: Node, check: Callable) -> void:
 	await suite.settle()
 
 static func _touch_checks(suite: Node, check: Callable) -> void:
-	var area: float = 0.0
 	var kinds: Array = GullInput.TOUCH_BUTTONS.keys()
 	for kind: String in kinds:
 		var box: Rect2 = GullInput.TOUCH_BUTTONS[kind]
-		area += box.get_area()
+		check.call(box.size.x >= 52 and box.size.y >= 30, "touch button is thumb sized: " + kind)
+		check.call(not box.intersects(Rect2(GullInput.DIVE_STICK_CENTER - Vector2(20, 20), Vector2(40, 40))), "touch button clears the dive circle: " + kind)
 		check.call(box.position.x >= 0 and box.end.x <= 320 and box.position.y >= 28 and box.end.y <= 180, "touch button on screen: " + kind)
 		check.call(not box.intersects(MINIMAP) and not box.intersects(GOAL_PANEL), "touch button clears minimap and goal panel: " + kind)
 		check.call(GullInput.touch_button_at(box.get_center()) == kind, "touch hit test matches drawn button: " + kind)
 		for other: String in kinds:
 			if other != kind:
 				check.call(not box.intersects(GullInput.TOUCH_BUTTONS[other]), "touch buttons do not overlap: %s/%s" % [kind, other])
-	check.call(area <= OLD_TOUCH_AREA * 0.75, "touch cluster covers at least 25%% less screen (%d vs %d)" % [area, OLD_TOUCH_AREA])
+	check.call(not GullInput.TOUCH_BUTTONS.has("dive") and GullInput.on_dive_stick(GullInput.DIVE_STICK_CENTER), "no DIVE button; the dive circle sits in the bottom-right corner")
 	check.call(GullInput.touch_button_at(Vector2(160, 160)) == "" and GullInput.touch_button_at(Vector2(120, 100)) == "", "beach outside the cluster stays available for aiming")
 	suite.main.start_level(2)
 	var game: BeachGame = suite.main.game
@@ -241,7 +240,7 @@ static func _touch_checks(suite: Node, check: Callable) -> void:
 	game.intro = 0
 	game.running = true
 	game.input.enabled = true
-	for pair: Array in [["peck", "touch_peck"], ["dive", "touch_dive"], ["flap", "touch_climb"]]:
+	for pair: Array in [["peck", "touch_peck"], ["flap", "touch_climb"]]:
 		game.input.clear_touch()
 		game.input.touch_dive = false
 		var tap := InputEventScreenTouch.new()

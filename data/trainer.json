@@ -18,7 +18,7 @@
     },
     "touch": {
       "flap": "FLAP",
-      "dive": "DIVE",
+      "dive": "the right stick",
       "peck": "PECK",
       "steer": "your thumb",
       "call": "CALL"

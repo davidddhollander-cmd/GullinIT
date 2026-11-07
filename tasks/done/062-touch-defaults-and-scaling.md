@@ -1,6 +1,6 @@
 ﻿# 062 â€” Touch: auto-peck by default, readable scaling, bigger buttons
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -42,5 +42,17 @@ Phone players can play the demo comfortably. PostHog shows 6 of 20 real sessions
 - [ ] README updated for the new tuning key and touch default.
 
 ## Report
+Branch `sonnet/062-touch-defaults-and-scaling`.
+Files: scripts/input_controller.gd, scripts/overlay.gd, scripts/main.gd, scripts/autoload/game_state.gd, data/tuning.json (dive_stick_radius 20, dive_stick_deadzone 0.35, approach_assist_strength 0.25), data/trainer.json, README.md, tests (touch_stick, control_mode, demo_polish, perk, trainer checks).
+Tests: baseline main 16647 checks, 3 failures; now 16651 checks, 3 failures. The 3 are pre-existing on main: "card 1 sets up the perfect steal...", "nobody teleports across the beach while running off", "data/demo.json enables the four-level demo".
+Decisions:
+- Dive circle centre (296,152), radius 20. PECK 52x30 at (264,98), FLAP 52x30 at (218,142), SLOW-MO 52x30 at (208,106). The dive stick starts a dive on the rising edge past the deadzone (touch_dive pulse), owns aim while held (recentred keeps the heading), release hands aim back to the left stick.
+- control_mode() defaults to casual when DisplayServer.is_touchscreen_available() or options.touch is on and no mode was saved.
+- Fractional scaling set in main.gd _ready on web + touchscreen only; project.godot untouched (texture filter is already nearest).
+- Approach assist applies only to the left stick while GLIDE with stick pointing down; touch only.
+- Trainer touch {dive} is "the right stick", so the dive prompt reads "DIVE! THE RIGHT STICK" (test updated).
+- Old "cluster covers 25% less area" check removed (buttons are now deliberately bigger).
+Not done: rotate-your-phone hint; is_touchscreen_available() on desktop browsers not tested (touch laptops count as touch).
+
 
 ## Review notes

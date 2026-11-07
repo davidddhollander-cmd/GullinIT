@@ -38,6 +38,8 @@ static func run(host: Node, check: Callable) -> void:
 	gull.state = BeachGull.State.GLIDE
 	gull.velocity = Vector2.ZERO
 	var radius: float = float(Config.tuning.flight.cursor_radius)
+	var approach: float = float(Config.tuning.touch.approach_assist_strength)
+	Config.tuning.touch.approach_assist_strength = 0.0 # keep the plain stick checks exact; restored for the approach checks
 	var stick_radius: float = float(Config.tuning.touch.stick_radius)
 	# Stick geometry.
 	_touch(input, 1, Vector2(100, 100), true)
@@ -82,11 +84,37 @@ static func run(host: Node, check: Callable) -> void:
 	gull.velocity = Vector2.ZERO
 	_touch(input, 1, Vector2(100, 100), true)
 	_drag(input, 1, Vector2(100, 112))
-	for pair: Array in [["flap", "touch_climb"], ["dive", "touch_dive"], ["peck", "touch_peck"]]:
+	for pair: Array in [["flap", "touch_climb"], ["peck", "touch_peck"]]:
 		_touch(input, 2, (GullInput.TOUCH_BUTTONS[pair[0]] as Rect2).get_center(), true)
 		input.update_player(gull, 160)
 		check.call(bool(input.get(pair[1])) and input.aim_finger == 1 and _near(gull.aim, gull.position + Vector2(0, 0.5) * radius), "stick and %s work with two fingers" % pair[0])
 		_touch(input, 2, (GullInput.TOUCH_BUTTONS[pair[0]] as Rect2).get_center(), false)
+	# Right-thumb dive stick: push starts the dive aim, owns aim, release ends it.
+	input.touch_dive = false
+	var circle: Vector2 = GullInput.DIVE_STICK_CENTER
+	var dive_radius: float = float(Config.tuning.touch.dive_stick_radius)
+	_touch(input, 2, circle, true)
+	input.update_player(gull, 160)
+	check.call(input.dive_finger == 2 and not input.touch_dive and not input.dive_held, "dive circle touch inside the deadzone does not dive")
+	_drag(input, 2, circle + Vector2(-dive_radius, 0))
+	input.update_player(gull, 160)
+	check.call(input.touch_dive and input.dive_held and _near(gull.aim, gull.position + Vector2(-1, 0) * radius), "pushing the dive stick starts a dive aimed that way")
+	input.touch_dive = false
+	_drag(input, 1, Vector2(100, 90))
+	input.update_player(gull, 160)
+	check.call(_near(gull.aim, gull.position + Vector2(-1, 0) * radius) and not input.touch_dive, "left stick does not change aim while the dive stick is held")
+	_drag(input, 2, circle)
+	input.update_player(gull, 160)
+	check.call(input.dive_held and not _near(gull.aim, gull.position + Vector2(0, -1) * radius), "recentring the dive stick keeps its ownership of the aim")
+	_touch(input, 2, circle, false)
+	input.update_player(gull, 160)
+	check.call(not input.dive_held and input.dive_finger == -1 and _near(gull.aim, gull.position + Vector2(0, -10.0 / 24.0) * radius), "releasing the dive stick returns aim to the left stick")
+	_drag(input, 1, Vector2(100, 112))
+	_touch(input, 3, circle, true)
+	check.call(input.aim_finger == 1 and input.dive_finger == 3, "dive circle touch never starts the left stick")
+	input.clear_touch()
+	_touch(input, 1, Vector2(100, 100), true)
+	_drag(input, 1, Vector2(100, 112))
 	# Review capture: stick ring and knob, reticle ahead of the gull, and the buttons.
 	_drag(input, 1, Vector2(118, 106))
 	var saved_position: Vector2 = gull.position
@@ -155,6 +183,19 @@ static func run(host: Node, check: Callable) -> void:
 	input.update_player(gull, 160)
 	check.call(not _near(gull.aim, plain), "assist applies at dive start")
 	input.touch_dive = false
+	# Approach assist: gliding down with the left stick bends the aim by approach_assist_strength.
+	Config.tuning.touch.approach_assist_strength = approach
+	check.call(is_equal_approx(approach, 0.25), "approach assist strength is 0.25")
+	_drag(input, 1, Vector2(118, 106))
+	gull.state = BeachGull.State.GLIDE
+	var stick_angle: float = Vector2(18, 6).angle()
+	var toward: float = (target.food_position() - gull.position).angle()
+	input.update_player(gull, 160)
+	check.call(absf((gull.aim - gull.position).angle() - lerpf(stick_angle, toward, approach)) < 0.02, "approach assist bends a downward glide toward a target at 0.25")
+	_drag(input, 1, Vector2(118, 94))
+	input.update_player(gull, 160)
+	check.call(absf((gull.aim - gull.position).angle() - Vector2(18, -6).angle()) < 0.001, "no approach assist while gliding upward")
+	_drag(input, 1, Vector2(124, 100))
 	# Mouse and gamepad stay exact.
 	gull.state = BeachGull.State.STRIKE
 	input.clear_touch()
