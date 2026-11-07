@@ -71,7 +71,7 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(_near(gull.aim, gull.position + Vector2(gull.facing, 0) * radius), "stick inside the deadzone uses the no-input heading rule")
 	_drag(input, 1, Vector2(124, 100))
 	_touch(input, 1, Vector2(124, 100), false)
-	check.call(input.aim_finger == -1 and input.touch_active, "releasing the stick keeps touch as the aim source")
+	check.call(input.aim_finger == GullInput.NO_FINGER and input.touch_active, "releasing the stick keeps touch as the aim source")
 	gull.velocity = Vector2(50, -50)
 	input.update_player(gull, 160)
 	check.call(_near(gull.aim, gull.position + Vector2(50, -50).normalized() * radius), "released stick in flight keeps the heading")
@@ -111,10 +111,30 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(input.dive_held and not _near(gull.aim, gull.position + Vector2(0, -1) * radius), "recentring the dive stick keeps its ownership of the aim")
 	_touch(input, 2, circle, false)
 	input.update_player(gull, 160)
-	check.call(not input.dive_held and input.dive_finger == -1 and _near(gull.aim, gull.position + Vector2(0, -10.0 / stick_radius) * radius), "releasing the dive stick returns aim to the left stick")
+	check.call(not input.dive_held and input.dive_finger == GullInput.NO_FINGER and _near(gull.aim, gull.position + Vector2(0, -10.0 / stick_radius) * radius), "releasing the dive stick returns aim to the left stick")
 	_drag(input, 1, Vector2(100, 112))
 	_touch(input, 3, circle, true)
 	check.call(input.aim_finger == 1 and input.dive_finger == 3, "dive circle touch never starts the left stick")
+	input.clear_touch()
+	# iOS WebKit reports large negative touch indices; they must still count as real fingers.
+	var ios_a: int = -26663660
+	var ios_b: int = -26663662
+	var fly_c: Vector2 = GullInput.FLY_STICK_CENTER
+	_touch(input, ios_a, fly_c, true)
+	_drag(input, ios_a, fly_c + Vector2(stick_radius * 0.5, -stick_radius * 0.5))
+	input.update_player(gull, 160)
+	check.call(input.aim_finger == ios_a and input.touch_stick() != Vector2.ZERO and gull.aim.x > gull.position.x and gull.aim.y < gull.position.y, "a large negative iOS touch index drives the FLY stick")
+	_touch(input, ios_a, fly_c, false)
+	check.call(input.aim_finger == GullInput.NO_FINGER, "releasing an iOS-index finger frees the FLY stick")
+	_touch(input, ios_b, circle, true)
+	_touch(input, ios_b, circle, false)
+	check.call(input.touch_dive and input.dive_finger == GullInput.NO_FINGER, "a quick iOS-index tap on the DIVE circle dives")
+	input.touch_dive = false
+	var peck_c: Vector2 = (GullInput.TOUCH_BUTTONS.peck as Rect2).get_center()
+	_touch(input, ios_b, peck_c, true)
+	var held_down: bool = input.peck_held
+	_touch(input, ios_b, peck_c, false)
+	check.call(held_down and not input.peck_held, "an iOS-index finger holds and releases PECK")
 	input.clear_touch()
 	_touch(input, 1, Vector2(100, 100), true)
 	_drag(input, 1, Vector2(100, 112))
@@ -131,9 +151,9 @@ static func run(host: Node, check: Callable) -> void:
 	_drag(input, 1, Vector2(100, 112))
 	input.clear_touch()
 	_touch(input, 1, Vector2(100, 20), true)
-	check.call(input.aim_finger == -1, "touch in the top bar does not start the stick")
+	check.call(input.aim_finger == GullInput.NO_FINGER, "touch in the top bar does not start the stick")
 	_touch(input, 1, (GullInput.TOUCH_BUTTONS.peck as Rect2).get_center(), true)
-	check.call(input.aim_finger == -1, "touch on a button does not start the stick")
+	check.call(input.aim_finger == GullInput.NO_FINGER, "touch on a button does not start the stick")
 	input.clear_touch()
 	# Assist.
 	var target: BeachTarget
@@ -371,7 +391,7 @@ static func _rework_checks(host: Node, check: Callable) -> void:
 	input.update_player(gull, 160)
 	check.call(not gull.climb, "pointing sideways stops climbing")
 	_vtouch(host, 1, Vector2(100 + sr, 100), false)
-	check.call(input.stick_anchor == rest and input.aim_finger == -1 and not input.touch_climb, "release returns the ring to rest")
+	check.call(input.stick_anchor == rest and input.aim_finger == GullInput.NO_FINGER and not input.touch_climb, "release returns the ring to rest")
 	# Starting inside the resting ring measures from its centre; outside re-anchors.
 	_vtouch(host, 2, rest + Vector2(sr * 0.5, 0), true)
 	check.call(input.stick_anchor == rest and input.touch_stick().x > 0.45, "a touch inside the ring measures from its centre")
@@ -380,7 +400,7 @@ static func _rework_checks(host: Node, check: Callable) -> void:
 	check.call(input.stick_anchor == Vector2(120, 60), "a touch elsewhere in the left zone re-anchors the ring")
 	_vtouch(host, 2, Vector2(120, 60), false)
 	_vtouch(host, 2, Vector2(160, 100), true)
-	check.call(input.aim_finger == -1, "the right side of the screen does not grab the FLY stick")
+	check.call(input.aim_finger == GullInput.NO_FINGER, "the right side of the screen does not grab the FLY stick")
 	_vtouch(host, 2, Vector2(160, 100), false)
 	# A finger that landed while input was off (a card closing) still steers once it drags.
 	_vdrag(host, 5, Vector2(90, 100))

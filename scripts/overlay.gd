@@ -760,12 +760,12 @@ func peck_available() -> bool:
 func _draw_touch_buttons() -> void:
 	var cream: Color = Color(1.0,0.96,0.85)
 	var fly_radius: float = float(Config.tuning.touch.stick_radius)
-	var fly_held: bool = game.input.aim_finger >= 0
+	var fly_held: bool = game.input.aim_finger != GullInput.NO_FINGER
 	var fly_center: Vector2 = game.input.stick_anchor if fly_held else GullInput.FLY_STICK_CENTER
 	_draw_stick(fly_center,fly_radius,game.input.stick_pos if fly_held else fly_center,fly_held,"FLY",GullInput.FLY_STICK_CENTER,cream)
 	var dive_radius: float = float(Config.tuning.touch.dive_stick_radius)
 	var dive_center: Vector2 = GullInput.DIVE_STICK_CENTER
-	_draw_stick(dive_center,dive_radius,game.input.dive_pos if game.input.dive_finger >= 0 else dive_center,game.input.dive_finger >= 0,"DIVE",dive_center,cream)
+	_draw_stick(dive_center,dive_radius,game.input.dive_pos if game.input.dive_finger != GullInput.NO_FINGER else dive_center,game.input.dive_finger != GullInput.NO_FINGER,"DIVE",dive_center,cream)
 	if game.input.slowmo_ready:
 		var slow_box: Rect2 = GullInput.SLOWMO_BUTTON
 		draw_rect(slow_box,Color(0.78,0.6,0.1,0.6))
