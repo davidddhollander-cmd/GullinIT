@@ -747,9 +747,9 @@ func _draw_touch_buttons() -> void:
 	var fly_held: bool = game.input.aim_finger != GullInput.NO_FINGER
 	var fly_center: Vector2 = GullInput.FLY_STICK_CENTER
 	_draw_stick(fly_center,fly_radius,game.input.stick_pos if fly_held else fly_center,fly_held,"FLY",GullInput.FLY_STICK_CENTER,cream)
-	var dive_radius: float = float(Config.tuning.touch.dive_stick_radius)
-	var dive_center: Vector2 = GullInput.DIVE_STICK_CENTER
-	_draw_stick(dive_center,dive_radius,game.input.dive_pos if game.input.dive_finger != GullInput.NO_FINGER else dive_center,game.input.dive_finger != GullInput.NO_FINGER,"DIVE",dive_center,cream)
+	var dive_held: bool = game.input.dive_finger != GullInput.NO_FINGER
+	_draw_round_button(GullInput.DIVE_STICK_CENTER,float(Config.tuning.touch.dive_stick_radius),"DIVE",dive_held,1.0)
+	_draw_round_button(GullInput.PECK_CENTER,GullInput.PECK_RADIUS,"PECK",game.input.peck_held,1.0 if peck_available() else 0.45)
 	if game.input.slowmo_ready:
 		var slow_box: Rect2 = GullInput.SLOWMO_BUTTON
 		draw_rect(slow_box,Color(0.78,0.6,0.1,0.6))
@@ -757,15 +757,12 @@ func _draw_touch_buttons() -> void:
 		var slow_caption: String = "SLOW" if game.perk_id == "bullet_time" else "CALL"
 		var slow_width: float = font.get_string_size(slow_caption,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x
 		draw_string(font,Vector2(roundf(slow_box.position.x+(slow_box.size.x-slow_width)*0.5),slow_box.position.y+19),slow_caption,HORIZONTAL_ALIGNMENT_LEFT,-1,8,cream)
-	for kind: String in GullInput.TOUCH_BUTTONS:
-		var box: Rect2 = GullInput.TOUCH_BUTTONS[kind]
-		var alpha: float = 0.45 if kind == "peck" and not peck_available() else 1.0
-		var held: bool = kind == "peck" and game.input.peck_held
-		draw_rect(box,Color(0.14,0.33,0.41,(0.9 if held else 0.78)*alpha))
-		draw_rect(box,Color(1.0,0.96,0.85,0.85*alpha),false,1.0)
-		var caption: String = kind.to_upper()
-		var text_width: float = font.get_string_size(caption,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x
-		draw_string(font,Vector2(roundf(box.position.x+(box.size.x-text_width)*0.5),roundf(box.position.y+box.size.y*0.5+3)),caption,HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color(1.0,0.96,0.85,alpha))
+
+func _draw_round_button(center: Vector2, radius: float, label: String, held: bool, alpha: float) -> void:
+	draw_circle(center,radius,Color(0.14,0.33,0.41,(0.9 if held else 0.78)*alpha))
+	draw_arc(center,radius,0,TAU,40,Color(1.0,0.96,0.85,(1.0 if held else 0.85)*alpha),1.0)
+	var label_width: float = font.get_string_size(label,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x
+	draw_string(font,Vector2(roundf(center.x-label_width*0.5),roundf(center.y+3.0)),label,HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color(1.0,0.96,0.85,alpha))
 
 ## Ring + knob + an 8 px label that always sits inside the resting ring, so the controls explain themselves.
 func _draw_stick(center: Vector2, radius: float, knob_point: Vector2, held: bool, label: String, rest: Vector2, cream: Color) -> void:

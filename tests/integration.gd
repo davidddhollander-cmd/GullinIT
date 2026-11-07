@@ -1954,7 +1954,7 @@ func stash_raid_checks() -> void:
 	game.input.enabled = true
 	var tap: InputEventScreenTouch = InputEventScreenTouch.new()
 	tap.index = 4
-	tap.position = (GullInput.TOUCH_BUTTONS.peck as Rect2).get_center()
+	tap.position = GullInput.PECK_CENTER
 	tap.pressed = true
 	game.input._input(tap)
 	check(game.input.touch_peck and not game.input.touch_climb,"touch peck does not flap")
