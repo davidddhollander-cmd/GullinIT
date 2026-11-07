@@ -43,8 +43,8 @@ Phone players can play the demo comfortably. PostHog shows 6 of 20 real sessions
 
 ## Report
 Branch `sonnet/062-touch-defaults-and-scaling`.
-Files: scripts/input_controller.gd, scripts/overlay.gd, scripts/main.gd, scripts/autoload/game_state.gd, data/tuning.json (dive_stick_radius 20, dive_stick_deadzone 0.35, approach_assist_strength 0.25), data/trainer.json, README.md, tests (touch_stick, control_mode, demo_polish, perk, trainer checks).
-Tests: baseline main 16647 checks, 3 failures; now 16651 checks, 3 failures. The 3 are pre-existing on main: "card 1 sets up the perfect steal...", "nobody teleports across the beach while running off", "data/demo.json enables the four-level demo".
+Files: scripts/input_controller.gd, scripts/overlay.gd, scripts/main.gd, scripts/autoload/game_state.gd, data/tuning.json (dive_stick_radius 20, dive_stick_deadzone 0.35, approach_assist_strength 0.25), data/trainer.json, README.md, tests (touch_stick, control_mode (touch default), demo_polish, perk, trainer checks).
+Tests: baseline main 16647 checks, 3 failures; now 16653 checks, 3 failures. The 3 are pre-existing on main: "card 1 sets up the perfect steal...", "nobody teleports across the beach while running off", "data/demo.json enables the four-level demo".
 Decisions:
 - Dive circle centre (296,152), radius 20. PECK 52x30 at (264,98), FLAP 52x30 at (218,142), SLOW-MO 52x30 at (208,106). The dive stick starts a dive on the rising edge past the deadzone (touch_dive pulse), owns aim while held (recentred keeps the heading), release hands aim back to the left stick.
 - control_mode() defaults to casual when DisplayServer.is_touchscreen_available() or options.touch is on and no mode was saved.
