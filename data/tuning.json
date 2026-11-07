@@ -48,14 +48,12 @@
   "touch": {
     "stick_radius": 30,
     "flap_up_threshold": 0.5,
-    "dive_tap_time": 0.35,
     "stick_deadzone": 0.15,
     "assist_range": 140,
     "assist_angle": 25,
     "assist_strength": 0.5,
     "approach_assist_strength": 0.25,
     "dive_stick_radius": 20,
-    "dive_stick_deadzone": 0.35,
     "mouse_ignore_after_touch": 0.5
   },
   "control_modes": {

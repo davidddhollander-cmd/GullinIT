@@ -221,19 +221,14 @@ static func _hint_checks(suite: Node, check: Callable) -> void:
 	await suite.settle()
 
 static func _touch_checks(suite: Node, check: Callable) -> void:
-	var kinds: Array = GullInput.TOUCH_BUTTONS.keys()
-	for kind: String in kinds:
-		var box: Rect2 = GullInput.TOUCH_BUTTONS[kind]
-		check.call(box.size.x >= 52 and box.size.y >= 30, "touch button is thumb sized: " + kind)
-		check.call(not box.intersects(Rect2(GullInput.DIVE_STICK_CENTER - Vector2(20, 20), Vector2(40, 40))), "touch button clears the dive circle: " + kind)
-		check.call(box.position.x >= 0 and box.end.x <= 320 and box.position.y >= 28 and box.end.y <= 180, "touch button on screen: " + kind)
-		check.call(not box.intersects(MINIMAP) and not box.intersects(GOAL_PANEL), "touch button clears minimap and goal panel: " + kind)
-		check.call(GullInput.touch_button_at(box.get_center()) == kind, "touch hit test matches drawn button: " + kind)
-		for other: String in kinds:
-			if other != kind:
-				check.call(not box.intersects(GullInput.TOUCH_BUTTONS[other]), "touch buttons do not overlap: %s/%s" % [kind, other])
-	check.call(not GullInput.TOUCH_BUTTONS.has("dive") and GullInput.on_dive_stick(GullInput.DIVE_STICK_CENTER), "no DIVE button; the dive circle sits in the bottom-right corner")
-	check.call(GullInput.touch_button_at(Vector2(160, 160)) == "" and GullInput.touch_button_at(Vector2(120, 100)) == "", "beach outside the cluster stays available for aiming")
+	var peck_box := Rect2(GullInput.PECK_CENTER - Vector2(GullInput.PECK_RADIUS, GullInput.PECK_RADIUS), Vector2(GullInput.PECK_RADIUS, GullInput.PECK_RADIUS) * 2.0)
+	var dive_r: float = float(Config.tuning.touch.dive_stick_radius)
+	check.call(GullInput.PECK_RADIUS >= 14.0, "PECK circle is thumb sized")
+	check.call(GullInput.PECK_CENTER.distance_to(GullInput.DIVE_STICK_CENTER) > GullInput.PECK_RADIUS + dive_r, "PECK circle clears the DIVE circle")
+	check.call(Rect2(0, 28, 320, 152).encloses(peck_box), "PECK circle on screen")
+	check.call(not peck_box.intersects(MINIMAP) and not peck_box.intersects(GOAL_PANEL) and not peck_box.intersects(GullInput.SLOWMO_BUTTON), "PECK circle clears minimap, goal panel and SLOW-MO")
+	check.call(GullInput.on_peck_button(GullInput.PECK_CENTER) and GullInput.on_dive_stick(GullInput.DIVE_STICK_CENTER), "PECK and DIVE are round buttons on the right thumb")
+	check.call(not GullInput.on_peck_button(Vector2(160, 160)) and not GullInput.on_peck_button(Vector2(120, 100)), "beach outside the cluster stays available for aiming")
 	suite.main.start_level(2)
 	var game: BeachGame = suite.main.game
 	game.set_physics_process(false)
@@ -245,7 +240,7 @@ static func _touch_checks(suite: Node, check: Callable) -> void:
 		game.input.touch_dive = false
 		var tap := InputEventScreenTouch.new()
 		tap.index = 2
-		tap.position = (GullInput.TOUCH_BUTTONS[pair[0]] as Rect2).get_center()
+		tap.position = GullInput.PECK_CENTER
 		tap.pressed = true
 		game.input._input(tap)
 		var others: bool = false
@@ -255,7 +250,7 @@ static func _touch_checks(suite: Node, check: Callable) -> void:
 		check.call(bool(game.input.get(pair[1])) and not others, "touch %s triggers only its own action" % pair[0])
 		tap = InputEventScreenTouch.new()
 		tap.index = 2
-		tap.position = (GullInput.TOUCH_BUTTONS[pair[0]] as Rect2).get_center()
+		tap.position = GullInput.PECK_CENTER
 		tap.pressed = false
 		game.input._input(tap)
 	check.call(not game.input.touch_climb, "no FLAP button: touch_climb only comes from the FLY stick")

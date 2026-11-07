@@ -194,10 +194,9 @@ static func _hold_checks(host: Node, check: Callable) -> void:
 	check.call(gull.peck_used and not gull.screech_held, "a gamepad X tap still pecks")
 	settle_gull.call()
 	# Touch PECK button.
-	var area: Rect2 = GullInput.TOUCH_BUTTONS.peck
 	var touch := InputEventScreenTouch.new()
 	touch.index = 3
-	touch.position = area.get_center()
+	touch.position = GullInput.PECK_CENTER
 	touch.pressed = true
 	game.input._input(touch)
 	check.call(game.input.touch_peck and game.input.peck_held, "the touch PECK button reports a held press")
@@ -206,7 +205,7 @@ static func _hold_checks(host: Node, check: Callable) -> void:
 	check.call(gull.screech_held, "holding the touch PECK button starts the screech")
 	var touch_up := InputEventScreenTouch.new()
 	touch_up.index = 3
-	touch_up.position = area.get_center()
+	touch_up.position = GullInput.PECK_CENTER
 	touch_up.pressed = false
 	game.input._input(touch_up)
 	game.effects.freeze = 0.0

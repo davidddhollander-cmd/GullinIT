@@ -88,33 +88,38 @@ static func run(host: Node, check: Callable) -> void:
 	_touch(input, 1, Vector2(38, 140), true)
 	_drag(input, 1, Vector2(38, 140 + stick_radius * 0.5))
 	for pair: Array in [["peck", "touch_peck"]]:
-		_touch(input, 2, (GullInput.TOUCH_BUTTONS[pair[0]] as Rect2).get_center(), true)
+		_touch(input, 2, GullInput.PECK_CENTER, true)
 		input.update_player(gull, 160)
 		check.call(bool(input.get(pair[1])) and input.aim_finger == 1 and _near(gull.aim, gull.position + Vector2(0, 0.5) * radius), "stick and %s work with two fingers" % pair[0])
-		_touch(input, 2, (GullInput.TOUCH_BUTTONS[pair[0]] as Rect2).get_center(), false)
-	# Right-thumb dive stick: push starts the dive aim, owns aim, release ends it.
+		_touch(input, 2, GullInput.PECK_CENTER, false)
+	# Right-thumb DIVE button: touch-down dives at once, never steers.
 	input.touch_dive = false
 	var circle: Vector2 = GullInput.DIVE_STICK_CENTER
 	var dive_radius: float = float(Config.tuning.touch.dive_stick_radius)
+	_drag(input, 1, Vector2(38 + stick_radius, 140)) # FLY stick held right
 	_touch(input, 2, circle, true)
 	input.update_player(gull, 160)
-	check.call(input.dive_finger == 2 and not input.touch_dive and not input.dive_held, "dive circle touch inside the deadzone does not dive")
+	check.call(input.dive_finger == 2 and input.touch_dive and gull.aim.x > gull.position.x + radius * 0.9, "DIVE touch-down dives at once; with FLY held right the aim points right")
+	input.touch_dive = false
+	var aim_before: Vector2 = gull.aim
 	_drag(input, 2, circle + Vector2(-dive_radius, 0))
 	input.update_player(gull, 160)
-	check.call(input.touch_dive and input.dive_held and _near(gull.aim, gull.position + Vector2(-1, 0) * radius), "pushing the dive stick starts a dive aimed that way")
-	input.touch_dive = false
-	_drag(input, 1, Vector2(38, 130))
-	input.update_player(gull, 160)
-	check.call(_near(gull.aim, gull.position + Vector2(-1, 0) * radius) and not input.touch_dive, "left stick does not change aim while the dive stick is held")
-	_drag(input, 2, circle)
-	input.update_player(gull, 160)
-	check.call(input.dive_held and not _near(gull.aim, gull.position + Vector2(0, -1) * radius), "recentring the dive stick keeps its ownership of the aim")
+	check.call(not input.touch_dive and _near(gull.aim, aim_before), "dragging the DIVE finger to the opposite side does not steer")
 	_touch(input, 2, circle, false)
-	input.update_player(gull, 160)
-	check.call(not input.dive_held and input.dive_finger == GullInput.NO_FINGER and _near(gull.aim, gull.position + Vector2(0, -10.0 / stick_radius) * radius), "releasing the dive stick returns aim to the left stick")
+	check.call(input.dive_finger == GullInput.NO_FINGER and not input.touch_dive, "releasing DIVE only resets the finger")
 	_drag(input, 1, Vector2(38, 152))
 	_touch(input, 3, circle, true)
 	check.call(input.aim_finger == 1 and input.dive_finger == 3, "dive circle touch never starts the left stick")
+	_touch(input, 3, circle, false)
+	check.call(GullInput.on_peck_button(GullInput.PECK_CENTER) and not GullInput.on_peck_button(Vector2(266, 100)), "PECK is a circle: centre hits, the old rect corner misses")
+	input.touch_peck = false
+	_touch(input, 4, Vector2(266, 100), true)
+	check.call(not input.touch_peck, "a touch at the old PECK rect corner does not peck")
+	_touch(input, 4, Vector2(266, 100), false)
+	_touch(input, 4, GullInput.PECK_CENTER, true)
+	check.call(input.touch_peck, "a touch at the PECK circle centre pecks")
+	_touch(input, 4, GullInput.PECK_CENTER, false)
+	input.touch_dive = false
 	input.clear_touch()
 	# iOS WebKit reports large negative touch indices; they must still count as real fingers.
 	var ios_a: int = -26663660
@@ -127,10 +132,11 @@ static func run(host: Node, check: Callable) -> void:
 	_touch(input, ios_a, fly_c, false)
 	check.call(input.aim_finger == GullInput.NO_FINGER, "releasing an iOS-index finger frees the FLY stick")
 	_touch(input, ios_b, circle, true)
+	check.call(input.touch_dive and input.dive_finger == ios_b, "touch-down on DIVE with an iOS-style index dives at once")
 	_touch(input, ios_b, circle, false)
-	check.call(input.touch_dive and input.dive_finger == GullInput.NO_FINGER, "a quick iOS-index tap on the DIVE circle dives")
+	check.call(input.dive_finger == GullInput.NO_FINGER, "releasing an iOS-index DIVE finger resets it")
 	input.touch_dive = false
-	var peck_c: Vector2 = (GullInput.TOUCH_BUTTONS.peck as Rect2).get_center()
+	var peck_c: Vector2 = GullInput.PECK_CENTER
 	_touch(input, ios_b, peck_c, true)
 	var held_down: bool = input.peck_held
 	_touch(input, ios_b, peck_c, false)
@@ -152,7 +158,7 @@ static func run(host: Node, check: Callable) -> void:
 	input.clear_touch()
 	_touch(input, 1, Vector2(100, 20), true)
 	check.call(input.aim_finger == GullInput.NO_FINGER, "touch in the top bar does not start the stick")
-	_touch(input, 1, (GullInput.TOUCH_BUTTONS.peck as Rect2).get_center(), true)
+	_touch(input, 1, GullInput.PECK_CENTER, true)
 	check.call(input.aim_finger == GullInput.NO_FINGER, "touch on a button does not start the stick")
 	input.clear_touch()
 	# Assist.
@@ -337,12 +343,8 @@ static func _rework_checks(host: Node, check: Callable) -> void:
 	var ring := Rect2(rest - Vector2(sr, sr), Vector2(sr, sr) * 2.0)
 	check.call(Rect2(8, 28, 304, 144).encloses(ring), "FLY ring fits the canvas with margin below the HUD bar: %s" % ring)
 	var dive_ring := Rect2(GullInput.DIVE_STICK_CENTER - Vector2(20, 20), Vector2(40, 40))
-	var boxes: Array[Rect2] = [GullInput.SLOWMO_BUTTON]
-	for kind: String in GullInput.TOUCH_BUTTONS:
-		boxes.append(GullInput.TOUCH_BUTTONS[kind])
-	for index: int in boxes.size():
-		check.call(boxes[index].size.x >= 52 and boxes[index].size.y >= 30 and not boxes[index].intersects(ring) and not boxes[index].intersects(dive_ring) and Rect2(0, 28, 320, 152).encloses(boxes[index]), "touch button %d is thumb sized and clear of both circles" % index)
-	check.call(boxes.size() == 2 and not boxes[0].intersects(boxes[1]) and not GullInput.TOUCH_BUTTONS.has("flap"), "no FLAP button; SLOW-MO and PECK do not overlap")
+	var slow: Rect2 = GullInput.SLOWMO_BUTTON
+	check.call(slow.size.x >= 52 and slow.size.y >= 30 and not slow.intersects(ring) and not slow.intersects(dive_ring) and not GullInput.on_peck_button(slow.get_center()) and Rect2(0, 28, 320, 152).encloses(slow), "SLOW-MO button is thumb sized and clear of the circles")
 	check.call(not ring.intersects(dive_ring), "the FLY and DIVE circles never overlap")
 	BeachGame.trainer_cards = false
 	host.main.start_level(2)
@@ -363,12 +365,11 @@ static func _rework_checks(host: Node, check: Callable) -> void:
 	# Root cause of "cannot steer with the left thumb": a finger on the stick lost to stale key/pad/mouse state and to a dive stick latch.
 	input.gamepad = true
 	input.key_aim = true
-	input.dive_held = true
 	input.touch_active = false
 	_vtouch(host, 1, Vector2(38, 140), true)
 	_vdrag(host, 1, Vector2(38 + sr, 140))
 	input.update_player(gull, 160)
-	check.call(input.aim_finger == 1 and gull.aim.x > gull.position.x + radius * 0.9, "left drag steers even with stale pad, key and dive-latch state (aim %s)" % gull.aim)
+	check.call(input.aim_finger == 1 and gull.aim.x > gull.position.x + radius * 0.9, "left drag steers even with stale pad and key state (aim %s)" % gull.aim)
 	_vdrag(host, 1, Vector2(38 - sr, 140))
 	input.update_player(gull, 160)
 	check.call(gull.aim.x < gull.position.x - radius * 0.9, "left drag back the other way turns the aim")
@@ -406,25 +407,19 @@ static func _rework_checks(host: Node, check: Callable) -> void:
 	_vdrag(host, 5, Vector2(90, 100))
 	check.call(input.aim_finger == 5, "a drag from an unseen finger in the left zone grabs the stick")
 	_vtouch(host, 5, Vector2(90, 100), false)
-	# DIVE circle: a tap dives along the heading with assist; a drag aims; a slow press does nothing.
+	# DIVE button: touch-down dives along the heading with assist; dragging never aims.
 	var circle: Vector2 = GullInput.DIVE_STICK_CENTER
 	input.touch_dive = false
 	_vtouch(host, 3, circle, true)
-	_vtouch(host, 3, circle, false)
-	check.call(input.touch_dive and not input.dive_held, "a quick tap in the DIVE circle starts a dive")
+	check.call(input.touch_dive, "touch-down on the DIVE button starts a dive at once")
 	gull.velocity = Vector2(60, 0)
 	input.update_player(gull, 160)
 	check.call(absf((gull.aim - gull.position).angle()) < 0.01, "a tap dive follows the current heading")
 	input.touch_dive = false
-	_vtouch(host, 3, circle, true)
-	input.dive_down_msec -= int(float(Config.tuning.touch.dive_tap_time) * 1000.0) + 100
-	_vtouch(host, 3, circle, false)
-	check.call(not input.touch_dive, "a slow press in the DIVE circle is not a tap")
-	_vtouch(host, 3, circle, true)
 	_vdrag(host, 3, circle + Vector2(0, 20))
 	input.update_player(gull, 160)
 	_vtouch(host, 3, circle + Vector2(0, 20), false)
-	check.call(input.touch_dive and gull.aim.y > gull.position.y + radius * 0.9 and not input.dive_held, "dragging from the DIVE circle dives in the drag direction, release ends it")
+	check.call(not input.touch_dive and absf((gull.aim - gull.position).angle()) < 0.01, "dragging from the DIVE button does not steer")
 	input.touch_dive = false
 	# Real-flow steering through physics: the gull turns when the left thumb drags.
 	game.set_physics_process(true)
