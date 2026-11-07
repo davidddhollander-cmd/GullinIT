@@ -1,4 +1,4 @@
-# 062 — Touch: auto-peck by default, readable scaling, bigger buttons
+﻿# 062 â€” Touch: auto-peck by default, readable scaling, bigger buttons
 
 Status: inbox
 Author: Claude
@@ -14,16 +14,17 @@ Phone players can play the demo comfortably. PostHog shows 6 of 20 real sessions
 - `scripts/autoload/game_state.gd:206-214`: `control_mode()` defaults to `"normal"`; only `"casual"` auto-pecks (`gull.gd:389`).
 - `scripts/game.gd:283` and `scripts/main.gd:160`: `touch_visible` is set from `DisplayServer.is_touchscreen_available()` or `options.touch`.
 - `project.godot`: `window/stretch/mode="canvas_items"`, `scale_mode="integer"`. On a phone (and in the itch iframe) integer scaling falls to 1x, so the 320x180 canvas and the 42x22 px buttons render tiny with black borders.
-- `data/tuning.json` → `touch` block (`assist_strength` 0.5, `assist_range`, `assist_angle`).
+- `data/tuning.json` â†’ `touch` block (`assist_strength` 0.5, `assist_range`, `assist_angle`).
 - The touch overlay draws the same rects as `TOUCH_BUTTONS`; keep them in sync.
 - Rules: UI text in GullPixel on its 8 px grid (8 or 16 px). Keep web audio settings in the committed `project.godot` (`default_playback_type.web=0`).
 
 ## Requirements
 1. **Auto-peck on touch.** When the device is a touchscreen and the player has never chosen a control mode, the effective default is `"casual"` (auto-peck). An explicit choice in settings still wins. Desktop default stays `"normal"`. Do it in `GameState.control_mode()` (one place), not per caller.
 2. **Fractional scaling on touch web.** On web builds with a touchscreen, switch the root window to fractional scaling at startup (`get_tree().root.content_scale_stretch = Window.CONTENT_SCALE_STRETCH_FRACTIONAL`) so the game fills the screen. Desktop keeps integer scaling (crisp pixels). Use nearest filtering, so no blur.
-3. **Bigger touch buttons.** Grow PECK / FLAP / DIVE / SLOW-MO to at least 52x30 logical px each, still a right-thumb cluster in the bottom-right corner, not covering the HUD. Update the overlay drawing and any tests that hard-code the old rects.
-4. **Approach assist on touch.** Let `_assist_aim()` also bend aim while the gull is gliding downward toward a target (not only after a dive starts), at a lower strength: new tuning key `touch.approach_assist_strength` = 0.25. Dive-time assist stays at `assist_strength`.
-5. Record the assumption in the Report if `is_touchscreen_available()` misreports on any desktop browser you can test (touch laptops count as touch; that is fine).
+3. **Right-thumb dive stick (replaces the DIVE button).** A fixed aim circle in the bottom-right corner, about 40 logical px across (tuning `touch.dive_stick_radius`). Pushing it past its deadzone starts the dive aimed in the push direction (same path as `touch_dive` today); holding steers the dive/swoop; releasing ends the steering (normal pull-up). While the dive stick is held, it owns `gull.aim` and the left floating stick is ignored for aim, so the two thumbs never fight. The left floating stick keeps steering flight otherwise and must not start on the dive circle.
+4. **Button layout.** PECK sits just above the dive circle (separate button, not in its centre, so peck taps and screech holds respond instantly). FLAP sits left of the circle. SLOW-MO keeps a spot in the cluster. PECK, FLAP and SLOW-MO are at least 52x30 logical px; nothing covers the HUD. The touch overlay draws the circle (ring + thumb knob) and the buttons from the same rects used for hit testing. Update tests that hard-code the old rects. PECK stays functional with auto-peck on (bins, screech hold, trainer peck lessons).
+5. **Assist on touch.** `_assist_aim()` bends the dive-stick aim during the dive as now (`assist_strength`). Also add approach assist while gliding downward toward a target with the left stick, at new tuning key `touch.approach_assist_strength` = 0.25.
+6. Trainer text that names the touch DIVE button (`{dive}` prompt for touch) should say to push the right stick instead. Record the assumption in the Report if `is_touchscreen_available()` misreports on any desktop browser you can test (touch laptops count as touch; that is fine).
 
 ## Out of scope
 - Keyboard/mouse dive assist, the dive lesson rewrite, settings toggles for assists (separate tasks).
@@ -31,9 +32,10 @@ Phone players can play the demo comfortably. PostHog shows 6 of 20 real sessions
 - New art.
 
 ## Done when (acceptance)
-- [ ] Fresh save on a touchscreen → `control_mode()` returns `"casual"`; after choosing "normal" it returns `"normal"`. Desktop fresh save → `"normal"`.
+- [ ] Fresh save on a touchscreen â†’ `control_mode()` returns `"casual"`; after choosing "normal" it returns `"normal"`. Desktop fresh save â†’ `"normal"`.
 - [ ] Touch web build fills the screen with fractional scaling; desktop build still integer-scales.
-- [ ] Touch buttons are at least 52x30 logical px and tap correctly (`touch_button_at` tests updated).
+- [ ] Pushing the right dive stick starts a dive aimed in the push direction and steers it while held; the left stick does not change aim during that time; release ends it.
+- [ ] No DIVE button remains; PECK (above the circle), FLAP and SLOW-MO are at least 52x30 and tap correctly; PECK hold still screeches with auto-peck on.
 - [ ] Approach assist bends aim while gliding toward a target on touch, at 0.25; no change for keyboard, mouse or pad.
 - [ ] Checks added in `tests/touch_stick_checks.gd` (or `control_mode_checks.gd`) and wired into `tests/integration.gd`.
 - [ ] Headless `tests/integration.tscn` passes with no new failures.
