@@ -2,6 +2,7 @@
 extends Control
 var game: BeachGame
 var font: Font = preload("res://assets/fonts/gull_pixel.fnt")
+var test_build: bool = str(ProjectSettings.get_setting("application/config/version")).ends_with("-test")
 var score_label: Label
 var time_label: Label
 var wind_label: Label
@@ -358,6 +359,8 @@ func _sync_trainer() -> void:
 	trainer_portrait.texture = cells[int(TrainerCard.MOODS.wince)] if since < 0.8 else cells[int(TrainerCard.MOODS.talking) if int(since / TrainerCard.TALK_STEP) % 2 == 0 else int(TrainerCard.MOODS.neutral)]
 
 func _process(delta: float) -> void:
+	if test_build:
+		queue_redraw()
 	if game.peck_pause or game.aim_pause:
 		queue_redraw()
 	var counting: bool = shown_score < game.score.points
@@ -550,6 +553,17 @@ func goal_status() -> Dictionary:
 	# The first star is the pass mark, so the HUD names it that way.
 	return {"title":"PASS" if index == 0 else "%d STARS" % (index+1),"progress":game.score.points,"goal":int(game.level.stars[index]),"done":game.score.points >= int(game.level.stars.back())}
 
+## -test builds only: raw touch input counters, so a phone screenshot shows what the browser delivered.
+func _draw_touch_debug() -> void:
+	var c: Dictionary = game.input.dbg_counts
+	var stick: Vector2 = game.input.touch_stick()
+	draw_rect(Rect2(60,58,200,34),Color(0,0,0,0.7))
+	draw_string(font,Vector2(62,66),"T+%d T-%d D%d MB%d MM%d DROP B%d E%d" % [c["T+"],c["T-"],c["D"],c["MB"],c["MM"],c["blk"],c["off"]],HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.CREAM)
+	draw_string(font,Vector2(62,74),"%s A%d V%d EN%d TA%d S%.2f,%.2f" % [game.input.dbg_last,game.input.aim_finger,game.input.dive_finger,int(game.input.enabled),int(game.input.touch_active),stick.x,stick.y],HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.CREAM)
+	var size: Vector2 = get_viewport().get_visible_rect().size
+	draw_string(font,Vector2(62,82),"GS%d VP%dx%d SC%.1f" % [game.player.state,size.x,size.y,DisplayServer.screen_get_scale()],HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.CREAM)
+	draw_string(font,Vector2(62,90),"BLK%d" % int(GullInput.touch_blocked),HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.CREAM)
+
 func _draw() -> void:
 	if game == null:
 		return
@@ -647,6 +661,8 @@ func _draw() -> void:
 		var x: float = 108+boundary/float(Config.tuning.world.width)*104
 		draw_rect(Rect2(x,171,1,5),BeachUI.CREAM)
 	draw_rect(Rect2(108+game.player.position.x/float(Config.tuning.world.width)*104,171,3,4),BeachUI.INK)
+	if test_build:
+		_draw_touch_debug()
 	if game.debug:
 		draw_rect(Rect2(4,30,240,21),BeachUI.INK)
 		draw_string(font,Vector2(7,38),"FPS %d  V %d,%d  WIND %.2f" % [Engine.get_frames_per_second(),game.player.velocity.x,game.player.velocity.y,game.wind.strength],HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.CREAM)

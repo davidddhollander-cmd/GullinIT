@@ -82,7 +82,26 @@ static func register_actions() -> void:
 static var touch_explained: bool = false ## the touch-controls card has been shown this app session
 static var touch_blocked: bool = false ## the rotate-phone hint is up: ignore fingers
 
+# Touch diagnostics for the -test build readout (overlay.gd).
+var dbg_counts: Dictionary = {"T+":0,"T-":0,"D":0,"MB":0,"MM":0,"blk":0,"off":0}
+var dbg_last: String = "-"
+
 func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		dbg_counts["T+" if event.pressed else "T-"] += 1
+		dbg_last = ("T+ i%d %d,%d" % [event.index,event.position.x,event.position.y]) if event.pressed else "T- i%d" % event.index
+	elif event is InputEventScreenDrag:
+		dbg_counts["D"] += 1
+		dbg_last = "D i%d %d,%d" % [event.index,event.position.x,event.position.y]
+	elif event is InputEventMouseButton:
+		dbg_counts["MB"] += 1
+	elif event is InputEventMouseMotion:
+		dbg_counts["MM"] += 1
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		if touch_blocked:
+			dbg_counts["blk"] += 1
+		if not enabled:
+			dbg_counts["off"] += 1
 	if touch_blocked and (event is InputEventScreenTouch or event is InputEventScreenDrag):
 		return
 	if event is InputEventScreenTouch or event is InputEventScreenDrag:
