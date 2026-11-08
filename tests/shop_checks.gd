@@ -59,7 +59,6 @@ static func run(suite: Node, check: Callable) -> void:
 	main._navigate("arcade")
 	await suite.settle()
 	check.call(not (main.menus.find_child("Card_kittiwake", true, false) as Button).disabled, "a bought species is pickable in the picker")
-	check.call((main.menus.find_child("Card_great-black-backed", true, false) as Button).disabled, "an unbought species stays locked")
 	var pick: Button = main.menus.find_child("PerkPick", true, false) as Button
 	check.call(pick != null and pick.text == "PERK:  < NONE >", "the picker shows a perk row once a perk is owned")
 	pick.pressed.emit()

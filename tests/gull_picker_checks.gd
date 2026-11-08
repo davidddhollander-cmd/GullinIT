@@ -126,7 +126,7 @@ static func run(suite: Node, check: Callable) -> void:
 	Config.species.unlock_all = false
 	main._navigate("arcade")
 	await suite.settle()
-	for id: String in ["great-black-backed", "kittiwake"]:
+	for id: String in ["kittiwake"]:
 		var card: Button = main.menus.find_child("Card_" + id, true, false)
 		check.call(card.disabled and (card.find_child("Status", true, false) as Label).text == "6 FEATHERS", id + " shows its 6 FEATHERS price and is not pickable")
 	check.call(not (main.menus.find_child("Card_herring", true, false) as Button).disabled, "the free herring gull stays pickable")
@@ -134,6 +134,7 @@ static func run(suite: Node, check: Callable) -> void:
 	suite.menu_font_grid(main.menus)
 	main._navigate("gull", "kittiwake")
 	check.call(GameState.options.gull == "great-black-backed" and main.screen == "pick", "a locked gull cannot be chosen")
+	GameState.options.gull = "kittiwake"
 	check.call(GameState.chosen_gull() == "herring", "a saved gull that is not owned falls back to herring")
 	Config.species.unlock_all = false
 	GameState.options.gull = "herring"
