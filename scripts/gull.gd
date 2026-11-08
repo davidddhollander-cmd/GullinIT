@@ -521,7 +521,12 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 		State.STRIKE:
 			var offset: Vector2 = aim - position
 			if offset.length() > float(d.aim_deadzone):
-				direction = Vector2.from_angle(rotate_toward(direction.angle(), offset.angle(), float(d.turn_rate) * dive_turn_scale * delta))
+				var step: float = float(d.turn_rate) * dive_turn_scale * delta
+				var turned: float = rotate_toward(direction.angle(), offset.angle(), step)
+				# Pulling out of a dive is easier than steering into the ground (player only).
+				if not rival and direction.y > 0.0 and sin(turned) < direction.y:
+					turned = rotate_toward(direction.angle(), offset.angle(), step * float(d.pull_up_turn_boost))
+				direction = Vector2.from_angle(turned)
 			# Climbing spends momentum faster than descending builds it.
 			# A tailwind pushes the swoop along; a headwind drags it in proportion to speed, mostly on shallow angles.
 			var tail: float = tailwind(direction.x)

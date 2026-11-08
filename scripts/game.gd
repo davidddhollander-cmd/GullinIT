@@ -1080,7 +1080,9 @@ func _mugging() -> void:
 			if not carrying:
 				# A dive peck into a rival with nothing to steal still sends it tumbling.
 				strike_near_carrier = false
-				pilot.bump(player.position)
+				var bump_loss: int = pilot.bump(player.position)
+				if bump_loss > 0:
+					effects.score_message(pilot.gull.position-Vector2(0,30),"-%d" % bump_loss,Color("ff8a7a"))
 				effects.snatch_contact(pilot.gull.position,player.velocity,false)
 				effects.message(pilot.gull.position-Vector2(0,20),"BONK!",BeachUI.GOLD)
 				Audio.play("snatch",1+score.tier*0.08)

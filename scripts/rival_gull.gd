@@ -412,7 +412,9 @@ func mug(attacker: Vector2 = Vector2.INF) -> int:
 	return value
 
 ## A dive peck from the player with no food to take: the rival drops what it was doing and tumbles.
-func bump(attacker: Vector2) -> void:
+## Returns the points the rival lost (0 when the stun did not land).
+func bump(attacker: Vector2) -> int:
+	var was_down: bool = gull.state == BeachGull.State.STUNNED
 	leave = 0
 	chase_prey = null
 	work = {}
@@ -420,6 +422,11 @@ func bump(attacker: Vector2) -> void:
 	cooldown = relax_time()
 	mode = Mode.RECOVER
 	gull.stun(float(Config.tuning.rival.peck_stun),attacker)
+	if was_down or gull.state != BeachGull.State.STUNNED:
+		return 0
+	var lost: int = mini(score,int(Config.tuning.rival.bump_score_loss))
+	score -= lost
+	return lost
 
 # --- Ground skills -------------------------------------------------------------------------------
 
