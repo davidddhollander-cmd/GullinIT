@@ -321,6 +321,22 @@ func run() -> void:
 			check(pilot.gull.visible and pilot.gull.position.x > 700 and pilot.gull.position.x < 900,"rival remains visible during retreat")
 			check(pilot.mug()==25 and pilot.gull.state==BeachGull.State.STUNNED,"rival mugging window")
 			check(pilot.mug()==0,"mug cannot duplicate score")
+			pilot.gull.state = BeachGull.State.GLIDE
+			pilot.gull.invulnerable = 0
+			pilot.score = 12
+			check(pilot.bump(Vector2(800,80))==5 and pilot.score==7,"player bump costs a rival 5 points")
+			check(pilot.bump(Vector2(800,80))==0 and pilot.score==7,"bumping a stunned rival costs nothing")
+			pilot.gull.state = BeachGull.State.GLIDE
+			pilot.score = 3
+			check(pilot.bump(Vector2(800,80))==3 and pilot.score==0,"bump loss floors at zero")
+			pilot.gull.state = BeachGull.State.GLIDE
+			pilot.score = 9
+			pilot.gull.stun_shield = 1
+			check(pilot.bump(Vector2(800,80))==0 and pilot.score==9,"shielded rival loses nothing")
+			pilot.gull.stun_shield = 0
+			pilot.gull.state = BeachGull.State.GLIDE
+			pilot.gull.stun(1.0,Vector2(800,80))
+			check(pilot.score==9,"rival-caused or scripted stun costs no points")
 		# Allow hit-stop and slow motion while bounding the simulation.
 		for frame: int in range(int((float(game.level.time_limit) + 30) * 60)):
 			if not game.running:
@@ -759,6 +775,19 @@ func mechanics_checks() -> void:
 		slowing = slowing and gull.dive_speed < previous_speed
 		previous_speed = gull.dive_speed
 	check(slowing and gull.dive_speed < 160 and gull.velocity.y < 0,"upward swoop noticeably slows every step while still rising")
+	var turn_gaps: Array[float] = []
+	for rival_flag: bool in [false,true]:
+		for sense: int in [-1,1]:
+			gull.rival = rival_flag
+			gull.state = BeachGull.State.STRIKE
+			gull.position = Vector2(300,40)
+			gull.direction = Vector2.from_angle(deg_to_rad(60))
+			gull.dive_speed = 120
+			gull.aim = gull.position + Vector2.from_angle(deg_to_rad(60 + 30 * sense)) * 100
+			gull.tick(1.0/60,0,0)
+			turn_gaps.append(absf(rad_to_deg(gull.direction.angle()) - 60))
+	gull.rival = false
+	check(turn_gaps[0] > turn_gaps[1] * 1.4 and is_equal_approx(turn_gaps[2],turn_gaps[3]),"player pulls up faster than it steers down; rivals get no boost")
 	gull.state = BeachGull.State.GLIDE
 	gull.position = Vector2(300,30)
 	gull.velocity = Vector2.ZERO

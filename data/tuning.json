@@ -87,6 +87,7 @@
     "landing_acceleration": 180
   },
   "dive": {
+    "pull_up_turn_boost": 1.5,
     "windup": 0.15,
     "cooldown": 0.4,
     "stun": 1.5,
@@ -299,6 +300,7 @@
     "leave_time": 4,
     "mug_stun": 1,
     "peck_stun": 0.8,
+    "bump_score_loss": 5,
     "mug_chance": 0.35,
     "mug_range": 90,
     "mug_hit": [24, 18],
