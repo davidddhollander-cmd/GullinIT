@@ -20,6 +20,9 @@ var food_size: Vector2
 var vendor: AnimatedSprite2D
 var window: Control
 var prepared_food: Sprite2D
+var ducked: bool = false ## Shakedown raid: the vendor sinks out of sight inside the mask
+var duck: float = 0.0 ## 0 up, 1 hidden
+var vendor_home_y: float = 0.0
 
 func setup(entry: Dictionary, index: int) -> void:
 	z_index = DRAW_DEPTH
@@ -44,6 +47,7 @@ func setup(entry: Dictionary, index: int) -> void:
 	vendor.position = Vector2(0,float(VendorArt.entry(stall_type).sprite_offset_y))-WINDOW.position
 	vendor.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	window.add_child(vendor)
+	vendor_home_y = vendor.position.y
 	prepared_food = Sprite2D.new()
 	prepared_food.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	prepared_food.hide()
@@ -70,6 +74,14 @@ func show_food(id: String) -> void:
 
 func advance(delta: float) -> void:
 	clock += delta
+	var goal: float = 1.0 if ducked else 0.0
+	if duck != goal:
+		duck = move_toward(duck,goal,delta/float(Config.tuning.shakedown.duck_time))
+		vendor.position.y = vendor_home_y+duck*float(Config.tuning.shakedown.duck_depth)
+
+func snap_duck() -> void:
+	duck = 1.0 if ducked else 0.0
+	vendor.position.y = vendor_home_y+duck*float(Config.tuning.shakedown.duck_depth)
 
 func sync_pose() -> void:
 	var frame: int = 0

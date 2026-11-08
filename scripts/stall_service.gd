@@ -38,7 +38,7 @@ func find_stall(buyer: BeachTarget, type: String = "") -> FoodStall:
 
 func request_family(buyer: BeachTarget) -> bool:
 	var stand: FoodStall = find_stall(buyer,"kiosk")
-	if stand == null or requests.has(stand):
+	if stand == null or requests.has(stand) or stand.ducked:
 		return false
 	var orders: Array[Dictionary] = []
 	for child: BeachTarget in buyer.family_children:
@@ -65,7 +65,7 @@ func serving(buyer: BeachTarget) -> bool:
 func request_shopper(buyer: BeachTarget) -> bool:
 	var type: String = buyer.purchase_stall_type()
 	var stand: FoodStall = find_stall(buyer,type)
-	if stand == null or requests.has(stand) or buyer.food or buyer.dropped_pending:
+	if stand == null or requests.has(stand) or stand.ducked or buyer.food or buyer.dropped_pending:
 		return false
 	if absf(buyer.position.x-stand.contact_x()) > 0.5:
 		return false
@@ -128,6 +128,12 @@ func abort(person: BeachTarget) -> void:
 			involved = involved or order.buyer == person
 		if involved:
 			_finish(stand,false)
+
+## Shakedown: the vendor hides, so the current order ends and no new one starts until the stand is released.
+func raid(stand: FoodStall) -> void:
+	if requests.has(stand):
+		_finish(stand,false)
+	stand.ducked = true
 
 func _is_active(portion: BeachTarget) -> bool:
 	for request: Dictionary in requests.values():

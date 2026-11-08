@@ -12,6 +12,10 @@ var panic_started: bool = false
 var dust_left: float = 0.0
 var dust_clock: float = 0.0
 var hits: int = 0
+var active_id: String = "" ## the running timed power ("" when none)
+var active_left: float = 0.0
+var powers_fired: int = 0
+var shakedown: BeachShakedown = BeachShakedown.new()
 
 func tuning() -> Dictionary:
 	return Config.tuning.brash
@@ -22,8 +26,15 @@ func power() -> Dictionary:
 func is_full() -> bool:
 	return not power().is_empty() and meter >= 1.0
 
+func active() -> bool:
+	return not active_id.is_empty()
+
+## Meter gain for a play style; each species' power.fill scales it.
+func earn(key: String) -> void:
+	add(float(tuning()[key])*float(power().get("fill",{}).get(key,1.0)))
+
 func add(amount: float) -> void:
-	if power().is_empty() or not allies.is_empty():
+	if power().is_empty() or not allies.is_empty() or active():
 		return
 	var was_full: bool = meter >= 1.0
 	meter = clampf(meter+amount,0.0,1.0)
@@ -49,13 +60,24 @@ func screech_ended() -> void:
 	vantage_shown = false
 
 func fire() -> bool:
-	if not is_full():
+	if not is_full() or game.player.state == BeachGull.State.STUNNED:
 		return false
 	meter = 0.0
 	var p: Dictionary = power()
 	game.effects.message(game.player.position-Vector2(0,24),str(p.name)+"!",BeachUI.GOLD)
-	Audio.play("gang_call",1.0,-2.0)
+	Audio.play(str(p.get("sound","gang_call")),1.0,-2.0)
 	game.effects.sound_wave(game.player.beak())
+	powers_fired += 1
+	game.track("power_fired",{"power":str(p.id),"level":int(game.level.get("id",0))})
+	if str(p.id) == "shakedown":
+		active_id = "shakedown"
+		active_left = float(p.duration)
+		shakedown.start(self)
+	else:
+		_gang_call(p)
+	return true
+
+func _gang_call(p: Dictionary) -> void:
 	CrowdPanic.warn(game.spawner.targets,game.player.position.x)
 	for target: BeachTarget in game.spawner.targets:
 		if is_instance_valid(target) and target.panic.state == CrowdPanic.State.LOOK_UP:
@@ -81,10 +103,15 @@ func fire() -> bool:
 		var start: Vector2 = Vector2(hit.x-side*120.0,-20.0)
 		gull.position = start
 		allies.append({"gull":gull,"target":target,"start":start,"hit":hit,"end":Vector2(hit.x+side*140.0,-30.0),"t":-lead-float(p.stagger)*i,"knocked":false})
-	return true
 
 ## Each ally follows two quadratic curves: a plunge from offscreen to the food, then a climb back out.
 func tick(delta: float) -> void:
+	if active():
+		active_left -= delta
+		if active_left <= 0.0:
+			end_power(false)
+		else:
+			shakedown.tick(delta)
 	var swoop: float = float(power().get("swoop_time",0.7))
 	for ally: Dictionary in allies:
 		ally.t += delta
@@ -161,7 +188,14 @@ func _draw() -> void:
 		draw_circle(Vector2.ZERO,lerpf(16,9,near),Color(0.09,0.18,0.22,lerpf(0.06,0.24,near)))
 		draw_set_transform(Vector2.ZERO)
 
+func end_power(snap: bool = true) -> void:
+	if active_id == "shakedown":
+		shakedown.end(snap)
+	active_id = ""
+	active_left = 0.0
+
 func clear() -> void:
+	end_power()
 	if not panic_started:
 		CrowdPanic.calm(game.spawner.targets)
 	for ally: Dictionary in allies:

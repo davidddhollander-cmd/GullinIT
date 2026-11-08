@@ -232,7 +232,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	)
 	player.dive_released.connect(func(at: Vector2, heading: Vector2) -> void: effects.dive_release(at,heading))
 	player.stun_ignored.connect(func() -> void:
-		effects.message(player.position,"SKULL!",BeachUI.GOLD)
+		effects.message(player.position,"NOPE!" if brash.active() else "SKULL!",BeachUI.GOLD)
 		Audio.play("click")
 	)
 	player.peck_started.connect(func() -> void:
@@ -819,6 +819,9 @@ func _peck() -> void:
 	if player.state == BeachGull.State.STRIKE:
 		player.attempt_peck()
 	elif player.state == BeachGull.State.GROUNDED:
+		if brash.active_id == "shakedown" and brash.shakedown.peck():
+			player.show_ground_peck()
+			return
 		if crabs.peck(player) or crabs.peck_attempted:
 			player.show_ground_peck()
 			return
@@ -902,7 +905,9 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 		if target.info.twist == "umbrella" and not target.is_loose():
 			_quest_event("umbrella_snatch")
 		if target.last_theft_direct:
-			brash.add(float(Config.tuning.brash.snatch)+(float(Config.tuning.brash.handover) if handover else 0.0))
+			brash.earn("snatch")
+			if handover:
+				brash.earn("handover")
 		effects.snatch_contact(contact_at,gull.velocity,handover)
 		Audio.play("snatch",1+score.tier*0.08)
 		if handover:
@@ -1089,7 +1094,7 @@ func _mugging() -> void:
 				effects.snatch_contact(pilot.gull.position,player.velocity,false)
 				effects.message(pilot.gull.position-Vector2(0,20),"BONK!",BeachUI.GOLD)
 				Audio.play("snatch",1+score.tier*0.08)
-				brash.add(float(Config.tuning.brash.bump))
+				brash.earn("bump")
 				_quest_event("rival_bumped",{"name":pilot.gull.rival_name})
 				if training and lesson == MUG_LESSON and pilot.dummy:
 					_training_advance()
@@ -1102,7 +1107,7 @@ func _mugging() -> void:
 				effects.snatch_contact(pilot.gull.position,player.velocity,false)
 				Audio.play("snatch",1+score.tier*0.08)
 				player.digestion.collect(pilot.carried_food_id,{"value":value,"upwind":player.upwind,"mugged":true,"mugged_from":pilot.gull.rival_name})
-				brash.add(float(Config.tuning.brash.mug))
+				brash.earn("mug")
 				strike_near_carrier = false
 				_learned("mug_miss")
 				if training and lesson == MUG_LESSON and pilot.dummy:
@@ -1156,6 +1161,7 @@ func finish() -> void:
 	if boss:
 		BeachBoss.conclude(self)
 	running = false
+	brash.clear()
 	end_slowmo()
 	input.enabled = false
 	input.clear_touch()
@@ -1166,6 +1172,7 @@ func finish() -> void:
 	result.feathers_earned = feathers_earned
 	if boss:
 		BeachBoss.verdict(self,result)
+	result.powers = brash.powers_fired
 	if training:
 		if lesson < TRAINING_LESSONS:
 			running = true

@@ -56,6 +56,7 @@ var rival_badge: ColorRect
 var upwind: bool = false
 ## Player-only species stats (data/species.json); rivals keep their profile tuning.
 var dive_mult: float = 1.0
+var steady_invulnerable: bool = false ## power immunity: no flicker
 var stun_shield: int = 0 ## Strong skull: stuns still to shrug off
 var wind_mult: float = 1.0
 var stun_mult: float = 1.0
@@ -434,7 +435,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			flap_anim_left = float(f.stroke_interval)
 			stroke_cooldown = 0.0
 	invulnerable = maxf(0.0, invulnerable - delta)
-	sprite.modulate.a = 0.5 if invulnerable > 0.0 and int(invulnerable * 12) % 2 == 0 else 1.0
+	sprite.modulate.a = 0.5 if invulnerable > 0.0 and not steady_invulnerable and int(invulnerable * 12) % 2 == 0 else 1.0
 	sprite.rotation = 0.0
 	sprite.scale = Vector2.ONE
 	sprite.speed_scale = 1.0
@@ -791,7 +792,11 @@ func crash_warning() -> bool:
 	return seconds_to_sand <= float(Config.tuning.dive.warning_time)
 
 func stun(duration: float = -1.0, attacker: Vector2 = Vector2.INF) -> void:
-	if state == State.STUNNED or invulnerable > 0:
+	if state == State.STUNNED:
+		return
+	if invulnerable > 0:
+		if steady_invulnerable:
+			stun_ignored.emit()
 		return
 	if stun_shield > 0:
 		stun_shield -= 1
@@ -874,7 +879,7 @@ func tick_tumble(delta: float) -> void:
 		tumble_angle = tumble_recovery_angle*(1.0-smoothstep(0.0,1.0,progress))
 	sprite.rotation = tumble_angle
 	if timer <= 0.0:
-		invulnerable = float(Config.tuning.dive.invulnerability)
+		invulnerable = maxf(invulnerable,float(Config.tuning.dive.invulnerability))
 		sprite.rotation = 0.0
 		state = State.GLIDE
 		cooldown = float(Config.tuning.dive.cooldown)
