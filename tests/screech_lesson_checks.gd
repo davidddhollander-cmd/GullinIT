@@ -39,7 +39,7 @@ static func _layout_checks(check: Callable) -> void:
 	var mums: Array = level.spawns.filter(func(s: Dictionary) -> bool: return s.type == "picnic_family")
 	var toddlers: Array = level.spawns.filter(func(s: Dictionary) -> bool: return s.type == "toddler")
 	check.call(mums.size() == 1 and toddlers.size() == 2 and toddlers.all(func(s: Dictionary) -> bool: return s.family_id == mums[0].family_id and s.station == mums[0].station), "level 2 has one mum with two toddlers sharing her family and station")
-	check.call(level.has("screech_lesson") and float(level.screech_lesson.start_meter) > 0.0 and float(level.screech_lesson.grab_timeout) > 0.0, "lesson tunables live in the level data")
+	check.call(level.has("screech_lesson") and float(level.screech_lesson.start_meter) > 0.0,"lesson tunables live in the level data")
 
 static func _lesson_checks(host: Node, check: Callable) -> void:
 	var game: BeachGame = _fresh_level_2(host, false)
@@ -115,20 +115,7 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	game.start_slowmo()
 	check.call(not game.brash.allies.is_empty(), "Q fires Gang Call on a full meter")
 	game._screech_lesson_tick(0.016)
-	check.call(game.screech_step == 3, "firing Gang Call finishes step 3")
-	game.overlay._process(0.0)
-	check.call(game.overlay.training_panel.visible and game.overlay.lesson_prompt.text.contains("Grab"), "the lesson panel shows the grab step")
-	# Let the gang land.
-	for frame: int in 120:
-		game.brash.tick(1.0 / 60)
-	var dropped: int = 0
-	for item: Dictionary in game.stash_raids.items:
-		if item.get("owner") != null:
-			dropped += 1
-	check.call(dropped >= 1, "the gang knocks food loose for step 4")
-	game.player.digestion.collect("ice_cream")
-	game._screech_lesson_tick(0.016)
-	check.call(not game.screech_lesson and bool(GameState.entry(2).get("screech_lesson_complete", false)), "collecting food finishes and saves the lesson")
+	check.call(not game.screech_lesson and bool(GameState.entry(2).get("screech_lesson_complete", false)), "firing Gang Call finishes and saves the lesson")
 	check.call(is_zero_approx(game.brash.meter), "the meter is empty for the real run")
 	game.effects.freeze = 0.0
 	game._physics_process(1.0 / 60)
@@ -145,14 +132,7 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	check.call(game.player.species == "kittiwake" and not game.screech_lesson, "non-herring species skip the lesson")
 	host.main.clear_game()
 	await host.settle()
-	# The grab step also ends on its timeout, and skipping is saved.
-	game = _fresh_level_2(host, false)
-	game.screech_step = 3
-	game.screech_clock = 0.0
-	game._screech_lesson_tick(float(game.screech_settings().grab_timeout) + 0.1)
-	check.call(not game.screech_lesson, "the grab step times out")
-	host.main.clear_game()
-	await host.settle()
+	# Skipping is saved.
 	game = _fresh_level_2(host, false)
 	game._quest_event("swallowed",{"food":"ice_cream","direct":true})
 	check.call(int(game.quests.quests[0].progress) == 0, "quest progress is ignored during the screech lesson")

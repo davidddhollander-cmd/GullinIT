@@ -119,17 +119,10 @@ var peck_hold_touch: bool = false
 # Level 2's first-play herring lesson: perch, screech, Gang Call, grab. The level clock is paused meanwhile.
 var screech_lesson: bool = false
 var screech_step: int = 0
-var screech_clock: float = 0.0
-var screech_snacks: int = 0
-const SCREECH_STEPS: int = 4
-# Level 3's first-play counter snatch lesson: perch on the ice cream stand, dive on the yellow target. The level clock is paused meanwhile.
-var counter_lesson: bool = false
-var counter_step: int = 0
-var counter_ready: bool = false
-var counter_prompted: bool = false
-var counter_stolen: bool = false
-var counter_idle: float = 0.0
-const COUNTER_STEPS: int = 2
+const SCREECH_STEPS: int = 3
+# The counter tip: the first serving a player sees on a counter freezes the beach once, rings the food and names the dive key.
+var counter_tip: bool = false
+var counter_tip_pos: Vector2 = Vector2.ZERO
 
 func setup(definition: Dictionary, is_casual: bool, force_training: bool = false, force_lesson: bool = false) -> void:
 	level = definition
@@ -223,10 +216,6 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	brash.game = self
 	add_child(brash)
 	screech_lesson = level.has("screech_lesson") and not training and player.species == "herring" and (force_lesson or not bool(GameState.entry(int(level.id)).get("screech_lesson_complete",false)))
-	# Level 3's lesson only runs when main asks for it, so scenes that build a level directly never start it.
-	counter_lesson = force_lesson and level.has("counter_lesson") and not training
-	if counter_lesson:
-		_counter_hold()
 	player.setup_perches(level.props)
 	player.add_sign_perches(beach.sign_layouts())
 	_wire_sand(player)
@@ -563,7 +552,7 @@ func _physics_process(delta: float) -> void:
 	var step: float = delta * (float(Config.tuning.juice.slow_scale) if effects.slow > 0 else 1.0)
 	spawner.reset_spacing()
 	play_clock += step
-	if not screech_lesson and not counter_lesson:
+	if not screech_lesson:
 		elapsed += step
 	wind.tick(step)
 	if squall != null:
@@ -667,12 +656,11 @@ func _physics_process(delta: float) -> void:
 	effects.wind_tick(step,camera_x,player,camera_y)
 	beach.tick(step)
 	overlay.queue_redraw()
+	_counter_tip_check()
 	if training:
 		_training_tick(step)
 	elif screech_lesson:
 		_screech_lesson_tick(step)
-	elif counter_lesson:
-		_counter_lesson_tick(step)
 	elif (casual and score.items >= int(Config.tuning.score.casual_items)) or (not casual and elapsed >= float(level.time_limit)):
 		finish()
 
@@ -749,8 +737,6 @@ func _open_intro_cards() -> void:
 			open_trainer(_trainer_entry("training", lesson))
 	elif trainer_cards and screech_lesson:
 		open_trainer(_trainer_entry("screech", 0))
-	elif trainer_cards and counter_lesson:
-		open_trainer(_trainer_entry("counter", 0))
 
 ## True while a Training Day card is queued behind a lesson toast. Dive and peck wait for the card, so the player cannot start
 ## (or finish) the lesson it is about to explain, and the aim and peck freezes never fire ahead of the card.
@@ -886,8 +872,6 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 		var contact_at: Vector2 = target.food_position()
 		if training and target.last_theft_direct and player.state == BeachGull.State.STRIKE:
 			_training_snatch(target)
-		if counter_lesson and counter_step == 1 and target.kind == "stall_handover":
-			counter_stolen = true
 		var handover: bool = target.last_theft_handover and target.last_theft_direct and (player.state == BeachGull.State.STRIKE or player.sweep_state == BeachGull.State.STRIKE)
 		if target.last_theft_biting and target.last_theft_direct and player.state == BeachGull.State.STRIKE:
 			_quest_event("mid_air_bite")
@@ -1007,7 +991,7 @@ func _scrap_collected(at: Vector2, food_id: String) -> void:
 
 func _quest_event(event: String, data: Dictionary = {}) -> void:
 	# The lessons run on a frozen clock with practice food: no quest progress there.
-	if running and not screech_lesson and not counter_lesson:
+	if running and not screech_lesson:
 		quests.record(event,data)
 
 func _quest_completed(quest: Dictionary) -> void:
@@ -1235,7 +1219,7 @@ func training_dummy() -> RivalPilot:
 
 func _toast() -> String:
 	var toasts: Array = Config.trainer.toasts
-	return str(toasts[(lesson+screech_step+counter_step)%toasts.size()])
+	return str(toasts[(lesson+screech_step)%toasts.size()])
 
 ## A lesson card from data/trainer.json: set is "training" or "screech", index the lesson or step.
 func _trainer_entry(set_name: String, index: int) -> Dictionary:
@@ -1321,6 +1305,7 @@ func _peck_pause_check() -> void:
 
 func _end_peck_pause() -> void:
 	peck_pause = false
+	counter_tip = false
 	_freeze_actors(false)
 
 ## Freezes the first dives as the wind-up starts: how a dive aims depends on the controls, so let the player try it.
@@ -1537,7 +1522,7 @@ func training_target() -> Vector2:
 # --- Level 2 screech lesson (first herring play) -------------------------------------------
 
 func lesson_active() -> bool:
-	return training or screech_lesson or counter_lesson
+	return training or screech_lesson
 
 func screech_settings() -> Dictionary:
 	return level.get("screech_lesson",{})
@@ -1552,8 +1537,6 @@ func lesson_perch() -> Dictionary:
 
 func _screech_advance() -> void:
 	screech_step += 1
-	screech_clock = 0.0
-	screech_snacks = player.digestion.snacks.size()
 	track("lesson_complete", {"lesson": 100+screech_step, "seconds": snappedf(elapsed, 0.1)})
 	if screech_step == 1:
 		brash.meter = maxf(brash.meter,float(screech_settings().get("start_meter",0.6)))
@@ -1589,14 +1572,12 @@ func _reset_practice_score() -> void:
 		score.bonuses[key] = 0
 
 func _screech_lesson_tick(delta: float) -> void:
-	screech_clock += delta
-	# The shoppers by the stand keep their ice creams until the gang arrives.
-	if screech_step < 3:
-		for target: BeachTarget in spawner.targets:
-			if target.kind == "kiosk_customer" and not target.food and not target.dropped_pending and not target.leaving:
-				target.food = true
-				target.food_sprite.show()
-				target.respawn = 0.0
+	# The shoppers by the stand keep their ice creams while the lesson runs.
+	for target: BeachTarget in spawner.targets:
+		if target.kind == "kiosk_customer" and not target.food and not target.dropped_pending and not target.leaving:
+			target.food = true
+			target.food_sprite.show()
+			target.respawn = 0.0
 	match screech_step:
 		0:
 			var perch: Dictionary = lesson_perch()
@@ -1610,11 +1591,6 @@ func _screech_lesson_tick(delta: float) -> void:
 				_screech_advance()
 			elif not brash.is_full():
 				screech_step = 1
-		3:
-			var snacks: int = player.digestion.snacks.size()
-			if snacks > screech_snacks or screech_clock >= float(screech_settings().get("grab_timeout",8.0)):
-				_screech_advance()
-			screech_snacks = snacks
 
 func screech_lesson_text() -> String:
 	return TrainerScript.line(Config.trainer.screech.strips[mini(screech_step, SCREECH_STEPS-1)], input)
@@ -1629,115 +1605,28 @@ func _perch_marker() -> Vector2:
 func screech_lesson_target() -> Vector2:
 	if screech_step == 0:
 		return _perch_marker()
-	elif screech_step == 3:
-		for item: Dictionary in stash_raids.items:
-			if item.get("owner") != null and not bool(item.get("recovered",false)):
-				return item.position
 	return Vector2(-1000,-1000)
 
-# --- Level 3 counter snatch lesson (first play) --------------------------------------------
+# --- Counter tip (first serving seen on a counter) -------------------------------------------
 
-func counter_settings() -> Dictionary:
-	return level.get("counter_lesson",{})
-
-## The ice cream shopper beside the stand, who plays the customer.
-func counter_client() -> BeachTarget:
-	var home: float = float(lesson_perch().get("x",0.0))
-	var best: BeachTarget
-	for target: BeachTarget in spawner.targets:
-		if target.kind == "kiosk_customer" and target.purchase_stall_type() == "kiosk" and (best == null or absf(target.position.x-home) < absf(best.position.x-home)):
-			best = target
-	return best
-
-## The customer waits at the stand empty-handed, so the order only starts when the lesson sends it.
-func _counter_hold() -> void:
-	var client: BeachTarget = counter_client()
-	if client != null and not client.food and not client.service_locked:
-		client.respawn = 5.0
-
-func _counter_advance() -> void:
-	counter_step += 1
-	track("lesson_complete", {"lesson": 200+counter_step, "seconds": snappedf(elapsed, 0.1)})
-	effects.message(player.position-Vector2(0,24), _toast(), BeachUI.GOLD)
-	if trainer_cards:
-		_queue_trainer(_trainer_entry("counter", counter_step), _counter_order)
-	else:
-		_counter_order()
-
-## Sends the customer to the counter with an empty hand, so a serving is on its way to steal.
-func _counter_order() -> void:
-	counter_ready = true
-	counter_prompted = false
-	counter_idle = 0.0
-	var client: BeachTarget = counter_client()
-	if client == null:
+## Freezes the beach once, the first time a serving sits on a counter in view: the food is ringed and the dive key named.
+## The dive press that resumes also dives, and the serving's handover window has not started ticking while frozen.
+func _counter_tip_check() -> void:
+	if not trainer_cards or not running or peck_pause or trainer_open or training or screech_lesson or GameState.counter_tip_seen():
 		return
-	if client.dropped_pending:
-		if not client.dropped_item.is_empty():
-			client.dropped_item.recovered = true
-		client.dropped_pending = false
-		client.dropped_item = {}
-		client.drop_retrieve = false
-	client.food = false
-	client.food_sprite.hide()
-	client.respawn = 0.0
-	client.recover = 0.0
-	client.update_art_pose(false)
-
-## Freezes the beach when the serving lands on the counter and shows the pulsing DIVE prompt.
-func _counter_prompt(client: BeachTarget) -> void:
+	var offset: Vector2 = Vector2(camera_x-160,camera_y-90)
 	for portion: BeachTarget in stalls.portions:
-		var serving: StallPortion = portion as StallPortion
-		if serving != null and serving.recipient == client and serving.food:
-			counter_prompted = true
-			prompt_action = "dive"
-			peck_pause = true
-			peck_pause_armed = false
-			input.clear_touch()
-			_freeze_actors(true)
-			return
-
-func _counter_lesson_tick(delta: float) -> void:
-	if counter_step == 0:
-		_counter_hold()
-		var perch: Dictionary = lesson_perch()
-		if not perch.is_empty() and player.is_supported_by("kiosk",float(perch.x)):
-			_counter_advance()
+		if not is_instance_valid(portion) or not portion.food or not portion.visible:
+			continue
+		var at: Vector2 = portion.food_position()-offset
+		if at.x < 8.0 or at.x > 312.0 or at.y < 28.0 or at.y > 165.0:
+			continue
+		counter_tip = true
+		counter_tip_pos = portion.food_position()
+		GameState.mark_counter_tip()
+		prompt_action = "dive"
+		peck_pause = true
+		peck_pause_armed = false
+		input.clear_touch()
+		_freeze_actors(true)
 		return
-	if counter_stolen:
-		end_counter_lesson(true)
-		return
-	var client: BeachTarget = counter_client()
-	if not counter_ready or client == null:
-		return
-	if client.service_locked:
-		counter_idle = 0.0
-		if trainer_cards and not counter_prompted:
-			_counter_prompt(client)
-	elif client.food:
-		# Served without a theft (a missed dive): take the ice cream back and order again.
-		counter_idle += delta
-		if counter_idle >= float(counter_settings().get("retry_wait",1.5)):
-			_counter_order()
-	else:
-		client.respawn = 0.0 # a lost serving: order again straight away
-
-## Finish (or skip) the lesson: save it, drop the practice snack and let the level clock run.
-func end_counter_lesson(completed: bool) -> void:
-	if not counter_lesson:
-		return
-	counter_lesson = false
-	if peck_pause:
-		_end_peck_pause()
-	_reset_practice_score()
-	player.digestion.snacks.clear()
-	player.digestion.rest = 0.0
-	GameState.complete_counter_lesson()
-	if completed:
-		effects.message(player.position-Vector2(0,24),"SPOTLESS!",BeachUI.GOLD)
-
-func counter_lesson_text() -> String:
-	return TrainerScript.line(Config.trainer.counter.strips[mini(counter_step, COUNTER_STEPS-1)], input)
-
-func counter_lesson_target() -> Vector2:
-	return _perch_marker() if counter_step == 0 else Vector2(-1000,-1000)

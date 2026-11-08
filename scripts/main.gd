@@ -132,31 +132,26 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			start_level(1, true)
 		"screech_lesson":
 			start_level(2, false, true)
-		"counter_lesson":
-			start_level(3, false, true)
 		"restart":
 			var replaying_training: bool = is_instance_valid(game) and game.training and bool(GameState.entry(1).get("training_complete", false))
-			var replaying_lesson: bool = is_instance_valid(game) and ((game.screech_lesson and bool(GameState.entry(current_level).get("screech_lesson_complete",false))) or (game.counter_lesson and bool(GameState.entry(current_level).get("counter_lesson_complete",false))))
+			var replaying_lesson: bool = is_instance_valid(game) and (game.screech_lesson and bool(GameState.entry(current_level).get("screech_lesson_complete",false)))
 			start_level(current_level, replaying_training, replaying_lesson)
 		"pause":
 			if is_instance_valid(game):
 				game.set_paused(true)
 				screen = "pause"
 				menus.show()
-				# Level 2's screech and Gang Call lesson and Level 3's counter snatch play once per save; the pause menu replays them.
-				var lesson_running: bool = game.screech_lesson or game.counter_lesson
+				# Level 2's screech and Gang Call lesson plays once per save; the pause menu replays it.
+				var lesson_running: bool = game.screech_lesson
 				var replay: String = ""
 				if not lesson_running:
 					if int(game.level.id) == 2 and game.player.species == "herring" and game.level.has("screech_lesson"):
 						replay = "screech_lesson"
-					elif game.level.has("counter_lesson"):
-						replay = "counter_lesson"
 				menus.pause(lesson_running,replay)
 				Audio.duck_music(true)
 		"skip_lesson":
 			if is_instance_valid(game):
 				game.end_screech_lesson(false)
-				game.end_counter_lesson(false)
 			_navigate("resume")
 		"resume":
 			if is_instance_valid(game):
@@ -202,9 +197,7 @@ func start_level(id: int, force_training: bool = false, force_lesson: bool = fal
 	game = BeachGame.new()
 	game.name = "Game"
 	add_child(game)
-	# Level 3's counter snatch lesson plays on the first visit, when the trainer's pop-ups are on.
-	var first_counter: bool = BeachGame.trainer_cards and Config.levels[id-1].has("counter_lesson") and not bool(GameState.entry(id).get("counter_lesson_complete",false))
-	game.setup(Config.levels[id-1],casual,force_training,force_lesson or first_counter)
+	game.setup(Config.levels[id-1],casual,force_training,force_lesson)
 	game.level_finished.connect(_finished)
 	game.pause_requested.connect(func() -> void: _navigate("pause"))
 	Audio.play_music("synth" if id == 1 else Audio.LEVEL_MUSIC[(id - 2) % Audio.LEVEL_MUSIC.size()])

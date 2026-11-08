@@ -4,7 +4,7 @@
   "name": "Water Fight",
   "seed": 7104,
   "time_limit": 135,
-  "wind": {"dir": 1, "strength": 0.5, "gusts": true, "flip": false},
+  "wind": {"dir": 1, "strength": 0.3, "gusts": true, "flip": false},
   "awareness_mult": 1.24,
   "twist": {"id": "watergun_teen_intro", "tip": {"id": "teen", "text": "WATER GUN TEEN: FLY HIGH, STAY DRY!"}},
   "quests": [

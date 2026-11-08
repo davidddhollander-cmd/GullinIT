@@ -4,10 +4,9 @@
   "name": "Boardwalk Bustle",
   "seed": 7113,
   "time_limit": 135,
-  "wind": {"dir": -1, "strength": 0.35, "gusts": false, "flip": false},
+  "wind": {"dir": -1, "strength": 0.2, "gusts": false, "flip": false},
   "awareness_mult": 1.08,
   "twist": {"id": "off_lead_dogs", "tip": {"id": "dogs", "text": "OFF-LEAD DOGS: STAY ABOVE THEM!"}},
-  "counter_lesson": {"retry_wait": 1.5},
   "quests": [
     {"id": "l3_outrun", "text": "OUTRUN THE DOGS", "event": "dog_outrun", "filter": {}, "count": 3, "bonus": 60},
     {"id": "l3_crab", "text": "EAT A CRAB", "event": "swallowed", "filter": {"food": "crab"}, "count": 1, "bonus": 40}

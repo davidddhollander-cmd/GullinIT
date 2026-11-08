@@ -269,6 +269,24 @@ func _draw_peck_prompt(offset: Vector2) -> void:
 	draw_string(font,Vector2(-width * 0.5,4.0),text,HORIZONTAL_ALIGNMENT_LEFT,-1,8,tint)
 	draw_set_transform(Vector2.ZERO,0.0,Vector2.ONE)
 
+## The counter tip: a gold ring on the food and a short caption under it.
+func _draw_counter_tip(offset: Vector2) -> void:
+	var at: Vector2 = game.counter_tip_pos - offset
+	draw_arc(at,12,0,TAU,24,BeachUI.GOLD,2)
+	draw_arc(at,16,0,TAU,24,Color(1.0,0.95,0.7,0.55),1)
+	var lines: PackedStringArray = TrainerScript.line(Config.trainer.counter_tip,game.input).split("
+")
+	var width: float = 0.0
+	for text: String in lines:
+		width = maxf(width,font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x)
+	var box: Vector2 = Vector2(width + 10.0,lines.size() * 10.0 + 4.0)
+	var left: float = clampf(at.x - box.x * 0.5,4.0,316.0 - box.x)
+	var top: float = clampf(at.y + 22.0,TOP_BAR_HEIGHT + 4.0,176.0 - box.y)
+	draw_rect(Rect2(left - 1.0,top - 1.0,box.x + 2.0,box.y + 2.0),BeachUI.GOLD)
+	draw_rect(Rect2(left,top,box.x,box.y),BeachUI.INK)
+	for i: int in lines.size():
+		draw_string(font,Vector2(left + 5.0,top + 10.0 + i * 10.0),lines[i],HORIZONTAL_ALIGNMENT_LEFT,-1,8,BeachUI.CREAM)
+
 ## The frozen first dive: a dashed line along the dive, gold once it reaches the snack.
 func _draw_aim_line(offset: Vector2) -> void:
 	var from: Vector2 = game.player.position - offset
@@ -381,9 +399,6 @@ func _process(delta: float) -> void:
 	elif game.screech_lesson:
 		lesson_label.text = "LESSON %d/%d" % [mini(game.screech_step + 1, BeachGame.SCREECH_STEPS), BeachGame.SCREECH_STEPS]
 		lesson_prompt.text = game.screech_lesson_text()
-	elif game.counter_lesson:
-		lesson_label.text = "LAST LESSON"
-		lesson_prompt.text = game.counter_lesson_text()
 	pause_button.visible = game.running
 	sync_quests()
 	if rival_score_labels.size() != game.pilots.size():
@@ -564,6 +579,8 @@ func _draw() -> void:
 			_draw_points()
 	if game.peck_pause:
 		_draw_peck_prompt(offset)
+	if game.counter_tip:
+		_draw_counter_tip(offset)
 	if game.aim_pause:
 		_draw_aim_line(offset)
 	var aim: Vector2 = game.player.aim-offset
@@ -579,8 +596,8 @@ func _draw() -> void:
 				var tip: Vector2 = Vector2(6.0 if side < 0 else 314.0,clampf(training_target.y,70.0,150.0))
 				draw_colored_polygon(PackedVector2Array([tip,tip+Vector2(-side*10.0,-8.0),tip+Vector2(-side*10.0,8.0)]),BeachUI.GOLD)
 				draw_polyline(PackedVector2Array([tip+Vector2(-side*10.0,-8.0),tip,tip+Vector2(-side*10.0,8.0)]),BeachUI.INK,1)
-		elif game.screech_lesson or game.counter_lesson:
-			var lesson_target: Vector2 = (game.screech_lesson_target() if game.screech_lesson else game.counter_lesson_target()) - offset
+		elif game.screech_lesson:
+			var lesson_target: Vector2 = game.screech_lesson_target() - offset
 			if lesson_target.x >= 4 and lesson_target.x <= 316 and lesson_target.y >= 28 and lesson_target.y <= 165:
 				draw_arc(lesson_target,12,0,TAU,24,BeachUI.GOLD,2)
 				draw_arc(lesson_target,16,0,TAU,24,Color(1.0,0.95,0.7,0.55),1)

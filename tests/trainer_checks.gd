@@ -29,8 +29,8 @@ static func run(host: Node, check: Callable) -> void:
 static func _copy_checks(check: Callable) -> void:
 	var input: GullInput = GullInput.new()
 	var trainer: Dictionary = Config.trainer
-	check.call(trainer.training.lessons.size() == BeachGame.TRAINING_LESSONS and trainer.screech.lessons.size() == BeachGame.SCREECH_STEPS-1 and trainer.screech.strips.size() == BeachGame.SCREECH_STEPS,"trainer copy covers every lesson and screech step")
-	check.call(trainer.counter.lessons.size() == BeachGame.COUNTER_STEPS and trainer.counter.strips.size() == BeachGame.COUNTER_STEPS,"trainer copy covers both counter lesson steps")
+	check.call(trainer.training.lessons.size() == BeachGame.TRAINING_LESSONS and trainer.screech.lessons.size() == BeachGame.SCREECH_STEPS and trainer.screech.strips.size() == BeachGame.SCREECH_STEPS,"trainer copy covers every lesson and screech step")
+	check.call(Config.trainer.has("counter_tip") and TrainerScript.line(Config.trainer.counter_tip,input).contains("COUNTER"),"trainer copy has the counter tip")
 	var worst_card: int = 0
 	var worst_strip: int = 0
 	var worst_banner: int = 0
@@ -51,7 +51,7 @@ static func _copy_checks(check: Callable) -> void:
 			texts.append(TrainerScript.line(trainer.training.closing.first_time_text,input))
 			texts.append(TrainerScript.line(trainer.screech.closing.text,input))
 			var pairs: Array[String] = []
-			for set_name: String in ["training","screech","counter"]:
+			for set_name: String in ["training","screech"]:
 				for lesson: Dictionary in trainer[set_name].lessons:
 					pairs.append(TrainerScript.line(lesson.lay,input) + "\n" + TrainerScript.line(lesson.how,input))
 					if lesson.has("strip"):
@@ -325,9 +325,7 @@ static func _screech_flow(host: Node, check: Callable) -> void:
 	check.call(game.trainer_open and card.how_label.get_parsed_text().contains("call the gang"),"step 3 shows the Gang Call card")
 	card.button.pressed.emit()
 	game._screech_advance()
-	check.call(game.trainer_queue.is_empty() and not game.trainer_open and game.screech_step == 3,"the grab step has no card")
-	game._screech_advance()
-	check.call(game.screech_lesson and not game.trainer_queue.is_empty(),"finishing the grab queues the closing card and keeps the clock paused")
+	check.call(game.screech_lesson and not game.trainer_queue.is_empty(),"finishing the Gang Call step queues the closing card and keeps the clock paused")
 	game._physics_process(BeachGame.TRAINER_DELAY + 0.1)
 	check.call(game.trainer_open and card.lay_label.get_parsed_text().contains("clock starts now") and card.button.text == "LET'S GO!","the closing card tells the player the clock starts")
 	card.button.pressed.emit()
@@ -399,7 +397,7 @@ static func _replay_flow(host: Node, check: Callable) -> void:
 	check.call(not _has_button(host,"REPLAY LESSON"),"no replay for a gull that cannot screech")
 	host.main.start_level(4)
 	host.main._navigate("pause")
-	check.call(not _has_button(host,"REPLAY LESSON"),"no replay outside Levels 2 and 3")
+	check.call(not _has_button(host,"REPLAY LESSON"),"no replay outside Level 2")
 	host.main.clear_game()
 	GameState.progress = {}
 
@@ -481,8 +479,7 @@ static func _peck_pause_flow(host: Node, check: Callable) -> void:
 	host.main.clear_game()
 	GameState.progress = {}
 
-## Level 3's counter snatch lesson: land on the ice cream stand, then the beach freezes on a pulsing DIVE prompt
-## the moment the serving lands on the counter.
+## The counter tip: the first serving seen on a counter freezes the beach once, on a DIVE prompt and a ringed target.
 static func _counter_flow(host: Node, check: Callable) -> void:
 	BeachGame.trainer_cards = true
 	GameState.options.control_mode = "normal"
@@ -491,48 +488,21 @@ static func _counter_flow(host: Node, check: Callable) -> void:
 	host.main.start_level(3)
 	var game: BeachGame = host.main.game
 	game.set_physics_process(false)
-	game.pilots.clear() # keep Gary off the practice serving
-	var card: TrainerCard = game.overlay.trainer_card
-	check.call(game.counter_lesson and not game.screech_lesson and not game.training and game.lesson_active(),"the first visit to Level 3 starts the counter lesson")
+	game.pilots.clear() # keep Gary off the serving
+	check.call(not game.counter_tip and not game.lesson_active() and not game.screech_lesson and not game.training,"Level 3 has no lesson, only the tip")
 	game.dismiss_intro()
-	var lay: String = card.lay_label.get_parsed_text()
-	check.call(game.trainer_open and card.counter_label.text == "Last lesson" and lay.contains("perfect steal") and lay.contains("pups") and card.how_label.get_parsed_text().contains("ice cream stand"),"card 1 sets up the perfect steal, the stand and the pups")
-	await host.snapshot("trainer-counter-1")
-	card.button.pressed.emit()
-	var client: BeachTarget = game.counter_client()
-	check.call(client != null and not client.food and game.counter_step == 0,"a customer waits empty-handed by the stand while the player climbs")
-	for frame: int in 30:
-		game._physics_process(1.0 / 60)
-	check.call(is_zero_approx(game.elapsed) and game.counter_step == 0 and not client.service_locked and not client.food,"the level clock is paused and the customer has not ordered yet")
-	var ring: Vector2 = game.counter_lesson_target()
-	var perch: Dictionary = game.lesson_perch()
-	check.call(not perch.is_empty() and absf(ring.x - float(perch.x)) < 2.0,"step 1 rings the stand's roof sign")
+	var client: BeachTarget = _stand_client(game)
+	var serving: StallPortion = _run_to_serving(game,client)
 	var gull: BeachGull = game.player
-	gull.support = perch
-	gull.state = BeachGull.State.GROUNDED
-	gull.velocity = Vector2.ZERO
-	gull.position = Vector2(float(perch.x),BeachGull.perch_y(perch,float(perch.x)) - float(Config.tuning.flight.feet_offset))
-	game._counter_lesson_tick(0.016)
-	check.call(game.counter_step == 1 and not game.trainer_queue.is_empty() and not game.counter_ready,"landing on the stand queues card 2 before the order starts")
-	game._physics_process(BeachGame.TRAINER_DELAY + 0.1)
-	check.call(game.trainer_open and card.counter_label.text == "Last lesson" and card.lay_label.get_parsed_text().contains("small window") and card.how_label.get_parsed_text().contains("Shift"),"card 2 warns of the small window and names the dive key")
-	await host.snapshot("trainer-counter-2")
-	card.button.pressed.emit()
-	check.call(game.counter_ready and not client.food,"dismissing card 2 sends the customer to the counter with an empty hand")
-	var frames: int = 0
-	while not game.peck_pause and frames < 600:
-		game._physics_process(1.0 / 60)
-		frames += 1
-	var serving: StallPortion = null
-	for portion: BeachTarget in game.stalls.portions:
-		serving = portion as StallPortion
-	check.call(game.peck_pause and game.prompt_action == "dive" and serving != null and serving.food and serving.recipient == client,"the beach freezes on a DIVE prompt as the yellow target appears on the counter")
+	check.call(serving != null and game.peck_pause and game.counter_tip and game.prompt_action == "dive" and serving.food,"the beach freezes on the tip when a serving lands on the counter")
+	check.call(GameState.counter_tip_seen() and bool(GameState.entry(3).get("counter_tip_seen",false)),"the tip is saved as seen")
+	check.call(game.counter_tip_pos.distance_to(serving.food_position()) < 1.0,"the tip rings the food")
 	var frozen_at: Vector2 = gull.position
 	var clock: float = game.stalls.requests.values()[0].time
 	game._physics_process(0.5)
 	check.call(gull.position == frozen_at and is_equal_approx(game.stalls.requests.values()[0].time,clock),"the counter window and the gull hold still until the dive")
 	game.overlay.queue_redraw()
-	await host.snapshot("trainer-counter-dive-prompt")
+	await host.snapshot("trainer-counter-tip")
 	var input: GullInput = game.input
 	_set_device(input,"keyboard")
 	check.call(game.overlay.prompt_text() == "DIVE! SHIFT","the keyboard prompt names Shift")
@@ -550,63 +520,57 @@ static func _counter_flow(host: Node, check: Callable) -> void:
 	press.physical_keycode = KEY_SHIFT
 	press.pressed = true
 	game._unhandled_input(press)
-	check.call(not game.peck_pause and gull.state in [BeachGull.State.WINDUP,BeachGull.State.STRIKE],"pressing dive resumes the beach and starts the dive")
-	# A steal of the serving finishes the lesson and leaves the real run at zero.
-	serving._finish_theft(gull,false)
-	for frame: int in 30:
-		game._physics_process(1.0 / 60)
-	check.call(not game.counter_lesson and bool(GameState.entry(3).get("counter_lesson_complete",false)) and game.score.points == 0 and gull.digestion.snacks.is_empty(),"stealing the serving ends and saves the lesson with a clean score")
-	# A missed dive: the customer is served, then orders again and the prompt returns.
-	GameState.progress["3"] = {}
+	check.call(not game.peck_pause and not game.counter_tip and gull.state in [BeachGull.State.WINDUP,BeachGull.State.STRIKE],"pressing dive resumes the beach and starts the dive")
+	game._counter_tip_check()
+	check.call(not game.peck_pause,"the tip does not freeze the beach a second time")
+	# Saves from the old counter lesson count as seen.
+	GameState.progress = {"3": {"counter_lesson_complete": true}}
+	check.call(GameState.counter_tip_seen(),"a finished old counter lesson counts as seen")
+	# Without the trainer's pop-ups the beach never freezes.
+	BeachGame.trainer_cards = false
+	GameState.progress = {}
 	host.main.start_level(3)
 	game = host.main.game
 	game.set_physics_process(false)
 	game.pilots.clear()
 	game.dismiss_intro()
-	game.overlay.trainer_card.button.pressed.emit()
-	game.counter_step = 1
-	game._counter_order()
-	client = game.counter_client()
-	frames = 0
-	while not game.peck_pause and frames < 600:
-		game._physics_process(1.0 / 60)
-		frames += 1
-	check.call(game.peck_pause,"the second attempt reaches the dive prompt")
-	game._end_peck_pause()
-	game.player.state = BeachGull.State.GLIDE
-	game.player.position = Vector2(200,60)
-	frames = 0
-	while not client.food and frames < 600:
-		game._physics_process(1.0 / 60)
-		game.player.position = Vector2(200,60)
-		frames += 1
-	check.call(client.food and game.counter_lesson,"a missed dive leaves the customer served and the lesson running")
-	frames = 0
-	while not game.peck_pause and frames < 900:
-		game._physics_process(1.0 / 60)
-		game.player.position = Vector2(200,60)
-		frames += 1
-	check.call(game.peck_pause and game.prompt_action == "dive","the customer orders again and the prompt returns")
-	# Skip and replay from the pause menu.
-	host.main.start_level(3)
-	check.call(host.main.game.counter_lesson,"restarting an unfinished lesson keeps it")
-	host.main._navigate("pause")
-	check.call(_has_button(host,"SKIP LESSON") and not _has_button(host,"REPLAY LESSON"),"while the lesson runs Level 3's pause menu offers SKIP LESSON")
-	host.main._navigate("skip_lesson")
-	check.call(not host.main.game.counter_lesson and bool(GameState.entry(3).get("counter_lesson_complete",false)),"skipping saves the lesson")
-	host.main.start_level(3)
-	check.call(not host.main.game.counter_lesson and not host.main.game.trainer_open,"a finished lesson is skipped on an ordinary play")
-	host.main._navigate("pause")
-	check.call(_has_button(host,"REPLAY LESSON") and not _has_button(host,"SKIP LESSON"),"Level 3's pause menu offers REPLAY LESSON once the lesson is done")
-	host.main._navigate("counter_lesson")
-	check.call(host.main.current_level == 3 and host.main.game.counter_lesson and host.main.game.counter_step == 0,"REPLAY LESSON restarts Level 3 with the lesson")
-	host.main._navigate("restart")
-	check.call(host.main.game.counter_lesson,"restarting a replayed lesson keeps the lesson")
-	# Without the trainer's pop-ups there is no lesson.
-	BeachGame.trainer_cards = false
-	GameState.progress = {}
-	host.main.start_level(3)
-	check.call(not host.main.game.counter_lesson,"with pop-ups off Level 3 plays straight through")
+	serving = _run_to_serving(game,_stand_client(game))
+	check.call(serving != null and not game.peck_pause and not game.counter_tip,"with pop-ups off a counter serving plays straight through")
 	host.main.clear_game()
 	BeachGame.trainer_cards = true
 	GameState.progress = {}
+
+## The ice cream shopper at the stand nearest the start, sent to order with an empty hand.
+static func _stand_client(game: BeachGame) -> BeachTarget:
+	var best: BeachTarget
+	for target: BeachTarget in game.spawner.targets:
+		if target.kind == "kiosk_customer" and target.purchase_stall_type() == "kiosk" and (best == null or target.position.x < best.position.x):
+			best = target
+	best.food = false
+	best.food_sprite.hide()
+	best.respawn = 0.0
+	best.recover = 0.0
+	best.update_art_pose(false)
+	return best
+
+## Runs the beach with the gull parked over the shopper until a serving sits on the counter (or the tip freezes the beach).
+static func _run_to_serving(game: BeachGame, client: BeachTarget) -> StallPortion:
+	var serving: StallPortion = null
+	var frames: int = 0
+	while serving == null and not game.peck_pause and frames < 1500:
+		game.player.state = BeachGull.State.GLIDE
+		game.player.position = client.position + Vector2(0,-40)
+		game.camera_x = clampf(game.player.position.x,160.0,float(Config.tuning.world.width) - 160.0)
+		game.camera_y = game.camera_target_y()
+		game._physics_process(1.0 / 60)
+		frames += 1
+		for portion: BeachTarget in game.stalls.portions:
+			if is_instance_valid(portion) and portion.food:
+				serving = portion as StallPortion
+	if serving != null and not game.peck_pause:
+		# Bring the counter into view: the tip looks at it at the start of the next tick.
+		game.player.position = serving.position + Vector2(0,-40)
+		game.camera_x = clampf(serving.position.x,160.0,float(Config.tuning.world.width) - 160.0)
+		game.camera_y = game.camera_target_y()
+		game._physics_process(1.0 / 60)
+	return serving

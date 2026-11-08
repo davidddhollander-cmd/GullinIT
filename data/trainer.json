@@ -205,8 +205,7 @@
         "touch": "Land on the ice cream sign"
       },
       "Hold {peck} to screech. Higher is louder",
-      "Brash is full! Screech again or press {call}",
-      "Grab the dropped food before they return"
+      "Brash is full! Screech again or press {call}"
     ],
     "lessons": [
       {
@@ -226,42 +225,15 @@
       {
         "mood": "amused",
         "lay": "Now for the best trick in the book: call the cavalry and see them runnin for cover!!",
-        "how": "Screech again, or press {call}, to call the gang. Then grab the food they knock loose before the crowd comes back."
+        "how": "Screech again, or press {call}, to call the gang."
       }
     ]
   },
-  "counter": {
-    "strips": [
-      {
-        "default": "Land on top of the ice cream stand",
-        "realistic": "Land on the ice cream stand, stop tapping {flap}",
-        "touch": "Land on top of the ice cream stand"
-      },
-      "Wait for the yellow target, then dive"
-    ],
-    "lessons": [
-      {
-        "mood": "neutral",
-        "counter": "Last lesson",
-        "lay": "One last lesson, gullster, and it's the big one: the perfect steal. Any gull can nick a snack off the sand. A true professional takes it straight off the counter.",
-        "how": {
-          "default": "Fly above the ice cream stand, let go of {flap} and drop onto the roof. Stay above the dogs.",
-          "realistic": "Fly above the ice cream stand, stop tapping {flap} and drop onto the roof. Stay above the dogs.",
-          "touch": "Fly above the ice cream stand, stop pushing FLY up and drop onto the roof. Stay above the dogs."
-        }
-      },
-      {
-        "mood": "amused",
-        "counter": "Last lesson",
-        "lay": "Listen close. There's only a small window for a spotless theft. The moment the ice cream lands on the counter, that's your cue...",
-        "how": {
-          "default": "When the yellow target shows, aim at it, dive with {dive} and tap {peck} as your beak reaches the food.",
-          "casual": "When the yellow target shows, aim at it and dive with {dive}. Your beak does the pecking.",
-          "touch": "When the yellow target shows, aim at it, tap DIVE and tap {peck} as your beak reaches the food.",
-          "touch_casual": "When the yellow target shows, aim at it and tap DIVE. Your beak does the pecking."
-        }
-      }
-    ]
+  "counter_tip": {
+    "default": "FOOD ON THE COUNTER!\nDIVE, THEN PECK IT",
+    "casual": "FOOD ON THE COUNTER!\nDIVE RIGHT AT IT",
+    "touch": "FOOD ON THE COUNTER!\nTAP DIVE, THEN PECK",
+    "touch_casual": "FOOD ON THE COUNTER!\nTAP DIVE AT IT"
   },
   "live_banners": true
 }
