@@ -992,7 +992,7 @@ func _crashed() -> void:
 	crashes += 1
 	training_clean_snatch = false
 	var before: int = score.points
-	score.points = ceili(score.points * 0.5)
+	score.points = ceili(score.points * float(Config.tuning.score.crash_keep))
 	score.lost += before-score.points
 	score.stunned()
 	effects.message(player.position-Vector2(0,20),str(Config.trainer.live.crash_toast) if training else "CRASH! POINTS LOST",Color("ef725c"))
