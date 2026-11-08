@@ -61,7 +61,7 @@ func build(button_text: String) -> void:
 	_row(column, "CLEAN RUN", "NO STUNS ALL LEVEL", "%s TOTAL" % _pct(t.clean))
 	_section(column, "PENALTIES", Color("ef725c"))
 	_row(column, "SWATTED", "DROP SNACK. COMBO OVER", "-5", Color("ef725c"))
-	_row(column, "CRASH", "DIVE INTO THE SAND", "HALF POINTS", Color("ef725c"))
+	_row(column, "CRASH", "DIVE INTO THE SAND", "-%d%% POINTS" % roundi((1.0 - float(t.crash_keep)) * 100.0), Color("ef725c"))
 
 	var actions := CenterContainer.new()
 	column.add_child(actions)

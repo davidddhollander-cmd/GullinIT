@@ -49,7 +49,7 @@ When that supply is empty, or a toddler's seeded ice-cream insistence roll succe
 
 Tap dive to enter a steerable swoop. Keep moving the mouse, stick, or touch aim throughout the dive: aim downward to gain speed, then ahead and upward to rise using that speed. Rising uses stronger braking so the gull visibly slows as it climbs, nearly running out of speed before returning to normal flight. Higher dives have more room to accelerate. Collecting food does not pull the bird up automatically. Flapping returns to normal flight. Wind still pushes the dive; approach protected pier food at a shallow angle.
 
-A fast, steep, beak-first impact with the sand halves the current run's points, resets the combo, and briefly stuns the gull. Odd point totals round up after halving. Slow or shallow landings keep your points. Saved best scores and unlocked levels are unaffected. The movement and crash thresholds can be adjusted in `data/tuning.json`.
+A fast, steep, beak-first impact with the sand costs a quarter of the current run's points, resets the combo, and briefly stuns the gull. Fractional point totals round up after the penalty. Slow or shallow landings keep your points. Saved best scores and unlocked levels are unaffected. The movement and crash thresholds can be adjusted in `data/tuning.json`.
 
 Flight refinements: the dive preparation animation keeps moving; braking grows gradually with the upward angle. At the end of a swoop the gull coasts with its remaining speed instead of automatically accelerating sideways. Hold flap to regain powered flight. Letting go of the controller stick stops walking on the ground and preserves heading in the air. Mouse movement resumes mouse aiming after controller/touch input.
 

@@ -153,6 +153,7 @@
       2.5,
       3
     ],
+    "crash_keep": 0.75,
     "risky": 0.5,
     "upwind": 0.2,
     "mugged": 0.5,

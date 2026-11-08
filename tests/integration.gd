@@ -718,7 +718,7 @@ func mechanics_checks() -> void:
 		if height > 100:
 			check(gull.state == BeachGull.State.GROUNDED and game.score.points == 100,"short slow dive lands without point loss")
 		else:
-			check(gull.state == BeachGull.State.STUNNED and game.score.points == 50,"fast beak-first ground crash halves current points")
+			check(gull.state == BeachGull.State.STUNNED and game.score.points == 75,"fast beak-first ground crash costs a quarter of current points")
 			check(game.score.stuns == 1 and game.score.window == 0,"crash counted once and resets combo")
 	check(impact_speeds[1] > impact_speeds[0] + 80,"higher dive progressively gains more speed")
 	check(not GameState.entry(1).has("best") and not GameState.entry(1).has("stars"),"crash does not write saved records")
@@ -734,10 +734,10 @@ func mechanics_checks() -> void:
 			gull.tick(1.0/hz,0,0)
 			if gull.state == BeachGull.State.STUNNED:
 				break
-		check(game.score.points == 50 and gull.position.y <= gull.ground_y(),"fast crash cannot tunnel below sand at %d Hz" % hz)
+		check(game.score.points == 75 and gull.position.y <= gull.ground_y(),"fast crash cannot tunnel below sand at %d Hz" % hz)
 	game.score.points = 101
 	game._crashed()
-	check(game.score.points == 51,"odd crash score keeps the extra point")
+	check(game.score.points == 76,"fractional crash score rounds up")
 	gull.state = BeachGull.State.STRIKE
 	gull.position = Vector2(300,gull.ground_y()-1)
 	gull.direction = Vector2(1,0.2).normalized()
@@ -1074,10 +1074,13 @@ func sunbather_pickup_checks() -> void:
 	gull.dive_speed = 300
 	gull.invulnerable = 0
 	gull.tick(0.2,0,0)
-	check(gull.state == BeachGull.State.STUNNED and game.score.points == 50,"crash fixture applies penalty before collision resolution")
+	check(gull.state == BeachGull.State.STUNNED and game.score.points == 75,"crash fixture applies penalty before collision resolution")
 	BeachCollisions.resolve(gull,[sleeper],[])
 	eat_pending(game)
-	check(sleeper.food and game.score.items == 0 and game.score.points == 50,"crash frame cannot award crossed sunbather food")
+	check(sleeper.food and game.score.items == 0 and game.score.points == 75,"crash frame cannot award crossed sunbather food")
+	game.score.points = 100
+	game._crashed()
+	check(game.score.points == 75,"a crash from 100 points leaves 75")
 	# A nearby pass outside the combined pickup ellipse remains a miss.
 	sleeper.food = true
 	game.score = BeachScore.new()
