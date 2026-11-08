@@ -3005,7 +3005,7 @@ func mum_art_checks() -> void:
 			check(texture.get_size() == Vector2(128,128),"mum frames share the approved 128-pixel source canvas")
 			check(Rect2(Vector2.ZERO,texture.atlas.get_size()).encloses(texture.region),"mum frame stays inside source sheet")
 	check(frames.get_frame_texture(&"idle",0).atlas.get_image().get_mipmap_count() == 0,"mum source remains crisp without mipmaps")
-	main.start_level(1)
+	main.start_level(2)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
 	game.intro = 0
@@ -3076,7 +3076,7 @@ func toddler_art_checks() -> void:
 			check(Rect2(Vector2.ZERO,texture.atlas.get_size()).encloses(texture.region),"toddler atlas region within sheet")
 			var pose_image := texture.atlas.get_image().get_region(Rect2i(texture.region))
 			check(pose_image.get_used_rect().end.y == 60,"toddler feet aligned at frame baseline")
-	main.start_level(1)
+	main.start_level(2)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
 	game.intro = 0

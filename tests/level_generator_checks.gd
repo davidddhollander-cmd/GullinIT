@@ -63,7 +63,7 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 		if spawn.type == "picnic_family":
 			family_positions[str(spawn.family_id)] = float(spawn.x)
 		elif spawn.type == "toddler":
-			children[str(spawn.family_id)] = float(spawn.x)
+			children[str(spawn.get("family_id",""))] = float(spawn.x)
 	for family_id: String in family_positions:
 		check.call(children.has(family_id) and absf(float(family_positions[family_id])-float(children[family_id]))>=38.0,"each family has a nearby child with clear spacing")
 	for a: int in level.spawns.size():
@@ -77,9 +77,9 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 			if prop.type == "kiosk":
 				kiosk_x = float(prop.x)
 	if number == 1:
-		check.call(types==["kiosk_customer","sunbather","toddler","picnic_family"],"training route introduces snack, bag, then family")
+		check.call(types==["kiosk_customer","sunbather","toddler"],"training route introduces snack, bag, then a lone toddler")
 		check.call(int(level.world.width)==800 and bool(level.tutorial),"training beach is short and tutorial enabled")
-		check.call(stand_count==1 and kiosk_x>float(family_positions["family_1"]),"family has a kiosk further along the beach")
+		check.call(stand_count==1 and family_positions.is_empty() and kiosk_x>float(children[""]),"the lone toddler has no mum and the kiosk is further along the beach")
 		check.call(level.rivals.is_empty(),"training beach has no rival")
 	elif number == 2:
 		check.call(types.count("picnic_family")==1 and types.count("toddler")==2 and types.count("sunbather")==1 and types.count("kiosk_customer")==3,"family beach has one mum with two toddlers, one sunbather and three shoppers")

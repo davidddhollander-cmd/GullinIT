@@ -6,6 +6,7 @@
       "flap": "Space or left click",
       "dive": "Shift or right click",
       "peck": "E",
+      "peck_alt": "E/mouse 3",
       "steer": "the mouse or WASD",
       "call": "Q"
     },
@@ -13,6 +14,7 @@
       "flap": "A",
       "dive": "B",
       "peck": "X",
+      "peck_alt": "X",
       "steer": "the left stick",
       "call": "RB"
     },
@@ -20,6 +22,7 @@
       "flap": "FLY up",
       "dive": "DIVE",
       "peck": "PECK",
+      "peck_alt": "PECK",
       "steer": "your thumb",
       "call": "CALL"
     }
@@ -64,8 +67,8 @@
       "touch": "Climb above him, then tap DIVE"
     },
     "toddler_peck": {
-      "default": "Tap {peck} to peck his ice cream!",
-      "touch": "Tap {peck} to peck his ice cream!"
+      "default": "Tap {peck_alt} to peck his ice cream!",
+      "touch": "Tap {peck_alt} to peck his ice cream!"
     },
     "toddler_pickup": "Walk over the ice cream to eat it.",
     "full_stomach": "Finish your snack first, greedy guts.",
@@ -163,14 +166,14 @@
       },
       {
         "mood": "amused",
-        "lay": "Now let's try something as easy as stealing candy from a baby...\nSee the toddler with the ice cream? Pecking his cone knocks it onto the sand. Then it's all yours.",
+        "lay": "Now let's try something as easy as stealing candy from a baby...",
         "how": {
-          "default": "Land beside the toddler, face his ice cream and tap {peck}. Then walk over the cone to eat it.",
-          "touch": "Land beside the toddler, face his ice cream and tap {peck}. Then walk over the cone to eat it."
+          "default": "Walk up to the toddler, face his ice cream and tap {peck_alt}.",
+          "touch": "Walk up to the toddler, face his ice cream and tap {peck_alt}."
         },
         "strip": {
-          "default": "Land by the toddler and tap {peck} at his ice cream",
-          "touch": "Land by the toddler and tap {peck} at his ice cream"
+          "default": "Walk up to the toddler and tap {peck_alt} at his ice cream",
+          "touch": "Walk up to the toddler and tap {peck_alt} at his ice cream"
         }
       },
       {

@@ -74,13 +74,39 @@ static func run(host: Node, check: Callable) -> void:
 	game._peck()
 	check.call(not toddler.food and toddler.dropped_pending and not toddler.drop_retrieve and game.lesson == BeachGame.TODDLER_LESSON,"pecking the toddler's ice cream drops it and the lesson waits")
 	check.call(not toddler.dropped_item.is_empty() and game.training_target() == toddler.dropped_item.position and game.training_text().contains("Walk over"),"the dropped cone is ringed and the strip says to eat it")
-	game._toddler_lesson_tick(BeachGame.TODDLER_DROP_RESET + 0.1)
-	check.call(toddler.food and not toddler.dropped_pending and game.lesson == BeachGame.TODDLER_LESSON,"a cone left lying is replaced")
+	var middle: InputEventMouseButton = InputEventMouseButton.new()
+	middle.button_index = MOUSE_BUTTON_MIDDLE
+	check.call(InputMap.event_is_action(middle,"peck"),"the middle mouse button is a peck button")
+	check.call(toddler.leaving and toddler.one_shot and toddler.facing == 1.0,"the pecked toddler runs away from the gull")
+	game.camera_x = 160.0
+	toddler.position.x = 160.0 + BeachGame.TODDLER_EXIT_MARGIN + 5.0
+	var toddler_count: int = game.spawner.targets.size()
+	game._toddler_lesson_tick(0.016)
+	check.call(game.spawner.targets.size() == toddler_count - 1 and game.spawner.replacements.is_empty(),"he vanishes past the screen edge and no replacement walks in")
+	check.call(game.training_target() == game.toddler_cone.position and game.training_text().contains("Walk over"),"the ring and strip follow the cone after he has gone")
+	# A cone lost before it is eaten brings back a toddler, so the lesson can always be finished.
+	game.toddler_cone.recovered = true
+	game._toddler_lesson_tick(0.016)
+	check.call(game.lesson_toddler() != null and game.lesson == BeachGame.TODDLER_LESSON,"a lost cone brings a fresh toddler")
+	toddler = game.lesson_toddler()
 	game.stash_raids.items.clear()
+	game.player.state = BeachGull.State.GROUNDED
+	game.player.facing = 1.0
 	game.player.position += (toddler.food_position() - Vector2(8,0)) - game.player.beak()
 	game.stash_raids.peck_cooldown = 0
 	game._peck()
-	game.stash_raids.collected.emit(Vector2(100,150),"ice_cream",false)
+	# Walk onto the real cone: the toddler is gone, yet the pickup still counts.
+	var cone: Dictionary = game.toddler_cone
+	check.call(cone.owner == null and not game.stash_raids.items.is_empty(),"the cone is plain floor food once he has gone")
+	cone.age = 5.0
+	cone.grounded = true
+	cone.velocity = Vector2.ZERO
+	game.player.digestion.snacks.clear()
+	game.player.digestion.rest = 0.0
+	game.player.state = BeachGull.State.GROUNDED
+	game.player.position += Vector2(cone.position) - game.player.beak()
+	game.stash_raids.tick(0.1)
+	check.call(game.stash_raids.items.is_empty(),"walking onto the cone eats it")
 	check.call(game.lesson == BeachGame.BIN_LESSON and int(GameState.entry(1).get("training_step",0)) == BeachGame.BIN_LESSON,"eating the dropped cone leads straight to the bin lesson")
 	game.stash_raids.items.clear()
 	check.call(game.training_text().contains("bin"),"bin lesson explains the new action")

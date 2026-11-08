@@ -38,7 +38,7 @@ var score_announcement_font_index: int = 0
 const SCORE_ANNOUNCEMENT_HOLD: float = BeachEffects.SCORE_MESSAGE_HOLD
 const SCORE_ANNOUNCEMENT_FADE: float = BeachEffects.SCORE_MESSAGE_FADE
 const TOP_BAR_HEIGHT: int = 17
-const BANNER_PORTRAIT: float = 36.0 ## Screeches in the live lesson banner
+const BANNER_PORTRAIT: float = 28.0 ## Screeches in the live lesson banner
 const AIM_LINE_LENGTH: float = 240.0
 const AIM_STRIP_WIDTH: float = 118.0 ## the frozen first dive's strip is narrow so it can sit beside the gull
 const AIM_STRIP_SHIFT: float = 90.0
@@ -159,12 +159,12 @@ func setup(owner_game: BeachGame) -> void:
 	training_center.offset_bottom = TOP_BAR_HEIGHT
 	training_center.mouse_filter = MOUSE_FILTER_IGNORE
 	training_panel = BeachUI.panel(training_center,Color(0.094,0.23,0.30,0.95))
-	training_panel.custom_minimum_size = Vector2(192,32)
+	training_panel.custom_minimum_size = Vector2.ZERO
 	var training_style: StyleBoxFlat = training_panel.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
-	training_style.content_margin_left = 8
-	training_style.content_margin_right = 8
-	training_style.content_margin_top = 4
-	training_style.content_margin_bottom = 4
+	training_style.content_margin_left = 5
+	training_style.content_margin_right = 5
+	training_style.content_margin_top = 2
+	training_style.content_margin_bottom = 2
 	training_panel.add_theme_stylebox_override("panel",training_style)
 	training_panel.mouse_filter = MOUSE_FILTER_IGNORE
 	var training_row: HBoxContainer = HBoxContainer.new()
@@ -173,7 +173,7 @@ func setup(owner_game: BeachGame) -> void:
 	training_panel.add_child(training_row)
 	# Screeches McCrumbs winces and talks beside the strip while the first-miss hint shows.
 	trainer_portrait = TextureRect.new()
-	trainer_portrait.custom_minimum_size = Vector2(48,48)
+	trainer_portrait.custom_minimum_size = Vector2(40,40)
 	trainer_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	trainer_portrait.stretch_mode = TextureRect.STRETCH_SCALE
 	trainer_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -181,7 +181,7 @@ func setup(owner_game: BeachGame) -> void:
 	trainer_portrait.hide()
 	var lesson_column: VBoxContainer = VBoxContainer.new()
 	lesson_column.mouse_filter = MOUSE_FILTER_IGNORE
-	lesson_column.add_theme_constant_override("separation",2)
+	lesson_column.add_theme_constant_override("separation",1)
 	lesson_column.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	training_row.add_child(lesson_column)
 	lesson_label = BeachUI.label(lesson_column,"LESSON 1/%d" % BeachGame.TRAINING_LESSONS,8,BeachUI.GOLD)
@@ -340,7 +340,7 @@ func show_rival_popup(rival_name: String, head: Texture2D, text: String, seconds
 ## While the first dive is frozen the strip steps to the side away from the gull, so the gull and the dashed line stay in view.
 func _place_aim_strip() -> void:
 	var shift: float = 0.0
-	training_panel.custom_minimum_size.x = 0.0 if game.aim_pause else 192.0
+	training_panel.custom_minimum_size.x = 0.0
 	if game.aim_pause:
 		lesson_prompt.custom_minimum_size.x = AIM_STRIP_WIDTH
 		shift = AIM_STRIP_SHIFT if game.player.position.x - (game.camera_x - 160.0) < 160.0 else -AIM_STRIP_SHIFT
@@ -352,7 +352,7 @@ func _sync_trainer() -> void:
 	var banner: bool = game.banner_active()
 	var talking: bool = game.training_miss_hint > 0.0
 	trainer_portrait.visible = talking or banner
-	var px: float = BANNER_PORTRAIT if banner and not talking else 48.0
+	var px: float = BANNER_PORTRAIT if banner and not talking else 40.0
 	trainer_portrait.custom_minimum_size = Vector2(px,px)
 	var align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_LEFT if banner else HORIZONTAL_ALIGNMENT_CENTER
 	lesson_prompt.horizontal_alignment = align

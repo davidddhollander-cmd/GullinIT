@@ -59,7 +59,7 @@ static func register_actions() -> void:
 		var peck_button: InputEventJoypadButton = InputEventJoypadButton.new()
 		peck_button.button_index = JOY_BUTTON_X
 		InputMap.action_add_event("peck",peck_button)
-	for pair: Array in [["climb",MOUSE_BUTTON_LEFT],["dive",MOUSE_BUTTON_RIGHT]]:
+	for pair: Array in [["climb",MOUSE_BUTTON_LEFT],["dive",MOUSE_BUTTON_RIGHT],["peck",MOUSE_BUTTON_MIDDLE]]:
 		var event: InputEventMouseButton = InputEventMouseButton.new()
 		event.button_index = pair[1]
 		InputMap.action_add_event(pair[0],event)

@@ -46,7 +46,7 @@ const AIM_PAUSES: int = 2 ## how many dives of the first dive lesson freeze for 
 const DIVE_NUDGE_TIME: float = 10.0 ## seconds without a dive before the first dive lesson says how again
 const MUG_RESCUE_MISSES: int = 3 ## missed dives before the dummy hovers still
 const BIN_TIP_RANGE: float = 28.0 ## how near a bin a useless peck has to be to earn a tip
-const TODDLER_DROP_RESET: float = 12.0 ## seconds a dropped lesson cone may lie before the toddler is given another
+const TODDLER_EXIT_MARGIN: float = 175.0 ## how far past the screen centre the fleeing toddler runs before he vanishes
 const DUMMY_FOOD: String = "crisps_bag"
 const RING_LESSON_1: Vector2 = Vector2(145,65) ## the takeoff ring, above the first palm
 const TRAINER_DELAY: float = 1.4 ## seconds between a screech or counter lesson's toast and the next pop-up
@@ -85,7 +85,7 @@ const MISS_ADVANCE_DELAY: float = 3.5
 var training_miss_advance: float = 0.0  # counts down to the next card after a first miss
 var training_reset_clock: float = 0.0
 var toddler_pause_armed: bool = true
-var toddler_drop_age: float = 0.0
+var toddler_cone: Dictionary = {} ## the ice cream the lesson toddler dropped
 var pending_rivals: Array = []
 const FLY_IN_SPEED: float = 1.5
 const FLY_IN_BUMP_RANGE: float = 14.0
@@ -432,9 +432,20 @@ func _food_knocked(target: BeachTarget, food_id: String, at: Vector2, impulse: V
 		training_miss_line = "first_miss"
 		training_miss_hint = MISS_HINT_TIME
 		training_miss_advance = MISS_ADVANCE_DELAY
-	if training and lesson == TODDLER_LESSON and target.kind == "toddler":
-		target.drop_retrieve = false # the practice cone stays on the sand for the player
+	var lesson_drop: bool = training and lesson == TODDLER_LESSON and target.kind == "toddler"
+	if lesson_drop:
+		# The practice cone stays on the sand for the player, and the toddler runs off the screen crying.
+		target.drop_retrieve = false
+		target.leaving = true
+		target.one_shot = true
+		target.facing = 1.0 if target.position.x >= player.position.x else -1.0
+		target.recover = 99.0
 	stash_raids.add_knocked_food(target,food_id,at,impulse)
+	if lesson_drop:
+		# The toddler leaves the beach, so the cone becomes plain floor food: nobody is left to claim it back.
+		toddler_cone = stash_raids.items.back()
+		toddler_cone.owner = null
+		toddler_cone.source = "floor"
 	effects.peck_contact(at,impulse,0.55,"glance")
 	effects.food_crumble(at,impulse)
 	effects.message(at-Vector2(0,18),"DROPPED!",Color("ef725c"))
@@ -775,11 +786,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("slowmo") and not event.is_echo():
 		start_slowmo()
 	if running and event.is_action_pressed("peck") and not event.is_echo():
-		if event is InputEventKey or event is InputEventJoypadButton:
+		if event is InputEventKey or event is InputEventJoypadButton or event is InputEventMouseButton:
 			_peck_pressed()
 		else:
 			_peck()
-	elif (event is InputEventKey or event is InputEventJoypadButton) and event.is_action_released("peck") and peck_hold_pending and not peck_hold_touch:
+	elif (event is InputEventKey or event is InputEventJoypadButton or event is InputEventMouseButton) and event.is_action_released("peck") and peck_hold_pending and not peck_hold_touch:
 		_peck_released()
 	if event.is_action_pressed("debug"):
 		debug = not debug
@@ -1480,28 +1491,20 @@ func _training_tick(delta: float) -> void:
 			target.food = true
 			target.food_sprite.show()
 
-## The toddler lesson's cone: a cone left lying too long is replaced so the lesson never runs out of food.
-func _toddler_lesson_tick(delta: float) -> void:
+## The toddler runs off crying and vanishes once he is past the screen edge. If the cone is lost before it is eaten,
+## a fresh toddler stands in the same spot so the lesson can always be finished.
+func _toddler_lesson_tick(_delta: float) -> void:
 	if lesson != TODDLER_LESSON:
 		return
-	var toddler: BeachTarget = lesson_toddler()
-	if toddler == null or not toddler.dropped_pending:
-		toddler_drop_age = 0.0
-		return
-	toddler_drop_age += delta
-	if toddler_drop_age < TODDLER_DROP_RESET:
-		return
-	toddler_drop_age = 0.0
-	if not toddler.dropped_item.is_empty():
-		toddler.dropped_item.recovered = true
-	toddler.dropped_pending = false
-	toddler.dropped_item = {}
-	toddler.drop_retrieve = false
-	toddler.recover = 0.0
-	toddler.seeking_parent = false
-	toddler.food = true
-	toddler.food_sprite.show()
-	toddler.update_art_pose(false)
+	for target: BeachTarget in spawner.targets.duplicate():
+		if is_instance_valid(target) and target.one_shot and absf(target.position.x-camera_x) > TODDLER_EXIT_MARGIN:
+			target.departed.emit(target)
+	if not toddler_cone.is_empty() and bool(toddler_cone.get("recovered",false)) and not advance_pending and lesson_toddler() == null:
+		toddler_cone = {}
+		for spawn: Dictionary in level.spawns:
+			if str(spawn.type) == "toddler":
+				spawner.create("toddler",float(spawn.x),spawn)
+				break
 
 ## The toddler the lesson pecks: the one nearest the gull.
 func lesson_toddler() -> BeachTarget:
@@ -1535,8 +1538,7 @@ func training_text() -> String:
 		if dive_nudge_clock >= DIVE_NUDGE_TIME:
 			return TrainerScript.line(live.dive_nudge, input)
 	if lesson == TODDLER_LESSON:
-		var toddler: BeachTarget = lesson_toddler()
-		if toddler != null and toddler.dropped_pending:
+		if not toddler_cone.is_empty() and not bool(toddler_cone.get("recovered",false)):
 			return TrainerScript.line(live.toddler_pickup, input)
 		if stash_raids.nearby_toddler() != null:
 			return TrainerScript.line(live.toddler_peck, input)
@@ -1569,10 +1571,10 @@ func training_target() -> Vector2:
 				distance = absf(nearest.x-player.position.x)
 		return nearest
 	if lesson == TODDLER_LESSON:
+		if not toddler_cone.is_empty() and not bool(toddler_cone.get("recovered",false)):
+			return toddler_cone.position
 		var toddler: BeachTarget = lesson_toddler()
 		if toddler != null:
-			if toddler.dropped_pending and not toddler.dropped_item.is_empty():
-				return toddler.dropped_item.position
 			return toddler.food_position()
 	if lesson == MUG_LESSON:
 		var dummy: RivalPilot = training_dummy()

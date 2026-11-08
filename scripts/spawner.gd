@@ -184,7 +184,8 @@ func _link_families() -> void:
 
 func _departed(target: BeachTarget) -> void:
 	benches.release(target)
-	replacements.append({"type":target.kind,"delay":float(Config.tuning.world.replacement_delay)})
+	if not target.one_shot:
+		replacements.append({"type":target.kind,"delay":float(Config.tuning.world.replacement_delay)})
 	targets.erase(target)
 	visual_offsets.erase(target)
 	lane_holds.erase(target)

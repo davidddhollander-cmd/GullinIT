@@ -31,6 +31,7 @@ var defense: float = 0.0
 var windup: float = -1.0
 var overhead: float = 0.0
 var leaving: bool = false
+var one_shot: bool = false ## leaves for good: no replacement walks in (the Training Day toddler)
 var facing: float = 1.0
 var patrol_home: float
 var patrol_radius: float = 35.0
@@ -195,7 +196,7 @@ func update_art_pose(moving: bool = false) -> void:
 		return
 	sprite.flip_h = facing < 0
 	var pose: StringName = &"walk" if moving else (&"eat" if food else &"idle")
-	if not food and (seeking_parent or toddler_cry_run_active or recover > 0) and not leaving:
+	if not food and (seeking_parent or toddler_cry_run_active or recover > 0):
 		pose = &"cry_run" if moving else &"cry"
 	sprite.play(pose)
 	ToddlerArt.align_food(self)
