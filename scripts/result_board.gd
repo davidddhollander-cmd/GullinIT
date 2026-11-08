@@ -124,6 +124,8 @@ func _build() -> void:
 	row_values.append(0)
 	row_formats.append("stats")
 	_update_row(rows.size() - 1, 0.0)
+	if int(result.get("powers", 0)) > 0 and y + 18.0 <= 126.0:
+		_add_count_row("POWERS", int(result.powers), y + 9.0)
 	_add_count_row("TOTAL", int(result.score), 126, "%d", GOLD)
 	_add_rules_link()
 

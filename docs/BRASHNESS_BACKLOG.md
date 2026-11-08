@@ -27,7 +27,7 @@ Saved 2026-10-27, after the herring Gang Call shipped. Nothing here is scheduled
 Each species gets one power, fired the same way (screech, Q, or the touch CALL button on a full meter). Add a `power` block to the species in `data/species.json` and a branch in `BeachBrash.fire()`. Screeching is currently herring-only (`_can_screech` in `game.gd`) and needs a screech animation per species.
 
 **Great black-back** (tough, shoves rivals)
-- ⭐ **Shakedown:** for 5 s you can't be stunned; touching a rival makes it drop its food to you; humans flinch and drop food on contact.
+- ✅ **Shakedown (built, task 064, playtest build with existing effects):** for 8 s you can't be stunned, the crowd keeps fleeing around you, touching a person or food-carrying rival makes them drop food, and grounded pecks at a stall counter spit food (capped) while the vendor hides. Code in `scripts/shakedown.gd`, tunables in `shakedown` in `data/tuning.json`.
 - Bellow: an instant shockwave screech that stuns every rival and makes nearby humans drop food.
 - Hostile Takeover: the vendor freezes and the stall's counter food is yours for a few seconds.
 

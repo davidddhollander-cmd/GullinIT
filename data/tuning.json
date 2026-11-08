@@ -337,6 +337,10 @@
     "screech_per_sec": 0.06, "vantage_per_px": 0.03, "vantage_max": 3.5,
     "hit_shake": 5, "hit_stop": 0.08, "hit_feathers": 50, "hit_feathers_per_hit": 4, "hit_crumbs": 24, "dust_time": 1.0, "dust_gap": 0.15, "food_lift": 2.8, "shadow_lead": 0.7
   },
+  "shakedown": {
+    "panic_interval": 1.0, "shake_radius": 36, "raid_cap": 6, "duck_time": 0.15, "duck_depth": 64,
+    "raid_foods": ["single_chip", "cookie", "crisps_bag", "crisps_box", "ice_cream", "half_eaten_doughnut", "half_eaten_sandwich"]
+  },
   "panic": {
     "panic_radius": 170, "look_up_time": 0.5, "lead_time": 0.5, "panic_time": 4.0,
     "panic_speed_mult": 4.0, "return_speed_mult": 2.5
