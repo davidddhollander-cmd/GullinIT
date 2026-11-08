@@ -37,14 +37,16 @@ var lesson: int = 0
 var quests: BeachQuests = BeachQuests.new()
 var feathers_earned: int = 0
 var mugged_rivals: Dictionary = {}
-const TRAINING_LESSONS: int = 5
-const DIVE_LESSON: int = 2
+const TRAINING_LESSONS: int = 6
+const TODDLER_LESSON: int = 2 ## peck the ice cream off the toddler, then eat it from the sand
 const BIN_LESSON: int = 3
-const MUG_LESSON: int = 4 ## the dummy carries food: dive through it. A bump (full stomach) passes too.
+const DIVE_LESSON: int = 4
+const MUG_LESSON: int = 5 ## the dummy carries food: dive through it. A bump (full stomach) passes too.
 const AIM_PAUSES: int = 2 ## how many dives of the first dive lesson freeze for steering
 const DIVE_NUDGE_TIME: float = 10.0 ## seconds without a dive before the first dive lesson says how again
 const MUG_RESCUE_MISSES: int = 3 ## missed dives before the dummy hovers still
 const BIN_TIP_RANGE: float = 28.0 ## how near a bin a useless peck has to be to earn a tip
+const TODDLER_DROP_RESET: float = 12.0 ## seconds a dropped lesson cone may lie before the toddler is given another
 const DUMMY_FOOD: String = "crisps_bag"
 const RING_LESSON_1: Vector2 = Vector2(145,65) ## the takeoff ring, above the first palm
 const TRAINER_DELAY: float = 1.4 ## seconds between a screech or counter lesson's toast and the next pop-up
@@ -82,6 +84,8 @@ var tip_ready_at: float = 0.0 ## repeating tips wait out their own display time
 const MISS_ADVANCE_DELAY: float = 3.5
 var training_miss_advance: float = 0.0  # counts down to the next card after a first miss
 var training_reset_clock: float = 0.0
+var toddler_pause_armed: bool = true
+var toddler_drop_age: float = 0.0
 var pending_rivals: Array = []
 const FLY_IN_SPEED: float = 1.5
 const FLY_IN_BUMP_RANGE: float = 14.0
@@ -248,6 +252,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 			effects.snatch_contact(at,player.velocity,false)
 			Audio.play("snatch",1+score.tier*0.08)
 			player.digestion.collect(food_id)
+			if training and lesson == TODDLER_LESSON:
+				_training_advance()
 	)
 	stash_raids.bin_emptied.connect(func(_bin_type: String) -> void: _quest_event("bin_emptied"))
 	stash_raids.bin_opened.connect(func(bin_type: String) -> void:
@@ -426,6 +432,8 @@ func _food_knocked(target: BeachTarget, food_id: String, at: Vector2, impulse: V
 		training_miss_line = "first_miss"
 		training_miss_hint = MISS_HINT_TIME
 		training_miss_advance = MISS_ADVANCE_DELAY
+	if training and lesson == TODDLER_LESSON and target.kind == "toddler":
+		target.drop_retrieve = false # the practice cone stays on the sand for the player
 	stash_raids.add_knocked_food(target,food_id,at,impulse)
 	effects.peck_contact(at,impulse,0.55,"glance")
 	effects.food_crumble(at,impulse)
@@ -1303,6 +1311,18 @@ func _peck_pause_check() -> void:
 			_freeze_actors(true)
 			return
 
+## First time the gull stands beside the toddler's ice cream: freeze on a pulsing PRESS E (X, PECK) so the peck key is clear.
+func _toddler_pause_check() -> void:
+	if not trainer_cards or lesson != TODDLER_LESSON or trainer_open or peck_pause or not toddler_pause_armed:
+		return
+	if stash_raids.nearby_toddler() == null:
+		return
+	toddler_pause_armed = false
+	prompt_action = "peck"
+	peck_pause = true
+	input.clear_touch()
+	_freeze_actors(true)
+
 func _end_peck_pause() -> void:
 	peck_pause = false
 	counter_tip = false
@@ -1415,6 +1435,8 @@ func _training_tick(delta: float) -> void:
 		if training_miss_advance <= 0.0 and lesson == DIVE_LESSON:
 			_training_advance()
 	_peck_pause_check()
+	_toddler_pause_check()
+	_toddler_lesson_tick(delta)
 	if lesson == 0:
 		# Remember takeoff even when the player releases flap before steering.
 		if player.state == BeachGull.State.GLIDE and player.position.y < 110 and not training_took_off:
@@ -1458,6 +1480,37 @@ func _training_tick(delta: float) -> void:
 			target.food = true
 			target.food_sprite.show()
 
+## The toddler lesson's cone: a cone left lying too long is replaced so the lesson never runs out of food.
+func _toddler_lesson_tick(delta: float) -> void:
+	if lesson != TODDLER_LESSON:
+		return
+	var toddler: BeachTarget = lesson_toddler()
+	if toddler == null or not toddler.dropped_pending:
+		toddler_drop_age = 0.0
+		return
+	toddler_drop_age += delta
+	if toddler_drop_age < TODDLER_DROP_RESET:
+		return
+	toddler_drop_age = 0.0
+	if not toddler.dropped_item.is_empty():
+		toddler.dropped_item.recovered = true
+	toddler.dropped_pending = false
+	toddler.dropped_item = {}
+	toddler.drop_retrieve = false
+	toddler.recover = 0.0
+	toddler.seeking_parent = false
+	toddler.food = true
+	toddler.food_sprite.show()
+	toddler.update_art_pose(false)
+
+## The toddler the lesson pecks: the one nearest the gull.
+func lesson_toddler() -> BeachTarget:
+	var best: BeachTarget
+	for target: BeachTarget in spawner.targets:
+		if is_instance_valid(target) and target.kind == "toddler" and not target.leaving and (best == null or absf(target.position.x-player.position.x) < absf(best.position.x-player.position.x)):
+			best = target
+	return best
+
 ## The short reminder on the strip while a lesson runs; the pop-up card does the explaining.
 func training_text() -> String:
 	var live: Dictionary = Config.trainer.live
@@ -1481,6 +1534,12 @@ func training_text() -> String:
 			return TrainerScript.line(live.missed, input)
 		if dive_nudge_clock >= DIVE_NUDGE_TIME:
 			return TrainerScript.line(live.dive_nudge, input)
+	if lesson == TODDLER_LESSON:
+		var toddler: BeachTarget = lesson_toddler()
+		if toddler != null and toddler.dropped_pending:
+			return TrainerScript.line(live.toddler_pickup, input)
+		if stash_raids.nearby_toddler() != null:
+			return TrainerScript.line(live.toddler_peck, input)
 	if lesson == MUG_LESSON:
 		var dummy: RivalPilot = training_dummy()
 		if dummy != null and not player.can_collect_food(DUMMY_FOOD):
@@ -1509,6 +1568,12 @@ func training_target() -> Vector2:
 				nearest = Vector2(float(crumb.x),156)
 				distance = absf(nearest.x-player.position.x)
 		return nearest
+	if lesson == TODDLER_LESSON:
+		var toddler: BeachTarget = lesson_toddler()
+		if toddler != null:
+			if toddler.dropped_pending and not toddler.dropped_item.is_empty():
+				return toddler.dropped_item.position
+			return toddler.food_position()
 	if lesson == MUG_LESSON:
 		var dummy: RivalPilot = training_dummy()
 		if dummy != null:

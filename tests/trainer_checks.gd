@@ -20,6 +20,7 @@ static func run(host: Node, check: Callable) -> void:
 	await _screech_flow(host,check)
 	await _replay_flow(host,check)
 	await _peck_pause_flow(host,check)
+	await _toddler_flow(host,check)
 	await _counter_flow(host,check)
 	await _focus_loss_flow(host,check)
 	BeachGame.trainer_cards = false
@@ -102,7 +103,7 @@ static func _copy_checks(check: Callable) -> void:
 		check.call((how.contains("pecks for you") or how.contains("does the pecking")) and not how.contains("tap E"),"Casual swoop card %d says the beak pecks for you" % index)
 	check.call(TrainerScript.line(trainer.live.peck_now,input).contains("Auto peck"),"Casual peck callout says auto peck")
 	GameState.options.control_mode = "normal"
-	check.call(TrainerScript.line(trainer.training.lessons[2].how,input).contains("tap E"),"Normal swoop card tells the player to tap peck")
+	check.call(TrainerScript.line(trainer.training.lessons[BeachGame.DIVE_LESSON].how,input).contains("tap E"),"Normal swoop card tells the player to tap peck")
 	for lesson: Dictionary in trainer.training.lessons:
 		uppercase_blocks += 1 if TrainerScript.line(lesson.lay,input) == TrainerScript.line(lesson.lay,input).to_upper() else 0
 	check.call(uppercase_blocks == 0,"trainer copy is written in normal case")
@@ -209,12 +210,12 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	for index: int in BeachGame.TRAINING_LESSONS:
 		if not game.banner_lesson(index):
 			card_lessons.append(index)
-	check.call(card_lessons == [BeachGame.DIVE_LESSON,BeachGame.BIN_LESSON,BeachGame.MUG_LESSON],"only the first dive, the bin and the rival dummy keep cards: "+str(card_lessons))
+	check.call(card_lessons == [BeachGame.TODDLER_LESSON,BeachGame.BIN_LESSON,BeachGame.DIVE_LESSON,BeachGame.MUG_LESSON],"only the toddler, the bin, the first dive and the rival dummy keep cards: "+str(card_lessons))
 	# Finishing a lesson shows a toast first, then the next card after a short beat.
 	game._training_advance()
 	check.call(not game.trainer_open and not game.trainer_queue.is_empty() and game.lesson == 2,"the next card waits a beat after the lesson-done toast")
 	game._physics_process(BeachGame.TRAINING_DELAY + 0.1)
-	check.call(game.trainer_open and card.counter_label.text == "Lesson 3/%d" % BeachGame.TRAINING_LESSONS,"the first dive keeps its card")
+	check.call(game.trainer_open and card.counter_label.text == "Lesson 3/%d" % BeachGame.TRAINING_LESSONS and card.lay_label.get_parsed_text().contains("candy from a baby") and card.how_label.get_parsed_text().contains("tap E"),"the toddler lesson keeps its card, with the candy-from-a-baby line and the peck key")
 	var before: Vector2 = game.player.position
 	var clock: float = game.elapsed
 	game._physics_process(0.5)
@@ -278,10 +279,10 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	check.call(not game.trainer_open and game.running and game.lesson == BeachGame.TRAINING_LESSONS,"keep practicing stays on the beach")
 	# The live strip stays hidden between a finished lesson and the next card; the sparring gull arrives DUMMY_LEAD before the mug card.
 	game.trainer_queue = {}
-	game.lesson = BeachGame.BIN_LESSON
+	game.lesson = BeachGame.DIVE_LESSON
 	game._training_advance()
 	game.overlay._process(0)
-	check.call(game.lesson == BeachGame.MUG_LESSON and game.training_dummy() == null and not game.overlay.training_panel.visible,"after the bin lesson there is no dummy and no live strip yet")
+	check.call(game.lesson == BeachGame.MUG_LESSON and game.training_dummy() == null and not game.overlay.training_panel.visible,"after the dive lesson there is no dummy and no live strip yet")
 	game._physics_process(BeachGame.TRAINING_DELAY - BeachGame.DUMMY_LEAD - 0.2)
 	game.overlay._process(0)
 	check.call(game.training_dummy() == null and not game.trainer_open and not game.overlay.training_panel.visible,"the dummy still waits until the last second of the pause")
@@ -410,7 +411,7 @@ static func _set_strike(game: BeachGame, customer: BeachTarget, close: bool) -> 
 	if close:
 		game.player.position += customer.food_position() - game.player.beak()
 
-## Lesson 3 freezes just before the beak reaches the snack so the player sees when to press peck.
+## The dive lesson freezes just before the beak reaches the snack so the player sees when to press peck.
 static func _peck_pause_flow(host: Node, check: Callable) -> void:
 	BeachGame.trainer_cards = true
 	GameState.options.control_mode = "normal"
@@ -420,7 +421,7 @@ static func _peck_pause_flow(host: Node, check: Callable) -> void:
 	game.set_physics_process(false)
 	game.overlay.start_button.pressed.emit()
 	game.overlay.trainer_card.button.pressed.emit()
-	game.lesson = 2
+	game.lesson = BeachGame.DIVE_LESSON
 	game.player.control_mode = "normal"
 	var customer: BeachTarget
 	for target: BeachTarget in game.spawner.targets:
@@ -470,7 +471,7 @@ static func _peck_pause_flow(host: Node, check: Callable) -> void:
 	check.call(not game.peck_pause,"the mug lesson does not pause")
 	await _aim_pause(host,check,game)
 	BeachGame.trainer_cards = false
-	game.lesson = 2
+	game.lesson = BeachGame.DIVE_LESSON
 	game.player.state = BeachGull.State.GLIDE
 	game._training_tick(0.016)
 	_set_strike(game,customer,true)
@@ -574,3 +575,46 @@ static func _run_to_serving(game: BeachGame, client: BeachTarget) -> StallPortio
 		game.camera_y = game.camera_target_y()
 		game._physics_process(1.0 / 60)
 	return serving
+
+## The toddler lesson: the first time the gull stands beside his ice cream the beach freezes on a PRESS <peck key> prompt.
+static func _toddler_flow(host: Node, check: Callable) -> void:
+	BeachGame.trainer_cards = true
+	GameState.options.control_mode = "normal"
+	GameState.progress = {}
+	host.main.start_level(1)
+	var game: BeachGame = host.main.game
+	game.set_physics_process(false)
+	game.overlay.start_button.pressed.emit()
+	game.overlay.trainer_card.button.pressed.emit()
+	game.lesson = BeachGame.TODDLER_LESSON
+	var toddler: BeachTarget = game.lesson_toddler()
+	game.player.state = BeachGull.State.GROUNDED
+	game.player.support = {}
+	game.player.facing = -1.0
+	game.player.position = Vector2(toddler.position.x + 120.0,game.player.ground_y())
+	game._training_tick(0.016)
+	check.call(not game.peck_pause,"far from the toddler the beach does not freeze")
+	game.player.facing = 1.0
+	game.player.position += (toddler.food_position() - Vector2(8,0)) - game.player.beak()
+	game._training_tick(0.016)
+	check.call(game.peck_pause and game.prompt_action == "peck","standing beside his ice cream freezes the beach on the peck prompt")
+	var input: GullInput = game.input
+	_set_device(input,"keyboard")
+	check.call(game.overlay.prompt_text() == "PRESS E","the keyboard prompt names E")
+	_set_device(input,"gamepad")
+	check.call(game.overlay.prompt_text() == "PRESS X","the gamepad prompt names X")
+	_set_device(input,"touch")
+	check.call(game.overlay.prompt_text() == "PRESS PECK","the touch prompt names the PECK button")
+	_set_device(input,"keyboard")
+	game.overlay.queue_redraw()
+	await host.snapshot("trainer-toddler-prompt")
+	var press: InputEventKey = InputEventKey.new()
+	press.physical_keycode = KEY_E
+	press.pressed = true
+	game._unhandled_input(press)
+	check.call(not game.peck_pause and toddler.dropped_pending and not toddler.food,"pressing peck resumes the beach and the same press knocks the ice cream off")
+	game._training_tick(0.016)
+	check.call(not game.peck_pause,"the toddler freeze happens only once")
+	BeachGame.trainer_cards = false
+	host.main.clear_game()
+	GameState.progress = {}

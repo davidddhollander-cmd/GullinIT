@@ -1,5 +1,5 @@
 extends Node
-const SAVE_VERSION: int = 2
+const SAVE_VERSION: int = 3
 var progress: Dictionary = {}
 var wallet: Dictionary = {"feathers": 0}
 var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false, "stats": true, "tips": [], "gull": "herring", "dev_player": false}
@@ -52,7 +52,7 @@ func load_progress() -> void:
 		if data.get("progress") is Dictionary:
 			progress = data.progress
 			if int(data.get("version", 1)) < SAVE_VERSION:
-				migrate_progress()
+				migrate_progress(int(data.get("version", 1)))
 		if data.get("wallet") is Dictionary:
 			wallet.merge(data.wallet, true)
 		_anon_id = str(data.get("anon_id", ""))
@@ -62,9 +62,15 @@ func load_progress() -> void:
 ## Save v2 inserted Squall as level 6 and moved the Sunset Showdown boss to 7: the old level 6 record
 ## (best, stars, quests) becomes level 7's, so a beaten boss stays beaten. Level 7 also opens for
 ## anyone who already has a record there (see unlocked), so nobody is locked out of the boss.
-func migrate_progress() -> void:
+## Save v3 added the toddler lesson at Training Day lesson 3 (index 2), so the old "resume at the mug" step 4 is now 5.
+## Every other unfinished step keeps its number: anyone past the old swoop simply meets the new lessons in order.
+func migrate_progress(from_version: int = 1) -> void:
+	var training: Dictionary = entry(1)
+	if from_version < 3 and not bool(training.get("training_complete", false)) and int(training.get("training_step", 0)) == 4:
+		training.training_step = 5
+		progress["1"] = training
 	var old: Variant = progress.get("6")
-	if old is Dictionary and not progress.has("7"):
+	if from_version < 2 and old is Dictionary and not progress.has("7"):
 		var moved: Dictionary = old.duplicate()
 		var done: Array = moved.get("quests", [])
 		if "l6_random" in done:

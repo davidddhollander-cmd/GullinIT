@@ -63,6 +63,11 @@
       "default": "Climb above him, then press {dive}",
       "touch": "Climb above him, then tap DIVE"
     },
+    "toddler_peck": {
+      "default": "Tap {peck} to peck his ice cream!",
+      "touch": "Tap {peck} to peck his ice cream!"
+    },
+    "toddler_pickup": "Walk over the ice cream to eat it.",
     "full_stomach": "Finish your snack first, greedy guts.",
     "practice": "Pause, then level select, to progress",
     "crash_toast": "Ouch! Dust yourself off."
@@ -158,6 +163,24 @@
       },
       {
         "mood": "amused",
+        "lay": "Now let's try something as easy as stealing candy from a baby...\nSee the toddler with the ice cream? Pecking his cone knocks it onto the sand. Then it's all yours.",
+        "how": {
+          "default": "Land beside the toddler, face his ice cream and tap {peck}. Then walk over the cone to eat it.",
+          "touch": "Land beside the toddler, face his ice cream and tap {peck}. Then walk over the cone to eat it."
+        },
+        "strip": {
+          "default": "Land by the toddler and tap {peck} at his ice cream",
+          "touch": "Land by the toddler and tap {peck} at his ice cream"
+        }
+      },
+      {
+        "mood": "neutral",
+        "lay": "Bins are a proper buffet. Peck one open and everything inside spills onto the sand. Scraps are grub. Wrappers are rubbish, so leave them.",
+        "how": "Land beside the bin and tap {peck} {n} times. Picnic bags burst the same way.",
+        "strip": "Land by the bin and tap {peck} {n} times"
+      },
+      {
+        "mood": "amused",
         "lay": "Now let's get you a proper challenge.\nSee the fella with the ice cream? That's yours. Timing is everything...",
         "how": {
           "default": "Climb above your target. Press {dive} to dive and then tap {peck} right when your beak reaches the delicious target.",
@@ -171,12 +194,6 @@
           "touch": "Aim at the snack, tap DIVE, then tap {peck}",
           "touch_casual": "Tap DIVE, your beak pecks for you"
         }
-      },
-      {
-        "mood": "neutral",
-        "lay": "Bins are a proper buffet. Peck one open and everything inside spills onto the sand. Scraps are grub. Wrappers are rubbish, so leave them.",
-        "how": "Land beside the bin and tap {peck} {n} times. Picnic bags burst the same way.",
-        "strip": "Land by the bin and tap {peck} {n} times"
       },
       {
         "mood": "amused",
