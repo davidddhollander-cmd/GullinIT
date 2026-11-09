@@ -4518,8 +4518,20 @@
       },
       "screech": {"frames": [0,1,2,3,4,5],"fps": 7,"loop": false,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-screech-v1.png"},
       "idle_enraged": {"frames": [0],"fps": 1,"loop": true,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"},
-      "walk_enraged": {"frames": [1,2,3,4,5,6,7,0],"fps": 8,"loop": true,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"}
-    }
+      "walk_enraged": {"frames": [1,2,3,4,5,6,7,0],"fps": 8,"loop": true,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"},
+      "fly_enraged": {"frames": [8.0,9.0,10.0,11.0],"fps": 10.0,"loop": true,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"},
+      "climb_enraged": {"frames": [8.0,9.0,10.0,11.0],"fps": 10.0,"loop": true,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"},
+      "glide_enraged": {"frames": [12.0],"fps": 1.0,"loop": true,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"},
+      "dive_windup_enraged": {"frames": [13.0],"fps": 1.0,"loop": false,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"},
+      "dive_enraged": {"frames": [14.0],"fps": 1.0,"loop": true,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"},
+      "pullup_enraged": {"frames": [15.0],"fps": 1.0,"loop": false,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"},
+      "snatch_enraged": {"frames": [16.0],"fps": 1.0,"loop": false,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"},
+      "peck_enraged": {"frames": [17.0],"fps": 1.0,"loop": false,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"},
+      "landing_enraged": {"frames": [18.0],"fps": 1.0,"loop": false,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"},
+      "stunned_enraged": {"frames": [19.0],"fps": 1.0,"loop": true,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"},
+      "screech_enraged": {"frames": [0,1,2,3,4,5],"fps": 7,"loop": false,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-screech-v1.png"}
+    },
+    "carry_enraged": {"file": "res://assets/sprites/gull-great-black-backed-enraged-carry-v1.png","overlay_file": "res://assets/sprites/gull-great-black-backed-enraged-carry-v1-upper-beak.png","source": "res://assets/reference/gull-great-black-backed-enraged-v1/carry-full-source-atlas.png","frame_w": 256,"frame_h": 256,"visual_scale": 0.375,"frame_sources": [1,2,3,4,5,6,7,0,8,9,10,11,12],"animations": {"walk": {"frames": [0,1,2,3,4,5,6,7],"fps": 8,"loop": true},"fly": {"frames": [8,9,10,11],"fps": 10,"loop": true},"glide": {"frames": [12],"fps": 1,"loop": true}},"beak_anchors": {"walk": [[4.5,-12.75],[4.5,-12.75],[4.5,-12.75],[4.5,-12.75],[4.5,-13.5],[4.5,-13.5],[4.5,-13.5],[4.125,-13.5]],"fly": [[5.25,1.5],[6.375,1.875],[5.25,1.125],[4.875,1.5]],"glide": [[12.375,0.75]]},"overlay_frames": {"walk": [0,1,2,3,4,5,6,7],"fly": [8,9,10,11],"glide": [12]}}
   },
   "off_lead_dog": {
     "file": "res://assets/sprites/off-lead-dog-pixel-v1.png",

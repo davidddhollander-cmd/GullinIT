@@ -1,0 +1,501 @@
+{
+  "file": "res://assets/sprites/gull-great-black-backed-diner-style.png",
+  "frame_w": 256,
+  "frame_h": 256,
+  "visual_scale": 0.375,
+  "species": "great-black-backed",
+  "art_height": 21,
+  "native_alpha": true,
+  "ground_beak_y": -11.625,
+  "frame_beaks": [
+    [
+      10.0,
+      -11.625
+    ],
+    [
+      10.0,
+      -11.0625
+    ],
+    [
+      10.0,
+      -10.875
+    ],
+    [
+      10.0,
+      -10.875
+    ],
+    [
+      10.0,
+      -11.25
+    ],
+    [
+      10.0,
+      -11.625
+    ],
+    [
+      10.0,
+      -11.625
+    ],
+    [
+      10.0,
+      -11.625
+    ],
+    [
+      10.0,
+      2
+    ],
+    [
+      10.0,
+      2
+    ],
+    [
+      10.0,
+      2
+    ],
+    [
+      10.0,
+      2
+    ],
+    [
+      10.0,
+      2
+    ],
+    [
+      10.0,
+      2
+    ],
+    [
+      10.0,
+      0
+    ],
+    [
+      10.0,
+      2
+    ],
+    [
+      10.0,
+      0
+    ],
+    [
+      10.0,
+      2.25
+    ],
+    [
+      10.0,
+      -6
+    ],
+    [
+      10.0,
+      -1.125
+    ]
+  ],
+  "frame_bounds": [
+    [
+      71,
+      84,
+      77,
+      56
+    ],
+    [
+      70,
+      86,
+      78,
+      54
+    ],
+    [
+      70,
+      86,
+      78,
+      54
+    ],
+    [
+      68,
+      86,
+      80,
+      54
+    ],
+    [
+      67,
+      85,
+      81,
+      55
+    ],
+    [
+      69,
+      84,
+      79,
+      56
+    ],
+    [
+      68,
+      84,
+      80,
+      56
+    ],
+    [
+      67,
+      84,
+      81,
+      56
+    ],
+    [
+      66,
+      82,
+      83,
+      67
+    ],
+    [
+      66,
+      94,
+      85,
+      53
+    ],
+    [
+      63,
+      123,
+      85,
+      53
+    ],
+    [
+      68,
+      98,
+      80,
+      48
+    ],
+    [
+      55,
+      109,
+      110,
+      39
+    ],
+    [
+      68,
+      94,
+      80,
+      51
+    ],
+    [
+      59,
+      118,
+      89,
+      26
+    ],
+    [
+      62,
+      92,
+      86,
+      55
+    ],
+    [
+      50,
+      104,
+      98,
+      43
+    ],
+    [
+      67,
+      100,
+      81,
+      40
+    ],
+    [
+      68,
+      83,
+      80,
+      57
+    ],
+    [
+      73,
+      99,
+      75,
+      41
+    ]
+  ],
+  "animations": {
+    "idle": {
+      "frames": [
+        0
+      ],
+      "fps": 1,
+      "loop": true,
+      "source_left": false
+    },
+    "walk": {
+      "frames": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        0
+      ],
+      "fps": 8,
+      "loop": true,
+      "source_left": false
+    },
+    "fly": {
+      "frames": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "fps": 10,
+      "loop": true,
+      "source_left": false
+    },
+    "climb": {
+      "frames": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "fps": 10,
+      "loop": true,
+      "source_left": false
+    },
+    "glide": {
+      "frames": [
+        12
+      ],
+      "fps": 1,
+      "loop": true,
+      "source_left": false
+    },
+    "dive_windup": {
+      "frames": [
+        13
+      ],
+      "fps": 1,
+      "loop": false,
+      "source_left": false
+    },
+    "dive": {
+      "frames": [
+        14
+      ],
+      "fps": 1,
+      "loop": true,
+      "source_left": false
+    },
+    "pullup": {
+      "frames": [
+        15
+      ],
+      "fps": 1,
+      "loop": false,
+      "source_left": false
+    },
+    "snatch": {
+      "frames": [
+        16
+      ],
+      "fps": 1,
+      "loop": false,
+      "source_left": false
+    },
+    "peck": {
+      "frames": [
+        17
+      ],
+      "fps": 1,
+      "loop": false,
+      "source_left": false
+    },
+    "landing": {
+      "frames": [
+        18
+      ],
+      "fps": 1,
+      "loop": false,
+      "source_left": false
+    },
+    "stunned": {
+      "frames": [
+        19
+      ],
+      "fps": 1,
+      "loop": true,
+      "source_left": false
+    },
+    "screech": {
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "fps": 7,
+      "loop": false,
+      "source_left": false,
+      "file": "res://assets/sprites/gull-great-black-backed-screech-v1.png"
+    },
+    "idle_enraged": {
+      "frames": [
+        0
+      ],
+      "fps": 1,
+      "loop": true,
+      "source_left": false,
+      "file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"
+    },
+    "walk_enraged": {
+      "frames": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        0
+      ],
+      "fps": 8,
+      "loop": true,
+      "source_left": false,
+      "file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"
+    }
+  },
+  "carry": {
+    "file": "res://assets/sprites/gull-great-black-backed-carry-v1.png",
+    "overlay_file": "res://assets/sprites/gull-great-black-backed-carry-v1-upper-beak.png",
+    "source": "res://assets/reference/gull-carry-v1/great-black-backed-carry-source.png",
+    "frame_w": 256,
+    "frame_h": 256,
+    "visual_scale": 0.375,
+    "frame_sources": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      0,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "animations": {
+      "walk": {
+        "frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "fly": {
+        "frames": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "fps": 10,
+        "loop": true
+      },
+      "glide": {
+        "frames": [
+          12
+        ],
+        "fps": 1,
+        "loop": true
+      }
+    },
+    "beak_anchors": {
+      "walk": [
+        [
+          4.5,
+          -12.75
+        ],
+        [
+          4.5,
+          -12.75
+        ],
+        [
+          4.5,
+          -12.75
+        ],
+        [
+          4.5,
+          -12.75
+        ],
+        [
+          4.5,
+          -13.5
+        ],
+        [
+          4.5,
+          -13.5
+        ],
+        [
+          4.5,
+          -13.5
+        ],
+        [
+          4.125,
+          -13.5
+        ]
+      ],
+      "fly": [
+        [
+          5.25,
+          1.5
+        ],
+        [
+          6.375,
+          1.875
+        ],
+        [
+          5.25,
+          1.125
+        ],
+        [
+          4.875,
+          1.5
+        ]
+      ],
+      "glide": [
+        [
+          12.375,
+          0.75
+        ]
+      ]
+    },
+    "overlay_frames": {
+      "walk": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "fly": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "glide": [
+        12
+      ]
+    }
+  }
+}
