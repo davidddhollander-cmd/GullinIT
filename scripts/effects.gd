@@ -23,7 +23,6 @@ const CRUMB_FLECKS_TEXTURE: Texture2D = preload("res://assets/sprites/vfx-crumb-
 const DUST_PUFF_TEXTURE: Texture2D = preload("res://assets/sprites/vfx-dust-puff-v1.png")
 const SPEED_STREAK_TEXTURE: Texture2D = preload("res://assets/sprites/vfx-speed-streak-v1.png")
 var feather_rng := RandomNumberGenerator.new()
-const SCORE_MESSAGE_HOLD: float = 3.0
 const SCORE_MESSAGE_FADE: float = 1.5
 const SCORE_MESSAGE_RISE_SPEED: float = 4.0
 
@@ -59,11 +58,19 @@ func combo_pop(at: Vector2, multiplier: String) -> void:
 
 func score_message(at: Vector2, text: String, color: Color = Color("fff4da")) -> void:
 	if Config.tuning.juice.floating_text:
+		# Only the newest few score messages stay: a new one pushes out the oldest.
+		var scores: Array[Dictionary] = []
+		for item: Dictionary in texts:
+			if item.get("score",false):
+				scores.append(item)
+		while not scores.is_empty() and scores.size() >= int(Config.tuning.juice.score_popups_max):
+			texts.erase(scores.pop_front())
 		texts.append({
 			"at":at,
 			"text":text,
 			"color":color,
-			"life":SCORE_MESSAGE_HOLD + SCORE_MESSAGE_FADE,
+			"score":true,
+			"life":float(Config.tuning.juice.score_popup_hold) + SCORE_MESSAGE_FADE,
 			"fade_time":SCORE_MESSAGE_FADE,
 			"rise_speed":SCORE_MESSAGE_RISE_SPEED,
 		})
@@ -455,8 +462,50 @@ func text_hop(item: Dictionary) -> float:
 	var t: Dictionary = Config.tuning.juice
 	return roundf(float(t.text_hop)*sin(clampf(float(item.get("age",0.0))/float(t.text_hop_time),0.0,1.0)*PI))
 
-func _draw() -> void:
+## Pure layout for floating text, so tests can run it without drawing. `placements` (same order as
+## `texts`, oldest first) hold {at, width, fixed}. Fixed texts (rise_speed 0: tips, taunts) keep their
+## spot and are placed first. Movable texts are placed newest first and move up in whole pixels until
+## their box clears every placed box. Returns one origin per placement, or null when a pushed text
+## would leave the top of the screen; those are not drawn.
+static func text_layout(placements: Array, screen_top: float) -> Array:
+	var origins: Array = []
+	origins.resize(placements.size())
+	var order: Array[int] = []
+	for i: int in placements.size():
+		if placements[i].fixed:
+			order.append(i)
+	for i: int in range(placements.size()-1,-1,-1):
+		if not placements[i].fixed:
+			order.append(i)
+	var placed: Array[Rect2] = []
+	for i: int in order:
+		var placement: Dictionary = placements[i]
+		var at := Vector2(roundf(placement.at.x),roundf(placement.at.y))
+		var box: Rect2 = _text_box(at,float(placement.width))
+		if not bool(placement.fixed):
+			while box.position.y >= screen_top and _hits_any(box,placed):
+				at.y -= 1.0
+				box = _text_box(at,float(placement.width))
+			if box.position.y < screen_top:
+				continue
+		placed.append(box)
+		origins[i] = at
+	return origins
+
+static func _text_box(at: Vector2, width: float) -> Rect2:
+	return Rect2(at-Vector2(2,8),Vector2(width+4,11))
+
+static func _hits_any(box: Rect2, placed: Array[Rect2]) -> bool:
+	for other: Rect2 in placed:
+		if box.intersects(other):
+			return true
+	return false
+
+## Where each floating text goes this frame: the hop and the move below the score banner first,
+## then the overlap pass (see text_layout). Null entries are not drawn.
+func layout_texts(screen_top: float) -> Array:
 	var game: BeachGame = get_parent() as BeachGame
+	var placements: Array = []
 	for item: Dictionary in texts:
 		var width: float = font.get_string_size(item.text,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x
 		var at: Vector2 = item.at-Vector2(width*0.5,0)
@@ -472,6 +521,18 @@ func _draw() -> void:
 				screen_at.y = maxf(row.get_global_rect().end.y+10.0,game.overlay.hint_rect("").end.y+10.0)
 				screen_at.x = clampf(screen_at.x,6.0,maxf(6.0,228.0-width))
 				at = transform.affine_inverse()*screen_at
+		placements.append({"at":at,"width":width,"fixed":float(item.get("rise_speed",10.0)) == 0.0})
+	return text_layout(placements,screen_top)
+
+func _draw() -> void:
+	var screen_top: float = (get_global_transform_with_canvas().affine_inverse()*Vector2.ZERO).y if is_inside_tree() else 0.0
+	var origins: Array = layout_texts(screen_top)
+	for i: int in texts.size():
+		if origins[i] == null:
+			continue
+		var item: Dictionary = texts[i]
+		var at: Vector2 = origins[i]
+		var width: float = font.get_string_size(item.text,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x
 		var alpha: float = clampf(float(item.life)/float(item.fade_time),0.0,1.0) if item.has("fade_time") else 1.0
 		var backing := Color("183b4e")
 		backing.a = alpha

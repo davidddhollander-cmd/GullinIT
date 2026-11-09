@@ -39,7 +39,7 @@ var score_announcement_fonts: Array[Font] = [
 	preload("res://assets/arcade_score_hot.fnt"),
 ]
 var score_announcement_font_index: int = 0
-const SCORE_ANNOUNCEMENT_HOLD: float = BeachEffects.SCORE_MESSAGE_HOLD
+const SCORE_ANNOUNCEMENT_HOLD: float = 3.0 ## banner keeps its own hold; floating popups use juice.score_popup_hold
 const SCORE_ANNOUNCEMENT_FADE: float = BeachEffects.SCORE_MESSAGE_FADE
 const TOP_BAR_HEIGHT: int = 17
 const BANNER_PORTRAIT: float = 28.0 ## Screeches in the live lesson banner
