@@ -60,6 +60,9 @@ var steady_invulnerable: bool = false ## power immunity: no flicker
 var stun_shield: int = 0 ## Strong skull: stuns still to shrug off
 var wind_mult: float = 1.0
 var stun_mult: float = 1.0
+var knockback: float = 1.0 ## scales the tumble launch (player only)
+var power_scale: float = 1.0 ## Shakedown bully size, applied after the per-frame reset
+var power_tint: Color = Color.WHITE
 var shoves: bool = false
 var dive_speed: float = 0.0
 var walk_phase: float = 0.0
@@ -313,6 +316,7 @@ func apply_species_stats() -> void:
 	dive_mult = float(s.get("dive",1.0))
 	wind_mult = float(s.get("wind",1.0))
 	stun_mult = float(s.get("stun",1.0))
+	knockback = float(s.get("knockback",1.0))
 	shoves = bool(s.get("shove",false))
 
 func show_ground_peck(time: float = 0.14) -> void:
@@ -435,7 +439,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			flap_anim_left = float(f.stroke_interval)
 			stroke_cooldown = 0.0
 	invulnerable = maxf(0.0, invulnerable - delta)
-	sprite.modulate.a = 0.5 if invulnerable > 0.0 and not steady_invulnerable and int(invulnerable * 12) % 2 == 0 else 1.0
+	sprite.modulate = Color(power_tint,0.5 if invulnerable > 0.0 and not steady_invulnerable and int(invulnerable * 12) % 2 == 0 else 1.0)
 	sprite.rotation = 0.0
 	sprite.scale = Vector2.ONE
 	sprite.speed_scale = 1.0
@@ -574,7 +578,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 	sprite.flip_h = facing < 0
 	sprite.visible = detailed_art or state != State.GROUNDED
 	if detailed_art:
-		sprite.scale *= art_scale
+		sprite.scale *= art_scale*power_scale
 		if state == State.GROUNDED:
 			if screech_held or screech_recover_left > 0.0:
 				sprite.animation = &"screech"
@@ -601,11 +605,12 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			# Production sheets use source-space bill x=20 and sole y=12.
 			# Resize around these contact anchors, keeping feet on sand/lids and
 			# the airborne bill at the existing collision point through dive rotation.
-			var offset := Vector2((float(d.beak_offset)-20.0*art_scale)*facing,0)
+			var drawn: float = art_scale*power_scale
+			var offset := Vector2((float(d.beak_offset)-20.0*drawn)*facing,0)
 			if state == State.GROUNDED:
-				offset.y = float(f.feet_offset)-12.0*art_scale
+				offset.y = float(f.feet_offset)-12.0*drawn
 			elif state != State.STRIKE:
-				offset.y = 2.0-4.0*art_scale
+				offset.y = 2.0-4.0*drawn
 			sprite.position = offset.rotated(sprite.rotation)
 			if state == State.STUNNED:
 				# Spin around the body, without the flight bill alignment orbit.
@@ -791,6 +796,10 @@ func crash_warning() -> bool:
 	var seconds_to_sand: float = maxf(0,float(Config.tuning.world.ground)-beak().y) / maxf(velocity.y,1)
 	return seconds_to_sand <= float(Config.tuning.dive.warning_time)
 
+## Post-hit flicker invulnerability: threats skip the gull. Power immunity is not this, so they still attack and bounce off.
+func untargetable() -> bool:
+	return invulnerable > 0.0 and not steady_invulnerable
+
 func stun(duration: float = -1.0, attacker: Vector2 = Vector2.INF) -> void:
 	if state == State.STUNNED:
 		return
@@ -821,7 +830,7 @@ func begin_tumble(duration: float = -1.0, attacker: Vector2 = Vector2.INF) -> vo
 	stop_screech(false)
 	stroke_left = 0.0
 	timer = (float(t.duration) if duration < 0.0 else maxf(duration,float(t.recovery_time))) * stun_mult
-	velocity = Vector2(away*float(t.launch_speed),-float(t.launch_up))
+	velocity = Vector2(away*float(t.launch_speed),-float(t.launch_up))*knockback
 	facing = away
 	tumble_angle = sprite.rotation
 	tumble_spin = away*float(t.spin)

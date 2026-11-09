@@ -23,11 +23,14 @@ var prepared_food: Sprite2D
 var ducked: bool = false ## Shakedown raid: the vendor sinks out of sight inside the mask
 var duck: float = 0.0 ## 0 up, 1 hidden
 var vendor_home_y: float = 0.0
+var home_x: float = 0.0
+var shake_left: float = 0.0 ## Shakedown raid rattle
 
 func setup(entry: Dictionary, index: int) -> void:
 	z_index = DRAW_DEPTH
 	stand_index = index
 	position = Vector2(float(entry.x),float(entry.get("y",160)))
+	home_x = position.x
 	stall_type = str(entry.type)
 	hotdog = stall_type=="hotdog_stand"
 	side = -1.0 if float(entry.get("customer_x",position.x+48))-position.x<0 else 1.0
@@ -74,12 +77,21 @@ func show_food(id: String) -> void:
 
 func advance(delta: float) -> void:
 	clock += delta
+	if shake_left > 0.0:
+		var t: Dictionary = Config.tuning.shakedown
+		shake_left = maxf(0.0,shake_left-delta)
+		position.x = home_x+sin(clock*80.0)*float(t.raid_shake)*shake_left/float(t.raid_shake_time)
 	var goal: float = 1.0 if ducked else 0.0
 	if duck != goal:
 		duck = move_toward(duck,goal,delta/float(Config.tuning.shakedown.duck_time))
 		vendor.position.y = vendor_home_y+duck*float(Config.tuning.shakedown.duck_depth)
 
+func rattle() -> void:
+	shake_left = float(Config.tuning.shakedown.raid_shake_time)
+
 func snap_duck() -> void:
+	shake_left = 0.0
+	position.x = home_x
 	duck = 1.0 if ducked else 0.0
 	vendor.position.y = vendor_home_y+duck*float(Config.tuning.shakedown.duck_depth)
 

@@ -54,7 +54,7 @@ func _in_leash(x: float) -> bool:
 	return x >= home.x - leash and x <= home.y + leash
 
 func _can_chase(gull: BeachGull) -> bool:
-	return _in_leash(gull.position.x) and gull.state != BeachGull.State.STUNNED and gull.invulnerable <= 0.0
+	return _in_leash(gull.position.x) and gull.state != BeachGull.State.STUNNED and not gull.untargetable()
 
 func _wander() -> void:
 	state = State.WANDER
@@ -209,6 +209,8 @@ func _try_catch(gull: BeachGull) -> void:
 		return
 	gull.stun(-1.0, position)
 	if gull.state != BeachGull.State.STUNNED:
+		if gull.steady_invulnerable:
+			_bounce(gull)
 		return
 	air = 0.0
 	state = State.CATCH
@@ -217,6 +219,14 @@ func _try_catch(gull: BeachGull) -> void:
 		rival_caught.emit(gull)
 	else:
 		caught.emit()
+
+## Power immunity: the dog bounces off and sulks for at least bounce_cooldown.
+func _bounce(gull: BeachGull) -> void:
+	var s: Dictionary = Config.tuning.shakedown
+	position.x = clampf(position.x - signf(gull.position.x - position.x) * float(s.bounce_recoil), 12.0, float(Config.tuning.world.width) - 12.0)
+	air = 0.0
+	_cooldown(true)
+	timer = maxf(timer, float(s.bounce_cooldown))
 
 func _give_up(leashed: bool = false) -> void:
 	if leashed:

@@ -65,7 +65,7 @@ func fire() -> bool:
 	meter = 0.0
 	var p: Dictionary = power()
 	game.effects.message(game.player.position-Vector2(0,24),str(p.name)+"!",BeachUI.GOLD)
-	Audio.play(str(p.get("sound","gang_call")),1.0,-2.0)
+	Audio.play(str(p.get("sound","gang_call")),float(p.get("pitch",1.0)),-2.0)
 	game.effects.sound_wave(game.player.beak())
 	powers_fired += 1
 	game.track("power_fired",{"power":str(p.id),"level":int(game.level.get("id",0))})
@@ -149,17 +149,23 @@ func tick(delta: float) -> void:
 ## Each gang hit lands harder than the last: feathers, sand, a screen punch and a rising cry.
 func _impact(ally: Dictionary, gull: BeachGull) -> void:
 	var t: Dictionary = tuning()
-	var fx: BeachEffects = game.effects
 	var knocked: bool = is_instance_valid(ally.target) and ally.target.knock_food(gull,float(t.food_lift))
-	fx.feather_burst(ally.hit,gull.velocity,int(t.hit_feathers)+hits*int(t.hit_feathers_per_hit))
+	hit_fx(ally.hit,gull.velocity,knocked,int(t.hit_feathers),int(t.hit_crumbs),float(t.hit_shake),float(t.hit_stop))
+
+## The shared impact bundle (Gang Call hits, Shakedown slam and shakes); each hit counts toward the rising cry.
+func hit_fx(at: Vector2, velocity: Vector2, knocked: bool, feathers: int, crumbs: int, shake: float, stop: float) -> void:
+	var t: Dictionary = tuning()
+	var fx: BeachEffects = game.effects
+	var step: int = mini(hits,int(t.hit_cap))
+	fx.feather_burst(at,velocity,feathers+step*int(t.hit_feathers_per_hit))
 	if knocked:
-		fx.food_crumble(ally.hit,gull.velocity,int(t.hit_crumbs)) # on top of the knock's own crumble
-	fx.sand_puff(Vector2(ally.hit.x,float(Config.tuning.world.ground)))
+		fx.food_crumble(at,velocity,crumbs) # on top of the knock's own crumble
+	fx.sand_puff(Vector2(at.x,float(Config.tuning.world.ground)))
 	if bool(Config.tuning.juice.shake) and GameState.options.shake:
-		fx.shake = maxf(fx.shake,float(t.hit_shake))
+		fx.shake = maxf(fx.shake,shake)
 	if bool(Config.tuning.juice.hitstop):
-		fx.freeze = maxf(fx.freeze,float(t.hit_stop))
-	Audio.play("gull_hit_%d" % (hits%3+1),1.0+0.1*hits,-3.0 if knocked else -7.0)
+		fx.freeze = maxf(fx.freeze,stop)
+	Audio.play("gull_hit_%d" % (step%3+1),1.0+0.1*step,-3.0 if knocked else -7.0)
 	hits += 1
 
 ## Panicked runners kick up sand for the first second of the stampede.

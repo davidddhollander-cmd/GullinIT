@@ -117,6 +117,7 @@ const SCREECH_HOLD_TIME: float = 0.24
 var peck_hold_pending: bool = false
 var peck_hold_elapsed: float = 0.0
 var screech_audio: AudioStreamPlayer
+var last_nope_ms: int = -100000
 var brash: BeachBrash = BeachBrash.new()
 var squall: BeachSquall ## level 6 weather twist
 var peck_hold_touch: bool = false
@@ -232,6 +233,10 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	)
 	player.dive_released.connect(func(at: Vector2, heading: Vector2) -> void: effects.dive_release(at,heading))
 	player.stun_ignored.connect(func() -> void:
+		var now: int = Time.get_ticks_msec()
+		if brash.active() and now-last_nope_ms < int(float(Config.tuning.shakedown.nope_gap)*1000.0):
+			return
+		last_nope_ms = now
 		effects.message(player.position,"NOPE!" if brash.active() else "SKULL!",BeachUI.GOLD)
 		Audio.play("click")
 	)
@@ -831,7 +836,7 @@ func _peck() -> void:
 			_bin_peck_tip()
 
 func _can_screech() -> bool:
-	return player != null and not training and player.species == "herring" and player.detailed_art and player.state == BeachGull.State.GROUNDED and not player.climb and absf(player.velocity.x) <= 1.0 and Input.get_vector("aim_left","aim_right","aim_up","aim_down").length() <= 0.15 and (input == null or input.touch_stick().length() <= 0.15)
+	return player != null and not training and player.detailed_art and player.sprite.sprite_frames.has_animation(&"screech") and player.state == BeachGull.State.GROUNDED and not player.climb and absf(player.velocity.x) <= 1.0 and Input.get_vector("aim_left","aim_right","aim_up","aim_down").length() <= 0.15 and (input == null or input.touch_stick().length() <= 0.15)
 
 func _advance_screech_hold(delta: float) -> void:
 	if not peck_hold_pending:
@@ -849,12 +854,15 @@ func _advance_screech_hold(delta: float) -> void:
 	if player.screech_held:
 		brash.screech_tick(delta)
 		if not is_instance_valid(screech_audio) or not screech_audio.playing:
-			screech_audio = Audio.play("screech_long" if rng.randf() < 0.6 else "screech_short",rng.randf_range(0.94,1.06),-6.0)
+			screech_audio = Audio.play("screech_long" if rng.randf() < 0.6 else "screech_short",rng.randf_range(0.94,1.06)*screech_pitch(),-6.0)
 		return
 	peck_hold_elapsed += delta
 	if peck_hold_elapsed >= SCREECH_HOLD_TIME and player.start_screech():
-		screech_audio = Audio.play("screech_long",1.0,-6.0)
+		screech_audio = Audio.play("screech_long",screech_pitch(),-6.0)
 		brash.fire()
+
+func screech_pitch() -> float:
+	return float(player.species_stats().get("screech_pitch",1.0))
 
 func _stop_screech(recover: bool = true) -> void:
 	brash.screech_ended()
@@ -928,7 +936,7 @@ func _award(value: int, risky: bool, upwind: bool, mugged: bool, handover: bool 
 
 func _stunned() -> void:
 	training_clean_snatch = false
-	brash.add(float(Config.tuning.brash.stun))
+	brash.earn("stun")
 	var before: int = score.points
 	score.points = maxi(0,score.points-5)
 	score.lost += before-score.points

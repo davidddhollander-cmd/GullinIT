@@ -54,6 +54,10 @@ static func run(host: Node, check: Callable) -> void:
 	_untouchable_checks(host,check)
 	_panic_and_shake_checks(host,check)
 	_raid_checks(host,check)
+	_toughness_checks(host,check)
+	_punch_checks(host,check)
+	_bounce_checks(host,check)
+	_raid_feel_checks(host,check)
 	await _end_checks(host,check)
 	await _board_checks(host,check)
 	Config.tuning.juice.audio = previous_audio
@@ -96,6 +100,7 @@ static func _fire_checks(host: Node, check: Callable) -> void:
 	brash.end_power()
 	game.player.state = BeachGull.State.GROUNDED
 	brash.meter = 1.0
+	game.effects.freeze = 0.0 # the first fire left a hitstop
 	game.input.touch_slowmo = true # the touch button path
 	game._physics_process(0.02)
 	check.call(brash.active_id == "shakedown" and brash.powers_fired == 2,"the touch button fires Shakedown too")
@@ -323,3 +328,258 @@ static func _board_checks(host: Node, check: Callable) -> void:
 		host.main.clear_game()
 		await host.settle()
 	GameState.progress = {"1": {"training_step": 7, "training_complete": true}, "2": {"screech_lesson_complete": true}}
+
+## Task 066: toughness stats and the species-agnostic screech gate.
+static func _toughness_checks(host: Node, check: Callable) -> void:
+	var launch: float = float(Config.tuning.tumble.launch_speed)
+	var up: float = float(Config.tuning.tumble.launch_up)
+	var herring: BeachGame = fixture(host,"herring")
+	var blackback: BeachGame = fixture(host,BLACKBACK)
+	for game: BeachGame in [herring,blackback]:
+		game.player.position = Vector2(200,60)
+		game.player.begin_tumble(-1.0,Vector2(180,60))
+	check.call(is_equal_approx(herring.player.velocity.x,launch) and is_equal_approx(herring.player.velocity.y,-up),"a herring's tumble launch is unchanged")
+	check.call(is_equal_approx(blackback.player.velocity.x,launch*0.6) and is_equal_approx(blackback.player.velocity.y,-up*0.6) and blackback.player.velocity.x < herring.player.velocity.x,"a black-back tumbles shorter: both launch components scaled by knockback")
+	for game: BeachGame in [herring,blackback]:
+		game.brash.meter = 0.5
+		game._stunned()
+	check.call(is_equal_approx(herring.brash.meter,0.5+float(Config.tuning.brash.stun)),"a stun costs a herring the full meter loss")
+	check.call(is_equal_approx(blackback.brash.meter,0.5+float(Config.tuning.brash.stun)*0.5),"a stun costs a black-back half as much meter")
+	# Screech gate follows the clip, not the species.
+	var player: BeachGull = herring.player
+	ground_gull(herring,80)
+	check.call(player.sprite.sprite_frames.has_animation(&"screech") and herring._can_screech(),"a herring with a screech clip can screech")
+	var frames: SpriteFrames = player.sprite.sprite_frames
+	var bare: SpriteFrames = frames.duplicate()
+	bare.remove_animation(&"screech")
+	player.sprite.sprite_frames = bare
+	check.call(not herring._can_screech(),"without a screech clip a gull cannot screech")
+	check.call(not herring._peck_pressed() and not herring.peck_hold_pending,"without the clip a peck press is a plain peck, not a pending hold")
+	player.sprite.sprite_frames = frames
+	check.call(herring._can_screech(),"restoring the clip re-enables the screech")
+	var black_player: BeachGull = blackback.player
+	ground_gull(blackback,80)
+	check.call(blackback._can_screech() == black_player.sprite.sprite_frames.has_animation(&"screech"),"the black-back screeches exactly when its art has a screech clip")
+	var fixture_frames: SpriteFrames = black_player.sprite.sprite_frames.duplicate()
+	if not fixture_frames.has_animation(&"screech"):
+		fixture_frames.add_animation(&"screech")
+		fixture_frames.add_frame(&"screech",fixture_frames.get_frame_texture(fixture_frames.get_animation_names()[0],0))
+	black_player.sprite.sprite_frames = fixture_frames
+	check.call(blackback._can_screech() and is_equal_approx(blackback.screech_pitch(),0.8) and is_equal_approx(herring.screech_pitch(),1.0),"adding a clip lets a black-back screech, lower; herring pitch is unchanged")
+	herring.queue_free()
+	blackback.queue_free()
+
+static func _person(game: BeachGame, x: float) -> BeachTarget:
+	var person: BeachTarget = game.spawner.create("kiosk_customer",x,{"food_id":"hotdog","appearance":"kiosk_customer"})
+	person.respawn = 100.0
+	person.food = true
+	return person
+
+## Puts a person so their food sits `gap` pixels from the point.
+static func _place(person: BeachTarget, at: Vector2, gap: float) -> void:
+	var low: float = 0.0
+	var high: float = 300.0
+	for i: int in 24:
+		var mid: float = (low+high)*0.5
+		person.position.x = at.x+mid
+		if at.distance_to(person.food_position()) < gap:
+			low = mid
+		else:
+			high = mid
+
+static func _punch_checks(host: Node, check: Callable) -> void:
+	var game: BeachGame = fixture(host,BLACKBACK)
+	var player: BeachGull = game.player
+	var brash: BeachBrash = game.brash
+	var t: Dictionary = Config.tuning.shakedown
+	check.call(is_equal_approx(float(t.shake_radius),50.0) and is_equal_approx(float(t.slam_radius),70.0) and is_equal_approx(float(t.gorge_digest),3.0) and int(t.gorge_capacity) == 4 and is_equal_approx(float(t.bully_scale),1.25) and is_equal_approx(float(t.bounce_cooldown),2.0),"punch tunables live in the shakedown block")
+	var inner: BeachTarget = _person(game,300)
+	var middle: BeachTarget = _person(game,300)
+	var outer: BeachTarget = _person(game,300)
+	ground_gull(game,300)
+	var at: Vector2 = player.position
+	_place(inner,at,30.0)
+	_place(middle,at,62.0)
+	_place(outer,at,95.0)
+	var knocks: Array[float] = []
+	for person: BeachTarget in [inner,middle,outer]:
+		person.food_knocked.connect(func(_who: BeachTarget, _id: String, _pos: Vector2, impulse: Vector2) -> void: knocks.append(impulse.y))
+	player.digestion.capacity = 6 # a perk's stomach
+	brash.meter = 1.0
+	brash.fire()
+	check.call(not inner.food and not middle.food and outer.food,"firing knocks food from everyone inside slam_radius at once, and no one outside")
+	check.call(brash.hits == 1 and knocks.size() == 2,"the slam is one impact bundle")
+	var lift: float = -float(Config.tuning.world.drop_impulse_up)*float(t.food_lift)
+	check.call(knocks.all(func(y: float) -> bool: return is_equal_approx(y,lift)),"slam food flies with food_lift")
+	check.call(not inner.drop_retrieve and not middle.drop_retrieve,"food knocked by the power cannot be reclaimed")
+	# Shake hits: higher lift, no reclaim, capped impact rate.
+	var reclaim: float = float(Config.foods.hotdog.reclaim_chance)
+	Config.foods.hotdog.reclaim_chance = 1.0
+	var control: BeachTarget = _person(game,700)
+	control.knock_food(player)
+	check.call(control.drop_retrieve,"control: an ordinary knock of this food is reclaimable")
+	var shaken: Array[BeachTarget] = [_person(game,400),_person(game,400)]
+	player.state = BeachGull.State.GLIDE
+	player.position = Vector2(560,100)
+	knocks.clear()
+	for person: BeachTarget in shaken:
+		_place(person,player.position,20.0)
+		person.food_knocked.connect(func(_who: BeachTarget, _id: String, _pos: Vector2, impulse: Vector2) -> void: knocks.append(impulse.y))
+	var before_hits: int = brash.hits
+	sim(game,0.02)
+	Config.foods.hotdog.reclaim_chance = reclaim
+	check.call(shaken.all(func(p: BeachTarget) -> bool: return not p.food),"shake knocks the food from people in range")
+	check.call(shaken.all(func(p: BeachTarget) -> bool: return not p.drop_retrieve),"shaken food cannot be reclaimed")
+	check.call(knocks.size() == 2 and knocks.all(func(y: float) -> bool: return absf(y-lift) <= float(Config.tuning.world.drop_impulse_side)),"shake knocks use food_lift (the gull's own heading adds at most drop_impulse_side)")
+	check.call(brash.hits == before_hits+1,"two simultaneous shake knocks make a single impact")
+	var again: BeachTarget = _person(game,400)
+	_place(again,player.position,20.0)
+	sim(game,0.02)
+	check.call(brash.hits == before_hits+1 and not again.food,"impact_gap stops chained hits stacking shake and freeze")
+	sim(game,float(t.impact_gap)+0.05)
+	var next: BeachTarget = _person(game,400)
+	_place(next,player.position,20.0)
+	sim(game,0.02)
+	check.call(brash.hits == before_hits+2 and not next.food,"the next hit after the gap lands as a fresh impact")
+	# Gorge.
+	var stomach: GullDigestion = player.digestion
+	check.call(stomach.capacity == 10 and is_equal_approx(stomach.speed,3.0),"capacity and digest speed rise during the power, on top of the perk")
+	stomach.snacks.clear()
+	stomach.collect("single_chip")
+	stomach.tick(0.2,false)
+	check.call(stomach.snacks.is_empty(),"digestion runs 3x during the power")
+	# Bully size, tint, warning.
+	var base: float = player.art_scale if player.detailed_art else 1.0
+	sim(game,0.1)
+	check.call(is_equal_approx(player.sprite.scale.x,base*1.25) and is_equal_approx(player.sprite.scale.y,base*1.25),"the gull is drawn at bully_scale during the power")
+	ground_gull(game,420)
+	sim(game,0.02)
+	var scaled_beak: Vector2 = player.beak()-player.position
+	var scaled_feet: Vector2 = player.position-Vector2(0,float(Config.tuning.flight.feet_offset))
+	player.power_scale = 1.0
+	sim(game,0.02)
+	check.call(player.state == BeachGull.State.GROUNDED and (player.beak()-player.position).is_equal_approx(scaled_beak) and is_equal_approx(player.position.y,scaled_feet.y+float(Config.tuning.flight.feet_offset)),"scaling the sprite does not move the beak or feet")
+	player.power_scale = float(t.bully_scale)
+	var tinted: bool = false
+	for i: int in 80:
+		sim(game,0.02)
+		tinted = tinted or player.sprite.modulate.g < 0.95
+	check.call(tinted,"the tint pulses")
+	var calm: float = game.brash.shakedown.pulse
+	sim(game,0.2)
+	var calm_step: float = game.brash.shakedown.pulse-calm
+	brash.active_left = 1.0
+	var warn: float = game.brash.shakedown.pulse
+	sim(game,0.2)
+	check.call(game.brash.shakedown.pulse-warn > calm_step*2.0,"the pulse speeds up in the last end_warning seconds")
+	game.effects.shake = 0.0
+	player.sand_landed.emit(Vector2(400,160))
+	check.call(not bool(Config.tuning.juice.shake) or not GameState.options.shake or game.effects.shake >= float(t.land_shake),"landing during the power adds a shake")
+	# Every end path restores size, capacity and speed.
+	for path: String in ["expiry","end_power","clear","finish"]:
+		if not brash.active():
+			ground_gull(game,80)
+			brash.meter = 1.0
+			brash.fire()
+		check.call(player.digestion.capacity == 10,"gorge applies for the %s path" % path)
+		match path:
+			"expiry":
+				sim(game,9.0)
+			"end_power":
+				brash.end_power()
+			"clear":
+				brash.clear()
+			"finish":
+				game.finish()
+		sim(game,0.02)
+		check.call(not brash.active() and player.digestion.capacity == 6 and is_equal_approx(player.digestion.speed,1.0),"%s restores the perk's capacity and normal digestion" % path)
+		check.call(is_equal_approx(player.power_scale,1.0) and is_equal_approx(player.sprite.scale.x,base) and player.sprite.modulate.is_equal_approx(Color.WHITE),"%s restores the sprite size and tint" % path)
+	game.queue_free()
+
+static func _bounce_checks(host: Node, check: Callable) -> void:
+	var game: BeachGame = fixture(host,BLACKBACK)
+	var player: BeachGull = game.player
+	var brash: BeachBrash = game.brash
+	var bounce: float = float(Config.tuning.shakedown.bounce_cooldown)
+	var dog: OffLeadDog = OffLeadDog.new()
+	game.add_child(dog)
+	dog.setup(100,[0,600],1)
+	ground_gull(game,100)
+	player.invulnerable = 1.0
+	check.call(player.untargetable() and not dog._can_chase(player),"a dog ignores a gull in ordinary post-hit invulnerability")
+	player.invulnerable = 0.0
+	check.call(not player.untargetable() and dog._can_chase(player),"a plain gull is targetable")
+	brash.meter = 1.0
+	brash.fire()
+	var nopes: Array[int] = [0]
+	player.stun_ignored.connect(func() -> void: nopes[0] += 1)
+	check.call(not player.untargetable() and dog._can_chase(player),"the dog still goes for a gull with power immunity")
+	var dog_x: float = dog.position.x
+	player.position.x = dog.mouth().x
+	dog._try_catch(player)
+	check.call(player.state != BeachGull.State.STUNNED and nopes[0] == 1,"the dog's catch is blocked and signalled")
+	check.call(dog.state == OffLeadDog.State.COOLDOWN and dog.timer >= bounce and not is_equal_approx(dog.position.x,dog_x),"the dog recoils and cannot bite again for bounce_cooldown")
+	game.last_nope_ms = Time.get_ticks_msec()
+	var first: int = game.last_nope_ms
+	player.stun()
+	check.call(game.last_nope_ms == first,"a second NOPE inside nope_gap is silent")
+	game.last_nope_ms -= 5000
+	player.stun()
+	check.call(game.last_nope_ms >= first,"NOPE shows again after the gap")
+	var sweeper: BeachSweeper = BeachSweeper.new()
+	game.add_child(sweeper)
+	sweeper.setup(game,100,1)
+	sweeper.state = BeachSweeper.State.SWAT
+	var hit_frame: int = int(BeachSweeper.art().swat_hit_frames[0])
+	sweeper.clip_name = &"swat"
+	sweeper.clip_clock = (float(hit_frame)+0.5)/6.0*float(Config.tuning.sweeper.swat_time)
+	player.position = sweeper.broom_point()
+	check.call(sweeper.can_mark(player),"the sweeper still marks a gull with power immunity")
+	var sweeper_x: float = sweeper.position.x
+	var before: int = nopes[0]
+	sweeper._swing_check(player)
+	check.call(sweeper.landed_hit and sweeper.bounced and player.state != BeachGull.State.STUNNED and nopes[0] == before+1,"the sweeper's swat is blocked and signalled")
+	check.call(not is_equal_approx(sweeper.position.x,sweeper_x),"the sweeper recoils")
+	sweeper._swing_fx_start()
+	sweeper.timer = 0.01
+	sweeper.tick(0.02,player)
+	check.call(sweeper.state == BeachSweeper.State.FIST and sweeper.cooldown >= bounce-0.05,"the sweeper cannot swing again for bounce_cooldown")
+	brash.end_power()
+	player.invulnerable = 0.5
+	check.call(not sweeper.can_mark(player),"after the power ordinary invulnerability is ignored by the sweeper again")
+	game.queue_free()
+
+static func _raid_feel_checks(host: Node, check: Callable) -> void:
+	var game: BeachGame = fixture(host,BLACKBACK)
+	var player: BeachGull = game.player
+	var stall: FoodStall = game.beach.stalls[0]
+	var raids: BeachStashRaids = game.stash_raids
+	game.brash.meter = 1.0
+	game.brash.fire()
+	var gravity: float = float(Config.tuning.world.stash_gravity)
+	var floor_y: float = float(Config.tuning.world.ground)
+	for roof: bool in [true,false]:
+		raids.items.clear()
+		raids.peck_cooldown = 0.0
+		ground_gull(game,stall.position.x+(10.0 if roof else -14.0))
+		if roof:
+			player.position.y -= 50.0
+		stall.shake_left = 0.0
+		game._peck()
+		var item: Dictionary = raids.items[0]
+		var pos: Vector2 = item.position
+		var vel: Vector2 = item.velocity
+		for i: int in 600:
+			vel.y += gravity*0.005
+			pos += vel*0.005
+			if pos.y >= floor_y-3.0:
+				break
+		var aim: float = player.position.x if roof else player.beak().x
+		check.call(absf(pos.x-aim) <= float(Config.tuning.world.peck_reach),"the spit lands within pickup reach of the gull (%s)" % ("roof" if roof else "sand"))
+		check.call(stall.shake_left > 0.0,"a raid peck rattles the stall")
+		var rattled: bool = false
+		for i: int in 40:
+			stall.advance(0.01)
+			rattled = rattled or not is_equal_approx(stall.position.x,stall.home_x)
+		check.call(rattled and is_equal_approx(stall.position.x,stall.home_x),"the rattle moves the stall briefly and settles exactly home")
+	game.queue_free()

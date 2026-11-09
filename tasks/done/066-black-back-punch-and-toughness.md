@@ -1,6 +1,6 @@
 # 066 — Black-back: harder Shakedown, real toughness, screech gate
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 064
@@ -53,8 +53,30 @@ David playtested Shakedown and it doesn't feel powerful. Make firing it and ever
 - [ ] Checks added to `tests/shakedown_checks.gd`; `./tools/validate.ps1` has no new failures
 
 ## Report
-<!-- Filled in by the implementer: what changed (files), test results (check counts),
-decisions/assumptions, anything not done, branch name and last commit hash. -->
+**Files changed:** `data/species.json` (black-back `knockback` 0.6, `screech_pitch` 0.8, `power.pitch` 0.75, `fill.stun` 0.5), `data/tuning.json` (`shakedown` block: slam/heavy-hit/gorge/bully/bounce/raid numbers, `shake_radius` 50; `brash.hit_cap`), `scripts/shakedown.gd`, `scripts/brashness.gd`, `scripts/gull.gd`, `scripts/game.gd`, `scripts/digestion.gd`, `scripts/food_stall.gd`, `scripts/off_lead_dog.gd`, `scripts/sweeper.gd`, `scripts/watergun_teen.gd`, `scripts/target.gd`, `tests/shakedown_checks.gd`.
+
+**Tests:** baseline on main 16631 checks, 2 failures (the two known ones). After: 16690 checks, 2 failures (identical to baseline: "nobody teleports across the beach while running off", "data/demo.json enables the four-level demo"); 59 new checks in tests/shakedown_checks.gd.
+
+**What was done**
+- Screech: `_can_screech()` now requires the player's frames to have a `screech` animation (no species test). Lesson gating stays herring-only. `screech_pitch` multiplies the screech audio (`BeachGame.screech_pitch()`).
+- Toughness: `knockback` stat scales both tumble launch components in `begin_tumble`; `_stunned()` uses `brash.earn("stun")` so the black-back's `fill.stun` 0.5 halves the loss.
+- Shared impact: `BeachBrash.hit_fx()` is the Gang Call bundle (feathers, crumbs, sand, shake, freeze, rising cry); `_impact()` calls it, so Gang Call is unchanged. The rising index is capped by `brash.hit_cap` (8; Gang Call never gets there).
+- Slam on fire: everyone within `slam_radius` loses food with `food_lift`, plus one full-weight impact and stampede dust. Heavy hits: shake knocks use `food_lift`, `drop_retrieve` forced false, one lighter impact per `impact_gap` even if several people are hit in one frame.
+- Gorge: capacity +4 and `GullDigestion.speed` 3x while active; the pre-power capacity is stored and restored in `Shakedown.end()` (covers expiry, `end_power`, `clear`, `finish`).
+- Bully: `BeachGull.power_scale` / `power_tint` are applied inside `tick()` after the per-frame reset, before the carry sync, and the bill/sole anchor offsets use the scaled size so beak and feet stay put. Slow tint pulse, faster plus a `click` tick in the last `end_warning` seconds. Landing during the power adds shake and a sand puff. Everything is reset in `end()`.
+- Bounce-offs: `BeachGull.untargetable()` replaces the `invulnerable <= 0` target checks in dog, sweeper, teen and family. The dog and sweeper recoil `bounce_recoil` px and cannot act again for `bounce_cooldown`. "NOPE!" (and its click) is rate-limited to `nope_gap` while a power runs.
+- Sound: fire uses the species `power.pitch` (0.75) and ducks the music for `duck_music` (1 s) using a scene-tree timer.
+- Raids: each raid peck rattles the stall (`FoodStall.rattle()` offsets the stall node's x for ~0.18 s, restored exactly to `home_x`; the vendor and mask move with it). The spit arc is aimed with the real gravity at the gull's beak (grounded) or the sand under the gull (on the roof), with a small spread.
+
+**Decisions**
+- A blocked teen shot just splashes and shows (rate-limited) NOPE; only the dog and sweeper got the recoil/cooldown, as specified.
+- Freeze (hitstop) from the fire slam means the next physics step can be skipped; one existing test needed `effects.freeze = 0` between two fires in the same frame sequence.
+- The stall shake moves the stall node, not just a child, because the vendor sits inside a clip mask and a vendor-only wobble is invisible once the vendor has ducked.
+- Black-back `_can_screech()` still depends on the art: until task 065 adds a `screech` clip it behaves as before (tests use a fixture clip).
+
+**Not done:** nothing from the requirement list. Not verified visually in game (no screenshots taken).
+
+**Branch / commit:** `sonnet/066-black-back-punch-and-toughness`, single commit at branch tip (see git log).
 
 ## Review notes
 <!-- Filled in by the reviewer. -->
