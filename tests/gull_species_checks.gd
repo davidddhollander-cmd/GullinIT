@@ -5,6 +5,7 @@ const SPECIES := ["herring","kittiwake","great-black-backed"]
 static func run(host: Node, check: Callable) -> void:
 	_check_carry_art(check)
 	preload("res://tests/black_back_screech_art_checks.gd").run(check)
+	preload("res://tests/black_back_enraged_art_checks.gd").run(check)
 	var speeds: Array[float] = []
 	for index: int in SPECIES.size():
 		var species: String = SPECIES[index]

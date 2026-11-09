@@ -1,0 +1,261 @@
+{
+  "baseline_exclusive": 140,
+  "frames": [
+    {
+      "frame": 0,
+      "source_crop": [
+        38,
+        95,
+        410,
+        360
+      ],
+      "resize": [
+        81,
+        67
+      ],
+      "detached_pixels_removed": 11,
+      "destination": [
+        67,
+        73
+      ],
+      "normal_beak": [
+        146,
+        95
+      ],
+      "enraged_beak": [
+        146,
+        95
+      ],
+      "bounds": [
+        67,
+        73,
+        148,
+        140
+      ]
+    },
+    {
+      "frame": 1,
+      "source_crop": [
+        40,
+        95,
+        410,
+        354
+      ],
+      "resize": [
+        82,
+        68
+      ],
+      "detached_pixels_removed": 24,
+      "destination": [
+        67,
+        72
+      ],
+      "normal_beak": [
+        146,
+        96
+      ],
+      "enraged_beak": [
+        146,
+        95
+      ],
+      "bounds": [
+        67,
+        72,
+        149,
+        140
+      ]
+    },
+    {
+      "frame": 2,
+      "source_crop": [
+        40,
+        95,
+        412,
+        358
+      ],
+      "resize": [
+        82,
+        67
+      ],
+      "detached_pixels_removed": 28,
+      "destination": [
+        66,
+        73
+      ],
+      "normal_beak": [
+        146,
+        97
+      ],
+      "enraged_beak": [
+        146,
+        96
+      ],
+      "bounds": [
+        66,
+        73,
+        148,
+        140
+      ]
+    },
+    {
+      "frame": 3,
+      "source_crop": [
+        41,
+        95,
+        412,
+        360
+      ],
+      "resize": [
+        84,
+        67
+      ],
+      "detached_pixels_removed": 18,
+      "destination": [
+        65,
+        73
+      ],
+      "normal_beak": [
+        146,
+        97
+      ],
+      "enraged_beak": [
+        146,
+        96
+      ],
+      "bounds": [
+        65,
+        73,
+        149,
+        140
+      ]
+    },
+    {
+      "frame": 4,
+      "source_crop": [
+        39,
+        96,
+        410,
+        361
+      ],
+      "resize": [
+        85,
+        70
+      ],
+      "detached_pixels_removed": 12,
+      "destination": [
+        63,
+        70
+      ],
+      "normal_beak": [
+        146,
+        96
+      ],
+      "enraged_beak": [
+        146,
+        96
+      ],
+      "bounds": [
+        63,
+        70,
+        148,
+        140
+      ]
+    },
+    {
+      "frame": 5,
+      "source_crop": [
+        40,
+        96,
+        410,
+        360
+      ],
+      "resize": [
+        83,
+        73
+      ],
+      "detached_pixels_removed": 51,
+      "destination": [
+        66,
+        67
+      ],
+      "normal_beak": [
+        146,
+        94
+      ],
+      "enraged_beak": [
+        146,
+        94
+      ],
+      "bounds": [
+        66,
+        67,
+        149,
+        140
+      ]
+    },
+    {
+      "frame": 6,
+      "source_crop": [
+        40,
+        96,
+        412,
+        360
+      ],
+      "resize": [
+        84,
+        73
+      ],
+      "detached_pixels_removed": 57,
+      "destination": [
+        64,
+        67
+      ],
+      "normal_beak": [
+        146,
+        95
+      ],
+      "enraged_beak": [
+        146,
+        94
+      ],
+      "bounds": [
+        64,
+        67,
+        148,
+        140
+      ]
+    },
+    {
+      "frame": 7,
+      "source_crop": [
+        41,
+        96,
+        411,
+        361
+      ],
+      "resize": [
+        85,
+        73
+      ],
+      "detached_pixels_removed": 8,
+      "destination": [
+        64,
+        67
+      ],
+      "normal_beak": [
+        146,
+        95
+      ],
+      "enraged_beak": [
+        146,
+        94
+      ],
+      "bounds": [
+        64,
+        67,
+        149,
+        140
+      ]
+    }
+  ]
+}
