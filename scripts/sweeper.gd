@@ -383,7 +383,7 @@ func _swing_check(gull: BeachGull) -> void:
 			bounced = true
 			position.x = clampf(position.x-signf(gull.position.x-position.x)*float(Config.tuning.shakedown.bounce_recoil),float(tuning().range[0])-220.0,float(tuning().range[1])+220.0)
 		if gull.state == BeachGull.State.STUNNED:
-			gull.velocity = Vector2(gull.velocity.x/maxf(absf(gull.velocity.x),0.001)*float(tuning().knock_speed),-float(tuning().knock_up)) # sent flying, far further than a normal tumble
+			gull.velocity = Vector2(gull.velocity.x/maxf(absf(gull.velocity.x),0.001)*float(tuning().knock_speed),-float(tuning().knock_up))*gull.knockback # sent flying, far further than a normal tumble
 			game.effects.swat_hit(gull.position,Vector2(signf(gull.velocity.x),-0.6).normalized())
 			swatted.emit(gull)
 

@@ -547,6 +547,13 @@ static func _bounce_checks(host: Node, check: Callable) -> void:
 	brash.end_power()
 	player.invulnerable = 0.5
 	check.call(not sweeper.can_mark(player),"after the power ordinary invulnerability is ignored by the sweeper again")
+	player.invulnerable = 0.0
+	sweeper.hit_done = false
+	sweeper.clip_name = &"swat"
+	sweeper.clip_clock = (float(hit_frame)+0.5)/6.0*float(Config.tuning.sweeper.swat_time)
+	player.position = sweeper.broom_point()
+	sweeper._swing_check(player)
+	check.call(player.knockback < 1.0 and player.state == BeachGull.State.STUNNED and is_equal_approx(absf(player.velocity.x),float(Config.tuning.sweeper.knock_speed)*player.knockback),"a broom swat launches a black-back by its knockback")
 	game.queue_free()
 
 static func _raid_feel_checks(host: Node, check: Callable) -> void:
