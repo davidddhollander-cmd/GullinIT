@@ -1,6 +1,6 @@
-# 069 — Enraged black-back art pilot (idle and walk)
+﻿# 069 — Enraged black-back art pilot (idle and walk)
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: none
