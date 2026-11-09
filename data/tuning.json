@@ -342,6 +342,9 @@
     "slam_radius": 70, "food_lift": 2.8, "impact_gap": 0.3, "hit_shake": 2.5, "hit_stop": 0.04, "hit_feathers": 24, "hit_crumbs": 12,
     "gorge_capacity": 4, "gorge_digest": 3.0, "bully_scale": 1.25, "bully_tint": [1.0, 0.82, 0.78], "pulse_speed": 0.6, "pulse_fast": 3.0, "end_warning": 1.5, "tick_pitch": 1.6,
     "land_shake": 1.5, "bounce_cooldown": 2.0, "bounce_recoil": 18, "nope_gap": 1.0, "duck_music": 1.0, "raid_shake": 1.5, "raid_shake_time": 0.18, "raid_reach": 14, "raid_speed_max": 140,
+    "rear_time": 0.3, "rear_dim": 0.45, "dim_fade": 0.15, "callout_hold": 1.2, "slam_ring_time": 0.18, "slam_ring_width": 3, "slam_ground_reach": 24,
+    "stomp_steps": 3.1416, "stomp_shake": 0.8, "panic_ring_radius": 90, "panic_ring_time": 0.5, "panic_ring_alpha": 0.3,
+    "deflate_time": 0.25, "deflate_feathers": 8, "deflate_pitch": 0.6,
     "raid_foods": ["single_chip", "cookie", "crisps_bag", "crisps_box", "ice_cream", "half_eaten_doughnut", "half_eaten_sandwich"]
   },
   "panic": {

@@ -42,6 +42,13 @@ func shout(at: Vector2, text: String, color: Color = Color("fff4da")) -> void:
 	if Config.tuning.juice.floating_text:
 		texts.append({"at":at,"text":text,"color":color,"life":float(Config.tuning.juice.float_time),"rise_speed":10.0,"plain":true})
 
+## One expanding ring that reaches exactly `radius` after `time` seconds.
+func ring(at: Vector2, radius: float, time: float, width: float = 1.0, color: Color = Color("fff4da")) -> void:
+	if not bool(Config.tuning.juice.particles):
+		return
+	particles.append({"ring":true,"at":at,"v":Vector2.ZERO,"gravity":0.0,"life":time,"duration":time,"delay":0.0,"grow":(radius-4.0)/time,"width":width,"points":48,"color":color})
+	queue_redraw()
+
 ## A combo tier went up: gold ring on the gull and the new multiplier floating above it.
 func combo_pop(at: Vector2, multiplier: String) -> void:
 	var t: Dictionary = Config.tuning.juice
@@ -511,7 +518,7 @@ func _draw() -> void:
 			if age > 0.0:
 				var ring_color: Color = item.color
 				ring_color.a = clampf(float(item.life)/float(item.duration),0.0,1.0)
-				draw_arc(item.at,4.0+age*float(item.get("grow",70.0)),0,TAU,20,ring_color,1.0)
+				draw_arc(item.at,4.0+age*float(item.get("grow",70.0)),0,TAU,int(item.get("points",20)),ring_color,float(item.get("width",1.0)))
 			continue
 		var color: Color = item.get("color",Color("fff4da"))
 		if item.has("duration"):

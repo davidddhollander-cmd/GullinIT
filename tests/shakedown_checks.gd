@@ -27,6 +27,10 @@ static func sim(game: BeachGame, seconds: float) -> void:
 		game.player.tick(delta,0,0.0)
 		game.brash.tick(delta)
 
+## Runs the pre-slam hold out, so the slam has landed.
+static func land_slam(game: BeachGame) -> void:
+	sim(game,float(Config.tuning.shakedown.rear_time)+0.01)
+
 static func stall_ticks(game: BeachGame, seconds: float) -> void:
 	var left: float = seconds
 	while left > 0.00001:
@@ -58,6 +62,8 @@ static func run(host: Node, check: Callable) -> void:
 	_punch_checks(host,check)
 	_bounce_checks(host,check)
 	_raid_feel_checks(host,check)
+	await _visual_checks(host,check)
+	_visual_edge_checks(host,check)
 	await _end_checks(host,check)
 	await _board_checks(host,check)
 	Config.tuning.juice.audio = previous_audio
@@ -104,6 +110,7 @@ static func _fire_checks(host: Node, check: Callable) -> void:
 	game.input.touch_slowmo = true # the touch button path
 	game._physics_process(0.02)
 	check.call(brash.active_id == "shakedown" and brash.powers_fired == 2,"the touch button fires Shakedown too")
+	sim(game,0.32) # the hold, then a little of the power
 	var label: String = str(brash.power().ready_label)
 	check.call(label == "SHAKE!" and brash.active_left < 8.0 and brash.active_left > 7.9,"overlay data: ready label and time left are available")
 	game.overlay.queue_redraw()
@@ -173,7 +180,7 @@ static func _panic_and_shake_checks(host: Node, check: Callable) -> void:
 	brash.fire()
 	check.call(far.panic.state == CrowdPanic.State.NONE,"firing only warns people in range")
 	player.position = Vector2(650,60)
-	sim(game,1.05)
+	sim(game,1.05+float(Config.tuning.shakedown.rear_time)) # the power clock starts after the hold
 	check.call(far.panic.state == CrowdPanic.State.LOOK_UP and far.panic.stampede_pending and far.panic.direction == 1.0,"people flee around the gull's current position, not where it fired")
 	check.call(holder.food and bystander.food,"food stays put when the gull is far away")
 	# The shake: contact drops food, in flight.
@@ -407,6 +414,8 @@ static func _punch_checks(host: Node, check: Callable) -> void:
 	player.digestion.capacity = 6 # a perk's stomach
 	brash.meter = 1.0
 	brash.fire()
+	check.call(inner.food and middle.food and brash.hits == 0,"nothing is knocked during the hold")
+	land_slam(game)
 	check.call(not inner.food and not middle.food and outer.food,"firing knocks food from everyone inside slam_radius at once, and no one outside")
 	check.call(brash.hits == 1 and knocks.size() == 2,"the slam is one impact bundle")
 	var lift: float = -float(Config.tuning.world.drop_impulse_up)*float(t.food_lift)
@@ -591,3 +600,237 @@ static func _raid_feel_checks(host: Node, check: Callable) -> void:
 			rattled = rattled or not is_equal_approx(stall.position.x,stall.home_x)
 		check.call(rattled and is_equal_approx(stall.position.x,stall.home_x),"the rattle moves the stall briefly and settles exactly home")
 	game.queue_free()
+
+## Task 068: a copy of the clips with `idle_enraged` and `walk_enraged` twins, standing in for art that does not exist yet.
+static func _with_twins(source: SpriteFrames) -> SpriteFrames:
+	var frames: SpriteFrames = source.duplicate()
+	for clip: StringName in [&"idle",&"walk"]:
+		var twin: StringName = StringName(String(clip)+"_enraged")
+		if frames.has_animation(twin):
+			continue
+		frames.add_animation(twin)
+		frames.set_animation_speed(twin,frames.get_animation_speed(clip))
+		frames.set_animation_loop(twin,frames.get_animation_loop(clip))
+		for index: int in frames.get_frame_count(clip):
+			frames.add_frame(twin,frames.get_frame_texture(clip,index))
+	return frames
+
+static func _count(fx: BeachEffects, key: String) -> int:
+	return fx.particles.filter(func(p: Dictionary) -> bool: return p.get(key,false)).size()
+
+static func _crits(fx: BeachEffects) -> int:
+	return fx.get_children().filter(func(n: Node) -> bool: return str(n.name).begins_with("PixelfxCritHit")).size()
+
+static func _visual_checks(host: Node, check: Callable) -> void:
+	var t: Dictionary = Config.tuning.shakedown
+	var game: BeachGame = fixture(host,BLACKBACK)
+	var player: BeachGull = game.player
+	var brash: BeachBrash = game.brash
+	var fx: BeachEffects = game.effects
+	var overlay: BeachOverlay = game.overlay
+	var person: BeachTarget = _person(game,300)
+	ground_gull(game,300)
+	player.aim = player.position
+	_place(person,player.position,30.0)
+	player.sprite.sprite_frames = _with_twins(player.sprite.sprite_frames)
+	sim(game,0.1)
+	check.call(player.sprite.animation == &"idle" and not player.enraged,"before the slam the gull plays its normal clip")
+	check.call(player.sprite.sprite_frames.has_animation(&"screech"),"the black-back has the screech clip the hold uses")
+	brash.meter = 1.0
+	brash.fire()
+	sim(game,0.1)
+	check.call(player.rearing and player.sprite.animation == &"screech" and player.sprite.frame == 4,"a grounded gull holds the screech peak during the hold")
+	check.call(brash.hits == 0 and person.food and is_equal_approx(brash.active_left,8.0) and fx.freeze == 0.0 and player.invulnerable >= 7.9,"during the hold: no slam yet, the power clock waits, no freeze, still invulnerable")
+	check.call(not fx.texts.any(func(item: Dictionary) -> bool: return str(item.text).contains("SHAKEDOWN")),"Shakedown has no small plated name")
+	check.call(overlay.score_announcement.visible and overlay.score_announcement.text == "SHAKEDOWN!" and is_equal_approx(overlay.score_announcement.scale.x,1.0),"SHAKEDOWN! shows in the banner, unscaled")
+	await host.get_tree().create_timer(0.15).timeout
+	check.call(is_equal_approx(overlay.dim.color.a,float(t.rear_dim)),"the screen is dimmed by rear_dim during the hold")
+	sim(game,0.21)
+	var left: float = brash.active_left
+	check.call(brash.hits == 1 and not person.food and not player.rearing and player.enraged and is_equal_approx(player.power_scale,float(t.bully_scale)),"the slam lands once at the end of the hold and the bird turns enraged and big")
+	check.call(left > 8.0-0.03,"the full power time still follows the hold")
+	var rings: Array = fx.particles.filter(func(p: Dictionary) -> bool: return p.get("ring",false) and is_equal_approx(float(p.get("width",1.0)),float(t.slam_ring_width)))
+	check.call(rings.size() == 1 and is_equal_approx(4.0+float(rings[0].grow)*float(rings[0].duration),float(t.slam_radius)) and is_equal_approx(float(rings[0].duration),float(t.slam_ring_time)),"the slam ring reaches exactly slam_radius in slam_ring_time")
+	check.call(overlay.flash.visible,"the slam shows one white frame")
+	overlay.tick_flash()
+	check.call(overlay.flash.visible,"the white layer is up for a rendered frame")
+	overlay.tick_flash()
+	check.call(not overlay.flash.visible,"and gone on the next")
+	check.call(_count(fx,"feather") == 0,"the slam bursts no feathers from the gull")
+	var shaken: BeachTarget = _person(game,300)
+	_place(shaken,player.position,20.0)
+	sim(game,0.02)
+	check.call(not shaken.food and brash.hits == 2 and _count(fx,"feather") == 0,"a shake knock bursts no feathers either")
+	await host.get_tree().create_timer(0.25).timeout
+	check.call(is_equal_approx(overlay.dim.color.a,0.0),"the dim is gone after the slam")
+	# Enraged clips.
+	sim(game,0.02)
+	check.call(player.sprite.animation == &"idle_enraged","after the slam the gull plays the enraged idle")
+	player.aim = player.position+Vector2(200,0)
+	sim(game,0.3)
+	check.call(player.sprite.animation == &"walk_enraged" and player.sprite.frame < player.sprite.sprite_frames.get_frame_count(&"walk_enraged"),"walking plays the enraged walk, frame kept in range")
+	player.aim = player.position
+	sim(game,0.5)
+	var enraged_beak: Vector2 = player.beak()
+	var enraged_sprite: Vector2 = player.sprite.position
+	player.set_enraged(false)
+	player.tick(0.001,0,0.0)
+	check.call(player.sprite.animation == &"idle" and player.beak().is_equal_approx(enraged_beak) and player.sprite.position.is_equal_approx(enraged_sprite),"beak and foot placement are the same on the enraged and normal clips")
+	player.set_enraged(true)
+	var bare: SpriteFrames = player.sprite.sprite_frames.duplicate()
+	bare.remove_animation(&"idle_enraged")
+	player.sprite.sprite_frames = bare
+	sim(game,0.1)
+	check.call(player.sprite.animation == &"idle","a clip with no enraged version plays normally")
+	player.sprite.sprite_frames = _with_twins(Config.frames(player.art_id))
+	# Stomps and the panic ring.
+	fx.shake = 0.0
+	fx.particles.clear()
+	player.aim = player.position+Vector2(250,0)
+	sim(game,1.05)
+	check.call(fx.shake >= float(t.stomp_shake) and _count(fx,"sand") > 0,"walking on the ground stomps: sand and a shake")
+	check.call(fx.particles.any(func(p: Dictionary) -> bool: return p.get("ring",false) and is_equal_approx(float(p.get("width",1.0)),1.0) and p.color.a < 0.5 and p.has("points")),"each panic repeat draws a faint thin ring")
+	player.aim = player.position
+	sim(game,0.5)
+	fx.shake = 0.0
+	fx.particles.clear()
+	player.walk_phase += 10.0
+	sim(game,0.02)
+	check.call(fx.shake == 0.0 and _count(fx,"sand") == 0,"a standing gull does not stomp")
+	player.state = BeachGull.State.GLIDE
+	player.position.y = 40.0
+	player.walk_phase += 10.0
+	sim(game,0.02)
+	check.call(fx.shake == 0.0 and _count(fx,"sand") == 0,"an airborne gull does not stomp")
+	ground_gull(game,player.position.x)
+	# Blocked hits.
+	game.last_nope_ms = 0
+	var crits: int = _crits(fx)
+	player.stun()
+	check.call(_crits(fx) == crits+1,"a blocked hit during the power plays the crit effect")
+	player.stun()
+	check.call(_crits(fx) == crits+1,"a rate-limited NOPE does not")
+	# Expiry deflates; the normal clip is back.
+	sim(game,brash.active_left-0.005)
+	check.call(brash.active() and player.enraged,"the power runs its full time")
+	sim(game,0.01)
+	check.call(not brash.active() and not player.enraged and is_equal_approx(player.power_scale,1.0),"expiry ends the power and the enraged look")
+	check.call(player.squash_left > 0.0 and is_equal_approx(player.squash_pose.x,float(t.bully_scale)) and is_equal_approx(player.squash_span,float(t.deflate_time)),"expiry deflates through squash over deflate_time")
+	sim(game,0.05)
+	var ratio: float = player.sprite.scale.x/player.art_scale
+	check.call(ratio > 1.0 and ratio < float(t.bully_scale),"the bird is still shrinking back")
+	sim(game,0.3)
+	check.call(is_equal_approx(player.sprite.scale.x,player.art_scale) and not String(player.sprite.animation).ends_with("_enraged"),"the sprite is back to normal and plays a normal clip")
+	fx.shake = 0.0
+	player.aim = player.position+Vector2(250,0)
+	sim(game,0.5)
+	check.call(fx.shake == 0.0,"no stomps after the power")
+	game.queue_free()
+	# Gang Call keeps its feathers.
+	var herring: BeachGame = fixture(host,"herring")
+	var ally := BeachGull.new()
+	var gang_target: BeachTarget = _person(herring,800)
+	herring.brash._impact({"hit":gang_target.food_position(),"target":gang_target},ally)
+	check.call(_count(herring.effects,"feather") > 0,"Gang Call still bursts feathers")
+	ally.free()
+	herring.queue_free()
+	# A rival made to drop food gets the feathers.
+	var rival_game: BeachGame = fixture(host,BLACKBACK)
+	rival_game.pending_rivals = [{"name":"TESTER","speed":1.0}]
+	rival_game._release_rivals()
+	var pilot: RivalPilot = rival_game.pilots[0]
+	pilot.carried = 20
+	pilot.carry_window = 3.0
+	pilot.carried_food_id = "crisps_bag"
+	ground_gull(rival_game,300)
+	rival_game.player.aim = rival_game.player.position
+	pilot.gull.position = rival_game.player.position+Vector2(20,0)
+	rival_game.brash.meter = 1.0
+	rival_game.brash.fire()
+	land_slam(rival_game)
+	var burst: Array = rival_game.effects.particles.filter(func(p: Dictionary) -> bool: return p.get("feather",false))
+	check.call(pilot.carried == 0 and burst.size() > 0 and burst.all(func(p: Dictionary) -> bool: return p.at.distance_to(pilot.gull.position) < 12.0),"a rival made to drop food bursts feathers at the rival, not at the gull")
+	rival_game.queue_free()
+
+static func _visual_edge_checks(host: Node, check: Callable) -> void:
+	# Level end, clear() and a pause in the middle of the hold leave nothing behind.
+	for path: String in ["finish","clear","pause"]:
+		var game: BeachGame = fixture(host,BLACKBACK)
+		var player: BeachGull = game.player
+		var brash: BeachBrash = game.brash
+		var person: BeachTarget = _person(game,300)
+		ground_gull(game,300)
+		player.aim = player.position
+		_place(person,player.position,30.0)
+		brash.meter = 1.0
+		brash.fire()
+		sim(game,0.1)
+		match path:
+			"finish":
+				game.finish()
+			"clear":
+				brash.clear()
+			"pause":
+				game.set_paused(true)
+		if path == "pause":
+			var rear: float = brash.shakedown.rear_left
+			game.set_paused(false)
+			game.set_physics_process(false)
+			check.call(brash.shakedown.rear_left == rear and brash.hits == 0 and player.rearing,"pausing the hold keeps it intact")
+			land_slam(game)
+			sim(game,1.0)
+			check.call(brash.hits == 1 and player.enraged,"after the pause the slam fires once")
+		else:
+			player.tick(0.02,0,0.0)
+			check.call(not player.rearing and brash.shakedown.rear_left == 0.0 and not player.enraged and game.effects.freeze == 0.0,"%s during the hold clears the hold, the pose and the freeze" % path)
+			check.call(is_equal_approx(game.overlay.dim.color.a,0.0) and not game.overlay.flash.visible and player.sprite.animation != &"screech","%s during the hold leaves no dim or stuck pose" % path)
+			sim(game,1.0)
+			check.call(brash.hits == 0 and person.food and game.effects.particles.filter(func(p: Dictionary) -> bool: return p.get("ring",false) and float(p.get("width",1.0)) > 2.0).is_empty(),"%s during the hold: no slam fires later" % path)
+		game.queue_free()
+	# A level-end snap after the slam returns the sprite at once.
+	var snap: BeachGame = fixture(host,BLACKBACK)
+	ground_gull(snap,300)
+	snap.player.aim = snap.player.position
+	snap.player.sprite.sprite_frames = _with_twins(snap.player.sprite.sprite_frames)
+	snap.brash.meter = 1.0
+	snap.brash.fire()
+	land_slam(snap)
+	sim(snap,0.1)
+	check.call(snap.player.enraged and snap.player.sprite.animation == &"idle_enraged","fixture: enraged after the slam")
+	snap.finish()
+	check.call(not snap.player.enraged and snap.player.sprite.animation == &"idle" and snap.player.squash_left == 0.0 and is_equal_approx(snap.player.sprite.scale.x,snap.player.art_scale),"a level-end snap returns the normal clip and size at once")
+	snap.queue_free()
+	# Cleaned out: the capping peck, once.
+	var raid: BeachGame = fixture(host,BLACKBACK)
+	var stall: FoodStall = raid.beach.stalls[0]
+	raid.brash.meter = 1.0
+	raid.brash.fire()
+	land_slam(raid)
+	ground_gull(raid,stall.position.x-12.0)
+	raid.player.aim = raid.player.position
+	var crits: int = _crits(raid.effects)
+	var cap: int = int(Config.tuning.shakedown.raid_cap)
+	for i: int in cap-1:
+		raid.stash_raids.peck_cooldown = 0.0
+		raid._peck()
+	check.call(_crits(raid.effects) == crits and not raid.effects.texts.any(func(item: Dictionary) -> bool: return item.text == "CLEANED OUT!"),"pecks before the cap do not clean the stall out")
+	for i: int in 4:
+		raid.stash_raids.peck_cooldown = 0.0
+		raid._peck()
+	check.call(_crits(raid.effects) == crits+1 and raid.effects.texts.filter(func(item: Dictionary) -> bool: return item.text == "CLEANED OUT!").size() == 1,"the capping peck plays the crit and shouts CLEANED OUT! once")
+	raid.queue_free()
+	# Reduced effects: no white frame, no dim; the power still works.
+	var calm: BeachGame = fixture(host,BLACKBACK)
+	var previous: bool = GameState.options.shake
+	GameState.options.shake = false
+	ground_gull(calm,300)
+	calm.player.aim = calm.player.position
+	calm.brash.meter = 1.0
+	calm.brash.fire()
+	var dimmed: bool = false
+	for i: int in 30:
+		sim(calm,0.02)
+		dimmed = dimmed or calm.overlay.dim.color.a > 0.0 or calm.overlay.flash.visible
+	GameState.options.shake = previous
+	check.call(not dimmed and calm.brash.hits == 1 and calm.player.enraged and calm.brash.active_left < 7.9,"with shake off: no dim and no white frame, and the power still runs")
+	calm.queue_free()
