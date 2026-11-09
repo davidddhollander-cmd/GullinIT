@@ -240,6 +240,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		last_nope_ms = now
 		player.hit_flash()
 		effects.shout(player.position,"NOPE!" if brash.active() else "SKULL!",BeachUI.GOLD)
+		if brash.active():
+			effects.pixelfx("pixelfx_crit_hit",player.position,Vector2(player.facing,0.0))
 		Audio.play("click")
 	)
 	player.peck_started.connect(func() -> void:

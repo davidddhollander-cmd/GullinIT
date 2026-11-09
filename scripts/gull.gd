@@ -65,6 +65,9 @@ var power_scale: float = 1.0 ## Shakedown bully size, applied after the per-fram
 var power_tint: Color = Color.WHITE
 var flash_left: float = 0.0 ## hit flash seconds remaining (this gull only)
 var squash_left: float = 0.0
+var squash_span: float = 0.0 ## seconds the current squash takes to ease back; 0 means juice.squash_time
+var enraged: bool = false ## Shakedown: play each clip's `<clip>_enraged` twin wherever one exists
+var rearing: bool = false ## Shakedown hold: a grounded gull stays on the screech peak
 var squash_pose: Vector2 = Vector2.ONE ## scale at the start of the squash timer; eases back to 1
 var shoves: bool = false
 var dive_speed: float = 0.0
@@ -415,6 +418,8 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 	var d: Dictionary = Config.tuning.dive
 	var w: Dictionary = Config.tuning.wind
 	var started_state: State = state
+	if enraged:
+		_swap_clip(false) # the ordinary logic below picks clips by their plain names
 	peck_sweep_active = started_state == State.STRIKE and peck_window_open()
 	peck_time = maxf(0.0,peck_time-delta)
 	var before: Vector2 = position
@@ -471,6 +476,9 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			var descending: bool = landing_aim()
 			var horizontal_target: float = side * max_speed
 			if on_ground and not support.is_empty() and bool(support.pole):
+				horizontal_target = 0
+				velocity.x = 0
+			if on_ground and rearing:
 				horizontal_target = 0
 				velocity.x = 0
 			if descending:
@@ -583,7 +591,11 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 	if detailed_art:
 		sprite.scale *= squash_scale()*(art_scale*power_scale)
 		if state == State.GROUNDED:
-			if screech_held or screech_recover_left > 0.0:
+			if rearing and sprite.sprite_frames.has_animation(&"screech"):
+				sprite.animation = &"screech"
+				sprite.pause()
+				sprite.frame = 4 # the peak of the call
+			elif screech_held or screech_recover_left > 0.0:
 				sprite.animation = &"screech"
 				sprite.pause()
 				if screech_held:
@@ -601,7 +613,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 				sprite.flip_h = (facing < 0) != bool(art_entry.animations.walk.get("source_left",false))
 			else:
 				sprite.play(&"idle")
-		if not screech_held and screech_recover_left <= 0.0 and art_event_left > 0.0 and sprite.sprite_frames.has_animation(art_event):
+		if not rearing and not screech_held and screech_recover_left <= 0.0 and art_event_left > 0.0 and sprite.sprite_frames.has_animation(art_event):
 			if (state == State.GROUNDED and art_event in [&"landing",&"peck"]) or (state == State.GLIDE and not climb and art_event == &"pullup"):
 				sprite.play(art_event)
 		if art_entry.has("frame_beaks"):
@@ -631,25 +643,46 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 				top = minf(top,(point.rotated(sprite.rotation)+sprite.position).y)
 			rival_badge.position.y = top-9
 			rival_label.position.y = top-9
+	if enraged:
+		_swap_clip(true)
 	sync_carry()
 	queue_redraw()
+
+func set_enraged(on: bool) -> void:
+	enraged = on
+	_swap_clip(on)
+
+## The one place enraged art is chosen: swaps the current clip for its `_enraged` twin (or back), keeping the frame.
+func _swap_clip(on: bool) -> void:
+	if sprite == null or sprite.sprite_frames == null:
+		return
+	var base: String = String(sprite.animation).trim_suffix("_enraged")
+	var twin: StringName = StringName(base+"_enraged")
+	var want: StringName = twin if on and sprite.sprite_frames.has_animation(twin) else StringName(base)
+	if want == sprite.animation or not sprite.sprite_frames.has_animation(want):
+		return
+	var frame_now: int = sprite.frame
+	var progress: float = sprite.frame_progress
+	sprite.animation = want
+	sprite.set_frame_and_progress(mini(frame_now,sprite.sprite_frames.get_frame_count(want)-1),progress)
 
 ## Brief white flash on this gull only.
 func hit_flash() -> void:
 	flash_left = HitFlash.duration()
 
 ## Quick body squash (negative y/x to stretch): scale (1+x, 1+y) now, easing back over squash_time.
-func squash(x: float, y: float) -> void:
+func squash(x: float, y: float, time: float = 0.0) -> void:
 	if bool(Config.tuning.juice.squash):
 		squash_pose = Vector2(1.0+x,1.0+y)
-		squash_left = float(Config.tuning.juice.squash_time)
+		squash_span = time if time > 0.0 else float(Config.tuning.juice.squash_time)
+		squash_left = squash_span
 
 ## Squash timer pose times the stretch along the body during a strike; (1,1) otherwise.
 func squash_scale() -> Vector2:
 	var j: Dictionary = Config.tuning.juice
 	if not bool(j.squash):
 		return Vector2.ONE
-	var scale_now: Vector2 = Vector2.ONE.lerp(squash_pose,squash_left/float(j.squash_time))
+	var scale_now: Vector2 = Vector2.ONE.lerp(squash_pose,squash_left/(squash_span if squash_span > 0.0 else float(j.squash_time)))
 	if state == State.STRIKE:
 		var stretch: float = float(j.strike_stretch)*clampf(dive_speed/float(Config.tuning.dive.max_speed),0.0,1.0)
 		scale_now *= Vector2(1.0+stretch,1.0-stretch*0.5)
@@ -716,7 +749,7 @@ func sync_carry() -> void:
 			local = int(walk_phase / TAU * 8) % 8
 	elif climb or flap_anim_left > 0.0:
 		clip = &"fly"
-		local = sprite.frame % 4 if sprite.animation == &"climb" else int(Time.get_ticks_msec() / 100) % 4
+		local = sprite.frame % 4 if String(sprite.animation).trim_suffix("_enraged") == "climb" else int(Time.get_ticks_msec() / 100) % 4
 	if carry_body.sprite_frames == null or carry_body.get_meta(&"art_id", "") != art_id:
 		carry_body.sprite_frames = carry_frames(art_id, art_entry, false)
 		carry_beak.sprite_frames = carry_frames(art_id, art_entry, true)

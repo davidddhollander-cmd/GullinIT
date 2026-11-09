@@ -25,6 +25,10 @@ var quest_box: HBoxContainer
 var quest_labels: Array[Label] = []
 var score_announcement: Label
 var score_announcement_tween: Tween
+var dim: ColorRect ## Shakedown hold: dims the world but sits behind the HUD
+var dim_tween: Tween
+var flash: ColorRect ## one white frame over everything
+var flash_left: int = 0
 var rival_score_panel: PanelContainer
 var rival_score_list: VBoxContainer
 var rival_score_labels: Array[Label] = []
@@ -56,6 +60,9 @@ func setup(owner_game: BeachGame) -> void:
 	theme = BeachUI.theme()
 	BeachUI.full(self)
 	mouse_filter = MOUSE_FILTER_IGNORE
+	dim = _screen_rect(Color(0,0,0,0))
+	flash = _screen_rect(Color.WHITE)
+	flash.hide()
 	var margin: MarginContainer = BeachUI.margin(self,5)
 	margin.add_theme_constant_override("margin_top",2)
 	margin.mouse_filter = MOUSE_FILTER_IGNORE
@@ -395,6 +402,7 @@ func _score_hop(delta: float, counting: bool) -> void:
 	score_label.add_theme_color_override("font_color",Color.WHITE if hopping and score_hop_left > 0.0 else (BeachUI.CREAM if counting else BeachUI.GOLD))
 
 func _process(delta: float) -> void:
+	tick_flash()
 	if game.peck_pause or game.aim_pause:
 		queue_redraw()
 	var counting: bool = shown_score < game.score.points
@@ -471,6 +479,34 @@ func sync_rival_scores() -> void:
 	you_score_label = _small(BeachUI.label(you_row,"000",TOP_BAR_FONT_SIZE,BeachUI.GOLD))
 	you_score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
+func _screen_rect(color: Color) -> ColorRect:
+	var rect: ColorRect = ColorRect.new()
+	rect.color = color
+	rect.mouse_filter = MOUSE_FILTER_IGNORE
+	BeachUI.full(rect)
+	add_child(rect)
+	return rect
+
+## Fades the dim layer to `alpha`; a fade of 0 sets it at once. Always leaves exactly one tween running.
+func set_dim(alpha: float, fade: float = 0.0) -> void:
+	if is_instance_valid(dim_tween):
+		dim_tween.kill()
+	if fade <= 0.0:
+		dim.color.a = alpha
+		return
+	dim_tween = create_tween()
+	dim_tween.tween_property(dim,"color:a",alpha,fade)
+
+## Shows the white layer for exactly one rendered frame (shown now, hidden by the second tick_flash).
+func white_frame() -> void:
+	flash.show()
+	flash_left = 2
+
+func tick_flash() -> void:
+	if flash_left > 0:
+		flash_left -= 1
+		flash.visible = flash_left > 0
+
 func show_score_announcement(food_id: String, earned: int) -> void:
 	if not Config.foods.has(food_id):
 		return
@@ -481,22 +517,29 @@ func show_score_announcement(food_id: String, earned: int) -> void:
 	score_announcement_font_index = (score_announcement_font_index + 1) % score_announcement_fonts.size()
 	# Every ice cream flavour reads as plain "Ice cream".
 	var shown: String = str(Config.foods["ice_cream"].name) if str(food.get("family","")) == "ice_cream" else str(food.name)
-	score_announcement.text = "%s +%d" % [shown.to_upper(),earned]
+	show_callout("%s +%d" % [shown.to_upper(),earned])
+
+## The big banner under the top bar. `pop` scales it in; text-only callouts (pop false) never scale the label.
+func show_callout(text: String, hold: float = SCORE_ANNOUNCEMENT_HOLD, pop: bool = true) -> void:
+	if is_instance_valid(score_announcement_tween):
+		score_announcement_tween.kill()
+	score_announcement.text = text
 	# Training text occupies the normal top-center slot, so shift the transient
 	# callout below it rather than covering the current instruction.
 	var row: Control = score_announcement.get_parent() as Control
 	row.offset_top = training_callout_top() if game.lesson_active() else SCORE_CALLOUT_TOP
 	row.offset_bottom = row.offset_top + 24.0
 	score_announcement.modulate.a = 1.0
-	score_announcement.scale = Vector2(0.72,0.72)
+	score_announcement.scale = Vector2(0.72,0.72) if pop else Vector2.ONE
 	score_announcement.pivot_offset = score_announcement.size * 0.5
 	score_announcement.show()
 	score_announcement_tween = create_tween()
 	score_announcement_tween.set_parallel(true)
-	score_announcement_tween.tween_property(score_announcement,"scale",Vector2.ONE,0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	if pop:
+		score_announcement_tween.tween_property(score_announcement,"scale",Vector2.ONE,0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	score_announcement_tween.tween_property(score_announcement,"modulate:a",1.0,0.12)
 	# Parallel mode would start the fade and hide alongside the hold, so chain each step.
-	score_announcement_tween.chain().tween_interval(SCORE_ANNOUNCEMENT_HOLD)
+	score_announcement_tween.chain().tween_interval(hold)
 	score_announcement_tween.chain().tween_property(score_announcement,"modulate:a",0.0,SCORE_ANNOUNCEMENT_FADE).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	score_announcement_tween.chain().tween_callback(score_announcement.hide)
 

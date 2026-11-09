@@ -64,7 +64,8 @@ func fire() -> bool:
 		return false
 	meter = 0.0
 	var p: Dictionary = power()
-	game.effects.message(game.player.position-Vector2(0,24),str(p.name)+"!",BeachUI.GOLD)
+	if str(p.id) != "shakedown": # Shakedown announces itself with the big callout
+		game.effects.message(game.player.position-Vector2(0,24),str(p.name)+"!",BeachUI.GOLD)
 	Audio.play(str(p.get("sound","gang_call")),float(p.get("pitch",1.0)),-2.0)
 	game.effects.sound_wave(game.player.beak())
 	powers_fired += 1
@@ -107,11 +108,14 @@ func _gang_call(p: Dictionary) -> void:
 ## Each ally follows two quadratic curves: a plunge from offscreen to the food, then a climb back out.
 func tick(delta: float) -> void:
 	if active():
-		active_left -= delta
-		if active_left <= 0.0:
-			end_power(false)
+		if shakedown.rear_left > 0.0:
+			shakedown.rear_tick(delta) # the power's clock starts after the hold
 		else:
-			shakedown.tick(delta)
+			active_left -= delta
+			if active_left <= 0.0:
+				end_power(false)
+			else:
+				shakedown.tick(delta)
 	var swoop: float = float(power().get("swoop_time",0.7))
 	for ally: Dictionary in allies:
 		ally.t += delta
@@ -159,7 +163,8 @@ func hit_fx(at: Vector2, velocity: Vector2, knocked: bool, feathers: int, crumbs
 	var t: Dictionary = tuning()
 	var fx: BeachEffects = game.effects
 	var step: int = mini(hits,int(t.hit_cap))
-	fx.feather_burst(at,velocity,feathers+step*int(t.hit_feathers_per_hit))
+	if feathers > 0: # 0 means the caller's own gull is the one hitting: no feathers
+		fx.feather_burst(at,velocity,feathers+step*int(t.hit_feathers_per_hit))
 	if knocked:
 		fx.food_crumble(at,velocity,crumbs) # on top of the knock's own crumble
 	fx.sand_puff(Vector2(at.x,float(Config.tuning.world.ground)))

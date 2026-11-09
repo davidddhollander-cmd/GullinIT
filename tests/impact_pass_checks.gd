@@ -86,6 +86,7 @@ static func _flash_checks(host: Node, check: Callable) -> void:
 	Shakedown._place(outer,slam.player.position,95.0)
 	slam.brash.meter = 1.0
 	slam.brash.fire()
+	Shakedown.land_slam(slam)
 	check.call(inner.flash_left > 0.0 and outer.flash_left == 0.0,"Shakedown's slam flashes the people it hits")
 	slam.queue_free()
 	# Reduce motion: no flash and no shake.
