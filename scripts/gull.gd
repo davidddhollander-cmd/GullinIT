@@ -63,6 +63,9 @@ var stun_mult: float = 1.0
 var knockback: float = 1.0 ## scales the tumble launch (player only)
 var power_scale: float = 1.0 ## Shakedown bully size, applied after the per-frame reset
 var power_tint: Color = Color.WHITE
+var flash_left: float = 0.0 ## hit flash seconds remaining (this gull only)
+var squash_left: float = 0.0
+var squash_pose: Vector2 = Vector2.ONE ## scale at the start of the squash timer; eases back to 1
 var shoves: bool = false
 var dive_speed: float = 0.0
 var walk_phase: float = 0.0
@@ -439,6 +442,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			flap_anim_left = float(f.stroke_interval)
 			stroke_cooldown = 0.0
 	invulnerable = maxf(0.0, invulnerable - delta)
+	squash_left = maxf(0.0, squash_left - delta)
 	sprite.modulate = Color(power_tint,0.5 if invulnerable > 0.0 and not steady_invulnerable and int(invulnerable * 12) % 2 == 0 else 1.0)
 	sprite.rotation = 0.0
 	sprite.scale = Vector2.ONE
@@ -513,8 +517,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			velocity.y = minf(velocity.y + float(f.gravity)*delta,float(f.max_descent))
 			position += velocity * delta
 			sprite.play(&"dive_windup")
-			if not bool(art_entry.get("native_alpha",false)):
-				sprite.scale = Vector2(1.15, 0.75)
+			sprite.scale = Vector2(1.15, 0.75)
 			if position.y >= ground_y():
 				land()
 			elif timer <= 0:
@@ -578,7 +581,7 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 	sprite.flip_h = facing < 0
 	sprite.visible = detailed_art or state != State.GROUNDED
 	if detailed_art:
-		sprite.scale *= art_scale*power_scale
+		sprite.scale *= squash_scale()*(art_scale*power_scale)
 		if state == State.GROUNDED:
 			if screech_held or screech_recover_left > 0.0:
 				sprite.animation = &"screech"
@@ -605,12 +608,13 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 			# Production sheets use source-space bill x=20 and sole y=12.
 			# Resize around these contact anchors, keeping feet on sand/lids and
 			# the airborne bill at the existing collision point through dive rotation.
-			var drawn: float = art_scale*power_scale
-			var offset := Vector2((float(d.beak_offset)-20.0*drawn)*facing,0)
+			# Per axis, so squash and stretch keep the bill and sole on their anchors.
+			var drawn: Vector2 = sprite.scale
+			var offset := Vector2((float(d.beak_offset)-20.0*drawn.x)*facing,0)
 			if state == State.GROUNDED:
-				offset.y = float(f.feet_offset)-12.0*drawn
+				offset.y = float(f.feet_offset)-12.0*drawn.y
 			elif state != State.STRIKE:
-				offset.y = 2.0-4.0*drawn
+				offset.y = 2.0-4.0*drawn.y
 			sprite.position = offset.rotated(sprite.rotation)
 			if state == State.STUNNED:
 				# Spin around the body, without the flight bill alignment orbit.
@@ -630,7 +634,31 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 	sync_carry()
 	queue_redraw()
 
-func _process(_delta: float) -> void:
+## Brief white flash on this gull only.
+func hit_flash() -> void:
+	flash_left = HitFlash.duration()
+
+## Quick body squash (negative y/x to stretch): scale (1+x, 1+y) now, easing back over squash_time.
+func squash(x: float, y: float) -> void:
+	if bool(Config.tuning.juice.squash):
+		squash_pose = Vector2(1.0+x,1.0+y)
+		squash_left = float(Config.tuning.juice.squash_time)
+
+## Squash timer pose times the stretch along the body during a strike; (1,1) otherwise.
+func squash_scale() -> Vector2:
+	var j: Dictionary = Config.tuning.juice
+	if not bool(j.squash):
+		return Vector2.ONE
+	var scale_now: Vector2 = Vector2.ONE.lerp(squash_pose,squash_left/float(j.squash_time))
+	if state == State.STRIKE:
+		var stretch: float = float(j.strike_stretch)*clampf(dive_speed/float(Config.tuning.dive.max_speed),0.0,1.0)
+		scale_now *= Vector2(1.0+stretch,1.0-stretch*0.5)
+	return scale_now
+
+func _process(delta: float) -> void:
+	if flash_left > 0.0:
+		flash_left = maxf(0.0,flash_left-delta)
+		HitFlash.apply(sprite,flash_left)
 	sync_carry() # food can be swallowed, mugged or dropped after tick(): switch art on the same rendered frame
 
 static func carry_frames(id: String, entry: Dictionary, overlay: bool) -> SpriteFrames:
@@ -763,6 +791,8 @@ func land() -> void:
 	if was_airborne and velocity.y > 0.1:
 		art_event = &"landing"
 		art_event_left = 0.16
+		var k: float = float(Config.tuning.juice.hard_land_squash if hard else Config.tuning.juice.land_squash)
+		squash(k,-k)
 	position.y = ground_y()
 	velocity.y = 0
 	velocity.x = clampf(velocity.x, -float(Config.tuning.flight.ground_speed), float(Config.tuning.flight.ground_speed))
@@ -820,6 +850,7 @@ func begin_tumble(duration: float = -1.0, attacker: Vector2 = Vector2.INF) -> vo
 	if away == 0.0:
 		away = -signf(velocity.x) if absf(velocity.x)>1.0 else -facing
 	state = State.STUNNED
+	hit_flash()
 	support = {}
 	departing_perch = {}
 	coasting = false

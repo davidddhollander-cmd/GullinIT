@@ -150,6 +150,8 @@ func tick(delta: float) -> void:
 func _impact(ally: Dictionary, gull: BeachGull) -> void:
 	var t: Dictionary = tuning()
 	var knocked: bool = is_instance_valid(ally.target) and ally.target.knock_food(gull,float(t.food_lift))
+	if knocked:
+		ally.target.hit_flash()
 	hit_fx(ally.hit,gull.velocity,knocked,int(t.hit_feathers),int(t.hit_crumbs),float(t.hit_shake),float(t.hit_stop))
 
 ## The shared impact bundle (Gang Call hits, Shakedown slam and shakes); each hit counts toward the rising cry.
