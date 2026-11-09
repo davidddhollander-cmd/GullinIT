@@ -1,6 +1,6 @@
 # 077 — Enraged carry sprites
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Sonnet
 Depends on: 075 (merged)
