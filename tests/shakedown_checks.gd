@@ -285,7 +285,9 @@ static func _raid_checks(host: Node, check: Callable) -> void:
 		game._peck()
 	var raid_items: Array = raids.items.filter(func(item: Dictionary) -> bool: return item.source == "raid")
 	check.call(raid_items.size() == int(Config.tuning.shakedown.raid_cap),"raid food stops at the cap")
-	check.call(raid_items.all(func(item: Dictionary) -> bool: return Config.foods[item.food_id].category != "large"),"raided food is never large")
+	var pool: Array = Config.tuning.shakedown.raid_foods
+	check.call(pool.all(func(id: String) -> bool: return Config.foods[id].category != "large"),"raided pool food is never large")
+	check.call(raid_items[0].food_id == "ice_cream" and raid_items[1].food_id == "ice_cream" and pool.has(raid_items[2].food_id),"a kiosk raid gives two ice creams then pool food")
 	check.call(raids.peck_cooldown > 0.0,"pecks after the cap still spend the cooldown (empty tap)")
 	# Other stall is its own raid.
 	var other: FoodStall = game.beach.stalls[1]
@@ -293,6 +295,33 @@ static func _raid_checks(host: Node, check: Callable) -> void:
 	raids.peck_cooldown = 0.0
 	game._peck()
 	check.call(other.ducked and raids.items.filter(func(item: Dictionary) -> bool: return item.source == "raid").size() == raid_items.size()+1,"each stall has its own cap and vendor")
+	# Signature food: the other stalls' first two items are what they sell, and the large ones can be picked up and swallowed.
+	var signature: Dictionary = Config.tuning.shakedown.raid_signature
+	var seen: Dictionary = {"kiosk": true}
+	for other_stall: FoodStall in game.beach.stalls:
+		if seen.has(other_stall.stall_type):
+			continue
+		seen[other_stall.stall_type] = true
+		var before: int = raids.items.size()
+		var done: int = int(game.brash.shakedown.raided.get(other_stall,0))
+		ground_gull(game,other_stall.position.x)
+		for i: int in 4-done:
+			raids.peck_cooldown = 0.0
+			game._peck()
+		var got: Array = raids.items.slice(before).map(func(item: Dictionary) -> String: return str(item.food_id))
+		var want: String = str(signature[other_stall.stall_type])
+		var lead: int = mini(2,got.size()) if done == 0 else 0
+		check.call(got.slice(0,lead).all(func(id: String) -> bool: return id == want) and (done > 0 or (lead == 2 and got.size() == 4 and pool.has(got[2]))),"%s raid: two %s first, then pool food" % [other_stall.stall_type,want])
+		if Config.foods[want].category == "large":
+			game.player.digestion.snacks.clear()
+			game.player.digestion.rest = 0.0
+			raids.items.clear()
+			raids.items.append({"owner":null,"source":"raid","food_id":want,"position":game.player.beak(),"velocity":Vector2.ZERO,"grounded":true,"age":1.0})
+			raids.tick(0.1)
+			check.call(game.player.digestion.snacks.size() == 1 and game.player.digestion.snacks[0].id == want,"a raided %s is picked up while gorging" % want)
+			for i: int in 100: # digestion ticks from the game loop, so step it directly: 2 simulated seconds
+				game.player.digestion.tick(0.02,true)
+			check.call(game.player.digestion.snacks.is_empty(),"a raided %s is swallowed" % want)
 	# Release: the vendor returns and service resumes.
 	sim(game,10.0)
 	check.call(not brash.active() and not stall.ducked and not other.ducked,"the power's end releases the stalls")
