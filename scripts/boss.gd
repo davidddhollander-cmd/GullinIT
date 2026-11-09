@@ -19,7 +19,7 @@ static func _bump(gull: BeachGull, force: float, from: Vector2, seconds: float) 
 static func blocks_mug(game: BeachGame, victim: RivalPilot, attacker: BeachGull) -> bool:
 	if not bool(victim.personality.get("mug_from_behind", false)) or is_behind(victim.gull, attacker.position):
 		return false
-	var force: float = attacker.bump_force_on(victim.gull)
+	var force: float = BeachGull.bump_force(attacker.impact_speed(),victim.gull.species_weight(),attacker.species_weight()) # the mugger bounces: its own weight resists
 	if force <= 0.0:
 		return false
 	_bump(attacker, force, victim.gull.position, float(Config.tuning.boss.bounce_stun))

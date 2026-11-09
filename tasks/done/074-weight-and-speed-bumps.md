@@ -1,6 +1,6 @@
-# 074 — Bumps use weight and impact speed
+﻿# 074 — Bumps use weight and impact speed
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Haiku
 Depends on: none
