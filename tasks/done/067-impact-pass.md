@@ -1,6 +1,6 @@
 # 067 — Impact pass: flashes, squash, weighted snatches
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on:
