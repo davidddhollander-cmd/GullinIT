@@ -392,6 +392,23 @@
     "snatch_contact_count": 5,
     "snatch_contact_life": 0.26,
     "trash_spin_min": 5.0,
-    "trash_spin_max": 9.0
+    "trash_spin_max": 9.0,
+    "flash": true,
+    "flash_time": 0.07,
+    "squash": true,
+    "squash_time": 0.14,
+    "strike_stretch": 0.2,
+    "land_squash": 0.1,
+    "hard_land_squash": 0.2,
+    "swallow_bulge": 0.12,
+    "snatch_stop_max": 0.09,
+    "snatch_shake_max": 3.5,
+    "weight_size_share": 0.5,
+    "combo_ring_grow": 56.0,
+    "combo_ring_life": 0.32,
+    "score_hop": 2,
+    "score_hop_time": 0.2,
+    "text_hop": 3,
+    "text_hop_time": 0.1
   }
 }

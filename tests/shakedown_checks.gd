@@ -450,6 +450,7 @@ static func _punch_checks(host: Node, check: Callable) -> void:
 	check.call(stomach.snacks.is_empty(),"digestion runs 3x during the power")
 	# Bully size, tint, warning.
 	var base: float = player.art_scale if player.detailed_art else 1.0
+	player.squash_left = 0.0 # the swallow above bulges the body briefly; this check is about bully_scale alone
 	sim(game,0.1)
 	check.call(is_equal_approx(player.sprite.scale.x,base*1.25) and is_equal_approx(player.sprite.scale.y,base*1.25),"the gull is drawn at bully_scale during the power")
 	ground_gull(game,420)

@@ -375,13 +375,32 @@ func _sync_trainer() -> void:
 	var cells: Array[ImageTexture] = TrainerCard.portrait_textures()
 	trainer_portrait.texture = cells[int(TrainerCard.MOODS.wince)] if since < 0.8 else cells[int(TrainerCard.MOODS.talking) if int(since / TrainerCard.TALK_STEP) % 2 == 0 else int(TrainerCard.MOODS.neutral)]
 
+var score_hop_left: float = 0.0
+var score_hop_rest: float = 0.0 ## the label's y in the top bar while it is not hopping
+var score_hop_points: int = 0
+
+## Points rose: the score label hops up a couple of pixels and flashes white, then settles. Position and colour only.
+func _score_hop(delta: float, counting: bool) -> void:
+	var t: Dictionary = Config.tuning.juice
+	if game.score.points > score_hop_points:
+		if score_hop_left <= 0.0:
+			score_hop_rest = score_label.position.y
+		score_hop_left = float(t.score_hop_time)
+	score_hop_points = game.score.points
+	var hopping: bool = score_hop_left > 0.0
+	if hopping:
+		score_hop_left = maxf(0.0,score_hop_left-delta)
+		var u: float = 1.0-score_hop_left/float(t.score_hop_time)
+		score_label.position.y = score_hop_rest-roundf(float(t.score_hop)*sin(u*PI))
+	score_label.add_theme_color_override("font_color",Color.WHITE if hopping and score_hop_left > 0.0 else (BeachUI.CREAM if counting else BeachUI.GOLD))
+
 func _process(delta: float) -> void:
 	if game.peck_pause or game.aim_pause:
 		queue_redraw()
 	var counting: bool = shown_score < game.score.points
 	shown_score = move_toward(shown_score,game.score.points,maxf(20.0,(game.score.points-shown_score)*4.0)*delta) if counting else float(game.score.points)
 	score_label.text = "%04d  X%s" % [roundi(shown_score),str(Config.tuning.score.tiers[game.score.tier])]
-	score_label.add_theme_color_override("font_color",BeachUI.CREAM if counting else BeachUI.GOLD)
+	_score_hop(delta,counting)
 	var time_left: float = maxf(0,float(game.level.time_limit)-game.elapsed)
 	time_label.text = "TRAINING" if game.training else ("%d/%d" % [game.score.items,Config.tuning.score.casual_items] if game.casual else "%02d" % ceili(time_left))
 	var warning: bool = not game.training and not game.casual and game.running and time_left <= TIME_WARNING

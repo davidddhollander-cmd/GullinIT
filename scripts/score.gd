@@ -1,6 +1,7 @@
 class_name BeachScore
 extends RefCounted
 signal combo_changed(tier: int)
+signal combo_rose(tier: int) ## combo_changed, but only when the tier actually went up
 var points: int = 0
 var items: int = 0
 var tier: int = 0
@@ -17,8 +18,11 @@ func tick(delta: float) -> void:
 func snatch(value: int, risky: bool, upwind: bool, mugged: bool, handover: bool = false) -> int:
 	var t: Dictionary = Config.tuning.score
 	if window > 0:
+		var before: int = tier
 		tier = mini(tier + 1, t.tiers.size() - 1)
 		combo_changed.emit(tier)
+		if tier > before:
+			combo_rose.emit(tier)
 	else:
 		tier = 0
 	var bonus: float = 1.0

@@ -56,6 +56,7 @@ func _knock_around(radius: float) -> int:
 	for target: BeachTarget in game.spawner.targets:
 		if is_instance_valid(target) and target.food and at.distance_to(target.food_position()) <= radius and target.knock_food(game.player,lift):
 			target.drop_retrieve = false
+			target.hit_flash()
 			game.effects.snatch_contact(target.food_position(),game.player.velocity,false)
 			count += 1
 	for pilot: RivalPilot in game.pilots:

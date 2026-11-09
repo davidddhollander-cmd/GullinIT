@@ -37,6 +37,19 @@ func whisper(at: Vector2, text: String, life: float = 0.0) -> void:
 		var seconds: float = life if life > 0.0 else float(Config.tuning.juice.float_time)
 		texts.append({"at":at,"text":text,"color":BeachUI.CREAM,"life":seconds,"fade_time":seconds*0.7,"rise_speed":10.0,"plain":true})
 
+## Short impact word (BONK!, PECK!...): outlined with no plate, in its own colour, held for the normal float time.
+func shout(at: Vector2, text: String, color: Color = Color("fff4da")) -> void:
+	if Config.tuning.juice.floating_text:
+		texts.append({"at":at,"text":text,"color":color,"life":float(Config.tuning.juice.float_time),"rise_speed":10.0,"plain":true})
+
+## A combo tier went up: gold ring on the gull and the new multiplier floating above it.
+func combo_pop(at: Vector2, multiplier: String) -> void:
+	var t: Dictionary = Config.tuning.juice
+	if bool(t.particles):
+		particles.append({"ring":true,"at":at,"v":Vector2.ZERO,"gravity":0.0,"life":float(t.combo_ring_life),"duration":float(t.combo_ring_life),"delay":0.0,"grow":float(t.combo_ring_grow),"color":BeachUI.GOLD})
+		queue_redraw()
+	shout(at-Vector2(0,30),"X"+multiplier,BeachUI.GOLD)
+
 func score_message(at: Vector2, text: String, color: Color = Color("fff4da")) -> void:
 	if Config.tuning.juice.floating_text:
 		texts.append({
@@ -60,12 +73,28 @@ func empty_message(at: Vector2) -> void:
 	texts.append({"at":at,"source":at,"text":"EMPTY","color":Color("d7d9cf"),"life":0.72,"fade_time":0.40})
 	queue_redraw()
 
-func impact(at: Vector2, stunned: bool) -> void:
+## `weight` (0..1) lifts a snatch's freeze and shake from the light values toward the max ones. Never cuts a bigger one short.
+func impact(at: Vector2, stunned: bool, weight: float = 0.0) -> void:
 	var t: Dictionary = Config.tuning.juice
 	if t.hitstop:
-		freeze = float(t.stun_stop if stunned else t.snatch_stop)
+		freeze = maxf(freeze,float(t.stun_stop) if stunned else lerpf(float(t.snatch_stop),float(t.snatch_stop_max),weight))
 	if t.shake and GameState.options.shake:
-		shake = float(t.stun_shake if stunned else t.snatch_shake)
+		shake = maxf(shake,float(t.stun_shake) if stunned else lerpf(float(t.snatch_shake),float(t.snatch_shake_max),weight))
+
+## 0 for a crumb, 1 for a big food, from the food's longest side (also sizes the collect burst).
+func food_size_amount(food_id: String) -> float:
+	var t: Dictionary = Config.tuning.juice
+	var size: Array = Config.foods.get(food_id,{}).get("size",[8,8])
+	var longest: float = maxf(float(size[0]),float(size[1]))
+	return clampf((longest-float(t.collect_size_min))/(float(t.collect_size_max)-float(t.collect_size_min)),0.0,1.0)
+
+## How much a snatch should land: food size and combo tier, full weight for a counter snatch.
+func snatch_weight(food_id: String, tier: int, bonus: bool = false) -> float:
+	if bonus:
+		return 1.0
+	var share: float = float(Config.tuning.juice.weight_size_share)
+	var top: float = maxf(1.0,float(Config.tuning.score.tiers.size()-1))
+	return clampf(food_size_amount(food_id)*share+clampf(float(tier)/top,0.0,1.0)*(1.0-share),0.0,1.0)
 
 func _texture_particle(kind: String,texture: Texture2D,at: Vector2,velocity: Vector2,life: float,angle: float = 0.0,spin: float = 0.0,scale: float = 1.0,gravity: float = 0.0,modulate: Color = Color.WHITE) -> void:
 	particles.append({
@@ -94,8 +123,8 @@ func peck_contact(at: Vector2,direction: Vector2,strength: float = 0.0,material:
 	queue_redraw()
 
 ## Snatch feedback happens at food/beak contact; scoring still waits for swallowing.
-func snatch_contact(at: Vector2,motion: Vector2,bonus: bool = false) -> void:
-	impact(at,false)
+func snatch_contact(at: Vector2,motion: Vector2,bonus: bool = false,weight: float = 0.0) -> void:
+	impact(at,false,1.0 if bonus else weight)
 	if not bool(Config.tuning.juice.particles):
 		return
 	var heading: Vector2 = motion.normalized() if motion.length_squared() > 0.01 else Vector2.RIGHT
@@ -338,10 +367,7 @@ func pixelfx_stunned(gull: BeachGull) -> AnimatedSprite2D:
 ## Gold sparkle where a snack scores, sized by the food: crumbs get a pinch, a hot dog or pizza slice the full burst.
 func collect_burst(at: Vector2, food_id: String = "") -> AnimatedSprite2D:
 	var t: Dictionary = Config.tuning.juice
-	var size: Array = Config.foods.get(food_id,{}).get("size",[8,8])
-	var longest: float = maxf(float(size[0]),float(size[1]))
-	var amount: float = clampf((longest-float(t.collect_size_min))/(float(t.collect_size_max)-float(t.collect_size_min)),0.0,1.0)
-	return pixelfx("pixelfx_collect_burst",at,Vector2.RIGHT,null,lerpf(float(t.collect_scale_min),1.0,amount))
+	return pixelfx("pixelfx_collect_burst",at,Vector2.RIGHT,null,lerpf(float(t.collect_scale_min),1.0,food_size_amount(food_id)))
 
 func pixelfx_hit_spark(at: Vector2, heading: Vector2) -> AnimatedSprite2D:
 	return pixelfx("pixelfx_hit_spark",at,heading)
@@ -383,6 +409,7 @@ func tick(delta: float) -> void:
 	kick = kick.move_toward(Vector2.ZERO,delta*float(Config.tuning.juice.dive_kick_decay))
 	for i: int in range(texts.size()-1,-1,-1):
 		texts[i].life -= delta
+		texts[i].age = float(texts[i].get("age",0.0))+delta
 		texts[i].at.y -= delta*float(texts[i].get("rise_speed",10.0))
 		if texts[i].life <= 0:
 			texts.remove_at(i)
@@ -416,11 +443,18 @@ func tick(delta: float) -> void:
 			particles.remove_at(i)
 	queue_redraw()
 
+## Pixels a floating text is lifted by right after it appears: up and back within text_hop_time.
+func text_hop(item: Dictionary) -> float:
+	var t: Dictionary = Config.tuning.juice
+	return roundf(float(t.text_hop)*sin(clampf(float(item.get("age",0.0))/float(t.text_hop_time),0.0,1.0)*PI))
+
 func _draw() -> void:
 	var game: BeachGame = get_parent() as BeachGame
 	for item: Dictionary in texts:
 		var width: float = font.get_string_size(item.text,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x
 		var at: Vector2 = item.at-Vector2(width*0.5,0)
+		# A hop on appearance: a few pixels up and back in the first moments, position only (never scaled).
+		at.y -= text_hop(item)
 		if game != null and game.overlay != null and game.overlay.score_announcement.visible:
 			var transform: Transform2D = get_global_transform_with_canvas()
 			var screen_at: Vector2 = transform*at

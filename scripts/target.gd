@@ -8,6 +8,7 @@ signal food_knocked(target: BeachTarget, food_id: String, at: Vector2, impulse: 
 var kind: String
 var info: Dictionary
 var alert: float = 0.0
+var flash_left: float = 0.0 ## hit flash seconds remaining (this person only)
 var seen_time: float = 0.0
 var food: bool = true
 var food_id: String = ""
@@ -317,6 +318,15 @@ func food_radius() -> Vector2:
 func _exit_tree() -> void:
 	if bench_visit.registry != null:
 		bench_visit.registry.release(self)
+
+## Brief white flash on this person only.
+func hit_flash() -> void:
+	flash_left = HitFlash.duration()
+
+func _process(delta: float) -> void:
+	if flash_left > 0.0:
+		flash_left = maxf(0.0,flash_left-delta)
+		HitFlash.apply(sprite,flash_left)
 
 func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	shine_time += delta
