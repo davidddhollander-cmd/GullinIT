@@ -1,0 +1,1587 @@
+{
+  "frames": [
+    {
+      "label": "body/8",
+      "source_crop": [
+        78,
+        96,
+        281,
+        267
+      ],
+      "resize": [
+        87,
+        75
+      ],
+      "trim": [
+        0,
+        0,
+        87,
+        75
+      ],
+      "destination": [
+        62,
+        78
+      ],
+      "normal_beak": [
+        146,
+        134
+      ],
+      "enraged_beak": [
+        146,
+        134
+      ],
+      "normal_bounds": [
+        66,
+        82,
+        149,
+        149
+      ],
+      "bounds": [
+        62,
+        78,
+        149,
+        153
+      ],
+      "grounded": false,
+      "detached_pixels_removed": 29,
+      "source_cell": [
+        0,
+        0,
+        378,
+        347
+      ]
+    },
+    {
+      "label": "body/9",
+      "source_crop": [
+        79,
+        129,
+        283,
+        265
+      ],
+      "resize": [
+        89,
+        61
+      ],
+      "trim": [
+        0,
+        0,
+        89,
+        61
+      ],
+      "destination": [
+        61,
+        90
+      ],
+      "normal_beak": [
+        146,
+        134
+      ],
+      "enraged_beak": [
+        146,
+        134
+      ],
+      "normal_bounds": [
+        66,
+        94,
+        151,
+        147
+      ],
+      "bounds": [
+        61,
+        90,
+        150,
+        151
+      ],
+      "grounded": false,
+      "detached_pixels_removed": 0,
+      "source_cell": [
+        378,
+        0,
+        756,
+        347
+      ]
+    },
+    {
+      "label": "body/10",
+      "source_crop": [
+        73,
+        179,
+        278,
+        332
+      ],
+      "resize": [
+        89,
+        61
+      ],
+      "trim": [
+        0,
+        0,
+        89,
+        61
+      ],
+      "destination": [
+        59,
+        116
+      ],
+      "normal_beak": [
+        146,
+        135
+      ],
+      "enraged_beak": [
+        146,
+        135
+      ],
+      "normal_bounds": [
+        63,
+        123,
+        148,
+        176
+      ],
+      "bounds": [
+        59,
+        116,
+        148,
+        177
+      ],
+      "grounded": false,
+      "detached_pixels_removed": 1,
+      "source_cell": [
+        756,
+        0,
+        1134,
+        347
+      ]
+    },
+    {
+      "label": "body/11",
+      "source_crop": [
+        82,
+        135,
+        280,
+        262
+      ],
+      "resize": [
+        84,
+        56
+      ],
+      "trim": [
+        0,
+        0,
+        84,
+        56
+      ],
+      "destination": [
+        64,
+        94
+      ],
+      "normal_beak": [
+        146,
+        134
+      ],
+      "enraged_beak": [
+        146,
+        134
+      ],
+      "normal_bounds": [
+        68,
+        98,
+        148,
+        146
+      ],
+      "bounds": [
+        64,
+        94,
+        148,
+        150
+      ],
+      "grounded": false,
+      "detached_pixels_removed": 1,
+      "source_cell": [
+        1134,
+        0,
+        1512,
+        347
+      ]
+    },
+    {
+      "label": "body/12",
+      "source_crop": [
+        51,
+        160,
+        325,
+        261
+      ],
+      "resize": [
+        114,
+        47
+      ],
+      "trim": [
+        0,
+        0,
+        114,
+        47
+      ],
+      "destination": [
+        53,
+        104
+      ],
+      "normal_beak": [
+        146,
+        134
+      ],
+      "enraged_beak": [
+        146,
+        134
+      ],
+      "normal_bounds": [
+        55,
+        109,
+        165,
+        148
+      ],
+      "bounds": [
+        53,
+        104,
+        167,
+        151
+      ],
+      "grounded": false,
+      "detached_pixels_removed": 3,
+      "source_cell": [
+        0,
+        347,
+        378,
+        693
+      ]
+    },
+    {
+      "label": "body/13",
+      "source_crop": [
+        82,
+        121,
+        280,
+        257
+      ],
+      "resize": [
+        84,
+        59
+      ],
+      "trim": [
+        0,
+        0,
+        84,
+        59
+      ],
+      "destination": [
+        64,
+        90
+      ],
+      "normal_beak": [
+        146,
+        134
+      ],
+      "enraged_beak": [
+        146,
+        134
+      ],
+      "normal_bounds": [
+        68,
+        94,
+        148,
+        145
+      ],
+      "bounds": [
+        64,
+        90,
+        148,
+        149
+      ],
+      "grounded": false,
+      "detached_pixels_removed": 10,
+      "source_cell": [
+        378,
+        347,
+        756,
+        693
+      ]
+    },
+    {
+      "label": "body/14",
+      "source_crop": [
+        64,
+        168,
+        280,
+        251
+      ],
+      "resize": [
+        93,
+        34
+      ],
+      "trim": [
+        0,
+        0,
+        93,
+        34
+      ],
+      "destination": [
+        55,
+        111
+      ],
+      "normal_beak": [
+        146,
+        130
+      ],
+      "enraged_beak": [
+        146,
+        130
+      ],
+      "normal_bounds": [
+        59,
+        118,
+        148,
+        144
+      ],
+      "bounds": [
+        55,
+        111,
+        148,
+        145
+      ],
+      "grounded": false,
+      "detached_pixels_removed": 1,
+      "source_cell": [
+        756,
+        347,
+        1134,
+        693
+      ]
+    },
+    {
+      "label": "body/15",
+      "source_crop": [
+        67,
+        118,
+        282,
+        267
+      ],
+      "resize": [
+        90,
+        63
+      ],
+      "trim": [
+        0,
+        0,
+        90,
+        63
+      ],
+      "destination": [
+        59,
+        88
+      ],
+      "normal_beak": [
+        146,
+        134
+      ],
+      "enraged_beak": [
+        146,
+        134
+      ],
+      "normal_bounds": [
+        62,
+        92,
+        148,
+        147
+      ],
+      "bounds": [
+        59,
+        88,
+        149,
+        151
+      ],
+      "grounded": false,
+      "detached_pixels_removed": 3,
+      "source_cell": [
+        1134,
+        347,
+        1512,
+        693
+      ]
+    },
+    {
+      "label": "body/16",
+      "source_crop": [
+        44,
+        145,
+        280,
+        252
+      ],
+      "resize": [
+        102,
+        51
+      ],
+      "trim": [
+        0,
+        0,
+        102,
+        51
+      ],
+      "destination": [
+        46,
+        96
+      ],
+      "normal_beak": [
+        146,
+        130
+      ],
+      "enraged_beak": [
+        146,
+        130
+      ],
+      "normal_bounds": [
+        50,
+        104,
+        148,
+        147
+      ],
+      "bounds": [
+        46,
+        96,
+        148,
+        147
+      ],
+      "grounded": false,
+      "detached_pixels_removed": 1,
+      "source_cell": [
+        0,
+        693,
+        378,
+        1040
+      ]
+    },
+    {
+      "label": "body/17",
+      "source_crop": [
+        78,
+        128,
+        278,
+        242
+      ],
+      "resize": [
+        85,
+        48
+      ],
+      "trim": [
+        0,
+        0,
+        85,
+        48
+      ],
+      "destination": [
+        63,
+        92
+      ],
+      "normal_beak": [
+        146,
+        134
+      ],
+      "enraged_beak": [
+        146,
+        134
+      ],
+      "normal_bounds": [
+        67,
+        100,
+        148,
+        140
+      ],
+      "bounds": [
+        63,
+        92,
+        148,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 1,
+      "source_cell": [
+        378,
+        693,
+        756,
+        1040
+      ]
+    },
+    {
+      "label": "body/18",
+      "source_crop": [
+        75,
+        99,
+        281,
+        246
+      ],
+      "resize": [
+        84,
+        60
+      ],
+      "trim": [
+        0,
+        0,
+        84,
+        60
+      ],
+      "destination": [
+        64,
+        80
+      ],
+      "normal_beak": [
+        146,
+        111
+      ],
+      "enraged_beak": [
+        146,
+        110
+      ],
+      "normal_bounds": [
+        68,
+        83,
+        148,
+        140
+      ],
+      "bounds": [
+        64,
+        80,
+        148,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 3,
+      "source_cell": [
+        756,
+        693,
+        1134,
+        1040
+      ]
+    },
+    {
+      "label": "body/19",
+      "source_crop": [
+        92,
+        129,
+        280,
+        242
+      ],
+      "resize": [
+        79,
+        44
+      ],
+      "trim": [
+        0,
+        0,
+        79,
+        44
+      ],
+      "destination": [
+        69,
+        96
+      ],
+      "normal_beak": [
+        146,
+        124
+      ],
+      "enraged_beak": [
+        146,
+        123
+      ],
+      "normal_bounds": [
+        73,
+        99,
+        148,
+        140
+      ],
+      "bounds": [
+        69,
+        96,
+        148,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 2,
+      "source_cell": [
+        1134,
+        693,
+        1512,
+        1040
+      ]
+    },
+    {
+      "label": "screech/0",
+      "source_crop": [
+        143,
+        134,
+        423,
+        342
+      ],
+      "resize": [
+        79,
+        69
+      ],
+      "trim": [
+        0,
+        0,
+        79,
+        69
+      ],
+      "destination": [
+        70,
+        71
+      ],
+      "normal_beak": [
+        147,
+        93
+      ],
+      "enraged_beak": [
+        147,
+        94
+      ],
+      "normal_bounds": [
+        74,
+        83,
+        149,
+        140
+      ],
+      "bounds": [
+        70,
+        71,
+        149,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 2,
+      "source_cell": [
+        0,
+        0,
+        535,
+        490
+      ]
+    },
+    {
+      "label": "screech/1",
+      "source_crop": [
+        125,
+        150,
+        413,
+        342
+      ],
+      "resize": [
+        84,
+        65
+      ],
+      "trim": [
+        0,
+        0,
+        84,
+        65
+      ],
+      "destination": [
+        69,
+        75
+      ],
+      "normal_beak": [
+        151,
+        98
+      ],
+      "enraged_beak": [
+        151,
+        98
+      ],
+      "normal_bounds": [
+        73,
+        89,
+        153,
+        140
+      ],
+      "bounds": [
+        69,
+        75,
+        153,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 2,
+      "source_cell": [
+        535,
+        0,
+        1070,
+        490
+      ]
+    },
+    {
+      "label": "screech/2",
+      "source_crop": [
+        113,
+        123,
+        420,
+        342
+      ],
+      "resize": [
+        85,
+        68
+      ],
+      "trim": [
+        0,
+        0,
+        85,
+        68
+      ],
+      "destination": [
+        67,
+        72
+      ],
+      "normal_beak": [
+        150,
+        82
+      ],
+      "enraged_beak": [
+        150,
+        82
+      ],
+      "normal_bounds": [
+        71,
+        80,
+        152,
+        140
+      ],
+      "bounds": [
+        67,
+        72,
+        152,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 22,
+      "source_cell": [
+        1070,
+        0,
+        1605,
+        490
+      ]
+    },
+    {
+      "label": "screech/3",
+      "source_crop": [
+        96,
+        96,
+        452,
+        348
+      ],
+      "resize": [
+        95,
+        74
+      ],
+      "trim": [
+        0,
+        0,
+        95,
+        74
+      ],
+      "destination": [
+        69,
+        66
+      ],
+      "normal_beak": [
+        145,
+        83
+      ],
+      "enraged_beak": [
+        145,
+        82
+      ],
+      "normal_bounds": [
+        71,
+        70,
+        162,
+        140
+      ],
+      "bounds": [
+        69,
+        66,
+        164,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 12,
+      "source_cell": [
+        0,
+        490,
+        535,
+        980
+      ]
+    },
+    {
+      "label": "screech/4",
+      "source_crop": [
+        62,
+        70,
+        466,
+        348
+      ],
+      "resize": [
+        108,
+        84
+      ],
+      "trim": [
+        0,
+        0,
+        108,
+        84
+      ],
+      "destination": [
+        58,
+        56
+      ],
+      "normal_beak": [
+        140,
+        77
+      ],
+      "enraged_beak": [
+        140,
+        76
+      ],
+      "normal_bounds": [
+        62,
+        64,
+        166,
+        140
+      ],
+      "bounds": [
+        58,
+        56,
+        166,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 1,
+      "source_cell": [
+        535,
+        490,
+        1070,
+        980
+      ]
+    },
+    {
+      "label": "screech/5",
+      "source_crop": [
+        111,
+        106,
+        409,
+        347
+      ],
+      "resize": [
+        82,
+        72
+      ],
+      "trim": [
+        0,
+        0,
+        82,
+        72
+      ],
+      "destination": [
+        67,
+        68
+      ],
+      "normal_beak": [
+        147,
+        86
+      ],
+      "enraged_beak": [
+        147,
+        87
+      ],
+      "normal_bounds": [
+        71,
+        79,
+        149,
+        140
+      ],
+      "bounds": [
+        67,
+        68,
+        149,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 9,
+      "source_cell": [
+        1070,
+        490,
+        1605,
+        980
+      ]
+    },
+    {
+      "label": "carry/0",
+      "source_crop": [
+        101,
+        97,
+        347,
+        286
+      ],
+      "resize": [
+        77,
+        63
+      ],
+      "trim": [
+        0,
+        0,
+        77,
+        63
+      ],
+      "destination": [
+        72,
+        77
+      ],
+      "normal_beak": [
+        146,
+        92
+      ],
+      "enraged_beak": [
+        146,
+        93
+      ],
+      "normal_bounds": [
+        75,
+        86,
+        148,
+        140
+      ],
+      "bounds": [
+        72,
+        77,
+        149,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 75,
+      "upper_beak_crop": [
+        127,
+        87,
+        148,
+        96
+      ]
+    },
+    {
+      "label": "carry/1",
+      "source_crop": [
+        101,
+        97,
+        347,
+        286
+      ],
+      "resize": [
+        79,
+        64
+      ],
+      "trim": [
+        0,
+        0,
+        79,
+        64
+      ],
+      "destination": [
+        70,
+        76
+      ],
+      "normal_beak": [
+        146,
+        92
+      ],
+      "enraged_beak": [
+        146,
+        92
+      ],
+      "normal_bounds": [
+        73,
+        86,
+        148,
+        140
+      ],
+      "bounds": [
+        70,
+        76,
+        149,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 31,
+      "upper_beak_crop": [
+        127,
+        87,
+        148,
+        96
+      ]
+    },
+    {
+      "label": "carry/2",
+      "source_crop": [
+        103,
+        97,
+        347,
+        285
+      ],
+      "resize": [
+        78,
+        63
+      ],
+      "trim": [
+        0,
+        0,
+        78,
+        63
+      ],
+      "destination": [
+        71,
+        77
+      ],
+      "normal_beak": [
+        146,
+        92
+      ],
+      "enraged_beak": [
+        146,
+        93
+      ],
+      "normal_bounds": [
+        74,
+        86,
+        148,
+        140
+      ],
+      "bounds": [
+        71,
+        77,
+        149,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 22,
+      "upper_beak_crop": [
+        128,
+        87,
+        148,
+        96
+      ]
+    },
+    {
+      "label": "carry/3",
+      "source_crop": [
+        102,
+        97,
+        347,
+        286
+      ],
+      "resize": [
+        81,
+        66
+      ],
+      "trim": [
+        0,
+        0,
+        81,
+        66
+      ],
+      "destination": [
+        67,
+        74
+      ],
+      "normal_beak": [
+        146,
+        91
+      ],
+      "enraged_beak": [
+        146,
+        92
+      ],
+      "normal_bounds": [
+        71,
+        85,
+        148,
+        140
+      ],
+      "bounds": [
+        67,
+        74,
+        148,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 35,
+      "upper_beak_crop": [
+        127,
+        86,
+        148,
+        96
+      ]
+    },
+    {
+      "label": "carry/4",
+      "source_crop": [
+        101,
+        97,
+        347,
+        288
+      ],
+      "resize": [
+        80,
+        68
+      ],
+      "trim": [
+        0,
+        0,
+        80,
+        68
+      ],
+      "destination": [
+        69,
+        72
+      ],
+      "normal_beak": [
+        146,
+        89
+      ],
+      "enraged_beak": [
+        146,
+        90
+      ],
+      "normal_bounds": [
+        72,
+        84,
+        148,
+        140
+      ],
+      "bounds": [
+        69,
+        72,
+        149,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 79,
+      "upper_beak_crop": [
+        127,
+        84,
+        148,
+        95
+      ]
+    },
+    {
+      "label": "carry/5",
+      "source_crop": [
+        101,
+        97,
+        347,
+        288
+      ],
+      "resize": [
+        81,
+        68
+      ],
+      "trim": [
+        0,
+        0,
+        81,
+        68
+      ],
+      "destination": [
+        68,
+        72
+      ],
+      "normal_beak": [
+        146,
+        89
+      ],
+      "enraged_beak": [
+        146,
+        89
+      ],
+      "normal_bounds": [
+        71,
+        84,
+        148,
+        140
+      ],
+      "bounds": [
+        68,
+        72,
+        149,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 154,
+      "upper_beak_crop": [
+        127,
+        85,
+        148,
+        94
+      ]
+    },
+    {
+      "label": "carry/6",
+      "source_crop": [
+        103,
+        97,
+        347,
+        288
+      ],
+      "resize": [
+        79,
+        67
+      ],
+      "trim": [
+        0,
+        0,
+        79,
+        67
+      ],
+      "destination": [
+        70,
+        73
+      ],
+      "normal_beak": [
+        146,
+        89
+      ],
+      "enraged_beak": [
+        146,
+        90
+      ],
+      "normal_bounds": [
+        73,
+        84,
+        148,
+        140
+      ],
+      "bounds": [
+        70,
+        73,
+        149,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 72,
+      "upper_beak_crop": [
+        127,
+        84,
+        148,
+        95
+      ]
+    },
+    {
+      "label": "carry/7",
+      "source_crop": [
+        102,
+        97,
+        347,
+        288
+      ],
+      "resize": [
+        81,
+        68
+      ],
+      "trim": [
+        0,
+        0,
+        81,
+        68
+      ],
+      "destination": [
+        67,
+        72
+      ],
+      "normal_beak": [
+        146,
+        89
+      ],
+      "enraged_beak": [
+        146,
+        90
+      ],
+      "normal_bounds": [
+        71,
+        84,
+        148,
+        140
+      ],
+      "bounds": [
+        67,
+        72,
+        148,
+        140
+      ],
+      "grounded": true,
+      "detached_pixels_removed": 59,
+      "upper_beak_crop": [
+        126,
+        84,
+        148,
+        95
+      ]
+    },
+    {
+      "label": "carry/8",
+      "source_crop": [
+        100,
+        95,
+        416,
+        377
+      ],
+      "resize": [
+        83,
+        75
+      ],
+      "trim": [
+        0,
+        0,
+        83,
+        75
+      ],
+      "destination": [
+        67,
+        75
+      ],
+      "normal_beak": [
+        147,
+        129
+      ],
+      "enraged_beak": [
+        147,
+        129
+      ],
+      "normal_bounds": [
+        70,
+        82,
+        149,
+        149
+      ],
+      "bounds": [
+        67,
+        75,
+        150,
+        150
+      ],
+      "grounded": false,
+      "detached_pixels_removed": 30,
+      "upper_beak_crop": [
+        130,
+        124,
+        149,
+        134
+      ]
+    },
+    {
+      "label": "carry/9",
+      "source_crop": [
+        101,
+        149,
+        420,
+        376
+      ],
+      "resize": [
+        81,
+        61
+      ],
+      "trim": [
+        0,
+        0,
+        81,
+        61
+      ],
+      "destination": [
+        71,
+        91
+      ],
+      "normal_beak": [
+        150,
+        132
+      ],
+      "enraged_beak": [
+        150,
+        132
+      ],
+      "normal_bounds": [
+        74,
+        94,
+        151,
+        147
+      ],
+      "bounds": [
+        71,
+        91,
+        152,
+        152
+      ],
+      "grounded": false,
+      "detached_pixels_removed": 56,
+      "upper_beak_crop": [
+        134,
+        125,
+        151,
+        135
+      ]
+    },
+    {
+      "label": "carry/10",
+      "source_crop": [
+        91,
+        227,
+        421,
+        473
+      ],
+      "resize": [
+        82,
+        61
+      ],
+      "trim": [
+        0,
+        0,
+        82,
+        61
+      ],
+      "destination": [
+        67,
+        116
+      ],
+      "normal_beak": [
+        147,
+        131
+      ],
+      "enraged_beak": [
+        147,
+        131
+      ],
+      "normal_bounds": [
+        70,
+        123,
+        148,
+        176
+      ],
+      "bounds": [
+        67,
+        116,
+        149,
+        177
+      ],
+      "grounded": false,
+      "detached_pixels_removed": 83,
+      "upper_beak_crop": [
+        131,
+        124,
+        148,
+        133
+      ]
+    },
+    {
+      "label": "carry/11",
+      "source_crop": [
+        94,
+        129,
+        416,
+        348
+      ],
+      "resize": [
+        79,
+        56
+      ],
+      "trim": [
+        0,
+        0,
+        79,
+        56
+      ],
+      "destination": [
+        69,
+        93
+      ],
+      "normal_beak": [
+        146,
+        129
+      ],
+      "enraged_beak": [
+        146,
+        129
+      ],
+      "normal_bounds": [
+        73,
+        98,
+        148,
+        146
+      ],
+      "bounds": [
+        69,
+        93,
+        148,
+        149
+      ],
+      "grounded": false,
+      "detached_pixels_removed": 18,
+      "upper_beak_crop": [
+        130,
+        125,
+        148,
+        134
+      ]
+    },
+    {
+      "label": "carry/12",
+      "source_crop": [
+        62,
+        177,
+        452,
+        342
+      ],
+      "resize": [
+        90,
+        47
+      ],
+      "trim": [
+        0,
+        0,
+        90,
+        47
+      ],
+      "destination": [
+        76,
+        106
+      ],
+      "normal_beak": [
+        164,
+        130
+      ],
+      "enraged_beak": [
+        164,
+        130
+      ],
+      "normal_bounds": [
+        79,
+        109,
+        165,
+        148
+      ],
+      "bounds": [
+        76,
+        106,
+        166,
+        153
+      ],
+      "grounded": false,
+      "detached_pixels_removed": 58,
+      "upper_beak_crop": [
+        153,
+        123,
+        165,
+        132
+      ]
+    }
+  ],
+  "carry_source_cell": 512,
+  "pilot": "approved-pilot.png"
+}
