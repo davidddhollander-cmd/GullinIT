@@ -18,6 +18,7 @@ var state: State = State.ENTER
 var facing: float = 1.0
 var timer: float = 0.0
 var cooldown: float = 0.0
+var bounced: bool = false ## the last swing hit power immunity
 var chase_time: float = 0.0
 var lost_time: float = 0.0
 var hit_done: bool = false
@@ -93,7 +94,7 @@ func _in_range(x: float, margin: float = 0.0) -> bool:
 	return x >= float(tuning().range[0])-margin and x <= float(tuning().range[1])+margin
 
 func can_mark(gull: BeachGull) -> bool:
-	return is_instance_valid(gull) and gull.visible and gull.state != BeachGull.State.STUNNED and gull.invulnerable <= 0.0 and _in_range(gull.position.x,10.0)
+	return is_instance_valid(gull) and gull.visible and gull.state != BeachGull.State.STUNNED and not gull.untargetable() and _in_range(gull.position.x,10.0)
 
 ## A gull is a mark while it is low and close; a grounded gull working a bin is noticed from further off.
 func gull_low(gull: BeachGull) -> bool:
@@ -259,6 +260,7 @@ func tick(delta: float, gull: BeachGull) -> void:
 				timer = float(t.swat_time)
 				hit_done = false
 				landed_hit = false
+				bounced = false
 				_swing_fx_start()
 				said.emit("swing")
 		State.SWAT:
@@ -268,7 +270,7 @@ func tick(delta: float, gull: BeachGull) -> void:
 			_swing_check(prey if is_instance_valid(prey) else gull)
 			if timer <= 0.0:
 				if landed_hit:
-					cooldown = float(t.cooldown)
+					cooldown = maxf(float(t.cooldown),float(Config.tuning.shakedown.bounce_cooldown) if bounced else 0.0)
 					prey = null
 					state = State.FIST
 					timer = float(t.fist_time)
@@ -377,8 +379,11 @@ func _swing_check(gull: BeachGull) -> void:
 		hit_done = true
 		landed_hit = true
 		gull.stun(float(tuning().knock_time),position)
+		if gull.state != BeachGull.State.STUNNED and gull.steady_invulnerable:
+			bounced = true
+			position.x = clampf(position.x-signf(gull.position.x-position.x)*float(Config.tuning.shakedown.bounce_recoil),float(tuning().range[0])-220.0,float(tuning().range[1])+220.0)
 		if gull.state == BeachGull.State.STUNNED:
-			gull.velocity = Vector2(gull.velocity.x/maxf(absf(gull.velocity.x),0.001)*float(tuning().knock_speed),-float(tuning().knock_up)) # sent flying, far further than a normal tumble
+			gull.velocity = Vector2(gull.velocity.x/maxf(absf(gull.velocity.x),0.001)*float(tuning().knock_speed),-float(tuning().knock_up))*gull.knockback # sent flying, far further than a normal tumble
 			game.effects.swat_hit(gull.position,Vector2(signf(gull.velocity.x),-0.6).normalized())
 			swatted.emit(gull)
 

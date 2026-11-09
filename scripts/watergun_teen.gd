@@ -59,7 +59,7 @@ func _in_leash(x: float) -> bool:
 
 # A gull is a valid mark while it is in the leash, within aiming height and not already down.
 func can_target(gull: BeachGull) -> bool:
-	return is_instance_valid(gull) and gull.visible and gull.state != BeachGull.State.STUNNED and gull.invulnerable <= 0.0 \
+	return is_instance_valid(gull) and gull.visible and gull.state != BeachGull.State.STUNNED and not gull.untargetable() \
 		and _in_leash(gull.position.x) and absf(gull.position.y-muzzle_level_y()) <= float(_t().aim_max_dy)
 
 func _nearest(gulls: Array[BeachGull], radius: float) -> BeachGull:

@@ -5,6 +5,7 @@ var snacks: Array[Dictionary] = []
 var progress: float = 0.0
 var rest: float = 0.0
 var capacity: int = 4 ## units of stomach; Bigger stomach perk raises it
+var speed: float = 1.0 ## digestion rate multiplier (Shakedown gorge)
 
 func cost(id: String) -> int:
 	return {"small":1,"medium":2,"large":4}[Config.foods[id].category]
@@ -35,7 +36,7 @@ func drop_current() -> Dictionary:
 	return snacks.pop_front()
 
 func tick(delta: float, grounded: bool) -> void:
-	var budget: float = delta * (2.0 if grounded else 1.0)
+	var budget: float = delta * speed * (2.0 if grounded else 1.0)
 	while budget > 0:
 		if rest > 0:
 			var used: float = minf(rest,budget)

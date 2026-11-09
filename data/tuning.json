@@ -335,10 +335,13 @@
   "brash": {
     "snatch": 0.15, "handover": 0.08, "mug": 0.2, "bump": 0.34, "stun": -0.25,
     "screech_per_sec": 0.06, "vantage_per_px": 0.03, "vantage_max": 3.5,
-    "hit_shake": 5, "hit_stop": 0.08, "hit_feathers": 50, "hit_feathers_per_hit": 4, "hit_crumbs": 24, "dust_time": 1.0, "dust_gap": 0.15, "food_lift": 2.8, "shadow_lead": 0.7
+    "hit_shake": 5, "hit_stop": 0.08, "hit_feathers": 50, "hit_feathers_per_hit": 4, "hit_crumbs": 24, "dust_time": 1.0, "dust_gap": 0.15, "food_lift": 2.8, "hit_cap": 8, "shadow_lead": 0.7
   },
   "shakedown": {
-    "panic_interval": 1.0, "shake_radius": 36, "raid_cap": 6, "duck_time": 0.15, "duck_depth": 64,
+    "panic_interval": 1.0, "shake_radius": 50, "raid_cap": 6, "duck_time": 0.15, "duck_depth": 64,
+    "slam_radius": 70, "food_lift": 2.8, "impact_gap": 0.3, "hit_shake": 2.5, "hit_stop": 0.04, "hit_feathers": 24, "hit_crumbs": 12,
+    "gorge_capacity": 4, "gorge_digest": 3.0, "bully_scale": 1.25, "bully_tint": [1.0, 0.82, 0.78], "pulse_speed": 0.6, "pulse_fast": 3.0, "end_warning": 1.5, "tick_pitch": 1.6,
+    "land_shake": 1.5, "bounce_cooldown": 2.0, "bounce_recoil": 18, "nope_gap": 1.0, "duck_music": 1.0, "raid_shake": 1.5, "raid_shake_time": 0.18, "raid_reach": 14, "raid_speed_max": 140,
     "raid_foods": ["single_chip", "cookie", "crisps_bag", "crisps_box", "ice_cream", "half_eaten_doughnut", "half_eaten_sandwich"]
   },
   "panic": {
