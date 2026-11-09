@@ -643,7 +643,7 @@ static func _visual_checks(host: Node, check: Callable) -> void:
 	check.call(brash.hits == 0 and person.food and is_equal_approx(brash.active_left,8.0) and fx.freeze == 0.0 and player.invulnerable >= 7.9,"during the hold: no slam yet, the power clock waits, no freeze, still invulnerable")
 	check.call(not fx.texts.any(func(item: Dictionary) -> bool: return str(item.text).contains("SHAKEDOWN")),"Shakedown has no small plated name")
 	check.call(overlay.score_announcement.visible and overlay.score_announcement.text == "SHAKEDOWN!" and is_equal_approx(overlay.score_announcement.scale.x,1.0),"SHAKEDOWN! shows in the banner, unscaled")
-	await host.get_tree().create_timer(0.15).timeout
+	overlay.dim_tween.custom_step(1.0) # finish the fade without racing the wall clock
 	check.call(is_equal_approx(overlay.dim.color.a,float(t.rear_dim)),"the screen is dimmed by rear_dim during the hold")
 	sim(game,0.21)
 	var left: float = brash.active_left
@@ -661,7 +661,7 @@ static func _visual_checks(host: Node, check: Callable) -> void:
 	_place(shaken,player.position,20.0)
 	sim(game,0.02)
 	check.call(not shaken.food and brash.hits == 2 and _count(fx,"feather") == 0,"a shake knock bursts no feathers either")
-	await host.get_tree().create_timer(0.25).timeout
+	overlay.dim_tween.custom_step(1.0)
 	check.call(is_equal_approx(overlay.dim.color.a,0.0),"the dim is gone after the slam")
 	# Enraged clips.
 	sim(game,0.02)

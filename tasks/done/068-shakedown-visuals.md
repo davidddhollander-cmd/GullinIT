@@ -1,6 +1,6 @@
-# 068 — Shakedown visuals: rear up, slam, rampage, deflate
+﻿# 068 — Shakedown visuals: rear up, slam, rampage, deflate
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 067
