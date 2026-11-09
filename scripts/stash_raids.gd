@@ -341,7 +341,7 @@ func tick(delta: float) -> void:
 				if item.get("source","") == "abandoned":
 					game._quest_event("abandoned_looted")
 			else:
-				collected.emit(item.position,item.food_id,item.get("source","") == "bin")
+				collected.emit(item.position,item.food_id,item.get("source","") in ["bin","raid"])
 	for owner: BeachTarget in raids.keys():
 		if not is_instance_valid(owner):
 			raids.erase(owner)
