@@ -323,7 +323,8 @@
     "leap_range": 26, "leap_height": 42, "leap_time": 0.6, "leap_speed": 100, "leap_lift": 33, "leap_cooldown": 0.8,
     "catch_radius": 9, "mouth_x": 9, "mouth_y": -7, "catch_time": 0.5,
     "cooldown": 4.0, "min_chase": 1.5, "lose_radius": 140, "leash": 260, "chase_timeout": 8.0, "bark_gap": 2.5,
-    "sniff_min": 1.5, "sniff_max": 3.0, "rest_min": 0.5, "rest_max": 1.2, "dog_bump_hit": [20, 10]
+    "sniff_min": 1.5, "sniff_max": 3.0, "rest_min": 0.5, "rest_max": 1.2, "dog_bump_hit": [20, 10],
+    "tumble_speed": 80, "tumble_up": 120, "tumble_gravity": 420, "tumble_spin": 12, "tumble_daze": 1.2
   },
   "watergun_teen": {
     "notice_radius": 140, "lose_radius": 190, "leash": 190, "aim_max_dy": 70, "aim_band": 6,
