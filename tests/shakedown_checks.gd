@@ -67,7 +67,44 @@ static func run(host: Node, check: Callable) -> void:
 	_visual_edge_checks(host,check)
 	await _end_checks(host,check)
 	await _board_checks(host,check)
+	_carry_art_checks(host,check)
 	Config.tuning.juice.audio = previous_audio
+
+## Task 077: a black-back carrying food shows the enraged carry sheets while Shakedown runs.
+static func _carry_sheets(gull: BeachGull) -> Array[String]:
+	var clip: StringName = gull.carry_body.animation
+	return [(gull.carry_body.sprite_frames.get_frame_texture(clip,0) as AtlasTexture).atlas.resource_path,(gull.carry_beak.sprite_frames.get_frame_texture(clip,0) as AtlasTexture).atlas.resource_path]
+
+static func _carry_art_checks(host: Node, check: Callable) -> void:
+	var game: BeachGame = fixture(host,BLACKBACK)
+	var player: BeachGull = game.player
+	ground_gull(game,300)
+	var normal: Dictionary = BeachGull.carry_for(player.art_id)
+	var twin: Dictionary = BeachGull.carry_for(player.art_id,true)
+	check.call(not twin.is_empty() and twin.file != normal.file and twin.overlay_file != normal.overlay_file,"the black-back registers distinct enraged carry sheets")
+	player.digestion.collect("ice_cream")
+	sim(game,0.1)
+	check.call(player.carry_body.visible and _carry_sheets(player) == [normal.file,normal.overlay_file],"a calm black-back carries on the normal sheets")
+	player.aim = player.position+Vector2(200,0)
+	sim(game,0.2)
+	var frame_now: int = player.carry_body.frame
+	var clip_now: StringName = player.carry_body.animation
+	player.set_enraged(true)
+	player.sync_carry()
+	check.call(_carry_sheets(player) == [twin.file,twin.overlay_file],"enraging mid-carry swaps body and beak to the enraged sheets at once")
+	check.call(player.carry_body.frame == frame_now and player.carry_body.animation == clip_now and player.carry_beak.frame == frame_now,"the clip and frame are kept across the swap")
+	sim(game,0.1)
+	check.call(_carry_sheets(player) == [twin.file,twin.overlay_file],"the enraged sheets stay while the power runs")
+	player.set_enraged(false)
+	player.sync_carry()
+	check.call(_carry_sheets(player) == [normal.file,normal.overlay_file] and player.carry_body.animation == clip_now,"ending the power restores the normal sheets")
+	player.species = "herring"
+	player.refresh_art()
+	player.set_enraged(true)
+	player.digestion.collect("ice_cream")
+	player.sync_carry()
+	check.call(player.carry_body.visible and _carry_sheets(player) == [BeachGull.carry_for(player.art_id).file,BeachGull.carry_for(player.art_id).overlay_file],"a herring keeps its normal carry sheets while enraged")
+	game.queue_free()
 
 static func _data_checks(check: Callable) -> void:
 	var power: Dictionary = Config.species.species["great-black-backed"].power

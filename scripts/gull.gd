@@ -95,12 +95,14 @@ var carry_beak: AnimatedSprite2D ## generated upper-beak overlay, drawn over the
 static var carry_frames_cache: Dictionary = {}
 static var carry_art: Dictionary = {} ## `carry` blocks from data/gull_art.json, by art id
 
-static func carry_for(id: String) -> Dictionary:
+static func carry_for(id: String, on: bool = false) -> Dictionary:
 	if carry_art.is_empty():
 		var all: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/gull_art.json"))
 		for key: String in all:
 			carry_art[key] = all[key].get("carry", {})
-	return carry_art.get(id, {})
+			carry_art[key+"/enraged"] = all[key].get("carry_enraged", {})
+	var twin: Dictionary = carry_art.get(id+"/enraged", {})
+	return twin if on and not twin.is_empty() else carry_art.get(id, {})
 var detailed_art: bool = false
 var art_scale: float = 1.0
 var body_scale: float = 1.0 ## boss-sized rivals: multiplies the species art scale
@@ -716,10 +718,10 @@ func _process(delta: float) -> void:
 		HitFlash.apply(sprite,flash_left)
 	sync_carry() # food can be swallowed, mugged or dropped after tick(): switch art on the same rendered frame
 
-static func carry_frames(id: String, entry: Dictionary, overlay: bool) -> SpriteFrames:
-	var key: String = id + ("/beak" if overlay else "")
+static func carry_frames(id: String, entry: Dictionary, overlay: bool, on: bool = false) -> SpriteFrames:
+	var carry: Dictionary = carry_for(id,on)
+	var key: String = id + ("/enraged" if on and carry_for(id) != carry else "") + ("/beak" if overlay else "")
 	if not carry_frames_cache.has(key):
-		var carry: Dictionary = carry_for(id)
 		var texture: Texture2D = load(str(carry.overlay_file if overlay else carry.file)) as Texture2D
 		var result: SpriteFrames = SpriteFrames.new()
 		result.remove_animation(&"default")
@@ -772,10 +774,11 @@ func sync_carry() -> void:
 	elif climb or flap_anim_left > 0.0:
 		clip = &"fly"
 		local = sprite.frame % 4 if String(sprite.animation).trim_suffix("_enraged") == "climb" else int(Time.get_ticks_msec() / 100) % 4
-	if carry_body.sprite_frames == null or carry_body.get_meta(&"art_id", "") != art_id:
-		carry_body.sprite_frames = carry_frames(art_id, art_entry, false)
-		carry_beak.sprite_frames = carry_frames(art_id, art_entry, true)
-		carry_body.set_meta(&"art_id", art_id)
+	var art_key: String = art_id + ("/enraged" if enraged and carry_for(art_id,true) != carry_for(art_id) else "")
+	if carry_body.sprite_frames == null or carry_body.get_meta(&"art_id", "") != art_key:
+		carry_body.sprite_frames = carry_frames(art_id, art_entry, false, enraged) # same clip and frame are set just below
+		carry_beak.sprite_frames = carry_frames(art_id, art_entry, true, enraged)
+		carry_body.set_meta(&"art_id", art_key)
 	for part: AnimatedSprite2D in [carry_body, carry_beak]:
 		part.animation = clip
 		part.frame = local
