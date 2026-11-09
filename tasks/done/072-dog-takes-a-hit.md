@@ -1,6 +1,6 @@
-# 072 — A bumped dog takes a hit like a gull
+﻿# 072 — A bumped dog takes a hit like a gull
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Haiku
 Depends on: 070
