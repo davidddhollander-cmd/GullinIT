@@ -37,12 +37,21 @@ func tick(delta: float, allow_spawning: bool) -> void:
 	if wait <= 0.0 or called:
 		_spawn()
 
+## Half the width of the view in world units: the canvas is 320 wide, more if the stretch ever shows wider.
+func _half_width() -> float:
+	return game.get_viewport().get_visible_rect().size.x*0.5/game.camera.zoom.x
+
+func _range_gap(x: float, bounds: Array) -> float:
+	return maxf(0.0,maxf(float(bounds[0])-x,x-float(bounds[1])))
+
 func _spawn() -> void:
 	var bounds: Array = settings.range
 	var from: float = game.player.position.x
-	# Run in from a side of the screen: the one inside his sand range and furthest from the gull.
-	var left: float = game.camera_x-176.0
-	var right: float = game.camera_x+176.0
+	# Always starts just off a screen edge, never on it: the side inside his sand range and furthest from the gull.
+	# Off the sand entirely, the side nearer his range; he runs the rest of the way in.
+	var half: float = _half_width()+BeachSweeper.screen_reach()+float(settings.spawn_margin)
+	var left: float = game.camera_x-half
+	var right: float = game.camera_x+half
 	var left_ok: bool = left >= float(bounds[0])-20.0 and left <= float(bounds[1])
 	var right_ok: bool = right >= float(bounds[0]) and right <= float(bounds[1])+20.0
 	var x: float
@@ -51,7 +60,7 @@ func _spawn() -> void:
 	elif left_ok or right_ok:
 		x = left if left_ok else right
 	else:
-		x = clampf(right if game.camera_x > float(bounds[1]) else left,float(bounds[0])-20.0,float(bounds[1])+20.0) # camera is off the sand: come in from its end
+		x = left if _range_gap(left,bounds) <= _range_gap(right,bounds) else right
 	sweeper = BeachSweeper.new()
 	game.actors.add_child(sweeper)
 	sweeper.setup(game,x,int(game.level.seed)+11+visits)
