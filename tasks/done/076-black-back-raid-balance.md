@@ -1,6 +1,6 @@
 # 076 — Black Back card, name and raid balance
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Sonnet
 Depends on: none
