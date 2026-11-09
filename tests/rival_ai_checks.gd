@@ -234,6 +234,7 @@ static func competition_checks(host: Node, main: Node, check: Callable) -> void:
 	gary.took_food(25)
 	gary.score = 25
 	chip.gull.state = BeachGull.State.STRIKE
+	chip.gull.dive_speed = float(Config.tuning.dive.max_speed) # task 074: a real dive is fast enough to bump
 	chip.gull.previous_beak = gary.gull.position
 	chip.gull.sweep_beak = gary.gull.position
 	game._rival_mugging()
@@ -251,6 +252,7 @@ static func competition_checks(host: Node, main: Node, check: Callable) -> void:
 	game.player.state = BeachGull.State.GLIDE
 	game.player.digestion.collect("hotdog")
 	gary.gull.state = BeachGull.State.STRIKE
+	gary.gull.dive_speed = float(Config.tuning.dive.max_speed) # task 074: a real dive is fast enough to bump
 	gary.gull.previous_beak = game.player.position
 	gary.gull.sweep_beak = game.player.position
 	var points: int = game.score.points

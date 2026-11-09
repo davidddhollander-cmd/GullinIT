@@ -394,7 +394,8 @@ func took_food(value: int) -> void:
 	theft_x = gull.position.x
 	mode = Mode.ESCAPE
 
-func mug(attacker: Vector2 = Vector2.INF) -> int:
+## force 0 (a slow mug, see BeachGull.bump_force) still steals the food but the rival does not tumble.
+func mug(attacker: Vector2 = Vector2.INF, force: float = -1.0) -> int:
 	if carry_window <= 0 or carried <= 0:
 		return 0
 	var value: int = carried
@@ -408,12 +409,15 @@ func mug(attacker: Vector2 = Vector2.INF) -> int:
 	eat_timer = 0.0
 	cooldown = relax_time()
 	mode = Mode.RECOVER
-	gull.stun(Config.tuning.rival.mug_stun,attacker)
+	if force != 0.0:
+		gull.stun(Config.tuning.rival.mug_stun,attacker,force)
 	return value
 
 ## A dive peck from the player with no food to take: the rival drops what it was doing and tumbles.
-## Returns the points the rival lost (0 when the stun did not land).
-func bump(attacker: Vector2) -> int:
+## force 0 is no bump at all. Returns the points the rival lost (0 when the stun did not land).
+func bump(attacker: Vector2, force: float = -1.0) -> int:
+	if force == 0.0:
+		return 0
 	var was_down: bool = gull.state == BeachGull.State.STUNNED
 	leave = 0
 	chase_prey = null
@@ -421,7 +425,7 @@ func bump(attacker: Vector2) -> int:
 	eat_timer = 0.0
 	cooldown = relax_time()
 	mode = Mode.RECOVER
-	gull.stun(float(Config.tuning.rival.peck_stun),attacker)
+	gull.stun(float(Config.tuning.rival.peck_stun),attacker,force)
 	if was_down or gull.state != BeachGull.State.STUNNED:
 		return 0
 	var lost: int = mini(score,int(Config.tuning.rival.bump_score_loss))
