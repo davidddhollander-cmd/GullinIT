@@ -1,6 +1,6 @@
 # 075 — Enraged black-back: full sprite set
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: 069 (merged)
