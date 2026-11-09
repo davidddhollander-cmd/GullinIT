@@ -7,15 +7,22 @@ extends RefCounted
 static func is_behind(victim: BeachGull, attacker: Vector2) -> bool:
 	return (attacker.x - victim.position.x) * victim.facing < 0.0
 
-static func _bump(gull: BeachGull, from: Vector2, seconds: float) -> void:
+## Tumbles `gull` from the hit of `attacker`; force 0 (no bump) does nothing.
+static func _bump(gull: BeachGull, force: float, from: Vector2, seconds: float) -> void:
+	if force <= 0.0:
+		return
 	if gull.state != BeachGull.State.STUNNED and gull.invulnerable <= 0.0:
-		gull.begin_tumble(seconds, from) # not stun(): the bump costs no food and no points
+		gull.begin_tumble(seconds, from, force) # not stun(): the bump costs no food and no points
 
 ## A guarded rival (mug_from_behind) bounces frontal mugs. Returns true when the mug is blocked.
+## A mug too slow to bump (force 0) is not blocked and goes through.
 static func blocks_mug(game: BeachGame, victim: RivalPilot, attacker: BeachGull) -> bool:
 	if not bool(victim.personality.get("mug_from_behind", false)) or is_behind(victim.gull, attacker.position):
 		return false
-	_bump(attacker, victim.gull.position, float(Config.tuning.boss.bounce_stun))
+	var force: float = attacker.bump_force_on(victim.gull)
+	if force <= 0.0:
+		return false
+	_bump(attacker, force, victim.gull.position, float(Config.tuning.boss.bounce_stun))
 	game.effects.message(victim.gull.position - Vector2(0, 20), "NOPE!", Color("ef725c"))
 	return true
 
@@ -31,7 +38,10 @@ static func shove(game: BeachGame) -> void:
 			continue
 		for other: BeachGull in game.gulls:
 			if other != bev and other.state == BeachGull.State.STRIKE and other.beak().distance_to(food) <= radius:
-				_bump(other, bev.position, float(pilot.personality.get("shove_stun", 0.4)))
+				var force: float = bev.bump_force_on(other)
+				if force <= 0.0:
+					continue
+				_bump(other, force, bev.position, float(pilot.personality.get("shove_stun", 0.4)))
 				game.effects.message(other.position - Vector2(0, 18), "MOVE IT!", Color("ffc65c"))
 
 ## A great-black-backed player diving at food a rival is also diving for bumps the rival away.
@@ -45,7 +55,10 @@ static func shove_player(game: BeachGame) -> void:
 			continue
 		var food: Vector2 = pilot.target.food_position()
 		if player.beak().distance_to(food) <= radius and pilot.gull.beak().distance_to(food) <= radius:
-			_bump(pilot.gull, player.position, float(Config.tuning.boss.player_shove_stun))
+			var force: float = player.bump_force_on(pilot.gull)
+			if force <= 0.0:
+				continue
+			_bump(pilot.gull, force, player.position, float(Config.tuning.boss.player_shove_stun))
 			game.effects.message(pilot.gull.position - Vector2(0, 18), "MOVE IT!", Color("ffc65c"))
 
 static func best_rival(game: BeachGame) -> int:

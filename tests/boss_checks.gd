@@ -28,6 +28,7 @@ static func _pilot(game: BeachGame, rival: String) -> RivalPilot:
 static func _strike_at(gull: BeachGull, point: Vector2) -> void:
 	gull.state = BeachGull.State.STRIKE
 	gull.invulnerable = 0.0
+	gull.dive_speed = float(Config.tuning.dive.max_speed) # a real strike is at dive speed; a slower one bumps nothing (task 074)
 	gull.position = point + Vector2(-6.0, -6.0)
 	gull.position += point - gull.beak()
 	gull.previous_beak = gull.beak()
@@ -43,6 +44,7 @@ static func _player_mug(suite: Node, game: BeachGame, pilot: RivalPilot, side: f
 	game.player.digestion.snacks.clear()
 	game.player.state = BeachGull.State.STRIKE
 	game.player.invulnerable = 0.0
+	game.player.dive_speed = float(Config.tuning.dive.max_speed) # task 074: a real dive is fast enough to bump
 	game.player.position = pilot.gull.position + Vector2(18.0 * side, 0.0)
 	game.player.previous_beak = pilot.gull.position
 	game.player.sweep_beak = pilot.gull.position

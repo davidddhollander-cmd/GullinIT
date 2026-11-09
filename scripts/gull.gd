@@ -317,6 +317,26 @@ func species_speed() -> float:
 	# Rivals keep their tuned pre-picker speeds (rival_flight); the player gets the picked species' flight.
 	return float(species_stats().get("rival_flight" if rival else "flight",1.0))
 
+func species_weight() -> float:
+	return float(species_stats().get("weight",1.0))
+
+## Speed used when this gull hits: the dive's speed while striking, otherwise its velocity.
+func impact_speed() -> float:
+	return dive_speed if state == State.STRIKE else velocity.length()
+
+## Gull-on-gull hit model (tuning.tumble.impact). 0 means no bump at all.
+static func bump_force(speed: float, attacker_weight: float, victim_weight: float) -> float:
+	var t: Dictionary = Config.tuning.tumble.impact
+	var min_speed: float = float(t.min_speed)
+	if speed < min_speed:
+		return 0.0
+	var s: float = clampf((speed-min_speed)/maxf(float(t.full_speed)-min_speed,0.001),0.0,1.0)
+	return minf(lerpf(float(t.low_force),1.0,s)*attacker_weight/maxf(victim_weight,0.001),float(t.max_force))
+
+## How hard this gull bumps the victim, from its own speed and weight. 0 means no bump.
+func bump_force_on(victim: BeachGull) -> float:
+	return bump_force(impact_speed(),species_weight(),victim.species_weight())
+
 ## The player's species changes more than flight: dive speed, wind push, stun length and shoving.
 func apply_species_stats() -> void:
 	var s: Dictionary = species_stats()
@@ -865,7 +885,8 @@ func crash_warning() -> bool:
 func untargetable() -> bool:
 	return invulnerable > 0.0 and not steady_invulnerable
 
-func stun(duration: float = -1.0, attacker: Vector2 = Vector2.INF) -> void:
+## force >= 0 is a gull-on-gull hit (bump_force): it scales the launch instead of knockback.
+func stun(duration: float = -1.0, attacker: Vector2 = Vector2.INF, force: float = -1.0) -> void:
 	if state == State.STUNNED:
 		return
 	if invulnerable > 0:
@@ -876,10 +897,10 @@ func stun(duration: float = -1.0, attacker: Vector2 = Vector2.INF) -> void:
 		stun_shield -= 1
 		stun_ignored.emit()
 		return
-	begin_tumble(duration,attacker)
+	begin_tumble(duration,attacker,force)
 	gull_stunned.emit()
 
-func begin_tumble(duration: float = -1.0, attacker: Vector2 = Vector2.INF) -> void:
+func begin_tumble(duration: float = -1.0, attacker: Vector2 = Vector2.INF, force: float = -1.0) -> void:
 	var t: Dictionary = Config.tuning.tumble
 	var away: float = signf(position.x-attacker.x) if attacker.is_finite() else signf(velocity.x)
 	if away == 0.0:
@@ -896,7 +917,7 @@ func begin_tumble(duration: float = -1.0, attacker: Vector2 = Vector2.INF) -> vo
 	stop_screech(false)
 	stroke_left = 0.0
 	timer = (float(t.duration) if duration < 0.0 else maxf(duration,float(t.recovery_time))) * stun_mult
-	velocity = Vector2(away*float(t.launch_speed),-float(t.launch_up))*knockback
+	velocity = Vector2(away*float(t.launch_speed),-float(t.launch_up))*(knockback if force < 0.0 else force)
 	facing = away
 	tumble_angle = sprite.rotation
 	tumble_spin = away*float(t.spin)

@@ -124,7 +124,8 @@
     "spin_drag": 5,
     "recovery_time": 0.18,
     "shed_time": 0.5,
-    "shed_interval": 0.12
+    "shed_interval": 0.12,
+    "impact": {"min_speed": 25, "full_speed": 340, "low_force": 0.35, "max_force": 2.5}
   },
   "wind": {
     "drift": 40,

@@ -381,12 +381,13 @@ func _fly_in_step(step: float) -> void:
 	gull.aim = player.position
 	gull.climb = gull.position.y > player.position.y
 	gull.tick(step,wind.direction,wind.strength)
-	var hit: bool = gull.position.distance_to(player.position) < FLY_IN_BUMP_RANGE
+	var force: float = gull.bump_force_on(player)
+	var hit: bool = force > 0.0 and gull.position.distance_to(player.position) < FLY_IN_BUMP_RANGE
 	if not hit and entry_age < FLY_IN_TIMEOUT:
 		return
 	gull.speed_factor = float(entry_profile.speed)
 	if hit:
-		player.stun(Config.tuning.rival.mug_stun,gull.position)
+		player.stun(Config.tuning.rival.mug_stun,gull.position,force)
 		effects.shout(player.position-Vector2(0,20),"BUMP!",Color("ef725c"))
 		Audio.play("snatch")
 	entry_pilot.cooldown = 2.0
@@ -1116,13 +1117,16 @@ func _mugging() -> void:
 		if (carrying or airborne) and BeachCollisions.segment_hits(player.previous_beak,player.sweep_beak,pilot.gull.position,Vector2(float(Config.tuning.rival.mug_hit[0]),float(Config.tuning.rival.mug_hit[1]))):
 			if BeachBoss.blocks_mug(self,pilot,player):
 				return
+			var force: float = player.bump_force_on(pilot.gull)
 			if not carrying:
-				# A dive peck into a rival with nothing to steal still sends it tumbling.
+				# A dive peck into a rival with nothing to steal still sends it tumbling; too slow a peck is no bump at all.
+				if force <= 0.0:
+					continue
 				strike_near_carrier = false
-				var bump_loss: int = pilot.bump(player.position)
+				var bump_loss: int = pilot.bump(player.position,force)
 				if bump_loss > 0:
 					effects.score_message(pilot.gull.position-Vector2(0,30),"-%d" % bump_loss,Color("ff8a7a"))
-				effects.snatch_contact(pilot.gull.position,player.velocity,false)
+				effects.snatch_contact(pilot.gull.position,player.velocity,false,clampf(force/float(Config.tuning.tumble.impact.max_force),0.0,1.0))
 				effects.shout(pilot.gull.position-Vector2(0,20),"BONK!",BeachUI.GOLD)
 				Audio.play("snatch",1+score.tier*0.08)
 				brash.earn("bump")
@@ -1130,7 +1134,7 @@ func _mugging() -> void:
 				if training and lesson == MUG_LESSON and pilot.dummy:
 					_training_advance()
 				return
-			var value: int = pilot.mug(player.position)
+			var value: int = pilot.mug(player.position,force)
 			if value > 0:
 				if not mugged_rivals.has(pilot.gull.rival_name):
 					mugged_rivals[pilot.gull.rival_name] = true
@@ -1155,7 +1159,7 @@ func _rival_mugging() -> void:
 			if victim != attacker and victim.carry_window > 0.0 and BeachCollisions.segment_hits(beak.previous_beak,beak.sweep_beak,victim.gull.position,Vector2(14,10)):
 				if BeachBoss.blocks_mug(self,victim,beak):
 					break
-				var value: int = victim.mug(beak.position)
+				var value: int = victim.mug(beak.position,beak.bump_force_on(victim.gull))
 				if value > 0:
 					attacker.carried_food_id = victim.carried_food_id
 					attacker.took_food(value)
@@ -1170,7 +1174,9 @@ func _rival_mugging() -> void:
 			attacker.carried_food_id = str(taken.id)
 			attacker.took_food(int(taken.get("value",Config.foods[taken.id].points)))
 			attacker.mugs += 1
-			player.stun(Config.tuning.rival.mug_stun,beak.position)
+			var mug_force: float = beak.bump_force_on(player)
+			if mug_force != 0.0: # a slow grab still takes the snack, but the player does not tumble
+				player.stun(Config.tuning.rival.mug_stun,beak.position,mug_force)
 			effects.message(player.position-Vector2(0,20),"MUGGED BY %s!" % attacker.gull.rival_name.to_upper(),Color("ef725c"))
 
 func _near_misses() -> void:

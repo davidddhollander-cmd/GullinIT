@@ -299,6 +299,7 @@ static func run(host: Node, check: Callable) -> void:
 	dummy.gull.state = BeachGull.State.GLIDE
 	dummy.gull.invulnerable = 0.0
 	game.player.state = BeachGull.State.STRIKE
+	game.player.dive_speed = float(Config.tuning.dive.max_speed) # task 074: a real dive is fast enough to bump
 	game.player.previous_beak = hover - Vector2(0,10)
 	game.player.sweep_beak = hover + Vector2(0,10)
 	game._mugging()
