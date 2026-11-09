@@ -198,7 +198,7 @@ func gull_picker() -> void:
 		box.offset_top = 3
 		box.offset_bottom = -3
 		var stage: Control = Control.new()
-		stage.custom_minimum_size = Vector2(0,14)
+		stage.custom_minimum_size = Vector2(0,22)
 		stage.clip_contents = true
 		stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		box.add_child(stage)
@@ -208,7 +208,7 @@ func gull_picker() -> void:
 		bird.scale = Vector2.ONE * float(Config.sprites[art_id].visual_scale) * 1.0
 		bird.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		bird.modulate = Color.WHITE if owned else Color(0.5,0.55,0.6)
-		bird.position = Vector2(50,8) # the frames carry the bird left of centre
+		bird.position = Vector2(50,12) # the frames carry the bird left of centre
 		bird.play(&"glide")
 		stage.add_child(bird)
 		var name_label: Label = BeachUI.label(box,str(info.name),BeachUI.FONT_NATIVE,BeachUI.GOLD if owned else Color("6b858b"))

@@ -347,6 +347,7 @@
     "rear_time": 0.3, "rear_dim": 0.45, "dim_fade": 0.15, "slam_ring_time": 0.3, "slam_ring_width": 3, "slam_ring2_lag": 0.08, "duck_reach": 70, "marker_radius": [10, 8],
     "stomp_steps": 3.1416, "stomp_shake": 0.8, "panic_ring_radius": 90, "panic_ring_time": 0.5, "panic_ring_alpha": 0.3,
     "deflate_time": 0.25, "deflate_feathers": 8, "deflate_pitch": 0.6,
+    "raid_signature": {"kiosk": "ice_cream", "hotdog_stand": "hotdog", "fish_chips_stand": "fried_fish"}, "raid_signature_count": 2,
     "raid_foods": ["single_chip", "cookie", "half_eaten_doughnut", "half_eaten_sandwich"]
   },
   "panic": {

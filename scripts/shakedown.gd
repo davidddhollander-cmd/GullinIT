@@ -214,13 +214,15 @@ func peck() -> bool:
 		game.effects.pixelfx("pixelfx_crit_hit",window,Vector2(game.player.facing,0))
 		game.effects.shout(window-Vector2(0,12),"CLEANED OUT!",BeachUI.GOLD)
 	var foods: Array = settings().raid_foods
+	var signature: String = str(settings().raid_signature.get(stall.stall_type,""))
+	var food_id: String = signature if count < int(settings().raid_signature_count) and not signature.is_empty() else str(foods[raids.rng.randi_range(0,foods.size()-1)])
 	game.effects.peck_contact(window,Vector2(game.player.facing,-0.35),float(count+1)/float(settings().raid_cap),"bin")
 	game.effects.release_burst(window,true)
 	stall.rattle()
 	Audio.play("bin_rattle",0.9+0.2*float(count)/float(settings().raid_cap))
 	var from: Vector2 = window+Vector2(0,6)
 	var rise: float = raids.rng.randf_range(65,95)
-	raids.items.append({"owner":null,"source":"raid","food_id":str(foods[raids.rng.randi_range(0,foods.size()-1)]),"position":from,"velocity":Vector2(_spit_speed(from,rise,count),-rise),"grounded":false,"age":0.0})
+	raids.items.append({"owner":null,"source":"raid","food_id":food_id,"position":from,"velocity":Vector2(_spit_speed(from,rise,count),-rise),"grounded":false,"age":0.0})
 	raids.queue_redraw()
 	return true
 
