@@ -1260,7 +1260,9 @@
         "loop": true,
         "source_left": false
       },
-      "screech": {"frames": [0,1,2,3,4,5],"fps": 7,"loop": false,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-screech-v1.png"}
+      "screech": {"frames": [0,1,2,3,4,5],"fps": 7,"loop": false,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-screech-v1.png"},
+      "idle_enraged": {"frames": [0],"fps": 1,"loop": true,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"},
+      "walk_enraged": {"frames": [1,2,3,4,5,6,7,0],"fps": 8,"loop": true,"source_left": false,"file": "res://assets/sprites/gull-great-black-backed-enraged-v1.png"}
     },
     "carry": {
       "file": "res://assets/sprites/gull-great-black-backed-carry-v1.png",
