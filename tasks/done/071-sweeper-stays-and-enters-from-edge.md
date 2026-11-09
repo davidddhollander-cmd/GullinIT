@@ -1,6 +1,6 @@
-# 071 — Sweeper ignores Shakedown and always enters from a screen edge
+﻿# 071 — Sweeper ignores Shakedown and always enters from a screen edge
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Haiku
 Depends on: 070
