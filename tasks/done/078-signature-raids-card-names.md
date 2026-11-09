@@ -1,6 +1,6 @@
 # 078 — Signature food in raids; gull card names lower
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Sonnet
 Depends on: none
