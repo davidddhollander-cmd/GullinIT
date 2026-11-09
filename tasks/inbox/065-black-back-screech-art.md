@@ -7,7 +7,7 @@ Depends on: none
 Created: 2026-11-09
 
 ## Goal
-The great black-back can stand and screech to charge its brashness meter, as the herring does. Screeching needs a `screech` animation drawn for this bird. Once the clip is registered, task 066's code turns the screech on by itself.
+The great black-back can stand and screech to charge its brashness meter, as the herring does. Screeching needs a `screech` animation drawn for this bird using the image generator to create a sprite sheet. Once the clip is registered, task 066's code turns the screech on by itself.
 
 ## Context
 - Reference clip: `assets/sprites/gull-herring-screech-v1.png`, 768x512, 3 columns x 2 rows of 256x256 cells, 6 frames. Registered in `data/gull_art.json` under `gull_herring` and `player_gull`, and in `data/sprites.json`, as `{"frames":[0,1,2,3,4,5],"fps":7,"loop":false,"source_left":false,"file":...}`.
@@ -16,7 +16,7 @@ The great black-back can stand and screech to charge its brashness meter, as the
 - AGENTS.md applies: use the built-in image generator. Code may crop, align and pack, but must not draw or repaint the bird. A code recolour of the herring sheet is not acceptable.
 
 ## Requirements
-1. Generate a 6-frame screech for the great black-back, using the existing black-back sheet as the identity and style reference and the herring screech as the pose reference. Same bird: same pixel density, outline, palette and proportions. It should read as a big, loud bully: head thrown back, beak wide open at the peak.
+1. Generate a 6-frame screech for the great black-back, using the existing black-back sheet as the identity and style reference and the herring screech as the pose reference. Same bird: same pixel density, outline, palette and proportions. It should read as a big, loud bully: head thrown back, beak wide open at the peak. Wings spreading outwards.
 2. Pack it as `assets/sprites/gull-great-black-backed-screech-v1.png` in the herring's layout (3x2, 256x256 cells). Feet stay on the existing idle baseline in every frame.
 3. Register `screech` on `gull_great_black_backed` in `data/gull_art.json` and wherever else the herring's clip needs a matching black-back entry (`data/sprites.json`), with the same frames, fps and loop values. Keep every existing clip unchanged. Add `frame_beaks` or `frame_bounds` entries if the black-back's existing clips rely on them for this frame range.
 4. Keep the untouched source artwork and prompt in `assets/reference/gull-great-black-backed-screech-v1/`. Put a preview in `assets/previews/` showing all 6 frames at in-game size next to the black-back's idle.
