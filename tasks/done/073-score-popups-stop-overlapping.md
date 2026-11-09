@@ -1,6 +1,6 @@
-# 073 — Floating text stops covering itself
+﻿# 073 — Floating text stops covering itself
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Haiku
 Depends on: none
