@@ -76,7 +76,7 @@ static func _data_checks(check: Callable) -> void:
 	var herring: Dictionary = Config.species.species.herring.power
 	check.call(herring.ready_label == "CALL!" and herring.sound == "gang_call" and not herring.has("fill"),"herring keeps CALL! and gang_call")
 	var t: Dictionary = Config.tuning.shakedown
-	check.call(is_equal_approx(float(t.panic_interval),1.0) and int(t.raid_cap) == 6 and float(t.shake_radius) > 0.0,"shakedown tunables live in tuning.json")
+	check.call(is_equal_approx(float(t.panic_interval),1.0) and int(t.raid_cap) == 4 and t.raid_foods == ["single_chip","cookie","half_eaten_doughnut","half_eaten_sandwich"] and float(t.shake_radius) > 0.0,"shakedown tunables live in tuning.json")
 	var sizes: Array = t.raid_foods.map(func(id: String) -> String: return str(Config.foods[id].category))
 	check.call(not t.raid_foods.is_empty() and not sizes.has("large"),"raid foods contain no large items")
 
@@ -274,6 +274,16 @@ static func _raid_checks(host: Node, check: Callable) -> void:
 	busy._peck()
 	check.call(int(busy.stash_raids.bins[0].pecks) == 1 and busy.stash_raids.items.size() == 1 and busy.stash_raids.items[0].source == "raid","the counter raid takes priority over a bin")
 	busy.queue_free()
+	# A collected raid item is a flat scrap: exact food points, combo untouched.
+	var flat: BeachGame = fixture(host,BLACKBACK)
+	ground_gull(flat,100)
+	var tier: int = flat.score.tier
+	var points: int = flat.score.points
+	flat.stash_raids.items.append({"owner":null,"source":"raid","food_id":"cookie","position":flat.player.beak(),"velocity":Vector2.ZERO,"grounded":true,"age":5.0})
+	flat.stash_raids.tick(0.02)
+	flat.player.digestion.tick(10.0,true)
+	check.call(flat.stash_raids.items.is_empty() and flat.score.tier == tier and flat.score.points == points+int(Config.foods.cookie.points),"a collected raid item adds exactly its points and leaves the combo tier alone")
+	flat.queue_free()
 
 static func _end_checks(host: Node, check: Callable) -> void:
 	var game: BeachGame = fixture(host,BLACKBACK)
