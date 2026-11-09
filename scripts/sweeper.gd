@@ -26,6 +26,7 @@ var landed_hit: bool = false
 var swings: int = 0
 var leaving: bool = false
 var paused: bool = false
+var flee_to: float = NAN ## Shakedown: run to this x and stay there until come_home()
 var brushing: bool = false
 var destination: float = 0.0
 var prey: BeachGull
@@ -200,6 +201,12 @@ func tick(delta: float, gull: BeachGull) -> void:
 	cooldown = maxf(0.0,cooldown-delta)
 	clip_clock += delta
 	var clip: StringName = &"idle"
+	if not is_nan(flee_to) and state != State.EXIT:
+		_release_pile()
+		_face(flee_to)
+		position.x = move_toward(position.x,flee_to,float(t.run_speed)*delta)
+		_animate(&"idle" if is_equal_approx(position.x,flee_to) else &"run")
+		return
 	match state:
 		State.ENTER:
 			clip = &"run"
@@ -327,6 +334,14 @@ func tick(delta: float, gull: BeachGull) -> void:
 				queue_free()
 				return
 	_animate(clip)
+
+## The scare is over: back to ordinary sweeping.
+func come_home() -> void:
+	if is_nan(flee_to):
+		return
+	flee_to = NAN
+	if state != State.EXIT:
+		_patrol()
 
 func _patrol() -> void:
 	state = State.PATROL

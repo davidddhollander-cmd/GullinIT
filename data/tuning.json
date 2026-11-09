@@ -323,7 +323,7 @@
     "leap_range": 26, "leap_height": 42, "leap_time": 0.6, "leap_speed": 100, "leap_lift": 33, "leap_cooldown": 0.8,
     "catch_radius": 9, "mouth_x": 9, "mouth_y": -7, "catch_time": 0.5,
     "cooldown": 4.0, "min_chase": 1.5, "lose_radius": 140, "leash": 260, "chase_timeout": 8.0, "bark_gap": 2.5,
-    "sniff_min": 1.5, "sniff_max": 3.0, "rest_min": 0.5, "rest_max": 1.2
+    "sniff_min": 1.5, "sniff_max": 3.0, "rest_min": 0.5, "rest_max": 1.2, "dog_bump_hit": [20, 10]
   },
   "watergun_teen": {
     "notice_radius": 140, "lose_radius": 190, "leash": 190, "aim_max_dy": 70, "aim_band": 6,
@@ -333,7 +333,7 @@
     "shot_speed": 170, "shot_range": 150, "lead": 0.5, "hit_radius": [10, 7], "hit_stun": 0.5
   },
   "brash": {
-    "snatch": 0.15, "handover": 0.08, "mug": 0.2, "bump": 0.34, "stun": -0.25,
+    "snatch": 0.15, "handover": 0.08, "mug": 0.2, "bump": 0.34, "dog_bump": 0.6, "stun": -0.25,
     "screech_per_sec": 0.06, "vantage_per_px": 0.03, "vantage_max": 3.5,
     "hit_shake": 5, "hit_stop": 0.08, "hit_feathers": 50, "hit_feathers_per_hit": 4, "hit_crumbs": 24, "dust_time": 1.0, "dust_gap": 0.15, "food_lift": 2.8, "hit_cap": 8, "shadow_lead": 0.7
   },
@@ -342,7 +342,7 @@
     "slam_radius": 70, "food_lift": 2.8, "impact_gap": 0.3, "hit_shake": 2.5, "hit_stop": 0.04, "hit_feathers": 24, "hit_crumbs": 12,
     "gorge_capacity": 4, "gorge_digest": 3.0, "bully_scale": 1.25, "bully_tint": [1.0, 0.82, 0.78], "pulse_speed": 0.6, "pulse_fast": 3.0, "end_warning": 1.5, "tick_pitch": 1.6,
     "land_shake": 1.5, "bounce_cooldown": 2.0, "bounce_recoil": 18, "nope_gap": 1.0, "duck_music": 1.0, "raid_shake": 1.5, "raid_shake_time": 0.18, "raid_reach": 14, "raid_speed_max": 140,
-    "rear_time": 0.3, "rear_dim": 0.45, "dim_fade": 0.15, "callout_hold": 1.2, "slam_ring_time": 0.18, "slam_ring_width": 3, "slam_ground_reach": 24,
+    "rear_time": 0.3, "rear_dim": 0.45, "dim_fade": 0.15, "slam_ring_time": 0.3, "slam_ring_width": 3, "slam_ring2_lag": 0.08, "duck_reach": 70, "marker_radius": [10, 8],
     "stomp_steps": 3.1416, "stomp_shake": 0.8, "panic_ring_radius": 90, "panic_ring_time": 0.5, "panic_ring_alpha": 0.3,
     "deflate_time": 0.25, "deflate_feathers": 8, "deflate_pitch": 0.6,
     "raid_foods": ["single_chip", "cookie", "crisps_bag", "crisps_box", "ice_cream", "half_eaten_doughnut", "half_eaten_sandwich"]

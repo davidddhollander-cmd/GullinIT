@@ -62,6 +62,7 @@ static func run(host: Node, check: Callable) -> void:
 	_punch_checks(host,check)
 	_bounce_checks(host,check)
 	_raid_feel_checks(host,check)
+	_playtest_fix_checks(host,check)
 	await _visual_checks(host,check)
 	_visual_edge_checks(host,check)
 	await _end_checks(host,check)
@@ -70,7 +71,7 @@ static func run(host: Node, check: Callable) -> void:
 
 static func _data_checks(check: Callable) -> void:
 	var power: Dictionary = Config.species.species["great-black-backed"].power
-	check.call(power.id == "shakedown" and power.name == "SHAKEDOWN" and is_equal_approx(float(power.duration),8.0) and not str(power.ready_label).is_empty() and not str(power.sound).is_empty(),"black-back has a shakedown power block")
+	check.call(power.id == "shakedown" and power.name == "SHAKEDOWN" and is_equal_approx(float(power.duration),9.0) and not str(power.ready_label).is_empty() and not str(power.sound).is_empty(),"black-back has a shakedown power block")
 	check.call(is_equal_approx(float(power.fill.bump),1.5) and is_equal_approx(float(power.fill.mug),1.5),"black-back earns more meter from bumps and muggings")
 	var herring: Dictionary = Config.species.species.herring.power
 	check.call(herring.ready_label == "CALL!" and herring.sound == "gang_call" and not herring.has("fill"),"herring keeps CALL! and gang_call")
@@ -98,8 +99,8 @@ static func _fire_checks(host: Node, check: Callable) -> void:
 	check.call(not brash.fire() and brash.meter == 1.0 and not brash.active(),"cannot fire while stunned and the meter is kept")
 	game.player.state = BeachGull.State.GLIDE
 	game.start_slowmo() # the Q path
-	check.call(brash.active_id == "shakedown" and is_equal_approx(brash.active_left,8.0) and brash.meter == 0.0 and brash.allies.is_empty(),"Q fires Shakedown on a full meter: no Gang Call gulls")
-	check.call(brash.powers_fired == 1 and game.player.steady_invulnerable and game.player.invulnerable >= 8.0,"firing counts the power and starts immunity")
+	check.call(brash.active_id == "shakedown" and is_equal_approx(brash.active_left,9.0) and brash.meter == 0.0 and brash.allies.is_empty(),"Q fires Shakedown on a full meter: no Gang Call gulls")
+	check.call(brash.powers_fired == 1 and game.player.steady_invulnerable and game.player.invulnerable >= 9.0,"firing counts the power and starts immunity")
 	brash.add(0.5)
 	brash.earn("mug")
 	check.call(brash.meter == 0.0,"the meter cannot fill while a power is active")
@@ -112,7 +113,7 @@ static func _fire_checks(host: Node, check: Callable) -> void:
 	check.call(brash.active_id == "shakedown" and brash.powers_fired == 2,"the touch button fires Shakedown too")
 	sim(game,0.32) # the hold, then a little of the power
 	var label: String = str(brash.power().ready_label)
-	check.call(label == "SHAKE!" and brash.active_left < 8.0 and brash.active_left > 7.9,"overlay data: ready label and time left are available")
+	check.call(label == "SHAKE!" and brash.active_left < 9.0 and brash.active_left > 8.9,"overlay data: ready label and time left are available")
 	game.overlay.queue_redraw()
 	game.queue_free()
 	var herring: BeachGame = fixture(host,"herring")
@@ -156,7 +157,7 @@ static func _untouchable_checks(host: Node, check: Callable) -> void:
 		if player.state != BeachGull.State.STUNNED:
 			break
 	check.call(player.state != BeachGull.State.STUNNED and brash.active() and still_covered,"tumble recovery keeps immunity covering the power")
-	sim(game,9.0)
+	sim(game,10.0)
 	check.call(not brash.active() and player.invulnerable == 0.0 and not player.steady_invulnerable and is_equal_approx(player.sprite.modulate.a,1.0),"on expiry immunity is off and the sprite is opaque")
 	ground_gull(game,80)
 	player.stun()
@@ -256,7 +257,7 @@ static func _raid_checks(host: Node, check: Callable) -> void:
 	game._peck()
 	check.call(other.ducked and raids.items.filter(func(item: Dictionary) -> bool: return item.source == "raid").size() == raid_items.size()+1,"each stall has its own cap and vendor")
 	# Release: the vendor returns and service resumes.
-	sim(game,9.0)
+	sim(game,10.0)
 	check.call(not brash.active() and not stall.ducked and not other.ducked,"the power's end releases the stalls")
 	check.call(game.stalls.request_shopper(walker) and game.stalls.requests.has(stall),"normal service resumes after the power")
 	stall_ticks(game,0.2)
@@ -494,7 +495,7 @@ static func _punch_checks(host: Node, check: Callable) -> void:
 		check.call(player.digestion.capacity == 10,"gorge applies for the %s path" % path)
 		match path:
 			"expiry":
-				sim(game,9.0)
+				sim(game,10.0)
 			"end_power":
 				brash.end_power()
 			"clear":
@@ -640,15 +641,15 @@ static func _visual_checks(host: Node, check: Callable) -> void:
 	brash.fire()
 	sim(game,0.1)
 	check.call(player.rearing and player.sprite.animation == &"screech" and player.sprite.frame == 4,"a grounded gull holds the screech peak during the hold")
-	check.call(brash.hits == 0 and person.food and is_equal_approx(brash.active_left,8.0) and fx.freeze == 0.0 and player.invulnerable >= 7.9,"during the hold: no slam yet, the power clock waits, no freeze, still invulnerable")
+	check.call(brash.hits == 0 and person.food and is_equal_approx(brash.active_left,9.0) and fx.freeze == 0.0 and player.invulnerable >= 8.9,"during the hold: no slam yet, the power clock waits, no freeze, still invulnerable")
 	check.call(not fx.texts.any(func(item: Dictionary) -> bool: return str(item.text).contains("SHAKEDOWN")),"Shakedown has no small plated name")
-	check.call(overlay.score_announcement.visible and overlay.score_announcement.text == "SHAKEDOWN!" and is_equal_approx(overlay.score_announcement.scale.x,1.0),"SHAKEDOWN! shows in the banner, unscaled")
+	check.call(not overlay.score_announcement.visible,"no SHAKEDOWN! banner appears")
 	overlay.dim_tween.custom_step(1.0) # finish the fade without racing the wall clock
 	check.call(is_equal_approx(overlay.dim.color.a,float(t.rear_dim)),"the screen is dimmed by rear_dim during the hold")
 	sim(game,0.21)
 	var left: float = brash.active_left
 	check.call(brash.hits == 1 and not person.food and not player.rearing and player.enraged and is_equal_approx(player.power_scale,float(t.bully_scale)),"the slam lands once at the end of the hold and the bird turns enraged and big")
-	check.call(left > 8.0-0.03,"the full power time still follows the hold")
+	check.call(left > 9.0-0.03,"the full power time still follows the hold")
 	var rings: Array = fx.particles.filter(func(p: Dictionary) -> bool: return p.get("ring",false) and is_equal_approx(float(p.get("width",1.0)),float(t.slam_ring_width)))
 	check.call(rings.size() == 1 and is_equal_approx(4.0+float(rings[0].grow)*float(rings[0].duration),float(t.slam_radius)) and is_equal_approx(float(rings[0].duration),float(t.slam_ring_time)),"the slam ring reaches exactly slam_radius in slam_ring_time")
 	check.call(overlay.flash.visible,"the slam shows one white frame")
@@ -832,5 +833,283 @@ static func _visual_edge_checks(host: Node, check: Callable) -> void:
 		sim(calm,0.02)
 		dimmed = dimmed or calm.overlay.dim.color.a > 0.0 or calm.overlay.flash.visible
 	GameState.options.shake = previous
-	check.call(not dimmed and calm.brash.hits == 1 and calm.player.enraged and calm.brash.active_left < 7.9,"with shake off: no dim and no white frame, and the power still runs")
+	check.call(not dimmed and calm.brash.hits == 1 and calm.player.enraged and calm.brash.active_left < 8.9,"with shake off: no dim and no white frame, and the power still runs")
 	calm.queue_free()
+
+## Task 070: rolling panic, fleeing actors, vendor ducking, slam reach and the black-back's dog bump.
+static func _playtest_fix_checks(host: Node, check: Callable) -> void:
+	var t: Dictionary = Config.tuning.shakedown
+	var species: Dictionary = Config.species.species
+	check.call(not t.has("callout_hold") and not t.has("slam_ground_reach") and is_equal_approx(float(t.slam_ring_time),0.3) and float(t.duck_reach) > 0.0,"070 tunables live in the shakedown block")
+	check.call(bool(species[BLACKBACK].get("bumps_dogs",false)) and not species.herring.has("bumps_dogs") and is_equal_approx(float(Config.tuning.brash.dog_bump),0.6),"only the black-back bumps dogs, for a big meter reward")
+	_rolling_panic_checks(host,check)
+	_flee_checks(host,check)
+	_kind_checks(host,check)
+	_duck_checks(host,check)
+	_slam_reach_checks(host,check)
+	_dog_bump_checks(host,check)
+
+static func _end_power_path(game: BeachGame, path: String) -> void:
+	match path:
+		"expiry":
+			sim(game,10.0)
+		"end_power":
+			game.brash.end_power()
+		"clear":
+			game.brash.clear()
+		"finish":
+			game.finish()
+
+static func _rolling_panic_checks(host: Node, check: Callable) -> void:
+	var game: BeachGame = fixture(host,BLACKBACK)
+	var player: BeachGull = game.player
+	var returning: BeachTarget = _person(game,300)
+	var far: BeachTarget = _person(game,900)
+	for person: BeachTarget in [returning,far]:
+		person.panic.state = CrowdPanic.State.RETURN
+		person.panic.home = 250.0
+		person.panic.direction = 1.0
+		person.panic.bounds = Vector2(20,1260)
+	ground_gull(game,340)
+	player.aim = player.position
+	game.brash.meter = 1.0
+	game.brash.fire()
+	check.call(returning.panic.state == CrowdPanic.State.PANIC and returning.panic.direction == -1.0 and is_equal_approx(returning.panic.timer,float(CrowdPanic.settings().panic_time)),"someone walking home near the gull panics again, away from it")
+	check.call(is_equal_approx(returning.panic.home,250.0) and far.panic.state == CrowdPanic.State.RETURN,"they keep their home, and people out of range are left alone")
+	returning.panic.timer = 0.5
+	ground_gull(game,200)
+	sim(game,1.05+float(Config.tuning.shakedown.rear_time))
+	check.call(returning.panic.state == CrowdPanic.State.PANIC and returning.panic.direction == 1.0 and returning.panic.timer > 3.0,"each pulse restarts the timer and turns them away from the gull's current x")
+	# After the power they still walk home.
+	game.brash.end_power()
+	var guard: int = 0
+	while returning.panic.state != CrowdPanic.State.NONE and guard < 1500:
+		returning.tick(0.02,[])
+		guard += 1
+	check.call(returning.panic.state == CrowdPanic.State.NONE and absf(returning.position.x-250.0) < 4.0,"after the power the person gets home")
+	game.queue_free()
+	# Gang Call does not pulse.
+	var herring: BeachGame = fixture(host,"herring")
+	var walker: BeachTarget = _person(herring,300)
+	walker.panic.state = CrowdPanic.State.RETURN
+	walker.panic.home = 250.0
+	herring.player.position = Vector2(320,60)
+	herring.brash.meter = 1.0
+	herring.brash.fire()
+	check.call(walker.panic.state == CrowdPanic.State.RETURN,"Gang Call leaves someone already walking home alone")
+	herring.queue_free()
+
+static func _actors(game: BeachGame, x: float) -> Dictionary:
+	var dog: OffLeadDog = OffLeadDog.new()
+	game.actors.add_child(dog)
+	dog.setup(x,[0,1200],1)
+	game.dogs.append(dog)
+	var teen: WatergunTeen = WatergunTeen.new()
+	game.actors.add_child(teen)
+	teen.setup(x+20.0,[0,1200],2)
+	game.teens.append(teen)
+	var sweeper: BeachSweeper = BeachSweeper.new()
+	game.add_child(sweeper)
+	sweeper.setup(game,x-40.0,3)
+	game.sweeper_visits.sweeper = sweeper
+	return {"dog":dog,"teen":teen,"sweeper":sweeper}
+
+static func _flee_checks(host: Node, check: Callable) -> void:
+	for path: String in ["expiry","end_power","clear","finish"]:
+		var game: BeachGame = fixture(host,BLACKBACK)
+		var actors: Dictionary = _actors(game,300)
+		var far: OffLeadDog = OffLeadDog.new()
+		game.actors.add_child(far)
+		far.setup(1000,[0,1200],4)
+		game.dogs.append(far)
+		var dog: OffLeadDog = actors.dog
+		var teen: WatergunTeen = actors.teen
+		var sweeper: BeachSweeper = actors.sweeper
+		sweeper.state = BeachSweeper.State.PATROL
+		ground_gull(game,280)
+		game.player.aim = game.player.position
+		game.brash.meter = 1.0
+		game.brash.fire()
+		check.call(not is_nan(dog.flee_to) and not is_nan(teen.flee_to) and not is_nan(sweeper.flee_to) and is_nan(far.flee_to),"dog, teen and sweeper in range flee; a distant dog does not (%s)" % path)
+		var before: Array[float] = [dog.position.x,teen.position.x,sweeper.position.x]
+		for i: int in 25:
+			dog.tick(0.1,game.player)
+			teen.tick(0.1,game.gulls)
+			sweeper.tick(0.1,game.player)
+		check.call(dog.position.x > before[0] and teen.position.x > before[1] and sweeper.position.x < before[2],"they run from the gull (%s)" % path)
+		check.call(dog.state != OffLeadDog.State.CHASE and teen.state == WatergunTeen.State.PATROL and sweeper.state == BeachSweeper.State.PATROL,"and attack nobody (%s)" % path)
+		_end_power_path(game,path)
+		check.call(is_nan(teen.flee_to) and is_nan(sweeper.flee_to) and teen.state == WatergunTeen.State.PATROL and sweeper.state == BeachSweeper.State.PATROL and dog.homecoming and not is_nan(dog.flee_to),"the power's end (%s) sends them back to normal: dog trots home, others patrol" % path)
+		for i: int in 400:
+			dog.tick(0.1,game.player)
+		check.call(is_nan(dog.flee_to) and not dog.homecoming and dog.state == OffLeadDog.State.WANDER,"the dog is wandering again (%s)" % path)
+		game.queue_free()
+	# A squall's own flight is never cut short by the power's end.
+	var storm: BeachGame = fixture(host,BLACKBACK)
+	var shelter: OffLeadDog = _actors(storm,300).dog
+	storm.squall = BeachSquall.new()
+	storm.squall.phase = BeachSquall.Phase.SQUALL
+	ground_gull(storm,280)
+	storm.brash.meter = 1.0
+	storm.brash.fire()
+	storm.brash.end_power()
+	check.call(not shelter.homecoming and not is_nan(shelter.flee_to),"the dog sheltering from a squall stays put when the power ends")
+	storm.squall = null
+	storm.queue_free()
+
+## Every kind of person near the gull looks up and runs, whatever they were doing.
+static func _kind_checks(host: Node, check: Callable) -> void:
+	var game: BeachGame = fixture(host,BLACKBACK)
+	var stall: FoodStall = game.beach.stalls[0]
+	var people: Dictionary = {}
+	var x: float = 600.0
+	for kind: String in ["sunbather","toddler","picnic_family","dog_owner","kiosk_customer","pier_diner","lifeguard"]:
+		people[kind] = game.spawner.create(kind,x,{})
+		x += 6.0
+	people["seated"] = _person(game,x)
+	var served: BeachTarget = game.spawner.create("kiosk_customer",stall.contact_x(),{"food_id":"ice_cream","appearance":"kiosk_customer"})
+	served.food = false
+	served.food_sprite.hide()
+	served.respawn = 0.0
+	stall_ticks(game,0.1)
+	people["service_locked"] = served
+	check.call(game.stalls.requests.has(stall),"fixture: a customer is mid-order")
+	var sleeper: BeachTarget = game.spawner.create("sunbather",x+10.0,{})
+	sleeper.sleep_state = BeachTarget.SleepState.SLEEPING
+	people["sleeping sunbather"] = sleeper
+	ground_gull(game,610)
+	game.brash.meter = 1.0
+	game.brash.fire()
+	for key: String in people:
+		var person: BeachTarget = people[key]
+		if absf(person.position.x-game.player.position.x) > float(CrowdPanic.settings().panic_radius):
+			CrowdPanic.warn([person],person.position.x) # the stall is out of the fixture gull's range: warn it directly
+		for i: int in 40:
+			person.tick(0.02,[])
+		check.call(person.panic.state in [CrowdPanic.State.LOOK_UP,CrowdPanic.State.PANIC],"%s reacts to Shakedown" % key)
+	check.call(not served.service_locked,"a service-locked customer is released to run")
+	game.queue_free()
+
+static func _duck_checks(host: Node, check: Callable) -> void:
+	var game: BeachGame = fixture(host,BLACKBACK)
+	var player: BeachGull = game.player
+	var stall: FoodStall = game.beach.stalls[0]
+	var other: FoodStall = game.beach.stalls[1]
+	var shopper: BeachTarget = game.spawner.create("kiosk_customer",stall.contact_x(),{"food_id":"ice_cream","appearance":"kiosk_customer"})
+	shopper.food = false
+	shopper.food_sprite.hide()
+	shopper.respawn = 0.0
+	stall_ticks(game,0.1)
+	check.call(game.stalls.requests.has(stall),"fixture: an order is running")
+	var reach: float = float(Config.tuning.shakedown.duck_reach)
+	ground_gull(game,stall.position.x+reach+10.0)
+	player.aim = player.position
+	game.brash.meter = 1.0
+	game.brash.fire()
+	check.call(not stall.marked and not other.marked,"no target corners during the hold")
+	land_slam(game)
+	check.call(stall.marked and other.marked,"corners show on every stall below the cap from the end of the hold, with the gull far away")
+	sim(game,0.1)
+	check.call(not stall.ducked,"a gull beyond duck_reach does not duck the vendor")
+	ground_gull(game,stall.position.x+10.0)
+	sim(game,0.1)
+	check.call(stall.ducked and not game.stalls.requests.has(stall) and not other.ducked and int(game.brash.shakedown.raided.get(stall,0)) == 0,"a gull inside duck_reach ducks the vendor before any peck")
+	for i: int in 3:
+		game.stash_raids.peck_cooldown = 0.0
+		game._peck()
+	check.call(int(game.brash.shakedown.raided.get(stall,0)) == 3,"pecks count while the vendor is down")
+	ground_gull(game,stall.position.x+reach+20.0)
+	sim(game,0.1)
+	check.call(not stall.ducked,"the vendor comes back when the gull leaves")
+	ground_gull(game,stall.position.x-reach+5.0)
+	sim(game,0.1)
+	check.call(stall.ducked and int(game.brash.shakedown.raided.get(stall,0)) == 3,"raid counts persist when it returns")
+	ground_gull(game,stall.position.x-12.0)
+	for i: int in 8:
+		game.stash_raids.peck_cooldown = 0.0
+		game._peck()
+	check.call(int(game.brash.shakedown.raided.get(stall,0)) == int(Config.tuning.shakedown.raid_cap) and not stall.marked and other.marked,"corners vanish at the cap, and only there")
+	for path: String in ["expiry","end_power","clear","finish"]:
+		if not game.brash.active():
+			ground_gull(game,stall.position.x)
+			game.brash.meter = 1.0
+			game.brash.fire()
+			land_slam(game)
+			sim(game,0.1)
+			check.call(stall.ducked and stall.marked,"%s: the second power ducks and marks again" % path)
+		_end_power_path(game,path)
+		check.call(not stall.ducked and not other.ducked and not stall.marked and not other.marked,"%s releases every stall and clears the corners" % path)
+	game.queue_free()
+
+static func _slam_reach_checks(host: Node, check: Callable) -> void:
+	var game: BeachGame = fixture(host,BLACKBACK)
+	var player: BeachGull = game.player
+	var radius: float = float(Config.tuning.shakedown.slam_radius)
+	var near: BeachTarget = _person(game,300)
+	var wide: BeachTarget = _person(game,300)
+	player.state = BeachGull.State.GLIDE
+	player.position = Vector2(300,30)
+	player.aim = player.position
+	for pair: Array in [[near,radius-8.0],[wide,radius+12.0]]:
+		var person: BeachTarget = pair[0]
+		person.position.x += float(pair[1])-(person.food_position().x-player.position.x)
+	game.brash.meter = 1.0
+	game.brash.fire()
+	land_slam(game)
+	check.call(not near.food and wide.food,"a slam from high in the air knocks food from people within slam_radius sideways, and no one beyond")
+	check.call(game.effects.get_children().any(func(n: Node) -> bool: return str(n.name).begins_with("PixelfxHeavyLanding")),"the ground slam plays beneath the gull at any height")
+	var duration: float = float(Config.tuning.shakedown.slam_ring_time)
+	var rings: Array = game.effects.particles.filter(func(p: Dictionary) -> bool: return p.get("ring",false) and is_equal_approx(float(p.duration),duration))
+	var thick: Array = rings.filter(func(p: Dictionary) -> bool: return is_equal_approx(float(p.width),float(Config.tuning.shakedown.slam_ring_width)))
+	var thin: Array = rings.filter(func(p: Dictionary) -> bool: return is_equal_approx(float(p.width),1.0) and is_equal_approx(float(p.delay),float(Config.tuning.shakedown.slam_ring2_lag)))
+	check.call(thick.size() == 1 and thin.size() == 1,"the slam draws a thick ring and a thinner one 0.08 s behind")
+	game.queue_free()
+
+static func _dog_bump_checks(host: Node, check: Callable) -> void:
+	var bump: float = float(Config.tuning.brash.dog_bump)
+	for species: String in [BLACKBACK,"herring"]:
+		var game: BeachGame = fixture(host,species)
+		var player: BeachGull = game.player
+		var dog: OffLeadDog = OffLeadDog.new()
+		game.actors.add_child(dog)
+		dog.setup(300,[0,1200],1)
+		dog.bumped.connect(game._dog_bumped.bind(dog))
+		game.dogs.append(dog)
+		var caught: Array[int] = [0]
+		dog.caught.connect(func() -> void: caught[0] += 1)
+		player.state = BeachGull.State.STRIKE
+		player.position = dog.position+Vector2(-30,-12)
+		player.velocity = Vector2(120,60)
+		player.previous_beak = dog.position+Vector2(-26,-14)
+		player.sweep_beak = dog.position+Vector2(4,-6)
+		game._dog_bump_check()
+		if species == BLACKBACK:
+			check.call(dog.state == OffLeadDog.State.COOLDOWN and dog.timer >= float(Config.tuning.shakedown.bounce_cooldown) and (dog.flash_left > 0.0 or HitFlash.duration() == 0.0),"a black-back's dive bumps the dog: recoil, cooldown and a flash")
+			check.call(is_equal_approx(game.brash.meter,bump) and game.effects.texts.any(func(item: Dictionary) -> bool: return item.text == "BONK!"),"the bump earns dog_bump and shouts BONK!")
+			var before: float = game.brash.meter
+			game._dog_bump_check()
+			check.call(is_equal_approx(game.brash.meter,before),"the dog cannot be bumped again during its cooldown")
+			# The dog's own catch loses to a diving black-back; any other state is caught as today.
+			var second: OffLeadDog = OffLeadDog.new()
+			game.actors.add_child(second)
+			second.setup(700,[0,1200],2)
+			second.bumped.connect(game._dog_bumped.bind(second))
+			second.caught.connect(func() -> void: caught[0] += 1)
+			player.position = second.mouth()
+			player.state = BeachGull.State.STRIKE
+			second._try_catch(player)
+			check.call(second.state == OffLeadDog.State.COOLDOWN and player.state != BeachGull.State.STUNNED and caught[0] == 0,"if the dog would catch a diving black-back, the bump wins")
+			var third: OffLeadDog = OffLeadDog.new()
+			game.actors.add_child(third)
+			third.setup(900,[0,1200],3)
+			third.caught.connect(func() -> void: caught[0] += 1)
+			player.position = third.mouth()
+			player.state = BeachGull.State.GLIDE
+			third._try_catch(player)
+			check.call(third.state == OffLeadDog.State.CATCH and caught[0] == 1,"outside STRIKE the dog still catches a black-back")
+		else:
+			check.call(dog.state != OffLeadDog.State.COOLDOWN and game.brash.meter == 0.0,"a herring's dive does not bump the dog")
+			player.position = dog.mouth()
+			dog._try_catch(player)
+			check.call(dog.state == OffLeadDog.State.CATCH and caught[0] == 1,"the dog still catches a diving herring")
+		game.queue_free()

@@ -519,8 +519,8 @@ func show_score_announcement(food_id: String, earned: int) -> void:
 	var shown: String = str(Config.foods["ice_cream"].name) if str(food.get("family","")) == "ice_cream" else str(food.name)
 	show_callout("%s +%d" % [shown.to_upper(),earned])
 
-## The big banner under the top bar. `pop` scales it in; text-only callouts (pop false) never scale the label.
-func show_callout(text: String, hold: float = SCORE_ANNOUNCEMENT_HOLD, pop: bool = true) -> void:
+## The big banner under the top bar.
+func show_callout(text: String) -> void:
 	if is_instance_valid(score_announcement_tween):
 		score_announcement_tween.kill()
 	score_announcement.text = text
@@ -530,16 +530,15 @@ func show_callout(text: String, hold: float = SCORE_ANNOUNCEMENT_HOLD, pop: bool
 	row.offset_top = training_callout_top() if game.lesson_active() else SCORE_CALLOUT_TOP
 	row.offset_bottom = row.offset_top + 24.0
 	score_announcement.modulate.a = 1.0
-	score_announcement.scale = Vector2(0.72,0.72) if pop else Vector2.ONE
+	score_announcement.scale = Vector2(0.72,0.72)
 	score_announcement.pivot_offset = score_announcement.size * 0.5
 	score_announcement.show()
 	score_announcement_tween = create_tween()
 	score_announcement_tween.set_parallel(true)
-	if pop:
-		score_announcement_tween.tween_property(score_announcement,"scale",Vector2.ONE,0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	score_announcement_tween.tween_property(score_announcement,"scale",Vector2.ONE,0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	score_announcement_tween.tween_property(score_announcement,"modulate:a",1.0,0.12)
 	# Parallel mode would start the fade and hide alongside the hold, so chain each step.
-	score_announcement_tween.chain().tween_interval(hold)
+	score_announcement_tween.chain().tween_interval(SCORE_ANNOUNCEMENT_HOLD)
 	score_announcement_tween.chain().tween_property(score_announcement,"modulate:a",0.0,SCORE_ANNOUNCEMENT_FADE).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	score_announcement_tween.chain().tween_callback(score_announcement.hide)
 

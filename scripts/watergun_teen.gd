@@ -21,6 +21,7 @@ var shots_fired: int = 0
 var destination: float = 0.0
 var resting: bool = true
 var paused: bool = false
+var flee_to: float = NAN ## Shakedown: run to this x and stay there until come_home()
 var aim_clip: StringName = &"shoot_level"
 var target: BeachGull
 var shots: Array[BeachWaterShot] = []
@@ -80,6 +81,13 @@ func _move(target_x: float, speed: float, delta: float) -> void:
 	_face(target_x)
 	position.x = clampf(move_toward(position.x,target_x,speed*delta),maxf(12.0,home.x-float(_t().leash)),minf(float(Config.tuning.world.width)-12.0,home.y+float(_t().leash)))
 
+## The scare is over: back to patrolling.
+func come_home() -> void:
+	if is_nan(flee_to):
+		return
+	flee_to = NAN
+	_patrol()
+
 func _patrol() -> void:
 	state = State.PATROL
 	target = null
@@ -109,6 +117,13 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	shot_gap = maxf(0.0,shot_gap-delta)
 	rearm = maxf(0.0,rearm-delta)
 	var clip: StringName = &"idle"
+	if not is_nan(flee_to):
+		state = State.PATROL
+		target = null
+		_face(flee_to)
+		position.x = move_toward(position.x,flee_to,float(t.run_speed)*delta)
+		_animate(&"idle" if is_equal_approx(position.x,flee_to) else &"run")
+		return
 	match state:
 		State.PATROL:
 			var mark: BeachGull = _nearest(gulls,float(t.notice_radius)) if rearm <= 0.0 else null

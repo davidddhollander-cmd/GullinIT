@@ -70,6 +70,7 @@ var enraged: bool = false ## Shakedown: play each clip's `<clip>_enraged` twin w
 var rearing: bool = false ## Shakedown hold: a grounded gull stays on the screech peak
 var squash_pose: Vector2 = Vector2.ONE ## scale at the start of the squash timer; eases back to 1
 var shoves: bool = false
+var bumps_dogs: bool = false
 var dive_speed: float = 0.0
 var walk_phase: float = 0.0
 var coasting: bool = false
@@ -324,6 +325,7 @@ func apply_species_stats() -> void:
 	stun_mult = float(s.get("stun",1.0))
 	knockback = float(s.get("knockback",1.0))
 	shoves = bool(s.get("shove",false))
+	bumps_dogs = bool(s.get("bumps_dogs",false))
 
 func show_ground_peck(time: float = 0.14) -> void:
 	art_event = &"peck"
