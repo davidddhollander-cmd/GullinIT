@@ -176,6 +176,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		)
 		dog.rival_caught.connect(_dog_caught_rival.bind(dog))
 		dog.bumped.connect(_dog_bumped.bind(dog))
+		dog.landed.connect(func(at: Vector2) -> void: effects.sand_puff(at))
+		dog.dazed.connect(func() -> void: dog.stars = effects.pixelfx("pixelfx_stunned",Vector2(0,-40),Vector2.RIGHT,dog))
 		dog.outrun.connect(func() -> void:
 			effects.message(player.position-Vector2(0,18),"OUTRUN!",BeachUI.GOLD)
 			Audio.play("snatch")

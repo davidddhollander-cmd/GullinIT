@@ -1084,7 +1084,7 @@ static func _dog_bump_checks(host: Node, check: Callable) -> void:
 		player.sweep_beak = dog.position+Vector2(4,-6)
 		game._dog_bump_check()
 		if species == BLACKBACK:
-			check.call(dog.state == OffLeadDog.State.COOLDOWN and dog.timer >= float(Config.tuning.shakedown.bounce_cooldown) and (dog.flash_left > 0.0 or HitFlash.duration() == 0.0),"a black-back's dive bumps the dog: recoil, cooldown and a flash")
+			check.call(dog.state == OffLeadDog.State.TUMBLE and (dog.flash_left > 0.0 or HitFlash.duration() == 0.0),"a black-back's dive bumps the dog into a tumble, with a flash")
 			check.call(is_equal_approx(game.brash.meter,bump) and game.effects.texts.any(func(item: Dictionary) -> bool: return item.text == "BONK!"),"the bump earns dog_bump and shouts BONK!")
 			var before: float = game.brash.meter
 			game._dog_bump_check()
@@ -1098,7 +1098,7 @@ static func _dog_bump_checks(host: Node, check: Callable) -> void:
 			player.position = second.mouth()
 			player.state = BeachGull.State.STRIKE
 			second._try_catch(player)
-			check.call(second.state == OffLeadDog.State.COOLDOWN and player.state != BeachGull.State.STUNNED and caught[0] == 0,"if the dog would catch a diving black-back, the bump wins")
+			check.call(second.state == OffLeadDog.State.TUMBLE and player.state != BeachGull.State.STUNNED and caught[0] == 0,"if the dog would catch a diving black-back, the bump wins")
 			var third: OffLeadDog = OffLeadDog.new()
 			game.actors.add_child(third)
 			third.setup(900,[0,1200],3)

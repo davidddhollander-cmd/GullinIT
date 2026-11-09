@@ -154,6 +154,7 @@ func run() -> void:
 	preload("res://tests/quest_checks.gd").run(Callable(self,"check"))
 	await preload("res://tests/quest_checks.gd").run_game(self,Callable(self,"check"))
 	await preload("res://tests/off_lead_dog_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/dog_hit_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/water_shot_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/watergun_teen_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/landed_food_checks.gd").run(self,Callable(self,"check"))

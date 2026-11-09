@@ -7,7 +7,9 @@ signal caught
 signal rival_caught(rival: BeachGull)
 signal outrun
 signal bumped(gull: BeachGull)
-enum State { WANDER, SNIFF, WARN, CHASE, LEAP, CATCH, COOLDOWN }
+signal landed(at: Vector2) ## tumble touched down: sand puff
+signal dazed ## tumble landed: the game adds the daze stars and hands them back in `stars`
+enum State { WANDER, SNIFF, WARN, CHASE, LEAP, CATCH, COOLDOWN, TUMBLE }
 var state: State = State.WANDER
 var home: Vector2 = Vector2(250, 410)
 var facing: float = 1.0
@@ -27,6 +29,11 @@ var prey: BeachGull ## current chase target, re-picked only while the dog is idl
 var flee_to: float = NAN ## squall: run to this x (off the map) and stay there
 var homecoming: bool = false ## flee_to is the way back; wander again on arrival
 var flash_left: float = 0.0
+var tumble_vx: float = 0.0
+var tumble_vz: float = 0.0
+var tumble_turn: float = 0.0 ## sprite spin, radians per second
+var tumble_landed: bool = false ## true during the daze after landing
+var stars: AnimatedSprite2D ## daze stars, owned by this dog and freed when the daze ends
 
 func setup(x: float, home_range: Array, seed_value: int) -> void:
 	var art: Dictionary = Config.sprites.off_lead_dog
@@ -94,6 +101,9 @@ func _pick_prey(player: BeachGull, rivals: Array[BeachGull]) -> BeachGull:
 
 func tick(delta: float, player: BeachGull, rivals: Array[BeachGull] = []) -> void:
 	var t: Dictionary = _t()
+	if state == State.TUMBLE:
+		_tick_tumble(delta) # the tumble and daze finish before any squall or Shakedown flee_to takes over
+		return
 	if not is_nan(flee_to):
 		_face(flee_to)
 		position.x = move_toward(position.x, flee_to, float(t.run_speed) * delta)
@@ -230,14 +240,66 @@ func _try_catch(gull: BeachGull) -> void:
 	else:
 		caught.emit()
 
-## A black-back's dive knocks the dog back; false while it is already sulking or running off.
+## A black-back's dive throws the dog; false while it is already sulking, tumbling or running off.
 func bump(gull: BeachGull) -> bool:
-	if state == State.COOLDOWN or not is_nan(flee_to):
+	if state == State.COOLDOWN or state == State.TUMBLE or not is_nan(flee_to):
 		return false
-	_bounce(gull)
+	_start_tumble(gull)
 	flash_left = HitFlash.duration()
 	bumped.emit(gull)
 	return true
+
+func _start_tumble(gull: BeachGull) -> void:
+	var away: float = signf(position.x - gull.position.x)
+	if away == 0.0:
+		away = signf(gull.velocity.x) if absf(gull.velocity.x) > 1.0 else facing
+	var t: Dictionary = _t()
+	facing = away
+	state = State.TUMBLE
+	tumble_vx = away * float(t.tumble_speed)
+	tumble_vz = float(t.tumble_up)
+	tumble_turn = away * float(t.tumble_spin)
+	tumble_landed = false
+
+func _tick_tumble(delta: float) -> void:
+	var t: Dictionary = _t()
+	if tumble_landed:
+		_animate(&"idle", 1.0)
+		timer -= delta
+		if timer <= 0.0:
+			_end_tumble()
+		return
+	tumble_vz -= float(t.tumble_gravity) * delta
+	air += tumble_vz * delta
+	position.x = clampf(position.x + tumble_vx * delta, 12.0, float(Config.tuning.world.width) - 12.0)
+	if position.x <= 12.0 or position.x >= float(Config.tuning.world.width) - 12.0:
+		tumble_vx = 0.0
+	sprite.rotation += tumble_turn * delta
+	_animate(&"leap", 1.0)
+	if air <= 0.0 and tumble_vz < 0.0:
+		_land()
+
+func _land() -> void:
+	air = 0.0
+	tumble_vx = 0.0
+	sprite.rotation = 0.0
+	tumble_landed = true
+	timer = float(_t().tumble_daze)
+	landed.emit(position)
+	dazed.emit()
+
+## Daze over: clear the spin and stars, then the normal cooldown.
+func _end_tumble() -> void:
+	_clear_tumble_visuals()
+	tumble_landed = false
+	_cooldown(true)
+
+func _clear_tumble_visuals() -> void:
+	if is_instance_valid(stars):
+		stars.queue_free()
+	stars = null
+	sprite.rotation = 0.0
+	air = 0.0
 
 ## Power immunity or a bump: the dog bounces off and sulks for at least bounce_cooldown.
 func _bounce(gull: BeachGull) -> void:
