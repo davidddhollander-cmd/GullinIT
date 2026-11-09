@@ -33,9 +33,62 @@ static func _spawn(game: BeachGame, x: float) -> BeachSweeper:
 	sweeper.timer = 999.0
 	return sweeper
 
+## Task 071: he always starts just off a screen edge, never on it, and runs in along the ground to his range.
+static func _entry_checks(suite: Node, check: Callable) -> void:
+	var t: Dictionary = Config.tuning.sweeper
+	var game: BeachGame = _start(suite,2)
+	var visits: SweeperVisits = game.sweeper_visits
+	var gull: BeachGull = game.player
+	var half: float = visits._half_width()
+	var reach: float = BeachSweeper.screen_reach()
+	check.call(absf(half-160.0) < 0.01,"the view is 320 wide, so the spawn offset comes from the real half-width (%s)" % half)
+	var width: float = float(Config.tuning.world.width)
+	var cams: Array[float] = []
+	var cam: float = 160.0
+	while cam <= width-160.0:
+		cams.append(cam)
+		cam += 16.0
+	cams.append(width-160.0)
+	var hidden: bool = true
+	var smooth: bool = true
+	var reached: bool = true
+	var near_side: bool = true
+	var step: float = 0.05
+	for camera: float in cams:
+		game.camera_x = camera
+		gull.position = Vector2(camera,40.0) # high and out of notice, so he only runs in
+		if is_instance_valid(visits.sweeper):
+			visits.sweeper.queue_free()
+		visits._spawn()
+		var sweeper: BeachSweeper = visits.sweeper
+		if absf(sweeper.position.x-camera) < half+reach:
+			hidden = false
+		if camera-half > float(t.range[1]) and sweeper.position.x > camera:
+			near_side = false # past his range the side nearer the sand is the left one
+		var prev: float = sweeper.position.x
+		for i: int in 200:
+			sweeper.tick(step,gull)
+			var now: float = sweeper.position.x
+			var seen: bool = absf(now-camera) < half or absf(prev-camera) < half
+			if seen and absf(now-prev) > float(t.run_speed)*step+0.01:
+				smooth = false # a jump onto the screen, not a run
+			prev = now
+			if sweeper.state != BeachSweeper.State.ENTER:
+				break
+		if sweeper.state != BeachSweeper.State.PATROL or sweeper.position.x < float(t.range[0])-20.0 or sweeper.position.x > float(t.range[1])+20.0:
+			reached = false
+	check.call(hidden,"every new sweeper starts outside the visible screen, at every camera position, including past his sand range")
+	check.call(near_side,"past his sand range he comes in from the side nearer the sand")
+	check.call(smooth,"he runs in at his run speed; nothing jumps him onto the screen")
+	check.call(reached,"he reaches his sand range by running, then patrols, from every camera position")
+	if is_instance_valid(visits.sweeper):
+		visits.sweeper.queue_free()
+	game.stash_raids.items.clear()
+
 static func run(suite: Node, check: Callable) -> void:
 	var t: Dictionary = Config.tuning.sweeper
 	check.call(Config.sprites.has("sweeper") and BeachSweeper.art().animations.has("swat"),"sweeper sprite and art data are registered")
+	_entry_checks(suite,check)
 	# Level gating and visit schedule.
 	var game: BeachGame = _start(suite,1)
 	check.call(not game.sweeper_visits.enabled,"levels without a sweeper block never schedule him")

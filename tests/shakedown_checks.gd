@@ -930,16 +930,18 @@ static func _flee_checks(host: Node, check: Callable) -> void:
 		game.player.aim = game.player.position
 		game.brash.meter = 1.0
 		game.brash.fire()
-		check.call(not is_nan(dog.flee_to) and not is_nan(teen.flee_to) and not is_nan(sweeper.flee_to) and is_nan(far.flee_to),"dog, teen and sweeper in range flee; a distant dog does not (%s)" % path)
-		var before: Array[float] = [dog.position.x,teen.position.x,sweeper.position.x]
+		check.call(not is_nan(dog.flee_to) and not is_nan(teen.flee_to) and is_nan(far.flee_to),"dog and teen in range flee; a distant dog does not (%s)" % path)
+		check.call(not ("flee_to" in sweeper) and not sweeper.has_method("come_home"),"the sweeper is not scared by Shakedown (%s)" % path)
+		var before: Array[float] = [dog.position.x,teen.position.x]
 		for i: int in 25:
 			dog.tick(0.1,game.player)
 			teen.tick(0.1,game.gulls)
 			sweeper.tick(0.1,game.player)
-		check.call(dog.position.x > before[0] and teen.position.x > before[1] and sweeper.position.x < before[2],"they run from the gull (%s)" % path)
-		check.call(dog.state != OffLeadDog.State.CHASE and teen.state == WatergunTeen.State.PATROL and sweeper.state == BeachSweeper.State.PATROL,"and attack nobody (%s)" % path)
+		check.call(dog.position.x > before[0] and teen.position.x > before[1],"they run from the gull (%s)" % path)
+		check.call(dog.state != OffLeadDog.State.CHASE and teen.state == WatergunTeen.State.PATROL,"and attack nobody (%s)" % path)
+		check.call(sweeper.state != BeachSweeper.State.EXIT and game.player.state != BeachGull.State.STUNNED,"the sweeper still works the sand, and his swats bounce off the power (%s)" % path)
 		_end_power_path(game,path)
-		check.call(is_nan(teen.flee_to) and is_nan(sweeper.flee_to) and teen.state == WatergunTeen.State.PATROL and sweeper.state == BeachSweeper.State.PATROL and dog.homecoming and not is_nan(dog.flee_to),"the power's end (%s) sends them back to normal: dog trots home, others patrol" % path)
+		check.call(is_nan(teen.flee_to) and teen.state == WatergunTeen.State.PATROL and dog.homecoming and not is_nan(dog.flee_to),"the power's end (%s) sends them back to normal: dog trots home, others patrol" % path)
 		for i: int in 400:
 			dog.tick(0.1,game.player)
 		check.call(is_nan(dog.flee_to) and not dog.homecoming and dog.state == OffLeadDog.State.WANDER,"the dog is wandering again (%s)" % path)

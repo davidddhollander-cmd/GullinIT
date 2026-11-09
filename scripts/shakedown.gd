@@ -12,7 +12,7 @@ var impact_left: float = 0.0
 var pulse: float = 0.0
 var rear_left: float = 0.0 ## seconds of the pre-slam hold still to run; the power clock waits for it
 var stomp_index: int = 0
-var scared: Array = [] ## dogs, teens and the sweeper sent running; come_home() on every end path
+var scared: Array = [] ## dogs and teens sent running; come_home() on every end path
 
 func settings() -> Dictionary:
 	return Config.tuning.shakedown
@@ -141,15 +141,13 @@ func _panic() -> void:
 	CrowdPanic.pulse(game.spawner.targets,game.player.position.x)
 	_scare()
 
-## Dogs, teens and the sweeper near the gull run from it until the power ends. A squall's own flight is left alone.
+## Dogs and teens near the gull run from it until the power ends. The sweeper is not scared. A squall's own flight is left alone.
 func _scare() -> void:
 	var at: float = game.player.position.x
 	var radius: float = float(CrowdPanic.settings().panic_radius)
 	var actors: Array = []
 	actors.append_array(game.dogs)
 	actors.append_array(game.teens)
-	if is_instance_valid(game.sweeper_visits.sweeper) and game.sweeper_visits.sweeper.state != BeachSweeper.State.EXIT:
-		actors.append(game.sweeper_visits.sweeper)
 	for actor: Node2D in actors:
 		if is_instance_valid(actor) and is_nan(actor.flee_to) and absf(actor.position.x-at) <= radius:
 			actor.flee_to = clampf(at+(1.0 if actor.position.x >= at else -1.0)*radius*1.5,12.0,float(Config.tuning.world.width)-12.0)

@@ -26,7 +26,6 @@ var landed_hit: bool = false
 var swings: int = 0
 var leaving: bool = false
 var paused: bool = false
-var flee_to: float = NAN ## Shakedown: run to this x and stay there until come_home()
 var brushing: bool = false
 var destination: float = 0.0
 var prey: BeachGull
@@ -84,6 +83,11 @@ func setup(owner_game: BeachGame, x: float, seed_value: int) -> void:
 	facing = 1.0 if x < game.camera_x else -1.0 # runs in toward the middle of the screen
 	destination = clampf(x+facing*float(tuning().enter_depth),float(edge[0]),float(edge[1]))
 	_animate(&"run")
+
+## How far his drawn sprite reaches from his feet toward the screen (its cell, past the body anchor).
+static func screen_reach() -> float:
+	var s: float = float(Config.sprites[SPRITE_ID].visual_scale)
+	return (float(Config.sprites[SPRITE_ID].frame_w)-float(art().body_anchor_x))*s
 
 func dismiss() -> void:
 	leaving = true
@@ -201,12 +205,6 @@ func tick(delta: float, gull: BeachGull) -> void:
 	cooldown = maxf(0.0,cooldown-delta)
 	clip_clock += delta
 	var clip: StringName = &"idle"
-	if not is_nan(flee_to) and state != State.EXIT:
-		_release_pile()
-		_face(flee_to)
-		position.x = move_toward(position.x,flee_to,float(t.run_speed)*delta)
-		_animate(&"idle" if is_equal_approx(position.x,flee_to) else &"run")
-		return
 	match state:
 		State.ENTER:
 			clip = &"run"
@@ -334,14 +332,6 @@ func tick(delta: float, gull: BeachGull) -> void:
 				queue_free()
 				return
 	_animate(clip)
-
-## The scare is over: back to ordinary sweeping.
-func come_home() -> void:
-	if is_nan(flee_to):
-		return
-	flee_to = NAN
-	if state != State.EXIT:
-		_patrol()
 
 func _patrol() -> void:
 	state = State.PATROL
