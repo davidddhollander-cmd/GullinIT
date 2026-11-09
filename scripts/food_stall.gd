@@ -25,6 +25,8 @@ var duck: float = 0.0 ## 0 up, 1 hidden
 var vendor_home_y: float = 0.0
 var home_x: float = 0.0
 var shake_left: float = 0.0 ## Shakedown raid rattle
+var marker_layer: Node2D
+var marked: bool = false ## Shakedown: gold corners on the counter window while raids remain
 
 func setup(entry: Dictionary, index: int) -> void:
 	z_index = DRAW_DEPTH
@@ -55,6 +57,9 @@ func setup(entry: Dictionary, index: int) -> void:
 	prepared_food.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	prepared_food.hide()
 	add_child(prepared_food)
+	marker_layer = Node2D.new()
+	marker_layer.draw.connect(_draw_marker)
+	add_child(marker_layer)
 	sync_pose()
 
 ## An idle stand serves whichever side the buyer arrives on; the vendor turns to match.
@@ -81,10 +86,17 @@ func advance(delta: float) -> void:
 		var t: Dictionary = Config.tuning.shakedown
 		shake_left = maxf(0.0,shake_left-delta)
 		position.x = home_x+sin(clock*80.0)*float(t.raid_shake)*shake_left/float(t.raid_shake_time)
+	if marked:
+		marker_layer.queue_redraw() # the corners pulse
 	var goal: float = 1.0 if ducked else 0.0
 	if duck != goal:
 		duck = move_toward(duck,goal,delta/float(Config.tuning.shakedown.duck_time))
 		vendor.position.y = vendor_home_y+duck*float(Config.tuning.shakedown.duck_depth)
+
+func set_marker(on: bool) -> void:
+	if on != marked:
+		marked = on
+		marker_layer.queue_redraw()
 
 func rattle() -> void:
 	shake_left = float(Config.tuning.shakedown.raid_shake_time)
@@ -132,3 +144,9 @@ func _draw() -> void:
 	# A real shelf supports the stationary food outside the roof's footprint.
 	draw_rect(Rect2(-COUNTER_REACH,COUNTER_TOP,COUNTER_REACH*2.0,3),Color("a56942"))
 	draw_rect(Rect2(-COUNTER_REACH,COUNTER_TOP,COUNTER_REACH*2.0,1),Color("efc181"))
+
+## Drawn on its own child so the corners sit in front of the vendor.
+func _draw_marker() -> void:
+	if marked:
+		var radius: Array = Config.tuning.shakedown.marker_radius
+		PickupShine.draw_target_corners(marker_layer,Vector2(0,-28),Vector2(float(radius[0]),float(radius[1])),true)

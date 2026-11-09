@@ -12,6 +12,7 @@ var impact_left: float = 0.0
 var pulse: float = 0.0
 var rear_left: float = 0.0 ## seconds of the pre-slam hold still to run; the power clock waits for it
 var stomp_index: int = 0
+var scared: Array = [] ## dogs, teens and the sweeper sent running; come_home() on every end path
 
 func settings() -> Dictionary:
 	return Config.tuning.shakedown
@@ -40,7 +41,6 @@ func start(owner: BeachBrash) -> void:
 	game.player.rearing = true
 	if _show_fx():
 		game.overlay.set_dim(float(s.rear_dim),0.08)
-	game.overlay.show_callout("SHAKEDOWN!",float(s.callout_hold),false)
 	if rear_left <= 0.0:
 		_slam()
 	if game.is_inside_tree():
@@ -71,30 +71,35 @@ func _slam() -> void:
 		game.overlay.set_dim(0.0,float(s.dim_fade))
 		game.overlay.white_frame()
 	game.effects.ring(at,float(s.slam_radius),float(s.slam_ring_time),float(s.slam_ring_width),Color("fff4da"))
-	if float(Config.tuning.world.ground)-(at.y+float(Config.tuning.flight.feet_offset)) <= float(s.slam_ground_reach):
-		game.effects.ground_slam(at,player.facing)
-	var knocked: bool = _knock_around(float(s.slam_radius)) > 0
+	game.effects.ring(at,float(s.slam_radius),float(s.slam_ring_time),1.0,Color("fff4da"),float(s.slam_ring2_lag))
+	game.effects.ground_slam(at,player.facing)
+	_mark_stalls()
+	var knocked: bool = _knock_around(float(s.slam_radius),true) > 0
 	var t: Dictionary = Config.tuning.brash
 	brash.hit_fx(at,Vector2(0,-1),knocked,0,int(t.hit_crumbs),float(t.hit_shake),float(t.hit_stop))
 	brash.dust_left = float(t.dust_time)
 
 ## Knocks food from people (and makes carriers drop) within radius of the gull; returns how many lost something.
-func _knock_around(radius: float) -> int:
+## `flat` measures sideways only, so a slam from high in the air reaches everyone beneath it.
+func _knock_around(radius: float, flat: bool = false) -> int:
 	var at: Vector2 = game.player.position
 	var lift: float = float(settings().food_lift)
 	var count: int = 0
 	for target: BeachTarget in game.spawner.targets:
-		if is_instance_valid(target) and target.food and at.distance_to(target.food_position()) <= radius and target.knock_food(game.player,lift):
+		if is_instance_valid(target) and target.food and _gap(at,target.food_position(),flat) <= radius and target.knock_food(game.player,lift):
 			target.drop_retrieve = false
 			target.hit_flash()
 			game.effects.snatch_contact(target.food_position(),game.player.velocity,false)
 			count += 1
 	for pilot: RivalPilot in game.pilots:
-		if pilot.carry_window > 0.0 and pilot.carried > 0 and at.distance_to(pilot.gull.position) <= radius:
+		if pilot.carry_window > 0.0 and pilot.carried > 0 and _gap(at,pilot.gull.position,flat) <= radius:
 			game._rival_drops_carry(pilot.gull,at)
 			game.effects.feather_burst(pilot.gull.position,Vector2(signf(pilot.gull.position.x-at.x),-1.0)*20.0,int(settings().hit_feathers))
 			count += 1
 	return count
+
+static func _gap(from: Vector2, to: Vector2, flat: bool) -> float:
+	return absf(from.x-to.x) if flat else from.distance_to(to)
 
 func _landed(at: Vector2) -> void:
 	if bool(Config.tuning.juice.shake) and GameState.options.shake:
@@ -109,6 +114,8 @@ func tick(delta: float) -> void:
 		_panic()
 		game.effects.ring(game.player.position,float(settings().panic_ring_radius),float(settings().panic_ring_time),1.0,Color(1,0.96,0.85,float(settings().panic_ring_alpha)))
 	impact_left = maxf(0.0,impact_left-delta)
+	_duck_stalls()
+	_mark_stalls()
 	_shake()
 	_pulse(delta)
 	_stomp()
@@ -131,6 +138,22 @@ func _stomp() -> void:
 func _panic() -> void:
 	CrowdPanic.warn(game.spawner.targets,game.player.position.x)
 	CrowdPanic.stampede(game.spawner.targets,game.player.position.x)
+	CrowdPanic.pulse(game.spawner.targets,game.player.position.x)
+	_scare()
+
+## Dogs, teens and the sweeper near the gull run from it until the power ends. A squall's own flight is left alone.
+func _scare() -> void:
+	var at: float = game.player.position.x
+	var radius: float = float(CrowdPanic.settings().panic_radius)
+	var actors: Array = []
+	actors.append_array(game.dogs)
+	actors.append_array(game.teens)
+	if is_instance_valid(game.sweeper_visits.sweeper) and game.sweeper_visits.sweeper.state != BeachSweeper.State.EXIT:
+		actors.append(game.sweeper_visits.sweeper)
+	for actor: Node2D in actors:
+		if is_instance_valid(actor) and is_nan(actor.flee_to) and absf(actor.position.x-at) <= radius:
+			actor.flee_to = clampf(at+(1.0 if actor.position.x >= at else -1.0)*radius*1.5,12.0,float(Config.tuning.world.width)-12.0)
+			scared.append(actor)
 
 func _shake() -> void:
 	if _knock_around(float(settings().shake_radius)) > 0 and impact_left <= 0.0:
@@ -148,6 +171,20 @@ func _pulse(delta: float) -> void:
 	game.player.power_tint = Color.WHITE.lerp(Color(float(tint[0]),float(tint[1]),float(tint[2])),0.5+0.5*sin(pulse*TAU))
 	if warning and floorf(pulse) > floorf(before):
 		Audio.play("click",float(s.tick_pitch),-4.0)
+
+## A vendor ducks while the gull is within duck_reach sideways of the stall, and comes back up when it leaves.
+func _duck_stalls() -> void:
+	for stall: FoodStall in game.beach.stalls:
+		if absf(stall.position.x-game.player.position.x) <= float(settings().duck_reach):
+			if not stall.ducked:
+				game.stalls.raid(stall)
+		else:
+			stall.ducked = false
+
+## Stalls with raids left show the steal corners; they go at the cap and when the power ends.
+func _mark_stalls() -> void:
+	for stall: FoodStall in game.beach.stalls:
+		stall.set_marker(gorging and rear_left <= 0.0 and int(raided.get(stall,0)) < int(settings().raid_cap))
 
 func stall_at(x: float) -> FoodStall:
 	var best: FoodStall
@@ -173,6 +210,7 @@ func peck() -> bool:
 	if count == 0:
 		game.stalls.raid(stall)
 	raided[stall] = count+1
+	_mark_stalls()
 	raids.peck_cooldown = float(Config.tuning.world.peck_cooldown)
 	if count+1 == int(settings().raid_cap):
 		game.effects.pixelfx("pixelfx_crit_hit",window,Vector2(game.player.facing,0))
@@ -226,6 +264,12 @@ func end(snap: bool) -> void:
 	game.player.sprite.modulate.a = 1.0
 	for stall: FoodStall in game.beach.stalls:
 		stall.ducked = false
+		stall.set_marker(false)
 		if snap:
 			stall.snap_duck()
 	raided.clear()
+	for actor: Node2D in scared:
+		# During a squall the dog is still sheltering; the squall's own clear brings it home.
+		if is_instance_valid(actor) and not (actor is OffLeadDog and game.squall != null and game.squall.phase == BeachSquall.Phase.SQUALL):
+			actor.come_home()
+	scared.clear()

@@ -175,6 +175,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 			_quest_event("dog_caught")
 		)
 		dog.rival_caught.connect(_dog_caught_rival.bind(dog))
+		dog.bumped.connect(_dog_bumped.bind(dog))
 		dog.outrun.connect(func() -> void:
 			effects.message(player.position-Vector2(0,18),"OUTRUN!",BeachUI.GOLD)
 			Audio.play("snatch")
@@ -666,6 +667,7 @@ func _physics_process(delta: float) -> void:
 		BeachBoss.shove(self)
 	BeachBoss.shove_player(self)
 	_mugging()
+	_dog_bump_check()
 	_mug_miss_check()
 	_rival_mugging()
 	_near_misses()
@@ -950,6 +952,20 @@ func _stunned() -> void:
 	score.stunned()
 	effects.impact(player.position,true)
 	Audio.play("stun")
+
+## A black-back dive that sweeps the beak through a dog bumps it (the dog's own catch checks the same rule).
+func _dog_bump_check() -> void:
+	if not player.bumps_dogs or player.state != BeachGull.State.STRIKE:
+		return
+	var box: Array = Config.tuning.off_lead_dog.dog_bump_hit
+	for dog: OffLeadDog in dogs:
+		if BeachCollisions.segment_hits(player.previous_beak,player.sweep_beak,dog.position-Vector2(0,float(box[1])),Vector2(float(box[0]),float(box[1]))):
+			dog.bump(player)
+
+func _dog_bumped(gull: BeachGull, dog: OffLeadDog) -> void:
+	effects.snatch_contact(dog.position-Vector2(0,8),gull.velocity,false)
+	effects.shout(dog.position-Vector2(0,24),"BONK!",BeachUI.GOLD)
+	brash.earn("dog_bump")
 
 func _dog_caught_rival(rival: BeachGull, dog: OffLeadDog) -> void:
 	effects.shout(dog.position-Vector2(0,24),"GOTCHA!",Color("ef725c"))

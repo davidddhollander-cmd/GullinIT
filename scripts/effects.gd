@@ -43,10 +43,10 @@ func shout(at: Vector2, text: String, color: Color = Color("fff4da")) -> void:
 		texts.append({"at":at,"text":text,"color":color,"life":float(Config.tuning.juice.float_time),"rise_speed":10.0,"plain":true})
 
 ## One expanding ring that reaches exactly `radius` after `time` seconds.
-func ring(at: Vector2, radius: float, time: float, width: float = 1.0, color: Color = Color("fff4da")) -> void:
+func ring(at: Vector2, radius: float, time: float, width: float = 1.0, color: Color = Color("fff4da"), delay: float = 0.0) -> void:
 	if not bool(Config.tuning.juice.particles):
 		return
-	particles.append({"ring":true,"at":at,"v":Vector2.ZERO,"gravity":0.0,"life":time,"duration":time,"delay":0.0,"grow":(radius-4.0)/time,"width":width,"points":48,"color":color})
+	particles.append({"ring":true,"at":at,"v":Vector2.ZERO,"gravity":0.0,"life":time,"duration":time,"delay":delay,"grow":(radius-4.0)/time,"width":width,"points":48,"color":color})
 	queue_redraw()
 
 ## A combo tier went up: gold ring on the gull and the new multiplier floating above it.

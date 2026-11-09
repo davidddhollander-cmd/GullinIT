@@ -34,6 +34,14 @@ static func stampede(targets: Array[BeachTarget], from_x: float) -> void:
 			target.panic.stampede_pending = true
 			target.panic.direction = signf(target.position.x-from_x) if not is_zero_approx(target.position.x-from_x) else -target.facing
 
+## Shakedown's repeat: anyone already running or walking home near the gull panics again, away from it, keeping their home.
+static func pulse(targets: Array[BeachTarget], from_x: float) -> void:
+	for target: BeachTarget in targets:
+		if is_instance_valid(target) and absf(target.position.x-from_x) <= float(settings().panic_radius) and target.panic.state in [State.PANIC,State.RETURN]:
+			target.panic.state = State.PANIC
+			target.panic.timer = float(settings().panic_time)
+			target.panic.direction = signf(target.position.x-from_x) if not is_zero_approx(target.position.x-from_x) else -target.facing
+
 ## The gang was cancelled before it struck.
 static func calm(targets: Array[BeachTarget]) -> void:
 	for target: BeachTarget in targets:

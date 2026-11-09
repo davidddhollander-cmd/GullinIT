@@ -64,7 +64,7 @@ func fire() -> bool:
 		return false
 	meter = 0.0
 	var p: Dictionary = power()
-	if str(p.id) != "shakedown": # Shakedown announces itself with the big callout
+	if str(p.id) != "shakedown": # Shakedown has its own rear-up and slam
 		game.effects.message(game.player.position-Vector2(0,24),str(p.name)+"!",BeachUI.GOLD)
 	Audio.play(str(p.get("sound","gang_call")),float(p.get("pitch",1.0)),-2.0)
 	game.effects.sound_wave(game.player.beak())

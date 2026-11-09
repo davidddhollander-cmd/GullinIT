@@ -6,6 +6,7 @@ signal barked
 signal caught
 signal rival_caught(rival: BeachGull)
 signal outrun
+signal bumped(gull: BeachGull)
 enum State { WANDER, SNIFF, WARN, CHASE, LEAP, CATCH, COOLDOWN }
 var state: State = State.WANDER
 var home: Vector2 = Vector2(250, 410)
@@ -25,6 +26,7 @@ var sprite: AnimatedSprite2D
 var prey: BeachGull ## current chase target, re-picked only while the dog is idle
 var flee_to: float = NAN ## squall: run to this x (off the map) and stay there
 var homecoming: bool = false ## flee_to is the way back; wander again on arrival
+var flash_left: float = 0.0
 
 func setup(x: float, home_range: Array, seed_value: int) -> void:
 	var art: Dictionary = Config.sprites.off_lead_dog
@@ -40,6 +42,11 @@ func setup(x: float, home_range: Array, seed_value: int) -> void:
 
 func _t() -> Dictionary:
 	return Config.tuning.off_lead_dog
+
+func _process(delta: float) -> void:
+	if flash_left > 0.0:
+		flash_left = maxf(0.0,flash_left-delta)
+		HitFlash.apply(sprite,flash_left)
 
 # Height of the gull's body above the sand line.
 func gull_height(gull: BeachGull) -> float:
@@ -207,6 +214,9 @@ func _try_leap(gull: BeachGull) -> void:
 func _try_catch(gull: BeachGull) -> void:
 	if not _can_chase(gull) or mouth().distance_to(gull.position) > float(_t().catch_radius):
 		return
+	if gull.bumps_dogs and gull.state == BeachGull.State.STRIKE:
+		bump(gull) # a diving black-back wins the clash
+		return
 	gull.stun(-1.0, position)
 	if gull.state != BeachGull.State.STUNNED:
 		if gull.steady_invulnerable:
@@ -220,7 +230,16 @@ func _try_catch(gull: BeachGull) -> void:
 	else:
 		caught.emit()
 
-## Power immunity: the dog bounces off and sulks for at least bounce_cooldown.
+## A black-back's dive knocks the dog back; false while it is already sulking or running off.
+func bump(gull: BeachGull) -> bool:
+	if state == State.COOLDOWN or not is_nan(flee_to):
+		return false
+	_bounce(gull)
+	flash_left = HitFlash.duration()
+	bumped.emit(gull)
+	return true
+
+## Power immunity or a bump: the dog bounces off and sulks for at least bounce_cooldown.
 func _bounce(gull: BeachGull) -> void:
 	var s: Dictionary = Config.tuning.shakedown
 	position.x = clampf(position.x - signf(gull.position.x - position.x) * float(s.bounce_recoil), 12.0, float(Config.tuning.world.width) - 12.0)
