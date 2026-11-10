@@ -30,6 +30,11 @@ static func run(host: Node, check: Callable) -> void:
 static func _copy_checks(check: Callable) -> void:
 	var input: GullInput = GullInput.new()
 	var trainer: Dictionary = Config.trainer
+	_set_device(input,"touch")
+	var touch_line: String = TrainerScript.fill("Push FLY up. Tap {dive}.",input,true)
+	check.call(touch_line == "Push %sFLY up%s. Tap %sDIVE%s." % [TrainerScript.MARK_ON,TrainerScript.MARK_OFF,TrainerScript.MARK_ON,TrainerScript.MARK_OFF],"touch literals and placeholders are each wrapped once")
+	_set_device(input,"keyboard")
+	check.call(TrainerScript.fill("Hit {peck}",input,true).contains(TrainerScript.MARK_ON + "E/mouse 3" + TrainerScript.MARK_OFF) and TrainerScript.fill("Hit {peck}",input) == "Hit E/mouse 3","key names are marked only in highlight mode")
 	check.call(trainer.training.lessons.size() == BeachGame.TRAINING_LESSONS and trainer.screech.lessons.size() == BeachGame.SCREECH_STEPS and trainer.screech.strips.size() == BeachGame.SCREECH_STEPS,"trainer copy covers every lesson and screech step")
 	check.call(Config.trainer.has("counter_tip") and TrainerScript.line(Config.trainer.counter_tip,input).contains("COUNTER"),"trainer copy has the counter tip")
 	var worst_card: int = 0
@@ -215,7 +220,7 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	game._training_advance()
 	check.call(not game.trainer_open and not game.trainer_queue.is_empty() and game.lesson == 2,"the next card waits a beat after the lesson-done toast")
 	game._physics_process(BeachGame.TRAINING_DELAY + 0.1)
-	check.call(game.trainer_open and card.counter_label.text == "Lesson 3/%d" % BeachGame.TRAINING_LESSONS and card.lay_label.get_parsed_text().contains("candy from a baby") and card.how_label.get_parsed_text().contains("tap E"),"the toddler lesson keeps its card, with the candy-from-a-baby line and the peck key")
+	check.call(game.trainer_open and card.counter_label.text == "Lesson 3/%d" % BeachGame.TRAINING_LESSONS and card.lay_label.get_parsed_text().contains("candy from a baby") and card.how_label.get_parsed_text().contains("E/mouse 3"),"the toddler lesson keeps its card, with the candy-from-a-baby line and the peck key")
 	var before: Vector2 = game.player.position
 	var clock: float = game.elapsed
 	game._physics_process(0.5)
