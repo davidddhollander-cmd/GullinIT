@@ -427,7 +427,7 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 		moved = routine.tick(self,delta)
 	elif not routine.enabled and info.twist in ["walk", "cry", "whistle"] and not toddler_pause and not customer_pause and not whistle_pause:
 		position.x += facing * float(t.walk_speed) * speed_mult * delta
-		moved = true
+		moved = speed_mult > 0.0 # a stand-still target (speed_mult 0) keeps its idle pose
 		# A purchase, retrieval or chase can leave us beyond a patrol endpoint.
 		# Keep heading inward until back inside; toggling here flips every tick.
 		var center := clampf(patrol_home,20.0,float(t.width)-20.0)

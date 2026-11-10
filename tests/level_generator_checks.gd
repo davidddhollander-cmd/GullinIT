@@ -77,7 +77,7 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 			if prop.type == "kiosk":
 				kiosk_x = float(prop.x)
 	if number == 1:
-		check.call(types==["kiosk_customer","sunbather","toddler"],"training route introduces snack, bag, then a lone toddler")
+		check.call(types==["kiosk_customer","toddler"],"training route introduces a snack, then a lone toddler")
 		check.call(int(level.world.width)==800 and bool(level.tutorial),"training beach is short and tutorial enabled")
 		check.call(stand_count==1 and family_positions.is_empty() and kiosk_x>float(children[""]),"the lone toddler has no mum and the kiosk is further along the beach")
 		check.call(level.rivals.is_empty(),"training beach has no rival")

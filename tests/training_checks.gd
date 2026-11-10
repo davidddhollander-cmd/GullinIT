@@ -54,13 +54,10 @@ static func run(host: Node, check: Callable) -> void:
 	game.running = true
 	check.call(game.training and game.lesson == 2 and game.player.state == BeachGull.State.GLIDE,"retry resumes saved lesson in flight")
 	var customer: BeachTarget
-	var sunbather: BeachTarget
 	for target: BeachTarget in game.spawner.targets:
 		if target.kind == "kiosk_customer":
 			customer = target
-		elif target.kind == "sunbather":
-			sunbather = target
-	check.call(is_instance_valid(customer) and is_instance_valid(sunbather),"training route provides held snack and picnic bag")
+	check.call(is_instance_valid(customer),"training route provides a held snack")
 	# Toddler lesson: peck his ice cream off, then walk over the cone.
 	var toddler: BeachTarget = game.lesson_toddler()
 	check.call(toddler != null and toddler.food and game.training_target() == toddler.food_position(),"the toddler holds an ice cream and the ring marks it")
@@ -173,21 +170,15 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(dummy != null and dummy.dummy and game.pilots.size() == 1 and dummy.dummy_food == BeachGame.DUMMY_FOOD,"the mug lesson spawns one dummy gull holding food")
 	game.player.digestion.tick(30,false) # the earlier snacks are digested: a full belly shows the full-stomach line instead
 	game.overlay._process(0)
-	check.call(game.overlay.lesson_label.text.contains("LESSON %d/%d" % [BeachGame.MUG_LESSON+1,BeachGame.TRAINING_LESSONS]) and game.training_text().contains("through the dummy") and game.training_target() == dummy.gull.position,"mug lesson names the action and rings the dummy")
+	check.call(game.overlay.lesson_label.text.contains("LESSON %d/%d" % [BeachGame.MUG_LESSON+1,BeachGame.TRAINING_LESSONS]) and game.training_text().contains("against the dummy") and game.training_target() == dummy.gull.position,"mug lesson names the action and rings the dummy")
 	game.player.support = {}
 	game.player.state = BeachGull.State.GLIDE
 	customer.food = false
 	customer.food_sprite.hide()
 	customer.dropped_pending = true
 	customer.dropped_item = {"recovered":false}
-	sunbather.stash_remaining = 0
-	game.stash_raids.items.append({"owner":sunbather})
 	game._training_tick(5.0)
 	check.call(customer.food and not customer.dropped_pending and bool(customer.dropped_item.is_empty()),"training restores missed customer snack after delay")
-	check.call(sunbather.stash_remaining == 0,"training does not duplicate a bag while its food is loose")
-	game.stash_raids.items.clear()
-	game._training_tick(5.0)
-	check.call(sunbather.stash_remaining == int(Config.tuning.world.sunbather_stash_size),"training restores exhausted bag after loose food clears")
 	var results: Array[Dictionary] = []
 	game.level_finished.connect(func(result: Dictionary) -> void: results.append(result))
 	# The dummy only patrols its lap: it never hunts, dives, steals or mugs.
@@ -286,7 +277,7 @@ static func run(host: Node, check: Callable) -> void:
 		game._mug_miss_check()
 		game.player.state = BeachGull.State.GLIDE
 		game._mug_miss_check()
-		check.call(game.lesson == BeachGame.MUG_LESSON and game.training_miss_hint > 0.0 and game.training_text().contains("dive straight through"),"missed dive %d repeats the mug tip" % miss)
+		check.call(game.lesson == BeachGame.MUG_LESSON and game.training_miss_hint > 0.0 and game.training_text().contains("dive against him"),"missed dive %d repeats the mug tip" % miss)
 		check.call((dummy.dummy_hold != Vector2.INF) == (miss == BeachGame.MUG_RESCUE_MISSES),"the dummy only hovers after %d misses" % BeachGame.MUG_RESCUE_MISSES)
 	dummy.gull.state = BeachGull.State.GLIDE
 	var hover: Vector2 = dummy.dummy_hold
