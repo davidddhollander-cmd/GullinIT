@@ -206,6 +206,7 @@ func setup(owner_game: BeachGame) -> void:
 	lesson_prompt.add_theme_font_override("normal_font", TrainerCard.SPEECH)
 	lesson_prompt.add_theme_font_size_override("normal_font_size", TrainerCard.SPEECH_SIZE)
 	lesson_prompt.custom_minimum_size = Vector2(176, 10)
+	TrainerScript.snug_chips(lesson_prompt)
 	training_row.add_child(trainer_portrait) # Screeches stands to the right of his words
 	_build_rival_popup()
 	var center: CenterContainer = CenterContainer.new()

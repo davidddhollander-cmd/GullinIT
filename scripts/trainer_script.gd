@@ -23,9 +23,16 @@ static var marking: bool = false
 static func phase() -> int:
 	return (Time.get_ticks_msec() / 333) % 2
 
+## Hug the glyphs: 1 px sideways, shaved top/bottom so the chip stays inside its own line.
+static func snug_chips(label: RichTextLabel) -> void:
+	label.add_theme_constant_override("text_highlight_h_padding",1)
+	label.add_theme_constant_override("text_highlight_v_padding",CHIP_V_PAD)
+
+const CHIP_V_PAD: int = 0
+
 static func bbcode(text: String) -> String:
 	var chip: String = "#ffc65c" if phase() == 1 else "#ffffff"
-	return text.replace(MARK_ON,"[bgcolor=%s][color=#183b4d] " % chip).replace(MARK_OFF," [/color][/bgcolor]")
+	return text.replace(MARK_ON,"[bgcolor=%s][color=#183b4d]" % chip).replace(MARK_OFF,"[/color][/bgcolor]")
 
 static func fill(text: String, input: GullInput, mark: bool = false) -> String:
 	mark = mark or marking
