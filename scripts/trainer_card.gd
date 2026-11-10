@@ -122,6 +122,7 @@ func _paragraph(parent: Node, color: Color) -> RichTextLabel:
 	label.add_theme_font_override("normal_font",SPEECH)
 	label.add_theme_font_size_override("normal_font_size",SPEECH_SIZE)
 	label.add_theme_color_override("default_color",color)
+	TrainerScript.snug_chips(label)
 	parent.add_child(label)
 	return label
 

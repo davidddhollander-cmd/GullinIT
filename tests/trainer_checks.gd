@@ -221,6 +221,7 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	check.call(not game.trainer_open and not game.trainer_queue.is_empty() and game.lesson == 2,"the next card waits a beat after the lesson-done toast")
 	game._physics_process(BeachGame.TRAINING_DELAY + 0.1)
 	check.call(game.trainer_open and card.counter_label.text == "Lesson 3/%d" % BeachGame.TRAINING_LESSONS and card.lay_label.get_parsed_text().contains("candy from a baby") and card.how_label.get_parsed_text().contains("E/mouse 3"),"the toddler lesson keeps its card, with the candy-from-a-baby line and the peck key")
+	await host.snapshot("trainer-toddler-card")
 	var before: Vector2 = game.player.position
 	var clock: float = game.elapsed
 	game._physics_process(0.5)
