@@ -15,8 +15,8 @@ static func pick(value: Variant) -> String:
 
 ## Display paths ask for marked names: each control name is wrapped in MARK_ON/MARK_OFF (bbcode() turns them into a pulsing highlight).
 ## Plain output (the default) is unchanged. `marking` lets a caller mark every line it asks for without threading a flag through.
-const MARK_ON: String = ""
-const MARK_OFF: String = ""
+const MARK_ON: String = "\u0001"
+const MARK_OFF: String = "\u0002"
 static var marking: bool = false
 
 ## Keycap chip: dark panel-colour text on a white chip that flips to gold (two solid colours, ~1.5 Hz) so the pixel font stays crisp.
@@ -31,7 +31,7 @@ static func fill(text: String, input: GullInput, mark: bool = false) -> String:
 	mark = mark or marking
 	var keys: Dictionary = Config.trainer.keys[device(input)]
 	if mark and device(input) == "touch": # literal control names in touch copy ("Push FLY up", "Tap DIVE")
-		var literal: RegEx = RegEx.create_from_string("\b(FLY up|FLY|DIVE|PECK)\b")
+		var literal: RegEx = RegEx.create_from_string("\\b(FLY up|FLY|DIVE|PECK)\\b")
 		text = literal.sub(text,MARK_ON + "$1" + MARK_OFF,true)
 	for key: String in keys:
 		text = text.replace("{%s}" % key,(MARK_ON + str(keys[key]) + MARK_OFF) if mark else str(keys[key]))

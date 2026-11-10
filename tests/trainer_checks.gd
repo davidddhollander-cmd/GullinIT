@@ -30,6 +30,10 @@ static func run(host: Node, check: Callable) -> void:
 static func _copy_checks(check: Callable) -> void:
 	var input: GullInput = GullInput.new()
 	var trainer: Dictionary = Config.trainer
+	_set_device(input,"touch")
+	var touch_line: String = TrainerScript.fill("Push FLY up. Tap {dive}.",input,true)
+	check.call(touch_line == "Push %sFLY up%s. Tap %sDIVE%s." % [TrainerScript.MARK_ON,TrainerScript.MARK_OFF,TrainerScript.MARK_ON,TrainerScript.MARK_OFF],"touch literals and placeholders are each wrapped once")
+	_set_device(input,"keyboard")
 	check.call(TrainerScript.fill("Hit {peck}",input,true).contains(TrainerScript.MARK_ON + "E/mouse 3" + TrainerScript.MARK_OFF) and TrainerScript.fill("Hit {peck}",input) == "Hit E/mouse 3","key names are marked only in highlight mode")
 	check.call(trainer.training.lessons.size() == BeachGame.TRAINING_LESSONS and trainer.screech.lessons.size() == BeachGame.SCREECH_STEPS and trainer.screech.strips.size() == BeachGame.SCREECH_STEPS,"trainer copy covers every lesson and screech step")
 	check.call(Config.trainer.has("counter_tip") and TrainerScript.line(Config.trainer.counter_tip,input).contains("COUNTER"),"trainer copy has the counter tip")
