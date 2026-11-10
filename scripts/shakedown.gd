@@ -73,6 +73,7 @@ func _slam() -> void:
 	game.effects.ring(at,float(s.slam_radius),float(s.slam_ring_time),float(s.slam_ring_width),Color("fff4da"))
 	game.effects.ring(at,float(s.slam_radius),float(s.slam_ring_time),1.0,Color("fff4da"),float(s.slam_ring2_lag))
 	game.effects.ground_slam(at,player.facing)
+	Audio.play("bb_slam")
 	_mark_stalls()
 	var knocked: bool = _knock_around(float(s.slam_radius),true) > 0
 	var t: Dictionary = Config.tuning.brash
@@ -130,6 +131,7 @@ func _stomp() -> void:
 	var landed: bool = index != stomp_index and player.state == BeachGull.State.GROUNDED and absf(player.velocity.x) > 1.0
 	stomp_index = index
 	if landed:
+		Audio.play("bb_stomp",1.0,-8.0)
 		game.effects.sand_puff(player.position+Vector2(0,float(Config.tuning.flight.feet_offset)))
 		if _show_fx():
 			game.effects.shake = maxf(game.effects.shake,float(settings().stomp_shake))

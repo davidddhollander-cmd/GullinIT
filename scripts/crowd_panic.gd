@@ -29,8 +29,12 @@ static func warn(targets: Array[BeachTarget], from_x: float) -> void:
 
 ## The first gull hit: everyone still looking up bolts away from the player.
 static func stampede(targets: Array[BeachTarget], from_x: float) -> void:
+	var voiced: bool = false # one panic voice per stampede, not one per runner
 	for target: BeachTarget in targets:
 		if is_instance_valid(target) and target.panic.state == State.LOOK_UP:
+			if not voiced:
+				voiced = true
+				Audio.react("panic",target.voice_kind(),target)
 			target.panic.stampede_pending = true
 			target.panic.direction = signf(target.position.x-from_x) if not is_zero_approx(target.position.x-from_x) else -target.facing
 
