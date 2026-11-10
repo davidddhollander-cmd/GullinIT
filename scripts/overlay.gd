@@ -777,7 +777,7 @@ func input_word(kind: String) -> String:
 		"flap":
 			return "A" if game.input.gamepad else "SPACE"
 		"peck":
-			return "X" if game.input.gamepad else "E"
+			return "X" if game.input.gamepad else "E/MOUSE 3"
 	return kind.to_upper()
 
 # One contextual hint at a time, chosen from the gull's current situation.

@@ -80,7 +80,7 @@ func _add_way(parent: Control, way: Dictionary) -> void:
 	box.add_theme_constant_override("separation", 1)
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(box)
-	_text(box, str(way.title), BeachUI.CREAM, TITLE_H)
+	_text(box, str(way.title), BeachUI.CREAM, TITLE_H).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var frame := TextureRect.new()
 	frame.custom_minimum_size = STILL_SIZE
 	frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE # stills are 4x (296x168) and scale 1:1 onto screen pixels at 1280x720
@@ -93,10 +93,11 @@ func _add_way(parent: Control, way: Dictionary) -> void:
 	_text(box, str(way.text), Color("a9d7d2"), TEXT_H)
 	_text(box, score_text(way), BeachUI.GOLD, SCORE_H)
 
-func _text(parent: Control, text: String, color: Color, height: float) -> void:
+func _text(parent: Control, text: String, color: Color, height: float) -> Label:
 	var label: Label = BeachUI.label(parent, text, BeachUI.FONT_NATIVE, color)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size = Vector2(STILL_SIZE.x, height)
+	return label
 
 ## "{combo}", "{mugged}" and "{handover}" in the copy read the real bonus from tuning.
 static func score_text(way: Dictionary) -> String:

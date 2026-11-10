@@ -1516,13 +1516,6 @@ func _training_tick(delta: float) -> void:
 		return
 	training_reset_clock = 0.0
 	for target: BeachTarget in spawner.targets:
-		if target.kind == "sunbather" and target.stash_remaining == 0:
-			var loose: bool = false
-			for item: Dictionary in stash_raids.items:
-				if item.get("owner") == target:
-					loose = true
-			if not loose:
-				target.stash_remaining = int(Config.tuning.world.sunbather_stash_size)
 		if target.kind == "kiosk_customer":
 			if target.dropped_pending:
 				# Reset abandoned practice food in place for another timed peck.

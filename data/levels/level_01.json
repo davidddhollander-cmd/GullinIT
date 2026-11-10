@@ -13,13 +13,12 @@
   "world": {"width": 800, "promenade_start": 800, "pier_start": 800, "start_x": 70, "start_y": 150},
   "zones": [
     {"name": "OPEN SAND", "from": 0, "to": 220},
-    {"name": "SNACKS", "from": 220, "to": 385},
-    {"name": "SUNBATHERS", "from": 385, "to": 550},
+    {"name": "BINS", "from": 220, "to": 385},
+    {"name": "PARASOLS", "from": 385, "to": 550},
     {"name": "SNACK KIOSK", "from": 550, "to": 800}
   ],
   "spawns": [
-    {"type": "kiosk_customer", "x": 360, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "first_snack", "patrol_radius": 5, "speed_mult": 0.45, "awareness_mult": 0.65, "reaction_delay": 3},
-    {"type": "sunbather", "x": 430, "appearance": "female_blue", "station": "first_bag", "patrol_radius": 0, "awareness_mult": 0.65, "reaction_delay": 3},
+    {"type": "kiosk_customer", "x": 590, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "first_snack", "patrol_radius": 0, "speed_mult": 0, "awareness_mult": 0.65, "reaction_delay": 3},
     {"type": "toddler", "x": 205, "station": "toddler", "patrol_radius": 5, "speed_mult": 0.6}
   ],
   "props": [

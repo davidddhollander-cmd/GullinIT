@@ -301,7 +301,7 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	game = host.main.game
 	game.set_physics_process(false)
 	game.overlay.start_button.pressed.emit()
-	check.call(game.trainer_open and game.overlay.trainer_card.counter_label.text == "Lesson %d/%d" % [BeachGame.MUG_LESSON+1,BeachGame.TRAINING_LESSONS] and game.overlay.trainer_card.how_label.get_parsed_text().contains("through him"),"resuming at the mug lesson shows the mug card")
+	check.call(game.trainer_open and game.overlay.trainer_card.counter_label.text == "Lesson %d/%d" % [BeachGame.MUG_LESSON+1,BeachGame.TRAINING_LESSONS] and game.overlay.trainer_card.how_label.get_parsed_text().contains("against the rival"),"resuming at the mug lesson shows the mug card")
 	await host.snapshot("trainer-lesson-5-mug")
 	host.main.clear_game()
 
@@ -506,7 +506,7 @@ static func _counter_flow(host: Node, check: Callable) -> void:
 	await host.snapshot("trainer-counter-tip")
 	var input: GullInput = game.input
 	_set_device(input,"keyboard")
-	check.call(game.overlay.prompt_text() == "DIVE! SHIFT","the keyboard prompt names Shift")
+	check.call(game.overlay.prompt_text() == "DIVE! SHIFT/MOUSE 2","the keyboard prompt names Shift")
 	_set_device(input,"gamepad")
 	check.call(game.overlay.prompt_text() == "DIVE! B","the gamepad prompt names B")
 	_set_device(input,"touch")
@@ -600,7 +600,7 @@ static func _toddler_flow(host: Node, check: Callable) -> void:
 	check.call(game.peck_pause and game.prompt_action == "peck","standing beside his ice cream freezes the beach on the peck prompt")
 	var input: GullInput = game.input
 	_set_device(input,"keyboard")
-	check.call(game.overlay.prompt_text() == "PRESS E","the keyboard prompt names E")
+	check.call(game.overlay.prompt_text() == "PRESS E/MOUSE 3","the keyboard prompt names E")
 	_set_device(input,"gamepad")
 	check.call(game.overlay.prompt_text() == "PRESS X","the gamepad prompt names X")
 	_set_device(input,"touch")

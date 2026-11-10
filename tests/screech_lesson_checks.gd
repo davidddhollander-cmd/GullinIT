@@ -80,7 +80,7 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	game.overlay.queue_redraw()
 	await host.snapshot("level2-lesson-2-screech")
 	game.input.gamepad = false
-	check.call(game.screech_lesson_text().contains("Hold E to screech") and game.screech_lesson_text().contains("Higher"), "step 2 names the keyboard peck key")
+	check.call(game.screech_lesson_text().contains("Hold E/mouse 3 to screech") and game.screech_lesson_text().contains("Higher"), "step 2 names the keyboard peck key")
 	game.input.gamepad = true
 	check.call(game.screech_lesson_text().contains("Hold X "), "step 2 names the gamepad peck button")
 	game.input.gamepad = false

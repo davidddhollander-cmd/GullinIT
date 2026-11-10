@@ -4,8 +4,8 @@
   "keys": {
     "keyboard": {
       "flap": "Space or left click",
-      "dive": "Shift or right click",
-      "peck": "E",
+      "dive": "Shift/mouse 2",
+      "peck": "E/mouse 3",
       "peck_alt": "E/mouse 3",
       "steer": "the mouse or WASD",
       "call": "Q"
@@ -56,8 +56,8 @@
     "first_miss": "First miss is normal! Scoop it off the floor later",
     "wheelie_low": "Too low, gullster. Land on the lid.",
     "bin_closer": "Closer, gullster! Land right beside the bin.",
-    "mug_miss": "Missed! Climb above him and dive straight through. No peck needed.",
-    "mug_rescue": "He's holding still for you. Climb above him and dive straight through.",
+    "mug_miss": "Missed! Fly up and dive against him again.",
+    "mug_rescue": "He's holding still for you. Fly up and dive against him.",
     "aim_freeze": {
       "default": "Steer with {steer}. Line up the snack.\nPress {dive} to go.",
       "touch": "Steer with {steer}. Line up the snack.\nTap DIVE to go."
@@ -76,7 +76,7 @@
     "crash_toast": "Ouch! Dust yourself off."
   },
   "tips": {
-    "mug_miss": "MISSED THE MUG! DIVE STRAIGHT THROUGH HIM",
+    "mug_miss": "MISSED! DIVE AGAINST HIM AGAIN",
     "wheelie_low": "TOO LOW! LAND ON THE BIN LID",
     "bin_closer": "CLOSER! LAND RIGHT BESIDE THE BIN"
   },
@@ -178,8 +178,8 @@
       },
       {
         "mood": "neutral",
-        "lay": "Bins are a proper buffet. Peck one open and everything inside spills onto the sand. Scraps are grub. Wrappers are rubbish, so leave them.",
-        "how": "Land beside the bin and tap {peck} {n} times. Picnic bags burst the same way.",
+        "lay": "Bins are a proper buffet. Let's go have a look what's in the next one...",
+        "how": "Land beside the bin and tap {peck} {n} times.",
         "strip": "Land by the bin and tap {peck} {n} times"
       },
       {
@@ -200,14 +200,14 @@
       },
       {
         "mood": "amused",
-        "lay": "Time to meet the competition. This dummy is a rival gull, and he's nicked a snack. Mugging a rival is the best steal in the game. Careful though: rivals can mug you too.",
+        "lay": "Time to meet the competition. This dummy is a rival gull, and he's nicked a snack. Mugging is one of the best steals in the game. Careful though: they can mug you too.",
         "how": {
-          "default": "Climb above him. Dive with {dive} and fly straight through him, no peck needed. The snack changes beaks. Full belly? Then you just bump him, and that counts too.",
-          "touch": "Climb above him. Tap DIVE and fly straight through him, no peck needed. The snack changes beaks. Full belly? Then you just bump him, and that counts too."
+          "default": "Fly up and dive ({dive}) against the rival. The snack changes beaks. If a rival doesn't have a snack, you can still hit him...",
+          "touch": "Fly up and tap DIVE against the rival. The snack changes beaks. If a rival doesn't have a snack, you can still hit him..."
         },
         "strip": {
-          "default": "Dive with {dive} straight through the dummy",
-          "touch": "Tap DIVE straight through the dummy"
+          "default": "Fly up and dive against the dummy",
+          "touch": "Fly up and tap DIVE against the dummy"
         }
       }
     ]
