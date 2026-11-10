@@ -13,7 +13,7 @@ var trainer_intro: bool = false ## Training Day opens with the trainer card inst
 var training_panel: PanelContainer
 var training_center: CenterContainer
 var lesson_label: Label
-var lesson_prompt: Label
+var lesson_prompt: RichTextLabel
 var pause_button: Button
 var rival_popup: PanelContainer
 var rival_popup_head: TextureRect
@@ -192,15 +192,19 @@ func setup(owner_game: BeachGame) -> void:
 	lesson_column.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	training_row.add_child(lesson_column)
 	lesson_label = BeachUI.label(lesson_column,"LESSON 1/%d" % BeachGame.TRAINING_LESSONS,8,BeachUI.GOLD)
-	lesson_prompt = BeachUI.label(lesson_column,"",8,BeachUI.CREAM)
-	for tip_label: Label in [lesson_label,lesson_prompt]:
-		tip_label.add_theme_font_size_override("font_size",6)
-		tip_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lesson_prompt = RichTextLabel.new()
+	lesson_column.add_child(lesson_prompt)
+	lesson_prompt.bbcode_enabled = true
+	lesson_prompt.fit_content = true
+	lesson_prompt.scroll_active = false
+	lesson_prompt.add_theme_color_override("default_color",BeachUI.CREAM)
+	lesson_label.add_theme_font_size_override("font_size",6)
+	lesson_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lesson_label.mouse_filter = MOUSE_FILTER_IGNORE
 	lesson_prompt.mouse_filter = MOUSE_FILTER_IGNORE
 	lesson_prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lesson_prompt.add_theme_font_override("font", TrainerCard.SPEECH)
-	lesson_prompt.add_theme_font_size_override("font_size", TrainerCard.SPEECH_SIZE)
+	lesson_prompt.add_theme_font_override("normal_font", TrainerCard.SPEECH)
+	lesson_prompt.add_theme_font_size_override("normal_font_size", TrainerCard.SPEECH_SIZE)
 	lesson_prompt.custom_minimum_size = Vector2(176, 10)
 	training_row.add_child(trainer_portrait) # Screeches stands to the right of his words
 	_build_rival_popup()
@@ -344,6 +348,19 @@ func show_rival_popup(rival_name: String, head: Texture2D, text: String, seconds
 	tween.tween_interval(seconds)
 	tween.tween_callback(rival_popup.hide)
 
+var lesson_prompt_left: bool = false
+var lesson_prompt_key: String = ""
+
+## The strip shows control names marked up (pulsing highlight); re-parsed only when the text or alignment changes.
+func _set_lesson_prompt(getter: Callable) -> void:
+	TrainerScript.marking = true
+	var marked: String = TrainerScript.bbcode(str(getter.call()))
+	TrainerScript.marking = false
+	var tagged: String = ("[left]%s[/left]" if lesson_prompt_left else "[center]%s[/center]") % marked
+	if tagged != lesson_prompt_key:
+		lesson_prompt_key = tagged
+		lesson_prompt.text = tagged
+
 ## While the first dive is frozen the strip steps to the side away from the gull, so the gull and the dashed line stay in view.
 func _place_aim_strip() -> void:
 	var shift: float = 0.0
@@ -362,10 +379,10 @@ func _sync_trainer() -> void:
 	var px: float = BANNER_PORTRAIT if banner and not talking else 40.0
 	trainer_portrait.custom_minimum_size = Vector2(px,px)
 	var align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_LEFT if banner else HORIZONTAL_ALIGNMENT_CENTER
-	lesson_prompt.horizontal_alignment = align
+	lesson_prompt_left = banner
 	lesson_label.horizontal_alignment = align
 	var wide: float = 0.0
-	for part: String in lesson_prompt.text.split("
+	for part: String in lesson_prompt.get_parsed_text().split("
 "):
 		wide = maxf(wide,TrainerCard.SPEECH.get_string_size(part,HORIZONTAL_ALIGNMENT_LEFT,-1,TrainerCard.SPEECH_SIZE).x)
 	lesson_prompt.custom_minimum_size.x = minf(ceilf(wide) + 2.0,BANNER_TEXT_WIDTH) if banner else 176.0
@@ -420,12 +437,12 @@ func _process(delta: float) -> void:
 	training_panel.visible = game.lesson_active() and game.running and game.intro <= 0 and not game.trainer_open and not game.peck_pause and not ((game.banner_delay > 0.0 or game.training_card_pending()) and game.training_miss_hint <= 0.0)
 	if game.training:
 		lesson_label.text = "PRACTICE" if game.lesson >= BeachGame.TRAINING_LESSONS else "LESSON %d/%d" % [game.lesson + 1, BeachGame.TRAINING_LESSONS]
-		lesson_prompt.text = game.training_text()
+		_set_lesson_prompt(game.training_text)
 		_sync_trainer()
 		_place_aim_strip()
 	elif game.screech_lesson:
 		lesson_label.text = "LESSON %d/%d" % [mini(game.screech_step + 1, BeachGame.SCREECH_STEPS), BeachGame.SCREECH_STEPS]
-		lesson_prompt.text = game.screech_lesson_text()
+		_set_lesson_prompt(game.screech_lesson_text)
 	pause_button.visible = game.running
 	sync_quests()
 	if rival_score_labels.size() != game.pilots.size():

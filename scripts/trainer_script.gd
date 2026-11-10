@@ -13,18 +13,36 @@ static func pick(value: Variant) -> String:
 		return str(value.get(GameState.control_mode(),value.get("default","")))
 	return str(value)
 
-static func fill(text: String, input: GullInput) -> String:
+## Display paths ask for marked names: each control name is wrapped in MARK_ON/MARK_OFF (bbcode() turns them into a pulsing highlight).
+## Plain output (the default) is unchanged. `marking` lets a caller mark every line it asks for without threading a flag through.
+const MARK_ON: String = ""
+const MARK_OFF: String = ""
+static var marking: bool = false
+
+## Keycap chip: dark panel-colour text on a white chip that flips to gold (two solid colours, ~1.5 Hz) so the pixel font stays crisp.
+static func phase() -> int:
+	return (Time.get_ticks_msec() / 333) % 2
+
+static func bbcode(text: String) -> String:
+	var chip: String = "#ffc65c" if phase() == 1 else "#ffffff"
+	return text.replace(MARK_ON,"[bgcolor=%s][color=#183b4d] " % chip).replace(MARK_OFF," [/color][/bgcolor]")
+
+static func fill(text: String, input: GullInput, mark: bool = false) -> String:
+	mark = mark or marking
 	var keys: Dictionary = Config.trainer.keys[device(input)]
+	if mark and device(input) == "touch": # literal control names in touch copy ("Push FLY up", "Tap DIVE")
+		var literal: RegEx = RegEx.create_from_string("\b(FLY up|FLY|DIVE|PECK)\b")
+		text = literal.sub(text,MARK_ON + "$1" + MARK_OFF,true)
 	for key: String in keys:
-		text = text.replace("{%s}" % key,str(keys[key]))
+		text = text.replace("{%s}" % key,(MARK_ON + str(keys[key]) + MARK_OFF) if mark else str(keys[key]))
 	return text.replace("{n}",str(int(Config.tuning.world.bin_pecks)))
 
-static func line(value: Variant, input: GullInput) -> String:
+static func line(value: Variant, input: GullInput, mark: bool = false) -> String:
 	if value is Dictionary and device(input) == "touch":
 		# Touch copy names the FLY stick and the DIVE circle: "touch_<mode>" first, then "touch".
 		var mode: String = "touch_" + GameState.control_mode()
 		if value.has(mode):
-			return fill(str(value[mode]),input)
+			return fill(str(value[mode]),input,mark)
 		if value.has("touch"):
-			return fill(str(value.touch),input)
-	return fill(pick(value),input)
+			return fill(str(value.touch),input,mark)
+	return fill(pick(value),input,mark)

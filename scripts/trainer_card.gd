@@ -130,12 +130,14 @@ static func markup(text: String) -> String:
 	var out: String = ""
 	for index: int in parts.size():
 		out += ("[color=#ffc65c]%s[/color]" % parts[index]) if index%2 == 1 else parts[index]
-	return out
+	return TrainerScript.bbcode(out)
 
 func open(entry: Dictionary) -> void:
 	mood_cell = int(MOODS.get(str(entry.get("mood","neutral")),0))
-	lay_label.text = markup(str(entry.get("lay","")))
-	how_label.text = markup(str(entry.get("how","")))
+	lay_raw = str(entry.get("lay",""))
+	how_raw = str(entry.get("how",""))
+	lay_label.text = markup(lay_raw)
+	how_label.text = markup(how_raw)
 	how_label.visible = not str(entry.get("how","")).is_empty()
 	# Where each paragraph's copy lives, for the debug text editor (F3).
 	lay_label.set_meta("text_source",str(entry.get("lay_source","")))
@@ -177,7 +179,15 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		dismiss()
 
+var lay_raw: String = ""
+var how_raw: String = ""
+var chip_phase: int = 0
+
 func _process(delta: float) -> void:
+	if visible and TrainerScript.phase() != chip_phase: # flip the key chips between white and gold
+		chip_phase = TrainerScript.phase()
+		lay_label.text = markup(lay_raw)
+		how_label.text = markup(how_raw)
 	press_grace -= delta
 	if auto_close > 0.0:
 		auto_close -= delta
