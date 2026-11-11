@@ -4,6 +4,8 @@ A tiny local page to listen to a project's sounds and mark each one approved or 
 
 ## Run
 
+Windows: double-click `SFX Lab.bat` in the repo root (close its window to stop). If the port is busy it assumes the lab is already open and just opens the page.
+
 ```
 python tools/sfx_lab/sfx_lab.py [--project PATH] [--config sfx_lab.json] [--port 8777] [--no-browser]
 ```
@@ -45,7 +47,7 @@ Keys are project-relative paths. `status` is `approved`, `rejected` or `unreview
 
 ## Use it in another game
 
-1. Copy `tools/sfx_lab/` into the project.
+1. Copy `tools/sfx_lab/` into the project, and `SFX Lab.bat` next to that `tools` folder (the bat is game-agnostic).
 2. Write `sfx_lab.json` (above) at the project root.
 3. Run the command above, then review.
 4. Have the game read the approvals file at startup and skip `rejected` entries whose `sha1` still matches (or ignore the hash when the source files are not shipped). Gullin' It does this in `scripts/autoload/audio.gd` (`set_approvals`, `rejected`, `pick`).

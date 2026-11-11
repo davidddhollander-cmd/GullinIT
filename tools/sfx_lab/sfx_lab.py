@@ -112,8 +112,12 @@ def make_handler(lab):
     return H
 
 
+class Server(ThreadingHTTPServer):
+    allow_reuse_address = False  # on Windows SO_REUSEADDR lets a second lab bind the same port
+
+
 def serve(lab, port=8777):
-    return ThreadingHTTPServer(("127.0.0.1", port), make_handler(lab))
+    return Server(("127.0.0.1", port), make_handler(lab))
 
 
 if __name__ == "__main__":
@@ -123,7 +127,14 @@ if __name__ == "__main__":
     ap.add_argument("--port", type=int, default=8777)
     ap.add_argument("--no-browser", action="store_true")
     a = ap.parse_args()
-    srv = serve(Lab(a.project, a.config), a.port)
+    try:
+        srv = serve(Lab(a.project, a.config), a.port)
+    except OSError:  # port taken: most likely the lab is already open
+        url = "http://127.0.0.1:%d/" % a.port
+        print("Port %d is busy; the SFX Lab may already be running at %s" % (a.port, url))
+        if not a.no_browser:
+            webbrowser.open(url)
+        sys.exit(0)
     url = "http://127.0.0.1:%d/" % srv.server_address[1]
     print("SFX Lab at", url, "(Ctrl+C to stop)")
     if not a.no_browser:
