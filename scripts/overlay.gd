@@ -246,7 +246,9 @@ TO PASS TO THE NEXT LEVEL" % [int(game.level.stars[0]),seconds/60,seconds%60])
 		start_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		start_button.grab_focus()
 	else:
-		BeachUI.label(intro,"ANY BUTTON TO GO",8,BeachUI.GOLD)
+		var go: Label = BeachUI.label(intro,"ANY BUTTON TO GO",8,BeachUI.GOLD)
+		if game.is_vs():
+			go.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	# Last child, so the pop-up draws over everything. Its button is the Training Day start button.
 	trainer_card = TrainerCard.new()
 	add_child(trainer_card)
