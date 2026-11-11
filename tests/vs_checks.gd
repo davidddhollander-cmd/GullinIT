@@ -112,12 +112,69 @@ static func run(suite: Node, check: Callable) -> void:
 			board.requested.connect(func(action: String, payload: Variant) -> void: asked.append([action, payload]))
 			for button: Button in _buttons(board):
 				button.pressed.emit() # the menus route REMATCH to a fresh round, then VS MENU to the title
-	check.call(asked.size() == 2 and asked[0][0] == "vs_start" and asked[0][1] == {"arena": ArenaId, "opponent": "gary"} and asked[1][0] == "vs", "REMATCH sends vs_start with the same payload and VS MENU sends vs")
-	check.call(main.game == null and main.screen == "title", "VS MENU leaves the round (to the title until task 081)")
+	check.call(asked.size() == 2 and asked[0][0] == "vs_start" and asked[0][1] == {"arena": ArenaId, "opponent": "gary"} and asked[1][0] == "vs_menu", "REMATCH sends vs_start with the same payload and VS MENU sends vs_menu")
+	check.call(main.game == null and main.screen == "vs_menu", "VS MENU leaves the round for the VS menu")
 	main._navigate("vs_start", asked[0][1])
 	check.call(main.game != game and main.game.is_vs() and main.game.score.points == 0, "REMATCH starts a fresh VS round")
 	main._navigate("restart")
 	check.call(main.game.is_vs() and main.game.level.vs.opponent == "gary", "R restarts the VS round, not an Arcade level")
+
+	# VS menu (task 081).
+	main._navigate("title")
+	var vs_button: Button = main.menus.find_child("VsButton", true, false)
+	check.call(vs_button != null and not vs_button.disabled and vs_button.text.begins_with("VS"), "the title has an enabled VS button")
+	vs_button.pressed.emit()
+	check.call(main.screen == "pick" and main.vs and main.menus.find_child("Card_herring", true, false) != null, "title VS opens the gull picker with the vs flag set")
+	main._navigate("gull", GameState.chosen_gull())
+	check.call(main.screen == "vs_menu", "picking a gull opens the VS menu")
+	await suite.settle()
+	var menus: Node = main.menus
+	check.call(not menus.find_child("ModeMatchup", true, false).disabled and menus.find_child("ModeLadder", true, false).disabled and menus.find_child("ModeMultiplayer", true, false).disabled, "MATCH-UP is enabled; LADDER and MULTIPLAYER are disabled")
+	var arena_row: Node = menus.find_child("ArenaRow", true, false)
+	var opponent_row: Node = menus.find_child("OpponentRow", true, false)
+	check.call(arena_row.get_child_count() == Config.arenas.size() and opponent_row.get_child_count() == Config.vs.opponents.size(), "arena and opponent rows are built from data")
+	check.call(arena_row.get_child(0).button_pressed and opponent_row.get_child(0).button_pressed and opponent_row.get_child(0).text.contains("BLACK BACK"), "Scrap Sands and Gary are preselected")
+	arena_row.get_child(0).pressed.emit()
+	check.call(arena_row.get_child(0).button_pressed, "one arena card always stays selected")
+	var fight: Button = menus.find_child("FightButton", true, false)
+	check.call(fight.has_focus(), "FIGHT! has focus when the menu opens")
+	var field: LineEdit = menus.find_child("NameField", true, false)
+	check.call(field.text == "HERRING" and field.max_length == OnlineScores.NAME_LENGTH and OnlineScores.player_name().is_empty(), "the name field shows HERRING when no name is saved")
+	for node: Control in [menus.find_child("ModeMatchup", true, false), fight, field, menus.find_child("PanelMargin", true, false)]:
+		if node != null:
+			var rect: Rect2 = node.get_global_rect()
+			check.call(Rect2(0, 0, 320, 180).encloses(rect), "%s fits the 320x180 canvas" % node.name)
+	field.text = "Gull-9!x"
+	field.text_changed.emit(field.text)
+	check.call(field.text == "GULL9X", "the name field keeps capitals and digits")
+	var started_vs: Array = []
+	menus.requested.connect(func(action: String, payload: Variant) -> void: started_vs.append([action, payload]))
+	fight.pressed.emit()
+	check.call(started_vs.size() == 1 and started_vs[0][0] == "vs_start" and started_vs[0][1] == {"arena": ArenaId, "opponent": "gary"} and OnlineScores.player_name() == "GULL9X", "FIGHT! sends vs_start and saves the name")
+	main._navigate("vs_menu")
+	await suite.settle()
+	check.call(main.menus.find_child("NameField", true, false).text == "GULL9X", "the name field shows the saved name")
+	main.menus.find_child("NameField", true, false).text = ""
+	main.menus.find_child("FightButton", true, false).pressed.emit()
+	check.call(OnlineScores.player_name() == "HERRING", "an empty name saves the default")
+	main._navigate("vs_start", {"arena": ArenaId, "opponent": "gary"})
+	main.game.set_physics_process(false)
+	main.game.running = true
+	var named: Dictionary = _finish(main.game, 100, 40)
+	main.menus.results(main.game.level, named)
+	var named_board: ResultBoard = main.menus.get_child(main.menus.get_child_count() - 1)
+	check.call(not named_board.scores_panel.has_node("NameField"), "the VS result sign never asks for a name")
+	main.clear_game()
+	main._navigate("title")
+	main._navigate("arcade")
+	check.call(not main.vs, "Arcade clears the vs flag")
+	main._navigate("gull", GameState.chosen_gull())
+	check.call(main.screen == "select", "Arcade still goes from the gull picker to the level select")
+	main._navigate("vs")
+	main._navigate("casual")
+	main._navigate("gull", GameState.chosen_gull())
+	check.call(main.screen == "select" and not main.vs, "Casual still goes from the gull picker to the level select")
+	main._navigate("title")
 
 	# Boards: Arcade names are unchanged.
 	check.call(OnlineScores.vs_board(ArenaId, "gary") == "vs-scrap_sands-gary" and OnlineScores.level_board(3) == "level-3", "VS and Arcade board names")

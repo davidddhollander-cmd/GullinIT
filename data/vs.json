@@ -2,6 +2,7 @@
   "round_time": 75,
   "board_prefix": "vs-",
   "intro_time": 2.0,
+  "default_name": "HERRING",
   "opponents": {
     "gary": {
       "name": "Gary", "blurb": "BLACK BACK", "species": "great-black-backed",

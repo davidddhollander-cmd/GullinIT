@@ -111,9 +111,7 @@ func title() -> void:
 	panel.add_child(content)
 	_small_button(content,"ARCADE  >",func() -> void: choose("arcade")).grab_focus()
 	_small_button(content,"CASUAL  /  PRACTICE",func() -> void: choose("casual"))
-	var coming: Button = _small_button(content,"VS / COOP - LATER",func() -> void: pass)
-	coming.name = "ComingSoonButton"
-	coming.disabled = true
+	_small_button(content,"VS  >",func() -> void: choose("vs")).name = "VsButton"
 	var small: HBoxContainer = HBoxContainer.new()
 	content.add_child(small)
 	_small_button(small,"OPTIONS",func() -> void: choose("options"))
@@ -238,6 +236,99 @@ func gull_picker() -> void:
 	content.add_child(bottom)
 	BeachUI.back_button(bottom,"< BACK",func() -> void: choose("title"))
 	_perk_picker(bottom)
+
+## VS menu: modes on the left, arena, opponent and name on the right. FIGHT! sends vs_start.
+func vs_menu() -> void:
+	clear("VS")
+	var outer: MarginContainer = content.get_parent().get_parent() as MarginContainer
+	outer.remove_child(content.get_parent())
+	content.get_parent().queue_free()
+	for edge: String in ["top","bottom","left","right"]:
+		outer.add_theme_constant_override("margin_" + edge,3)
+	var columns: HBoxContainer = HBoxContainer.new()
+	columns.add_theme_constant_override("separation",2)
+	outer.add_child(columns)
+	var left: VBoxContainer = _vs_panel(columns,96)
+	BeachUI.label(left,"VS",BeachUI.FONT_DISPLAY,BeachUI.GOLD)
+	for mode: Array in [["ModeMatchup","MATCH-UP  >",true],["ModeLadder","LADDER\nLATER",false],["ModeMultiplayer","MULTIPLAYER\nLATER",false]]:
+		var node: Button = BeachUI.button(left,mode[1],func() -> void: pass)
+		node.name = mode[0]
+		node.disabled = not mode[2]
+		node.size_flags_horizontal = SIZE_EXPAND_FILL
+	var right: VBoxContainer = _vs_panel(columns,0)
+	right.add_theme_constant_override("separation",2)
+	right.get_parent().size_flags_horizontal = SIZE_EXPAND_FILL
+	var arena: ButtonGroup = _vs_row(right,"ARENA","ArenaRow",Config.arenas.keys().map(func(id: String) -> Array: return [id,str(Config.arenas[id].name).to_upper()]))
+	var opponent: ButtonGroup = _vs_row(right,"OPPONENT","OpponentRow",Config.vs.opponents.keys().map(func(id: String) -> Array: return [id,"%s\n%s" % [str(Config.vs.opponents[id].name).to_upper(),str(Config.vs.opponents[id].blurb)]]))
+	BeachUI.label(right,"YOUR NAME",BeachUI.FONT_NATIVE,BeachUI.GOLD)
+	var field: LineEdit = LineEdit.new()
+	field.name = "NameField"
+	field.max_length = OnlineScores.NAME_LENGTH
+	field.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	field.add_theme_font_size_override("font_size",BeachUI.FONT_NATIVE)
+	field.custom_minimum_size.y = 14
+	var field_box: StyleBoxFlat = StyleBoxFlat.new()
+	field_box.bg_color = BeachUI.INK
+	field_box.set_corner_radius_all(2)
+	for state: String in ["normal","focus","read_only"]:
+		field.add_theme_stylebox_override(state,field_box)
+	field.add_theme_color_override("font_color",BeachUI.CREAM)
+	field.add_theme_color_override("caret_color",BeachUI.GOLD)
+	field.text = OnlineScores.player_name() if not OnlineScores.player_name().is_empty() else str(Config.vs.default_name)
+	field.text_changed.connect(func(text: String) -> void:
+		var clean: String = OnlineScores.clean_name(text)
+		if clean != text:
+			field.text = clean
+			field.caret_column = clean.length())
+	right.add_child(field)
+	var spacer: Control = Control.new()
+	spacer.size_flags_vertical = SIZE_EXPAND_FILL
+	right.add_child(spacer)
+	var actions: HBoxContainer = HBoxContainer.new()
+	right.add_child(actions)
+	BeachUI.back_button(actions,"< BACK",func() -> void: choose("title"))
+	var gap: Control = Control.new()
+	gap.size_flags_horizontal = SIZE_EXPAND_FILL
+	actions.add_child(gap)
+	var fight: Button = BeachUI.back_button(actions,"FIGHT!",func() -> void:
+		var name_text: String = OnlineScores.clean_name(field.text)
+		OnlineScores.set_player_name(name_text if not name_text.is_empty() else str(Config.vs.default_name))
+		choose("vs_start",{"arena": str(arena.get_pressed_button().get_meta("id")),"opponent": str(opponent.get_pressed_button().get_meta("id"))}))
+	fight.name = "FightButton"
+	field.text_submitted.connect(func(_text: String) -> void: fight.grab_focus())
+	fight.grab_focus()
+
+## A wood panel with a column inside; the frame's content margins are trimmed so 96 px still holds MULTIPLAYER.
+func _vs_panel(parent: Control, width: float) -> VBoxContainer:
+	var panel: PanelContainer = BeachUI.wood_panel(parent)
+	var box: StyleBoxTexture = panel.get_theme_stylebox("panel").duplicate() as StyleBoxTexture
+	box.content_margin_left = 11
+	box.content_margin_right = 11
+	box.content_margin_top = 12
+	box.content_margin_bottom = 12
+	panel.add_theme_stylebox_override("panel",box)
+	panel.custom_minimum_size.x = width
+	var column: VBoxContainer = VBoxContainer.new()
+	column.add_theme_constant_override("separation",3)
+	panel.add_child(column)
+	return column
+
+## A caption and a row of toggle cards, one always selected (the first). Entries are [id, text].
+func _vs_row(parent: Control, caption: String, row_name: String, entries: Array) -> ButtonGroup:
+	BeachUI.label(parent,caption,BeachUI.FONT_NATIVE,BeachUI.GOLD)
+	var row: HBoxContainer = HBoxContainer.new()
+	row.name = row_name
+	row.add_theme_constant_override("separation",3)
+	parent.add_child(row)
+	var group: ButtonGroup = ButtonGroup.new()
+	for entry: Array in entries:
+		var card: Button = BeachUI.button(row,str(entry[1]),func() -> void: pass)
+		card.toggle_mode = true
+		card.button_group = group
+		card.set_meta("id",entry[0])
+		card.size_flags_horizontal = SIZE_EXPAND_FILL
+		card.button_pressed = row.get_child_count() == 1
+	return group
 
 const CONTROL_MODE_TEXT: Array[String] = ["TAP EVERY WINGBEAT","HOLD TO FLAP","AUTO PECK IN DIVES"]
 const SMALL_FONT: Font = preload("res://assets/fonts/gull_hud.fnt")

@@ -3,6 +3,7 @@ var game: BeachGame
 var menus: BeachMenus
 var background: BeachBackdrop
 var casual: bool = false
+var vs: bool = false ## picking a gull leads to the VS menu instead of the level select
 var current_level: int = 1
 var vs_round: Dictionary = {} ## {arena, opponent} of the VS round being played, for REMATCH and R
 var screen: String = "title"
@@ -78,7 +79,9 @@ func _ready() -> void:
 	if OS.get_cmdline_user_args().has("--smoke"):
 		_navigate("start",1)
 	elif OS.get_cmdline_user_args().has("--vs"):
-		_navigate("vs_start",{"arena": "scrap_sands","opponent": "gary"}) # dev entry until the VS menu lands (task 081)
+		_navigate("vs_start",{"arena": "scrap_sands","opponent": "gary"}) # dev entry: straight into a round
+	elif OS.get_cmdline_user_args().has("--vs-menu"):
+		_navigate("vs_menu") # dev entry: straight to the VS menu
 
 func _process(delta: float) -> void:
 	if background.visible:
@@ -92,8 +95,9 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			menus.show()
 			menus.title()
 			Audio.play_music("title")
-		"arcade", "casual":
+		"arcade", "casual", "vs":
 			casual = action == "casual"
+			vs = action == "vs"
 			clear_game()
 			screen = "pick"
 			menus.show()
@@ -103,7 +107,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			if Config.species.species.has(str(payload)) and GameState.gull_owned(str(payload)):
 				GameState.options.gull = str(payload)
 				GameState.save_progress()
-				_navigate("select")
+				_navigate("vs_menu" if vs else "select")
 		"shop":
 			if GameState.shop_open():
 				clear_game()
@@ -133,8 +137,13 @@ func _navigate(action: String, payload: Variant = null) -> void:
 				start_level(int(payload),replay_training)
 		"vs_start":
 			start_vs(str(payload.arena),str(payload.opponent))
-		"vs":
-			_navigate("title") # task 081 gives VS its own menu
+		"vs_menu":
+			vs = true
+			clear_game()
+			screen = "vs_menu"
+			menus.show()
+			menus.vs_menu()
+			Audio.stop_music()  # selection screens: gull calls stay audible
 		"train_again":
 			start_level(1, true)
 		"screech_lesson":

@@ -1,6 +1,6 @@
 # 081 — VS sub-menu
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 080
@@ -44,8 +44,10 @@ Players reach VS from the title screen through a sub-menu: mode list on the left
 - [ ] `./tools/validate.ps1` passes with no new failures
 
 ## Report
-<!-- Filled in by the implementer: what changed (files), test results (check counts),
-decisions/assumptions, anything not done, branch name and last commit hash. -->
+Files: `scripts/menus.gd` (title VS button, `vs_menu`, `_vs_panel`, `_vs_row`), `scripts/main.gd` (`vs` flag, `vs`/`vs_menu` actions, `--vs-menu` dev arg), `scripts/result_board.gd` (VS MENU sends `vs_menu`), `data/vs.json` (`default_name`), `tests/vs_checks.gd`.
+Tests: headless integration `INTEGRATION: 17300 checks, 2 failures` (baseline 17280 with the same two pre-existing failures: teleport-while-running-off and demo.json). 20 new checks.
+Decisions: the title button sends `vs` (gull picker); the result sign's VS MENU sends a new `vs_menu` action, since `vs` must open the picker. `vs_menu` also sets the flag. The VS menu's two panels are built from `BeachUI.wood_panel` with trimmed side margins so MULTIPLAYER fits 96 px at 8 px type; the "VS" title sits in the left panel. Toggle cards use a ButtonGroup (one always selected). Enter in the name field moves focus to FIGHT!. Name field styled dark, same cleaning as the result sign. Selected cards show the pressed (coral) theme style.
+Not done / not verified: no gamepad or real touch/web run (relies on shared focus and `_touch_to_gui`); the "result sign never asks for a name" check runs offline so it is weak (OnlineScores is inactive in tests).
 
 ## Review notes
 <!-- Filled in by the reviewer. -->
