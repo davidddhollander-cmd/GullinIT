@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>SFX Lab</title>
+<style>
+body{margin:0;font:14px system-ui,sans-serif;background:#1e2227;color:#dde;display:flex;height:100vh}
+#side{width:240px;background:#171a1e;overflow:auto;flex:none}
+#side div{padding:8px 12px;cursor:pointer;border-bottom:1px solid #222}
+#side div.on{background:#2d3a4a}#side small{display:block;color:#9ab}
+#main{flex:1;display:flex;flex-direction:column;min-width:0}
+#bar{display:flex;gap:10px;align-items:center;padding:8px 12px;background:#252a30;flex-wrap:wrap}
+#bar button.on{background:#4a6a9a}#list{overflow:auto;flex:1;padding:0 12px 40px}
+h3{margin:14px 0 4px;color:#9bd;display:flex;gap:8px;align-items:center}
+.row{display:flex;gap:6px;align-items:center;padding:4px 6px;border-left:5px solid #555;background:#262b31;margin:2px 0}
+.row.sel{outline:1px solid #7af}.row.approved{border-color:#4c4}.row.rejected{border-color:#d44}
+.name{width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dur{width:50px;color:#9ab}
+.note{flex:1;min-width:80px;background:#1a1d21;color:#dde;border:1px solid #444;padding:3px}
+.badge{background:#c82;color:#000;padding:0 5px;border-radius:3px;font-size:12px}
+button{background:#38414c;color:#dde;border:0;padding:4px 9px;cursor:pointer;border-radius:3px}
+#saved{margin-left:auto;color:#7c7}#saved.err{color:#f66}
+</style></head><body>
+<div id="side"></div>
+<div id="main">
+ <div id="bar"><b id="title"></b>
+  <span id="filters"></span><input id="q" placeholder="search name">
+  vol <input id="vol" type="range" min="0" max="1" step="0.05" value="0.8">
+  <label><input id="gp" type="checkbox"> game pitch</label>
+  <span id="saved"></span></div>
+ <div id="list"></div>
+</div>
+<script>
+let D, cat, filter = "All", sel = null, dur = {};
+const $ = id => document.getElementById(id), player = new Audio();
+const FILTERS = ["All", "Unreviewed", "Approved", "Rejected", "Changed"];
+const stem = p => p.split("/").pop().replace(/\.[^.]+$/, "");
+const groupOf = p => { const g = D.config.group_variants; return g ? stem(p).replace(new RegExp(g), "") : stem(p); };
+const el = (t, props = {}, kids = []) => { const e = Object.assign(document.createElement(t), props); kids.forEach(k => e.append(k)); return e; };
+// A changed file counts as unreviewed everywhere except the Changed filter.
+const eff = s => s.changed ? "unreviewed" : s.status;
+
+async function load() {
+  D = await (await fetch("/api/sounds")).json();
+  document.title = D.config.title || "SFX Lab"; $("title").textContent = document.title;
+  cat = cat || D.config.categories[0].name;
+  $("filters").replaceChildren(...FILTERS.map(f => el("button", {textContent: f, onclick: () => { filter = f; render(); }})));
+  render();
+}
+function visible() {
+  const q = $("q").value.toLowerCase();
+  return D.sounds.filter(s => s.category == cat && stem(s.path).toLowerCase().includes(q) &&
+    (filter == "All" || (filter == "Changed" ? s.changed : eff(s) == filter.toLowerCase())));
+}
+function render() {
+  $("filters").childNodes.forEach(b => b.className = b.textContent == filter ? "on" : "");
+  $("side").replaceChildren(...D.config.categories.map(c => {
+    const l = D.sounds.filter(s => s.category == c.name), n = st => l.filter(s => eff(s) == st).length;
+    return el("div", {className: c.name == cat ? "on" : "", onclick: () => { cat = c.name; sel = null; render(); }},
+      [c.name, el("small", {textContent: `✓${n("approved")}  ✗${n("rejected")}  ?${n("unreviewed")}`})]);
+  }));
+  const rows = visible(), groups = {};
+  rows.forEach(s => (groups[groupOf(s.path)] ||= []).push(s));
+  if (!sel || !rows.some(s => s.path == sel)) sel = rows[0] && rows[0].path;
+  $("list").replaceChildren(...Object.entries(groups).flatMap(([g, ss]) => [
+    el("h3", {}, [g, el("button", {textContent: "▶ play group", onclick: () => playGroup(ss)})]), ...ss.map(row)]));
+  const s = $("list").querySelector(".sel"); if (s) s.scrollIntoView({block: "nearest"});
+}
+function row(s) {
+  const d = el("span", {className: "dur", textContent: dur[s.path] ? dur[s.path].toFixed(2) + "s" : ""});
+  if (!dur[s.path]) { const a = new Audio("/audio/" + s.path); a.preload = "metadata"; a.onloadedmetadata = () => { dur[s.path] = a.duration; d.textContent = a.duration.toFixed(2) + "s"; }; }
+  const note = el("input", {className: "note", value: s.note, placeholder: "note", onfocus: () => sel = s.path});
+  note.onblur = () => { if (note.value != s.note) save(s, s.status, note.value); };
+  note.onkeydown = e => { e.stopPropagation(); if (e.key == "Enter") note.blur(); };
+  return el("div", {className: `row ${eff(s)} ${s.path == sel ? "sel" : ""}`, id: s.path, onclick: () => { sel = s.path; render(); }},
+    [el("span", {className: "name", textContent: stem(s.path), title: s.path}), d,
+     el("button", {textContent: "▶", onclick: e => { e.stopPropagation(); play(s); }}),
+     el("button", {textContent: "✓", onclick: e => { e.stopPropagation(); save(s, "approved", note.value); }}),
+     el("button", {textContent: "✗", onclick: e => { e.stopPropagation(); save(s, "rejected", note.value); }}),
+     el("button", {textContent: "↺", onclick: e => { e.stopPropagation(); save(s, "unreviewed", note.value); }}), note,
+     ...(s.changed ? [el("span", {className: "badge", textContent: "changed since review"})] : [])]);
+}
+function play(s, then) {
+  player.pause(); player.onended = then || null;
+  player.src = "/audio/" + s.path; player.volume = +$("vol").value;
+  const pp = D.config.preview_pitch && D.config.preview_pitch[s.category], on = $("gp").checked && pp;
+  player.preservesPitch = !on;
+  player.playbackRate = on ? pp[0] + Math.random() * (pp[1] - pp[0]) : 1;
+  player.play();
+}
+function playGroup(ss) { let i = 0; const next = () => { if (i < ss.length) play(ss[i++], next); }; next(); }
+async function save(s, status, note) {
+  const m = $("saved");
+  try {
+    const r = await fetch("/api/verdict", {method: "POST", body: JSON.stringify({path: s.path, status, note})});
+    if (!r.ok) throw new Error((await r.json()).error);
+    m.className = ""; m.textContent = "saved"; await load();
+  } catch (e) { m.className = "err"; m.textContent = "save failed: " + e.message; }
+}
+document.onkeydown = e => {
+  if (e.target.tagName == "INPUT" && e.target.type == "text" || e.target.tagName == "TEXTAREA") return;
+  const rows = visible(), i = rows.findIndex(s => s.path == sel), s = rows[i], k = e.key.toLowerCase();
+  if (!s) return;
+  const next = () => { sel = (rows[i + 1] || s).path; };
+  if (k == "arrowdown" || k == "arrowup") { sel = (rows[i + (k == "arrowdown" ? 1 : -1)] || s).path; render(); }
+  else if (k == " ") play(s);
+  else if (k == "a") { next(); save(s, "approved", s.note); }
+  else if (k == "r") { next(); save(s, "rejected", s.note); }
+  else if (k == "u") save(s, "unreviewed", s.note);
+  else if (k == "n") { document.getElementById(s.path).querySelector(".note").focus(); }
+  else return;
+  e.preventDefault();
+};
+$("q").oninput = render; $("vol").oninput = () => player.volume = +$("vol").value;
+load();
+</script></body></html>
