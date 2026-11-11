@@ -172,7 +172,7 @@ func hit_fx(at: Vector2, velocity: Vector2, knocked: bool, feathers: int, crumbs
 		fx.shake = maxf(fx.shake,shake)
 	if bool(Config.tuning.juice.hitstop):
 		fx.freeze = maxf(fx.freeze,stop)
-	Audio.play("bb_hit" if active_id == "shakedown" else "gull_hit_%d" % (step%3+1),1.0+0.1*step,-3.0 if knocked else -7.0)
+	Audio.play("bb_hit" if active_id == "shakedown" else Audio.pick(Audio.GULL_HITS,step%3),1.0+0.1*step,-3.0 if knocked else -7.0)
 	hits += 1
 
 ## Panicked runners kick up sand for the first second of the stampede.

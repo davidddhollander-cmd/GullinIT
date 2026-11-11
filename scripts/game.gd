@@ -879,7 +879,7 @@ func _advance_screech_hold(delta: float) -> void:
 	if player.screech_held:
 		brash.screech_tick(delta)
 		if not is_instance_valid(screech_audio) or not screech_audio.playing:
-			screech_audio = Audio.play(species_cue("screech_long","screech_long") if rng.randf() < 0.6 else species_cue("screech_short","screech_short"),rng.randf_range(0.94,1.06)*screech_pitch(),-6.0)
+			screech_audio = Audio.play(Audio.pick([species_cue("screech_long","screech_long"),species_cue("screech_short","screech_short")],0 if rng.randf() < 0.6 else 1),rng.randf_range(0.94,1.06)*screech_pitch(),-6.0)
 		return
 	peck_hold_elapsed += delta
 	if peck_hold_elapsed >= SCREECH_HOLD_TIME and player.start_screech():
@@ -896,7 +896,7 @@ func species_cue(key: String, default: String) -> String:
 
 ## A bump or bonk is a knock, not a reward: a random gull-hit sound (cosmetic RNG).
 func _hit_sound() -> void:
-	Audio.play("gull_hit_%d" % (1+Audio.fx_rng.randi()%3))
+	Audio.play(Audio.pick(Audio.GULL_HITS))
 
 func screech_pitch() -> float:
 	return float(player.species_stats().get("screech_pitch",1.0))

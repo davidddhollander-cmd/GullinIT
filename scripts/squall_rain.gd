@@ -38,7 +38,7 @@ func strike() -> void:
 	strike_age = 0.0
 	strikes += 1
 	# The crack lands on the flash; the two recordings alternate, each slightly re-pitched.
-	Audio.play("thunder_%d" % (1 + strikes % 2), rng.randf_range(0.9, 1.05), -2.0)
+	Audio.play(Audio.pick(["thunder_1","thunder_2"],strikes%2), rng.randf_range(0.9, 1.05), -2.0)
 	bolt = PackedVector2Array()
 	var at := Vector2(rng.randf_range(40.0, 280.0), -2.0)
 	bolt.append(at)

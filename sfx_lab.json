@@ -1,0 +1,21 @@
+{
+  "title": "Gullin' It SFX Lab",
+  "audio_dirs": ["assets/audio"],
+  "recursive": false,
+  "extensions": [".ogg", ".wav", ".mp3"],
+  "approvals_file": "data/sfx_approvals.json",
+  "categories": [
+    {"name": "Voices: man",   "match": "^voice_.*_man$"},
+    {"name": "Voices: woman", "match": "^voice_.*_woman$"},
+    {"name": "Voices: kid",   "match": "^voice_.*_kid$"},
+    {"name": "Black Back",    "match": "^bb_"},
+    {"name": "Gull",          "match": "^(dive|snatch|stun|screech_|gull_|wing_flap|gang_call|263786)"},
+    {"name": "Dog",           "match": "^dog_"},
+    {"name": "People and props", "match": "^(swat_|whistle|bag_|bin_)"},
+    {"name": "Weather and ambience", "match": "^(thunder|rain|gust|menu_waves)"},
+    {"name": "UI and results", "match": "^(ui_|click|score|level_end)"},
+    {"name": "Other",         "match": ".*"}
+  ],
+  "group_variants": "_(man|woman|kid|\\d+)$",
+  "preview_pitch": {"Voices: man": [0.86, 1.04], "Voices: woman": [0.96, 1.04], "Voices: kid": [0.91, 1.04]}
+}

@@ -36,6 +36,11 @@ const AMBIENCE_SILENT_DB: float = -60.0
 var ambience: AudioStreamPlayer
 var ambience_id: String = ""
 var ambience_tween: Tween
+## SFX Lab verdicts (tools/sfx_lab): cue names the lab marked rejected. Empty or missing file allows everything.
+const APPROVALS_PATH: String = "res://data/sfx_approvals.json"
+const GULL_HITS: Array[String] = ["gull_hit_1", "gull_hit_2", "gull_hit_3"]
+const CUE_FILES: Dictionary = {"gull_call": "263786__steaq__seagull-single-call"} ## cue -> file stem when they differ
+var rejected_cues: Dictionary = {}
 
 func _ready() -> void:
 	for bus: String in ["SFX", "Music"]:
@@ -44,6 +49,7 @@ func _ready() -> void:
 			AudioServer.set_bus_name(AudioServer.bus_count - 1, bus)
 			AudioServer.set_bus_send(AudioServer.bus_count - 1, "Master")
 	apply_options()
+	set_approvals(_read_approvals())
 	for cue: String in ["snatch", "dive", "stun", "gust", "click"]:
 		var path: String = "res://assets/audio/%s.wav" % cue
 		if ResourceLoader.exists(path):
@@ -75,6 +81,51 @@ func _ready() -> void:
 	ambience.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
 	ambience.volume_db = AMBIENCE_SILENT_DB
 	add_child(ambience)
+
+func _read_approvals() -> Dictionary:
+	if not FileAccess.file_exists(APPROVALS_PATH):
+		return {}
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(APPROVALS_PATH))
+	return parsed.get("sounds", {}) if parsed is Dictionary and parsed.get("sounds") is Dictionary else {}
+
+## `sounds` is the approvals file's "sounds" map (path -> {status, sha1}). Only `rejected` entries matter.
+## An entry whose recorded sha1 differs from the source file on disk is stale and ignored; in an export the
+## .ogg source is gone (get_sha1 is empty), so there the rejected status is authoritative.
+func set_approvals(sounds: Dictionary) -> void:
+	rejected_cues.clear()
+	for path: Variant in sounds:
+		var entry: Variant = sounds[path]
+		if not entry is Dictionary or entry.get("status") != "rejected":
+			continue
+		var disk: String = _sha1("res://" + str(path))
+		if disk != "" and entry.has("sha1") and disk != str(entry.sha1):
+			continue
+		rejected_cues[str(path).get_file().get_basename()] = true
+
+func _sha1(path: String) -> String: ## "" when the source file isn't readable (exports ship only the imported copy)
+	var bytes: PackedByteArray = FileAccess.get_file_as_bytes(path) if FileAccess.file_exists(path) else PackedByteArray()
+	if bytes.is_empty():
+		return ""
+	var ctx: HashingContext = HashingContext.new()
+	ctx.start(HashingContext.HASH_SHA1)
+	ctx.update(bytes)
+	return ctx.finish().hex_encode()
+
+func rejected(cue: String) -> bool:
+	return rejected_cues.has(CUE_FILES.get(cue, cue))
+
+## A random cue from `cues` that isn't rejected, or "" when all are. With `start` >= 0 it is the first
+## allowed cue from that index on (for deterministic alternation); "" plays nothing.
+func pick(cues: Array, start: int = -1) -> String:
+	var ok: Array = cues.filter(func(c: String) -> bool: return not rejected(c))
+	if ok.is_empty():
+		return ""
+	if start < 0:
+		return str(ok[fx_rng.randi()%ok.size()])
+	for i: int in cues.size():
+		if not rejected(str(cues[(start+i)%cues.size()])):
+			return str(cues[(start+i)%cues.size()])
+	return ""
 
 # Switches the soundtrack, fading the old track out and the new one in. Calling it
 # with the track that is already playing only restores full volume.
@@ -177,7 +228,7 @@ func apply_options() -> void:
 		AudioServer.set_bus_mute(AudioServer.get_bus_index(bus), volume <= 0.001)
 
 func play(cue: String, pitch: float = 1.0, volume_db: float = 0.0) -> AudioStreamPlayer:
-	if not streams.has(cue) or not bool(Config.tuning.juice.audio):
+	if not streams.has(cue) or not bool(Config.tuning.juice.audio) or rejected(cue):
 		return null
 	var player: AudioStreamPlayer = AudioStreamPlayer.new()
 	player.bus = "SFX"
@@ -210,10 +261,9 @@ func react(event: String, kind: String, speaker: Object) -> AudioStreamPlayer:
 	var cues: Array = spec.cues
 	var voice: Dictionary = cfg.pitch.get(kind, cfg.pitch.default)
 	var span: Array = voice.pitch
-	var line: String = str(cues[fx_rng.randi()%cues.size()])
-	var cue: String = "voice_%s_%s" % [line,voice.register]
-	if not streams.has(cue):
-		cue = "voice_%s_kid" % line # wah exists only as a kid
+	var cue: String = _voice_cue(cues,str(voice.register))
+	if cue == "":
+		return null
 	var player: AudioStreamPlayer = play(cue,fx_rng.randf_range(float(span[0]),float(span[1])),float(cfg.volume_db))
 	if player == null:
 		return null
@@ -227,6 +277,19 @@ func react(event: String, kind: String, speaker: Object) -> AudioStreamPlayer:
 			if now-int(voice_speaker_ms[key]) > int(float(cfg.speaker_gap)*1000.0):
 				voice_speaker_ms.erase(key)
 	return player
+
+## A random allowed take among `lines` in `register`. If none is left, the other registers in turn: a line
+## with no take of its own (wah is kid only) borrows one, and a kid is voiced by an adult only as a last resort.
+func _voice_cue(lines: Array, register: String) -> String:
+	for reg: String in [register]+VOICE_REGISTERS.filter(func(r: String) -> bool: return r != register):
+		var ok: Array[String] = []
+		for line: Variant in lines:
+			var cue: String = "voice_%s_%s" % [line,reg]
+			if streams.has(cue) and not rejected(cue):
+				ok.append(cue)
+		if not ok.is_empty():
+			return ok[fx_rng.randi()%ok.size()]
+	return ""
 
 ## A person's swat knocked a gull: the thwack, with a stamp so the player's own stun cue can yield for this frame.
 func swat_hit() -> void:
@@ -242,14 +305,14 @@ func flap(pitch: float = 1.0, extra_db: float = 0.0) -> AudioStreamPlayer:
 	var now: int = Time.get_ticks_msec()
 	if now-flap_ms < int(float(cfg.min_gap)*1000.0):
 		return null
-	var player: AudioStreamPlayer = play("wing_flap_%d" % (1+fx_rng.randi()%2),pitch*fx_rng.randf_range(0.92,1.08),float(cfg.volume_db)+extra_db)
+	var player: AudioStreamPlayer = play(pick(["wing_flap_1","wing_flap_2"]),pitch*fx_rng.randf_range(0.92,1.08),float(cfg.volume_db)+extra_db)
 	if player != null:
 		flap_ms = now
 	return player
 
 ## A random dog bark (a recorded one when `dog_bark_N.ogg` exists, else the generated cue).
 func bark() -> AudioStreamPlayer:
-	return play(dog_barks[fx_rng.randi()%dog_barks.size()])
+	return play(pick(dog_barks))
 
 func play_result_reaction(success: bool, intensity: int) -> AudioStreamPlayer:
 	if not bool(Config.tuning.juice.audio):

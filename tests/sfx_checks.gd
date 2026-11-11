@@ -152,6 +152,7 @@ static func run(host: Node, check: Callable) -> void:
 		herring.species_cue("dive","dive")
 	check.call(herring.rng.state == state and Audio.fx_rng != herring.rng,"Audio.react and the sfx helpers leave the level rng untouched")
 	check.call(BeachTarget.new().voice_kind() == "default" and owner.voice_kind() == "man","voice_kind picks a pitch range")
+	_verdict_checks(check,a,herring)
 	_quiet()
 	Audio.stop_all()
 	for node: Node in [a,b,owner]+runners:
@@ -209,3 +210,90 @@ static func _waves(host: Node, check: Callable) -> void:
 	GameState.progress["stage1_complete"] = saved_shop
 	Audio.stop_ambience(0.0)
 	Audio.ambience_tween.custom_step(1.0)
+
+## Task 083: SFX Lab verdicts, with an injected approvals map instead of the real file.
+static func _verdict_checks(check: Callable, speaker: Node, game: BeachGame) -> void:
+	var reject: Callable = func(stems: Array) -> void:
+		var sounds: Dictionary = {}
+		for stem: String in stems:
+			sounds["assets/audio/%s.ogg" % stem] = {"status": "rejected"}
+		Audio.set_approvals(sounds)
+	var made: Callable = func(p: AudioStreamPlayer) -> bool: return p != null
+	Audio.set_approvals({})
+	check.call(not Audio.rejected("snatch") and made.call(Audio.play("snatch")),"an empty approvals map allows everything")
+	Audio.set_approvals({"assets/audio/dive.wav": {"status": "approved"}, "assets/audio/snatch.wav": {"status": "unreviewed"}})
+	check.call(not Audio.rejected("dive") and not Audio.rejected("snatch"),"approved and unreviewed entries are allowed")
+	reject.call(["snatch"])
+	check.call(Audio.rejected("snatch") and Audio.play("snatch") == null,"a rejected cue doesn't play")
+	Audio.set_approvals({"assets/audio/snatch.wav": {"status": "rejected", "sha1": "0000"}})
+	check.call(not Audio.rejected("snatch"),"a rejected entry with a stale sha1 is ignored")
+	reject.call(["263786__steaq__seagull-single-call"])
+	check.call(Audio.rejected("gull_call") and Audio.play("gull_call") == null,"gull_call maps to its source file stem")
+	# react skips a rejected line and picks another, and never plays a rejected take.
+	var event: String = "theft"
+	var lines: Array = Config.tuning.voices.events[event].cues
+	var keep: String = str(lines[0])
+	var banned: Array = []
+	for line: Variant in lines:
+		if str(line) != keep:
+			banned.append("voice_%s_man" % line)
+	reject.call(banned)
+	var all_man: bool = true
+	for i: int in 12:
+		_quiet()
+		var voiced: AudioStreamPlayer = Audio.react(event,"man",speaker)
+		all_man = all_man and voiced != null and voiced.stream == Audio.streams["voice_%s_man" % keep]
+	check.call(all_man,"react skips rejected lines and plays the remaining one in the same register")
+	# Every man take rejected: another register is used, never nothing; every register rejected: null.
+	var man_all: Array = []
+	var every: Array = []
+	for line: Variant in lines:
+		man_all.append("voice_%s_man" % line)
+		for register: String in Audio.VOICE_REGISTERS:
+			every.append("voice_%s_%s" % [line,register])
+	reject.call(man_all)
+	_quiet()
+	var fallback: AudioStreamPlayer = Audio.react(event,"man",speaker)
+	check.call(fallback != null and not fallback.stream in [Audio.streams["voice_%s_man" % keep]],"a register with every take rejected falls back to another register")
+	reject.call(every)
+	_quiet()
+	check.call(Audio.react(event,"man",speaker) == null,"all lines rejected gives null")
+	# A kid keeps its register while any kid take is left.
+	var kid_left: Array = []
+	for line: Variant in lines:
+		if str(line) != keep and Audio.streams.has("voice_%s_kid" % line):
+			kid_left.append("voice_%s_kid" % line)
+	reject.call(kid_left+["voice_%s_man" % keep,"voice_%s_woman" % keep])
+	_quiet()
+	var kid: AudioStreamPlayer = Audio.react(event,"toddler",speaker)
+	check.call(kid != null and kid.stream == Audio.streams["voice_%s_kid" % keep],"a kid voice keeps the kid register")
+	# Variant picks: rejected flaps, barks and hits are skipped; all rejected plays nothing.
+	reject.call(["wing_flap_1"])
+	var flaps_ok: bool = true
+	for i: int in 12:
+		Audio.flap_ms = Time.get_ticks_msec()-5000
+		var flap: AudioStreamPlayer = Audio.flap()
+		flaps_ok = flaps_ok and flap != null and flap.stream == Audio.streams["wing_flap_2"]
+	check.call(flaps_ok,"a rejected wing flap is skipped")
+	reject.call(["wing_flap_1","wing_flap_2"])
+	Audio.flap_ms = Time.get_ticks_msec()-5000
+	check.call(Audio.flap() == null,"all wing flaps rejected plays nothing")
+	var barks: Array[String] = Audio.dog_barks.duplicate()
+	reject.call(barks.slice(1))
+	var barks_ok: bool = true
+	for i: int in 8:
+		var woof: AudioStreamPlayer = Audio.bark()
+		barks_ok = barks_ok and woof != null and woof.stream == Audio.streams[barks[0]]
+	check.call(barks_ok,"a rejected bark is skipped")
+	reject.call(barks)
+	check.call(Audio.bark() == null,"all barks rejected plays nothing")
+	reject.call(["gull_hit_1","gull_hit_3"])
+	check.call(Audio.pick(Audio.GULL_HITS) == "gull_hit_2" and Audio.pick(Audio.GULL_HITS,0) == "gull_hit_2" and Audio.pick(Audio.GULL_HITS,2) == "gull_hit_2","pick skips rejected hits")
+	reject.call(Audio.GULL_HITS)
+	check.call(Audio.pick(Audio.GULL_HITS) == "" and Audio.pick(Audio.GULL_HITS,1) == "","pick returns empty when every variant is rejected")
+	check.call(game != null and Audio.play(Audio.pick(Audio.GULL_HITS)) == null,"a hit sound with every variant rejected plays nothing")
+	Audio.set_approvals({})
+	Audio.set_approvals({"assets/audio/x.ogg": 5, "assets/audio/y.ogg": {"status": "rejected"}})
+	check.call(Audio.rejected("y") and not Audio.rejected("x"),"malformed entries are ignored")
+	Audio.set_approvals({})
+	Audio.dog_barks = barks
