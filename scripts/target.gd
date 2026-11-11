@@ -553,7 +553,7 @@ func _tick_defense(delta: float, gulls: Array[BeachGull]) -> void:
 		if can_attack and kind == "toddler" and gull.position.distance_to(food_position()) < float(info.danger):
 			if kind == "picnic_family" and gull.state != BeachGull.State.STUNNED and not gull.untargetable():
 				mum_swat_time = 0.25
-			gull.stun(-1.0,position)
+			gull.swatted(-1.0,position)
 	if windup >= 0:
 		windup -= delta
 	if not seen:

@@ -168,7 +168,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		dog.setup(float(spawn.x),spawn.home,int(level.seed)+5+dogs.size())
 		dog.barked.connect(func() -> void:
 			effects.message(dog.position-Vector2(0,24),"WOOF!",BeachUI.GOLD)
-			Audio.play("dog_bark")
+			Audio.bark()
 		)
 		dog.caught.connect(func() -> void:
 			effects.shout(dog.position-Vector2(0,24),"GOTCHA!",Color("ef725c"))
@@ -233,6 +233,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	score.combo_changed.connect(func(tier: int) -> void: Audio.play("score",1.0+tier*0.06,-4.0))
 	score.combo_rose.connect(func(tier: int) -> void: effects.combo_pop(player.position,str(Config.tuning.score.tiers[tier])))
 	player.dive_started.connect(_dive_began)
+	player.wing_stroke.connect(_wing_stroke)
 	# The windup is 0.15 s, so the air rush starts with the fall (strike), not the crouch.
 	player.dive_released.connect(func(at: Vector2, heading: Vector2) -> void:
 		Audio.play(species_cue("dive","dive"),Audio.fx_rng.randf_range(0.94,1.06))
@@ -873,6 +874,10 @@ func _advance_screech_hold(delta: float) -> void:
 		brash.fire()
 
 ## The cue this gull's species uses for `key` (species.json "sfx" map), else the default cue.
+func _wing_stroke() -> void:
+	var flap: Dictionary = player.species_stats().get("flap",{})
+	Audio.flap(float(flap.get("pitch",1.0)),float(flap.get("volume_db",0.0)))
+
 func species_cue(key: String, default: String) -> String:
 	return str(player.species_stats().get("sfx",{}).get(key,default))
 
@@ -964,7 +969,8 @@ func _stunned() -> void:
 		stash_raids.items.append({"owner":null,"source":"dropped","food_id":dropped.id,"snack":dropped,"position":player.beak(),"velocity":Vector2(-player.facing*35,-55),"grounded":false,"age":0.0})
 	score.stunned()
 	effects.impact(player.position,true)
-	Audio.play(species_cue("stun","stun"))
+	if not Audio.swat_recent(): # a person's swat already played its thwack this frame
+		Audio.play(species_cue("stun","stun"))
 
 ## A black-back dive that sweeps the beak through a dog bumps it (the dog's own catch checks the same rule).
 func _dog_bump_check() -> void:

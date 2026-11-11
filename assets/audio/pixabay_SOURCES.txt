@@ -6,4 +6,8 @@ thunder_1.ogg  <- pwlpl-loud-thunder-sound-effect-359272.mp3   (first 6.5 s, 1.5
 thunder_2.ogg  <- soundmarker33-thunder-clap-512544.mp3        (0.55-6.55 s, 1.5 s fade, -16 LUFS)
 rain_loop.ogg  <- dragon-studio-heavy-wind-and-rain-515265.mp3 (1-28 s, -6 dB, 2 s crossfade seam)
 
-Pages: https://pixabay.com/sound-effects/ (search the numeric IDs above).
+swat_thwack.ogg  <- freesound_community-thwack-wobble-96509.mp3  (onset + 0.75 s, 150 ms fade, soft-limited, rms matched to gull_hit_1..3)
+wing_flap_1..2.ogg <- freesound_community-wing-flap-1-6434.mp3   (two strokes cut at the energy valley, peak -3 dBFS)
+dog_bark_1..2.ogg <- freesound_community-small-dog-barking-84707.mp3 (two loudest of three barks, about 0.3 s each, 60 ms fade, peak -3 dBFS; michorvath)
+
+Pages: https://pixabay.com/sound-effects/ (search the numeric IDs above; the dog bark is /nature-small-dog-barking-84707/).

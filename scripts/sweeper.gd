@@ -383,7 +383,7 @@ func _swing_check(gull: BeachGull) -> void:
 	if can_mark(gull) and gull_height(gull) <= float(tuning().reach_height) and gull.position.distance_to(hit_zone) <= float(tuning().hit_radius):
 		hit_done = true
 		landed_hit = true
-		gull.stun(float(tuning().knock_time),position)
+		gull.swatted(float(tuning().knock_time),position)
 		if gull.state != BeachGull.State.STUNNED and gull.steady_invulnerable:
 			bounced = true
 			position.x = clampf(position.x-signf(gull.position.x-position.x)*float(Config.tuning.shakedown.bounce_recoil),float(tuning().range[0])-220.0,float(tuning().range[1])+220.0)

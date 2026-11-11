@@ -5,6 +5,7 @@ signal gull_stunned
 signal dive_started
 signal dive_released(at: Vector2, direction: Vector2) ## windup ends and the strike begins
 signal stun_ignored
+signal wing_stroke ## a wingbeat starts (player flap sound)
 signal ground_crashed
 signal peck_started
 signal sand_landed(at: Vector2)
@@ -830,6 +831,7 @@ func wingbeat(delta: float) -> float:
 		stroke_left = float(f.stroke_duration)
 		stroke_cooldown += float(f.stroke_interval)
 		stroke_started = true
+		wing_stroke.emit()
 	if stroke_left <= 0.0:
 		return 0.0
 	var share: float = minf(delta, stroke_left)
@@ -902,6 +904,12 @@ func stun(duration: float = -1.0, attacker: Vector2 = Vector2.INF, force: float 
 		return
 	begin_tumble(duration,attacker,force)
 	gull_stunned.emit()
+
+## A person's swat: the thwack plays only when the knock lands (not while shielded, invulnerable or already down).
+func swatted(duration: float = -1.0, attacker: Vector2 = Vector2.INF, force: float = -1.0) -> void:
+	if state != State.STUNNED and invulnerable <= 0 and stun_shield <= 0:
+		Audio.swat_hit()
+	stun(duration,attacker,force)
 
 func begin_tumble(duration: float = -1.0, attacker: Vector2 = Vector2.INF, force: float = -1.0) -> void:
 	var t: Dictionary = Config.tuning.tumble

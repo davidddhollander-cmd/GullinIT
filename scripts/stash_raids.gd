@@ -378,7 +378,7 @@ func tick(delta: float) -> void:
 			raid.action_time -= delta
 			if raid.action_time <= 0:
 				if raider.state != BeachGull.State.STUNNED and raider.position.distance_to(owner.position-Vector2(0,12)) < float(t.stash_swat_reach):
-					raider.stun(-1.0,owner.position)
+					raider.swatted(-1.0,owner.position)
 				raid.swat = float(t.stash_swat_cooldown)
 				raid.action = "swat_follow"
 				raid.action_time = SunbatherArt.SWAT_FOLLOW

@@ -11,7 +11,11 @@ bb_stun.ogg         glottal-pulse croak through low formants plus a sine thump
 bb_hit.ogg          sine thump drop plus low-passed noise crack, saturated
 bb_slam.ogg         deep sine drop, noise crack and low rumble, saturated
 bb_stomp.ogg        soft sine thud with a little low-passed dust noise
-voice_hey/oi/whoa/aah/huh/aww/hah/wah.ogg
-                    cartoon gibberish: glottal pulse train (vibrato, jitter) through moving vowel formants, noise for the "h" onsets
+voice_<line>_<man|woman|kid>.ogg   (task 080; replaces the 079 voice_<line>.ogg)
+                    cartoon gibberish: glottal pulse train (vibrato, jitter) through moving vowel/consonant formants (bandwidths 0.7x of 079),
+                    noise consonants (h, sh, s, f, ch, t, k, p), +5 dB presence lift at 3 kHz. Per-register f0 (112/205/320 Hz) and formant scale
+                    (1.0/1.12/1.25) are rendered offline. Lines: hey oi my_chips no_no whoa huh eek shoo get_off hah gotcha aww ugh hmph aah wah (wah kid only).
+bb_screech_*, bb_shakedown (task 080): re-rendered at 0.6x speed (about -8.8 semitones), stronger octave-down layer, 3.5 kHz roll-off.
+dog_bark_1..2.ogg   real barks, see pixabay_SOURCES.txt. Without a *dog*bark* source make_sfx.py ships only the generated dog_bark.ogg below.
 dog_bark.ogg        noisy glottal burst through "a" formants plus a short "rf" noise tail
 whistle.ogg         two-tone sine trill (2.8 / 3.35 kHz, 22 Hz) with pea-rattle amplitude modulation and breath noise

@@ -420,17 +420,25 @@
     "text_hop_time": 0.1
   },
   "voices": {
-    "volume_db": -11.0,
+    "volume_db": -7.0,
     "speaker_gap": 3.5,
-    "pitch": {"default": [0.92, 1.08], "man": [0.82, 0.95], "woman": [1.12, 1.28], "teen": [1.05, 1.18], "toddler": [1.3, 1.5], "old_man": [0.72, 0.85]},
+    "pitch": {
+      "default": {"register": "man", "pitch": [0.96, 1.04]},
+      "man": {"register": "man", "pitch": [0.96, 1.04]},
+      "woman": {"register": "woman", "pitch": [0.96, 1.04]},
+      "teen": {"register": "kid", "pitch": [0.91, 0.99]},
+      "toddler": {"register": "kid", "pitch": [0.96, 1.04]},
+      "old_man": {"register": "man", "pitch": [0.86, 0.94]}
+    },
     "events": {
-      "theft":   {"cues": ["voice_hey", "voice_oi", "voice_whoa"], "chance": 1.0, "gap": 0.3},
-      "notice":  {"cues": ["voice_huh", "voice_whoa"],             "chance": 0.8, "gap": 0.9},
-      "warning": {"cues": ["voice_huh", "voice_hey"],              "chance": 0.3, "gap": 1.5},
-      "swat":    {"cues": ["voice_hah"],                           "chance": 0.8, "gap": 0.9},
-      "give_up": {"cues": ["voice_aww"],                           "chance": 0.5, "gap": 1.5},
-      "panic":   {"cues": ["voice_aah", "voice_whoa"],             "chance": 1.0, "gap": 4.0},
-      "cry":     {"cues": ["voice_wah"],                           "chance": 1.0, "gap": 1.0}
+      "theft":   {"cues": ["hey", "oi", "my_chips", "no_no"], "chance": 1.0, "gap": 0.3},
+      "notice":  {"cues": ["huh", "whoa", "eek"],             "chance": 0.8, "gap": 0.9},
+      "warning": {"cues": ["shoo", "hey", "get_off"],         "chance": 0.3, "gap": 1.5},
+      "swat":    {"cues": ["hah", "gotcha"],                  "chance": 0.8, "gap": 0.9},
+      "give_up": {"cues": ["aww", "ugh", "hmph"],             "chance": 0.5, "gap": 1.5},
+      "panic":   {"cues": ["aah", "eek"],                     "chance": 1.0, "gap": 4.0},
+      "cry":     {"cues": ["wah"],                            "chance": 1.0, "gap": 1.0}
     }
-  }
+  },
+  "flap": {"volume_db": -13.0, "min_gap": 0.2}
 }
