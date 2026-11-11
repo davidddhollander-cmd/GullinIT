@@ -21,7 +21,12 @@ var music_tween: Tween
 ## Cosmetic randomness only: never touch the level-seeded rng, or level determinism breaks.
 var fx_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 const BB_CUES: Array[String] = ["bb_screech_long", "bb_screech_short", "bb_dive", "bb_stun", "bb_hit", "bb_shakedown", "bb_slam", "bb_stomp"]
-const VOICE_CUES: Array[String] = ["voice_hey", "voice_oi", "voice_whoa", "voice_aah", "voice_huh", "voice_aww", "voice_hah", "voice_wah", "dog_bark", "whistle"]
+const VOICE_LINES: Array[String] = ["hey", "oi", "my_chips", "no_no", "whoa", "huh", "eek", "shoo", "get_off", "hah", "gotcha", "aww", "ugh", "hmph", "aah", "wah"]
+const VOICE_REGISTERS: Array[String] = ["man", "woman", "kid"]
+const MISC_CUES: Array[String] = ["dog_bark", "whistle", "swat_thwack", "wing_flap_1", "wing_flap_2"]
+var dog_barks: Array[String] = [] ## "dog_bark_1..": real recorded barks when present, else the generated "dog_bark"
+var swat_ms: int = -1000000 ## when a person's swat last knocked a gull
+var flap_ms: int = -1000000
 var voice_last_ms: int = -1000000 ## when any character voice last started
 var voice_speaker_ms: Dictionary = {} ## speaker instance id -> last voice start
 var voice_player: AudioStreamPlayer
@@ -40,8 +45,20 @@ func _ready() -> void:
 	for cue: String in ["bag_thump", "bin_rattle", "stash_release", "release_accent", "empty_tap"]:
 		streams[cue] = _stash_stream(cue)
 	streams["gull_call"] = GULL_CALL
-	for cue: String in ["screech_long", "screech_short", "gang_call", "gull_hit_1", "gull_hit_2", "gull_hit_3", "score", "ui_confirm", "ui_back", "ui_error", "level_end", "level_end_fail", "thunder_1", "thunder_2"] + BB_CUES + VOICE_CUES:
+	for cue: String in ["screech_long", "screech_short", "gang_call", "gull_hit_1", "gull_hit_2", "gull_hit_3", "score", "ui_confirm", "ui_back", "ui_error", "level_end", "level_end_fail", "thunder_1", "thunder_2"] + BB_CUES + MISC_CUES:
 		streams[cue] = load("res://assets/audio/%s.ogg" % cue)
+	for line: String in VOICE_LINES:
+		for register: String in VOICE_REGISTERS:
+			var path: String = "res://assets/audio/voice_%s_%s.ogg" % [line,register]
+			if ResourceLoader.exists(path):
+				streams["voice_%s_%s" % [line,register]] = load(path)
+	for i: int in range(1,5):
+		var bark: String = "res://assets/audio/dog_bark_%d.ogg" % i
+		if ResourceLoader.exists(bark):
+			streams["dog_bark_%d" % i] = load(bark)
+			dog_barks.append("dog_bark_%d" % i)
+	if dog_barks.is_empty():
+		dog_barks.append("dog_bark")
 	music = AudioStreamPlayer.new()
 	music.bus = "Music"
 	music.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
@@ -146,8 +163,13 @@ func react(event: String, kind: String, speaker: Object) -> AudioStreamPlayer:
 	if fx_rng.randf() >= float(spec.chance):
 		return null
 	var cues: Array = spec.cues
-	var span: Array = cfg.pitch.get(kind, cfg.pitch.default)
-	var player: AudioStreamPlayer = play(str(cues[fx_rng.randi()%cues.size()]),fx_rng.randf_range(float(span[0]),float(span[1])),float(cfg.volume_db))
+	var voice: Dictionary = cfg.pitch.get(kind, cfg.pitch.default)
+	var span: Array = voice.pitch
+	var line: String = str(cues[fx_rng.randi()%cues.size()])
+	var cue: String = "voice_%s_%s" % [line,voice.register]
+	if not streams.has(cue):
+		cue = "voice_%s_kid" % line # wah exists only as a kid
+	var player: AudioStreamPlayer = play(cue,fx_rng.randf_range(float(span[0]),float(span[1])),float(cfg.volume_db))
 	if player == null:
 		return null
 	if is_instance_valid(voice_player) and voice_player.playing:
@@ -160,6 +182,29 @@ func react(event: String, kind: String, speaker: Object) -> AudioStreamPlayer:
 			if now-int(voice_speaker_ms[key]) > int(float(cfg.speaker_gap)*1000.0):
 				voice_speaker_ms.erase(key)
 	return player
+
+## A person's swat knocked a gull: the thwack, with a stamp so the player's own stun cue can yield for this frame.
+func swat_hit() -> void:
+	swat_ms = Time.get_ticks_msec()
+	play("swat_thwack",fx_rng.randf_range(0.95,1.05))
+
+func swat_recent() -> bool:
+	return Time.get_ticks_msec()-swat_ms <= 60
+
+## One wing stroke of the player gull; flap.min_gap keeps it light. `pitch`/`extra_db` come from the species sfx block.
+func flap(pitch: float = 1.0, extra_db: float = 0.0) -> AudioStreamPlayer:
+	var cfg: Dictionary = Config.tuning.flap
+	var now: int = Time.get_ticks_msec()
+	if now-flap_ms < int(float(cfg.min_gap)*1000.0):
+		return null
+	var player: AudioStreamPlayer = play("wing_flap_%d" % (1+fx_rng.randi()%2),pitch*fx_rng.randf_range(0.92,1.08),float(cfg.volume_db)+extra_db)
+	if player != null:
+		flap_ms = now
+	return player
+
+## A random dog bark (a recorded one when `dog_bark_N.ogg` exists, else the generated cue).
+func bark() -> AudioStreamPlayer:
+	return play(dog_barks[fx_rng.randi()%dog_barks.size()])
 
 func play_result_reaction(success: bool, intensity: int) -> AudioStreamPlayer:
 	if not bool(Config.tuning.juice.audio):

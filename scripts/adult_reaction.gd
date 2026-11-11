@@ -185,6 +185,6 @@ func _hit(owner: BeachTarget) -> void:
 	if is_instance_valid(focus) and focus.position.distance_to(owner.position-Vector2(0,12)) < 24:
 		if owner.kind in ["pier_diner","lifeguard","kiosk_customer"]:
 			owner.action_pose_time = 0.28
-		focus.stun(-1.0,owner.position)
+		focus.swatted(-1.0,owner.position)
 		Audio.react("swat",owner.voice_kind(),owner)
 		owner.mum_swat_time = 0.25

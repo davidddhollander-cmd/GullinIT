@@ -4,7 +4,7 @@ extends RefCounted
 
 const SHAKEDOWN: GDScript = preload("res://tests/shakedown_checks.gd")
 const CUES: Array[String] = ["dive", "snatch", "bb_screech_long", "bb_screech_short", "bb_dive", "bb_stun", "bb_hit", "bb_shakedown", "bb_slam", "bb_stomp",
-	"voice_hey", "voice_oi", "voice_whoa", "voice_aah", "voice_huh", "voice_aww", "voice_hah", "voice_wah", "dog_bark", "whistle"]
+	"dog_bark", "whistle", "swat_thwack", "wing_flap_1", "wing_flap_2", "voice_hey_man", "voice_my_chips_woman", "voice_wah_kid"]
 
 ## Quiets the voice channel so the next react() is only gated by what the test is about.
 static func _quiet(ago_ms: int = 10000) -> void:
@@ -23,7 +23,16 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(length.call("snatch") >= 0.18 and length.call("snatch") <= 0.28,"snatch reward is 0.18-0.28 s")
 	check.call(length.call("bb_dive") >= 0.6 and length.call("bb_dive") <= 0.75,"bb_dive is 0.6-0.75 s")
 	check.call(length.call("bb_screech_long") <= 4.55,"bb_screech_long is trimmed to 4.5 s")
-	check.call(length.call("voice_wah") <= 0.75 and length.call("voice_hey") >= 0.15 and length.call("voice_hey") <= 0.5,"voice cues keep to their lengths")
+	check.call(length.call("voice_wah_kid") <= 0.75 and length.call("voice_hey_man") >= 0.15 and length.call("voice_hey_man") <= 0.5,"voice cues keep to their lengths")
+	check.call(length.call("swat_thwack") <= 0.8 and length.call("wing_flap_1") >= 0.15 and length.call("wing_flap_1") <= 0.35,"thwack and flaps keep to their lengths")
+	check.call(float(Config.tuning.voices.volume_db) > -9.0 and float(Config.tuning.flap.min_gap) >= 0.2,"voices raised, flap block present")
+	# Every event cue exists for every register (wah is kid only and the other registers fall back to it).
+	for event: String in Config.tuning.voices.events:
+		for line: String in Config.tuning.voices.events[event].cues:
+			var found: int = 0
+			for register: String in Audio.VOICE_REGISTERS:
+				found += 1 if Audio.streams.has("voice_%s_%s" % [line,register]) else 0
+			check.call(found == (1 if line == "wah" else 3) and Audio.streams.has("voice_%s_kid" % line),"event %s line %s loads for its registers" % [event,line])
 	check.call(Config.species.species["great-black-backed"].power.sound == "bb_shakedown","shakedown fires bb_shakedown")
 
 	var blackback: BeachGame = SHAKEDOWN.fixture(host,"great-black-backed")
@@ -86,6 +95,54 @@ static func run(host: Node, check: Callable) -> void:
 	_quiet()
 	owner.reaction.theft(owner,herring.player)
 	check.call(Audio.get_child_count()-before == 1,"a repeat theft during the same reaction stays quiet")
+	# Register selection per kind, and runtime pitch stays jitter-only (within +-5% of the kind's base).
+	for kind: String in Config.tuning.voices.pitch:
+		var spec: Dictionary = Config.tuning.voices.pitch[kind]
+		var mid: float = (float(spec.pitch[0])+float(spec.pitch[1]))*0.5
+		var register_ok: bool = true
+		var pitch_ok: bool = true
+		for i: int in 12:
+			_quiet()
+			var voiced: AudioStreamPlayer = Audio.react("theft",kind,Node.new())
+			var pool: Array = []
+			for line: String in Config.tuning.voices.events.theft.cues:
+				pool.append(Audio.streams["voice_%s_%s" % [line,spec.register]])
+			register_ok = register_ok and voiced != null and voiced.stream in pool
+			pitch_ok = pitch_ok and voiced != null and absf(voiced.pitch_scale/mid-1.0) <= 0.05 and voiced.pitch_scale >= float(spec.pitch[0])-0.0001 and voiced.pitch_scale <= float(spec.pitch[1])+0.0001
+		check.call(register_ok,"kind %s speaks in its %s register" % [kind,spec.register])
+		check.call(pitch_ok,"kind %s runtime pitch is jitter only (+-5%%)" % kind)
+	_quiet()
+	var woof: AudioStreamPlayer = Audio.react("cry","man",a)
+	check.call(woof != null and woof.stream == Audio.streams["voice_wah_kid"],"wah has only a kid register; other kinds fall back to it")
+
+	# A swat that knocks the player plays the thwack and not the stun cue; a stroke plays one flap, held by min_gap.
+	var swat_before: Array = Audio.get_children()
+	herring.player.invulnerable = 0.0
+	herring.player.stun_shield = 0
+	herring.player.state = BeachGull.State.GLIDE
+	herring.player.swatted(-1.0,herring.player.position+Vector2(-10,0))
+	var knocked: Array = []
+	for node: Node in Audio.get_children():
+		if node is AudioStreamPlayer and not node in swat_before:
+			knocked.append((node as AudioStreamPlayer).stream)
+	check.call(Audio.streams["swat_thwack"] in knocked and not Audio.streams["stun"] in knocked and not Audio.streams["bb_stun"] in knocked,"swatting the player plays swat_thwack and not stun")
+	check.call(Audio.swat_recent(),"the swat stamps Audio.swat_ms")
+	Audio.flap_ms = Time.get_ticks_msec()-5000
+	var flaps_before: int = Audio.get_child_count()
+	herring.player.wing_stroke.emit()
+	herring.player.wing_stroke.emit()
+	check.call(Audio.get_child_count()-flaps_before == 1,"a stroke plays one flap and min_gap blocks the repeat")
+	Audio.flap_ms = Time.get_ticks_msec()-int(float(Config.tuning.flap.min_gap)*1000.0)-20
+	flaps_before = Audio.get_child_count()
+	herring.player.wing_stroke.emit()
+	check.call(Audio.get_child_count()-flaps_before == 1,"a stroke after min_gap plays another flap")
+	var bark_cues: Array[String] = Audio.dog_barks.duplicate()
+	check.call(not bark_cues.is_empty() and bark_cues.all(func(c: String) -> bool: return Audio.streams.has(c)),"dog barks resolve to loaded cues")
+	Audio.dog_barks = ["dog_bark"] # the fallback when no recorded bark is shipped
+	var fallback: AudioStreamPlayer = Audio.bark()
+	check.call(fallback != null and fallback.stream == Audio.streams["dog_bark"],"with no recorded barks the generated dog_bark plays")
+	Audio.dog_barks = bark_cues
+
 	# Cosmetic audio never consumes the level-seeded rng.
 	var state: int = herring.rng.state
 	for i: int in 30:
