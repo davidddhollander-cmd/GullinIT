@@ -423,6 +423,9 @@
   "voices": {
     "volume_db": -7.0,
     "speaker_gap": 3.5,
+    "require_approved": true,
+    "fallback": {"man": ["kid", "woman"], "woman": ["kid", "man"], "kid": ["woman", "man"]},
+    "borrow_pitch": {"man": 0.80, "woman": 0.92},
     "pitch": {
       "default": {"register": "man", "pitch": [0.96, 1.04]},
       "man": {"register": "man", "pitch": [0.96, 1.04]},
