@@ -1,6 +1,6 @@
 # 080 — SFX round 2: clearer voices, deeper Black Back, swat thwack, wing flaps, real dog bark
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 079 (merged)
@@ -117,4 +117,4 @@ Branch `sonnet/080-sfx-round-2`, last commit: see `git log -1`.
 
 
 ## Review notes
-<!-- Filled in by the reviewer. -->
+Reviewed by Claude Opus 2026-11-11: diff read; integration 17218 checks, same 2 pre-existing failures (sunbather run-off teleport, demo lock off). Audio unheard by agents; David approved merge after audition file. Watch: thwack onset ~0.3 s into source, voices near dive loudness.
