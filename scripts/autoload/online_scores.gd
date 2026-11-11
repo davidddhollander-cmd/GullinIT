@@ -66,6 +66,14 @@ func submit(board: String, score: int, done: Callable) -> void:
 	if done.is_valid():
 		done.call(entries)
 
+# Read-only: the board's top rows for the VS menu. No identify, no alias, never posts. done(rows) gets [] when offline or on failure.
+func top(board: String, done: Callable, slots: int = ResultBoard.SCORE_SLOTS) -> void:
+	var rows: Array = []
+	if active():
+		rows = board_view(await _call(HTTPClient.METHOD_GET, "/leaderboards/%s/entries/top?limit=%d" % [board, slots]), -1, slots)
+	if done.is_valid():
+		done.call(rows)
+
 # Talo's top-entries reply as ResultBoard rows: the top five, or the top four plus the
 # player's own entry when they rank lower.
 static func board_view(top: Dictionary, alias_id: int, slots: int = ResultBoard.SCORE_SLOTS) -> Array:

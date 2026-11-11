@@ -136,6 +136,15 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(arena_row.get_child(0).button_pressed and opponent_row.get_child(0).button_pressed and opponent_row.get_child(0).text.contains("BLACK BACK"), "Scrap Sands and Gary are preselected")
 	arena_row.get_child(0).pressed.emit()
 	check.call(arena_row.get_child(0).button_pressed, "one arena card always stays selected")
+	var scores: Node = menus.find_child("ScoresToBeat", true, false)
+	check.call(scores != null and scores.find_child("ScoreRows", true, false).get_child_count() == 3 * Config.vs.seed_scores.size() and scores.find_child("ScoreRows", true, false).get_child(1).text == str(Config.vs.seed_scores[0].name), "SCORES TO BEAT shows the seed scores while offline")
+	check.call(arena_row.get_child(0).size_flags_horizontal & Control.SIZE_EXPAND == 0 and opponent_row.get_child(0).size_flags_horizontal & Control.SIZE_EXPAND == 0 and menus.find_child("NameField", true, false).size_flags_horizontal & Control.SIZE_EXPAND == 0, "arena, opponent and name controls are compact, not expand-fill")
+	var canned: Dictionary = {"topEntries": [{"position": 0, "score": 42, "playerAlias": {"id": 7, "identifier": "ACE#abc123"}}, {"position": 1, "score": 30, "playerAlias": {"id": 8, "identifier": "BOB#def456"}}]}
+	var canned_rows: Array = OnlineScores.board_view(canned, -1)
+	check.call(canned_rows.size() == 2 and canned_rows[0] == {"name": "ACE", "score": 42, "rank": 1, "me": false} and canned_rows[1].rank == 2, "a Talo top-entries reply shapes into ranked rows")
+	var fetched: Array = []
+	OnlineScores.top("vs-test", func(rows: Array) -> void: fetched.append(rows))
+	check.call(fetched == [[]], "the fetch-only top() answers [] offline without posting")
 	var fight: Button = menus.find_child("FightButton", true, false)
 	check.call(fight.has_focus(), "FIGHT! has focus when the menu opens")
 	var field: LineEdit = menus.find_child("NameField", true, false)

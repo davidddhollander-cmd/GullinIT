@@ -36,7 +36,7 @@ const ON_CREAM: Dictionary = {
 
 func _ink_labels(node: Node = self) -> void:
 	for child: Node in node.get_children():
-		if child is Button:
+		if child is Button or child.name == "ScoresToBeat":
 			continue
 		if child is Label:
 			var color: Color = (child as Label).get_theme_color("font_color")
@@ -249,24 +249,34 @@ func vs_menu() -> void:
 	columns.add_theme_constant_override("separation",2)
 	outer.add_child(columns)
 	var left: VBoxContainer = _vs_panel(columns,96)
-	BeachUI.label(left,"VS",BeachUI.FONT_DISPLAY,BeachUI.GOLD)
+	BeachUI.label(left,"VS",BeachUI.FONT_DISPLAY,BeachUI.GOLD).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	for mode: Array in [["ModeMatchup","MATCH-UP  >",true],["ModeLadder","LADDER\nLATER",false],["ModeMultiplayer","MULTIPLAYER\nLATER",false]]:
 		var node: Button = BeachUI.button(left,mode[1],func() -> void: pass)
 		node.name = mode[0]
 		node.disabled = not mode[2]
-		node.size_flags_horizontal = SIZE_EXPAND_FILL
+		node.size_flags_horizontal = SIZE_SHRINK_CENTER
+		node.custom_minimum_size.x = 84
 	var right: VBoxContainer = _vs_panel(columns,0)
 	right.add_theme_constant_override("separation",2)
 	right.get_parent().size_flags_horizontal = SIZE_EXPAND_FILL
-	var arena: ButtonGroup = _vs_row(right,"ARENA","ArenaRow",Config.arenas.keys().map(func(id: String) -> Array: return [id,str(Config.arenas[id].name).to_upper()]))
-	var opponent: ButtonGroup = _vs_row(right,"OPPONENT","OpponentRow",Config.vs.opponents.keys().map(func(id: String) -> Array: return [id,"%s\n%s" % [str(Config.vs.opponents[id].name).to_upper(),str(Config.vs.opponents[id].blurb)]]))
-	BeachUI.label(right,"YOUR NAME",BeachUI.FONT_NATIVE,BeachUI.GOLD)
+	var columns2: HBoxContainer = HBoxContainer.new()
+	columns2.add_theme_constant_override("separation",4)
+	columns2.size_flags_vertical = SIZE_EXPAND_FILL
+	right.add_child(columns2)
+	var picks: VBoxContainer = VBoxContainer.new()
+	picks.add_theme_constant_override("separation",2)
+	picks.alignment = BoxContainer.ALIGNMENT_CENTER
+	columns2.add_child(picks)
+	var arena: ButtonGroup = _vs_row(picks,"ARENA","ArenaRow",Config.arenas.keys().map(func(id: String) -> Array: return [id,str(Config.arenas[id].name).to_upper()]))
+	var opponent: ButtonGroup = _vs_row(picks,"OPPONENT","OpponentRow",Config.vs.opponents.keys().map(func(id: String) -> Array: return [id,"%s\n%s" % [str(Config.vs.opponents[id].name).to_upper(),str(Config.vs.opponents[id].blurb)]]))
+	BeachUI.label(picks,"YOUR NAME",BeachUI.FONT_NATIVE,BeachUI.GOLD).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var field: LineEdit = LineEdit.new()
 	field.name = "NameField"
 	field.max_length = OnlineScores.NAME_LENGTH
 	field.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	field.add_theme_font_size_override("font_size",BeachUI.FONT_NATIVE)
-	field.custom_minimum_size.y = 14
+	field.custom_minimum_size = Vector2(84,14)
+	field.size_flags_horizontal = SIZE_SHRINK_CENTER
 	var field_box: StyleBoxFlat = StyleBoxFlat.new()
 	field_box.bg_color = BeachUI.INK
 	field_box.set_corner_radius_all(2)
@@ -280,10 +290,11 @@ func vs_menu() -> void:
 		if clean != text:
 			field.text = clean
 			field.caret_column = clean.length())
-	right.add_child(field)
-	var spacer: Control = Control.new()
-	spacer.size_flags_vertical = SIZE_EXPAND_FILL
-	right.add_child(spacer)
+	picks.add_child(field)
+	var refresh_scores: Callable = _vs_scores(columns2,arena,opponent)
+	for group: ButtonGroup in [arena,opponent]:
+		group.pressed.connect(func(_button: BaseButton) -> void: refresh_scores.call())
+	refresh_scores.call()
 	var actions: HBoxContainer = HBoxContainer.new()
 	right.add_child(actions)
 	BeachUI.back_button(actions,"< BACK",func() -> void: choose("title"))
@@ -315,9 +326,10 @@ func _vs_panel(parent: Control, width: float) -> VBoxContainer:
 
 ## A caption and a row of toggle cards, one always selected (the first). Entries are [id, text].
 func _vs_row(parent: Control, caption: String, row_name: String, entries: Array) -> ButtonGroup:
-	BeachUI.label(parent,caption,BeachUI.FONT_NATIVE,BeachUI.GOLD)
+	BeachUI.label(parent,caption,BeachUI.FONT_NATIVE,BeachUI.GOLD).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var row: HBoxContainer = HBoxContainer.new()
 	row.name = row_name
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation",3)
 	parent.add_child(row)
 	var group: ButtonGroup = ButtonGroup.new()
@@ -326,10 +338,63 @@ func _vs_row(parent: Control, caption: String, row_name: String, entries: Array)
 		card.toggle_mode = true
 		card.button_group = group
 		card.set_meta("id",entry[0])
-		card.size_flags_horizontal = SIZE_EXPAND_FILL
+		card.custom_minimum_size.x = 84
 		card.button_pressed = row.get_child_count() == 1
 	return group
 
+## SCORES TO BEAT: an inset with the top rows of the selected matchup's board. Shows the seed scores while loading,
+## offline or on an empty reply. Returns a refresh Callable to call when the arena or opponent changes.
+func _vs_scores(parent: Control, arena: ButtonGroup, opponent: ButtonGroup) -> Callable:
+	var panel: PanelContainer = PanelContainer.new()
+	panel.name = "ScoresToBeat"
+	panel.size_flags_horizontal = SIZE_EXPAND_FILL
+	panel.size_flags_vertical = SIZE_SHRINK_CENTER
+	var inset: StyleBoxFlat = StyleBoxFlat.new()
+	inset.bg_color = BeachUI.INK
+	inset.set_corner_radius_all(2)
+	for edge: String in ["left","right","top","bottom"]:
+		inset.set("content_margin_" + edge,3)
+	panel.add_theme_stylebox_override("panel",inset)
+	parent.add_child(panel)
+	var box: VBoxContainer = VBoxContainer.new()
+	box.add_theme_constant_override("separation",1)
+	panel.add_child(box)
+	BeachUI.label(box,"SCORES TO BEAT",BeachUI.FONT_NATIVE,BeachUI.GOLD).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var grid: GridContainer = GridContainer.new()
+	grid.name = "ScoreRows"
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation",4)
+	grid.add_theme_constant_override("v_separation",1)
+	box.add_child(grid)
+	var fill: Callable = func(rows: Array) -> void:
+		for child: Node in grid.get_children():
+			grid.remove_child(child)
+			child.queue_free()
+		for i: int in mini(rows.size(),VS_SCORE_ROWS):
+			var row: Dictionary = rows[i]
+			var color: Color = BeachUI.GOLD if bool(row.get("me",false)) else BeachUI.CREAM
+			BeachUI.label(grid,str(row.get("rank",i + 1)),BeachUI.FONT_NATIVE,Color("a9d7d2") if color == BeachUI.CREAM else color)
+			var who: Label = BeachUI.label(grid,str(row.name),BeachUI.FONT_NATIVE,color)
+			who.size_flags_horizontal = SIZE_EXPAND_FILL
+			var points: Label = BeachUI.label(grid,str(int(row.score)),BeachUI.FONT_NATIVE,color)
+			points.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var seed_rows: Array = []
+	for i: int in Config.vs.seed_scores.size():
+		seed_rows.append(Dictionary(Config.vs.seed_scores[i]).merged({"rank": i + 1,"me": false}))
+	var ticket: Array = [0]
+	return func() -> void:
+		ticket[0] += 1
+		var mine: int = ticket[0]
+		fill.call(seed_rows)
+		var board: String = OnlineScores.vs_board(str(arena.get_pressed_button().get_meta("id")),str(opponent.get_pressed_button().get_meta("id")))
+		OnlineScores.top(board,func(rows: Array) -> void:
+			if mine != ticket[0] or not is_instance_valid(grid) or rows.is_empty():
+				return
+			for row: Dictionary in rows:
+				row.me = not OnlineScores.player_name().is_empty() and row.name == OnlineScores.player_name()
+			fill.call(rows))
+
+const VS_SCORE_ROWS: int = 5
 const CONTROL_MODE_TEXT: Array[String] = ["TAP EVERY WINGBEAT","HOLD TO FLAP","AUTO PECK IN DIVES"]
 const SMALL_FONT: Font = preload("res://assets/fonts/gull_hud.fnt")
 
