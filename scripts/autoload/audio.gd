@@ -41,6 +41,8 @@ const APPROVALS_PATH: String = "res://data/sfx_approvals.json"
 const GULL_HITS: Array[String] = ["gull_hit_1", "gull_hit_2", "gull_hit_3"]
 const CUE_FILES: Dictionary = {"gull_call": "263786__steaq__seagull-single-call"} ## cue -> file stem when they differ
 var rejected_cues: Dictionary = {}
+var approved_cues: Dictionary = {} ## cue stems the lab approved (fresh sha1); only voices.require_approved reads them
+var has_approvals: bool = false ## false with no approvals at all, so a fresh project's voices still play
 
 func _ready() -> void:
 	for bus: String in ["SFX", "Music"]:
@@ -93,14 +95,16 @@ func _read_approvals() -> Dictionary:
 ## .ogg source is gone (get_sha1 is empty), so there the rejected status is authoritative.
 func set_approvals(sounds: Dictionary) -> void:
 	rejected_cues.clear()
+	approved_cues.clear()
+	has_approvals = not sounds.is_empty()
 	for path: Variant in sounds:
 		var entry: Variant = sounds[path]
-		if not entry is Dictionary or entry.get("status") != "rejected":
+		if not entry is Dictionary or not entry.get("status") in ["rejected","approved"]:
 			continue
 		var disk: String = _sha1("res://" + str(path))
 		if disk != "" and entry.has("sha1") and disk != str(entry.sha1):
 			continue
-		rejected_cues[str(path).get_file().get_basename()] = true
+		(rejected_cues if entry.status == "rejected" else approved_cues)[str(path).get_file().get_basename()] = true
 
 func _sha1(path: String) -> String: ## "" when the source file isn't readable (exports ship only the imported copy)
 	var bytes: PackedByteArray = FileAccess.get_file_as_bytes(path) if FileAccess.file_exists(path) else PackedByteArray()
@@ -111,8 +115,12 @@ func _sha1(path: String) -> String: ## "" when the source file isn't readable (e
 	ctx.update(bytes)
 	return ctx.finish().hex_encode()
 
+## Not allowed: rejected, or (voice cues with voices.require_approved, once any approvals exist) not approved.
 func rejected(cue: String) -> bool:
-	return rejected_cues.has(CUE_FILES.get(cue, cue))
+	var stem: String = CUE_FILES.get(cue, cue)
+	if rejected_cues.has(stem):
+		return true
+	return cue.begins_with("voice_") and has_approvals and bool(Config.tuning.voices.get("require_approved",false)) and not approved_cues.has(stem)
 
 ## A random cue from `cues` that isn't rejected, or "" when all are. With `start` >= 0 it is the first
 ## allowed cue from that index on (for deterministic alternation); "" plays nothing.
@@ -264,7 +272,10 @@ func react(event: String, kind: String, speaker: Object) -> AudioStreamPlayer:
 	var cue: String = _voice_cue(cues,str(voice.register))
 	if cue == "":
 		return null
-	var player: AudioStreamPlayer = play(cue,fx_rng.randf_range(float(span[0]),float(span[1])),float(cfg.volume_db))
+	var pitch: float = fx_rng.randf_range(float(span[0]),float(span[1]))
+	if cue.ends_with("_kid") and voice.register != "kid": # an adult borrowing a kid take sounds older
+		pitch *= float(cfg.borrow_pitch.get(voice.register,1.0))
+	var player: AudioStreamPlayer = play(cue,pitch,float(cfg.volume_db))
 	if player == null:
 		return null
 	if is_instance_valid(voice_player) and voice_player.playing:
@@ -281,7 +292,7 @@ func react(event: String, kind: String, speaker: Object) -> AudioStreamPlayer:
 ## A random allowed take among `lines` in `register`. If none is left, the other registers in turn: a line
 ## with no take of its own (wah is kid only) borrows one, and a kid is voiced by an adult only as a last resort.
 func _voice_cue(lines: Array, register: String) -> String:
-	for reg: String in [register]+VOICE_REGISTERS.filter(func(r: String) -> bool: return r != register):
+	for reg: String in [register]+Config.tuning.voices.fallback.get(register,[]):
 		var ok: Array[String] = []
 		for line: Variant in lines:
 			var cue: String = "voice_%s_%s" % [line,reg]

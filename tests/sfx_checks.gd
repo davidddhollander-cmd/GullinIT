@@ -217,6 +217,9 @@ static func _verdict_checks(check: Callable, speaker: Node, game: BeachGame) -> 
 		var sounds: Dictionary = {}
 		for stem: String in stems:
 			sounds["assets/audio/%s.ogg" % stem] = {"status": "rejected"}
+		for cue: String in Audio.streams: # voices are approved-only, so approve every take this test doesn't reject
+			if cue.begins_with("voice_") and not cue in stems:
+				sounds["assets/audio/%s.ogg" % cue] = {"status": "approved"}
 		Audio.set_approvals(sounds)
 	var made: Callable = func(p: AudioStreamPlayer) -> bool: return p != null
 	Audio.set_approvals({})
@@ -292,8 +295,60 @@ static func _verdict_checks(check: Callable, speaker: Node, game: BeachGame) -> 
 	reject.call(Audio.GULL_HITS)
 	check.call(Audio.pick(Audio.GULL_HITS) == "" and Audio.pick(Audio.GULL_HITS,1) == "","pick returns empty when every variant is rejected")
 	check.call(game != null and Audio.play(Audio.pick(Audio.GULL_HITS)) == null,"a hit sound with every variant rejected plays nothing")
+	_approved_voice_checks(check,speaker)
 	Audio.set_approvals({})
 	Audio.set_approvals({"assets/audio/x.ogg": 5, "assets/audio/y.ogg": {"status": "rejected"}})
 	check.call(Audio.rejected("y") and not Audio.rejected("x"),"malformed entries are ignored")
 	Audio.set_approvals({})
 	Audio.dog_barks = barks
+
+## Task 085: voices are approved-only (voices.require_approved), fallback and borrow_pitch come from data.
+static func _approved_voice_checks(check: Callable, speaker: Node) -> void:
+	var approve: Callable = func(cues: Array) -> void:
+		var sounds: Dictionary = {}
+		for cue: Variant in cues:
+			sounds["assets/audio/%s.ogg" % cue] = {"status": "approved"}
+		Audio.set_approvals(sounds)
+	var cfg: Dictionary = Config.tuning.voices
+	check.call(bool(cfg.require_approved),"voices.require_approved is on")
+	approve.call(["voice_oi_kid"])
+	check.call(Audio.rejected("voice_hey_kid") and not Audio.rejected("voice_oi_kid") and not Audio.rejected("snatch"),"an unreviewed voice take is not allowed, other sounds are unaffected")
+	Audio.set_approvals({"assets/audio/voice_oi_kid.ogg": {"status": "approved", "sha1": "0000"}})
+	check.call(Audio.rejected("voice_oi_kid"),"a stale approved voice take is not allowed")
+	Audio.set_approvals({})
+	check.call(not Audio.rejected("voice_hey_kid"),"with no approvals voices still play")
+	Config.tuning.voices.require_approved = false
+	approve.call(["voice_oi_kid"])
+	check.call(not Audio.rejected("voice_hey_kid"),"require_approved off allows unreviewed voices")
+	Config.tuning.voices.require_approved = true
+	# A man with only kid takes approved plays one at the borrowed pitch.
+	approve.call(["voice_hey_kid","voice_oi_kid"])
+	var ok: bool = true
+	var span: Array = cfg.pitch.man.pitch
+	for i: int in 12:
+		_quiet()
+		var p: AudioStreamPlayer = Audio.react("theft","man",speaker)
+		var mul: float = float(cfg.borrow_pitch.man)
+		ok = ok and p != null and p.stream in [Audio.streams["voice_hey_kid"],Audio.streams["voice_oi_kid"]] and p.pitch_scale >= float(span[0])*mul-0.0001 and p.pitch_scale <= float(span[1])*mul+0.0001
+	check.call(ok,"a man with only kid takes approved plays a kid take at the borrowed pitch")
+	_quiet()
+	var kid: AudioStreamPlayer = Audio.react("theft","toddler",speaker)
+	check.call(kid != null and kid.pitch_scale >= float(cfg.pitch.toddler.pitch[0])-0.0001,"a kid is not pitch-borrowed")
+	# Fallback order comes from data: kid takes first, then the order listed.
+	approve.call(["voice_hey_woman","voice_hey_man","voice_oi_kid"])
+	_quiet()
+	check.call(Audio.react("theft","woman",speaker).stream == Audio.streams["voice_hey_woman"],"the own register comes first")
+	approve.call(["voice_oi_man","voice_oi_woman"])
+	var saved: Variant = cfg.fallback.kid
+	cfg.fallback.kid = ["man","woman"]
+	_quiet()
+	var first: AudioStreamPlayer = Audio.react("theft","toddler",speaker)
+	cfg.fallback.kid = ["woman","man"]
+	_quiet()
+	var second: AudioStreamPlayer = Audio.react("theft","toddler",speaker)
+	cfg.fallback.kid = saved
+	check.call(first.stream == Audio.streams["voice_oi_man"] and second.stream == Audio.streams["voice_oi_woman"],"fallback order comes from voices.fallback")
+	# An event with no allowed take is silent for everyone.
+	approve.call(["voice_hey_kid"])
+	_quiet()
+	check.call(Audio.react("swat","man",speaker) == null and Audio.react("swat","toddler",speaker) == null,"an event with no allowed take returns null")

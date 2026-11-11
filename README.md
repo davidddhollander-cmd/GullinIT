@@ -129,6 +129,8 @@ The integration scene exercises all six timed loops, scoring, persistence, unloc
 
 SFX Lab (task 083): double-click `SFX Lab.bat` (or run `python tools/sfx_lab/sfx_lab.py`) to open a local page to browse every sound in `assets/audio` by category, play it and mark it approved or rejected (verdicts go to `data/sfx_approvals.json`). `Audio` never plays a rejected cue and picks another variant where one exists; a file that changed since review counts as unreviewed. See `tools/sfx_lab/README.md`.
 
+Approved voices (task 085): `voices.require_approved` in `data/tuning.json` makes `voice_*` cues play only when the lab approved them (unreviewed and stale count as not allowed; with no approvals at all voices still play). `voices.fallback` gives each register's order of other registers to try (own register first), so adults reach the kid takes before each other. `voices.borrow_pitch.<man|woman>` multiplies the pitch when an adult plays a kid take so it sounds older. An event with no allowed take stays silent. `menu_waves.ogg` has a gentle high shelf (about -6 dB above 5 kHz) from `tools/make_menu_waves.py`.
+
 ## Export
 
 `export_presets.cfg` contains Windows Desktop and single-threaded Web presets, explicitly including gameplay JSON. Install export templates matching your engine version, create `build/windows` and `build/web`, then use Project > Export or:

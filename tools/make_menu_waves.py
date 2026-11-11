@@ -39,6 +39,11 @@ def main():
     loop = seg[:L].copy()
     loop[:X] = seg[:X] * np.sin(t) + seg[L:L + X] * np.cos(t)
     loop -= loop.mean()
+    # David's lab note: "less sharp". Gentle high shelf, 0 dB at 3 kHz easing to -6 dB from 5 kHz up.
+    # The FFT filter is circular, so the crossfaded loop still closes on itself.
+    f = np.fft.rfftfreq(len(loop), 1 / m.SR)
+    gain = 10 ** (-6 * np.clip((f - 3000) / 2000, 0, 1) / 20)
+    loop = np.fft.irfft(np.fft.rfft(loop) * gain, len(loop))
     loop = m.peak_to(loop, -10)
     loop *= 10 ** ((TARGET_LUFS - m.lufs(loop)) / 20)
     peak = 20 * np.log10(np.max(np.abs(loop)))
