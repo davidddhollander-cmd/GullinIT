@@ -139,8 +139,10 @@ static func run(host: Node, check: Callable) -> void:
 	var bark_cues: Array[String] = Audio.dog_barks.duplicate()
 	check.call(not bark_cues.is_empty() and bark_cues.all(func(c: String) -> bool: return Audio.streams.has(c)),"dog barks resolve to loaded cues")
 	Audio.dog_barks = ["dog_bark"] # the fallback when no recorded bark is shipped
+	Audio.set_approvals({}) # the shipped verdicts reject the generated bark; this checks the fallback mechanism
 	var fallback: AudioStreamPlayer = Audio.bark()
 	check.call(fallback != null and fallback.stream == Audio.streams["dog_bark"],"with no recorded barks the generated dog_bark plays")
+	Audio.set_approvals(Audio._read_approvals())
 	Audio.dog_barks = bark_cues
 
 	# Cosmetic audio never consumes the level-seeded rng.

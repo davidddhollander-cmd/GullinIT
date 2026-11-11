@@ -1,6 +1,6 @@
 # 085 — Play only approved people voices; kid takes stand in for adults
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 083, 084 (merged)
@@ -64,4 +64,4 @@ Note: the own register still comes first, so adults use their own approved take 
 Not done: no push or merge. `data/sfx_approvals.json` untouched.
 
 ## Review notes
-<!-- Filled in by the reviewer. -->
+Reviewed by Claude Opus 2026-11-11: diff read. The third baseline failure (generated dog_bark fallback) came from the committed verdicts rejecting dog_bark; the reviewer made that check use an empty approvals map. Integration 17346 checks, 2 known failures. Known gap: for notice, kids and women fall through to huh_man (only approved take), unshifted; fix in the second sounds pass. Merged into main.
