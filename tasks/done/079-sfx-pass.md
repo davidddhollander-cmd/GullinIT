@@ -1,6 +1,6 @@
 # 079 — SFX pass: air dive, Black Back voice, snatch reward, character reactions
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -145,4 +145,4 @@ Reference: a pure sine sweep over the same range has flatness 0.0000 and the old
 Branch `sonnet/079-sfx-pass`, last commit: see `git log -1` (hash below).
 
 ## Review notes
-<!-- Filled in by the reviewer. -->
+Reviewed by Claude Opus 2026-11-11: diff and hooks read; integration 17181 checks, same 2 pre-existing failures as baseline (sunbather run-off teleport, demo lock off). Agents cannot hear audio; David auditions in game. Merged into main at f80f043.
