@@ -48,7 +48,7 @@ const QUEST_FONT_SIZE := 6
 func setup(for_level: Dictionary, for_result: Dictionary) -> void:
 	level = for_level
 	result = for_result
-	passed = bool(result.get("training", false)) and bool(result.get("success", false)) or int(result.stars) > 0 or bool(result.casual)
+	passed = bool(result.get("training", false)) and bool(result.get("success", false)) or int(result.stars) > 0 or bool(result.casual) or (is_vs() and bool(result.won))
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = false
@@ -60,6 +60,9 @@ func setup(for_level: Dictionary, for_result: Dictionary) -> void:
 		set_process(true)
 		set_process_input(true)
 	queue_redraw()
+
+func is_vs() -> bool:
+	return bool(result.get("vs", false))
 
 func _build_training() -> void:
 	var heading: Label = BeachUI.label(self,"TRAINING COMPLETE!",BeachUI.FONT_DISPLAY,CREAM)
@@ -95,7 +98,7 @@ func _build_training() -> void:
 			buttons[0].grab_focus())
 
 func _build() -> void:
-	title_label = BeachUI.label(self, ("BEACH BOSS!" if bool(result.won) else "OUT-EATEN!") if result.has("boss") else "", BeachUI.FONT_DISPLAY, CREAM)
+	title_label = BeachUI.label(self, ("BEACH BOSS!" if bool(result.won) else "OUT-EATEN!") if result.has("boss") else (("YOU WIN!" if bool(result.won) else "OUT-EATEN!") if is_vs() else ""), BeachUI.FONT_DISPLAY, CREAM)
 	_place(title_label, 38, 292, 17)
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle = BeachUI.label(self, str(level.name).to_upper() + ("  /  DEMO COMPLETE - THANKS!" if demo_finished() else ""), BeachUI.FONT_NATIVE, GOLD if demo_finished() else SEA)
@@ -106,28 +109,34 @@ func _build() -> void:
 	# between the clean bonus and the snatch/stun counts; the total ends the panel.
 	# A stunned run has no clean bonus; that row shows what the stuns and crashes cost instead,
 	# with EARNED POINTS counted before the losses so the column still adds up to TOTAL.
-	var lost := int(result.get("lost", 0))
-	if int(result.stuns) > 0:
-		_add_count_row("EARNED POINTS", int(result.base) + lost, 66)
-		_add_count_row("LOST TO HITS", lost, 75, "-%d", Color("ef725c"))
+	if is_vs():
+		var rival := str(Config.vs.opponents[level.vs.opponent].name).to_upper()
+		_add_count_row("YOU", int(result.base), 74, "%d", GOLD)
+		_add_count_row(rival, int(result.rival_best), 86)
+		_add_count_row("WON BY" if bool(result.won) else "LOST BY", absi(int(result.margin)), 106, "%d", GOLD if bool(result.won) else Color("ef725c"))
 	else:
-		_add_count_row("EARNED POINTS", int(result.base), 66)
-		_add_count_row("CLEAN BONUS", int(result.clean), 75, "+%d")
-	var y := 84.0
-	for quest: Dictionary in result.get("quests", []):
-		_add_quest_row(quest, y)
-		y += 9.0
-	var stats := BeachUI.label(self, "", BeachUI.FONT_NATIVE, CREAM)
-	stats.position = Vector2(LEFT_PANEL.position.x + 6, y)
-	stats.size = Vector2(LEFT_PANEL.size.x - 12, 9)
-	rows.append(stats)
-	row_values.append(0)
-	row_formats.append("stats")
-	_update_row(rows.size() - 1, 0.0)
-	if int(result.get("powers", 0)) > 0 and y + 18.0 <= 126.0:
-		_add_count_row("POWERS", int(result.powers), y + 9.0)
-	_add_count_row("TOTAL", int(result.score), 126, "%d", GOLD)
-	_add_rules_link()
+		var lost := int(result.get("lost", 0))
+		if int(result.stuns) > 0:
+			_add_count_row("EARNED POINTS", int(result.base) + lost, 66)
+			_add_count_row("LOST TO HITS", lost, 75, "-%d", Color("ef725c"))
+		else:
+			_add_count_row("EARNED POINTS", int(result.base), 66)
+			_add_count_row("CLEAN BONUS", int(result.clean), 75, "+%d")
+		var y := 84.0
+		for quest: Dictionary in result.get("quests", []):
+			_add_quest_row(quest, y)
+			y += 9.0
+		var stats := BeachUI.label(self, "", BeachUI.FONT_NATIVE, CREAM)
+		stats.position = Vector2(LEFT_PANEL.position.x + 6, y)
+		stats.size = Vector2(LEFT_PANEL.size.x - 12, 9)
+		rows.append(stats)
+		row_values.append(0)
+		row_formats.append("stats")
+		_update_row(rows.size() - 1, 0.0)
+		if int(result.get("powers", 0)) > 0 and y + 18.0 <= 126.0:
+			_add_count_row("POWERS", int(result.powers), y + 9.0)
+		_add_count_row("TOTAL", int(result.score), 126, "%d", GOLD)
+		_add_rules_link()
 
 	_build_scores_panel()
 
@@ -146,7 +155,7 @@ func _build() -> void:
 		star.size = Vector2(16, 16)
 		star.pivot_offset = star.size * 0.5
 		add_child(star)
-		star.visible = not bool(result.casual)
+		star.visible = not bool(result.casual) and not is_vs()
 		star_slots.append(star)
 	hint_label = BeachUI.label(self, "CLICK / TAP / CONFIRM TO TALLY", BeachUI.FONT_NATIVE, Color("f9d98b"))
 	_place(hint_label, 137, 280, 9)
@@ -157,12 +166,16 @@ func _build() -> void:
 	actions.size = Vector2(236, 14)
 	actions.add_theme_constant_override("separation", 3)
 	add_child(actions)
-	if passed and int(level.id) < Config.levels.size() and GameState.unlocked(int(level.id) + 1):
-		_add_button(actions, "NEXT >", "start", int(level.id) + 1)
-	elif demo_finished() and not GameState.feedback_url().is_empty():
-		_add_button(actions, "FEEDBACK", "feedback")
-	_add_button(actions, "RETRY / R", "restart")
-	_add_button(actions, "LEVELS", "select")
+	if is_vs():
+		_add_button(actions, "REMATCH", "vs_start", {"arena": str(level.id), "opponent": str(level.vs.opponent)})
+		_add_button(actions, "VS MENU", "vs_menu")
+	else:
+		if passed and int(level.id) < Config.levels.size() and GameState.unlocked(int(level.id) + 1):
+			_add_button(actions, "NEXT >", "start", int(level.id) + 1)
+		elif demo_finished() and not GameState.feedback_url().is_empty():
+			_add_button(actions, "FEEDBACK", "feedback")
+		_add_button(actions, "RETRY / R", "restart")
+		_add_button(actions, "LEVELS", "select")
 	for button: Button in buttons:
 		button.disabled = true
 
@@ -218,16 +231,26 @@ func _build_scores_panel() -> void:
 		points.size = Vector2(width - 78, 10)
 		points.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		score_rows.append({"rank": rank, "name": player, "score": points})
-	var board: Array = seed_scores(int(level.id))
-	if bool(result.casual):
+	var board: Array = Array(Config.vs.seed_scores) if is_vs() else seed_scores(int(level.id))
+	if is_vs():
+		# Only a win posts (the margin); a loss shows the board without the player.
+		set_high_scores(ranked_view(board, {"name": "YOU", "score": _best(), "me": true}) if bool(result.won) else board, "VS TOP 5")
+		if OnlineScores.active() and not OnlineScores.player_name().is_empty():
+			OnlineScores.submit(_board(), _best(), _show_online)
+	elif bool(result.casual):
 		set_high_scores(board, "NOT RANKED")
 	else:
 		set_high_scores(ranked_view(board, {"name": "YOU", "score": _best(), "me": true}))
 		if OnlineScores.active() and not OnlineScores.player_name().is_empty():
-			OnlineScores.submit(int(level.id), _best(), _show_online)
+			OnlineScores.submit(_board(), _best(), _show_online)
 
 func _best() -> int:
+	if is_vs():
+		return int(result.margin) if bool(result.won) else 0
 	return maxi(int(GameState.entry(int(level.id)).get("best", 0)), int(result.score))
+
+func _board() -> String:
+	return OnlineScores.vs_board(str(level.id), str(level.vs.opponent)) if is_vs() else OnlineScores.level_board(int(level.id))
 
 # The real board replaces the seeded one once Talo answers; offline keeps the seeds.
 func _show_online(entries: Array) -> void:
@@ -266,7 +289,7 @@ func _ask_name() -> void:
 			buttons[0].grab_focus()
 		if not OnlineScores.clean_name(text).is_empty():
 			OnlineScores.set_player_name(text)
-			OnlineScores.submit(int(level.id), _best(), _show_online))
+			OnlineScores.submit(_board(), _best(), _show_online))
 	field.grab_focus()
 
 func _show_rows(shown: bool) -> void:
@@ -382,7 +405,7 @@ func open_score_rules(button_text: String) -> ScoreRulesCard:
 
 # The last demo level was cleared: the next level exists but belongs to the full game.
 func demo_finished() -> bool:
-	return passed and not bool(result.get("training", false)) and GameState.demo_locked(int(level.id) + 1) and int(level.id) < Config.levels.size()
+	return passed and not is_vs() and not bool(result.get("training", false)) and GameState.demo_locked(int(level.id) + 1) and int(level.id) < Config.levels.size()
 
 func _add_count_row(caption: String, value: int, y: float, format: String = "%d", color: Color = CREAM) -> void:
 	var x := LEFT_PANEL.position.x + 6
@@ -486,13 +509,13 @@ func finish_tally() -> void:
 		stars_label.text = "*".repeat(int(result.stars)) + "-".repeat(3 - int(result.stars))
 		_light_stars(int(result.stars))
 		# Screeches' verdict lands with the stars; boss levels keep their own title.
-		if not result.has("boss"):
+		if not result.has("boss") and not is_vs():
 			var lines: Array = Config.quips.result_titles[clampi(int(result.stars), 0, 3)]
 			title_label.text = str(lines.pick_random())
 	hint_label.text = _record_text()
 	if not GameState.save_error.is_empty():
 		hint_label.add_theme_color_override("font_color", Color("ef725c"))
-	elif not bool(result.casual):
+	elif not bool(result.casual) and not is_vs():
 		BeachUI.feather_icon(hint_label)
 	var target := _target_text()
 	if not target.is_empty() and not demo_finished():
@@ -507,12 +530,14 @@ func finish_tally() -> void:
 # How far the run fell short of the next star; empty for Practice, boss levels and full marks.
 func _target_text() -> String:
 	var stars := int(result.stars)
-	if bool(result.casual) or result.has("boss") or stars >= level.stars.size():
+	if bool(result.casual) or result.has("boss") or is_vs() or stars >= level.stars.size():
 		return ""
 	var short := int(level.stars[stars]) - int(result.score)
 	return "%d MORE TO PASS" % short if stars == 0 else "%d MORE FOR STAR %d" % [short, stars + 1]
 
 func _record_text() -> String:
+	if is_vs():
+		return "A TIE IS A LOSS" if int(result.margin) == 0 else ""
 	var record: Dictionary = GameState.entry(int(level.id))
 	if not GameState.save_error.is_empty():
 		return GameState.save_error

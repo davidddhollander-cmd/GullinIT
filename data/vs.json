@@ -1,0 +1,15 @@
+{
+  "round_time": 75,
+  "board_prefix": "vs-",
+  "intro_time": 2.0,
+  "default_name": "HERRING",
+  "opponents": {
+    "gary": {
+      "name": "Gary", "blurb": "BLACK BACK", "species": "great-black-backed",
+      "speed": 0.8, "accuracy_px": 16, "mug_chance": 0.3,
+      "entry": "fly_in", "entry_text": "THIS IS MY BEACH. GET YOUR NOSH ELSEWHERE YOU GIT!",
+      "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}
+    }
+  },
+  "seed_scores": [{"name": "TIDES", "score": 180}, {"name": "SPRAT", "score": 120}, {"name": "BEAKY", "score": 60}]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "scrap_sands",
+  "authored": true,
+  "name": "Scrap Sands",
+  "seed": 8001,
+  "time_limit": 75,
+  "wind": {"dir": -1, "strength": 0.2, "gusts": false, "flip": false},
+  "awareness_mult": 1.08,
+  "rivals": [],
+  "world": {"width": 640, "promenade_start": 240, "pier_start": 640, "start_x": 45, "start_y": 105},
+  "zones": [
+    {"name": "SAND", "from": 0, "to": 240},
+    {"name": "PROMENADE", "from": 240, "to": 640}
+  ],
+  "spawns": [
+    {"type": "sunbather", "x": 90, "appearance": "female_red", "station": "sun_0", "patrol_radius": 0},
+    {"type": "kiosk_customer", "x": 345, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "ice_cream", "patrol_radius": 12},
+    {"type": "kiosk_customer", "x": 540, "food_id": "hotdog", "appearance": "shopper_mullet", "station": "hotdogs", "patrol_radius": 12},
+    {"type": "kiosk_customer", "x": 590, "food_id": "hotdog", "appearance": "old_man", "station": "hotdogs", "patrol_radius": 12},
+    {"type": "off_lead_dog", "x": 140, "home": [60, 220]}
+  ],
+  "props": [
+    {"type": "beach_palm", "x": 30, "y": 148},
+    {"type": "beach_parasol", "x": 90, "y": 143},
+    {"type": "beach_lamp", "x": 222, "y": 151},
+    {"type": "bin", "x": 250},
+    {"type": "kiosk", "x": 300, "customer_x": 345},
+    {"type": "beach_bench", "x": 400, "y": 153},
+    {"type": "wheelie_bin", "x": 440},
+    {"type": "beach_lamp", "x": 470, "y": 151},
+    {"type": "hotdog_stand", "x": 500, "customer_x": 540},
+    {"type": "bin", "x": 610}
+  ],
+  "map_version": 3
+}

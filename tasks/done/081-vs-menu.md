@@ -1,6 +1,6 @@
 # 081 — VS sub-menu
 
-Status: inbox
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 080
@@ -21,6 +21,8 @@ Players reach VS from the title screen through a sub-menu: mode list on the left
 3. **`Menus.vs_menu()`**, titled `VS`:
    - **Left wood panel (about 96 px):** three buttons named `ModeMatchup`, `ModeLadder`, `ModeMultiplayer`. MATCH-UP is enabled and shown as selected. LADDER and MULTIPLAYER are disabled with a LATER caption.
    - **Right wood panel:** label `ARENA` and a row of toggle cards, one per `Config.arenas` entry (name in capitals); label `OPPONENT` and a row of toggle cards, one per `Config.vs.opponents` entry (name and `blurb`). One card per row is always selected; the first of each is preselected.
+   - label `YOUR NAME` and a name field (reuse the result sign's name-entry rules: `OnlineScores.clean_name`, capitals and digits, `OnlineScores.NAME_LENGTH` = 8). It is prefilled with the saved player name, or with the default `HERRING` when none is saved ("HERRING GULL" does not fit the 8-character board name). The default lives in `data/vs.json` as `default_name`.
+   - On FIGHT! the cleaned field text is saved with `OnlineScores.set_player_name`; an empty field saves the default. A VS round therefore always has a name, so the VS result sign never shows its `YOUR NAME?` prompt.
    - `< BACK` (to title) and `FIGHT!`, which sends `vs_start` with the selected `{arena, opponent}` and has focus when the menu opens.
 4. **Result sign:** the second VS button from task 080 is captioned `VS MENU` and opens this menu.
 5. Remove the temporary `vs` → title routing from task 080. Keep the `--vs` dev argument.
@@ -35,14 +37,17 @@ Players reach VS from the title screen through a sub-menu: mode list on the left
 - [ ] Title → VS → gull picker → VS menu → FIGHT! starts a Scrap Sands round against Gary
 - [ ] MATCH-UP is enabled; LADDER and MULTIPLAYER are disabled
 - [ ] Arena and opponent rows are built from data, with Scrap Sands and Gary preselected
+- [ ] The name field shows the saved name or `HERRING`, saves on FIGHT!, and the VS result sign no longer asks for a name
 - [ ] REMATCH and VS MENU work from the result sign; BACK returns to the title
 - [ ] Arcade and Casual flows are unchanged (gull picker still leads to the level select)
 - [ ] Checks added to `tests/vs_checks.gd`; any test that looked for `ComingSoonButton` is updated
 - [ ] `./tools/validate.ps1` passes with no new failures
 
 ## Report
-<!-- Filled in by the implementer: what changed (files), test results (check counts),
-decisions/assumptions, anything not done, branch name and last commit hash. -->
+Files: `scripts/menus.gd` (title VS button, `vs_menu`, `_vs_panel`, `_vs_row`), `scripts/main.gd` (`vs` flag, `vs`/`vs_menu` actions, `--vs-menu` dev arg), `scripts/result_board.gd` (VS MENU sends `vs_menu`), `data/vs.json` (`default_name`), `tests/vs_checks.gd`.
+Tests: headless integration `INTEGRATION: 17300 checks, 2 failures` (baseline 17280 with the same two pre-existing failures: teleport-while-running-off and demo.json). 20 new checks.
+Decisions: the title button sends `vs` (gull picker); the result sign's VS MENU sends a new `vs_menu` action, since `vs` must open the picker. `vs_menu` also sets the flag. The VS menu's two panels are built from `BeachUI.wood_panel` with trimmed side margins so MULTIPLAYER fits 96 px at 8 px type; the "VS" title sits in the left panel. Toggle cards use a ButtonGroup (one always selected). Enter in the name field moves focus to FIGHT!. Name field styled dark, same cleaning as the result sign. Selected cards show the pressed (coral) theme style.
+Not done / not verified: no gamepad or real touch/web run (relies on shared focus and `_touch_to_gui`); the "result sign never asks for a name" check runs offline so it is weak (OnlineScores is inactive in tests).
 
 ## Review notes
 <!-- Filled in by the reviewer. -->

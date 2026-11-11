@@ -3,7 +3,9 @@ var game: BeachGame
 var menus: BeachMenus
 var background: BeachBackdrop
 var casual: bool = false
+var vs: bool = false ## picking a gull leads to the VS menu instead of the level select
 var current_level: int = 1
+var vs_round: Dictionary = {} ## {arena, opponent} of the VS round being played, for REMATCH and R
 var screen: String = "title"
 var quitting: bool = false
 var _pagehide: JavaScriptObject
@@ -77,6 +79,10 @@ func _ready() -> void:
 		JavaScriptBridge.get_interface("document").addEventListener("visibilitychange", _visibility)
 	if OS.get_cmdline_user_args().has("--smoke"):
 		_navigate("start",1)
+	elif OS.get_cmdline_user_args().has("--vs"):
+		_navigate("vs_start",{"arena": "scrap_sands","opponent": "gary"}) # dev entry: straight into a round
+	elif OS.get_cmdline_user_args().has("--vs-menu"):
+		_navigate("vs_menu") # dev entry: straight to the VS menu
 
 func _process(delta: float) -> void:
 	if background.visible:
@@ -91,8 +97,9 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			menus.title()
 			Audio.play_music("title")
 			_waves("title_db")
-		"arcade", "casual":
+		"arcade", "casual", "vs":
 			casual = action == "casual"
+			vs = action == "vs"
 			clear_game()
 			screen = "pick"
 			menus.show()
@@ -103,7 +110,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			if Config.species.species.has(str(payload)) and GameState.gull_owned(str(payload)):
 				GameState.options.gull = str(payload)
 				GameState.save_progress()
-				_navigate("select")
+				_navigate("vs_menu" if vs else "select")
 		"shop":
 			if GameState.shop_open():
 				clear_game()
@@ -133,11 +140,24 @@ func _navigate(action: String, payload: Variant = null) -> void:
 				# The Training Day card always opens lessons, even on a completed save.
 				var replay_training: bool = int(payload) == 1 and bool(GameState.entry(1).get("training_complete",false))
 				start_level(int(payload),replay_training)
+		"vs_start":
+			start_vs(str(payload.arena),str(payload.opponent))
+		"vs_menu":
+			vs = true
+			clear_game()
+			screen = "vs_menu"
+			menus.show()
+			menus.vs_menu()
+			Audio.stop_music()  # selection screens: gull calls stay audible
+			_waves("quiet_db")
 		"train_again":
 			start_level(1, true)
 		"screech_lesson":
 			start_level(2, false, true)
 		"restart":
+			if is_instance_valid(game) and not game.level.get("vs",{}).is_empty():
+				start_vs(str(vs_round.arena),str(vs_round.opponent))
+				return
 			var replaying_training: bool = is_instance_valid(game) and game.training and bool(GameState.entry(1).get("training_complete", false))
 			var replaying_lesson: bool = is_instance_valid(game) and (game.screech_lesson and bool(GameState.entry(current_level).get("screech_lesson_complete",false)))
 			start_level(current_level, replaying_training, replaying_lesson)
@@ -198,8 +218,25 @@ func _quit() -> void:
 	get_tree().quit()
 
 func start_level(id: int, force_training: bool = false, force_lesson: bool = false) -> void:
-	clear_game()
 	current_level = id
+	vs_round = {}
+	_start_game(Config.levels[id-1],force_training,force_lesson)
+	Audio.play_music("synth" if id == 1 else Audio.LEVEL_MUSIC[(id - 2) % Audio.LEVEL_MUSIC.size()])
+
+## A VS round on a deep copy of the arena (the source stays untouched) with the one opponent as its rival.
+func start_vs(arena_id: String, opponent_id: String) -> void:
+	if not Config.arenas.has(arena_id) or not Config.vs.opponents.has(opponent_id):
+		return
+	var round_level: Dictionary = Config.arenas[arena_id].duplicate(true)
+	round_level.rivals = [Config.vs.opponents[opponent_id].duplicate(true)]
+	round_level.time_limit = Config.vs.round_time
+	round_level.vs = {"opponent": opponent_id}
+	vs_round = {"arena": arena_id,"opponent": opponent_id}
+	_start_game(round_level,false,false)
+	Audio.play_music(Audio.LEVEL_MUSIC[0])
+
+func _start_game(level: Dictionary, force_training: bool, force_lesson: bool) -> void:
+	clear_game()
 	screen = "game"
 	background.hide()
 	menus.hide()
@@ -207,10 +244,9 @@ func start_level(id: int, force_training: bool = false, force_lesson: bool = fal
 	game = BeachGame.new()
 	game.name = "Game"
 	add_child(game)
-	game.setup(Config.levels[id-1],casual,force_training,force_lesson)
+	game.setup(level,casual and level.get("vs",{}).is_empty(),force_training,force_lesson)
 	game.level_finished.connect(_finished)
 	game.pause_requested.connect(func() -> void: _navigate("pause"))
-	Audio.play_music("synth" if id == 1 else Audio.LEVEL_MUSIC[(id - 2) % Audio.LEVEL_MUSIC.size()])
 
 func clear_game() -> void:
 	if is_instance_valid(game):
@@ -223,7 +259,7 @@ func clear_game() -> void:
 
 func _finished(result: Dictionary) -> void:
 	screen = "results"
-	var passed: bool = bool(result.get("success", false)) or int(result.stars) > 0 or bool(result.casual)
+	var passed: bool = bool(result.get("success", false)) or int(result.stars) > 0 or bool(result.casual) or bool(result.get("vs", false))
 	game.track_end("completed" if passed else "failed", result)
 	game.set_paused(true)
 	game.overlay.hide()

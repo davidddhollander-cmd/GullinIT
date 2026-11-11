@@ -42,17 +42,23 @@ func identifier() -> String:
 static func display_name(talo_identifier: String) -> String:
 	return talo_identifier.get_slice("#", 0)
 
-# Posts the player's best for the level, then calls done(entries) with the board view
+## Board names: levels keep "<board_prefix><id>" (level-3); a VS matchup is "vs-<arena>-<opponent>".
+func level_board(level_id: int) -> String:
+	return "%s%d" % [config.board_prefix, level_id]
+
+static func vs_board(arena_id: String, opponent_id: String) -> String:
+	return "%s%s-%s" % [Config.vs.board_prefix, arena_id, opponent_id]
+
+# Posts the player's best to the named board (score 0 posts nothing, it only fetches), then calls done(entries) with the board view
 # (top entries plus the player's own rank) for ResultBoard.set_high_scores; [] on failure.
 # done is skipped when its object was freed meanwhile (the player left the sign).
-func submit(level_id: int, score: int, done: Callable) -> void:
+func submit(board: String, score: int, done: Callable) -> void:
 	var entries: Array = []
 	if active() and not player_name().is_empty():
 		if _alias_id == 0:
 			var who: Dictionary = await _call(HTTPClient.METHOD_GET, "/players/identify?service=username&identifier=" + identifier().uri_encode())
 			_alias_id = int(who.get("alias", {}).get("id", 0))
 		if _alias_id != 0:
-			var board: String = "%s%d" % [config.board_prefix, level_id]
 			if score > 0:
 				await _call(HTTPClient.METHOD_POST, "/leaderboards/%s/entries" % board, {"score": score})
 			var top: Dictionary = await _call(HTTPClient.METHOD_GET, "/leaderboards/%s/entries/top?limit=%d" % [board, ResultBoard.SCORE_SLOTS])

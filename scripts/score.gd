@@ -46,7 +46,7 @@ func result(level: Dictionary, casual: bool, elapsed: float) -> Dictionary:
 	var total: int = points + (0 if casual else clean)
 	var stars: int = 0
 	if not casual:
-		for threshold: int in level.stars:
+		for threshold: int in level.get("stars",[]): # arenas have no star marks
 			if total >= threshold:
 				stars += 1
 	return {"score":total,"base":points,"clean":0 if casual else clean,"stars":stars,"items":items,"stuns":stuns,"lost":lost,"bonuses":bonuses.duplicate(),"elapsed":elapsed,"casual":casual}

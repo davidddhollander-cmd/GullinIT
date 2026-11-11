@@ -217,8 +217,11 @@ func setup(owner_game: BeachGame) -> void:
 	intro_panel.mouse_filter = MOUSE_FILTER_IGNORE
 	var intro: VBoxContainer = VBoxContainer.new()
 	intro_panel.add_child(intro)
-	BeachUI.label(intro,"TRAINING DAY" if game.training else "%02d / %s" % [game.level.id,game.level.name.to_upper()],8,BeachUI.GOLD)
-	if game.training:
+	if not game.is_vs():
+		BeachUI.label(intro,"TRAINING DAY" if game.training else "%02d / %s" % [game.level.id,game.level.name.to_upper()],8,BeachUI.GOLD)
+	if game.is_vs():
+		_vs_card(intro)
+	elif game.training:
 		BeachUI.label(intro,"FIVE SHORT LESSONS. TAKE YOUR TIME.")
 		BeachUI.label(intro,"NO TIMER. NO SCORE. NO MANNERS.",8,Color("80bcb8"))
 		BeachUI.label(intro,"FOLLOW THE GOLDEN RING.",8,BeachUI.GOLD)
@@ -243,12 +246,41 @@ TO PASS TO THE NEXT LEVEL" % [int(game.level.stars[0]),seconds/60,seconds%60])
 		start_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		start_button.grab_focus()
 	else:
-		BeachUI.label(intro,"ANY BUTTON TO GO",8,BeachUI.GOLD)
+		var go: Label = BeachUI.label(intro,"ANY BUTTON TO GO",8,BeachUI.GOLD)
+		if game.is_vs():
+			go.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	# Last child, so the pop-up draws over everything. Its button is the Training Day start button.
 	trainer_card = TrainerCard.new()
 	add_child(trainer_card)
 	if trainer_intro:
 		start_button = trainer_card.button
+
+## VS intro card: "<YOUR GULL> VS GARY" with both gull sprites facing off, the arena name underneath.
+func _vs_card(card: VBoxContainer) -> void:
+	var opponent: Dictionary = Config.vs.opponents[game.level.vs.opponent]
+	var mine: String = str(Config.species.species[game.player.species].name)
+	BeachUI.label(card,"%s VS %s" % [mine,str(opponent.name).to_upper()],8,BeachUI.GOLD).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var row: HBoxContainer = HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	card.add_child(row)
+	for side: Array in [[game.player.species,false],[str(opponent.species),true]]:
+		var stage: Control = Control.new()
+		stage.custom_minimum_size = Vector2(64,24)
+		stage.clip_contents = true
+		row.add_child(stage)
+		var art_id: String = "gull_" + str(side[0]).replace("-","_")
+		var bird: AnimatedSprite2D = AnimatedSprite2D.new()
+		bird.sprite_frames = Config.frames(art_id)
+		bird.scale = Vector2.ONE * float(Config.sprites[art_id].visual_scale)
+		bird.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		bird.flip_h = side[1]
+		bird.position = Vector2(20 if side[1] else 44,12) # the frames carry the bird left of centre
+		bird.play(&"glide")
+		stage.add_child(bird)
+		if not side[1]:
+			BeachUI.label(row,"VS",16,BeachUI.CREAM)
+	var arena: Label = BeachUI.label(card,str(game.level.name).to_upper(),8,Color("80bcb8"))
+	arena.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 func _small(label: Label) -> Label:
 	label.add_theme_font_override("font",HUD_FONT)
@@ -658,7 +690,7 @@ func _draw() -> void:
 	_draw_digestion()
 	if game.running:
 		_draw_perks(offset)
-		if not game.training:
+		if not game.training and not game.is_vs():
 			_draw_points()
 	if game.peck_pause:
 		_draw_peck_prompt(offset)
