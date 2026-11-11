@@ -1,6 +1,6 @@
 # 080 — VS round on Scrap Sands
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
