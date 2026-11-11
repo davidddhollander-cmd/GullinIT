@@ -449,7 +449,7 @@ static func _toughness_checks(host: Node, check: Callable) -> void:
 		fixture_frames.add_animation(&"screech")
 		fixture_frames.add_frame(&"screech",fixture_frames.get_frame_texture(fixture_frames.get_animation_names()[0],0))
 	black_player.sprite.sprite_frames = fixture_frames
-	check.call(blackback._can_screech() and is_equal_approx(blackback.screech_pitch(),0.8) and is_equal_approx(herring.screech_pitch(),1.0),"adding a clip lets a black-back screech, lower; herring pitch is unchanged")
+	check.call(blackback._can_screech() and is_equal_approx(blackback.screech_pitch(),1.0) and is_equal_approx(herring.screech_pitch(),1.0),"adding a clip lets a black-back screech; the drop is baked into bb_screech so both pitches are 1.0")
 	herring.queue_free()
 	blackback.queue_free()
 

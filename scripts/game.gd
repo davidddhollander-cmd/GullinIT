@@ -168,7 +168,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		dog.setup(float(spawn.x),spawn.home,int(level.seed)+5+dogs.size())
 		dog.barked.connect(func() -> void:
 			effects.message(dog.position-Vector2(0,24),"WOOF!",BeachUI.GOLD)
-			Audio.play("click")
+			Audio.play("dog_bark")
 		)
 		dog.caught.connect(func() -> void:
 			effects.shout(dog.position-Vector2(0,24),"GOTCHA!",Color("ef725c"))
@@ -191,6 +191,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		teen.spotted.connect(func(_gull: BeachGull) -> void:
 			effects.message(teen.position-Vector2(0,34),"HEY!",BeachUI.GOLD)
 			Audio.play("click")
+			Audio.react("warning","teen",teen)
 		)
 		teen.fired.connect(func(shot: BeachWaterShot, direction: Vector2) -> void:
 			effects.water_muzzle(shot.position,direction)
@@ -231,11 +232,12 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	player.ground_crashed.connect(_crashed)
 	score.combo_changed.connect(func(tier: int) -> void: Audio.play("score",1.0+tier*0.06,-4.0))
 	score.combo_rose.connect(func(tier: int) -> void: effects.combo_pop(player.position,str(Config.tuning.score.tiers[tier])))
-	player.dive_started.connect(func() -> void:
-		Audio.play("dive")
-		_dive_began()
+	player.dive_started.connect(_dive_began)
+	# The windup is 0.15 s, so the air rush starts with the fall (strike), not the crouch.
+	player.dive_released.connect(func(at: Vector2, heading: Vector2) -> void:
+		Audio.play(species_cue("dive","dive"),Audio.fx_rng.randf_range(0.94,1.06))
+		effects.dive_release(at,heading)
 	)
-	player.dive_released.connect(func(at: Vector2, heading: Vector2) -> void: effects.dive_release(at,heading))
 	player.stun_ignored.connect(func() -> void:
 		var now: int = Time.get_ticks_msec()
 		if brash.active() and now-last_nope_ms < int(float(Config.tuning.shakedown.nope_gap)*1000.0):
@@ -389,7 +391,7 @@ func _fly_in_step(step: float) -> void:
 	if hit:
 		player.stun(Config.tuning.rival.mug_stun,gull.position,force)
 		effects.shout(player.position-Vector2(0,20),"BUMP!",Color("ef725c"))
-		Audio.play("snatch")
+		_hit_sound()
 	entry_pilot.cooldown = 2.0
 	entry_pilot.mode = RivalPilot.Mode.RECOVER
 	overlay.show_rival_popup(str(entry_profile.name),_rival_head(),str(entry_profile.entry_text),float(Config.tuning.juice.taunt_time) * 2.5)
@@ -863,12 +865,20 @@ func _advance_screech_hold(delta: float) -> void:
 	if player.screech_held:
 		brash.screech_tick(delta)
 		if not is_instance_valid(screech_audio) or not screech_audio.playing:
-			screech_audio = Audio.play("screech_long" if rng.randf() < 0.6 else "screech_short",rng.randf_range(0.94,1.06)*screech_pitch(),-6.0)
+			screech_audio = Audio.play(species_cue("screech_long","screech_long") if rng.randf() < 0.6 else species_cue("screech_short","screech_short"),rng.randf_range(0.94,1.06)*screech_pitch(),-6.0)
 		return
 	peck_hold_elapsed += delta
 	if peck_hold_elapsed >= SCREECH_HOLD_TIME and player.start_screech():
-		screech_audio = Audio.play("screech_long",screech_pitch(),-6.0)
+		screech_audio = Audio.play(species_cue("screech_long","screech_long"),screech_pitch(),-6.0)
 		brash.fire()
+
+## The cue this gull's species uses for `key` (species.json "sfx" map), else the default cue.
+func species_cue(key: String, default: String) -> String:
+	return str(player.species_stats().get("sfx",{}).get(key,default))
+
+## A bump or bonk is a knock, not a reward: a random gull-hit sound (cosmetic RNG).
+func _hit_sound() -> void:
+	Audio.play("gull_hit_%d" % (1+Audio.fx_rng.randi()%3))
 
 func screech_pitch() -> float:
 	return float(player.species_stats().get("screech_pitch",1.0))
@@ -954,7 +964,7 @@ func _stunned() -> void:
 		stash_raids.items.append({"owner":null,"source":"dropped","food_id":dropped.id,"snack":dropped,"position":player.beak(),"velocity":Vector2(-player.facing*35,-55),"grounded":false,"age":0.0})
 	score.stunned()
 	effects.impact(player.position,true)
-	Audio.play("stun")
+	Audio.play(species_cue("stun","stun"))
 
 ## A black-back dive that sweeps the beak through a dog bumps it (the dog's own catch checks the same rule).
 func _dog_bump_check() -> void:
@@ -1003,7 +1013,10 @@ func _wire_sweeper(sweeper: BeachSweeper) -> void:
 	Audio.play("click")
 	_quest_event("sweeper_arrived")
 	sweeper.said.connect(func(key: String) -> void: _sweeper_says(sweeper,key))
-	sweeper.warned.connect(func() -> void: _quest_event("sweeper_warned"))
+	sweeper.warned.connect(func() -> void:
+		_quest_event("sweeper_warned")
+		Audio.react("warning","default",sweeper)
+	)
 	sweeper.swatted.connect(func(hit: BeachGull) -> void:
 		_sweeper_says(sweeper,"hit")
 		if hit == player:
@@ -1036,7 +1049,7 @@ func _crashed() -> void:
 	score.stunned()
 	effects.message(player.position-Vector2(0,20),str(Config.trainer.live.crash_toast) if training else "CRASH! POINTS LOST",Color("ef725c"))
 	effects.impact(player.position,true)
-	Audio.play("stun")
+	Audio.play(species_cue("stun","stun"))
 
 func _scrap_collected(at: Vector2, food_id: String) -> void:
 	player.digestion.collect(food_id,{"scrap":true})
@@ -1092,6 +1105,7 @@ func _swallowed(snack: Dictionary) -> void:
 			effects.message(player.position-Vector2(0,22),"GARY JOINS THE LUNCH RUSH!",BeachUI.GOLD)
 
 func _cry(source: BeachTarget) -> void:
+	Audio.react("cry",source.voice_kind(),source)
 	if source.kind == "toddler":
 		_quest_event("toddler_cried")
 	if is_instance_valid(source.family_parent):
@@ -1102,7 +1116,7 @@ func _whistle(source: BeachTarget) -> void:
 		if target.position.distance_to(source.position) <= float(Config.tuning.world.whistle_radius):
 			target.alert = 1
 	effects.message(source.position-Vector2(0,38),"HEY!",Color("ef725c"))
-	Audio.play("gust")
+	Audio.play("whistle")
 
 func _gust() -> void:
 	effects.message(player.position-Vector2(0,20),"WIND TURNING!" if wind.flip else "GUST INCOMING!",Color("fff4da"))
@@ -1128,7 +1142,7 @@ func _mugging() -> void:
 					effects.score_message(pilot.gull.position-Vector2(0,30),"-%d" % bump_loss,Color("ff8a7a"))
 				effects.snatch_contact(pilot.gull.position,player.velocity,false,clampf(force/float(Config.tuning.tumble.impact.max_force),0.0,1.0))
 				effects.shout(pilot.gull.position-Vector2(0,20),"BONK!",BeachUI.GOLD)
-				Audio.play("snatch",1+score.tier*0.08)
+				_hit_sound()
 				brash.earn("bump")
 				_quest_event("rival_bumped",{"name":pilot.gull.rival_name})
 				if training and lesson == MUG_LESSON and pilot.dummy:

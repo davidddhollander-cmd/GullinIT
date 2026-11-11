@@ -18,6 +18,13 @@ const MUSIC_DUCK_DB: float = -14.0
 const MUSIC_SILENT_DB: float = -40.0
 var music_track: String = ""
 var music_tween: Tween
+## Cosmetic randomness only: never touch the level-seeded rng, or level determinism breaks.
+var fx_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+const BB_CUES: Array[String] = ["bb_screech_long", "bb_screech_short", "bb_dive", "bb_stun", "bb_hit", "bb_shakedown", "bb_slam", "bb_stomp"]
+const VOICE_CUES: Array[String] = ["voice_hey", "voice_oi", "voice_whoa", "voice_aah", "voice_huh", "voice_aww", "voice_hah", "voice_wah", "dog_bark", "whistle"]
+var voice_last_ms: int = -1000000 ## when any character voice last started
+var voice_speaker_ms: Dictionary = {} ## speaker instance id -> last voice start
+var voice_player: AudioStreamPlayer
 
 func _ready() -> void:
 	for bus: String in ["SFX", "Music"]:
@@ -33,7 +40,7 @@ func _ready() -> void:
 	for cue: String in ["bag_thump", "bin_rattle", "stash_release", "release_accent", "empty_tap"]:
 		streams[cue] = _stash_stream(cue)
 	streams["gull_call"] = GULL_CALL
-	for cue: String in ["screech_long", "screech_short", "gang_call", "gull_hit_1", "gull_hit_2", "gull_hit_3", "score", "ui_confirm", "ui_back", "ui_error", "level_end", "level_end_fail", "thunder_1", "thunder_2"]:
+	for cue: String in ["screech_long", "screech_short", "gang_call", "gull_hit_1", "gull_hit_2", "gull_hit_3", "score", "ui_confirm", "ui_back", "ui_error", "level_end", "level_end_fail", "thunder_1", "thunder_2"] + BB_CUES + VOICE_CUES:
 		streams[cue] = load("res://assets/audio/%s.ogg" % cue)
 	music = AudioStreamPlayer.new()
 	music.bus = "Music"
@@ -121,6 +128,37 @@ func play(cue: String, pitch: float = 1.0, volume_db: float = 0.0) -> AudioStrea
 	add_child(player)
 	player.finished.connect(player.queue_free)
 	player.play()
+	return player
+
+## A character voice for `event` (a key of tuning.voices.events). `kind` picks the pitch range, `speaker` the per-speaker gap.
+## One voice at a time (theft may cut in); returns the player, or null when gated or the dice say no.
+func react(event: String, kind: String, speaker: Object) -> AudioStreamPlayer:
+	var cfg: Dictionary = Config.tuning.voices
+	var spec: Dictionary = cfg.events.get(event, {})
+	if spec.is_empty():
+		return null
+	var now: int = Time.get_ticks_msec()
+	var id: int = speaker.get_instance_id() if speaker != null else 0
+	if now-voice_last_ms < int(float(spec.gap)*1000.0) or now-int(voice_speaker_ms.get(id,-1000000)) < int(float(cfg.speaker_gap)*1000.0):
+		return null
+	if is_instance_valid(voice_player) and voice_player.playing and event != "theft":
+		return null
+	if fx_rng.randf() >= float(spec.chance):
+		return null
+	var cues: Array = spec.cues
+	var span: Array = cfg.pitch.get(kind, cfg.pitch.default)
+	var player: AudioStreamPlayer = play(str(cues[fx_rng.randi()%cues.size()]),fx_rng.randf_range(float(span[0]),float(span[1])),float(cfg.volume_db))
+	if player == null:
+		return null
+	if is_instance_valid(voice_player) and voice_player.playing:
+		voice_player.queue_free() # stop() would skip the finished signal that frees it
+	voice_player = player
+	voice_last_ms = now
+	voice_speaker_ms[id] = now
+	if voice_speaker_ms.size() > 64: # ponytail: drop stale speakers; they would pass the gap anyway
+		for key: Variant in voice_speaker_ms.keys():
+			if now-int(voice_speaker_ms[key]) > int(float(cfg.speaker_gap)*1000.0):
+				voice_speaker_ms.erase(key)
 	return player
 
 func play_result_reaction(success: bool, intensity: int) -> AudioStreamPlayer:

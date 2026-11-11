@@ -1,0 +1,17 @@
+Generated audio (task 079). Everything below is synthesised or derived from audio already in this folder by
+tools/make_sfx.py (numpy + ffmpeg, fixed seeds, no downloads, no third-party samples). Project-owned.
+
+dive.wav            band-passed white noise, centre sweeping 450 -> 3400 -> 800 Hz, asymmetric swell (replaces the old zip)
+snatch.wav          6 ms noise "tk" plus two soft bell notes (A5, E6), exponential decay (replaces the old blip)
+bb_screech_long.ogg   <- screech_long.ogg: 0.72x speed, octave-lower layer, tanh saturation, 180-400 Hz boost, 5 kHz roll-off, 38 Hz growl AM, trimmed to 4.5 s, loudness matched
+bb_screech_short.ogg  <- screech_short.ogg: same chain
+bb_shakedown.ogg      <- screech_long.ogg: same chain with extra low end and harder saturation, 3.2 s, loudness matched to gang_call
+bb_dive.ogg         heavier, lower band-passed noise swoosh plus low rumble
+bb_stun.ogg         glottal-pulse croak through low formants plus a sine thump
+bb_hit.ogg          sine thump drop plus low-passed noise crack, saturated
+bb_slam.ogg         deep sine drop, noise crack and low rumble, saturated
+bb_stomp.ogg        soft sine thud with a little low-passed dust noise
+voice_hey/oi/whoa/aah/huh/aww/hah/wah.ogg
+                    cartoon gibberish: glottal pulse train (vibrato, jitter) through moving vowel formants, noise for the "h" onsets
+dog_bark.ogg        noisy glottal burst through "a" formants plus a short "rf" noise tail
+whistle.ogg         two-tone sine trill (2.8 / 3.35 kHz, 22 Hz) with pea-rattle amplitude modulation and breath noise

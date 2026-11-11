@@ -29,6 +29,8 @@ func theft(owner: BeachTarget, gull: BeachGull, perfect: bool = false) -> void:
 		return
 	if mode.is_empty():
 		home = owner.position.x
+	if mode not in ["surprise","chase","notice"]: # once per new reaction, not per snatch
+		Audio.react("notice" if owner.kind == "sunbather" else "theft",owner.voice_kind(),owner)
 	focus = gull
 	committed = perfect and owner.kind in ["kiosk_customer","pier_diner"]
 	if committed:
@@ -65,6 +67,8 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 				home = owner.position.x
 				focus = gull
 				mode = "warning"
+				if owner.kind != "lifeguard": # the lifeguard has the whistle
+					Audio.react("warning",owner.voice_kind(),owner)
 				timer = (float(Config.tuning.world.sunbather_warning_time) if owner.kind == "sunbather" else 0.35) * owner.reaction_delay
 				window = 5
 				owner.alert = maxf(owner.alert,0.5)
@@ -109,6 +113,8 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 	elif mode == "chase":
 		if not is_instance_valid(focus) or timer <= 0 or (not committed and (focus.position.y < 100 or absf(focus.position.x-home)>85)):
 			mode = "give_up" if committed else "return"
+			if mode == "give_up":
+				Audio.react("give_up",owner.voice_kind(),owner)
 			timer = (FAILED_CHASE_ANGER_TIME if _uses_theft_reaction_pilot(owner) else float(Config.tuning.world.snatch_give_up_time)) if committed else 0.0
 			swat_timer = -1
 			if _uses_theft_reaction_pilot(owner):
@@ -180,4 +186,5 @@ func _hit(owner: BeachTarget) -> void:
 		if owner.kind in ["pier_diner","lifeguard","kiosk_customer"]:
 			owner.action_pose_time = 0.28
 		focus.stun(-1.0,owner.position)
+		Audio.react("swat",owner.voice_kind(),owner)
 		owner.mum_swat_time = 0.25

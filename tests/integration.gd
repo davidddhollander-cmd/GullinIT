@@ -194,6 +194,7 @@ func run() -> void:
 	preload("res://tests/old_man_art_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/slow_adult_checks.gd").run_checks(self,Callable(self,"check"))
 	preload("res://tests/crowd_spacing_checks.gd").run_checks(self, Callable(self,"check"))
+	preload("res://tests/sfx_checks.gd").run(self,Callable(self,"check"))
 	await sunbather_reaction_flow_checks()
 	await art_checks()
 	await food_checks()

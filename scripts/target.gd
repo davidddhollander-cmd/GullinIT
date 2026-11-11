@@ -922,6 +922,19 @@ func _finish_theft(gull: BeachGull, risky: bool) -> void:
 		cried.emit(self)
 	update_art_pose(leaving)
 
+## Which pitch range of tuning.voices.pitch this person speaks in.
+func voice_kind() -> String:
+	match kind:
+		"toddler":
+			return "toddler"
+		"picnic_family":
+			return "woman"
+		"sunbather":
+			return "woman" if sunbather_female else "man"
+		"kiosk_customer":
+			return "old_man" if shopper_appearance == "old_man" else ("woman" if shopper_appearance == "shopper_sundress" else "man")
+	return "default"
+
 func _draw() -> void:
 	if kind == "sunbather":
 		# Current character atlases have no baked towel, including their rest poses.
