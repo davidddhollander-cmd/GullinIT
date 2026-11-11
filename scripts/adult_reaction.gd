@@ -78,6 +78,8 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 			near[gull] = false
 	if mode.is_empty():
 		return false
+	if owner.glance_gate():
+		return true # lying back down: sunglasses first, then stand
 	if owner.bench_visit.phase != BenchVisit.Phase.NONE:
 		owner.bench_visit.interrupt(owner)
 		if owner.bench_visit.anchored():
@@ -109,9 +111,9 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 		if timer <= 0:
 			owner.stash_standing = true
 			mode = "chase"
-			timer = 3
+			timer = float(Config.tuning.world.stash_chase_time)
 	elif mode == "chase":
-		if not is_instance_valid(focus) or timer <= 0 or (not committed and (focus.position.y < 100 or absf(focus.position.x-home)>85)):
+		if not is_instance_valid(focus) or timer <= 0 or (not committed and (focus.position.y < 100 or absf(focus.position.x-home)>(float(Config.tuning.world.stash_chase_leash) if owner.kind == "sunbather" else 85.0))):
 			mode = "give_up" if committed else "return"
 			if mode == "give_up":
 				Audio.react("give_up",owner.voice_kind(),owner)
@@ -120,7 +122,7 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 			if _uses_theft_reaction_pilot(owner):
 				owner.facing = escape_direction
 		else:
-			var reach: float = float(Config.tuning.world.snatch_chase_distance) if committed else 80.0
+			var reach: float = float(Config.tuning.world.snatch_chase_distance) if committed else (float(Config.tuning.world.stash_chase_leash) if owner.kind == "sunbather" else 80.0)
 			var destination: float = clampf(focus.position.x,home-reach,home+reach)
 			if committed and focus.position.y < 100 and absf(destination-owner.position.x)<12.0:
 				destination = home+escape_direction*reach
@@ -138,7 +140,7 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 			elif focus.position.distance_to(owner.position-Vector2(0,12)) < 24 and swat <= 0:
 				swat_timer = maxf(0.4,0.4 * owner.reaction_delay)
 			elif moving and not whistle_pause:
-				owner.position.x = move_toward(owner.position.x,destination,(30.0 if owner.kind == "sunbather" else 45.0*owner.chase_speed_mult)*delta)
+				owner.position.x = move_toward(owner.position.x,destination,(float(Config.tuning.world.stash_chase_speed) if owner.kind == "sunbather" else 45.0*owner.chase_speed_mult)*delta)
 	elif mode == "give_up":
 		if _uses_theft_reaction_pilot(owner):
 			# Planted presentation only: this state never arms the swat timer or calls _hit().

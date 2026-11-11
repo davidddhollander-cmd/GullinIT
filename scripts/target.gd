@@ -107,34 +107,57 @@ var sleep_state: SleepState = SleepState.SLEEPING
 var sleep_pecks: int = 0
 var rise_remaining: float = 0.0
 var shoo_left: float = 0.0
+var glanced: bool = false ## an awake sunbather lying down has already looked through the sunglasses this time
 const STEP_ON_RADIUS: float = 18.0
 
+## Sleepers are protected from proximity; the second bag peck (or a gull landing on them) wakes them.
 func register_bag_peck() -> void:
 	if sleep_state != SleepState.SLEEPING:
 		return
 	sleep_pecks += 1
-	if sleep_pecks >= 2:
-		shoo_left = SunbatherArt.shoo_time() # wave the gull away from the bag, still lying down
 	if sleep_pecks >= int(Config.tuning.world.sunbather_sleep_pecks):
-		sleep_state = SleepState.WAKING
-		rise_remaining = float(Config.tuning.world.sunbather_rise_time)*reaction_delay
+		_begin_waking()
 	queue_redraw()
 
-func _tick_sleep(delta: float, gulls: Array[BeachGull] = []) -> bool:
-	if kind != "sunbather" or sleep_state == SleepState.AWAKE:
+## Waking always starts with the sunglasses check, still lying down, then the rise.
+func _begin_waking() -> void:
+	sleep_state = SleepState.WAKING
+	shoo_left = SunbatherArt.shoo_time()
+	rise_remaining = float(Config.tuning.world.sunbather_rise_time)*reaction_delay
+
+## An awake sunbather lying back down always looks through the sunglasses before standing for a new
+## disturbance. Returns true while that look is still playing; callers hold their stand-up until then.
+func glance_gate() -> bool:
+	if kind != "sunbather" or sleep_state != SleepState.AWAKE or stash_standing:
 		return false
-	# A rival standing on the sleeper wakes them at once; only pecks at the bag are protected.
+	if not glanced:
+		glanced = true
+		shoo_left = SunbatherArt.shoo_time()
+	return shoo_left > 0.0
+
+func _tick_sleep(delta: float, gulls: Array[BeachGull] = []) -> bool:
+	if kind != "sunbather":
+		return false
+	if sleep_state == SleepState.AWAKE:
+		if stash_standing:
+			glanced = false # up again; the next time they lie down they look first
+		elif shoo_left > 0.0:
+			shoo_left = maxf(0.0,shoo_left-delta)
+			SunbatherArt.shoo_pose(self,1.0-shoo_left/SunbatherArt.shoo_time())
+			queue_redraw()
+			return true
+		return false
+	# A gull landing on the sleeper wakes them at once; only pecks at the bag are counted.
 	if sleep_state == SleepState.SLEEPING:
 		for gull: BeachGull in gulls:
-			if gull.rival and gull.state == BeachGull.State.GROUNDED and absf(gull.position.x-position.x) < STEP_ON_RADIUS:
-				sleep_state = SleepState.WAKING
-				rise_remaining = float(Config.tuning.world.sunbather_rise_time)*reaction_delay
+			if gull.state == BeachGull.State.GROUNDED and absf(gull.position.x-position.x) < STEP_ON_RADIUS:
+				_begin_waking()
 				break
-	# Neither proximity nor first-burst theft can bypass the four protected hits.
+	# Proximity and first-burst theft alone never wake a sleeper.
 	alert = 0.0
 	defense = 0.0
 	if shoo_left > 0.0:
-		# Lying-down shoo comes first; the rise (if woken) starts once the wave is over.
+		# The sunglasses check comes first; the rise (if woken) starts once it is over.
 		shoo_left = maxf(0.0,shoo_left-delta)
 		SunbatherArt.shoo_pose(self,1.0-shoo_left/SunbatherArt.shoo_time())
 	elif sleep_state == SleepState.SLEEPING:
@@ -1016,10 +1039,6 @@ func _draw() -> void:
 			var glint: Texture2D = PickupShine.overlay(BAG_TEXTURES[bag_variant],shine_time,stash_home_x*0.37)
 			if glint != null:
 				draw_texture_rect(glint,Rect2(bag_at,bag_size),false)
-		if stash_remaining > 0:
-			draw_rect(Rect2(bag+Vector2(-5,1),Vector2(stash_remaining*3+1,4)),Color("183b4e"))
-		for i: int in stash_remaining:
-			draw_rect(Rect2(bag+Vector2(-4+i*3,2),Vector2(2,2)),Color("ffc65c"))
 		draw_set_transform(Vector2.ZERO)
 	if kind == "picnic_family":
 		for i: int in supply_crisps:

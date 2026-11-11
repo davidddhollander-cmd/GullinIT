@@ -1,0 +1,14 @@
+Use case: identity-preserve. Asset: production pixel-art sprite sheet for a small beach game. Reference image is the exact existing FEMALE sunbather, reclining on her side with head LEFT, feet RIGHT, brown hair in a bun, orange tan skin, RED swimsuit. Preserve her exact body proportions, clothing, hair and reclining silhouette. Replace the prior waving action with a quiet sunglasses check.
+
+Output ONE horizontal strip of FIVE equal square cells, transparent background. Five full-body poses, no other objects, no labels. Keep torso, legs, feet, supporting elbow and head position absolutely stationary and identically aligned across every cell. She stays lying flat on the ground. The free hand moves only to lift her sunglasses, never waves.
+
+Five frames LEFT TO RIGHT:
+1 REST: original relaxed pose, black sunglasses cover eyes, free hand resting.
+2 LIFT: thumb and index finger pinch the outer corner of the sunglasses and slide them UP to the forehead, visibly ABOVE the eyes; sleepy eyes opening.
+3 LOOK LEFT: sunglasses held ABOVE BOTH EYEBROWS with lenses completely clear of BOTH EYES. Both eyes wide open: two bright white eye shapes and two dark pupils shifted together to the LEFT sides of the whites. Head does NOT turn. Free hand holds glasses at the temple.
+4 LOOK RIGHT: EXACT SAME pose, head, hand and raised sunglasses as frame 3; ONLY the two pupils move together to the RIGHT sides of the bright white eye shapes. Ther must read unmistakably as looking in the opposite direction.
+5 LOWER: sunglasses returned over eyes, hand returns toward resting pose, compatible with frame 1.
+
+Critical eye detail: in frames 3 AND 4 the viewer must see TWO distinct WHITE EYES with DARK PUPILS, unobstructed by glasses, hair or fingers. Make the eyes slightly exaggerated to remain readable at tiny game scale. Do NOT draw dark sunglasses over the eyes in these middle frames. Glasses are a separate black shape ABOVE the eyebrows. The pupil shifts are the focal point, not an arm gesture. Expression: sleepy, mildly annoyed, 'who disturbed my nap?'
+
+Crisp restrained pixel-art like the reference, flat orange skin shading, navy-black outlines, no smooth painting, no antialiasing, no motion lines. 128x128 logical source cells at scale 0.5; reclining body approximately 98 source pixels wide; lowest occupied row 115, with lots of transparent space above. If rendered larger, use crisp enlarged pixel blocks. Do not enlarge the head disproportionately, sit up, rotate the head, move the torso or feet, add a towel, scenery, shadows, text, extra limbs or extra people. Transparent alpha background.

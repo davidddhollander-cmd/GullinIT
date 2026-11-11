@@ -57,6 +57,7 @@ func pin_base_reactions() -> void:
 	for world: Dictionary in [Config.tuning.world, Config.default_world]:
 		world.sunbather_rise_time = 0.7
 		world.sunbather_shoo_time = 0.0
+		world.sunbather_sleep_pecks = 4 # these fixtures walk four protected pecks; slow_adult_checks covers the two-peck wake
 
 func run() -> void:
 	BeachGame.trainer_cards = false # lesson-logic tests drive lessons without dismissing pop-ups; trainer_checks.gd covers the cards

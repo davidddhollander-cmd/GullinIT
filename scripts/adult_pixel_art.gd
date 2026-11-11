@@ -16,7 +16,8 @@ const SUN_CLIPS := {
 	"rest": 4, "rise": 7, "idle": 4, "eat": 4,
 	"walk": 6, "walk_left": 6, "alert": 4, "block": 4,
 	"swat": 6, "chase": 6, "chase_left": 6,
-	"kick": 6, "kick_left": 6, "pickup": 5, "run": 7, "run_left": 7
+	"kick": 6, "kick_left": 6, "pickup": 5, "run": 7, "run_left": 7,
+	"lie_shoo": 5 # sunglasses check, atlas cells 88-92
 }
 static func clips(mum: bool) -> Dictionary:
 	return MUM_CLIPS if mum else SUN_CLIPS

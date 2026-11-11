@@ -193,7 +193,7 @@ func _make(id: String, species: String, gull_path: bool, motion: String) -> Dict
 			sprite.stop()
 		else:
 			sprite.play(wanted)
-		sprite.set_meta(&"half_height", float(def.frame_h) * sprite.scale.y * 0.5)
+		sprite.set_meta(&"half_height", float(def.frame_h) * sprite.scale.y * 0.5 - float(comparisons[index].get("drop", 0.0))) # drop: art sits above its cell bottom, e.g. a towel
 		sprite.set_meta(&"source_left", bool(def.get("animations", {}).get("walk", {}).get("source_left", false)))
 		stage.add_child(sprite)
 		if motion == "in_beak":

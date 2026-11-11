@@ -7,6 +7,8 @@ static func run(root: Node, check: Callable) -> void:
 	game.set_physics_process(false)
 	game.running = true
 	game.intro = 0.0
+	var sleep_pecks_base: int = int(Config.tuning.world.sunbather_sleep_pecks)
+	Config.tuning.world.sunbather_sleep_pecks = 4 # this fixture walks the whole protected raid; slow_adult_checks covers the two-peck wake
 	var owner := game.spawner.create("sunbather",180.0)
 	var other := game.spawner.create("sunbather",310.0)
 	var gull: BeachGull = game.player
@@ -26,9 +28,9 @@ static func run(root: Node, check: Callable) -> void:
 		var counted: int = owner.sleep_pecks
 		check.call(not raids.peck() and owner.sleep_pecks == counted,"rejected repeat cannot consume a protected hit")
 		owner.reaction.theft(owner,gull)
-		owner.tick(5.0,[gull])
+		owner.tick(5.0,[])
 		raids.tick(5.0)
-		check.call(owner.sleep_state == BeachTarget.SleepState.SLEEPING and owner.reaction.mode.is_empty() and not owner.stash_standing and owner.sprite.animation == &"rest","time, proximity and theft cannot wake protected sleeper")
+		check.call(owner.sleep_state == BeachTarget.SleepState.SLEEPING and owner.reaction.mode.is_empty() and not owner.stash_standing and owner.sprite.animation == &"rest","time and theft cannot wake protected sleeper")
 	check.call(owner.stash_remaining == 1,"first food burst still happens on third hit")
 	check.call(not raids.items.is_empty(),"sleeping owner leaves scattered food for the gull")
 	# Collect a real first-burst snack through the normal loose-food collision path.
@@ -73,6 +75,56 @@ static func run(root: Node, check: Callable) -> void:
 	raids.peck_cooldown = 0.0
 	raids.peck()
 	check.call(owner.sleep_pecks == history,"empty bag taps do not change wake history")
+	# Awake but lying back down: a new raid gets the sunglasses check before the owner stands.
+	var shoo_base: float = float(Config.tuning.world.sunbather_shoo_time)
+	Config.tuning.world.sunbather_shoo_time = 1.2
+	owner.stash_remaining = 3
+	owner.stash_standing = false
+	owner.glanced = false
+	owner.position.x = owner.stash_home_x
+	gull.land()
+	gull.position.x = owner.stash_position().x-10.0
+	raids.peck_cooldown = 0.0
+	check.call(raids.peck(),"a lying awake owner's bag can be pecked again")
+	for frame: int in 40:
+		owner.tick(0.02,[])
+		raids.tick(0.02)
+	check.call(not owner.stash_standing and owner.sprite.animation == &"lie_shoo","a new raid on a lying awake owner starts with the sunglasses check, not standing")
+	var stood: bool = false
+	for frame: int in 80:
+		owner.tick(0.02,[])
+		raids.tick(0.02)
+		stood = stood or owner.stash_standing
+	check.call(stood,"the owner stands once the sunglasses check is over")
+	Config.tuning.world.sunbather_shoo_time = shoo_base
+	# A woken owner goes for the nearest gull first (chasing it), and only then retrieves snacks.
+	var hunter: BeachTarget = other
+	hunter.sleep_state = BeachTarget.SleepState.AWAKE
+	hunter.stash_standing = true
+	hunter.stash_remaining = 3
+	hunter.position.x = hunter.stash_home_x
+	raids.items.clear()
+	gull.land()
+	gull.state = BeachGull.State.GROUNDED
+	gull.position = Vector2(hunter.stash_home_x+70.0,float(Config.tuning.world.ground)-3.0)
+	gull.previous_beak = gull.beak()
+	gull.sweep_beak = gull.beak()
+	raids.peck_cooldown = 0.0
+	raids.raids.erase(hunter)
+	raids.raids[hunter] = {"pecks":0,"notice":0.0,"swat":0.0,"action":"","action_time":0.0,"pickup_item":{},"raider":gull}
+	raids.items.append({"owner":hunter,"food_id":"cookie","position":Vector2(hunter.stash_home_x-30.0,float(Config.tuning.world.ground)-3.0),"velocity":Vector2.ZERO,"grounded":true,"age":1.0})
+	var start_x: float = hunter.position.x
+	var advanced: bool = false
+	var hit_before_pickup: bool = false
+	for frame: int in 200:
+		hunter.tick(0.02,[])
+		raids.tick(0.02)
+		advanced = advanced or hunter.position.x > start_x+20.0
+		if gull.state == BeachGull.State.STUNNED and not hit_before_pickup:
+			hit_before_pickup = raids.items.size() == 1 and hunter.stash_remaining == 3
+	check.call(advanced,"a woken owner chases the nearest gull towards it, away from the dropped snack")
+	check.call(hit_before_pickup,"the chase ends with a hit on the gull before the snack is picked up")
+	gull.state = BeachGull.State.GROUNDED
 	# Real clean swept snatches commit to a visible pursuit, even during high escape.
 	for kind: String in ["kiosk_customer","pier_diner"]:
 		var victim_spawn: Dictionary = {"food_id":"ice_cream"}
@@ -134,3 +186,4 @@ static func run(root: Node, check: Callable) -> void:
 	check.call(not training_actor.routine.enabled,"tutorial target retains its authored short patrol")
 	training_actor.free()
 	game.free()
+	Config.tuning.world.sunbather_sleep_pecks = sleep_pecks_base

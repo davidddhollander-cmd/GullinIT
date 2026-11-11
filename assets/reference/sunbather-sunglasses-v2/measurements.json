@@ -1,0 +1,170 @@
+{
+  "male-red": {
+    "bounds": [
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ]
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "source_pixel_grid": 2,
+    "screen_pixel_grid": 1.0,
+    "production_palette": "generated red",
+    "fit": "resting envelope"
+  },
+  "female-red": {
+    "bounds": [
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ]
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "source_pixel_grid": 2,
+    "screen_pixel_grid": 1.0,
+    "production_palette": "generated red",
+    "fit": "resting envelope"
+  },
+  "male-blue": {
+    "bounds": [
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ]
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "source_pixel_grid": 2,
+    "screen_pixel_grid": 1.0,
+    "production_palette": "existing Godot garment conversion",
+    "fit": "resting envelope"
+  },
+  "female-blue": {
+    "bounds": [
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ]
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "source_pixel_grid": 2,
+    "screen_pixel_grid": 1.0,
+    "production_palette": "existing Godot garment conversion",
+    "fit": "resting envelope"
+  }
+}

@@ -105,6 +105,22 @@ func nearby_stash(include_empty: bool = false) -> BeachTarget:
 			nearest = target
 	return nearest
 
+## Nearest low-flying or grounded gull (player or rival) within the owner's chase range and leash, or null.
+func _chase_foe(owner: BeachTarget, t: Dictionary) -> BeachGull:
+	var gulls: Array[BeachGull] = [game.player]
+	for pilot: RivalPilot in game.pilots:
+		gulls.append(pilot.gull)
+	var best: BeachGull = null
+	var best_gap: float = float(t.stash_chase_range)
+	for candidate: BeachGull in gulls:
+		if not is_instance_valid(candidate) or candidate.state == BeachGull.State.STUNNED or candidate.untargetable() or candidate.position.y <= float(owner.info.altitude):
+			continue
+		var gap: float = absf(candidate.position.x-owner.position.x)
+		if gap < best_gap and absf(candidate.position.x-owner.stash_home_x) <= float(t.stash_chase_leash):
+			best = candidate
+			best_gap = gap
+	return best
+
 func peck() -> bool:
 	if peck_cooldown > 0 or not game.running:
 		return false
@@ -134,6 +150,9 @@ func peck() -> bool:
 		raid.notice = float(t.sunbather_notice_delay)*owner.reaction_delay
 	raid.raider = _gull()
 	raid.pecks += 1
+	if owner.sleep_state == BeachTarget.SleepState.AWAKE: # a fresh peck re-angers a settled or distracted owner
+		raid.chase_left = float(t.stash_chase_time)
+		raid.struck = false
 	owner.register_bag_peck()
 	if owner.sleep_state == BeachTarget.SleepState.AWAKE:
 		owner.alert = minf(1,owner.alert+float(t.peck_alert))
@@ -354,6 +373,8 @@ func tick(delta: float) -> void:
 			continue
 		if owner.panic.state != CrowdPanic.State.NONE:
 			continue # running from a squall or a gang call: the bag can wait
+		if owner.glance_gate():
+			continue # lying back down: sunglasses first, then stand
 		raid["action"] = str(raid.get("action",""))
 		raid["action_time"] = float(raid.get("action_time",0.0))
 		raid["pickup_item"] = raid.get("pickup_item",{})
@@ -363,6 +384,10 @@ func tick(delta: float) -> void:
 		if notice > 0.0:
 			continue
 		owner.stash_standing = true
+		if not raid.has("chase_left"): # just stood up: the nearest gull comes first, the snacks after
+			raid.chase_left = float(t.stash_chase_time)
+			raid.struck = false
+		raid.chase_left = maxf(0.0,float(raid.chase_left)-delta)
 		var action: String = str(raid.action)
 		if action == "pickup":
 			raid.action_time -= delta
@@ -379,6 +404,7 @@ func tick(delta: float) -> void:
 			if raid.action_time <= 0:
 				if raider.state != BeachGull.State.STUNNED and raider.position.distance_to(owner.position-Vector2(0,12)) < float(t.stash_swat_reach):
 					raider.swatted(-1.0,owner.position)
+					raid.struck = true
 				raid.swat = float(t.stash_swat_cooldown)
 				raid.action = "swat_follow"
 				raid.action_time = SunbatherArt.SWAT_FOLLOW
@@ -416,6 +442,12 @@ func tick(delta: float) -> void:
 				distance = gap
 		var destination: float = float(items[nearest].position.x) if nearest >= 0 else owner.stash_home_x
 		var moving: bool = false
+		# Until the gull has been hit (or the chase runs out) the owner goes for the nearest gull before any snack.
+		var foe: BeachGull = _chase_foe(owner,t) if action == "" and float(raid.chase_left) > 0.0 and not bool(raid.struck) else null
+		if foe != null:
+			raid.raider = foe
+			raider = foe
+			destination = clampf(foe.position.x,owner.stash_home_x-float(t.stash_chase_leash),owner.stash_home_x+float(t.stash_chase_leash))
 		# Start the telegraphed attack before choosing a return/settle action.
 		if action == "" and raid.swat <= 0 and raider.state != BeachGull.State.STUNNED and raider.position.distance_to(owner.position-Vector2(0,12)) < float(t.stash_swat_reach):
 			raid.action = "swat_windup"
@@ -428,8 +460,10 @@ func tick(delta: float) -> void:
 			moving = absf(destination-owner.position.x)>1
 			if moving:
 				owner.sunbather_run_time += delta
-			owner.position.x = move_toward(owner.position.x,destination,float(t.stash_retrieve_speed)*delta)
-			if nearest >= 0 and absf(owner.position.x-destination) <= 3:
+			owner.position.x = move_toward(owner.position.x,destination,float(t.stash_chase_speed if foe != null else t.stash_retrieve_speed)*delta)
+			if foe != null:
+				pass # chasing: no pickup or settling until the gull is dealt with
+			elif nearest >= 0 and absf(owner.position.x-destination) <= 3:
 				raid.action = "pickup"
 				raid.action_time = SunbatherArt.PICKUP_PAUSE
 				raid.pickup_item = items[nearest]

@@ -1,0 +1,182 @@
+{
+  "male-red": {
+    "original_cells_identical": 88,
+    "production_size": [
+      1024,
+      1536
+    ],
+    "alpha_values": [
+      0,
+      255
+    ],
+    "bounds": [
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ]
+    ],
+    "source_grid": 2,
+    "screen_grid": 1
+  },
+  "male-blue": {
+    "original_cells_identical": 88,
+    "production_size": [
+      1024,
+      1536
+    ],
+    "alpha_values": [
+      0,
+      255
+    ],
+    "bounds": [
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ],
+      [
+        20,
+        82,
+        108,
+        116
+      ]
+    ],
+    "source_grid": 2,
+    "screen_grid": 1
+  },
+  "female-red": {
+    "original_cells_identical": 88,
+    "production_size": [
+      1024,
+      1536
+    ],
+    "alpha_values": [
+      0,
+      255
+    ],
+    "bounds": [
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ]
+    ],
+    "source_grid": 2,
+    "screen_grid": 1
+  },
+  "female-blue": {
+    "original_cells_identical": 88,
+    "production_size": [
+      1024,
+      1536
+    ],
+    "alpha_values": [
+      0,
+      255
+    ],
+    "bounds": [
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ],
+      [
+        15,
+        80,
+        113,
+        116
+      ]
+    ],
+    "source_grid": 2,
+    "screen_grid": 1
+  }
+}
