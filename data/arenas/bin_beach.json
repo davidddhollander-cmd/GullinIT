@@ -1,0 +1,30 @@
+{
+  "id": "bin_beach",
+  "authored": true,
+  "name": "Bin Beach",
+  "seed": 8002,
+  "time_limit": 75,
+  "sweeper": {"enabled": true, "range": [24, 620], "first_arrival": 10, "dwell": 40, "absence": [12, 18]},
+  "wind": {"dir": 1, "strength": 0.2, "gusts": false, "flip": false},
+  "awareness_mult": 1.08,
+  "rivals": [],
+  "world": {"width": 640, "promenade_start": 640, "pier_start": 640, "start_x": 45, "start_y": 105},
+  "zones": [
+    {"name": "BIN BEACH", "from": 0, "to": 640}
+  ],
+  "spawns": [
+    {"type": "sunbather", "x": 320, "appearance": "male_blue", "station": "sun_0", "patrol_radius": 0}
+  ],
+  "props": [
+    {"type": "beach_palm", "x": 26, "y": 148},
+    {"type": "bin", "x": 75},
+    {"type": "wheelie_bin", "x": 150},
+    {"type": "bin", "x": 230},
+    {"type": "beach_parasol_blue", "x": 320, "y": 143},
+    {"type": "bin", "x": 405},
+    {"type": "wheelie_bin", "x": 475},
+    {"type": "bin", "x": 545},
+    {"type": "bin", "x": 610}
+  ],
+  "map_version": 3
+}
