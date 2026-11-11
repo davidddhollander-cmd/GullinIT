@@ -93,6 +93,8 @@ The player gull now uses the supplied sprite-sheet artwork with standing, walkin
 - `data/foods.json`: eleven foods in small, medium and large categories, including three bin leftovers, with points, sizes and sprites. See `docs/FOOD.md` for values and artwork details.
 - `data/targets.json`: each person's possible foods, awareness and defensive behavior.
 - `data/levels/level_01.json` through `level_06.json`: level layout, rivals, wind, timers, and star thresholds.
+- `data/vs.json`: VS mode (round time, board prefix, intro time, opponent profiles, offline seed scores). Loaded as `Config.vs`. Dev entry: run with `-- --vs` for Scrap Sands against Gary.
+- `data/arenas/*.json`: VS arenas in the level-file schema, keyed by `id` into `Config.arenas` (kept out of `Config.levels` and the Arcade level select). VS boards post the margin to `vs-<arena>-<opponent>` on a win.
 - `data/sprites.json`: sprite sheet paths, dimensions, frame indices, animation speeds, and loop settings. Replace the PNGs while preserving those contracts, or update the manifest to match new sheets.
 - `tools/generate_assets.py`: original placeholder pixel art, font, sounds, and initial JSON generator (Python standard library only). **Running it overwrites assets and tuning data**, including hand edits; back up changes first.
 - Menu typography uses the bundled 8 px GullPixel bitmap face at its native size or an exact 2x size. Keep menu font overrides on that 8 px grid so one-pixel letter strokes stay crisp.

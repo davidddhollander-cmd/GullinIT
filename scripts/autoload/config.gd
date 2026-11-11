@@ -10,6 +10,8 @@ var species: Dictionary = {} ## data/species.json: {unlock_all, species:{id:{nam
 var trainer: Dictionary = {} ## data/trainer.json: Screeches McCrumbs' pop-up copy
 var perks: Dictionary = {} ## data/perks.json: {slots, perks:{id:{name,blurb,price,...effect values}}}
 var levels: Array[Dictionary] = []
+var arenas: Dictionary = {} ## data/arenas/*.json keyed by id (VS mode); never part of `levels` or the Arcade level select
+var vs: Dictionary = {} ## data/vs.json: {round_time, board_prefix, intro_time, opponents:{id:{...rival profile}}, seed_scores}
 var frames_cache: Dictionary = {}
 var last_error: String = ""
 var layout_rules: Dictionary = {}
@@ -44,6 +46,12 @@ func reload_data() -> bool:
 	var next_layout: Dictionary = read_json("res://data/level_layout.json")
 	for i: int in range(1, 8):
 		next_levels.append(read_json("res://data/levels/level_%02d.json" % i))
+	var next_arenas: Dictionary = {}
+	for file: String in DirAccess.get_files_at("res://data/arenas"):
+		if file.ends_with(".json"):
+			var arena: Dictionary = read_json("res://data/arenas/" + file)
+			next_arenas[str(arena.get("id", file))] = arena
+	var next_vs: Dictionary = read_json("res://data/vs.json")
 	if not last_error.is_empty():
 		return false
 	for key: String in ["flight", "dive", "wind", "score", "world", "juice", "rival"]:
@@ -73,6 +81,10 @@ func reload_data() -> bool:
 	layout_rules = next_layout
 	for i: int in levels.size():
 		levels[i] = BeachLevelGenerator.generate(levels[i],layout_rules)
+	vs = next_vs
+	arenas.clear()
+	for id: String in next_arenas:
+		arenas[id] = BeachLevelGenerator.generate(next_arenas[id],layout_rules) # authored arenas keep their layout
 	frames_cache.clear()
 	reloaded.emit()
 	return true

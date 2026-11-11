@@ -129,6 +129,10 @@ const SCREECH_STEPS: int = 3
 var counter_tip: bool = false
 var counter_tip_pos: Vector2 = Vector2.ZERO
 
+## A VS round: Scrap Sands against one opponent, won on points. No quests, stars, Feathers, lessons or progress.
+func is_vs() -> bool:
+	return level.has("vs")
+
 func setup(definition: Dictionary, is_casual: bool, force_training: bool = false, force_lesson: bool = false) -> void:
 	level = definition
 	Config.apply_level_world(level)
@@ -300,7 +304,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	overlay = BeachOverlay.new()
 	canvas.add_child(overlay)
 	overlay.setup(self)
-	intro = Config.tuning.world.intro_time
+	intro = float(Config.vs.intro_time) if is_vs() else Config.tuning.world.intro_time
 	intro_dismissed_elapsed = -1.0
 	if overlay.trainer_card != null:
 		overlay.trainer_card.dismissed.connect(_on_trainer_dismissed)
@@ -468,6 +472,8 @@ func _food_knocked(target: BeachTarget, food_id: String, at: Vector2, impulse: V
 	effects.impact(at,false)
 
 func _reload() -> void:
+	if is_vs():
+		return # the round runs on its own copy of the arena
 	level = Config.levels[int(level.id)-1]
 	Config.apply_level_world(level)
 	wind.base = level.wind.strength
@@ -701,7 +707,7 @@ func _physics_process(delta: float) -> void:
 		finish()
 
 func mode_name() -> String:
-	return "training" if training else ("practice" if casual else "arcade")
+	return "vs" if is_vs() else "training" if training else ("practice" if casual else "arcade")
 
 func track(event: String, props: Dictionary = {}, urgent: bool = false) -> void:
 	Analytics.input_kind = "touch" if input.touch_visible else ("gamepad" if input.gamepad else "keyboard_mouse")
@@ -712,12 +718,15 @@ func track_end(outcome: String, result: Dictionary = {}, urgent: bool = false) -
 	if end_tracked or intro_dismissed_elapsed < 0.0:
 		return
 	end_tracked = true
-	track("level_end", _run_stats().merged({"score": int(result.get("score", score.points)), "stars": int(result.get("stars", 0)), "outcome": outcome}), urgent)
+	track("level_end", _run_stats().merged({"score": int(result.get("score", score.points)), "stars": int(result.get("stars", 0)), "outcome": outcome}).merged(_vs_stats().merged({"won": bool(result.won), "margin": int(result.margin)}) if result.has("vs") else _vs_stats()), urgent)
 
 # The run so far; a tab hidden on a phone may never come back, so this is reported then too.
 func track_hidden() -> void:
 	if not end_tracked and intro_dismissed_elapsed >= 0.0:
 		track("game_hidden", _run_stats(), true)
+
+func _vs_stats() -> Dictionary:
+	return {"arena": str(level.id), "opponent": str(level.vs.opponent)} if is_vs() else {}
 
 func _run_stats() -> Dictionary:
 	var stats: Dictionary = {"level": int(level.id), "mode": mode_name(), "seconds": snappedf(elapsed, 0.1), "play_seconds": snappedf(play_clock, 0.1), "crashes": crashes, "lesson": mini(lesson + 1, TRAINING_LESSONS) if training else 0}.merged(dive_stats)
@@ -750,7 +759,7 @@ func _dive_tick() -> void:
 func dismiss_intro() -> void:
 	_begin_lesson_stats()
 	play_clock = 0.0
-	track("level_start", {"level": int(level.id), "mode": mode_name()})
+	track("level_start", {"level": int(level.id), "mode": mode_name()}.merged(_vs_stats()))
 	if training:
 		track("lesson_start", {"lesson": lesson + 1})
 	intro = 0.0
@@ -759,7 +768,11 @@ func dismiss_intro() -> void:
 	running = true
 	input.enabled = true
 	overlay.intro_panel.hide()
-	if input.touch_visible and not GullInput.touch_explained:
+	if is_vs():
+		for pilot: RivalPilot in pilots:
+			if str(pilot.personality.get("entry","")) == "fly_in":
+				_start_fly_in(pilot.personality) # the opponent crashes in as the round starts
+	if input.touch_visible and not GullInput.touch_explained and not is_vs():
 		GullInput.touch_explained = true ## once per app session, right after the first intro card
 		open_trainer(Config.trainer.touch_explainer,_open_intro_cards)
 	else:
@@ -1215,6 +1228,7 @@ func finish() -> void:
 	peck_hold_pending = false
 	_stop_screech(false)
 	var boss: bool = level.has("boss") and not casual
+	var vs: bool = is_vs()
 	if boss:
 		BeachBoss.conclude(self)
 	running = false
@@ -1229,6 +1243,11 @@ func finish() -> void:
 	result.feathers_earned = feathers_earned
 	if boss:
 		BeachBoss.verdict(self,result)
+	if vs:
+		result.vs = true # not BeachBoss.verdict: that one sets the stage flag
+		result.rival_best = BeachBoss.best_rival(self)
+		result.margin = score.points - int(result.rival_best)
+		result.won = int(result.margin) > 0 # a tie is a loss
 	result.powers = brash.powers_fired
 	if training:
 		if lesson < TRAINING_LESSONS:
@@ -1241,7 +1260,7 @@ func finish() -> void:
 		result.success = true
 		result.stars = 0
 		result.casual = false
-	else:
+	elif not vs:
 		GameState.record(level.id,result.score,result.stars,elapsed if casual else -1.0)
 	level_finished.emit(result)
 
