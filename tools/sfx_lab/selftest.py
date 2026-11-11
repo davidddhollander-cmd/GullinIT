@@ -60,4 +60,8 @@ assert len(get("/audio/" + p)) > 100
 wav(os.path.join(tmp, p), 1200)  # regenerate the file
 s = sounds()[p]
 assert s["changed"] and s["status"] == "rejected", s
+import subprocess  # a second lab on a busy port exits 0 with the "already running" line
+r = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "sfx_lab.py"), "--project", tmp,
+                    "--port", str(srv.server_address[1]), "--no-browser"], capture_output=True, text=True, timeout=30)
+assert r.returncode == 0 and "may already be running" in r.stdout, (r.returncode, r.stdout, r.stderr)
 print("selftest ok")

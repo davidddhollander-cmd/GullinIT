@@ -127,7 +127,7 @@ Validation creates `test-output/.gdignore` so archived scripts and captures cann
 
 The integration scene exercises all six timed loops, scoring, persistence, unlocks, dive hits, stun recovery, explicit family links, shared-stock conservation, finite sunbather depletion, retry reset, parent shields and alerts, vendor telegraphing, wind gusts, rival mugging, casual completion, menu bounds, and input routing. It uses deterministic simulation, not a human playthrough. See `docs/HANDOFF.md` for the validated state and remaining limits.
 
-SFX Lab (task 083): `python tools/sfx_lab/sfx_lab.py` opens a local page to browse every sound in `assets/audio` by category, play it and mark it approved or rejected (verdicts go to `data/sfx_approvals.json`). `Audio` never plays a rejected cue and picks another variant where one exists; a file that changed since review counts as unreviewed. See `tools/sfx_lab/README.md`.
+SFX Lab (task 083): double-click `SFX Lab.bat` (or run `python tools/sfx_lab/sfx_lab.py`) to open a local page to browse every sound in `assets/audio` by category, play it and mark it approved or rejected (verdicts go to `data/sfx_approvals.json`). `Audio` never plays a rejected cue and picks another variant where one exists; a file that changed since review counts as unreviewed. See `tools/sfx_lab/README.md`.
 
 ## Export
 
