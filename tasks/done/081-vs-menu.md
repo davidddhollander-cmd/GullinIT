@@ -1,6 +1,6 @@
 # 081 — VS sub-menu
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 080
