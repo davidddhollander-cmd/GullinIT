@@ -1,6 +1,6 @@
 # 083 — SFX Lab: a generic sound review tool, plus the game honouring its verdicts
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none (082 menu waves is in flight and also edits `scripts/autoload/audio.gd`. Keep the game-side change small and self-contained so the merge is easy.)
@@ -123,4 +123,4 @@ Not done: no Chrome/Firefox check; no check of the web export. Menu waves (task 
 Launch: `python tools/sfx_lab/sfx_lab.py` from the repo root (add `--no-browser` to skip opening the page, `--port` to change 8777).
 
 ## Review notes
-<!-- Filled in by the reviewer. -->
+Reviewed by Claude Opus 2026-11-11: diff read; merged into main together with 082/083 (audio.gd and sfx_checks.gd conflicts resolved by keeping both sides). Integration on main 17332 checks, same 2 pre-existing failures.

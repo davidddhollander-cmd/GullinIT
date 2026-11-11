@@ -1,6 +1,6 @@
 # 082 — Beach waves ambience on menus and the results/high-score screen
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 079, 080 (SFX tasks, merged)
@@ -57,4 +57,6 @@ Menus and the results screen sound like the seaside: gentle waves with distant g
 **Branch / commit**: `sonnet/082-menu-waves`, last commit hash: see `git log -1` (recorded in the hand-off message).
 
 ## Review notes
-<!-- Filled in by the reviewer. -->
+Reviewed by Claude Opus 2026-11-11: diff read; merged into main together with 082/083 (audio.gd and sfx_checks.gd conflicts resolved by keeping both sides). Integration on main 17332 checks, same 2 pre-existing failures.
+
+Reviewer merged main (VS mode) into the branch: waves also play on the VS menu, and VS rounds fade them out via _start_game.
