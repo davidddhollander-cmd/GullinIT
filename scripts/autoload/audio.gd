@@ -30,6 +30,12 @@ var flap_ms: int = -1000000
 var voice_last_ms: int = -1000000 ## when any character voice last started
 var voice_speaker_ms: Dictionary = {} ## speaker instance id -> last voice start
 var voice_player: AudioStreamPlayer
+## One persistent looping bed on the SFX bus (menu waves), so SFX volume, mute and juice.audio apply.
+const AMBIENCE: Dictionary = {"menu_waves": "res://assets/audio/menu_waves.ogg"}
+const AMBIENCE_SILENT_DB: float = -60.0
+var ambience: AudioStreamPlayer
+var ambience_id: String = ""
+var ambience_tween: Tween
 
 func _ready() -> void:
 	for bus: String in ["SFX", "Music"]:
@@ -64,6 +70,11 @@ func _ready() -> void:
 	music.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
 	music.volume_db = MUSIC_DB
 	add_child(music)
+	ambience = AudioStreamPlayer.new()
+	ambience.bus = "SFX"
+	ambience.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
+	ambience.volume_db = AMBIENCE_SILENT_DB
+	add_child(ambience)
 
 # Switches the soundtrack, fading the old track out and the new one in. Calling it
 # with the track that is already playing only restores full volume.
@@ -119,6 +130,40 @@ func _fade_music(target_db: float, duration: float) -> void:
 func _kill_music_tween() -> void:
 	if music_tween != null and music_tween.is_valid():
 		music_tween.kill()
+
+## Fades the ambience bed `id` in to `db` after `delay` seconds. The same id already playing only
+## fades to the new level, it never restarts the loop.
+func play_ambience(id: String, fade: float = 1.0, db: float = -12.0, delay: float = 0.0) -> void:
+	if not AMBIENCE.has(id) or not is_instance_valid(ambience) or not bool(Config.tuning.juice.audio):
+		return
+	if not (id == ambience_id and ambience.playing):
+		var stream: Variant = load(AMBIENCE[id]) if ResourceLoader.exists(AMBIENCE[id]) else null
+		if not stream is AudioStream:
+			return
+		if stream is AudioStreamOggVorbis:
+			(stream as AudioStreamOggVorbis).loop = true
+		ambience_id = id
+		ambience.stream = stream
+		ambience.volume_db = AMBIENCE_SILENT_DB
+		ambience.play()
+	_kill_ambience_tween()
+	ambience_tween = create_tween()
+	if delay > 0.0:
+		ambience_tween.tween_interval(delay)
+	ambience_tween.tween_property(ambience, "volume_db", db, maxf(fade, 0.01))
+
+func stop_ambience(fade: float = 0.8) -> void:
+	if not is_instance_valid(ambience) or not ambience.playing:
+		return
+	ambience_id = ""
+	_kill_ambience_tween()
+	ambience_tween = create_tween()
+	ambience_tween.tween_property(ambience, "volume_db", AMBIENCE_SILENT_DB, maxf(fade, 0.01))
+	ambience_tween.tween_callback(ambience.stop)
+
+func _kill_ambience_tween() -> void:
+	if ambience_tween != null and ambience_tween.is_valid():
+		ambience_tween.kill()
 
 func stop_all() -> void:
 	for player: Node in get_children():

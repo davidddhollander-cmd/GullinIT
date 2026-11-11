@@ -159,3 +159,53 @@ static func run(host: Node, check: Callable) -> void:
 	blackback.queue_free()
 	herring.queue_free()
 	Config.tuning.juice.audio = previous_audio
+	_waves(host,check)
+
+## Task 082: the menu waves bed plays on menus and results, never in a level.
+static func _waves(host: Node, check: Callable) -> void:
+	var main: Node = host.main
+	var previous_audio: bool = bool(Config.tuning.juice.audio)
+	var saved_shop: Variant = GameState.progress.get("stage1_complete", false)
+	Config.tuning.juice.audio = true
+	GameState.progress["stage1_complete"] = true
+	var on: Callable = func() -> bool: return Audio.ambience.playing and Audio.ambience_id == "menu_waves" and Audio.ambience.stream != null
+	var db: Dictionary = Config.tuning.ambience.menu_waves_db
+	check.call(float(db.title_db) < float(db.quiet_db) and float(db.quiet_db) < 0.0,"menu waves sit lower under the title music than on the quiet screens")
+	check.call(Audio.ambience.bus == "SFX" and Audio.ambience.playback_type == AudioServer.PLAYBACK_TYPE_STREAM,"the ambience player uses the SFX bus and stream playback")
+	check.call(Audio.ambience.get_parent() == Audio and (Audio.AMBIENCE.menu_waves as String).ends_with("menu_waves.ogg"),"one persistent ambience player lives on Audio")
+	main._navigate("title")
+	check.call(on.call(),"waves play on the title")
+	var stream: AudioStream = Audio.ambience.stream
+	main._navigate("select")
+	check.call(on.call() and Audio.ambience.stream == stream,"waves play on level select")
+	var pos: float = Audio.ambience.get_playback_position()
+	main._navigate("shop")
+	check.call(main.screen == "shop" and on.call() and Audio.ambience.stream == stream,"title to select to shop keeps the same stream playing")
+	check.call(Audio.ambience.get_playback_position() >= pos or Audio.ambience.get_playback_position() < 0.5,"navigating between menus does not restart the loop")
+	main._navigate("arcade")
+	check.call(on.call() and Audio.ambience.stream == stream,"waves play on the gull picker")
+	main._navigate("options")
+	check.call(on.call(),"waves keep playing on the title options screen")
+	main.start_level(2)
+	Audio.ambience_tween.custom_step(1.0)
+	check.call(not Audio.ambience.playing and Audio.ambience_id == "","start_level stops the waves")
+	main._navigate("pause")
+	check.call(not Audio.ambience.playing,"pause does not start the waves")
+	main._navigate("options_pause")
+	check.call(not Audio.ambience.playing,"the pause options screen does not start the waves")
+	main._navigate("resume")
+	main.game.dismiss_intro()
+	main.game.finish()
+	check.call(main.screen == "results" and on.call(),"results starts the waves")
+	check.call(is_equal_approx(Audio.ambience.volume_db,Audio.AMBIENCE_SILENT_DB),"results waves wait for the sting, then fade in")
+	main.clear_game()
+	main._navigate("title")
+	Audio.stop_ambience(0.0)
+	Audio.ambience_tween.custom_step(1.0)
+	Config.tuning.juice.audio = false
+	Audio.play_ambience("menu_waves")
+	check.call(not Audio.ambience.playing,"juice.audio off keeps the waves silent")
+	Config.tuning.juice.audio = previous_audio
+	GameState.progress["stage1_complete"] = saved_shop
+	Audio.stop_ambience(0.0)
+	Audio.ambience_tween.custom_step(1.0)

@@ -9,5 +9,6 @@ rain_loop.ogg  <- dragon-studio-heavy-wind-and-rain-515265.mp3 (1-28 s, -6 dB, 2
 swat_thwack.ogg  <- freesound_community-thwack-wobble-96509.mp3  (onset + 0.75 s, 150 ms fade, soft-limited, rms matched to gull_hit_1..3)
 wing_flap_1..2.ogg <- freesound_community-wing-flap-1-6434.mp3   (two strokes cut at the energy valley, peak -3 dBFS)
 dog_bark_1..2.ogg <- freesound_community-small-dog-barking-84707.mp3 (two loudest of three barks, about 0.3 s each, 60 ms fade, peak -3 dBFS; michorvath)
+menu_waves.ogg <- freesound_community-gentle-ocean-waves-birdsong-and-gull-7109.mp3 (52 s from 18 s in, mono, 3 s equal-power tail-to-head crossfade seam, -20 LUFS, peak -3.2 dBFS; tools/make_menu_waves.py)
 
 Pages: https://pixabay.com/sound-effects/ (search the numeric IDs above; the dog bark is /nature-small-dog-barking-84707/).

@@ -354,6 +354,7 @@
     "panic_radius": 170, "look_up_time": 0.5, "lead_time": 0.5, "panic_time": 4.0,
     "panic_speed_mult": 4.0, "return_speed_mult": 2.5
   },
+  "ambience": {"menu_waves_db": {"title_db": -16.0, "quiet_db": -10.0}},
   "juice": {
     "audio": true,
     "shine": true,

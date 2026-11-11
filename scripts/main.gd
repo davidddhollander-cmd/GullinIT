@@ -62,6 +62,7 @@ func _ready() -> void:
 	_build_rotate_hint()
 	Analytics.track("session_start")
 	Audio.play_music("title", 0.0)
+	_waves("title_db", 2.0)
 	get_tree().auto_accept_quit = false
 	get_tree().root.close_requested.connect(_quit)
 	if OS.has_feature("web"):
@@ -95,6 +96,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			menus.show()
 			menus.title()
 			Audio.play_music("title")
+			_waves("title_db")
 		"arcade", "casual", "vs":
 			casual = action == "casual"
 			vs = action == "vs"
@@ -103,6 +105,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			menus.show()
 			menus.gull_picker()
 			Audio.stop_music()  # selection screens: gull calls stay audible
+			_waves("quiet_db")
 		"gull":
 			if Config.species.species.has(str(payload)) and GameState.gull_owned(str(payload)):
 				GameState.options.gull = str(payload)
@@ -115,6 +118,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 				menus.show()
 				menus.shop()
 				Audio.stop_music()  # selection screens: gull calls stay audible
+			_waves("quiet_db")
 		"buy":
 			var id: String = str(payload)
 			var price: int = int(Config.perks.perks[id].price) if Config.perks.perks.has(id) else (int(Config.species.species[id].price) if Config.species.species.has(id) else -1)
@@ -130,6 +134,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			menus.show()
 			menus.level_select(casual)
 			Audio.stop_music()  # selection screens: gull calls stay audible
+			_waves("quiet_db")
 		"start":
 			if GameState.unlocked(int(payload)):
 				# The Training Day card always opens lessons, even on a completed save.
@@ -144,6 +149,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			menus.show()
 			menus.vs_menu()
 			Audio.stop_music()  # selection screens: gull calls stay audible
+			_waves("quiet_db")
 		"train_again":
 			start_level(1, true)
 		"screech_lesson":
@@ -193,6 +199,10 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			if not url.is_empty():
 				OS.shell_open(url)
 
+## Menu waves: sit under the title music (title_db), come up when the music stops (quiet_db).
+func _waves(level: String, fade: float = 1.0, delay: float = 0.0) -> void:
+	Audio.play_ambience("menu_waves", fade, float(Config.tuning.ambience.menu_waves_db[level]), delay)
+
 func _abandon() -> void:
 	if is_instance_valid(game):
 		game.track_end("abandoned", {}, true)
@@ -230,6 +240,7 @@ func _start_game(level: Dictionary, force_training: bool, force_lesson: bool) ->
 	screen = "game"
 	background.hide()
 	menus.hide()
+	Audio.stop_ambience(0.8)
 	game = BeachGame.new()
 	game.name = "Game"
 	add_child(game)
@@ -253,6 +264,7 @@ func _finished(result: Dictionary) -> void:
 	game.set_paused(true)
 	game.overlay.hide()
 	Audio.stop_music()
+	_waves("quiet_db", 1.2, 1.2)  # after the result sting
 	menus.show()
 	menus.results(game.level,result)
 
