@@ -168,7 +168,7 @@ func _build() -> void:
 	add_child(actions)
 	if is_vs():
 		_add_button(actions, "REMATCH", "vs_start", {"arena": str(level.id), "opponent": str(level.vs.opponent)})
-		_add_button(actions, "VS MENU", "vs")
+		_add_button(actions, "VS MENU", "vs_menu")
 	else:
 		if passed and int(level.id) < Config.levels.size() and GameState.unlocked(int(level.id) + 1):
 			_add_button(actions, "NEXT >", "start", int(level.id) + 1)
