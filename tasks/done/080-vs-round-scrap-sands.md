@@ -1,6 +1,6 @@
 # 080 — VS round on Scrap Sands
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -46,8 +46,20 @@ A playable VS round: the player against Gary on a new compact arena, Scrap Sands
 - [ ] README/docs note the new `data/vs.json` and `data/arenas/` keys
 
 ## Report
-<!-- Filled in by the implementer: what changed (files), test results (check counts),
-decisions/assumptions, anything not done, branch name and last commit hash. -->
+**Files:** `data/vs.json`, `data/arenas/scrap_sands.json` (new); `scripts/autoload/config.gd` (loads `Config.vs`, `Config.arenas`); `scripts/main.gd` (`start_vs`, `vs_start`/`vs` actions, `--vs`, shared `_start_game`, R restarts a VS round); `scripts/game.gd` (`is_vs()`, intro length, Gary fly-in at round start, verdict, no `GameState.record`, analytics); `scripts/overlay.gd` (VS intro card, no pass-mark bar); `scripts/result_board.gd` (VS sign, REMATCH / VS MENU, board name); `scripts/autoload/online_scores.gd` (`submit(board, ...)`, `level_board`, `vs_board`); `scripts/score.gd` (`level.get("stars", [])`); `tests/vs_checks.gd` (new), `tests/integration.gd`; `README.md`.
+
+**Tests:** see the final reply for exact numbers (baseline 17218 checks / 2 failures; after the change 17280 checks, same 2 failures, none new; 62 new checks).
+
+**Decisions:**
+- Two shoppers at the hot-dog stand work (level 5 already does it), so no fallback to the kiosk was needed: kiosk customer at 345, hot-dog customers at 540 and 590.
+- Id handling: the arena id is the string `scrap_sands`. `int("scrap_sands")` is 0, so `int(level.id)` call sites degrade harmlessly (entry 0 is empty, level-id gates for levels 1 to 5 treat it as an authored opening level). The arena also sets `"authored": true` so the generator never rewrites it. The only `Config.levels[id-1]` use that could break is `BeachGame._reload`, which now returns early in a VS round. `Score.result` reads `level.get("stars", [])`. Side effect: the id-gated kiosk arrivals (`level.id >= 4`) do not run on Scrap Sands, so food comes only from the starting shoppers, scraps and bins; flag for playtest.
+- Gary fly-in: triggered when the intro card ends (`dismiss_intro`), reusing `_start_fly_in`. `vs.json` carries `entry_text` because the fly-in popup needs it.
+- VS boards: loss calls the same `submit` path with score 0 (the existing `score > 0` guard posts nothing, it only fetches). The sign shows the seed scores offline; YOU is merged in only after a win. Name entry still prompts on the first ranked sign.
+- The touch-controls explainer card is skipped in VS (spec: no trainer cards). `GameState.options.tips` (e.g. bin hints) can still be written by `_learned`; no level, star, Feather or flag data is.
+- `vs` action routes to the title until task 081.
+- Result sign hides the star plank and the rules badge in VS; left panel shows YOU / GARY / WON BY or LOST BY.
+
+**Not done / not verified:** no visual check (no screenshots; the intro card sprite offsets and the sign layout are unseen in the rendered game); Talo board `vs-scrap_sands-gary` must be created by David; no live online post tested (tests are offline).
 
 ## Review notes
 <!-- Filled in by the reviewer. -->
