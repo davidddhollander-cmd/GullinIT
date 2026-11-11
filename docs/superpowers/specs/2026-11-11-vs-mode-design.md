@@ -52,6 +52,7 @@ Title → **VS >** → gull picker → VS menu → FIGHT! → VS intro card → 
 
 - **Left panel (about 96 px):** three buttons. MATCH-UP is selected and is the only one enabled. LADDER and MULTIPLAYER are disabled with a LATER caption. They are named nodes so tests can find them.
 - **Right panel:** an ARENA row of toggle cards (one per file in `data/arenas/`; Scrap Sands only), an OPPONENT row of toggle cards (one per entry in `opponents`; Gary only), then `< BACK` (to title) and `FIGHT!`.
+- Below the rows is a `YOUR NAME` field for the leaderboard, prefilled with the saved name or the default `HERRING` (board names are capped at 8 characters, so "HERRING GULL" does not fit). FIGHT! saves it, so the result sign never has to ask.
 - Scrap Sands and Gary are preselected, so FIGHT! works straight away.
 - FIGHT! sends action `vs_start` with `{arena, opponent}`.
 
