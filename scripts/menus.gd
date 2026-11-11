@@ -267,9 +267,16 @@ func vs_menu() -> void:
 	picks.add_theme_constant_override("separation",2)
 	picks.alignment = BoxContainer.ALIGNMENT_CENTER
 	columns2.add_child(picks)
-	var arena: ButtonGroup = _vs_row(picks,"ARENA","ArenaRow",Config.arenas.keys().map(func(id: String) -> Array: return [id,str(Config.arenas[id].name).to_upper()]))
+	var arena: ButtonGroup = _vs_row(picks,"ARENA","ArenaRow",Array(Config.vs.arenas).filter(func(id: String) -> bool: return Config.arenas.has(id)).map(func(id: String) -> Array: return [id,str(Config.arenas[id].name).to_upper()]),true)
 	var opponent: ButtonGroup = _vs_row(picks,"OPPONENT","OpponentRow",Config.vs.opponents.keys().map(func(id: String) -> Array: return [id,"%s\n%s" % [str(Config.vs.opponents[id].name).to_upper(),str(Config.vs.opponents[id].blurb)]]))
-	BeachUI.label(picks,"YOUR NAME",BeachUI.FONT_NATIVE,BeachUI.GOLD).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# Scores and the name share the right-hand column, so two stacked arena cards still fit on the left.
+	var side: VBoxContainer = VBoxContainer.new()
+	side.add_theme_constant_override("separation",2)
+	side.alignment = BoxContainer.ALIGNMENT_CENTER
+	side.size_flags_horizontal = SIZE_EXPAND_FILL
+	columns2.add_child(side)
+	var refresh_scores: Callable = _vs_scores(side,arena,opponent)
+	BeachUI.label(side,"YOUR NAME",BeachUI.FONT_NATIVE,BeachUI.GOLD).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var field: LineEdit = LineEdit.new()
 	field.name = "NameField"
 	field.max_length = OnlineScores.NAME_LENGTH
@@ -290,8 +297,7 @@ func vs_menu() -> void:
 		if clean != text:
 			field.text = clean
 			field.caret_column = clean.length())
-	picks.add_child(field)
-	var refresh_scores: Callable = _vs_scores(columns2,arena,opponent)
+	side.add_child(field)
 	for group: ButtonGroup in [arena,opponent]:
 		group.pressed.connect(func(_button: BaseButton) -> void: refresh_scores.call())
 	refresh_scores.call()
@@ -325,12 +331,13 @@ func _vs_panel(parent: Control, width: float) -> VBoxContainer:
 	return column
 
 ## A caption and a row of toggle cards, one always selected (the first). Entries are [id, text].
-func _vs_row(parent: Control, caption: String, row_name: String, entries: Array) -> ButtonGroup:
+func _vs_row(parent: Control, caption: String, row_name: String, entries: Array, stacked: bool = false) -> ButtonGroup:
 	BeachUI.label(parent,caption,BeachUI.FONT_NATIVE,BeachUI.GOLD).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var row: HBoxContainer = HBoxContainer.new()
+	var row: BoxContainer = BoxContainer.new()
+	row.vertical = stacked
 	row.name = row_name
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation",3)
+	row.add_theme_constant_override("separation",2 if stacked else 3)
 	parent.add_child(row)
 	var group: ButtonGroup = ButtonGroup.new()
 	for entry: Array in entries:
@@ -339,6 +346,7 @@ func _vs_row(parent: Control, caption: String, row_name: String, entries: Array)
 		card.button_group = group
 		card.set_meta("id",entry[0])
 		card.custom_minimum_size.x = 84
+		card.size_flags_horizontal = SIZE_SHRINK_CENTER
 		card.button_pressed = row.get_child_count() == 1
 	return group
 

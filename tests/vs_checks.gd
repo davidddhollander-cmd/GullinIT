@@ -61,6 +61,17 @@ static func run(suite: Node, check: Callable) -> void:
 	main._navigate("select")
 	check.call(not _buttons(main.menus).any(func(button: Button) -> bool: return button.text.to_upper().contains("SCRAP")), "the Arcade level select does not list Scrap Sands")
 
+	# Bin Beach: the second arena, mostly bins, with the sweeper.
+	var bins: Dictionary = Config.arenas.get("bin_beach", {})
+	check.call(not bins.is_empty() and bins.name == "Bin Beach" and int(bins.world.width) == 640 and Array(Config.vs.arenas) == ["scrap_sands", "bin_beach"], "Bin Beach loads as the second arena")
+	check.call(_count(bins.props, "bin") + _count(bins.props, "wheelie_bin") >= 6 and _count(bins.props, "wheelie_bin") >= 1 and bins.spawns.size() <= 2, "Bin Beach is mostly bins")
+	check.call(bool(bins.sweeper.enabled) and float(bins.sweeper.first_arrival) <= 15.0 and float(bins.sweeper.range[1]) <= float(bins.world.width), "the sweeper arrives early on Bin Beach")
+	check.call(PropOverlap.overlaps(bins.props).is_empty(), "Bin Beach props do not overlap %s" % str(PropOverlap.overlaps(bins.props)))
+	check.call(not _buttons(main.menus).any(func(button: Button) -> bool: return button.text.to_upper().contains("BIN BEACH")), "the Arcade level select does not list Bin Beach")
+	main._navigate("vs_start", {"arena": "bin_beach", "opponent": "gary"})
+	check.call(main.game.is_vs() and main.game.level.rivals.size() == 1 and int(main.game.level.time_limit) == 75 and main.game.sweeper_visits.enabled and main.game.sweeper_visits.wait <= 15.0, "a Bin Beach round has one rival, 75 seconds and the sweeper scheduled")
+	main.clear_game()
+
 	# The VS level copy.
 	var before: String = JSON.stringify(Config.arenas[ArenaId])
 	var progress_before: String = JSON.stringify(GameState.progress)
@@ -134,6 +145,7 @@ static func run(suite: Node, check: Callable) -> void:
 	var opponent_row: Node = menus.find_child("OpponentRow", true, false)
 	check.call(arena_row.get_child_count() == Config.arenas.size() and opponent_row.get_child_count() == Config.vs.opponents.size(), "arena and opponent rows are built from data")
 	check.call(arena_row.get_child(0).button_pressed and opponent_row.get_child(0).button_pressed and opponent_row.get_child(0).text.contains("BLACK BACK"), "Scrap Sands and Gary are preselected")
+	check.call(arena_row.get_child_count() == 2 and arena_row.get_child(1).text == "BIN BEACH" and not arena_row.get_child(1).button_pressed, "the arena row lists Scrap Sands then Bin Beach")
 	arena_row.get_child(0).pressed.emit()
 	check.call(arena_row.get_child(0).button_pressed, "one arena card always stays selected")
 	var scores: Node = menus.find_child("ScoresToBeat", true, false)

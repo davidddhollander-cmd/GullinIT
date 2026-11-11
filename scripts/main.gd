@@ -79,10 +79,14 @@ func _ready() -> void:
 		JavaScriptBridge.get_interface("document").addEventListener("visibilitychange", _visibility)
 	if OS.get_cmdline_user_args().has("--smoke"):
 		_navigate("start",1)
-	elif OS.get_cmdline_user_args().has("--vs"):
-		_navigate("vs_start",{"arena": "scrap_sands","opponent": "gary"}) # dev entry: straight into a round
+	elif not _vs_args().is_empty():
+		# dev entry: straight into a round; --vs=bin_beach picks the arena
+		_navigate("vs_start",{"arena": str(_vs_args()[0]).trim_prefix("--vs=") if str(_vs_args()[0]).contains("=") else "scrap_sands","opponent": "gary"})
 	elif OS.get_cmdline_user_args().has("--vs-menu"):
 		_navigate("vs_menu") # dev entry: straight to the VS menu
+
+func _vs_args() -> Array:
+	return Array(OS.get_cmdline_user_args()).filter(func(a: String) -> bool: return a == "--vs" or a.begins_with("--vs="))
 
 func _process(delta: float) -> void:
 	if background.visible:

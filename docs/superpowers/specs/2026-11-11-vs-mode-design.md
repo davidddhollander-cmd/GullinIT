@@ -100,6 +100,18 @@ First-pass positions (tune in playtest):
 
 Other names considered: Squabble Bay, Pecking Order.
 
+## The arena: Bin Beach (`data/arenas/bin_beach.json`)
+
+Added 11 Nov at David's request: an arena that is mostly bins to raid, with the sweeper.
+
+- **World:** 640 wide, all sand (no promenade), light steady wind.
+- **Bins:** seven — five bins at 75, 230, 405, 545, 610 and two wheelie bins at 150 and 475.
+- **People:** one sunbather under a parasol at 320. No shops, shoppers or dog.
+- **Sweeper:** enabled over 24–620, with arena-only timing so he matters in a 75-second round: first arrival at 10 s, stays 40 s, away 12–18 s. Global sweeper tuning is unchanged.
+- **Board:** `vs-bin_beach-gary` (David creates it in Talo).
+
+Arena order in the menu comes from `data/vs.json` → `arenas` (Scrap Sands first). With two arenas the ARENA cards stack in the left column, and SCORES TO BEAT and YOUR NAME share the right column.
+
 ## The round
 
 `main.gd` builds the VS level as a deep copy of the chosen arena (the source is never modified) with:
