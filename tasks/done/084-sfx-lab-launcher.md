@@ -1,6 +1,6 @@
 # 084 — Double-click launcher for the SFX Lab
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 083 (merged)
@@ -38,4 +38,4 @@ Files: `SFX Lab.bat` (new), `tools/sfx_lab/sfx_lab.py`, `tools/sfx_lab/selftest.
 - Branch sonnet/084-sfx-lab-launcher.
 
 ## Review notes
-<!-- Filled in by the reviewer. -->
+Reviewed by Claude Opus 2026-11-11: diff read, selftest rerun ok, nothing left listening on 8777. Merged into main.
