@@ -2,6 +2,7 @@ extends Node
 var game: BeachGame
 var menus: BeachMenus
 var background: BeachBackdrop
+var _scenery: Array[CanvasItem] = []
 var casual: bool = false
 var vs: bool = false ## picking a gull leads to the VS menu instead of the level select
 var current_level: int = 1
@@ -52,6 +53,14 @@ func _ready() -> void:
 	var flyby := TitleFlyby.new()
 	flyby.z_index = 4
 	background.add_child(flyby)
+	# Everything the Practice menu hides to show the bare beach.
+	for node: CanvasItem in background.prop_sprites:
+		_scenery.append(node)
+	for node: CanvasItem in background.get_children():
+		if node is SunbatherTowel or node is TitleFlyby or (node is AnimatedSprite2D and node.z_index == 3):
+			_scenery.append(node)
+	if background.background_art != null:
+		_scenery.append(background.background_art.birds)
 	var layer: CanvasLayer = CanvasLayer.new()
 	layer.layer = 5
 	add_child(layer)
@@ -93,6 +102,9 @@ func _process(delta: float) -> void:
 		background.tick(delta)
 
 func _navigate(action: String, payload: Variant = null) -> void:
+	for node: CanvasItem in _scenery:
+		if is_instance_valid(node):
+			node.visible = action != "practice"
 	match action:
 		"title":
 			clear_game()

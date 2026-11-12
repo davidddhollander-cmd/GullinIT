@@ -109,9 +109,9 @@ func title() -> void:
 	content = VBoxContainer.new()
 	content.custom_minimum_size.x = 104
 	panel.add_child(content)
-	_small_button(content,"ARCADE  >",func() -> void: choose("arcade")).grab_focus()
-	_small_button(content,"PRACTICE  >",func() -> void: choose("practice"))
-	_small_button(content,"VS  >",func() -> void: choose("vs")).name = "VsButton"
+	_big_button(content,"ARCADE  >",func() -> void: choose("arcade")).grab_focus()
+	_big_button(content,"PRACTICE  >",func() -> void: choose("practice"))
+	_big_button(content,"VS  >",func() -> void: choose("vs")).name = "VsButton"
 	var small: HBoxContainer = HBoxContainer.new()
 	content.add_child(small)
 	_small_button(small,"OPTIONS",func() -> void: choose("options"))
@@ -598,6 +598,12 @@ func _small_button(parent: Control, text: String, action: Callable) -> Button:
 	node.add_theme_font_size_override("font_size",6)
 	return node
 
+func _big_button(parent: Control, text: String, action: Callable) -> Button:
+	var node: Button = _small_button(parent,text,action)
+	node.remove_theme_font_override("font") # GullPixel 8 px
+	node.add_theme_font_size_override("font_size",BeachUI.FONT_NATIVE)
+	return node
+
 func _small_label(parent: Control, text: String, color: Color) -> Label:
 	var node: Label = BeachUI.label(parent,text,6,color)
 	node.add_theme_font_override("font",SMALL_FONT)
@@ -634,13 +640,12 @@ func pause(skippable: bool = false, replay: String = "", practice: bool = false)
 
 ## Practice hub: the two score cards, then the open-ended session on Scrap Sands with the chosen gull.
 func practice_menu() -> void:
-	clear("PRACTICE")
+	clear("")
+	content.get_child(0).free() # no title; the gull card and buttons speak for themselves
 	var panel: PanelContainer = content.get_parent() as PanelContainer
 	panel.size_flags_horizontal = SIZE_SHRINK_CENTER
 	panel.size_flags_vertical = SIZE_SHRINK_CENTER
 	content.custom_minimum_size.x = 128
-	content.get_child(0).add_theme_font_size_override("font_size",BeachUI.FONT_NATIVE)
-	(content.get_child(0) as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	# Side by side: the practice panel, then a display-only card for the chosen gull.
 	var pair: HBoxContainer = HBoxContainer.new()
 	pair.alignment = BoxContainer.ALIGNMENT_CENTER
