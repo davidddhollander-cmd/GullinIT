@@ -195,32 +195,7 @@ func gull_picker() -> void:
 		box.offset_right = -3
 		box.offset_top = 3
 		box.offset_bottom = -3
-		var stage: Control = Control.new()
-		stage.custom_minimum_size = Vector2(0,22)
-		stage.clip_contents = true
-		stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		box.add_child(stage)
-		var art_id: String = "gull_" + id.replace("-","_")
-		var bird: AnimatedSprite2D = AnimatedSprite2D.new()
-		bird.sprite_frames = Config.frames(art_id)
-		bird.scale = Vector2.ONE * float(Config.sprites[art_id].visual_scale) * 1.0
-		bird.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		bird.modulate = Color.WHITE if owned else Color(0.5,0.55,0.6)
-		bird.position = Vector2(50,12) # the frames carry the bird left of centre
-		bird.play(&"glide")
-		stage.add_child(bird)
-		var name_label: Label = BeachUI.label(box,str(info.name),BeachUI.FONT_NATIVE,BeachUI.GOLD if owned else Color("6b858b"))
-		name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		var blurb: Label = BeachUI.label(box,str(info.blurb),BeachUI.FONT_NATIVE,Color("a9d7d2") if owned else Color("6b858b"))
-		blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		blurb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		blurb.size_flags_vertical = SIZE_EXPAND_FILL
-		_stat_rows(box,info.get("card",{}),owned)
-		# Only the herring has a power so far; the others get theirs later (docs/BRASHNESS_BACKLOG.md).
-		var special: Label = _small_label(box,"SPECIAL: " + str(info.get("power",{}).get("name","SOON")),BeachUI.GOLD if owned else Color("6b858b"))
-		special.name = "Special"
-		special.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_gull_card_body(box,id,owned)
 		var status: Label = _small_label(box,"UNLOCKED" if owned else "%d FEATHERS" % int(info.price),BeachUI.CREAM if owned else BeachUI.CORAL)
 		status.name = "Status"
 		status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -236,6 +211,36 @@ func gull_picker() -> void:
 	content.add_child(bottom)
 	BeachUI.back_button(bottom,"< BACK",func() -> void: choose("title"))
 	_perk_picker(bottom)
+
+## Gull card body shared by the picker and the practice menu: bird stage, name, blurb, stats, special.
+func _gull_card_body(box: VBoxContainer, id: String, owned: bool) -> void:
+	var info: Dictionary = Config.species.species[id]
+	var stage: Control = Control.new()
+	stage.custom_minimum_size = Vector2(0,22)
+	stage.clip_contents = true
+	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(stage)
+	var art_id: String = "gull_" + id.replace("-","_")
+	var bird: AnimatedSprite2D = AnimatedSprite2D.new()
+	bird.sprite_frames = Config.frames(art_id)
+	bird.scale = Vector2.ONE * float(Config.sprites[art_id].visual_scale) * 1.0
+	bird.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	bird.modulate = Color.WHITE if owned else Color(0.5,0.55,0.6)
+	bird.position = Vector2(50,12) # the frames carry the bird left of centre
+	bird.play(&"glide")
+	stage.add_child(bird)
+	var name_label: Label = BeachUI.label(box,str(info.name),BeachUI.FONT_NATIVE,BeachUI.GOLD if owned else Color("6b858b"))
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var blurb: Label = BeachUI.label(box,str(info.blurb),BeachUI.FONT_NATIVE,Color("a9d7d2") if owned else Color("6b858b"))
+	blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	blurb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	blurb.size_flags_vertical = SIZE_EXPAND_FILL
+	_stat_rows(box,info.get("card",{}),owned)
+	# Only the herring has a power so far; the others get theirs later (docs/BRASHNESS_BACKLOG.md).
+	var special: Label = _small_label(box,"SPECIAL: " + str(info.get("power",{}).get("name","SOON")),BeachUI.GOLD if owned else Color("6b858b"))
+	special.name = "Special"
+	special.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 ## VS menu: modes on the left, arena, opponent and name on the right. FIGHT! sends vs_start.
 func vs_menu() -> void:
@@ -568,7 +573,7 @@ func _stat_rows(parent: Control, card: Dictionary, owned: bool) -> void:
 			line.add_child(pip)
 
 ## One button cycling through the gulls the player owns (the gull picker's rule); each pick saves like choosing in the picker.
-func _gull_cycler() -> void:
+func _gull_cycler(on_change: Callable = Callable()) -> void:
 	var owned: Array[String] = []
 	for id: String in Config.species.species:
 		if GameState.gull_owned(id):
@@ -581,7 +586,9 @@ func _gull_cycler() -> void:
 	button.pressed.connect(func() -> void:
 		var next: String = owned[(owned.find(GameState.chosen_gull()) + 1) % owned.size()]
 		choose("gull_practice",next)
-		refresh.call())
+		refresh.call()
+		if on_change.is_valid():
+			on_change.call())
 	_small_label(content,"TAP TO SWAP GULL",Color("80bcb8")).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 func _small_button(parent: Control, text: String, action: Callable) -> Button:
@@ -627,15 +634,34 @@ func pause(skippable: bool = false, replay: String = "", practice: bool = false)
 
 ## Practice hub: the two score cards, then the open-ended session on Scrap Sands with the chosen gull.
 func practice_menu() -> void:
-	clear("PRACTICE", "NO TIMER. NO SCORE.")
+	clear("PRACTICE")
 	var panel: PanelContainer = content.get_parent() as PanelContainer
 	panel.size_flags_horizontal = SIZE_SHRINK_CENTER
 	panel.size_flags_vertical = SIZE_SHRINK_CENTER
 	content.custom_minimum_size.x = 128
 	content.get_child(0).add_theme_font_size_override("font_size",BeachUI.FONT_NATIVE)
-	content.get_child(1).add_theme_font_override("font",SMALL_FONT)
-	content.get_child(1).add_theme_font_size_override("font_size",6)
-	_gull_cycler()
+	(content.get_child(0) as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# Side by side: the practice panel, then a display-only card for the chosen gull.
+	var pair: HBoxContainer = HBoxContainer.new()
+	pair.alignment = BoxContainer.ALIGNMENT_CENTER
+	pair.add_theme_constant_override("separation",2)
+	var outer: Node = panel.get_parent()
+	outer.add_child(pair)
+	panel.reparent(pair)
+	var card_panel: PanelContainer = BeachUI.wood_panel(pair)
+	card_panel.size_flags_vertical = SIZE_SHRINK_CENTER
+	var card_box: VBoxContainer = VBoxContainer.new()
+	card_box.custom_minimum_size.x = 76
+	card_box.add_theme_constant_override("separation",2)
+	card_panel.add_child(card_box)
+	var show_card: Callable = func() -> void:
+		for child: Node in card_box.get_children():
+			card_box.remove_child(child)
+			child.queue_free()
+		_gull_card_body(card_box,GameState.chosen_gull(),true)
+		_ink_labels.call_deferred(card_box)
+	show_card.call()
+	_gull_cycler(show_card)
 	var rules: Button = _small_button(content,"HOW TO SCORE",func() -> void: pass)
 	rules.name = "RulesButton"
 	rules.pressed.connect(func() -> void:
@@ -650,6 +676,8 @@ func practice_menu() -> void:
 				ways.grab_focus()))
 	var go: Button = _small_button(content,"LET'S PRACTICE!",func() -> void: choose("practice_start"))
 	go.name = "GoButton"
+	go.remove_theme_font_override("font") # SMALL_FONT has no apostrophe; the main call to action uses GullPixel 8 px
+	go.add_theme_font_size_override("font_size",BeachUI.FONT_NATIVE)
 	go.grab_focus()
 	_small_button(content,"< BACK",func() -> void: choose("title"))
 
