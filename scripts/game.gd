@@ -4,6 +4,8 @@ signal level_finished(result: Dictionary)
 signal pause_requested
 var level: Dictionary
 var casual: bool = false
+var practice_rearm: float = 0.0
+var practice: bool = false ## Practice mode: Scrap Sands, one patrolling dummy, no clock, no end, no saves
 var elapsed: float = 0.0
 var running: bool = false
 var intro: float = 0.0
@@ -138,7 +140,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	Config.apply_level_world(level)
 	training = bool(level.get("tutorial",false)) and (force_training or not bool(GameState.entry(1).get("training_complete",false)))
 	lesson = 0 if force_training else clampi(int(GameState.entry(1).get("training_step",0)),0,TRAINING_LESSONS-1)
-	casual = is_casual and not training
+	practice = level.has("practice")
+	casual = is_casual and not training and not practice
 	if not training:
 		var quest_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 		quest_rng.randomize()
@@ -308,6 +311,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	intro_dismissed_elapsed = -1.0
 	if overlay.trainer_card != null:
 		overlay.trainer_card.dismissed.connect(_on_trainer_dismissed)
+	if practice:
+		_training_dummy_setup()
 	if training:
 		player.peck_window_scale = 2.5
 		player.position = Vector2(70,player.ground_y())
@@ -472,7 +477,7 @@ func _food_knocked(target: BeachTarget, food_id: String, at: Vector2, impulse: V
 	effects.impact(at,false)
 
 func _reload() -> void:
-	if is_vs():
+	if is_vs() or practice:
 		return # the round runs on its own copy of the arena
 	level = Config.levels[int(level.id)-1]
 	Config.apply_level_world(level)
@@ -699,15 +704,17 @@ func _physics_process(delta: float) -> void:
 	beach.tick(step)
 	overlay.queue_redraw()
 	_counter_tip_check()
+	if practice:
+		_practice_tick(step)
 	if training:
 		_training_tick(step)
 	elif screech_lesson:
 		_screech_lesson_tick(step)
-	elif (casual and score.items >= int(Config.tuning.score.casual_items)) or (not casual and elapsed >= float(level.time_limit)):
+	elif not practice and ((casual and score.items >= int(Config.tuning.score.casual_items)) or (not casual and elapsed >= float(level.time_limit))):
 		finish()
 
 func mode_name() -> String:
-	return "vs" if is_vs() else "training" if training else ("practice" if casual else "arcade")
+	return "vs" if is_vs() else "training" if training else ("practice" if casual or practice else "arcade")
 
 func track(event: String, props: Dictionary = {}, urgent: bool = false) -> void:
 	Analytics.input_kind = "touch" if input.touch_visible else ("gamepad" if input.gamepad else "keyboard_mouse")
@@ -1310,6 +1317,18 @@ func _training_dummy_setup() -> void:
 	var dummy: RivalPilot = training_dummy()
 	if dummy != null:
 		dummy.dummy_food = DUMMY_FOOD
+
+## Practice: a mugged dummy gets a fresh snack after `rearm_time` (data/arenas/scrap_sands.json) once it has recovered.
+func _practice_tick(delta: float) -> void:
+	var dummy: RivalPilot = training_dummy()
+	if dummy == null or not dummy.dummy_food.is_empty():
+		practice_rearm = 0.0
+		return
+	if dummy.gull.state != BeachGull.State.STUNNED:
+		practice_rearm += delta
+		if practice_rearm >= float(level.practice.rearm_time):
+			dummy.dummy_food = DUMMY_FOOD
+			practice_rearm = 0.0
 
 func training_dummy() -> RivalPilot:
 	for pilot: RivalPilot in pilots:

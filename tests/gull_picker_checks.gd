@@ -115,7 +115,8 @@ static func run(suite: Node, check: Callable) -> void:
 		check.call(has_sprite, id + " card shows the animated species sprite")
 	_button(main.menus, "< BACK").pressed.emit()
 	check.call(main.screen == "title", "BACK on the picker returns to the title")
-	main._navigate("casual")
+	main._navigate("arcade")
+	main.casual = true # the casual game flag still drives its own checks
 	(main.menus.find_child("Card_great-black-backed", true, false) as Button).pressed.emit()
 	await suite.settle()
 	check.call(main.screen == "select" and main.casual and GameState.options.gull == "great-black-backed", "picking a gull saves it and opens level select")

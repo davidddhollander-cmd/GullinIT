@@ -191,14 +191,14 @@ func _peck_toddler(toddler: BeachTarget) -> bool:
 	return true
 
 ## Purely cosmetic rubbish on top of the food burst; uses visual_rng so food trajectories are unchanged.
-func _spray_litter(content_position: Vector2, wheelie: bool) -> void:
+func _spray_litter(content_position: Vector2, wheelie: bool, bin_x: float) -> void:
 	var t: Dictionary = Config.tuning.world
 	var j: Dictionary = Config.tuning.juice
 	for i: int in int(t.bin_litter_wheelie if wheelie else t.bin_litter):
 		var kind: String = LITTER_KINDS[visual_rng.randi_range(0,LITTER_KINDS.size()-1)]
 		var direction: float = -1.0 if visual_rng.randf() < 0.5 else 1.0
 		var rest_limit: float = PI
-		items.append({"owner":null,"source":"bin","food_id":"","garbage":true,"garbage_kind":kind,"extra":true,"position":content_position+Vector2(visual_rng.randf_range(-4,4),6),
+		items.append({"owner":null,"source":"bin","bin_x":bin_x,"food_id":"","garbage":true,"garbage_kind":kind,"extra":true,"position":content_position+Vector2(visual_rng.randf_range(-4,4),6),
 			"velocity":Vector2(direction*visual_rng.randf_range(6,22),-visual_rng.randf_range(65,125)),"grounded":false,"age":0.0,
 			"rotation":visual_rng.randf_range(-0.18,0.18),"angular_velocity":-direction*visual_rng.randf_range(float(j.trash_spin_min),float(j.trash_spin_max)),
 			"rest_angle":visual_rng.randf_range(-rest_limit,rest_limit)})
@@ -251,7 +251,7 @@ func _peck_bin(bin: Dictionary) -> bool:
 				item.rest_angle = visual_rng.randf_range(-rest_limit,rest_limit)
 			items.append(item)
 		if count > 0:
-			_spray_litter(content_position,wheelie)
+			_spray_litter(content_position,wheelie,float(bin.x))
 			bin_opened.emit(str(bin.type))
 			if int(bin.remaining) <= 0:
 				bin_emptied.emit(str(bin.type))

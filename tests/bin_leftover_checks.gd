@@ -54,6 +54,18 @@ static func run(suite: Node, check: Callable) -> void:
 	raids.queue_redraw()
 	await suite.snapshot("bin-leftovers")
 	raids.items.clear()
+	# A promenade bin spills within BIN_SPILL_SPREAD of itself, litter included (it used to snap to the sand edge).
+	var prom: Dictionary = bin.duplicate()
+	prom.x = float(Config.tuning.world.beach_scatter_max_x) + 60.0
+	prom.pecks = int(Config.tuning.world.bin_pecks) - 1
+	prom.remaining = 3
+	raids.peck_cooldown = 0
+	raids._peck_bin(prom)
+	for i: int in 240:
+		raids.tick(1.0 / 60.0)
+	var strays: int = raids.items.filter(func(it: Dictionary) -> bool: return absf(float(it.position.x) - float(prom.x)) > BeachStashRaids.BIN_SPILL_SPREAD + 0.5).size()
+	check.call(raids.items.any(func(it: Dictionary) -> bool: return bool(it.get("extra", false))) and strays == 0, "promenade bin food and litter land within the spill spread of that bin")
+	raids.items.clear()
 	for id: String in LEFTOVERS:
 		var selected: Dictionary = {}
 		for drop: Dictionary in drops:

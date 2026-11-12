@@ -101,8 +101,8 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			menus.title()
 			Audio.play_music("title")
 			_waves("title_db")
-		"arcade", "casual", "vs":
-			casual = action == "casual"
+		"arcade", "vs":
+			casual = false
 			vs = action == "vs"
 			clear_game()
 			screen = "pick"
@@ -115,6 +115,19 @@ func _navigate(action: String, payload: Variant = null) -> void:
 				GameState.options.gull = str(payload)
 				GameState.save_progress()
 				_navigate("vs_menu" if vs else "select")
+		"practice":
+			clear_game()
+			screen = "practice"
+			menus.show()
+			menus.practice_menu()
+			Audio.stop_music()  # selection screens: gull calls stay audible
+			_waves("quiet_db")
+		"practice_start":
+			start_practice()
+		"gull_practice": # the practice menu's cycler: owned gulls only, saved like the picker
+			if Config.species.species.has(str(payload)) and GameState.gull_owned(str(payload)):
+				GameState.options.gull = str(payload)
+				GameState.save_progress()
 		"shop":
 			if GameState.shop_open():
 				clear_game()
@@ -136,7 +149,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			clear_game()
 			screen = "select"
 			menus.show()
-			menus.level_select(casual)
+			menus.level_select()
 			Audio.stop_music()  # selection screens: gull calls stay audible
 			_waves("quiet_db")
 		"start":
@@ -159,6 +172,9 @@ func _navigate(action: String, payload: Variant = null) -> void:
 		"screech_lesson":
 			start_level(2, false, true)
 		"restart":
+			if is_instance_valid(game) and game.practice:
+				start_practice()
+				return
 			if is_instance_valid(game) and not game.level.get("vs",{}).is_empty():
 				start_vs(str(vs_round.arena),str(vs_round.opponent))
 				return
@@ -176,7 +192,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 				if not lesson_running:
 					if int(game.level.id) == 2 and game.player.species == "herring" and game.level.has("screech_lesson"):
 						replay = "screech_lesson"
-				menus.pause(lesson_running,replay)
+				menus.pause(lesson_running,replay,game.practice)
 				Audio.duck_music(true)
 		"skip_lesson":
 			if is_instance_valid(game):
@@ -237,6 +253,18 @@ func start_vs(arena_id: String, opponent_id: String) -> void:
 	round_level.vs = {"opponent": opponent_id}
 	vs_round = {"arena": arena_id,"opponent": opponent_id}
 	_start_game(round_level,false,false)
+	Audio.play_music(Audio.LEVEL_MUSIC[0])
+
+## Practice: the Scrap Sands map with no rivals but a patrolling dummy, no clock and no end (see "practice_setup" in the arena data).
+func start_practice() -> void:
+	var arena: Dictionary = Config.arenas.scrap_sands.duplicate(true)
+	var setup: Dictionary = arena.practice_setup
+	arena.erase("practice_setup")
+	arena.rivals = []
+	arena.training_dummy = setup.dummy
+	arena.practice = setup
+	vs_round = {}
+	_start_game(arena,false,false)
 	Audio.play_music(Audio.LEVEL_MUSIC[0])
 
 func _start_game(level: Dictionary, force_training: bool, force_lesson: bool) -> void:
