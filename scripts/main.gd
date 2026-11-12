@@ -113,9 +113,9 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			menus.title()
 			Audio.play_music("title")
 			_waves("title_db")
-		"arcade", "vs":
+		"arcade", "vs", "pick": # "pick" re-opens the gull picker in the current mode (shop's back)
 			casual = false
-			vs = action == "vs"
+			vs = action == "vs" or (action == "pick" and vs)
 			clear_game()
 			screen = "pick"
 			menus.show()

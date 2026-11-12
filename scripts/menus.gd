@@ -104,6 +104,9 @@ func title() -> void:
 	tagline.add_theme_color_override("font_shadow_color",BeachUI.INK)
 	tagline.add_theme_constant_override("shadow_offset_x",1)
 	tagline.add_theme_constant_override("shadow_offset_y",1)
+	var gap: Control = Control.new()
+	gap.custom_minimum_size.y = 6
+	column.add_child(gap)
 	var panel: PanelContainer = BeachUI.wood_panel(column)
 	panel.size_flags_horizontal = SIZE_SHRINK_BEGIN
 	content = VBoxContainer.new()
@@ -209,8 +212,21 @@ func gull_picker() -> void:
 	var bottom: HBoxContainer = HBoxContainer.new()
 	bottom.alignment = BoxContainer.ALIGNMENT_CENTER
 	content.add_child(bottom)
-	BeachUI.back_button(bottom,"< BACK",func() -> void: choose("title"))
+	var back: Button = _small_button(bottom,"< BACK",func() -> void: choose("title"))
+	back.size_flags_horizontal = SIZE_SHRINK_CENTER
+	back.custom_minimum_size.x = 40
 	_perk_picker(bottom)
+	var shop_button: Button = _small_button(bottom,"SHOP" if GameState.shop_open() else "SHOP - LVL 7",func() -> void: choose("shop"))
+	shop_button.name = "ShopButton"
+	shop_button.size_flags_horizontal = SIZE_SHRINK_CENTER
+	shop_button.custom_minimum_size.x = 40
+	shop_button.disabled = not GameState.shop_open()
+	var feathers: Label = BeachUI.label(self,"FEATHERS %d" % GameState.feathers(),BeachUI.FONT_NATIVE,BeachUI.CREAM)
+	feathers.name = "Feathers"
+	feathers.position = Vector2(188,20)
+	feathers.size = Vector2(108,9)
+	feathers.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	BeachUI.feather_icon(feathers)
 
 ## Gull card body shared by the picker and the practice menu: bird stage, name, blurb, stats, special.
 func _gull_card_body(box: VBoxContainer, id: String, owned: bool) -> void:
@@ -516,7 +532,7 @@ func shop(bought: bool = false) -> void:
 	var spacer: Control = Control.new()
 	spacer.size_flags_vertical = SIZE_EXPAND_FILL
 	right.add_child(spacer)
-	var back: Button = BeachUI.back_button(right,"< BACK",func() -> void: choose("title"))
+	var back: Button = BeachUI.back_button(right,"< BACK",func() -> void: choose("pick"))
 	(first if first != null else back).grab_focus()
 
 func _shop_item(parent: Control, id: String, item_name: String, blurb: String, price: int, width: int, stacked: bool) -> Button:
