@@ -16,13 +16,13 @@ const SCORE_H: float = 22.0 ## two lines
 var close_button: Button
 var stills: Array[TextureRect] = []
 
-static func open(parent: Control) -> ScoreWaysCard:
+static func open(parent: Control, title_text: String = "HOW TO SCORE") -> ScoreWaysCard:
 	var card := ScoreWaysCard.new()
 	parent.add_child(card)
-	card.build()
+	card.build(title_text)
 	return card
 
-func build() -> void:
+func build(title_text: String = "HOW TO SCORE") -> void:
 	BeachUI.full(self)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	z_index = 20
@@ -48,7 +48,7 @@ func build() -> void:
 	column.add_theme_constant_override("separation", 3)
 	panel.add_child(column)
 
-	var title: Label = BeachUI.label(column, "HOW TO SCORE", BeachUI.FONT_DISPLAY, Color.WHITE)
+	var title: Label = BeachUI.label(column, title_text, BeachUI.FONT_DISPLAY, Color.WHITE)
 	title.add_theme_font_override("font", TITLE_FONT)
 	title.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.65))
 	title.add_theme_constant_override("shadow_offset_x", 1)

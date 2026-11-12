@@ -1,7 +1,7 @@
 {
   "id": 6,
   "crabs": {"enabled": true},
-  "name": "Squall",
+  "name": "Thunderstorm",
   "seed": 7116,
   "time_limit": 150,
   "authored": true,
@@ -10,7 +10,7 @@
   "twist": {
     "id": "squall",
     "_note": "Initial tuning, to be playtested. Seconds: calm, then a warning toast, then the squall, then clearing. Wind strengths are tuning.wind base values.",
-    "calm": 45.0,
+    "calm": 8.0,
     "warning": 3.0,
     "squall": 40.0,
     "ramp": 3.0,

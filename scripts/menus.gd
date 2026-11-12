@@ -110,7 +110,7 @@ func title() -> void:
 	content.custom_minimum_size.x = 104
 	panel.add_child(content)
 	_small_button(content,"ARCADE  >",func() -> void: choose("arcade")).grab_focus()
-	_small_button(content,"CASUAL  /  PRACTICE",func() -> void: choose("casual"))
+	_small_button(content,"PRACTICE  >",func() -> void: choose("practice"))
 	_small_button(content,"VS  >",func() -> void: choose("vs")).name = "VsButton"
 	var small: HBoxContainer = HBoxContainer.new()
 	content.add_child(small)
@@ -118,9 +118,9 @@ func title() -> void:
 	if not OS.has_feature("web"):
 		_small_button(small,"QUIT",func() -> void: choose("quit"))
 
-func level_select(casual: bool) -> void:
+func level_select() -> void:
 	var trained: bool = bool(GameState.entry(1).get("training_complete", false))
-	clear("PICK YOUR BEACH", "PRACTICE / 15 SNATCHES. NO TIMER" if casual else ("ARCADE / TRAINING DAY FIRST" if not trained else "ARCADE / EARN A STAR TO MOVE ON"))
+	clear("PICK YOUR BEACH", "ARCADE / TRAINING DAY FIRST" if not trained else "ARCADE / EARN A STAR TO MOVE ON")
 	content.add_theme_constant_override("separation",2)
 	var outer: MarginContainer = content.get_parent().get_parent() as MarginContainer
 	for edge: String in ["top","bottom","left","right"]:
@@ -567,6 +567,23 @@ func _stat_rows(parent: Control, card: Dictionary, owned: bool) -> void:
 			pip.color = (BeachUI.GOLD if owned else Color("6b858b")) if lit else Color(0.0,0.0,0.0,0.3)
 			line.add_child(pip)
 
+## One button cycling through the gulls the player owns (the gull picker's rule); each pick saves like choosing in the picker.
+func _gull_cycler() -> void:
+	var owned: Array[String] = []
+	for id: String in Config.species.species:
+		if GameState.gull_owned(id):
+			owned.append(id)
+	var button: Button = BeachUI.button(content,"",func() -> void: pass,0)
+	button.name = "GullCycler"
+	button.size_flags_horizontal = SIZE_EXPAND_FILL
+	var refresh: Callable = func() -> void: button.text = str(Config.species.species[GameState.chosen_gull()].name)
+	refresh.call()
+	button.pressed.connect(func() -> void:
+		var next: String = owned[(owned.find(GameState.chosen_gull()) + 1) % owned.size()]
+		choose("gull_practice",next)
+		refresh.call())
+	_small_label(content,"TAP TO SWAP GULL",Color("80bcb8")).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
 func _small_button(parent: Control, text: String, action: Callable) -> Button:
 	var node: Button = BeachUI.back_button(parent,text,action,0)
 	node.size_flags_horizontal = SIZE_EXPAND_FILL
@@ -580,7 +597,7 @@ func _small_label(parent: Control, text: String, color: Color) -> Label:
 	node.add_theme_font_size_override("font_size",6)
 	return node
 
-func pause(skippable: bool = false, replay: String = "") -> void:
+func pause(skippable: bool = false, replay: String = "", practice: bool = false) -> void:
 	clear("TAKING A BREATHER", "YOUR LUNCH CAN WAIT.")
 	# A compact box: half the usual menu, 8 px heading, 6 px subtitle and 13 px buttons.
 	var panel: PanelContainer = content.get_parent() as PanelContainer
@@ -606,7 +623,35 @@ func pause(skippable: bool = false, replay: String = "") -> void:
 			if is_instance_valid(rules):
 				rules.grab_focus()))
 	_small_button(pair,"OPTIONS",func() -> void: choose("options_pause")).size_flags_horizontal = SIZE_EXPAND_FILL
-	_small_button(content,"LEVEL SELECT",func() -> void: choose("select"))
+	_small_button(content,"PRACTICE MENU" if practice else "LEVEL SELECT",func() -> void: choose("practice" if practice else "select"))
+
+## Practice hub: the two score cards, then the open-ended session on Scrap Sands with the chosen gull.
+func practice_menu() -> void:
+	clear("PRACTICE", "NO TIMER. NO SCORE.")
+	var panel: PanelContainer = content.get_parent() as PanelContainer
+	panel.size_flags_horizontal = SIZE_SHRINK_CENTER
+	panel.size_flags_vertical = SIZE_SHRINK_CENTER
+	content.custom_minimum_size.x = 128
+	content.get_child(0).add_theme_font_size_override("font_size",BeachUI.FONT_NATIVE)
+	content.get_child(1).add_theme_font_override("font",SMALL_FONT)
+	content.get_child(1).add_theme_font_size_override("font_size",6)
+	_gull_cycler()
+	var rules: Button = _small_button(content,"HOW TO SCORE",func() -> void: pass)
+	rules.name = "RulesButton"
+	rules.pressed.connect(func() -> void:
+		ScoreRulesCard.open(self,"BACK").closed.connect(func() -> void:
+			if is_instance_valid(rules):
+				rules.grab_focus()))
+	var ways: Button = _small_button(content,"STEAL TYPES",func() -> void: pass)
+	ways.name = "WaysButton"
+	ways.pressed.connect(func() -> void:
+		ScoreWaysCard.open(self,"STEAL TYPES").closed.connect(func() -> void:
+			if is_instance_valid(ways):
+				ways.grab_focus()))
+	var go: Button = _small_button(content,"LET'S PRACTICE!",func() -> void: choose("practice_start"))
+	go.name = "GoButton"
+	go.grab_focus()
+	_small_button(content,"< BACK",func() -> void: choose("title"))
 
 func options(from_pause: bool) -> void:
 	clear("MAKE YOURSELF AT HOME")

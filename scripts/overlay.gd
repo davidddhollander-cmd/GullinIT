@@ -217,10 +217,14 @@ func setup(owner_game: BeachGame) -> void:
 	intro_panel.mouse_filter = MOUSE_FILTER_IGNORE
 	var intro: VBoxContainer = VBoxContainer.new()
 	intro_panel.add_child(intro)
-	if not game.is_vs():
+	if not game.is_vs() and not game.practice:
 		BeachUI.label(intro,"TRAINING DAY" if game.training else "%02d / %s" % [game.level.id,game.level.name.to_upper()],8,BeachUI.GOLD)
 	if game.is_vs():
 		_vs_card(intro)
+	elif game.practice:
+		BeachUI.label(intro,"PRACTICE",8,BeachUI.GOLD)
+		BeachUI.label(intro,"MUG THE DUMMY. NO TIMER.")
+		BeachUI.label(intro,"LEAVE FROM THE PAUSE MENU.",8,Color("80bcb8"))
 	elif game.training:
 		BeachUI.label(intro,"FIVE SHORT LESSONS. TAKE YOUR TIME.")
 		BeachUI.label(intro,"NO TIMER. NO SCORE. NO MANNERS.",8,Color("80bcb8"))
@@ -460,8 +464,8 @@ func _process(delta: float) -> void:
 	score_label.text = "%04d  X%s" % [roundi(shown_score),str(Config.tuning.score.tiers[game.score.tier])]
 	_score_hop(delta,counting)
 	var time_left: float = maxf(0,float(game.level.time_limit)-game.elapsed)
-	time_label.text = "TRAINING" if game.training else ("%d/%d" % [game.score.items,Config.tuning.score.casual_items] if game.casual else "%02d" % ceili(time_left))
-	var warning: bool = not game.training and not game.casual and game.running and time_left <= TIME_WARNING
+	time_label.text = "" if game.practice else "TRAINING" if game.training else ("%d/%d" % [game.score.items,Config.tuning.score.casual_items] if game.casual else "%02d" % ceili(time_left))
+	var warning: bool = not game.training and not game.practice and not game.casual and game.running and time_left <= TIME_WARNING
 	time_label.add_theme_color_override("font_color",Color("ef725c") if warning else BeachUI.CREAM)
 	time_label.modulate.a = 0.35 if warning and Time.get_ticks_msec()%500 < 200 else 1.0
 	wind_label.text = "CALM" if absf(game.player.wind_force) < 0.01 else "%s %d%%" % ["WIND >" if game.player.wind_force > 0 else "< WIND",roundi(absf(game.player.wind_force)*100)]
@@ -690,7 +694,7 @@ func _draw() -> void:
 	_draw_digestion()
 	if game.running:
 		_draw_perks(offset)
-		if not game.training and not game.is_vs():
+		if not game.training and not game.is_vs() and not game.practice:
 			_draw_points()
 	if game.peck_pause:
 		_draw_peck_prompt(offset)

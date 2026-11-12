@@ -31,5 +31,6 @@
     {"type": "hotdog_stand", "x": 500, "customer_x": 540},
     {"type": "bin", "x": 610}
   ],
+  "practice_setup": {"dummy": {"name": "Dummy", "species": "herring", "speed": 0.5, "accuracy_px": 0, "mug_chance": 0, "dummy": true, "range": [60, 580], "cruise_y": 92}, "rearm_time": 2.5},
   "map_version": 3
 }

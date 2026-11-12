@@ -192,9 +192,9 @@ static func run(suite: Node, check: Callable) -> void:
 	main._navigate("gull", GameState.chosen_gull())
 	check.call(main.screen == "select", "Arcade still goes from the gull picker to the level select")
 	main._navigate("vs")
-	main._navigate("casual")
+	main._navigate("arcade")
 	main._navigate("gull", GameState.chosen_gull())
-	check.call(main.screen == "select" and not main.vs, "Casual still goes from the gull picker to the level select")
+	check.call(main.screen == "select" and not main.vs, "Arcade after VS goes from the gull picker to the level select")
 	main._navigate("title")
 
 	# Boards: Arcade names are unchanged.

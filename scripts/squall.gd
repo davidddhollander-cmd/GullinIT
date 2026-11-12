@@ -45,7 +45,7 @@ func tick(delta: float) -> void:
 	var seconds: float = game.elapsed
 	if not warned and seconds >= float(cfg.calm) - float(cfg.warning):
 		warned = true
-		game.effects.message(Vector2(game.camera_x, 84.0), "SQUALL INCOMING!", Color("fff4da"), float(cfg.warning) + 1.0, 0.0)
+		game.effects.message(Vector2(game.camera_x, 84.0), "THUNDERSTORM INCOMING!", Color("fff4da"), float(cfg.warning) + 1.0, 0.0)
 		Audio.play("gust")
 	var next: Phase = phase_at(seconds)
 	if next != phase:
