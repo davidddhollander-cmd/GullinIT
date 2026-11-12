@@ -3565,6 +3565,130 @@
         "animation": "rest",
         "drop": 6.0,
         "category": "shades"
-      }
+      },
+    {
+      "title": "SUNBATHER FIX MALE RED",
+      "description": "LEFT OLD RIGHT NEW EYES AND SHORTS",
+      "current": "sunbather",
+      "current_override": {
+        "file": "res://assets/sprites/sunbather-lift-old/retro-sunbather-male-red-32bit-old.png",
+        "animations": {
+          "rest": {
+            "frames": [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 88, 88, 88, 88, 89, 89, 89, 89, 90, 90, 90, 90, 91, 91, 91, 91, 92, 92, 92, 92],
+            "fps": 28.0,
+            "loop": true
+          }
+        }
+      },
+      "candidate": {
+        "clone": "sunbather",
+        "file": "res://assets/sprites/retro-sunbather-male-red-32bit.png",
+        "animations": {
+          "rest": {
+            "frames": [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 88, 88, 88, 88, 89, 89, 89, 89, 90, 90, 90, 90, 91, 91, 91, 91, 92, 92, 92, 92],
+            "fps": 28.0,
+            "loop": true
+          }
+        }
+      },
+      "reference": "shopper_mullet",
+      "motion": "on_sand",
+      "animation": "rest",
+      "drop": 6.0,
+      "category": "shades fix"
+    },
+    {
+      "title": "SUNBATHER FIX MALE BLUE",
+      "description": "LEFT OLD RIGHT NEW EYES AND SHORTS",
+      "current": "sunbather",
+      "current_override": {
+        "file": "res://assets/sprites/sunbather-lift-old/retro-sunbather-male-blue-32bit-old.png",
+        "animations": {
+          "rest": {
+            "frames": [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 88, 88, 88, 88, 89, 89, 89, 89, 90, 90, 90, 90, 91, 91, 91, 91, 92, 92, 92, 92],
+            "fps": 28.0,
+            "loop": true
+          }
+        }
+      },
+      "candidate": {
+        "clone": "sunbather",
+        "file": "res://assets/sprites/retro-sunbather-male-blue-32bit.png",
+        "animations": {
+          "rest": {
+            "frames": [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 88, 88, 88, 88, 89, 89, 89, 89, 90, 90, 90, 90, 91, 91, 91, 91, 92, 92, 92, 92],
+            "fps": 28.0,
+            "loop": true
+          }
+        }
+      },
+      "reference": "shopper_mullet",
+      "motion": "on_sand",
+      "animation": "rest",
+      "drop": 6.0,
+      "category": "shades fix"
+    },
+    {
+      "title": "SUNBATHER FIX FEMALE RED",
+      "description": "LEFT OLD RIGHT NEW EYES AND SHORTS",
+      "current": "sunbather",
+      "current_override": {
+        "file": "res://assets/sprites/sunbather-lift-old/retro-sunbather-female-red-32bit-old.png",
+        "animations": {
+          "rest": {
+            "frames": [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 88, 88, 88, 88, 89, 89, 89, 89, 90, 90, 90, 90, 91, 91, 91, 91, 92, 92, 92, 92],
+            "fps": 28.0,
+            "loop": true
+          }
+        }
+      },
+      "candidate": {
+        "clone": "sunbather",
+        "file": "res://assets/sprites/retro-sunbather-female-red-32bit.png",
+        "animations": {
+          "rest": {
+            "frames": [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 88, 88, 88, 88, 89, 89, 89, 89, 90, 90, 90, 90, 91, 91, 91, 91, 92, 92, 92, 92],
+            "fps": 28.0,
+            "loop": true
+          }
+        }
+      },
+      "reference": "shopper_mullet",
+      "motion": "on_sand",
+      "animation": "rest",
+      "drop": 6.0,
+      "category": "shades fix"
+    },
+    {
+      "title": "SUNBATHER FIX FEMALE BLUE",
+      "description": "LEFT OLD RIGHT NEW EYES AND SHORTS",
+      "current": "sunbather",
+      "current_override": {
+        "file": "res://assets/sprites/sunbather-lift-old/retro-sunbather-female-blue-32bit-old.png",
+        "animations": {
+          "rest": {
+            "frames": [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 88, 88, 88, 88, 89, 89, 89, 89, 90, 90, 90, 90, 91, 91, 91, 91, 92, 92, 92, 92],
+            "fps": 28.0,
+            "loop": true
+          }
+        }
+      },
+      "candidate": {
+        "clone": "sunbather",
+        "file": "res://assets/sprites/retro-sunbather-female-blue-32bit.png",
+        "animations": {
+          "rest": {
+            "frames": [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 88, 88, 88, 88, 89, 89, 89, 89, 90, 90, 90, 90, 91, 91, 91, 91, 92, 92, 92, 92],
+            "fps": 28.0,
+            "loop": true
+          }
+        }
+      },
+      "reference": "shopper_mullet",
+      "motion": "on_sand",
+      "animation": "rest",
+      "drop": 6.0,
+      "category": "shades fix"
+    }
   ]
 }
