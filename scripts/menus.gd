@@ -216,7 +216,7 @@ func gull_picker() -> void:
 	back.size_flags_horizontal = SIZE_SHRINK_CENTER
 	back.custom_minimum_size.x = 40
 	_perk_picker(bottom)
-	var shop_button: Button = _small_button(bottom,"SHOP" if GameState.shop_open() else "SHOP - LVL 7",func() -> void: choose("shop"))
+	var shop_button: Button = _small_button(bottom,"SHOP" if GameState.shop_open() else "SHOP - LVL 3",func() -> void: choose("shop"))
 	shop_button.name = "ShopButton"
 	shop_button.size_flags_horizontal = SIZE_SHRINK_CENTER
 	shop_button.custom_minimum_size.x = 40
@@ -700,7 +700,9 @@ func practice_menu() -> void:
 	go.remove_theme_font_override("font") # SMALL_FONT has no apostrophe; the main call to action uses GullPixel 8 px
 	go.add_theme_font_size_override("font_size",BeachUI.FONT_NATIVE)
 	go.grab_focus()
-	_small_button(content,"< BACK",func() -> void: choose("title"))
+	var practice_back: Button = _small_button(content,"< BACK",func() -> void: choose("title"))
+	practice_back.size_flags_horizontal = SIZE_SHRINK_CENTER
+	practice_back.custom_minimum_size.x = 40
 
 func options(from_pause: bool) -> void:
 	clear("MAKE YOURSELF AT HOME")

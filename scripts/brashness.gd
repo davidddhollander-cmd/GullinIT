@@ -94,7 +94,7 @@ func _gang_call(p: Dictionary) -> void:
 	for i: int in int(p.allies):
 		var side: float = -1.0 if i%2 == 0 else 1.0
 		var target: BeachTarget = targets[i] if i < targets.size() else null
-		var hit: Vector2 = target.food_position() if target != null else Vector2(game.camera_x+(i-1)*70.0,float(Config.tuning.world.ground)-30.0)
+		var hit: Vector2 = target.food_position() if target != null else Vector2(game.camera_x+(i-1)*70.0,_sand_y())
 		var gull: BeachGull = BeachGull.new()
 		gull.species = "herring"
 		gull.state = BeachGull.State.GLIDE
@@ -104,6 +104,29 @@ func _gang_call(p: Dictionary) -> void:
 		var start: Vector2 = Vector2(hit.x-side*120.0,-20.0)
 		gull.position = start
 		allies.append({"gull":gull,"target":target,"start":start,"hit":hit,"end":Vector2(hit.x+side*140.0,-30.0),"t":-lead-float(p.stagger)*i,"knocked":false})
+
+## Gull y when its feet touch the sand.
+func _sand_y() -> float:
+	return float(Config.tuning.world.ground)-float(Config.tuning.flight.feet_offset)
+
+## The nearest still-snatchable held snack no other ally has claimed.
+func _repick(ally: Dictionary) -> BeachTarget:
+	var best: BeachTarget = null
+	for target: BeachTarget in game.spawner.targets:
+		if not is_instance_valid(target) or not game.snatchable(target) or allies.any(func(a: Dictionary) -> bool: return a.target == target):
+			continue
+		if best == null or absf(target.position.x-ally.hit.x) < absf(best.position.x-ally.hit.x):
+			best = target
+	return best
+
+## Mid-plunge the aim point bends (capped px/s) toward the live snack, or down to the sand when none is left.
+func _steer(ally: Dictionary, delta: float) -> void:
+	var target: BeachTarget = ally.target
+	if not is_instance_valid(target) or not game.snatchable(target):
+		ally.target = _repick(ally)
+		target = ally.target
+	var goal: Vector2 = target.food_position() if target != null else Vector2(ally.hit.x,_sand_y())
+	ally.hit = ally.hit.move_toward(goal,float(tuning().steer_px_per_s)*delta)
 
 ## Each ally follows two quadratic curves: a plunge from offscreen to the food, then a climb back out.
 func tick(delta: float) -> void:
@@ -128,6 +151,8 @@ func tick(delta: float) -> void:
 		var before: Vector2 = gull.position
 		var plunge: bool = ally.t < swoop
 		var u: float = clampf(ally.t/swoop,0.0,1.0) if plunge else clampf((ally.t-swoop)/swoop,0.0,1.0)
+		if plunge:
+			_steer(ally,delta)
 		var from: Vector2 = ally.start if plunge else ally.hit
 		var to: Vector2 = ally.hit if plunge else ally.end
 		var control: Vector2 = Vector2(to.x,from.y) if plunge else Vector2(from.x,to.y)

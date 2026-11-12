@@ -18,6 +18,77 @@ func eat_pending(game: BeachGame) -> void:
 	# are tested separately with the real, unadvanced queue.
 	game.player.digestion.tick(30,false)
 
+## Gang Call allies plunge to the sand with no snack, follow a moving one, re-pick a lost one, and never share a target.
+func gang_call_steering_checks(game: BeachGame) -> void:
+	var brash: BeachBrash = game.brash
+	var sand: float = float(Config.tuning.world.ground) - float(Config.tuning.flight.feet_offset)
+	var stats: Dictionary = game.player.species_stats().power
+	var total: float = (float(stats.swoop_time) * 2.0 + float(stats.stagger) * float(stats.allies) + float(CrowdPanic.settings().lead_time)) 
+	game.player.land()
+	game.player.position = Vector2(game.camera_x, game.player.ground_y())
+	for person: BeachTarget in game.spawner.targets:
+		person.food = false
+		person.food_sprite.hide()
+	var first: BeachTarget = game.spawner.create("kiosk_customer", game.camera_x + 60.0)
+	var second: BeachTarget = game.spawner.create("kiosk_customer", game.camera_x - 60.0)
+	for person: BeachTarget in [first, second]:
+		person.food = true
+		person.food_sprite.show()
+	brash.meter = 1.0
+	check(brash.fire(), "Gang Call fires for the steering test")
+	var gulls: Array[BeachGull] = []
+	var lowest: Array[float] = []
+	for ally: Dictionary in brash.allies:
+		gulls.append(ally.gull)
+		lowest.append(-1000.0)
+	var unique: bool = true
+	var followed: bool = false
+	var start_x: float = first.position.x
+	for frame: int in int(total * 60.0) + 30:
+		if frame > 20: # the target walks away during the plunge
+			first.position.x += 0.6
+		brash.tick(1.0 / 60.0)
+		var seen: Array[BeachTarget] = []
+		for ally: Dictionary in brash.allies:
+			if ally.target != null:
+				unique = unique and not seen.has(ally.target)
+				seen.append(ally.target)
+			if ally.target == first and ally.t > 0.0 and ally.t < 0.7 and ally.hit.distance_to(first.food_position()) < 25.0 and first.position.x > start_x + 3.0:
+				followed = true
+		for i: int in gulls.size():
+			if is_instance_valid(gulls[i]) and gulls[i].visible:
+				lowest[i] = maxf(lowest[i], gulls[i].position.y)
+	check(unique, "no two live Gang Call allies share a target")
+	check(followed, "an ally steers toward a target that moves during the plunge")
+	check(not first.food and not second.food, "allies that follow moving targets still knock their food")
+	for i: int in range(2, gulls.size()): # the first two allies hold a snack each
+		check(lowest[i] >= sand - 0.5, "ally %d without a snack plunges to the sand (%.1f of %.1f)" % [i, lowest[i], sand])
+	# A target that loses its snack mid-plunge hands its ally to an unclaimed holder, or the sand.
+	for person: BeachTarget in game.spawner.targets:
+		person.food = false
+		person.food_sprite.hide()
+	var holder: BeachTarget = game.spawner.create("kiosk_customer", game.camera_x + 40.0)
+	var spare: BeachTarget = game.spawner.create("kiosk_customer", game.camera_x - 40.0)
+	for person: BeachTarget in [holder, spare]:
+		person.food = true
+		person.food_sprite.show()
+	brash.meter = 1.0
+	brash.fire()
+	brash.tick(float(CrowdPanic.settings().lead_time) + 0.1)
+	var claimed: Array = brash.allies.map(func(a: Dictionary) -> Variant: return a.target)
+	check(claimed.has(holder) and claimed.has(spare), "the initial assignment gives each snack to one ally")
+	holder.food = false
+	holder.food_sprite.hide()
+	brash.tick(1.0 / 60.0)
+	unique = true
+	var seen_after: Array = []
+	for ally: Dictionary in brash.allies:
+		if ally.target != null:
+			unique = unique and not seen_after.has(ally.target) and ally.target != holder
+			seen_after.append(ally.target)
+	check(unique, "an ally whose target lost its snack never doubles up on another ally's target")
+	brash.clear()
+
 func settle() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -1587,6 +1658,7 @@ func screech_checks() -> void:
 		check(not holders[0].food, "the gang knocks food out of the nearest beachgoer's hands")
 	brash.tick(0.1)
 	check(brash.allies.is_empty(), "the gang flies off and is cleaned up")
+	await gang_call_steering_checks(game)
 	main.clear_game()
 	await settle()
 

@@ -341,7 +341,7 @@
   "brash": {
     "snatch": 0.15, "handover": 0.08, "mug": 0.2, "bump": 0.34, "dog_bump": 0.6, "stun": -0.25,
     "screech_per_sec": 0.06, "vantage_per_px": 0.03, "vantage_max": 3.5,
-    "hit_shake": 5, "hit_stop": 0.08, "hit_feathers": 50, "hit_feathers_per_hit": 4, "hit_crumbs": 24, "dust_time": 1.0, "dust_gap": 0.15, "food_lift": 2.8, "hit_cap": 8, "shadow_lead": 0.7
+    "hit_shake": 5, "hit_stop": 0.08, "hit_feathers": 50, "hit_feathers_per_hit": 4, "hit_crumbs": 24, "dust_time": 1.0, "dust_gap": 0.15, "food_lift": 2.8, "hit_cap": 8, "shadow_lead": 0.7, "steer_px_per_s": 90
   },
   "shakedown": {
     "panic_interval": 1.0, "shake_radius": 50, "raid_cap": 4, "duck_time": 0.15, "duck_depth": 64,

@@ -210,9 +210,9 @@ func equip_perk(id: String) -> void:
 	options.perk = id if id.is_empty() or perk_owned(id) else ""
 	save_progress()
 
-## The shop opens once the Stage 1 boss is beaten.
+## The shop opens once level 3 is unlocked.
 func shop_open() -> bool:
-	return bool(progress.get("stage1_complete", false))
+	return unlocked(3)
 
 ## The last pick if it exists and is owned, else the herring gull.
 func chosen_gull() -> String:

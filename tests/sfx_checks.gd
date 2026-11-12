@@ -168,9 +168,9 @@ static func run(host: Node, check: Callable) -> void:
 static func _waves(host: Node, check: Callable) -> void:
 	var main: Node = host.main
 	var previous_audio: bool = bool(Config.tuning.juice.audio)
-	var saved_shop: Variant = GameState.progress.get("stage1_complete", false)
+	var saved_shop: Variant = GameState.progress.get("2", null)
 	Config.tuning.juice.audio = true
-	GameState.progress["stage1_complete"] = true
+	GameState.progress["2"] = {"stars": 1}
 	var on: Callable = func() -> bool: return Audio.ambience.playing and Audio.ambience_id == "menu_waves" and Audio.ambience.stream != null
 	var db: Dictionary = Config.tuning.ambience.menu_waves_db
 	check.call(float(db.title_db) < float(db.quiet_db) and float(db.quiet_db) < 0.0,"menu waves sit lower under the title music than on the quiet screens")
@@ -209,7 +209,10 @@ static func _waves(host: Node, check: Callable) -> void:
 	Audio.play_ambience("menu_waves")
 	check.call(not Audio.ambience.playing,"juice.audio off keeps the waves silent")
 	Config.tuning.juice.audio = previous_audio
-	GameState.progress["stage1_complete"] = saved_shop
+	if saved_shop == null:
+		GameState.progress.erase("2")
+	else:
+		GameState.progress["2"] = saved_shop
 	Audio.stop_ambience(0.0)
 	Audio.ambience_tween.custom_step(1.0)
 

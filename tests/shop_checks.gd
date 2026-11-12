@@ -14,17 +14,17 @@ static func run(suite: Node, check: Callable) -> void:
 	var saved_options: Dictionary = GameState.options.duplicate(true)
 	Config.species.unlock_all = false
 	GameState.wallet = {"feathers": 0}
-	GameState.progress.erase("stage1_complete")
+	GameState.progress = {}
 	GameState.options.perk = ""
-	# SHOP button: always there, disabled until Stage 1 is beaten.
+	# SHOP button: always there, disabled until level 3 is unlocked.
 	main._navigate("title")
 	await suite.settle()
 	check.call(main.menus.find_child("ShopButton", true, false) == null, "the main menu has no SHOP button")
 	suite.layout(main.menus)
 	suite.menu_font_grid(main.menus)
 	main._navigate("shop")
-	check.call(main.screen == "title", "the shop will not open before stage1_complete")
-	GameState.set_flag("stage1_complete")
+	check.call(main.screen == "title", "the shop will not open before level 3 is unlocked")
+	GameState.progress["2"] = {"stars": 1}
 	main._navigate("title")
 	await suite.settle()
 	main._navigate("shop")
