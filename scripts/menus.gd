@@ -8,6 +8,36 @@ func _ready() -> void:
 	theme = BeachUI.theme()
 	BeachUI.full(self)
 
+## The Feather count: icon and number on a small bright tablet in the top-right corner. The number label is named "Feathers".
+func _feather_tablet() -> void:
+	var tablet: PanelContainer = PanelContainer.new()
+	tablet.name = "FeatherTablet"
+	tablet.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var box: StyleBoxFlat = StyleBoxFlat.new()
+	box.bg_color = Color("ffe08a")
+	box.border_color = Color("a8581c")
+	box.set_border_width_all(1)
+	box.anti_aliasing = false
+	box.set_corner_radius_all(2)
+	box.content_margin_left = 3
+	box.content_margin_right = 4
+	box.content_margin_top = 1
+	box.content_margin_bottom = 1
+	tablet.add_theme_stylebox_override("panel",box)
+	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override("separation",2)
+	tablet.add_child(row)
+	var icon: TextureRect = TextureRect.new()
+	icon.texture = BeachUI.FEATHER_ICON
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon.custom_minimum_size = Vector2(10,10)
+	icon.size_flags_vertical = SIZE_SHRINK_CENTER
+	row.add_child(icon)
+	var count: Label = BeachUI.label(row,str(GameState.feathers()),BeachUI.FONT_NATIVE,BeachUI.INK)
+	count.name = "Feathers"
+	add_child(tablet)
+	tablet.position = Vector2(298.0 - tablet.get_combined_minimum_size().x,13.0) # right edge fixed
+
 func clear(title: String, subtitle: String = "", card: bool = false) -> VBoxContainer:
 	for child: Node in get_children():
 		remove_child(child)
@@ -128,12 +158,7 @@ func level_select() -> void:
 	var outer: MarginContainer = content.get_parent().get_parent() as MarginContainer
 	for edge: String in ["top","bottom","left","right"]:
 		outer.add_theme_constant_override("margin_" + edge,0)
-	var feathers: Label = BeachUI.label(self,"FEATHERS %d" % GameState.feathers(),BeachUI.FONT_NATIVE,BeachUI.CREAM)
-	feathers.name = "Feathers"
-	feathers.position = Vector2(188,20)
-	feathers.size = Vector2(108,9)
-	feathers.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	BeachUI.feather_icon(feathers)
+	_feather_tablet()
 	# Seven cards: three on the first row (Training Day's REPLAY LESSONS card is wide), four on the second.
 	var grid: VBoxContainer = VBoxContainer.new()
 	grid.size_flags_vertical = SIZE_EXPAND_FILL
@@ -183,12 +208,13 @@ func gull_picker() -> void:
 	var chosen: String = GameState.chosen_gull()
 	for id: String in Config.species.species:
 		var info: Dictionary = Config.species.species[id]
-		var owned: bool = GameState.gull_owned(id)
+		var owned: bool = GameState.gull_pickable(id)
+		var soon: bool = bool(info.get("coming_soon", false)) and not GameState.gull_owned(id)
 		var card: Button = BeachUI.button(row,"",func() -> void: choose("gull",id),82)
 		card.name = "Card_" + id
 		card.size_flags_horizontal = SIZE_EXPAND_FILL
 		card.size_flags_vertical = SIZE_EXPAND_FILL
-		card.disabled = not owned
+		card.disabled = not owned or soon
 		var box: VBoxContainer = VBoxContainer.new()
 		box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		box.add_theme_constant_override("separation",2)
@@ -199,7 +225,8 @@ func gull_picker() -> void:
 		box.offset_top = 3
 		box.offset_bottom = -3
 		_gull_card_body(box,id,owned)
-		var status: Label = _small_label(box,"UNLOCKED" if owned else "%d FEATHERS" % int(info.price),BeachUI.CREAM if owned else BeachUI.CORAL)
+		var status_text: String = "COMING SOON" if soon else ("UNLOCKED" if GameState.gull_owned(id) else ("FREE PICK" if owned else "%d FEATHERS" % int(info.price)))
+		var status: Label = _small_label(box,status_text,BeachUI.CREAM if owned else BeachUI.CORAL)
 		status.name = "Status"
 		status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -221,12 +248,7 @@ func gull_picker() -> void:
 	shop_button.size_flags_horizontal = SIZE_SHRINK_CENTER
 	shop_button.custom_minimum_size.x = 40
 	shop_button.disabled = not GameState.shop_open()
-	var feathers: Label = BeachUI.label(self,"FEATHERS %d" % GameState.feathers(),BeachUI.FONT_NATIVE,BeachUI.CREAM)
-	feathers.name = "Feathers"
-	feathers.position = Vector2(188,20)
-	feathers.size = Vector2(108,9)
-	feathers.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	BeachUI.feather_icon(feathers)
+	_feather_tablet()
 
 ## Gull card body shared by the picker and the practice menu: bird stage, name, blurb, stats, special.
 func _gull_card_body(box: VBoxContainer, id: String, owned: bool) -> void:
@@ -499,12 +521,16 @@ func shop(bought: bool = false) -> void:
 	var outer: MarginContainer = content.get_parent().get_parent() as MarginContainer
 	for edge: String in ["top","bottom"]:
 		outer.add_theme_constant_override("margin_" + edge,0)
-	var feathers: Label = BeachUI.label(self,"FEATHERS %d" % GameState.feathers(),BeachUI.FONT_NATIVE,BeachUI.CREAM)
-	feathers.name = "Feathers"
-	feathers.position = Vector2(188,20)
-	feathers.size = Vector2(108,9)
-	feathers.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	BeachUI.feather_icon(feathers)
+	_feather_tablet()
+	var hint: Label = BeachUI.label(self,"EARN FEATHERS BY
+COMPLETING QUESTS
+IN ARCADE MODE",6,Color("a9d7d2"))
+	hint.name = "EarnHint"
+	hint.add_theme_font_override("font",SMALL_FONT)
+	hint.add_theme_font_size_override("font_size",6)
+	hint.add_theme_constant_override("line_spacing",1)
+	hint.position = Vector2(166,11)
+	hint.size = Vector2(98,21)
 	var columns: HBoxContainer = HBoxContainer.new()
 	columns.size_flags_vertical = SIZE_EXPAND_FILL
 	columns.add_theme_constant_override("separation",4)
@@ -515,33 +541,46 @@ func shop(bought: bool = false) -> void:
 	var right: VBoxContainer = VBoxContainer.new()
 	right.add_theme_constant_override("separation",2)
 	columns.add_child(right)
-	BeachUI.label(left,"PERKS",BeachUI.FONT_NATIVE,Color("a9d7d2"))
-	BeachUI.label(right,"GULLS",BeachUI.FONT_NATIVE,Color("a9d7d2"))
+	var perks_head: HBoxContainer = HBoxContainer.new()
+	left.add_child(perks_head)
+	BeachUI.label(perks_head,"PERKS",BeachUI.FONT_NATIVE,Color("a9d7d2")).size_flags_vertical = SIZE_SHRINK_CENTER
+	BeachUI.sticker(perks_head,"COMING SOON").name = "PerksSticker"
+	# Both header rows share one height so the two item columns start level.
+	var gulls_head: HBoxContainer = HBoxContainer.new()
+	gulls_head.custom_minimum_size.y = perks_head.get_combined_minimum_size().y
+	right.add_child(gulls_head)
+	BeachUI.label(gulls_head,"GULLS",BeachUI.FONT_NATIVE,Color("a9d7d2")).size_flags_vertical = SIZE_SHRINK_CENTER
 	var first: Button
 	for id: String in Config.perks.perks:
 		var info: Dictionary = Config.perks.perks[id]
-		var item: Button = _shop_item(left,id,str(info.name),str(info.blurb),int(info.price),170,false)
+		var item: Button = _shop_item(left,id,str(info.name),str(info.blurb),int(info.price),140,false,bool(info.get("coming_soon", false)))
 		first = first if first != null or item.disabled else item
 	for id: String in Config.species.species:
 		var info: Dictionary = Config.species.species[id]
 		if int(info.price) > 0:
-			var item: Button = _shop_item(right,id,str(info.name),str(info.blurb),int(info.price),122,true)
+			if bool(info.get("coming_soon", false)):
+				BeachUI.sticker(right,"COMING SOON").name = "Sticker_" + id
+			var item: Button = _shop_item(right,id,str(info.name),str(info.blurb),int(info.price),132,false,bool(info.get("coming_soon", false)))
 			first = first if first != null or item.disabled else item
 	var message: Label = BeachUI.label(right,"BOUGHT!" if bought else "",BeachUI.FONT_NATIVE,BeachUI.GOLD)
 	message.name = "Message"
 	var spacer: Control = Control.new()
 	spacer.size_flags_vertical = SIZE_EXPAND_FILL
 	right.add_child(spacer)
-	var back: Button = BeachUI.back_button(right,"< BACK",func() -> void: choose("pick"))
+	var back: Button = _small_button(self,"< BACK",func() -> void: choose("pick")) # small font, centred on the screen under both columns
+	back.size_flags_horizontal = SIZE_SHRINK_CENTER
+	back.custom_minimum_size.x = 40
+	back.size = Vector2(40,12)
+	back.position = Vector2(140,150)
 	(first if first != null else back).grab_focus()
 
-func _shop_item(parent: Control, id: String, item_name: String, blurb: String, price: int, width: int, stacked: bool) -> Button:
+func _shop_item(parent: Control, id: String, item_name: String, blurb: String, price: int, width: int, stacked: bool, soon: bool = false) -> Button:
 	var owned: bool = GameState.owns(id)
-	var affordable: bool = GameState.feathers() >= price
+	var affordable: bool = GameState.feathers() >= price and not soon
 	var button: Button = BeachUI.button(parent,"",func() -> void: choose("buy",id),width)
 	button.name = "Item_" + id
-	button.custom_minimum_size.y = 32 if stacked else 24
-	button.disabled = owned or not affordable
+	button.custom_minimum_size.y = 27 if stacked else 18
+	button.disabled = owned or not affordable or soon
 	var box: VBoxContainer = VBoxContainer.new()
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_theme_constant_override("separation",0)
@@ -549,24 +588,35 @@ func _shop_item(parent: Control, id: String, item_name: String, blurb: String, p
 	BeachUI.full(box)
 	box.offset_left = 4
 	box.offset_right = -4
-	box.offset_top = 3
-	box.offset_bottom = -3
-	var status_text: String = "OWNED" if owned else ("BUY  %d" % price if affordable else "%d FEATHERS" % price)
+	box.offset_top = 2
+	box.offset_bottom = -2
+	var status_text: String = "OWNED" if owned else ("BUY  %d" % price if affordable else str(price))
 	var status_color: Color = BeachUI.CREAM if owned else (BeachUI.GOLD if affordable else Color("6b858b"))
-	var dim: bool = owned or not affordable
+	var dim: bool = owned or not affordable or soon
 	var head: HBoxContainer = HBoxContainer.new()
 	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(head)
 	var title_label: Label = BeachUI.label(head,item_name,BeachUI.FONT_NATIVE,Color("6b858b") if dim and not owned else BeachUI.GOLD)
 	title_label.size_flags_horizontal = SIZE_EXPAND_FILL
-	var blurb_label: Label = BeachUI.label(box,blurb,BeachUI.FONT_NATIVE,Color("6b858b") if dim else Color("a9d7d2"))
+	var blurb_label: Label = BeachUI.label(box,blurb,6,Color("6b858b") if dim else Color("a9d7d2"))
 	blurb_label.name = "Blurb"
-	var status: Label
-	if stacked:
-		status = BeachUI.label(box,status_text,BeachUI.FONT_NATIVE,status_color)
-	else:
-		status = BeachUI.label(head,status_text,BeachUI.FONT_NATIVE,status_color)
+	blurb_label.add_theme_font_override("font",SMALL_FONT)
+	blurb_label.add_theme_font_size_override("font_size",6)
+	# The price reads as a number plus the Feather icon instead of the word FEATHERS.
+	var price_row: HBoxContainer = HBoxContainer.new()
+	price_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	price_row.add_theme_constant_override("separation",1)
+	(box if stacked else head).add_child(price_row)
+	var status: Label = BeachUI.label(price_row,status_text,BeachUI.FONT_NATIVE,status_color)
 	status.name = "Status"
+	if not owned:
+		var icon: TextureRect = TextureRect.new()
+		icon.texture = BeachUI.FEATHER_ICON
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		icon.custom_minimum_size = Vector2(10,10)
+		icon.size_flags_vertical = SIZE_SHRINK_CENTER
+		icon.modulate = Color.WHITE if affordable else Color(1,1,1,0.45)
+		price_row.add_child(icon)
 	return button
 
 # Simplified card stats: one row per stat, 1-5 pips from data/species.json "card".
@@ -599,6 +649,7 @@ func _gull_cycler(on_change: Callable = Callable()) -> void:
 	button.size_flags_horizontal = SIZE_EXPAND_FILL
 	var refresh: Callable = func() -> void: button.text = str(Config.species.species[GameState.chosen_gull()].name)
 	refresh.call()
+	button.disabled = owned.size() < 2
 	button.pressed.connect(func() -> void:
 		var next: String = owned[(owned.find(GameState.chosen_gull()) + 1) % owned.size()]
 		choose("gull_practice",next)

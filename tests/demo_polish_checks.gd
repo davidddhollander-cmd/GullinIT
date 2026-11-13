@@ -40,7 +40,7 @@ static func _demo_lock_checks(suite: Node, check: Callable) -> void:
 	var saved_unlock: bool = GameState.unlock_all
 	var saved_progress: Dictionary = GameState.progress.duplicate(true)
 	GameState.load_demo()
-	check.call(bool(GameState.demo.enabled) and int(GameState.demo.last_level) == 4, "data/demo.json enables the four-level demo")
+	check.call(bool(GameState.demo.enabled) and int(GameState.demo.last_level) == 3, "data/demo.json enables the three-level demo")
 	GameState.demo = {"enabled": true, "last_level": 3, "feedback_url": ""}
 	GameState.unlock_all = true
 	check.call(GameState.unlocked(3) and not GameState.unlocked(4) and not GameState.unlocked(5) and not GameState.unlocked(6) and not GameState.unlocked(7), "demo locks levels 4-7 even with unlock_all")

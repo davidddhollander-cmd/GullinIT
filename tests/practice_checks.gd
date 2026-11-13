@@ -64,7 +64,7 @@ static func run(suite: Node, check: Callable) -> void:
 	var unlock: Variant = Config.species.get("unlock_all", false)
 	var owned: Variant = GameState.wallet.get("owned", [])
 	Config.species.unlock_all = false
-	GameState.wallet.owned = []
+	GameState.wallet.owned = ["herring", "great-black-backed"]
 	GameState.options.gull = "herring"
 	main._navigate("practice")
 	var cycler: Button = main.menus.find_child("GullCycler", true, false)

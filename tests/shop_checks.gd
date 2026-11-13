@@ -16,6 +16,14 @@ static func run(suite: Node, check: Callable) -> void:
 	GameState.wallet = {"feathers": 0}
 	GameState.progress = {}
 	GameState.options.perk = ""
+	# The demo marks perks and the kittiwake COMING SOON; buying is tested with the flags lifted, then restored.
+	var soon: Dictionary = {}
+	for group: Dictionary in [Config.perks.perks, Config.species.species]:
+		for id: String in group:
+			if group[id].has("coming_soon"):
+				soon[id] = group[id]
+				group[id] = group[id].duplicate()
+				group[id].erase("coming_soon")
 	# SHOP button: always there, disabled until level 3 is unlocked.
 	main._navigate("title")
 	await suite.settle()
@@ -32,7 +40,7 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(main.screen == "shop", "SHOP opens the feather shop")
 	# Poor: everything greyed, buying does nothing.
 	var bullet: Button = _item(main, "bullet_time")
-	check.call(bullet.disabled and _status(bullet) == "5 FEATHERS", "a perk you cannot afford shows its price greyed")
+	check.call(bullet.disabled and _status(bullet) == "5", "a perk you cannot afford shows its price greyed")
 	main._navigate("buy", "bullet_time")
 	check.call(not GameState.owns("bullet_time") and GameState.feathers() == 0, "buying with too few Feathers does nothing")
 	# Rich enough for kittiwake (6) + keen eye (3), not bullet time.
@@ -44,7 +52,7 @@ static func run(suite: Node, check: Callable) -> void:
 	await suite.settle()
 	check.call(GameState.owns("keen_eye") and GameState.feathers() == 7, "buying a perk spends its price")
 	check.call((main.menus.find_child("Message", true, false) as Label).text == "BOUGHT!", "a purchase shows BOUGHT!")
-	check.call((main.menus.find_child("Feathers", true, false) as Label).text == "FEATHERS 7", "the total updates after buying")
+	check.call((main.menus.find_child("Feathers", true, false) as Label).text == "7", "the total updates after buying")
 	check.call(_item(main, "keen_eye").disabled and _status(_item(main, "keen_eye")) == "OWNED", "a bought perk reads OWNED")
 	main._navigate("buy", "keen_eye")
 	check.call(GameState.feathers() == 7, "buying an owned item again does not charge")
@@ -94,6 +102,21 @@ static func run(suite: Node, check: Callable) -> void:
 	main._navigate("arcade")
 	await suite.settle()
 	check.call(main.menus.find_child("PerkPick", true, false) == null, "no perk row when no perk is owned")
+	for group: Dictionary in [Config.perks.perks, Config.species.species]:
+		for id: String in group:
+			if soon.has(id):
+				group[id] = soon[id]
+	GameState.wallet = {"feathers": 10, "owned": []}
+	main._navigate("shop")
+	await suite.settle()
+	check.call(main.menus.find_child("PerksSticker", true, false) != null and main.menus.find_child("Sticker_kittiwake", true, false) != null, "COMING SOON stickers sit above the perks and the kittiwake")
+	check.call(_item(main, "keen_eye").disabled and _item(main, "kittiwake").disabled, "coming-soon items cannot be bought")
+	main._navigate("buy", "keen_eye")
+	main._navigate("buy", "kittiwake")
+	check.call(GameState.feathers() == 10 and not GameState.owns("keen_eye") and not GameState.owns("kittiwake"), "buying a coming-soon item does nothing")
+	suite.layout(main.menus)
+	suite.menu_font_grid(main.menus)
+	await suite.snapshot("shop-coming-soon")
 	GameState.wallet = saved_wallet
 	GameState.progress = saved_progress
 	GameState.options = saved_options

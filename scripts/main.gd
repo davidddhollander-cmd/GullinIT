@@ -123,7 +123,11 @@ func _navigate(action: String, payload: Variant = null) -> void:
 			Audio.stop_music()  # selection screens: gull calls stay audible
 			_waves("quiet_db")
 		"gull":
-			if Config.species.species.has(str(payload)) and GameState.gull_owned(str(payload)):
+			if Config.species.species.has(str(payload)) and GameState.gull_pickable(str(payload)):
+				if not GameState.gull_owned(str(payload)): # the free starter pick
+					var owned: Array = GameState.wallet.get("owned", [])
+					owned.append(str(payload))
+					GameState.wallet.owned = owned
 				GameState.options.gull = str(payload)
 				GameState.save_progress()
 				_navigate("vs_menu" if vs else "select")
@@ -151,7 +155,8 @@ func _navigate(action: String, payload: Variant = null) -> void:
 		"buy":
 			var id: String = str(payload)
 			var price: int = int(Config.perks.perks[id].price) if Config.perks.perks.has(id) else (int(Config.species.species[id].price) if Config.species.species.has(id) else -1)
-			if price > 0 and screen == "shop":
+			var info: Dictionary = Config.perks.perks.get(id, Config.species.species.get(id, {}))
+			if price > 0 and screen == "shop" and not bool(info.get("coming_soon", false)):
 				if GameState.buy(id,price):
 					Audio.play("ui_confirm",1.0,-4.0)
 					menus.shop(true)

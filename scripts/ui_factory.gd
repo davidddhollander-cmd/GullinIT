@@ -67,6 +67,24 @@ static func label(parent: Node, value: String, size: int = FONT_NATIVE, color: C
 	parent.add_child(node)
 	return node
 
+## A little red-lettered paper sticker (e.g. COMING SOON), sized to its text.
+static func sticker(parent: Node, value: String) -> PanelContainer:
+	var panel: PanelContainer = PanelContainer.new()
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var box: StyleBoxFlat = StyleBoxFlat.new()
+	box.bg_color = CREAM
+	box.border_color = Color("a3262a")
+	box.set_border_width_all(1)
+	box.anti_aliasing = false
+	box.content_margin_left = 5
+	box.content_margin_right = 5
+	box.content_margin_top = 2
+	box.content_margin_bottom = 2
+	panel.add_theme_stylebox_override("panel",box)
+	label(panel,value,FONT_NATIVE,Color("d12f2f"))
+	parent.add_child(panel)
+	return panel
+
 ## A smaller button for BACK and similar exits: 59 x 13, centred in its row or column. The theme's 6 px
 ## top and bottom padding would hold a button at 20 px, so its styles are copied with slimmer padding.
 ## A Feather icon just left of an 8 px label's text, whatever its alignment.

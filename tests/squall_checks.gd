@@ -182,7 +182,7 @@ static func _order_and_saves(check: Callable) -> void:
 	for index: int in Config.levels.size():
 		ids_ok = ids_ok and int(Config.levels[index].id) == index + 1
 	check.call(ids_ok and bool(Config.levels[6].get("boss", false)) and not bool(Config.levels[5].get("boss", false)), "level ids match their order and only level 7 is the boss")
-	check.call(GameState.last_playable_level() >= 4 and GameState.demo.last_level >= 4, "demo and last-level defaults cover the new level")
+	check.call(GameState.last_playable_level() >= 3 and GameState.demo.last_level >= 3, "demo and last-level defaults cover the new level")
 	var saved_progress: Dictionary = GameState.progress.duplicate(true)
 	var saved_unlock: bool = GameState.unlock_all
 	var saved_demo: Dictionary = GameState.demo.duplicate()

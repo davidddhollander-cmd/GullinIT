@@ -183,6 +183,17 @@ func unlocked(id: int) -> bool:
 func gull_owned(id: String) -> bool:
 	return bool(Config.species.get("unlock_all", false)) or int(Config.species.species[id].get("price", 0)) <= 0 or owns(id)
 
+## Starter gulls (herring, black back) cost Feathers like any other, except the first one picked is free.
+func has_starter() -> bool:
+	for id: String in Config.species.species:
+		if bool(Config.species.species[id].get("starter", false)) and owns(id):
+			return true
+	return false
+
+## Owned, or a starter gull while no starter has been picked yet.
+func gull_pickable(id: String) -> bool:
+	return gull_owned(id) or (not has_starter() and bool(Config.species.species[id].get("starter", false)))
+
 ## Shop purchases (gull species ids and perk ids) live in wallet.owned.
 func owns(id: String) -> bool:
 	return id in wallet.get("owned", [])

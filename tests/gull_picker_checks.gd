@@ -129,8 +129,21 @@ static func run(suite: Node, check: Callable) -> void:
 	await suite.settle()
 	for id: String in ["kittiwake"]:
 		var card: Button = main.menus.find_child("Card_" + id, true, false)
-		check.call(card.disabled and (card.find_child("Status", true, false) as Label).text == "6 FEATHERS", id + " shows its 6 FEATHERS price and is not pickable")
-	check.call(not (main.menus.find_child("Card_herring", true, false) as Button).disabled, "the free herring gull stays pickable")
+		check.call(card.disabled and (card.find_child("Status", true, false) as Label).text == "COMING SOON", id + " says COMING SOON and is not pickable")
+	var saved_owned: Variant = GameState.wallet.get("owned", [])
+	GameState.wallet.owned = []
+	main._navigate("arcade")
+	await suite.settle()
+	check.call(not (main.menus.find_child("Card_herring", true, false) as Button).disabled and not (main.menus.find_child("Card_great-black-backed", true, false) as Button).disabled, "both starter gulls are pickable before the first pick")
+	main._navigate("gull", "great-black-backed")
+	check.call(GameState.gull_owned("great-black-backed") and GameState.feathers() == int(GameState.wallet.get("feathers", 0)), "the first starter pick is free and owned")
+	main._navigate("arcade")
+	await suite.settle()
+	var other: Button = main.menus.find_child("Card_herring", true, false) as Button
+	check.call(other.disabled and (other.find_child("Status", true, false) as Label).text == "5 FEATHERS", "the other starter then costs 5 FEATHERS")
+	main._navigate("gull", "herring")
+	check.call(GameState.options.gull == "great-black-backed" and not GameState.gull_owned("herring"), "the other starter cannot be picked without buying it")
+	GameState.wallet.owned = saved_owned
 	suite.layout(main.menus)
 	suite.menu_font_grid(main.menus)
 	main._navigate("gull", "kittiwake")

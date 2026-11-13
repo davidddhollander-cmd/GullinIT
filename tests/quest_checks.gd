@@ -196,7 +196,7 @@ static func run_game(suite: Node, check: Callable) -> void:
 	check.call(card_two != "" and not card_two.contains("Q ") and not card_two.contains("BEST"), "level card shows stars only, no quest count or best score")
 	check.call(card_one != "" and not card_one.contains("Q "), "trained level 1 card has no quest count")
 	var feather_label: Label = main.menus.find_child("Feathers", true, false)
-	check.call(feather_label != null and feather_label.text == "FEATHERS 7", "level select header shows Feathers total")
+	check.call(feather_label != null and feather_label.text == "7", "level select header shows Feathers total")
 	suite.layout(main.menus)
 	suite.menu_font_grid(main.menus)
 	await suite.snapshot("quest-level-select")
