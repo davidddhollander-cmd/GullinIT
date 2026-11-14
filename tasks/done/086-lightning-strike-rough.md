@@ -1,6 +1,6 @@
 # 086 — Kittiwake power: Lightning Strike (rough playtest build)
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 064 (merged)
@@ -103,3 +103,6 @@ The kittiwake gets its special. On a full brashness meter the player fires Light
 
 ## Review notes
 <!-- Filled in by the reviewer. -->
+
+## Review notes
+Reviewed by Claude (Opus), 2026-11-14. Matches the acceptance list. Merged into main with one conflict in `game.gd` `_snatched` (the toddler-lesson fix), resolved by keeping both. Integration: the same 12 environmental failures as main (flash, name field, PostHog), none added. Playtest found it overpowered; charges and tuning follow in 088.
