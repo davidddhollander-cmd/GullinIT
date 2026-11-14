@@ -67,6 +67,11 @@ static func run(host: Node, check: Callable) -> void:
 	game.player.position += (toddler.food_position() - Vector2(8,0)) - game.player.beak()
 	check.call(game.stash_raids.nearby_toddler() == toddler and game.training_text().contains("peck his ice cream"),"beside the toddler the strip names the peck key")
 	check.call(game.peck_pause == false,"pop-ups off: the toddler lesson never freezes")
+	# A direct beak snatch of the cone also finishes the lesson (else the empty toddler soft-locks it); rewind afterwards.
+	check.call(toddler.take(game.player) and game.lesson == BeachGame.BIN_LESSON,"snatching the toddler's cone directly advances the lesson")
+	game.lesson = BeachGame.TODDLER_LESSON
+	toddler.food = true
+	toddler.food_sprite.show()
 	game.stash_raids.peck_cooldown = 0
 	game._peck()
 	check.call(not toddler.food and toddler.dropped_pending and not toddler.drop_retrieve and game.lesson == BeachGame.TODDLER_LESSON,"pecking the toddler's ice cream drops it and the lesson waits")
