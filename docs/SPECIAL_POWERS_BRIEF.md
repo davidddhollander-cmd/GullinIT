@@ -1,6 +1,6 @@
 # Special powers: Great black-back and kittiwake
 
-Handover brief, 2026-11-03, revised 2026-11-08 after a review against the code. Design agreed; Shakedown built (task 064), the rest not started.
+Handover brief, 2026-11-03, revised 2026-11-08 after a review against the code. Design agreed; Shakedown built (task 064); Lightning Strike built as a rough playtest build (task 086, no FX, awaiting playtest).
 Source plan: `docs/BRASHNESS_BACKLOG.md`. Both powers fire like Gang Call: full brashness meter, then Q or the touch power button.
 
 **Perks are out of scope.** David will rethink them once the specials exist. Do not change, retire or migrate any perk in these tasks.

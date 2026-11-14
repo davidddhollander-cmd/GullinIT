@@ -521,11 +521,11 @@ func snatchable(target: BeachTarget) -> bool:
 	return target.food and not target.leaving and target.kind != "sunbather" and not (target.info.twist == "shield" and target.defense > 0)
 
 ## Touch aim assist: the snatchable food nearest the aimed direction, within range and cone.
-func assist_target(origin: Vector2, dir: Vector2, max_range: float, max_angle: float) -> BeachTarget:
+func assist_target(origin: Vector2, dir: Vector2, max_range: float, max_angle: float, exclude: Array = []) -> BeachTarget:
 	var best: BeachTarget = null
 	var best_angle: float = max_angle
 	for target: BeachTarget in spawner.targets + stalls.portions:
-		if not snatchable(target):
+		if not snatchable(target) or exclude.has(target):
 			continue
 		var offset: Vector2 = target.food_position() - origin
 		if offset.length() > max_range:
@@ -543,6 +543,9 @@ func slowmo_active() -> bool:
 	return slowmo_end_msec >= 0
 
 func start_slowmo() -> void:
+	if running and brash.lightning.winding():
+		brash.lightning.end_windup() # the second press
+		return
 	if running and perk_id != "bullet_time" and brash.fire():
 		input.slowmo_ready = false
 		return
@@ -923,6 +926,7 @@ func set_paused(value: bool) -> void:
 		peck_hold_pending = false
 		peck_hold_touch = false
 		_stop_screech(false)
+	brash.lightning.set_paused(value)
 	set_physics_process(not value)
 	set_process_unhandled_input(not value)
 	input.enabled = not value and running and intro <= 0 and not trainer_open
@@ -948,14 +952,19 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 			_training_snatch(target)
 		if training and lesson == TODDLER_LESSON and target.kind == "toddler":
 			_training_advance() # a beak hit on the cone counts too, or the empty toddler soft-locks the lesson
-		var handover: bool = target.last_theft_handover and target.last_theft_direct and (player.state == BeachGull.State.STRIKE or player.sweep_state == BeachGull.State.STRIKE)
+		var handover: bool = target.last_theft_handover and target.last_theft_direct and (player.state == BeachGull.State.STRIKE or player.sweep_state == BeachGull.State.STRIKE or player.dashing)
 		if target.last_theft_biting and target.last_theft_direct and player.state == BeachGull.State.STRIKE:
 			_quest_event("mid_air_bite")
 		if dive_live and target.last_theft_direct and not dive_hit:
 			dive_hit = true
 			dive_stats.dive_snatches += 1
 		strike_near_carrier = false
-		player.digestion.collect(target.food_id,{"risky":risky,"upwind":player.upwind,"handover":handover})
+		var details: Dictionary = {"risky":risky,"upwind":player.upwind,"handover":handover}
+		if player.dashing:
+			details.id = target.food_id
+			_swallowed(details) # Lightning Strike swallows whole: scored at once, the stomach untouched
+		else:
+			player.digestion.collect(target.food_id,details)
 		if target.info.twist == "umbrella" and not target.is_loose():
 			_quest_event("umbrella_snatch")
 		if target.last_theft_direct:

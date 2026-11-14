@@ -18,7 +18,7 @@ var digestion: GullDigestion = GullDigestion.new()
 var digestion_enabled: bool = false
 
 func can_collect_food(id: String) -> bool:
-	return not digestion_enabled or digestion.can_collect(id)
+	return dashing or not digestion_enabled or digestion.can_collect(id)
 var velocity: Vector2 = Vector2.ZERO
 var aim: Vector2 = Vector2.ZERO
 var previous_beak: Vector2
@@ -57,6 +57,7 @@ var rival_badge: ColorRect
 var upwind: bool = false
 ## Player-only species stats (data/species.json); rivals keep their profile tuning.
 var dive_mult: float = 1.0
+var dashing: bool = false ## Lightning Strike streak: outside the state machine, untouchable, takes foods whole
 var steady_invulnerable: bool = false ## power immunity: no flicker
 var stun_shield: int = 0 ## Strong skull: stuns still to shrug off
 var wind_mult: float = 1.0
@@ -394,6 +395,8 @@ func beak_for_state(for_state: State) -> Vector2:
 	return position + Vector2(facing * float(Config.tuning.dive.beak_offset), 2)
 
 func dive(wind_dir: int) -> void:
+	if dashing:
+		return
 	if state == State.GROUNDED and not support.is_empty() and cooldown <= 0.0:
 		# Deliberately drop from the current one-way surface without recatching it.
 		departing_perch = support
@@ -438,6 +441,8 @@ func consume_peck() -> void:
 	peck_near_target = null
 
 func tick(delta: float, wind_dir: int, strength: float) -> void:
+	if dashing:
+		return # BeachLightning moves the hidden gull
 	art_event_left = maxf(0.0,art_event_left-delta)
 	var f: Dictionary = Config.tuning.flight
 	var d: Dictionary = Config.tuning.dive
@@ -888,11 +893,11 @@ func crash_warning() -> bool:
 
 ## Post-hit flicker invulnerability: threats skip the gull. Power immunity is not this, so they still attack and bounce off.
 func untargetable() -> bool:
-	return invulnerable > 0.0 and not steady_invulnerable
+	return dashing or (invulnerable > 0.0 and not steady_invulnerable)
 
 ## force >= 0 is a gull-on-gull hit (bump_force): it scales the launch instead of knockback.
 func stun(duration: float = -1.0, attacker: Vector2 = Vector2.INF, force: float = -1.0) -> void:
-	if state == State.STUNNED:
+	if state == State.STUNNED or dashing:
 		return
 	if invulnerable > 0:
 		if steady_invulnerable:
@@ -907,7 +912,7 @@ func stun(duration: float = -1.0, attacker: Vector2 = Vector2.INF, force: float 
 
 ## A person's swat: the thwack plays only when the knock lands (not while shielded, invulnerable or already down).
 func swatted(duration: float = -1.0, attacker: Vector2 = Vector2.INF, force: float = -1.0) -> void:
-	if state != State.STUNNED and invulnerable <= 0 and stun_shield <= 0:
+	if state != State.STUNNED and invulnerable <= 0 and stun_shield <= 0 and not dashing:
 		Audio.swat_hit()
 	stun(duration,attacker,force)
 

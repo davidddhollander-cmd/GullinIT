@@ -655,12 +655,12 @@ func _draw_brash() -> void:
 	var full: bool = brash.is_full()
 	var live: bool = brash.active()
 	var pulse: bool = full and int(Time.get_ticks_msec()/250)%2 == 0
-	var fill: float = brash.active_left/float(brash.power().get("duration",1.0)) if live else brash.meter
+	var fill: float = brash.active_fraction() if live else brash.meter
 	draw_rect(METER_RECT,BeachUI.INK)
 	draw_rect(METER_RECT.grow(-1),Color("5a3a4a"))
 	draw_rect(Rect2(METER_RECT.position+Vector2.ONE,Vector2(34*clampf(fill,0.0,1.0),6)),BeachUI.CREAM if pulse else (BeachUI.GOLD if full or live else Color("ef725c")))
 	draw_rect(METER_RECT,BeachUI.CREAM if full else (BeachUI.GOLD if live else Color("397a85")),false,1.0)
-	var label: String = "%.1f" % brash.active_left if live else (str(brash.power().get("ready_label","CALL!")) if full else "BRASH")
+	var label: String = brash.active_label() if live else (str(brash.power().get("ready_label","CALL!")) if full else "BRASH")
 	draw_string(HUD_FONT,METER_RECT.position+Vector2(4,6),label,HORIZONTAL_ALIGNMENT_LEFT,-1,6,BeachUI.INK if full or live else BeachUI.CREAM)
 	# Lesson steps 2 and 3 point at the bar: a pulsing gold outline.
 	if game.screech_lesson and game.screech_step in [1,2] and int(Time.get_ticks_msec()/300)%2 == 0:

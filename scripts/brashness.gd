@@ -16,6 +16,7 @@ var active_id: String = "" ## the running timed power ("" when none)
 var active_left: float = 0.0
 var powers_fired: int = 0
 var shakedown: BeachShakedown = BeachShakedown.new()
+var lightning: BeachLightning = BeachLightning.new()
 
 func tuning() -> Dictionary:
 	return Config.tuning.brash
@@ -25,6 +26,13 @@ func power() -> Dictionary:
 
 func is_full() -> bool:
 	return not power().is_empty() and meter >= 1.0
+
+## Overlay: how full the running power's bar is, and its text.
+func active_fraction() -> float:
+	return lightning.fraction() if active_id == "lightning_strike" else active_left/float(power().get("duration",1.0))
+
+func active_label() -> String:
+	return lightning.label() if active_id == "lightning_strike" else "%.1f" % active_left
 
 func active() -> bool:
 	return not active_id.is_empty()
@@ -74,6 +82,10 @@ func fire() -> bool:
 		active_id = "shakedown"
 		active_left = float(p.duration)
 		shakedown.start(self)
+	elif str(p.id) == "lightning_strike":
+		active_id = "lightning_strike"
+		active_left = 0.0
+		lightning.start(self)
 	else:
 		_gang_call(p)
 	return true
@@ -130,7 +142,9 @@ func _steer(ally: Dictionary, delta: float) -> void:
 
 ## Each ally follows two quadratic curves: a plunge from offscreen to the food, then a climb back out.
 func tick(delta: float) -> void:
-	if active():
+	if active_id == "lightning_strike":
+		lightning.tick(delta)
+	elif active():
 		if shakedown.rear_left > 0.0:
 			shakedown.rear_tick(delta) # the power's clock starts after the hold
 		else:
@@ -229,6 +243,8 @@ func _draw() -> void:
 func end_power(snap: bool = true) -> void:
 	if active_id == "shakedown":
 		shakedown.end(snap)
+	elif active_id == "lightning_strike":
+		lightning.end(snap)
 	active_id = ""
 	active_left = 0.0
 

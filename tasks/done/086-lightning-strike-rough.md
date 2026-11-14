@@ -1,6 +1,6 @@
 # 086 — Kittiwake power: Lightning Strike (rough playtest build)
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 064 (merged)
@@ -71,7 +71,35 @@ The kittiwake gets its special. On a full brashness meter the player fires Light
 - [ ] `docs/BRASHNESS_BACKLOG.md` and `docs/SPECIAL_POWERS_BRIEF.md` note Lightning Strike as built (rough, awaiting playtest).
 
 ## Report
-<!-- Filled in by the implementer. -->
+**Branch:** `sonnet/086-lightning-strike-rough` (from main c252ead). Last commit: see `git log -1` on the branch.
+
+**Files changed**
+- New: `scripts/lightning_strike.gd` (`BeachLightning`: WINDUP, DASH, LAND phases; reticles and bolt drawn with `_draw()`), `tests/lightning_strike_checks.gd`.
+- Hooks: `scripts/brashness.gd` (`lightning` instance, `fire()` branch, `tick()` branch, `end_power()` branch, `active_fraction()`/`active_label()` for the HUD), `scripts/gull.gd` (`dashing` flag: tick early-return, stun/swat/dive guards, `untargetable()`, `can_collect_food()` returns true), `scripts/game.gd` (`assist_target` gets an optional `exclude` array; `start_slowmo` second press ends the windup; `set_paused` calls `lightning.set_paused`; `_snatched` swallows whole when dashing and counts the counter bonus), `scripts/overlay.gd` (meter fill and label via brash), `data/species.json`, `data/tuning.json`, `tests/integration.gd`, `docs/BRASHNESS_BACKLOG.md`, `docs/SPECIAL_POWERS_BRIEF.md`.
+
+**Tests**
+- Baseline (main, before changes): `INTEGRATION: 17612 checks, 0 failures`.
+- After: `INTEGRATION: 17669 checks, 0 failures` (+57 checks, all in `lightning_strike_checks.gd`).
+- Ran with the Godot 4.7.2 console exe from the other checkout's `.tools` (this worktree has no `.tools`).
+
+**Decisions**
+- Windup clock: `delta / Engine.time_scale` (real seconds), so no `Time` tick and it freezes with the physics process on pause. `set_paused` drops the slow motion for the menu and restores it on resume. `start_slowmo`/`end_slowmo` (Bullet Time) are never called.
+- Windup marking in realistic and normal modes uses `assist_target` with the gull's aim direction; I added an optional `exclude` argument so a second food in the cone can be picked once the best one is already marked.
+- Casual mode and touch (`input.touch_active`) auto-mark the nearest 3 foods on screen, then hold a short beat (`auto_hold`, 0.6 real s, extra tunable) so the reticles are visible before the dash.
+- Swallowed whole: while `dashing`, `can_collect_food` is true (so `take()` works with a full stomach) and `_snatched` passes the snack straight to `_swallowed()` instead of `digestion.collect()`. Stomach contents are untouched; scoring, quests and the counter bonus go through the normal path. The counter bonus uses `player.dashing` in the `handover` test.
+- Dash: the gull is `visible = false`, state GLIDE, `dashing = true`; `BeachGull.tick` returns at once so there is no STRIKE, sand crash or stun. Immunity is 999 during the dash (`untargetable()` is true while dashing, which dogs, sweeper, teens and stash raids already check). Landing sets `land_invulnerable` with `steady_invulnerable` (no flicker), velocity = last leg direction at normal flight speed. The power ends when that immunity runs out, so `active_id` stays set through the landing.
+- A stun during the windup (it is not made immune) cancels the power and refunds the meter. A cancelled or empty windup also decrements `powers_fired`; the `power_fired` analytics event for the press was already sent.
+- Lost mark: fizzle uses the existing hit-spark pixelfx and a click, then `fizzle_pause`, then the next leg.
+- HUD: during the windup the meter bar drains with the remaining windup time and reads "AIM"; during the dash and landing it reads "ZAP".
+- Extra tunables beyond the task: `auto_hold` and `bolt_fade` (0.2 s) in `lightning_strike`.
+
+**Not done / caveats**
+- Not played in a window; verified by the automated checks only. Dash timing, bolt look and the reticle layout need David's eyes.
+- The Bullet Time Q conflict is untouched (known gap): the kittiwake cannot fire with that perk equipped.
+- `coming_soon` left as is. The gang_call sound is the placeholder fire sound.
+
+**How David plays a kittiwake**
+- There is an existing testing switch: `"unlock_all": false` at the top of `data/species.json`. Set it to `true` locally (do not commit it); the kittiwake card then becomes pickable on the gull select screen. Pick Kittiwake, play without the Bullet Time perk. Each direct snatch fills 0.15 x 1.4 of the meter (about 5 snatches), then press Q (or the touch power button). Sweep the aim over up to 3 foods, press Q again to go early, and the gull streaks through them.
 
 ## Review notes
 <!-- Filled in by the reviewer. -->
