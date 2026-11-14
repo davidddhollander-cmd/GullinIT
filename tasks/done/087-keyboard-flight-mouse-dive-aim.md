@@ -1,6 +1,6 @@
 # 087 — Keyboard flight lock: the mouse aims dives, never steers flight
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
