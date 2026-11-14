@@ -32,6 +32,7 @@ Each species gets one power, fired the same way (screech, Q, or the touch CALL b
 - Hostile Takeover: the vendor freezes and the stall's counter food is yours for a few seconds.
 
 **Kittiwake** (fast diver)
+- ✅ **Lightning Strike (built rough, task 086, no new art, awaiting playtest):** slow-mo windup marks up to 3 foods, then the gull streaks through them and swallows each whole. Code in `scripts/lightning_strike.gd`, tunables in `lightning_strike` in `data/tuning.json`. Keep it, or switch to Feeding Frenzy below.
 - ⭐ **Feeding Frenzy:** for 4 s dives have no recovery time and flow into one another; each clean snatch adds +1 s. The cheapest to build: mostly timers on existing systems.
 - Slipstream: you ignore wind and fly very fast for 5 s.
 - Afterimage: decoy gulls draw swats and the dog while you strike.

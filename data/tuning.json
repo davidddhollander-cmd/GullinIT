@@ -354,6 +354,10 @@
     "raid_signature": {"kiosk": "ice_cream", "hotdog_stand": "hotdog", "fish_chips_stand": "fried_fish"}, "raid_signature_count": 2,
     "raid_foods": ["single_chip", "cookie", "half_eaten_doughnut", "half_eaten_sandwich"]
   },
+  "lightning_strike": {
+    "windup_time": 2.5, "windup_time_scale": 0.35, "max_marks": 3, "mark_range": 140, "mark_angle": 25,
+    "dash_speed": 1000, "land_invulnerable": 0.5, "fizzle_pause": 0.1, "auto_hold": 0.6, "bolt_fade": 0.2
+  },
   "panic": {
     "panic_radius": 170, "look_up_time": 0.5, "lead_time": 0.5, "panic_time": 4.0,
     "panic_speed_mult": 4.0, "return_speed_mult": 2.5
