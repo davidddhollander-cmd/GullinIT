@@ -946,6 +946,8 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 		var contact_at: Vector2 = target.food_position()
 		if training and target.last_theft_direct and player.state == BeachGull.State.STRIKE:
 			_training_snatch(target)
+		if training and lesson == TODDLER_LESSON and target.kind == "toddler":
+			_training_advance() # a beak hit on the cone counts too, or the empty toddler soft-locks the lesson
 		var handover: bool = target.last_theft_handover and target.last_theft_direct and (player.state == BeachGull.State.STRIKE or player.sweep_state == BeachGull.State.STRIKE)
 		if target.last_theft_biting and target.last_theft_direct and player.state == BeachGull.State.STRIKE:
 			_quest_event("mid_air_bite")
