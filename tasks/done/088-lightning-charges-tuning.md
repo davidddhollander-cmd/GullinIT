@@ -1,6 +1,6 @@
 # 088 — Lightning Strike charges and tuning
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 086 (merged)
@@ -41,3 +41,8 @@ Playtest verdict on 086: it's fun but overpowered. Each full brash bar becomes o
 - The integration suite shows no new failures. Main currently has 12 failures from this machine's environment: flash, name field and PostHog.
 
 ## Report
+
+Files: data/species.json, data/tuning.json, scripts/brashness.gd, scripts/lightning_strike.gd, scripts/overlay.gd, tests/lightning_strike_checks.gd.
+Tests: headless integration run, 12 failures, all the known environmental ones (9 flash, dive release rings, name field HERRING, PostHog page_open). New charge checks pass.
+Decisions: `max_charges()` on BeachBrash; `fire()` spends int(meter) and keeps the remainder, passing `lightning.charges_spent`; cancel refunds `meter += charges_spent`. HUD: bar shows fmod(meter,1) (full when all banked) plus one gold 4x3 pip per banked charge under the bar (no new text). Ready cue replays whenever the whole-charge count rises. Existing lightning tests adjusted for the new tuning (2 marks per charge, windup 0.525 game s, mark positions inside 110 range, no landing immunity).
+Not done: none.

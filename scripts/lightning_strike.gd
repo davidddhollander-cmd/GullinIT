@@ -1,6 +1,6 @@
 class_name BeachLightning
 extends Node2D
-## Kittiwake power (rough playtest build): slow-motion windup marks up to 3 foods, then the gull becomes a bolt that
+## Kittiwake power (rough playtest build): slow-motion windup marks up to 2 foods per banked charge, then the gull becomes a bolt that
 ## snatches each mark in turn and lands mid-air. Self-contained: delete this file and its hooks to remove the power.
 ## Phases: WINDUP (marking, real-time clock) -> DASH (hidden gull, straight legs) -> LAND (brief immunity), then end_power.
 
@@ -17,11 +17,15 @@ var pause_left: float = 0.0
 var land_left: float = 0.0
 var trail: Array[Dictionary] = []
 var heading: Vector2 = Vector2.RIGHT
+var charges_spent: int = 1 ## set by BeachBrash.fire before start; each charge buys marks_per_charge marks
 var slowed: bool = false ## this power has set Engine.time_scale
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 func settings() -> Dictionary:
 	return Config.tuning.lightning_strike
+
+func max_marks() -> int:
+	return charges_spent*int(settings().marks_per_charge)
 
 func winding() -> bool:
 	return phase == Phase.WINDUP
@@ -58,7 +62,7 @@ func _auto_mark() -> void:
 			seen.append(target)
 	var from: Vector2 = game.player.position
 	seen.sort_custom(func(a: BeachTarget, b: BeachTarget) -> bool: return a.food_position().distance_to(from) < b.food_position().distance_to(from))
-	for target: BeachTarget in seen.slice(0,int(settings().max_marks)):
+	for target: BeachTarget in seen.slice(0,max_marks()):
 		_mark(target)
 
 func _mark(target: BeachTarget) -> void:
@@ -86,14 +90,14 @@ func _windup(delta: float) -> void:
 		return
 	wind_left -= delta/maxf(Engine.time_scale,0.05)
 	var s: Dictionary = settings()
-	if marks.size() < int(s.max_marks) and not _auto():
+	if marks.size() < max_marks() and not _auto():
 		var dir: Vector2 = game.player.aim-game.player.position
 		if dir.length() < 1.0:
 			dir = Vector2(game.player.facing,0)
 		var found: BeachTarget = game.assist_target(game.player.position,dir,float(s.mark_range),deg_to_rad(float(s.mark_angle)),marks)
 		if found != null:
 			_mark(found)
-	if marks.size() >= int(s.max_marks) or wind_left <= 0.0:
+	if marks.size() >= max_marks() or wind_left <= 0.0:
 		end_windup()
 
 ## Second press, timeout or a full set of marks. With no marks the meter comes back.
@@ -117,7 +121,7 @@ func end_windup() -> void:
 	heading = Vector2(player.facing,0)
 
 func cancel() -> void:
-	brash.meter = 1.0
+	brash.meter += charges_spent
 	brash.powers_fired = maxi(0,brash.powers_fired-1)
 	brash.end_power(false)
 

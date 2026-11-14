@@ -56,6 +56,7 @@ static func run(host: Node, check: Callable) -> void:
 	_dash_checks(host,check)
 	_counter_checks(host,check)
 	_lost_mark_checks(host,check)
+	_charge_checks(host,check)
 	_landing_checks(host,check)
 	_other_species_checks(host,check)
 	await _end_checks(host,check)
@@ -65,16 +66,16 @@ static func run(host: Node, check: Callable) -> void:
 static func _data_and_fire_checks(host: Node, check: Callable) -> void:
 	var p: Dictionary = Config.species.species.kittiwake.power
 	var t: Dictionary = Config.tuning.lightning_strike
-	check.call(p.id == "lightning_strike" and p.name == "LIGHTNING STRIKE" and p.ready_label == "STRIKE!" and p.sound == "gang_call" and is_equal_approx(float(p.pitch),1.3) and is_equal_approx(float(p.fill.snatch),1.4) and is_equal_approx(float(p.fill.handover),1.4),"kittiwake power block carries the agreed data")
+	check.call(p.id == "lightning_strike" and p.name == "LIGHTNING STRIKE" and p.ready_label == "STRIKE!" and p.sound == "gang_call" and is_equal_approx(float(p.pitch),1.3) and is_equal_approx(float(p.fill.snatch),1.0) and is_equal_approx(float(p.fill.handover),1.0) and int(p.charges) == 2,"kittiwake power block carries the agreed data")
 	check.call(bool(Config.species.species.kittiwake.get("coming_soon",false)),"kittiwake stays coming_soon")
-	check.call(is_equal_approx(float(t.windup_time),2.5) and is_equal_approx(float(t.windup_time_scale),0.35) and int(t.max_marks) == 3 and float(t.mark_range) > 0.0 and float(t.mark_angle) > 0.0 and float(t.dash_speed) >= 600.0 and is_equal_approx(float(t.land_invulnerable),0.5) and is_equal_approx(float(t.fizzle_pause),0.1),"lightning_strike tunables exist")
+	check.call(is_equal_approx(float(t.windup_time),1.5) and is_equal_approx(float(t.windup_time_scale),0.35) and int(t.marks_per_charge) == 2 and is_equal_approx(float(t.mark_range),110.0) and is_equal_approx(float(t.mark_angle),15.0) and float(t.dash_speed) >= 600.0 and is_zero_approx(float(t.land_invulnerable)) and is_equal_approx(float(t.fizzle_pause),0.1),"lightning_strike tunables exist")
 	var game: BeachGame = fixture(host)
 	var brash: BeachBrash = game.brash
 	brash.earn("snatch")
-	check.call(is_equal_approx(brash.meter,float(Config.tuning.brash.snatch)*1.4),"kittiwake direct snatches fill 1.4x")
+	check.call(is_equal_approx(brash.meter,float(Config.tuning.brash.snatch)),"kittiwake direct snatches fill 1.0x")
 	brash.meter = 0.0
 	brash.earn("handover")
-	check.call(is_equal_approx(brash.meter,float(Config.tuning.brash.handover)*1.4),"kittiwake counter snatches fill 1.4x")
+	check.call(is_equal_approx(brash.meter,float(Config.tuning.brash.handover)),"kittiwake counter snatches fill 1.0x")
 	brash.meter = 1.0
 	game.player.state = BeachGull.State.STUNNED
 	check.call(not brash.fire() and brash.meter == 1.0 and not brash.active(),"cannot fire while stunned")
@@ -105,18 +106,17 @@ static func _windup_checks(host: Node, check: Callable) -> void:
 	fire(game)
 	var seconds: float = run_until(game,func() -> bool: return not brash.active())
 	check.call(not brash.active() and brash.meter == 1.0 and is_equal_approx(Engine.time_scale,1.0),"an empty windup times out, refunds and restores time")
-	check.call(is_equal_approx(seconds,2.5*0.35) or absf(seconds-0.875) < 0.06,"the windup lasts windup_time of real seconds (%.3f game s at 0.35x)" % seconds)
-	var people: Array[BeachTarget] = [food(game,60.0),food(game,170.0),food(game,280.0)]
+	check.call(is_equal_approx(seconds,1.5*0.35) or absf(seconds-0.525) < 0.06,"the windup lasts windup_time of real seconds (%.3f game s at 0.35x)" % seconds)
+	var people: Array[BeachTarget] = [food(game,100.0),food(game,170.0),food(game,240.0)]
 	fire(game)
 	aim_tick(game,people[0])
 	check.call(brash.lightning.marks == [people[0]],"sweeping the aim over a food marks it as number 1")
 	aim_tick(game,people[0])
 	check.call(brash.lightning.marks.size() == 1,"the same food is not marked twice")
 	aim_tick(game,people[1])
-	check.call(brash.lightning.marks.size() == 2 and brash.lightning.winding(),"the second food becomes number 2 and the windup carries on")
-	brash.lightning.queue_redraw()
-	aim_tick(game,people[2])
-	check.call(brash.lightning.marks == [people[0],people[1],people[2]] and dashing(game),"the windup ends at 3 marks and the dash starts")
+	check.call(brash.lightning.marks.size() == 2 and dashing(game),"the second food becomes number 2 and, at the cap, the dash starts")
+	check.call(brash.lightning.max_marks() == 2,"one charge allows 2 marks")
+	check.call(dashing(game),"the dash starts")
 	check.call(is_equal_approx(Engine.time_scale,1.0) and not player.visible and player.dashing,"the dash restores time, hides the gull and sets dashing")
 	brash.end_power()
 	check.call(clean(game),"ending mid-dash leaves a clean state")
@@ -126,7 +126,7 @@ static func _windup_checks(host: Node, check: Callable) -> void:
 	game.start_slowmo()
 	check.call(dashing(game) and brash.lightning.marks.size() == 1,"a second press ends the windup and dashes at the marks so far")
 	brash.end_power()
-	# The timeout also dashes with fewer than 3 marks.
+	# The timeout also dashes with fewer marks than the cap.
 	fire(game)
 	aim_tick(game,people[0])
 	run_until(game,func() -> bool:
@@ -145,7 +145,7 @@ static func _casual_checks(host: Node, check: Callable) -> void:
 	var far: BeachTarget = food(game,260.0)
 	game.player.aim = Vector2(0,0) # facing nothing: casual ignores aim
 	fire(game)
-	check.call(game.brash.lightning.marks.size() == 3 and not game.brash.lightning.marks.has(far) and game.brash.lightning.marks.all(func(m: BeachTarget) -> bool: return near.has(m)),"casual mode marks the nearest 3 foods by itself")
+	check.call(game.brash.lightning.marks.size() == 2 and not game.brash.lightning.marks.has(far) and game.brash.lightning.marks.all(func(m: BeachTarget) -> bool: return near.has(m)),"casual mode marks the nearest 2 foods (one charge) by itself")
 	run_until(game,func() -> bool: return dashing(game))
 	check.call(dashing(game),"casual mode dashes after a short beat")
 	game.brash.end_power()
@@ -265,13 +265,38 @@ static func _landing_checks(host: Node, check: Callable) -> void:
 		return landed(game))
 	check.call(states.all(func(s: int) -> bool: return s == BeachGull.State.GLIDE),"the dash never enters STRIKE or a sand crash")
 	check.call(player.visible and not player.dashing and player.state == BeachGull.State.GLIDE,"the gull returns mid-air in GLIDE")
-	check.call(is_equal_approx(player.invulnerable,0.5) and player.steady_invulnerable,"landing gives 0.5 s of immunity with no flicker")
+	check.call(is_zero_approx(player.invulnerable) and player.steady_invulnerable,"landing gives no extra immunity")
 	var cap: float = float(Config.tuning.flight.max_speed)*player.species_speed()
 	check.call(player.velocity.length() <= cap+0.01 and player.velocity.length() > 1.0,"the landing keeps the dash direction at normal flight speed")
 	run_until(game,func() -> bool: return not brash.active())
 	check.call(clean(game),"the power ends cleanly after the immunity")
 	game.queue_free()
 	Engine.time_scale = 1.0
+
+static func _charge_checks(host: Node, check: Callable) -> void:
+	var game: BeachGame = fixture(host)
+	var brash: BeachBrash = game.brash
+	brash.add(5.0)
+	check.call(is_equal_approx(brash.meter,2.0) and brash.max_charges() == 2,"the kittiwake meter caps at 2 charges")
+	brash.meter = 2.0
+	game.start_slowmo()
+	check.call(brash.lightning.max_marks() == 4 and is_zero_approx(brash.meter),"firing on 2 charges allows 4 marks and spends both")
+	brash.end_power()
+	brash.meter = 1.0
+	game.start_slowmo()
+	check.call(brash.lightning.max_marks() == 2 and is_zero_approx(brash.meter),"firing on 1 charge allows 2 marks")
+	brash.end_power()
+	brash.meter = 1.4
+	game.start_slowmo()
+	check.call(brash.lightning.max_marks() == 2 and is_equal_approx(brash.meter,0.4),"the fractional remainder survives firing")
+	brash.lightning.end_windup() # no marks: refund
+	check.call(is_equal_approx(brash.meter,1.4),"an empty windup refunds the spent charges")
+	game.queue_free()
+	Engine.time_scale = 1.0
+	var herring: BeachGame = Shake.fixture(host,"herring")
+	herring.brash.add(5.0)
+	check.call(herring.brash.max_charges() == 1 and is_equal_approx(herring.brash.meter,1.0),"a one-charge power still clamps at 1")
+	herring.queue_free()
 
 static func _other_species_checks(host: Node, check: Callable) -> void:
 	var herring: BeachGame = Shake.fixture(host,"herring")
