@@ -24,6 +24,10 @@ func tuning() -> Dictionary:
 func power() -> Dictionary:
 	return game.player.species_stats().get("power",{})
 
+## Banked charges the running power can hold (data: power.charges, default 1).
+func max_charges() -> int:
+	return int(power().get("charges",1))
+
 func is_full() -> bool:
 	return not power().is_empty() and meter >= 1.0
 
@@ -44,9 +48,9 @@ func earn(key: String) -> void:
 func add(amount: float) -> void:
 	if power().is_empty() or not allies.is_empty() or active():
 		return
-	var was_full: bool = meter >= 1.0
-	meter = clampf(meter+amount,0.0,1.0)
-	if meter >= 1.0 and not was_full:
+	var was: int = int(meter)
+	meter = clampf(meter+amount,0.0,float(max_charges()))
+	if int(meter) > was:
 		# Ready sting: a sharp call and a pop over the gull.
 		Audio.play("gull_call",1.35,-4.0)
 		game.effects.message(game.player.position-Vector2(0,22),"READY!",BeachUI.GOLD)
@@ -70,7 +74,8 @@ func screech_ended() -> void:
 func fire() -> bool:
 	if not is_full() or game.player.state == BeachGull.State.STUNNED:
 		return false
-	meter = 0.0
+	var spent: int = int(meter)
+	meter -= spent # the fractional progress toward the next charge survives
 	var p: Dictionary = power()
 	if str(p.id) != "shakedown": # Shakedown has its own rear-up and slam
 		game.effects.message(game.player.position-Vector2(0,24),str(p.name)+"!",BeachUI.GOLD)
@@ -85,6 +90,7 @@ func fire() -> bool:
 	elif str(p.id) == "lightning_strike":
 		active_id = "lightning_strike"
 		active_left = 0.0
+		lightning.charges_spent = spent
 		lightning.start(self)
 	else:
 		_gang_call(p)

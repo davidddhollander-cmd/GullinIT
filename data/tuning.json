@@ -358,8 +358,8 @@
     "raid_foods": ["single_chip", "cookie", "half_eaten_doughnut", "half_eaten_sandwich"]
   },
   "lightning_strike": {
-    "windup_time": 2.5, "windup_time_scale": 0.35, "max_marks": 3, "mark_range": 140, "mark_angle": 25,
-    "dash_speed": 1000, "land_invulnerable": 0.5, "fizzle_pause": 0.1, "auto_hold": 0.6, "bolt_fade": 0.2
+    "windup_time": 1.5, "windup_time_scale": 0.35, "marks_per_charge": 2, "mark_range": 110, "mark_angle": 15,
+    "dash_speed": 1000, "land_invulnerable": 0, "fizzle_pause": 0.1, "auto_hold": 0.6, "bolt_fade": 0.2
   },
   "panic": {
     "panic_radius": 170, "look_up_time": 0.5, "lead_time": 0.5, "panic_time": 4.0,
