@@ -57,6 +57,9 @@
     "dive_steer_default": 0.55,
     "mouse_ignore_after_touch": 0.5
   },
+  "input": {
+    "mouse_aim_fresh": 1.5
+  },
   "control_modes": {
     "realistic_tap_interval": 0.15
   },

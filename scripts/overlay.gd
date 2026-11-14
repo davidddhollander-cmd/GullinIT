@@ -455,8 +455,13 @@ func _score_hop(delta: float, counting: bool) -> void:
 		score_label.position.y = score_hop_rest-roundf(float(t.score_hop)*sin(u*PI))
 	score_label.add_theme_color_override("font_color",Color.WHITE if hopping and score_hop_left > 0.0 else (BeachUI.CREAM if counting else BeachUI.GOLD))
 
+func _exit_tree() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
 func _process(delta: float) -> void:
 	tick_flash()
+	var hide_cursor: bool = game.input.enabled and GameState.mouse_role() == "dive_aim" and not game.input.gamepad and not game.input.touch_active and game.input.mouse_fresh()
+	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN if hide_cursor else Input.MOUSE_MODE_VISIBLE
 	if game.peck_pause or game.aim_pause:
 		queue_redraw()
 	var counting: bool = shown_score < game.score.points
@@ -731,6 +736,14 @@ func _draw() -> void:
 		if game.player.landing_aim() and game.player.state != BeachGull.State.GROUNDED:
 			var landing_x: float = clampf(aim.x,8,312)
 			draw_line(Vector2(landing_x-6,159),Vector2(landing_x+6,159),BeachUI.CREAM,2)
+		var mouse_aim: bool = GameState.mouse_role() == "dive_aim" and not game.input.gamepad and not game.input.touch_active and game.input.mouse_fresh()
+		if mouse_aim:
+			var reticle: Vector2 = game.input.mouse_pos
+			draw_arc(reticle,5,0,TAU,16,BeachUI.GOLD,1.0)
+			draw_line(reticle-Vector2(8,0),reticle-Vector2(3,0),BeachUI.GOLD)
+			draw_line(reticle+Vector2(3,0),reticle+Vector2(8,0),BeachUI.GOLD)
+			draw_line(reticle-Vector2(0,8),reticle-Vector2(0,3),BeachUI.GOLD)
+			draw_line(reticle+Vector2(0,3),reticle+Vector2(0,8),BeachUI.GOLD)
 		draw_arc(aim,4,0,TAU,12,Color("fff4da"))
 		draw_line(aim-Vector2(7,0),aim+Vector2(7,0),Color("fff4da"))
 		draw_line(aim-Vector2(0,7),aim+Vector2(0,7),Color("fff4da"))

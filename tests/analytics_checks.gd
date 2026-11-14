@@ -53,6 +53,7 @@ static func run(suite: Node, check: Callable) -> void:
 	var game: BeachGame = main.game
 	game.dismiss_intro()
 	check.call(rec.names() == ["level_start"] and rec.last("level_start").level == 2 and rec.last("level_start").mode == "arcade", "level_start fires when the level begins")
+	check.call(rec.last("level_start").has("mouse_role") and str(rec.last("level_start").mouse_role) in ["steer","dive_aim"], "level_start carries mouse_role")
 	var common: Dictionary = rec.last("level_start")
 	check.call(common.platform != "" and common.build == "0.1.0-demo" and common.input == "keyboard_mouse" and common["$process_person_profile"] == false, "common properties are attached")
 	check.call(rec.sent[0].api_key == "phc_test" and rec.sent[0].distinct_id.length() == 32 and rec.sent[0].has("timestamp") and rec.urls[0] == "https://eu.i.posthog.com/i/v0/e/", "capture payload and endpoint")
@@ -90,6 +91,7 @@ static func run(suite: Node, check: Callable) -> void:
 	game.finish()
 	var ended: Dictionary = rec.last("level_end")
 	check.call(ended.dives == 2 and ended.dive_pecks == 1 and ended.dive_snatches == 0 and ended.dive_overshoots == 1, "level_end reports dive outcomes")
+	check.call(ended.has("mouse_role"), "level_end carries mouse_role")
 	check.call(rec.names().count("level_end") == 1 and ended.level == 2 and ended.mode == "arcade" and ended.has("score") and ended.has("stars") and ended.crashes == 1 and is_equal_approx(ended.seconds, 12.3) and ended.outcome in ["completed", "failed"], "level_end fires on finish with its properties")
 	main.clear_game()
 	check.call(rec.names().count("level_end") == 1, "leaving the results screen does not report a second end")

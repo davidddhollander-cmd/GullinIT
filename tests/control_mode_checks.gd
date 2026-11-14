@@ -243,6 +243,7 @@ static func run(suite: Node, check: Callable) -> void:
 	_setting(check)
 	await _picker(suite, check)
 	_input(suite, check)
+	GameState.options.erase("mouse_role") # the W press above flips it to dive_aim
 	_realistic(suite, check)
 	await _casual(suite, check)
 	_rivals(suite, check)
