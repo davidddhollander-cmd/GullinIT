@@ -230,6 +230,14 @@ func chosen_gull() -> String:
 	var id: String = str(options.get("gull", "herring"))
 	return id if Config.species.species.has(id) and gull_owned(id) else "herring"
 
+## What the mouse does in flight: "steer" (cursor is the stick) or "dive_aim" (keys steer, the cursor only aims dives).
+func mouse_role() -> String:
+	return "dive_aim" if str(options.get("mouse_role","steer")) == "dive_aim" else "steer"
+
+func set_mouse_role(id: String) -> void:
+	options.mouse_role = "dive_aim" if id == "dive_aim" else "steer"
+	save_progress()
+
 const CONTROL_MODES: Array[String] = ["realistic","normal","casual"]
 
 ## How hard flying and snatching are: realistic taps every wingbeat, casual pecks dives for you.

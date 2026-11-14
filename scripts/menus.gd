@@ -794,7 +794,12 @@ func options(from_pause: bool) -> void:
 			options(from_pause))
 		toggle.size_flags_horizontal = SIZE_EXPAND_FILL
 	if not OS.has_feature("mobile"):
-		BeachUI.button(content,"FULLSCREEN / F11",func() -> void: choose("fullscreen"))
+		var extras: HBoxContainer = HBoxContainer.new()
+		content.add_child(extras)
+		_small_button(extras,"MOUSE: AIMS DIVES" if GameState.mouse_role() == "dive_aim" else "MOUSE: STEERS FLIGHT",func() -> void:
+			GameState.set_mouse_role("steer" if GameState.mouse_role() == "dive_aim" else "dive_aim")
+			options(from_pause)).name = "MouseRoleButton"
+		_small_button(extras,"FULLSCREEN / F11",func() -> void: choose("fullscreen"))
 	BeachUI.back_button(content,"SAVE / BACK",func() -> void:
 		GameState.save_progress()
 		choose(back_action)).grab_focus()

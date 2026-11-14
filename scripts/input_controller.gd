@@ -18,6 +18,10 @@ var aim_finger: int = NO_FINGER
 var dive_finger: int = NO_FINGER ## finger on the DIVE button (overlay pressed state; blocks re-triggering while held)
 var gamepad: bool = false ## last device used was a pad; prompts show pad buttons
 var key_aim: bool = false ## WASD/arrows steer like a stick until the mouse or a touch takes over
+var mouse_pos: Vector2 = Vector2.ZERO ## last mouse position seen in _input (viewport coords)
+var mouse_move_msec: int = -1000000 ## last real mouse motion
+var mouse_dive: bool = false ## the current dive was started with mouse 2
+var _was_diving: bool = false
 const PAD_DEADZONE: float = 0.3 ## stick drift below this never claims the prompts
 var touch_visible: bool = false
 var enabled: bool = false
@@ -86,6 +90,17 @@ func _input(event: InputEvent) -> void:
 		else:
 			touch_down.erase(event.index)
 		key_aim = false
+	if event is InputEventMouseMotion or event is InputEventMouseButton:
+		mouse_pos = event.position
+	if event is InputEventMouseMotion and not touch_recent():
+		mouse_move_msec = Time.get_ticks_msec()
+	if event.is_action_pressed("dive") and not event.is_echo():
+		mouse_dive = event is InputEventMouseButton
+	if enabled and event is InputEventKey and event.pressed and not event.is_echo() and GameState.mouse_role() == "steer":
+		for action: String in ["aim_left","aim_right","aim_up","aim_down"]:
+			if event.is_action_pressed(action):
+				GameState.set_mouse_role("dive_aim") ## first key steer: the keyboard owns flight from now on
+				break
 	# The last device used wins: pad buttons or a real stick push, otherwise keys and mouse.
 	if event is InputEventJoypadButton or (event is InputEventJoypadMotion and absf(event.axis_value) > PAD_DEADZONE):
 		gamepad = true
@@ -93,8 +108,9 @@ func _input(event: InputEvent) -> void:
 		gamepad = false
 	elif event is InputEventMouseMotion and not touch_recent():
 		gamepad = false
-		key_aim = false
 		touch_active = false
+		if GameState.mouse_role() == "steer":
+			key_aim = false
 	if not enabled:
 		return
 	if event.is_action_pressed("climb") and not event.is_echo():
@@ -166,7 +182,9 @@ func update_player(gull: BeachGull, camera_x: float, camera_y: float = 90.0) -> 
 	elif stick.length() > 0.15:
 		key_aim = not gamepad # keys share the aim actions with the pad stick
 		_aim_with_stick(gull,stick)
-	elif gamepad or key_aim:
+	elif not gamepad and not touch_active and dive_aim_active(gull):
+		gull.aim = mouse_pos + Vector2(camera_x-160,camera_y-90)
+	elif gamepad or key_aim or (GameState.mouse_role() == "dive_aim" and not touch_active):
 		_aim_without_stick(gull)
 	elif touch_active:
 		_aim_with_touch(gull)
@@ -175,6 +193,18 @@ func update_player(gull: BeachGull, camera_x: float, camera_y: float = 90.0) -> 
 	gull.climb = Input.is_action_pressed("climb") or touch_climb
 	gull.flap_tap_pending = gull.flap_tap_pending or flap_tap
 	flap_tap = false
+
+## dive_aim mode: the cursor is live (moved recently, or mouse 2 started this dive).
+func mouse_fresh() -> bool:
+	return mouse_dive or Time.get_ticks_msec() - mouse_move_msec < int(float(Config.tuning.input.mouse_aim_fresh) * 1000.0)
+
+## True while a dive should chase the cursor; also tracks when a dive ends.
+func dive_aim_active(gull: BeachGull) -> bool:
+	var diving: bool = gull.state in [BeachGull.State.WINDUP,BeachGull.State.STRIKE]
+	if _was_diving and not diving:
+		mouse_dive = false
+	_was_diving = diving
+	return diving and GameState.mouse_role() == "dive_aim" and mouse_fresh()
 
 func _aim_with_touch(gull: BeachGull) -> void:
 	var touch_vec: Vector2 = touch_stick()

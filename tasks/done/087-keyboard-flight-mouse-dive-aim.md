@@ -1,6 +1,6 @@
 # 087 — Keyboard flight lock: the mouse aims dives, never steers flight
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -41,7 +41,10 @@ A player who flies with the keyboard never loses control because their mouse han
 - [ ] `./tools/validate.ps1` (in `GullinIt-main` pass `-Godot ../GullinIt/.tools/Godot_v4.7.2-stable_win64_console.exe`) passes with no new failures.
 
 ## Report
-<!-- Filled in by the implementer. -->
+Files: data/tuning.json (input.mouse_aim_fresh 1.5), scripts/autoload/game_state.gd (mouse_role/set_mouse_role), scripts/input_controller.gd, scripts/game.gd (analytics), scripts/menus.gd (options row), scripts/overlay.gd (reticle + OS cursor hide), tests/mouse_role_checks.gd (new, wired in integration.gd), tests/analytics_checks.gd, tests/control_mode_checks.gd and tests/touch_stick_checks.gd (reset mouse_role after their W/key presses).
+Tests: ./tools/validate.ps1 -> INTEGRATION: 17636 checks, 0 failures.
+Decisions: first WASD/arrow KEY press while input is enabled flips steer to dive_aim and saves (pad/touch never). In dive_aim, mouse motion no longer clears key_aim; glide/grounded use _aim_without_stick. WINDUP/STRIKE chase the cursor when mouse moved within mouse_aim_fresh or the dive came from mouse 2 (flag clears when dive ends or on a Shift dive); held key wins. Reticle (gold ring + ticks) drawn in overlay at last mouse position while fresh; OS cursor hidden only then (restored on overlay exit). Options row sits beside FULLSCREEN in one row of small buttons (a full-size row pushed SAVE/BACK off screen); it is hidden on mobile with fullscreen. level_start and _run_stats (so level_end and game_hidden) carry mouse_role.
+Not done: no manual playtest. Trainer lesson 1 copy unchanged ("keys or mouse") and stays accurate enough.
 
 ## Review notes
 <!-- Filled in by the reviewer. -->

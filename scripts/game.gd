@@ -736,7 +736,7 @@ func _vs_stats() -> Dictionary:
 	return {"arena": str(level.id), "opponent": str(level.vs.opponent)} if is_vs() else {}
 
 func _run_stats() -> Dictionary:
-	var stats: Dictionary = {"level": int(level.id), "mode": mode_name(), "seconds": snappedf(elapsed, 0.1), "play_seconds": snappedf(play_clock, 0.1), "crashes": crashes, "lesson": mini(lesson + 1, TRAINING_LESSONS) if training else 0}.merged(dive_stats)
+	var stats: Dictionary = {"level": int(level.id), "mode": mode_name(), "mouse_role": GameState.mouse_role(), "seconds": snappedf(elapsed, 0.1), "play_seconds": snappedf(play_clock, 0.1), "crashes": crashes, "lesson": mini(lesson + 1, TRAINING_LESSONS) if training else 0}.merged(dive_stats)
 	return stats.merged(_lesson_stats()) if training else stats
 
 func _lesson_stats() -> Dictionary:
@@ -766,7 +766,7 @@ func _dive_tick() -> void:
 func dismiss_intro() -> void:
 	_begin_lesson_stats()
 	play_clock = 0.0
-	track("level_start", {"level": int(level.id), "mode": mode_name()}.merged(_vs_stats()))
+	track("level_start", {"level": int(level.id), "mode": mode_name(), "mouse_role": GameState.mouse_role()}.merged(_vs_stats()))
 	if training:
 		track("lesson_start", {"lesson": lesson + 1})
 	intro = 0.0
