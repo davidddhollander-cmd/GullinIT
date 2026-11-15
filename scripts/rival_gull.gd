@@ -18,6 +18,7 @@ var carried: int = 0
 var score: int = 0
 var carry_window: float = 0.0
 var carried_food_id: String = "crisps_bag"
+var carried_blue: bool = false ## the carried crab was a blue one
 var rng: RandomNumberGenerator
 var aim_error: float = 0.0
 var retreat_direction: float = 1.0

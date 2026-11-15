@@ -130,7 +130,6 @@ func spawn(origin: String, camera_x: float, blue: bool = false) -> BeachCrab:
 	return crab
 
 ## A crab dropped by a hit gull lands alive: a live crab on the ground at x, already scuttling away from the gull.
-## ponytail: colour is not recorded on the carried snack, so revived crabs are always red.
 func revive(x: float, from: Vector2, blue: bool = false) -> BeachCrab:
 	var crab := BeachCrab.new()
 	add_child(crab)

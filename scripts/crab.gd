@@ -27,7 +27,7 @@ var escape_destination: float = 0.0
 
 func prepare(at: Vector2, origin: String, direction: float, blue: bool, tuning: Dictionary, bounds: Vector2 = Vector2.ZERO, seed_value: int = 1) -> void:
 	kind = "crab"
-	info = {"twist":"crab"}
+	info = {"twist":"crab","blue":blue}
 	food_id = "crab"
 	food = false
 	entry = origin
