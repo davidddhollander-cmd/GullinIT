@@ -315,7 +315,7 @@ func _small(label: Label) -> Label:
 func prompt_text() -> String:
 	var key: String = str(Config.trainer.keys[TrainerScript.device(game.input)][game.prompt_action]).split(" or ")[0].to_upper()
 	if game.prompt_action == "peck":
-		return "PRESS %s" % key
+		return "PRESS %s" % ("X" if game.input.gamepad else key) if TrainerScript.device(game.input) != "keyboard" else "PRESS E OR CLICK" # any click pecks here
 	return "DIVE!" if key == "DIVE" else "DIVE! %s" % key
 
 ## Lesson 3 freezes just before the beak reaches the snack and the counter lesson when the serving lands: a pulsing prompt well above the gull.
@@ -867,7 +867,7 @@ func input_word(kind: String) -> String:
 		"flap":
 			return "A" if game.input.gamepad else "SPACE"
 		"peck":
-			return "X" if game.input.gamepad else "E/MOUSE 3"
+			return "X" if game.input.gamepad else "E/MIDDLE CLICK"
 	return kind.to_upper()
 
 # One contextual hint at a time, chosen from the gull's current situation.

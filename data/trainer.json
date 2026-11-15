@@ -4,9 +4,9 @@
   "keys": {
     "keyboard": {
       "flap": "Space or left click",
-      "dive": "Shift/mouse 2",
-      "peck": "E/mouse 3",
-      "peck_alt": "E/mouse 3",
+      "dive": "Shift/right click",
+      "peck": "E/middle click",
+      "peck_alt": "E/middle click",
       "steer": "the mouse or WASD",
       "call": "Q"
     },

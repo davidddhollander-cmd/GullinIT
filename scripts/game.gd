@@ -811,6 +811,14 @@ func _unhandled_input(event: InputEvent) -> void:
 	if training_card_pending() and (event.is_action_pressed("dive") or event.is_action_pressed("peck")):
 		return
 	if peck_pause:
+		if prompt_action == "peck" and event is InputEventMouseButton and event.pressed:
+			# Any mouse button pecks out of the freeze: mouse-only players have no idea where "middle click" is.
+			_end_peck_pause()
+			input.flap_tap = false # a left click is also the climb button; it must only peck
+			get_viewport().set_input_as_handled()
+			if running:
+				_peck_pressed()
+			return
 		if not event.is_action_pressed(prompt_action) or event.is_echo():
 			return
 		_end_peck_pause() # the same press then pecks or dives, below
@@ -1447,6 +1455,7 @@ func _toddler_pause_check() -> void:
 	toddler_pause_armed = false
 	prompt_action = "peck"
 	peck_pause = true
+	effects.texts.clear() # the lesson-done toast and score popups would overlap the prompt
 	input.clear_touch()
 	_freeze_actors(true)
 
