@@ -233,7 +233,7 @@ func _repeat_named_animation() -> void:
 	if not comparisons[index].has("animation"):
 		return
 	for side: Dictionary in sides + ([reference_side] if not reference_side.is_empty() else []):
-		if side.get("node") is AnimatedSprite2D and not (side.node as AnimatedSprite2D).is_playing():
+		if side.get("node") is AnimatedSprite2D and not (side.node as AnimatedSprite2D).is_playing() and (side.node as AnimatedSprite2D).sprite_frames.has_animation(str(comparisons[index].animation)):
 			(side.node as AnimatedSprite2D).play(str(comparisons[index].animation))
 
 ## Both sides get the same commands, so identical art stays frame-for-frame identical.

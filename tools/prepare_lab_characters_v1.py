@@ -1,0 +1,128 @@
+"""Cuts the Crumb Lady sheet and the two pigeon sheets (assets/reference/{crumb-lady-v2,pigeon-v1,pigeon-v2}/source.png)
+into clean Art Lab sprite sheets (assets/lab/) and adds "CHARACTERS" comparisons to data/art_lab.json.
+
+Usage:  python tools/prepare_lab_characters_v1.py
+Needs numpy and Pillow. Safe to re-run: it replaces the earlier "CRUMB LADY ..." / "PIGEON ..." entries.
+The sources are transparent sheets whose figures drift a little off their grid cells, so each figure is found as a
+connected blob, owned by the cell holding its centre, and copied into an equal frame with its own cell's alignment kept.
+Frames stay at source resolution; the sprites.json style visual_scale does the shrinking, as for the other characters.
+"""
+import json
+from pathlib import Path
+
+import numpy as np
+from PIL import Image
+
+import prepare_food_icons_v1 as food  # label
+
+ROOT = Path(__file__).resolve().parent.parent
+REF = ROOT / "assets" / "reference"
+LAB_DIR = ROOT / "assets" / "lab"
+LAB = ROOT / "data" / "art_lab.json"
+ALPHA_SEED = 100  # opaque art sits near 255, the sheets' halo is faint
+ALPHA_KEEP = 16  # below this a pixel is cleared (anti-aliased edges stay)
+CATEGORY = "characters"
+
+
+def owned_labels(alpha: np.ndarray, cols: int, rows: int) -> dict[tuple[int, int], np.ndarray]:
+	"""Per grid cell, a full-size mask of the figure pieces whose centre lies in that cell."""
+	small = alpha[::4, ::4] >= ALPHA_SEED
+	grown = small.copy()
+	for dy in (-1, 0, 1):
+		for dx in (-1, 0, 1):
+			grown |= np.roll(np.roll(small, dy, 0), dx, 1)
+	lab = food.label(grown)
+	h, w = alpha.shape
+	cell_w, cell_h = w / cols, h / rows
+	owner = np.zeros(lab.shape, dtype=np.int32)  # 1 + row * cols + col per blob pixel
+	for n in np.unique(lab):
+		if n == 0:
+			continue
+		ys, xs = np.nonzero((lab == n) & small)
+		if len(ys) < 2:
+			continue  # specks
+		col = int((xs.mean() * 4) // cell_w)
+		row = int((ys.mean() * 4) // cell_h)
+		owner[lab == n] = 1 + row * cols + col
+	big = np.kron(owner, np.ones((4, 4), dtype=np.int32))[:h, :w]
+	return {(r, c): big == 1 + r * cols + c for r in range(rows) for c in range(cols)}
+
+
+def cut_sheet(src: Path, cols: int, rows: int, frame_w: int, frame_h: int, window_x, window_y, out: Path) -> list[tuple[int, int, int, int]]:
+	"""window_x(col, cell_w) / window_y(row, cell_h) give the source window origin for a frame; returns each frame's art box."""
+	rgba = np.array(Image.open(src).convert("RGBA"))
+	h, w = rgba.shape[:2]
+	masks = owned_labels(rgba[:, :, 3], cols, rows)
+	sheet = np.zeros((rows * frame_h, cols * frame_w, 4), dtype=np.uint8)
+	boxes = []
+	for r in range(rows):
+		for c in range(cols):
+			own = masks[(r, c)] & (rgba[:, :, 3] >= ALPHA_KEEP)
+			x0, y0 = window_x(c, w / cols), window_y(r, h / rows)
+			frame = np.zeros((frame_h, frame_w, 4), dtype=np.uint8)
+			sx0, sy0 = max(x0, 0), max(y0, 0)
+			sx1, sy1 = min(x0 + frame_w, w), min(y0 + frame_h, h)
+			piece = np.where(own[sy0:sy1, sx0:sx1, None], rgba[sy0:sy1, sx0:sx1], 0)
+			frame[sy0 - y0:sy1 - y0, sx0 - x0:sx1 - x0] = piece
+			ys, xs = np.nonzero(frame[:, :, 3] >= ALPHA_SEED)
+			if not len(ys):
+				raise SystemExit(f"{src.parent.name}: no figure in row {r} col {c}")
+			boxes.append((int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1))
+			if xs.min() == 0 or ys.min() == 0 or xs.max() == frame_w - 1 or ys.max() == frame_h - 1:
+				print(f"  WARNING {src.parent.name} frame {r * cols + c}: art touches the frame edge")
+			sheet[r * frame_h:(r + 1) * frame_h, c * frame_w:(c + 1) * frame_w] = frame
+	LAB_DIR.mkdir(parents=True, exist_ok=True)
+	Image.fromarray(sheet).save(out, optimize=True)
+	return boxes
+
+
+def anim(frames: list[int], fps: float, loop: bool = True) -> dict:
+	return {"frames": [float(f) for f in frames], "fps": fps, "loop": loop}
+
+
+def main() -> None:
+	lab = json.loads(LAB.read_text(encoding="utf-8-sig"))
+	comparisons = [c for c in lab["comparisons"] if not (c["title"].startswith("CRUMB LADY ") or c["title"].startswith("PIGEON "))]
+
+	# Crumb Lady: 6 x 4 cells of 256 px, rows = walk, hit, panic run, sow. Frames stop 6 px under the boots (feet at y 244 of 256).
+	lady_h = 250
+	boxes = cut_sheet(REF / "crumb-lady-v2" / "source.png", 6, 4, 256, lady_h, lambda c, cw: round(c * cw), lambda r, ch: round(r * ch), LAB_DIR / "crumb-lady-v2-sheet.png")
+	print("crumb lady frame boxes (x0,y0,x1,y1):", boxes[:3], "...")
+	lady = {"file": "res://assets/lab/crumb-lady-v2-sheet.png", "frame_w": 256, "frame_h": lady_h, "visual_scale": 0.15,
+		"animations": {"idle": anim([0], 4), "walk": anim([0, 1, 2, 3, 4, 5], 8), "swat": anim([6, 7, 8, 9, 10, 11], 10, False),
+			"run": anim([12, 13, 14, 15, 16, 17], 10), "sow": anim([18, 19, 20, 21, 22, 23], 8, False)}}
+	for title, why, motion, animation in [
+		("CRUMB LADY WALK", "NEW CHARACTER. SHOPPER BESIDE FOR SIZE. WALK ROW.", "walk_across", "walk"),
+		("CRUMB LADY PANIC RUN", "NEW CHARACTER. PANIC RUN ROW. SHOPPER RUN BESIDE.", "walk_across", "run"),
+		("CRUMB LADY HIT", "NEW CHARACTER. ANGRY SWAT ROW. SHOPPER SWAT BESIDE.", "idle", "swat"),
+		("CRUMB LADY SOW CRUMBS", "NEW CHARACTER. SWEEPING CRUMB THROW ROW.", "idle", "sow"),
+	]:
+		comparisons.append({"title": title, "description": why, "current": "shopper_mullet", "candidate": lady,
+			"motion": motion, "animation": animation, "category": CATEGORY})
+
+	# Pigeons: 4 x 5 cells (384 x 204.8). Frames are 416 x 280 windows starting 60 px above each cell so wingtips that
+	# spill over the grid are kept; masked to the owning figure so neighbours never leak in.
+	pigeon_w, pigeon_h = 416, 280
+	pigeons = {}
+	for version in ("v1", "v2"):
+		out = LAB_DIR / f"pigeon-{version}-sheet.png"
+		boxes = cut_sheet(REF / f"pigeon-{version}" / "source.png", 4, 5, pigeon_w, pigeon_h, lambda c, cw: round(c * cw) - 16, lambda r, ch: round(r * ch) - 60, out)
+		print(f"pigeon {version} frame boxes:", boxes)
+		pigeons[version] = {"file": f"res://assets/lab/pigeon-{version}-sheet.png", "frame_w": pigeon_w, "frame_h": pigeon_h, "visual_scale": 0.075,
+			"animations": {"idle": anim([0], 4), "walk": anim([1, 2, 3, 4, 5, 6, 7], 10), "flap": anim([8, 9, 10, 11], 8),
+				"glide": anim([12, 13, 14, 15], 4, False), "act": anim([16, 17, 18, 19], 3, False)}}
+	for title, why, motion, animation in [
+		("PIGEON WALK V1 V2", "NEW PIGEON. V1 LEFT. V2 RIGHT. SHOPPER BETWEEN FOR SIZE.", "walk_across", "walk"),
+		("PIGEON FLAP V1 V2", "NEW PIGEON. V1 LEFT. V2 RIGHT. WINGBEAT ROW. GROUNDED FOR REVIEW.", "idle", "flap"),
+		("PIGEON GLIDE DIVE V1 V2", "NEW PIGEON. V1 LEFT. V2 RIGHT. GLIDE. DIVE PREP. DIVE. PULL UP.", "idle", "glide"),
+		("PIGEON SNATCH PECK V1 V2", "NEW PIGEON. V1 LEFT. V2 RIGHT. SNATCH. PECK. LAND. STUNNED.", "idle", "act"),
+	]:
+		comparisons.append({"title": title, "description": why, "current": "shopper_mullet", "current_override": pigeons["v1"],
+			"candidate": pigeons["v2"], "reference": "shopper_mullet", "motion": motion, "animation": animation, "category": CATEGORY})
+
+	lab["comparisons"] = comparisons
+	LAB.write_text(json.dumps(lab, indent=2) + "\n", encoding="utf-8")
+
+
+if __name__ == "__main__":
+	main()
