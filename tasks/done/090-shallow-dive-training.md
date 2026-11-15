@@ -1,6 +1,6 @@
 # 090 — Training: teach a shallow dive, approach-angle cue, fix the dummy lesson copy
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none

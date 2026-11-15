@@ -1,6 +1,6 @@
 # 091 — Level 2: two quests, Gary quest to level 3, clearer start card with a LET'S GULL IT! button
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none

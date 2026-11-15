@@ -1,6 +1,6 @@
 # 092 — Touch: one ASSIST setting and assist analytics
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
