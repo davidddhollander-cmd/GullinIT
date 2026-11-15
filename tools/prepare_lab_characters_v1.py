@@ -115,8 +115,8 @@ def main() -> None:
 	print("crumb lady frame boxes (x0,y0,x1,y1):", boxes[:3], "...")
 	lady_anims = {"idle": anim([0], 4), "walk": anim([0, 1, 2, 3, 4, 5], 8), "swat": anim([6, 7, 8, 9, 10, 11], 10, False),
 		"run": anim([12, 13, 14, 15, 16, 17], 10), "sow": anim([18, 19, 20, 21, 22, 23], 8, False)}
-	lady_steps = {}  # name -> sprite def: light = 4 art px per game px, medium = 3, chunky = 2 (the shopper's density)
-	for name, factor, colours, scale in [("light", LIGHT_FACTOR_LADY, 128, 0.25), ("medium", 0.45, 64, 1 / 3), ("chunky", 0.3, 48, 0.5)]:
+	lady_steps = {}  # name -> sprite def: light = 4 art px per game px, medium = 3 (the chosen level)
+	for name, factor, colours, scale in [("light", LIGHT_FACTOR_LADY, 128, 0.25), ("medium", 0.45, 64, 1 / 3)]:
 		lw, lh = light_touch(LAB_DIR / "crumb-lady-v2-sheet.png", 6, 4, 256, lady_h, factor, colours, LAB_DIR / f"crumb-lady-v2-{name}.png")
 		lady_steps[name] = {"file": f"res://assets/lab/crumb-lady-v2-{name}.png", "frame_w": lw, "frame_h": lh, "visual_scale": scale, "animations": lady_anims}
 	for title, why, motion, animation in [
@@ -127,8 +127,7 @@ def main() -> None:
 	]:
 		comparisons.append({"title": title, "description": why, "current": "shopper_mullet", "current_override": lady_steps["light"], "candidate": lady_steps["medium"],
 			"reference": "shopper_mullet", "motion": motion, "animation": animation, "category": CATEGORY})
-	comparisons.append({"title": "CRUMB LADY MEDIUM VS CHUNKY", "description": "NEW CHARACTER. MEDIUM LEFT. CHUNKY RIGHT AT THE SHOPPER PIXEL SIZE. SHOPPER BETWEEN.", "current": "shopper_mullet",
-		"current_override": lady_steps["medium"], "candidate": lady_steps["chunky"], "reference": "shopper_mullet", "motion": "walk_across", "animation": "walk", "category": CATEGORY})
+
 
 	# Pigeons: 4 x 5 cells (384 x 204.8). Frames are 416 x 280 windows starting 60 px above each cell so wingtips that
 	# spill over the grid are kept; masked to the owning figure so neighbours never leak in.
