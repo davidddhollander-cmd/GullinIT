@@ -9,10 +9,9 @@
   "twist": {"id": "off_lead_dogs", "tip": {"id": "dogs", "text": "OFF-LEAD DOGS: STAY ABOVE THEM!"}},
   "quests": [
     {"id": "l3_outrun", "text": "OUTRUN THE DOGS", "event": "dog_outrun", "filter": {}, "count": 3, "bonus": 60},
-    {"id": "l3_crab", "text": "EAT A CRAB", "event": "swallowed", "filter": {"food": "crab"}, "count": 1, "bonus": 40}
+    {"id": "l3_crab", "text": "EAT A CRAB", "event": "swallowed", "filter": {"food": "crab"}, "count": 1, "bonus": 40},
+    {"id": "l3_bump_gary", "text": "BUMP GARY TWICE", "event": "rival_bumped", "filter": {"name": "Gary"}, "count": 2, "bonus": 40}
   ],
-  "random_quest": {"count": [3, 5], "bonus": 40},
-  "random_foods": ["hotdog", "fried_fish", "ice_cream", "half_eaten_doughnut", "half_eaten_pizza"],
   "stars": [250, 550, 750],
   "rivals": [{"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16, "mug_chance": 0.3, "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}}],
   "world": {"width": 1280, "promenade_start": 430, "pier_start": 920, "start_x": 65, "start_y": 105},

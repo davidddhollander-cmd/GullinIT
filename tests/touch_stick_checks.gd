@@ -353,6 +353,7 @@ static func _rework_checks(host: Node, check: Callable) -> void:
 	var game: BeachGame = host.main.game
 	game.set_physics_process(false)
 	game.intro = 0
+	game.overlay.intro_panel.hide() # the start card's panel would swallow the synthetic touches
 	game.running = true
 	var input: GullInput = game.input
 	input.enabled = true

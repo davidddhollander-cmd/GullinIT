@@ -307,7 +307,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	overlay = BeachOverlay.new()
 	canvas.add_child(overlay)
 	overlay.setup(self)
-	intro = float(Config.vs.intro_time) if is_vs() else Config.tuning.world.intro_time
+	intro = float(Config.vs.intro_time) if is_vs() else 1.0 # any value above 0: the start card waits for its button
 	intro_dismissed_elapsed = -1.0
 	if overlay.trainer_card != null:
 		overlay.trainer_card.dismissed.connect(_on_trainer_dismissed)
@@ -577,7 +577,7 @@ func _physics_process(delta: float) -> void:
 	if aim_pause:
 		_aim_pause_tick()
 		return
-	if intro > 0 and int(level.id) != 1:
+	if intro > 0 and is_vs():
 		intro -= delta
 		if intro <= 0:
 			dismiss_intro()
@@ -816,7 +816,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_end_aim_pause()
 		return
 	if intro > 0:
-		if int(level.id) != 1 and event.is_pressed() and not event is InputEventMouseMotion:
+		if is_vs() and event.is_pressed() and not event is InputEventMouseMotion:
 			dismiss_intro()
 			get_viewport().set_input_as_handled()
 		return

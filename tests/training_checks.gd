@@ -5,7 +5,7 @@ static func run(host: Node, check: Callable) -> void:
 	host.main.start_level(1)
 	var game: BeachGame = host.main.game
 	game.set_physics_process(false)
-	game._physics_process(float(Config.tuning.world.intro_time)+1.0)
+	game._physics_process(3.0)
 	check.call(not game.running and game.intro > 0 and not game.input.enabled,"tutorial waits for explicit start without running in background")
 	game.set_paused(true)
 	game.set_paused(false)

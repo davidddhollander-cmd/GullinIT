@@ -10,19 +10,20 @@ static func run(check: Callable) -> void:
 	var quests: BeachQuests = BeachQuests.new()
 	var l2: Dictionary = _level(2)
 	quests.setup(l2, rng)
-	check.call(quests.quests.size() == 3 and quests.quests[2].id == "l2_bump_gary" and int(quests.quests[2].count) == 2 and not l2.has("random_quest"), "level 2 has ice cream, toddler and bump-Gary-twice quests, no random slot")
+	check.call(quests.quests.size() == 2 and quests.quests[0].id == "l2_ice" and quests.quests[1].id == "l2_cry" and not l2.has("random_quest"), "level 2 has just the ice cream and toddler quests, no random slot")
 	var bump: BeachQuests = BeachQuests.new()
-	bump.setup(l2, rng)
+	bump.setup(_level(3), rng)
+	check.call(bump.quests.size() == 3 and bump.quests[2].id == "l3_bump_gary" and not _level(3).has("random_quest"), "level 3 has outrun, crab and bump-Gary-twice, no random slot")
 	bump.record("rival_bumped", {"name": "Chip"})
 	bump.record("rival_bumped", {"name": "Gary"})
 	check.call(not bump.quests[2].done and int(bump.quests[2].progress) == 1, "only Gary bumps count, one of two so far")
 	bump.record("rival_bumped", {"name": "Gary"})
-	check.call(bump.quests[2].done, "bumping Gary twice completes l2_bump_gary")
-	var l3: Dictionary = _level(3)
+	check.call(bump.quests[2].done, "bumping Gary twice completes l3_bump_gary")
+	var l3: Dictionary = _level(5) # level 5 still has a random quest slot
 	var l3roll: BeachQuests = BeachQuests.new()
 	l3roll.setup(l3, rng)
 	var random: Dictionary = l3roll.quests[2]
-	check.call(random.id == "l3_random" and random.filter.food in l3.random_foods and int(random.count) >= 3 and int(random.count) <= 5, "random quest picks a listed food and a 3-5 count")
+	check.call(random.id == "l5_random" and random.filter.food in l3.random_foods and int(random.count) >= 3 and int(random.count) <= 5, "random quest picks a listed food and a 3-5 count")
 	check.call(random.text == "EAT %s" % str(Config.foods[random.filter.food].name).to_upper(), "random quest text names the food")
 	for seed: int in 40:
 		rng.seed = seed
@@ -30,15 +31,15 @@ static func run(check: Callable) -> void:
 		roll.setup(l3, rng)
 		check.call(roll.quests[2].filter.food in l3.random_foods, "random food always from random_foods (seed %d)" % seed)
 	# Every random food must be a real food, and levels 1 has no random slot.
-	for id: int in [2, 3]:
+	for id: int in [2, 5]:
 		for food: String in _level(id).random_foods:
 			check.call(Config.foods.has(food), "level %d random food exists: %s" % [id, food])
 	var l1: BeachQuests = BeachQuests.new()
 	l1.setup(_level(1), rng)
 	check.call(l1.quests.is_empty() and not _level(1).has("quests") and not _level(1).has("random_quest"), "Training Day has no quests")
 	var l3q: BeachQuests = BeachQuests.new()
-	l3q.setup(_level(3), rng)
-	check.call(l3q.quests.size() == 3 and l3q.quests[0].id == "l3_outrun" and l3q.quests[2].id == "l3_random", "level 3 has two quests plus random")
+	l3q.setup(_level(5), rng)
+	check.call(l3q.quests.size() == 3 and l3q.quests[0].id == "l5_fish" and l3q.quests[2].id == "l5_random", "level 5 has two quests plus random")
 
 	var fired: Array[String] = []
 	quests.quest_completed.connect(func(q: Dictionary) -> void: fired.append(q.id))
@@ -82,6 +83,34 @@ static func _text_rect(game: BeachGame, item: Dictionary) -> Rect2:
 	var width: float = game.effects.font.get_string_size(item.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 8).x
 	return Rect2(item.at - Vector2(width * 0.5 + 2.0, 8.0), Vector2(width + 4.0, 11.0))
 
+## The arcade start card: pass mark first, optional quests, a LET'S GULL IT! button that the card waits for.
+static func _start_card_checks(suite: Node, check: Callable) -> void:
+	var main: Node = suite.main
+	GameState.progress = {"2": {"quests": ["l2_bump_gary"],"stars": 0}} # an old save that completed the removed quest
+	main.start_level(2)
+	var game: BeachGame = main.game
+	var texts: Array[String] = []
+	for node: Node in game.overlay.intro_panel.find_children("*","Label",true,false):
+		texts.append((node as Label).text)
+	var card: String = " ".join(texts)
+	var seconds: int = int(game.level.time_limit)
+	check.call(card.contains("TO PASS:") and card.contains(str(int(game.level.stars[0]))) and card.contains("%d:%02d" % [seconds/60,seconds%60]) and card.contains("OPTIONAL") and card.contains("QUEST POINTS COUNT") and not card.contains("STAR"),"level 2 start card shows the pass mark, optional quests and no stars line: "+card)
+	check.call(game.overlay.start_button != null and game.overlay.start_button.text == "LET'S GULL IT!" and game.overlay.start_button.has_focus(),"level 2 start card has a focused LET'S GULL IT! button")
+	await suite.settle()
+	await suite.snapshot("level-2-start-card")
+	game._physics_process(3.0)
+	var key: InputEventKey = InputEventKey.new()
+	key.physical_keycode = KEY_Q
+	key.pressed = true
+	game._unhandled_input(key)
+	check.call(not game.running and game.intro > 0.0 and game.overlay.intro_panel.visible,"level 2 card stays up past 2 s and ignores random keys")
+	game.overlay.start_button.pressed.emit()
+	check.call(game.running and game.player.state != BeachGull.State.STRIKE,"the button starts level 2 without a dive")
+	GameState.progress = {}
+	main.start_level(7)
+	await suite.settle()
+	await suite.snapshot("level-7-start-card")
+
 static func _play(main: Node, level: int) -> BeachGame:
 	main.start_level(level)
 	main.game.screech_lesson = false # ordinary runs; the level 2 lesson has its own checks
@@ -108,6 +137,8 @@ static func run_game(suite: Node, check: Callable) -> void:
 	main.casual = false
 	var game: BeachGame = _play(main, 2)
 	check.call(game.quests.quests.size() == 2, "level 2 game keeps its two fixed quests")
+	await _start_card_checks(suite, check)
+	game = _play(main, 2)
 	var before: int = game.score.points
 	for i: int in 3:
 		game._swallowed({"id": "ice_cream"})
@@ -164,7 +195,7 @@ static func run_game(suite: Node, check: Callable) -> void:
 	game.dismiss_intro()
 	game.overlay._process(0.0)
 	var rows: Array[Label] = game.overlay.quest_labels
-	check.call(rows.size() == 3 and game.overlay.quest_box.visible, "level 2 shows a 3 row quest checklist")
+	check.call(rows.size() == 2 and game.overlay.quest_box.visible, "level 2 shows a 2 row quest checklist")
 	check.call(rows[0].text.contains("3 CLEAN ICE CREAMS") and rows[0].text.contains("0/3"), "counted quest shows progress 0/3")
 	check.call(not rows[1].text.contains("/"), "single quests show no progress")
 	for i: int in 2:

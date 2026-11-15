@@ -44,7 +44,7 @@ static func run(suite: Node, check: Callable) -> void:
 		if spawn.type == "off_lead_dog":
 			homes.append(spawn.home)
 	check.call(homes.size() == 2 and level.twist.id == "off_lead_dogs" and float(homes[0][1]) < float(homes[1][0]), "level 3 has two off-lead dog spawns with separate homes and the dog twist")
-	check.call(level.quests.size() == 2 and level.quests[0].id == "l3_outrun" and int(level.quests[0].count) == 3 and level.has("random_quest"), "level 3 quests are outrun x3, crab plus random")
+	check.call(level.quests.size() == 3 and level.quests[0].id == "l3_outrun" and int(level.quests[0].count) == 3 and level.quests[2].id == "l3_bump_gary" and not level.has("random_quest"), "level 3 quests are outrun x3, crab, bump Gary twice")
 	check.call(Config.levels[3].quests[0].id == "l4_counter" and not Config.levels[3].spawns.any(func(spawn: Dictionary) -> bool: return spawn.type == "off_lead_dog"), "level 4 has no dog and keeps its counter quest")
 	for number: int in [1, 2, 4]:
 		var other: BeachGame = _fresh(suite, number)

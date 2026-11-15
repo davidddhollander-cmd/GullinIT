@@ -10,8 +10,7 @@
   "twist": {"id": "gary_intro"},
   "quests": [
     {"id": "l2_ice", "text": "3 CLEAN ICE CREAMS", "event": "swallowed", "filter": {"food": "ice_cream", "direct": true}, "count": 3, "bonus": 50},
-    {"id": "l2_cry", "text": "MAKE A TODDLER CRY", "event": "toddler_cried", "filter": {}, "count": 1, "bonus": 30},
-    {"id": "l2_bump_gary", "text": "BUMP GARY TWICE", "event": "rival_bumped", "filter": {"name": "Gary"}, "count": 2, "bonus": 40}
+    {"id": "l2_cry", "text": "MAKE A TODDLER CRY", "event": "toddler_cried", "filter": {}, "count": 1, "bonus": 30}
   ],
   "random_foods": ["ice_cream", "crisps_bag", "half_eaten_doughnut", "half_eaten_sandwich"],
   "stars": [150, 400, 550],

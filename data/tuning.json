@@ -193,7 +193,6 @@
     "depart_thefts": 2,
     "walk_speed": 9,
     "replacement_delay": 2,
-    "intro_time": 2,
     "shield_time": 2,
     "recover_time": 3,
     "suspicious": 0.4,

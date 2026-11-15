@@ -230,29 +230,45 @@ func setup(owner_game: BeachGame) -> void:
 		BeachUI.label(intro,"NO TIMER. NO SCORE. NO MANNERS.",8,Color("80bcb8"))
 		BeachUI.label(intro,"FOLLOW THE GOLDEN RING.",8,BeachUI.GOLD)
 	else:
-		# Just the pass mark and the quests; controls live in the training day.
+		# Goal first (the pass mark), then the optional quests; controls live in the training day.
 		if game.level.has("objective"):
 			BeachUI.label(intro,str(game.level.objective))
 		var seconds: int = int(game.level.time_limit)
-		BeachUI.label(intro,"15 SNATCHES. NO TIMER." if game.casual else "SCORE %d IN %d:%02d
-TO PASS TO THE NEXT LEVEL" % [int(game.level.stars[0]),seconds/60,seconds%60])
+		if game.casual:
+			BeachUI.label(intro,"15 SNATCHES. NO TIMER.")
+		else:
+			var saved: Dictionary = GameState.entry(int(game.level.id))
+			var best: int = int(saved.get("best",0))
+			var pass_score: int = int(game.level.stars[0])
+			var goal: HBoxContainer = HBoxContainer.new()
+			goal.add_theme_constant_override("separation",8)
+			intro.add_child(goal)
+			if int(saved.get("stars",0)) > 0:
+				BeachUI.label(goal,"PASSED. BEAT YOUR BEST: %d" % best,8,BeachUI.GOLD)
+			else:
+				BeachUI.label(goal,"TO PASS:",8,BeachUI.GOLD)
+				BeachUI.label(goal,"SCORE %d IN %d:%02d" % [pass_score,seconds/60,seconds%60])
 		if not game.quests.quests.is_empty():
+			var gap: Control = Control.new()
+			gap.custom_minimum_size = Vector2(0,4)
+			intro.add_child(gap)
 			# Quests sit in the small HUD font so a long list stays clear of the pass mark.
-			_small(BeachUI.label(intro,"QUESTS",8,BeachUI.GOLD))
+			_small(BeachUI.label(intro,"BONUS QUESTS - OPTIONAL",8,BeachUI.GOLD))
 			for quest: Dictionary in game.quests.quests:
 				_small(BeachUI.label(intro,"- %s  +%d" % [quest.text,int(quest.bonus)],8,Color("80bcb8")))
+			_small(BeachUI.label(intro,"QUEST POINTS COUNT TOWARD YOUR SCORE",8,Color("80bcb8")))
 	trainer_intro = BeachGame.trainer_cards and game.training
 	if trainer_intro:
 		intro_panel.hide()
-	elif int(game.level.id) == 1:
+	elif game.is_vs():
+		var go: Label = BeachUI.label(intro,"ANY BUTTON TO GO",8,BeachUI.GOLD)
+		go.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	else:
+		# A real button: the card waits for it, and the press never reaches the gull.
 		intro_panel.mouse_filter = MOUSE_FILTER_STOP
-		start_button = BeachUI.button(intro,"LET'S GULL IT",game.dismiss_intro)
+		start_button = BeachUI.button(intro,"LET'S GULL IT!",game.dismiss_intro)
 		start_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		start_button.grab_focus()
-	else:
-		var go: Label = BeachUI.label(intro,"ANY BUTTON TO GO",8,BeachUI.GOLD)
-		if game.is_vs():
-			go.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	# Last child, so the pop-up draws over everything. Its button is the Training Day start button.
 	trainer_card = TrainerCard.new()
 	add_child(trainer_card)
