@@ -141,6 +141,12 @@ static func run(host: Node, check: Callable) -> void:
 		for _step in 20:
 			revived.tick(0.05,[drop_game.player])
 		check.call(not is_equal_approx(revived.position.x,landed_x),"a dropped crab scuttles away after landing")
+	check.call(revived!=null and not revived.info.blue,"a dropped red crab revives red")
+	drop_game.stash_raids.items.append({"owner":null,"source":"dropped","food_id":"crab","blue":true,"position":Vector2(260,Config.tuning.world.ground-30),"velocity":Vector2(0,60),"grounded":false,"age":0.0})
+	for _step in 30:
+		drop_game.stash_raids.tick(0.05)
+	var blue_revived: BeachCrab = drop_game.crabs.targets[drop_game.crabs.targets.size()-1] if drop_game.crabs.targets.size()>1 else null
+	check.call(blue_revived!=null and blue_revived.info.blue,"a dropped blue crab revives blue")
 	drop_game.queue_free()
 	await host.get_tree().process_frame
 	await preload("res://tests/crab_habitat_checks.gd").run(host,check)

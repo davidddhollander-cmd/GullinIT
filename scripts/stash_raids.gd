@@ -319,7 +319,7 @@ func tick(delta: float) -> void:
 					item.landed_dir = 1.0 if float(item.velocity.x) >= 0.0 else -1.0
 				if item.get("source","") == "dropped" and item.food_id == "crab":
 					# A dropped crab scuttles off alive instead of lying there as a snack.
-					game.crabs.revive(item.position.x,game.player.position)
+					game.crabs.revive(item.position.x,game.player.position,bool(item.get("blue",false)))
 					items.remove_at(index)
 					continue
 				item.velocity = Vector2.ZERO

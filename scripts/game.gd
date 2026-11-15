@@ -970,7 +970,7 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 			dive_hit = true
 			dive_stats.dive_snatches += 1
 		strike_near_carrier = false
-		var details: Dictionary = {"risky":risky,"upwind":player.upwind,"handover":handover}
+		var details: Dictionary = {"risky":risky,"upwind":player.upwind,"handover":handover,"blue":bool(target.info.get("blue",false))}
 		if player.dashing:
 			details.id = target.food_id
 			_swallowed(details) # Lightning Strike swallows whole: scored at once, the stomach untouched
@@ -990,6 +990,7 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 		for pilot: RivalPilot in pilots:
 			if pilot.gull == gull:
 				pilot.carried_food_id = target.food_id
+				pilot.carried_blue = bool(target.info.get("blue",false))
 				pilot.took_food(target.food_value())
 				effects.shout(gull.position,"MINE!",Color("ffc65c"))
 
@@ -1008,7 +1009,7 @@ func _stunned() -> void:
 	score.lost += before-score.points
 	var dropped: Dictionary = player.digestion.drop_current()
 	if not dropped.is_empty():
-		stash_raids.items.append({"owner":null,"source":"dropped","food_id":dropped.id,"snack":dropped,"position":player.beak(),"velocity":Vector2(-player.facing*35,-55),"grounded":false,"age":0.0})
+		stash_raids.items.append({"owner":null,"source":"dropped","food_id":dropped.id,"blue":bool(dropped.get("blue",false)),"snack":dropped,"position":player.beak(),"velocity":Vector2(-player.facing*35,-55),"grounded":false,"age":0.0})
 	score.stunned()
 	effects.impact(player.position,true)
 	if not Audio.swat_recent(): # a person's swat already played its thwack this frame
@@ -1038,7 +1039,7 @@ func _rival_drops_carry(rival: BeachGull, attacker: Vector2) -> void:
 		if pilot.gull == rival:
 			var food_id: String = pilot.carried_food_id
 			if pilot.mug(attacker) > 0:
-				stash_raids.items.append({"owner":null,"source":"dropped","food_id":food_id,"position":rival.position-Vector2(0,10),"velocity":Vector2(-rival.facing*35,-55),"grounded":false,"age":0.0})
+				stash_raids.items.append({"owner":null,"source":"dropped","food_id":food_id,"blue":pilot.carried_blue,"position":rival.position-Vector2(0,10),"velocity":Vector2(-rival.facing*35,-55),"grounded":false,"age":0.0})
 
 # The player's own stun handler already reacts, so only rivals get a callout.
 func _sweeper_says(sweeper: BeachSweeper, key: String) -> void:
@@ -1203,7 +1204,7 @@ func _mugging() -> void:
 					_quest_event("rival_mugged_distinct")
 				effects.snatch_contact(pilot.gull.position,player.velocity,false)
 				Audio.play("snatch",1+score.tier*0.08)
-				player.digestion.collect(pilot.carried_food_id,{"value":value,"upwind":player.upwind,"mugged":true,"mugged_from":pilot.gull.rival_name})
+				player.digestion.collect(pilot.carried_food_id,{"value":value,"upwind":player.upwind,"mugged":true,"mugged_from":pilot.gull.rival_name,"blue":pilot.carried_blue})
 				brash.earn("mug")
 				strike_near_carrier = false
 				_learned("mug_miss")
@@ -1224,6 +1225,7 @@ func _rival_mugging() -> void:
 				var value: int = victim.mug(beak.position,beak.bump_force_on(victim.gull))
 				if value > 0:
 					attacker.carried_food_id = victim.carried_food_id
+					attacker.carried_blue = victim.carried_blue
 					attacker.took_food(value)
 					attacker.mugs += 1
 					effects.shout(beak.position,"MUGGED!",Color("ffc65c"))
@@ -1234,6 +1236,7 @@ func _rival_mugging() -> void:
 			# The food goes into the rival's beak, not onto the sand: take it before the stun can drop it.
 			var taken: Dictionary = player.digestion.drop_current()
 			attacker.carried_food_id = str(taken.id)
+			attacker.carried_blue = bool(taken.get("blue",false))
 			attacker.took_food(int(taken.get("value",Config.foods[taken.id].points)))
 			attacker.mugs += 1
 			var mug_force: float = beak.bump_force_on(player)
