@@ -1,6 +1,6 @@
 # 091 — Level 2: two quests, Gary quest to level 3, clearer start card with a LET'S GULL IT! button
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -59,7 +59,18 @@ Level 2 ("Family Picnic") stops overwhelming players straight after training. Re
 - [ ] **Analytics (after release, not blocking merge):** `level_end` for level 2 (`mode` arcade): share with `outcome` `completed` rises from 2 of 20, and `quit` + `abandoned` falls from 11 of 20, over the next ~20 runs; more players send `level_start` for level 3.
 
 ## Report
-<!-- Filled in by the implementer. -->
+Files: data/levels/level_02.json (bump Gary removed), data/levels/level_03.json (`l3_bump_gary` replaces random_quest; its now-unused random_foods removed), data/tuning.json (`world.intro_time` removed), scripts/overlay.gd (new start card + button), scripts/game.gd (card waits for the button; timer/any-key dismiss only for VS), tests: quest_checks (level 2/3/5 quest pins, new `_start_card_checks` with captures), off_lead_dog_checks, shakedown_checks (3-quest board case now uses level 3), touch_stick_checks (hide the card panel in the synthetic-touch fixture), integration/training_checks (no `intro_time`, button label).
+Tests: before (090 tip) 17745 checks, 0 failures; after 17741 checks, 0 failures (quest-pin checks removed/rewritten, 4 card checks added). One `-Capture` run showed 11 touch_stick_checks failures that passed in the plain run with no code change between (the plain run printed 0 failures); probably capture-mode only, not investigated.
+Captures (worktree, not committed): C:/Users/david/Documents/ChatGPT/GullinIt-main/.claude/worktrees/p1/test-output/level-2-start-card.png and .../level-7-start-card.png. Both fit with no clipping.
+Decisions:
+- Card: "TO PASS:" gold + "SCORE n IN m:ss" side by side, 4 px gap, "BONUS QUESTS - OPTIONAL" gold small, muted quest rows, "QUEST POINTS COUNT TOWARD YOUR SCORE", then the LET'S GULL IT! button (level 1 label changed too). Boss objective line stays above the pass line; Practice shows "15 SNATCHES. NO TIMER." plus the same quest block.
+- Already-passed levels show "PASSED. BEAT YOUR BEST: n" (saved `best`, when saved `stars` > 0).
+- VS keeps its 2 s auto-close and "ANY BUTTON TO GO" (it is not an arcade level). All other levels wait for the button; `intro` is just a nonzero flag (1.0) for them. Panel mouse_filter is STOP so clicks hit the button; main.gd already forwards taps to the GUI while the card is up, so touch works.
+- `world.intro_time` removed (only VS uses `vs.intro_time`). Level 3 random_foods removed (nothing reads it without random_quest); quest_checks' random-quest cases now use level 5.
+- Requirement 5: result board already shows "N MORE TO PASS" in its subtitle on a fail (result_board.gd `_target_text`), so nothing changed.
+- Old saves: quest ids are plain strings in `GameState`; a check starts level 2 with a save containing `l2_bump_gary` and it loads and plays.
+Not done: analytics criteria (post-release); did not touch docs (nothing listed intro_time or level quests).
+Branch sonnet/091-level-2-quests-and-start-card.
 
 ## Review notes
 <!-- Filled in by the reviewer. -->

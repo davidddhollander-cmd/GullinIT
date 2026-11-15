@@ -15,7 +15,7 @@ static func _set_device(input: GullInput, device: String) -> void:
 	input.touch_visible = device == "touch"
 
 static func run(host: Node, check: Callable) -> void:
-	_copy_checks(check)
+	_copy_checks(host,check)
 	await _training_flow(host,check)
 	await _screech_flow(host,check)
 	await _replay_flow(host,check)
@@ -27,7 +27,42 @@ static func run(host: Node, check: Callable) -> void:
 	GameState.options.erase("control_mode")
 	GameState.progress = {}
 
-static func _copy_checks(check: Callable) -> void:
+## Shallow-dive teaching: the steepness helper, the safe angle, and no "straight through" copy in the dive lessons.
+static func _dive_cue_checks(host: Node, check: Callable) -> void:
+	var gull: BeachGull = BeachGull.new()
+	gull.state = BeachGull.State.STRIKE
+	gull.direction = Vector2.from_angle(deg_to_rad(70))
+	check.call(gull.dive_too_steep(),"a 70 degree dive is too steep")
+	gull.direction = Vector2.from_angle(deg_to_rad(25))
+	check.call(not gull.dive_too_steep(),"a 25 degree dive is not too steep")
+	gull.direction = Vector2.from_angle(deg_to_rad(115))
+	check.call(gull.dive_too_steep(),"a steep dive to the left is too steep too")
+	gull.state = BeachGull.State.GLIDE
+	check.call(not gull.dive_too_steep(),"gliding is never too steep")
+	gull.free()
+	# A dive at the safe angle from the lesson's usual height (40 px above the kiosk food) lands without a crash.
+	for drop: float in [58.0,100.0]:
+		var crashed: Array[bool] = [false]
+		var flyer: BeachGull = BeachGull.new()
+		host.add_child(flyer)
+		flyer.ground_crashed.connect(func() -> void: crashed[0] = true)
+		flyer.position = Vector2(300,float(Config.tuning.world.ground) - drop)
+		flyer.direction = Vector2.from_angle(deg_to_rad(float(Config.tuning.dive.safe_angle)))
+		flyer.dive_speed = float(Config.tuning.dive.start_speed)
+		flyer.state = BeachGull.State.STRIKE
+		var elapsed: float = 0.0
+		while flyer.state == BeachGull.State.STRIKE and elapsed < 5.0:
+			flyer.aim = flyer.position + flyer.direction * 50.0
+			flyer.tick(1.0/60.0,0,0.0)
+			elapsed += 1.0/60.0
+		check.call(not crashed[0] and flyer.state != BeachGull.State.STUNNED,"a dive at dive.safe_angle from %d px up does not crash" % int(drop))
+		flyer.queue_free()
+	var lessons: Array = Config.trainer.training.lessons
+	var text: String = JSON.stringify([lessons[BeachGame.DIVE_LESSON],lessons[BeachGame.MUG_LESSON],Config.trainer.live,Config.trainer.tips]).to_lower()
+	check.call(not text.contains("straight through") and not text.contains("climb above"),"dive lesson copy never says straight through or climb above")
+	check.call(Config.trainer.live.has("too_steep"),"trainer copy has the too steep line")
+
+static func _copy_checks(host: Node, check: Callable) -> void:
 	var input: GullInput = GullInput.new()
 	var trainer: Dictionary = Config.trainer
 	_set_device(input,"touch")
@@ -37,6 +72,7 @@ static func _copy_checks(check: Callable) -> void:
 	check.call(TrainerScript.fill("Hit {peck}",input,true).contains(TrainerScript.MARK_ON + "E/mouse 3" + TrainerScript.MARK_OFF) and TrainerScript.fill("Hit {peck}",input) == "Hit E/mouse 3","key names are marked only in highlight mode")
 	check.call(trainer.training.lessons.size() == BeachGame.TRAINING_LESSONS and trainer.screech.lessons.size() == BeachGame.SCREECH_STEPS and trainer.screech.strips.size() == BeachGame.SCREECH_STEPS,"trainer copy covers every lesson and screech step")
 	check.call(Config.trainer.has("counter_tip") and TrainerScript.line(Config.trainer.counter_tip,input).contains("COUNTER"),"trainer copy has the counter tip")
+	_dive_cue_checks(host,check)
 	var worst_card: int = 0
 	var worst_strip: int = 0
 	var worst_banner: int = 0
@@ -129,7 +165,7 @@ static func _aim_pause(host: Node, check: Callable, game: BeachGame) -> void:
 	game.player.dive(0)
 	game._physics_process(1.0/60.0)
 	check.call(game.aim_pause and game.player.state == BeachGull.State.WINDUP,"pressing dive freezes the first dive at the wind-up")
-	check.call(game.training_text().contains("Line up the snack"),"the freeze says how to steer: "+game.training_text())
+	check.call(game.training_text().contains("slant"),"the freeze says how to steer: "+game.training_text())
 	var frozen_at: Vector2 = game.player.position
 	var flat: Vector2 = game.player.direction
 	Input.action_press("aim_down")

@@ -382,7 +382,7 @@ static func _end_checks(host: Node, check: Callable) -> void:
 static func _board_checks(host: Node, check: Callable) -> void:
 	GameState.progress = {"1": {"training_step": 7, "training_complete": true}, "2": {"screech_lesson_complete": true}}
 	var texts: Array = []
-	for setup: Array in [[5,true],[5,false],[2,true]]:
+	for setup: Array in [[5,true],[5,false],[3,true]]:
 		Config.levels[int(setup[0])-1]["player_species"] = BLACKBACK
 		host.main.start_level(int(setup[0]))
 		Config.levels[int(setup[0])-1].erase("player_species")

@@ -5,7 +5,7 @@ static func run(host: Node, check: Callable) -> void:
 	host.main.start_level(1)
 	var game: BeachGame = host.main.game
 	game.set_physics_process(false)
-	game._physics_process(float(Config.tuning.world.intro_time)+1.0)
+	game._physics_process(3.0)
 	check.call(not game.running and game.intro > 0 and not game.input.enabled,"tutorial waits for explicit start without running in background")
 	game.set_paused(true)
 	game.set_paused(false)
@@ -174,6 +174,7 @@ static func run(host: Node, check: Callable) -> void:
 	var dummy: RivalPilot = game.training_dummy()
 	check.call(dummy != null and dummy.dummy and game.pilots.size() == 1 and dummy.dummy_food == BeachGame.DUMMY_FOOD,"the mug lesson spawns one dummy gull holding food")
 	game.player.digestion.tick(30,false) # the earlier snacks are digested: a full belly shows the full-stomach line instead
+	game.player.state = BeachGull.State.GLIDE # still STRIKE (steep) from the dive above, which would show the too-steep line
 	game.overlay._process(0)
 	check.call(game.overlay.lesson_label.text.contains("LESSON %d/%d" % [BeachGame.MUG_LESSON+1,BeachGame.TRAINING_LESSONS]) and game.training_text().contains("against the dummy") and game.training_target() == dummy.gull.position,"mug lesson names the action and rings the dummy")
 	game.player.support = {}

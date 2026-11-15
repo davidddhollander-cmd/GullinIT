@@ -111,6 +111,7 @@
     "uphill_deceleration": 420,
     "uphill_drag": 75,
     "crash_vertical_speed": 170,
+    "safe_angle": 35,
     "hard_landing_speed": 120,
     "warning_risk": 0.7,
     "warning_time": 0.65
@@ -192,7 +193,6 @@
     "depart_thefts": 2,
     "walk_speed": 9,
     "replacement_delay": 2,
-    "intro_time": 2,
     "shield_time": 2,
     "recover_time": 3,
     "suspicious": 0.4,

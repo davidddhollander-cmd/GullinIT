@@ -1,6 +1,6 @@
 # 090 — Training: teach a shallow dive, approach-angle cue, fix the dummy lesson copy
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -44,7 +44,19 @@ More players pass the first dive lesson and finish Training Day. Real players (P
 - [ ] **Analytics (after release, not blocking merge):** over the first ~15 new players who `lesson_start` lesson 5, at least 75% send `lesson_complete` lesson 5 (live: 7 of 11), with median `lesson_crashes` ≤ 1 and `lesson_overshoots` ≤ 2; at least half of training starters send `lesson_complete` lesson 6 (live: 4 of 15).
 
 ## Report
-<!-- Filled in by the implementer. -->
+Files: data/trainer.json (lessons[4] lay/how/strip all four variants, live.aim_freeze, live.dive_nudge, new live.too_steep), data/tuning.json (`dive.safe_angle` 35), scripts/gull.gd (`dive_too_steep()`), scripts/game.gd (`dive_line_shown()`, too-steep strip line), scripts/overlay.gd (dive line in WINDUP/STRIKE for the two dive lessons, coral when too steep; intro says SIX), tests/trainer_checks.gd (new `_dive_cue_checks`), tests/training_checks.gd (one test fixture fix), README.md.
+Tests: baseline main 17737 checks, 0 failures; after 17745 checks, 0 failures (8 new checks).
+Decisions:
+- `lay` for lesson 5 left unchanged (it has no "straight"/"climb" wording); the `how` and `strip` carry the slant teaching. `dive_nudge` also said "Climb above him", reworded to "Come in from the side, then press {dive}".
+- `how` reads "...not straight down. Then tap {peck} as your beak reaches the cone." (the "Then" keeps the existing "tap E" test wording working).
+- Colour priority: coral (too steep) beats gold (lined up), since a steep line-up is the failure to teach. `dive_too_steep()` is angle below horizontal (atan2(y, |x|)) of `direction`, true only in WINDUP/STRIKE.
+- Too-steep strip order: crash, then miss hint, then too_steep, then the normal strip/peck_now (so the miss hint and first-miss text are not hidden).
+- Safe-angle test: a 35 degree dive from 58 px and 100 px above the sand (food is ~18 px up, so 40 px above food) does not crash, so 35 needed no tuning.
+- Test fixture fix: training_checks left the player in STRIKE (steep default direction), which now shows the too-steep line; set it to GLIDE before the mug-lesson text check.
+- Dummy lesson copy: verified no "straight through"/"climb above" remains in lessons[4], [5], live or tips (checked by a new test).
+Switching the cue on for arcade levels: drop the lesson check in `BeachGame.dive_line_shown()` (one line) and the `training_text` lesson condition does not apply (strip is training-only), so only the line would show.
+Not done: analytics criteria (post-release).
+Branch sonnet/090-shallow-dive-training.
 
 ## Review notes
 <!-- Filled in by the reviewer. -->

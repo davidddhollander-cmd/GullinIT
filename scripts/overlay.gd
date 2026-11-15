@@ -226,33 +226,49 @@ func setup(owner_game: BeachGame) -> void:
 		BeachUI.label(intro,"MUG THE DUMMY. NO TIMER.")
 		BeachUI.label(intro,"LEAVE FROM THE PAUSE MENU.",8,Color("80bcb8"))
 	elif game.training:
-		BeachUI.label(intro,"FIVE SHORT LESSONS. TAKE YOUR TIME.")
+		BeachUI.label(intro,"SIX SHORT LESSONS. TAKE YOUR TIME.")
 		BeachUI.label(intro,"NO TIMER. NO SCORE. NO MANNERS.",8,Color("80bcb8"))
 		BeachUI.label(intro,"FOLLOW THE GOLDEN RING.",8,BeachUI.GOLD)
 	else:
-		# Just the pass mark and the quests; controls live in the training day.
+		# Goal first (the pass mark), then the optional quests; controls live in the training day.
 		if game.level.has("objective"):
 			BeachUI.label(intro,str(game.level.objective))
 		var seconds: int = int(game.level.time_limit)
-		BeachUI.label(intro,"15 SNATCHES. NO TIMER." if game.casual else "SCORE %d IN %d:%02d
-TO PASS TO THE NEXT LEVEL" % [int(game.level.stars[0]),seconds/60,seconds%60])
+		if game.casual:
+			BeachUI.label(intro,"15 SNATCHES. NO TIMER.")
+		else:
+			var saved: Dictionary = GameState.entry(int(game.level.id))
+			var best: int = int(saved.get("best",0))
+			var pass_score: int = int(game.level.stars[0])
+			var goal: HBoxContainer = HBoxContainer.new()
+			goal.add_theme_constant_override("separation",8)
+			intro.add_child(goal)
+			if int(saved.get("stars",0)) > 0:
+				BeachUI.label(goal,"PASSED. BEAT YOUR BEST: %d" % best,8,BeachUI.GOLD)
+			else:
+				BeachUI.label(goal,"TO PASS:",8,BeachUI.GOLD)
+				BeachUI.label(goal,"SCORE %d IN %d:%02d" % [pass_score,seconds/60,seconds%60])
 		if not game.quests.quests.is_empty():
+			var gap: Control = Control.new()
+			gap.custom_minimum_size = Vector2(0,4)
+			intro.add_child(gap)
 			# Quests sit in the small HUD font so a long list stays clear of the pass mark.
-			_small(BeachUI.label(intro,"QUESTS",8,BeachUI.GOLD))
+			_small(BeachUI.label(intro,"BONUS QUESTS - OPTIONAL",8,BeachUI.GOLD))
 			for quest: Dictionary in game.quests.quests:
 				_small(BeachUI.label(intro,"- %s  +%d" % [quest.text,int(quest.bonus)],8,Color("80bcb8")))
+			_small(BeachUI.label(intro,"QUEST POINTS COUNT TOWARD YOUR SCORE",8,Color("80bcb8")))
 	trainer_intro = BeachGame.trainer_cards and game.training
 	if trainer_intro:
 		intro_panel.hide()
-	elif int(game.level.id) == 1:
+	elif game.is_vs():
+		var go: Label = BeachUI.label(intro,"ANY BUTTON TO GO",8,BeachUI.GOLD)
+		go.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	else:
+		# A real button: the card waits for it, and the press never reaches the gull.
 		intro_panel.mouse_filter = MOUSE_FILTER_STOP
-		start_button = BeachUI.button(intro,"LET'S GULL IT",game.dismiss_intro)
+		start_button = BeachUI.button(intro,"LET'S GULL IT!",game.dismiss_intro)
 		start_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		start_button.grab_focus()
-	else:
-		var go: Label = BeachUI.label(intro,"ANY BUTTON TO GO",8,BeachUI.GOLD)
-		if game.is_vs():
-			go.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	# Last child, so the pop-up draws over everything. Its button is the Training Day start button.
 	trainer_card = TrainerCard.new()
 	add_child(trainer_card)
@@ -341,7 +357,7 @@ func _draw_aim_line(offset: Vector2) -> void:
 	var direction: Vector2 = game.player.direction
 	var ground: float = float(Config.tuning.world.ground)
 	var length: float = (ground - from.y) / direction.y if direction.y > 0.05 else AIM_LINE_LENGTH
-	var color: Color = BeachUI.GOLD if game.aim_lines_up() else BeachUI.CREAM
+	var color: Color = BeachUI.CORAL if game.player.dive_too_steep() else (BeachUI.GOLD if game.aim_lines_up() else BeachUI.CREAM)
 	draw_dashed_line(from,from + direction * minf(length,AIM_LINE_LENGTH),color,1.0,4.0)
 
 # Rival shout-out: head cropped from the rival's own sprite sheet (shouting frame) beside a line of speech.
@@ -708,7 +724,7 @@ func _draw() -> void:
 		_draw_peck_prompt(offset)
 	if game.counter_tip:
 		_draw_counter_tip(offset)
-	if game.aim_pause:
+	if game.aim_pause or game.dive_line_shown():
 		_draw_aim_line(offset)
 	var aim: Vector2 = game.player.aim-offset
 	if game.running:

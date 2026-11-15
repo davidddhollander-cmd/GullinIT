@@ -215,7 +215,7 @@ func _aim_with_touch(gull: BeachGull) -> void:
 	else:
 		_aim_with_stick(gull,touch_vec)
 		_assist_aim(gull)
-		if gull.state == BeachGull.State.GLIDE and touch_vec.y > 0.0:
+		if GameState.assist() and gull.state == BeachGull.State.GLIDE and touch_vec.y > 0.0:
 			_bend_toward_target(gull,float(Config.tuning.touch.approach_assist_strength)) ## approach assist while gliding down
 
 # Shared by the gamepad stick and the touch stick.
@@ -231,10 +231,10 @@ func _aim_without_stick(gull: BeachGull) -> void:
 		var heading: Vector2 = gull.velocity.normalized() if gull.velocity.length() > 1 else Vector2(gull.facing,0)
 		gull.aim = gull.position + heading * float(Config.tuning.flight.cursor_radius)
 
-## Touch only: at dive start and through the swoop, bend the aim toward the snack
+## Touch only, and only while ASSIST is on: at dive start and through the swoop, bend the aim toward the snack
 ## nearest the aimed direction, if one lies inside the assist cone.
 func _assist_aim(gull: BeachGull) -> void:
-	if not (gull.state in [BeachGull.State.WINDUP,BeachGull.State.STRIKE] or (gull.state == BeachGull.State.GLIDE and touch_dive)):
+	if not GameState.assist() or not (gull.state in [BeachGull.State.WINDUP,BeachGull.State.STRIKE] or (gull.state == BeachGull.State.GLIDE and touch_dive)):
 		return
 	_bend_toward_target(gull,float(Config.tuning.touch.assist_strength))
 

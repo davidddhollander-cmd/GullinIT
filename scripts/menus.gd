@@ -446,7 +446,7 @@ func _vs_scores(parent: Control, arena: ButtonGroup, opponent: ButtonGroup) -> C
 			fill.call(rows))
 
 const VS_SCORE_ROWS: int = 5
-const CONTROL_MODE_TEXT: Array[String] = ["TAP EVERY WINGBEAT","HOLD TO FLAP","AUTO PECK IN DIVES"]
+const CONTROL_MODE_TEXT: Array[String] = ["REALISTIC: TAP EVERY WINGBEAT","NORMAL: HOLD TO FLAP","EASY: AUTO PECK IN DIVES"] ## display only; the saved ids stay realistic / normal / casual
 const SMALL_FONT: Font = preload("res://assets/fonts/gull_hud.fnt")
 
 # REALISTIC . NORMAL . CASUAL slider under the cards: a 6 px heading, then the slider with its mode beside it. Every change saves at once.
@@ -464,7 +464,7 @@ func _control_mode_slider(parent: Control) -> void:
 	slider.ticks_on_borders = true
 	slider.custom_minimum_size = Vector2(90,7)
 	slider.value = GameState.CONTROL_MODES.find(GameState.control_mode())
-	slider.tooltip_text = "REALISTIC / NORMAL / CASUAL"
+	slider.tooltip_text = "REALISTIC / NORMAL / EASY"
 	# The stock 16 px grabber would grow the row and squash the gull cards.
 	var knob: Image = Image.create(5,7,false,Image.FORMAT_RGBA8)
 	knob.fill(BeachUI.GOLD)
@@ -481,7 +481,7 @@ func _control_mode_slider(parent: Control) -> void:
 	detail.custom_minimum_size.x = 110
 	var refresh: Callable = func() -> void:
 		var at: int = int(slider.value)
-		detail.text = "%s: %s" % [GameState.CONTROL_MODES[at].to_upper(),CONTROL_MODE_TEXT[at]]
+		detail.text = CONTROL_MODE_TEXT[at]
 	slider.value_changed.connect(func(value: float) -> void:
 		GameState.set_control_mode(GameState.CONTROL_MODES[int(value)])
 		refresh.call())
@@ -786,6 +786,11 @@ func options(from_pause: bool) -> void:
 	steer.custom_minimum_size.y = 12
 	steer_row.add_child(steer)
 	steer.value_changed.connect(func(value: float) -> void: GameState.options["dive_steer"] = value)
+	var assist_button: Button = BeachUI.button(steer_row,"ASSIST: "+("ON" if GameState.assist() else "OFF"),func() -> void:
+		GameState.set_assist(not GameState.assist())
+		options(from_pause))
+	assist_button.name = "AssistButton"
+	assist_button.tooltip_text = "AUTO PECK AND AIM ASSIST IN DIVES"
 	var toggles: HBoxContainer = HBoxContainer.new()
 	content.add_child(toggles)
 	for key: String in ["shake","touch","stats"]:

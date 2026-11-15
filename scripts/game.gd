@@ -307,7 +307,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	overlay = BeachOverlay.new()
 	canvas.add_child(overlay)
 	overlay.setup(self)
-	intro = float(Config.vs.intro_time) if is_vs() else Config.tuning.world.intro_time
+	intro = float(Config.vs.intro_time) if is_vs() else 1.0 # any value above 0: the start card waits for its button
 	intro_dismissed_elapsed = -1.0
 	if overlay.trainer_card != null:
 		overlay.trainer_card.dismissed.connect(_on_trainer_dismissed)
@@ -577,7 +577,7 @@ func _physics_process(delta: float) -> void:
 	if aim_pause:
 		_aim_pause_tick()
 		return
-	if intro > 0 and int(level.id) != 1:
+	if intro > 0 and is_vs():
 		intro -= delta
 		if intro <= 0:
 			dismiss_intro()
@@ -738,8 +738,11 @@ func track_hidden() -> void:
 func _vs_stats() -> Dictionary:
 	return {"arena": str(level.id), "opponent": str(level.vs.opponent)} if is_vs() else {}
 
+func _assist_stats() -> Dictionary:
+	return {"control_mode": GameState.control_mode(), "assist": GameState.assist(), "dive_steer": snappedf(GameState.dive_steer(), 0.01)}
+
 func _run_stats() -> Dictionary:
-	var stats: Dictionary = {"level": int(level.id), "mode": mode_name(), "mouse_role": GameState.mouse_role(), "seconds": snappedf(elapsed, 0.1), "play_seconds": snappedf(play_clock, 0.1), "crashes": crashes, "lesson": mini(lesson + 1, TRAINING_LESSONS) if training else 0}.merged(dive_stats)
+	var stats: Dictionary = _assist_stats().merged({"level": int(level.id), "mode": mode_name(), "mouse_role": GameState.mouse_role(), "seconds": snappedf(elapsed, 0.1), "play_seconds": snappedf(play_clock, 0.1), "crashes": crashes, "lesson": mini(lesson + 1, TRAINING_LESSONS) if training else 0}).merged(dive_stats)
 	return stats.merged(_lesson_stats()) if training else stats
 
 func _lesson_stats() -> Dictionary:
@@ -769,7 +772,7 @@ func _dive_tick() -> void:
 func dismiss_intro() -> void:
 	_begin_lesson_stats()
 	play_clock = 0.0
-	track("level_start", {"level": int(level.id), "mode": mode_name(), "mouse_role": GameState.mouse_role()}.merged(_vs_stats()))
+	track("level_start", {"level": int(level.id), "mode": mode_name(), "mouse_role": GameState.mouse_role()}.merged(_assist_stats()).merged(_vs_stats()))
 	if training:
 		track("lesson_start", {"lesson": lesson + 1})
 	intro = 0.0
@@ -816,7 +819,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_end_aim_pause()
 		return
 	if intro > 0:
-		if int(level.id) != 1 and event.is_pressed() and not event is InputEventMouseMotion:
+		if is_vs() and event.is_pressed() and not event is InputEventMouseMotion:
 			dismiss_intro()
 			get_viewport().set_input_as_handled()
 		return
@@ -1479,6 +1482,10 @@ func _end_aim_pause() -> void:
 	input.touch_dive = false
 	_freeze_actors(false)
 
+## The dive lessons draw the dive line for the whole wind-up and strike (ponytail: arcade levels would just drop the lesson check).
+func dive_line_shown() -> bool:
+	return training and (lesson == DIVE_LESSON or lesson == MUG_LESSON) and player.state in [BeachGull.State.WINDUP,BeachGull.State.STRIKE]
+
 ## True when the frozen dive's line reaches the snack, so the overlay can turn it gold.
 func aim_lines_up() -> bool:
 	var snack: Vector2 = training_target()
@@ -1629,6 +1636,8 @@ func training_text() -> String:
 		return TrainerScript.line(live.crash, input)
 	if training_miss_hint > 0.0:
 		return TrainerScript.line(live[training_miss_line], input)
+	if (lesson == DIVE_LESSON or lesson == MUG_LESSON) and player.dive_too_steep():
+		return TrainerScript.line(live.too_steep, input)
 	if lesson >= TRAINING_LESSONS:
 		return TrainerScript.line(live.practice, input)
 	var data: Dictionary = Config.trainer.training.lessons[mini(lesson, TRAINING_LESSONS-1)]
