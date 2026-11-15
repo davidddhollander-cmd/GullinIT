@@ -1,6 +1,6 @@
 # 093 Lesson 3 peck freeze
 
-Status: done
+Status: merged
 Assignee: Claude Sonnet
 
 ## Goal
