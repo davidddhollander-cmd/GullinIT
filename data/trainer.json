@@ -110,13 +110,13 @@
   "training": {
     "opening": {
       "mood": "neutral",
-      "text": "Welcome to the beach, young gullster.\nIf you want to survive 'n thrive, you got to learn quick. Follow the **golden ring**.\n\nMight make a fine thief out of you yet.",
+      "text": "Welcome to the beach, gullster. Learn quick and nick everything.\n\nFollow the **golden ring**.",
       "button": "Let's gull it"
     },
     "closing": {
       "mood": "proud",
-      "text": "Not bad, gullster. Not bad at all. You can swoop, raid bins, bump rivals and mug them blind. Now get out there and fleece that beach.",
-      "first_time_text": "Not bad, gullster. Not bad at all.\n\nYou can swoop, raid bins, bump rivals and mug them blind. Here's a feather for your trouble.\n\nNow get out there and fleece that beach.",
+      "text": "Not bad, gullster. You can swoop, raid bins and mug rivals blind.\n\nNow go fleece that beach.",
+      "first_time_text": "Not bad, gullster. You can swoop, raid bins and mug rivals blind.\n\nHere's a feather for your trouble.",
       "button": "Progress to next level",
       "button_alt": "Keep practicing",
       "delay": 3.0
@@ -167,7 +167,7 @@
       },
       {
         "mood": "amused",
-        "lay": "Now let's try something as easy as stealing candy from a baby...",
+        "lay": "Easy as stealing candy from a baby...",
         "how": {
           "default": "Walk up to the toddler, face his ice cream and tap {peck_alt}.",
           "touch": "Walk up to the toddler, face his ice cream and tap {peck_alt}."
@@ -179,18 +179,18 @@
       },
       {
         "mood": "neutral",
-        "lay": "Bins are a proper buffet. Let's go have a look what's in the next one...",
-        "how": "Land beside the bin and tap {peck} {n} times.",
+        "lay": "Bins are a proper buffet.",
+        "how": "Land by the bin and tap {peck} {n} times.",
         "strip": "Land by the bin and tap {peck} {n} times"
       },
       {
         "mood": "amused",
-        "lay": "Now let's get you a proper challenge.\nSee the fella with the ice cream? That's yours. Timing is everything...",
+        "lay": "See the fella with the ice cream? That's yours.",
         "how": {
-          "default": "Fly in from the side, a little above him. Press {dive} and aim at a shallow slant, not straight down. Then tap {peck} as your beak reaches the cone.",
-          "casual": "Fly in from the side, a little above him. Press {dive} and aim at a shallow slant, not straight down. Casual mode does the pecking, so just fly your beak into the cone. Then aim up.",
-          "touch": "Fly in from the side, a little above him. Tap DIVE and aim at a shallow slant, not straight down. Then tap {peck} as your beak reaches the cone.",
-          "touch_casual": "Fly in from the side, a little above him. Tap DIVE and aim at a shallow slant, not straight down. Casual mode does the pecking, so just fly your beak into the cone. Then aim up."
+          "default": "Come in from the side, a bit above him. Press {dive}, aim at a shallow slant, then tap {peck} at the cone.",
+          "casual": "Come in from the side, a bit above him. Press {dive} and aim at a shallow slant. Easy mode pecks for you.",
+          "touch": "Come in from the side, a bit above him. Tap DIVE, aim at a shallow slant, then tap {peck} at the cone.",
+          "touch_casual": "Come in from the side, a bit above him. Tap DIVE and aim at a shallow slant. Easy mode pecks for you."
         },
         "strip": {
           "default": "Dive at a slant, not straight down, then tap {peck}",
@@ -201,10 +201,10 @@
       },
       {
         "mood": "amused",
-        "lay": "Time to meet the competition. This dummy is a rival gull, and he's nicked a snack. Mugging is one of the best steals in the game. Careful though: they can mug you too.",
+        "lay": "Meet the competition. This dummy's nicked a snack. Mug him, but watch out: rivals mug back.",
         "how": {
-          "default": "Fly up and dive ({dive}) against the rival. The snack changes beaks. If a rival doesn't have a snack, you can still hit him...",
-          "touch": "Fly up and tap DIVE against the rival. The snack changes beaks. If a rival doesn't have a snack, you can still hit him..."
+          "default": "Fly up and dive ({dive}) into the rival to steal his snack.",
+          "touch": "Fly up and tap DIVE into the rival to steal his snack."
         },
         "strip": {
           "default": "Fly up and dive against the dummy",
@@ -214,41 +214,40 @@
     ]
   },
   "screech": {
-    "closing": {
-      "mood": "proud",
-      "text": "That's the Gang Call, gullster. Fill the Brash meter, call the gang, nick the lot.\n\nAnything you grabbed in training doesn't count, so make the real ones count. The clock starts now.",
-      "button": "Let's go!"
-    },
     "strips": [
-      {
-        "default": "Land on the ice cream sign",
-        "realistic": "Land on the ice cream sign, stop tapping {flap}",
-        "touch": "Land on the ice cream sign"
-      },
       "Hold {peck} to screech. Higher is louder",
       "Brash is full! Screech again or press {call}"
     ],
     "lessons": [
       {
-        "mood": "neutral",
-        "lay": "Level two, gullster, and a new trick. A screech is a gull's best weapon, and it's louder from up high. That ice cream stand has a sign on its roof, and that's your stage.",
+        "mood": "amused",
+        "lay": {
+          "default": "Level two, new trick. Every gull has a special, and yours is the GANG CALL. Screech to fill your Brash meter up top. Snatches, mugs and bumps fill it too. Get stunned and it drains.",
+          "great-black-backed": "Level two, new trick. Every gull has a special, and yours is the SHAKEDOWN. Screech to fill your Brash meter up top. Bumps and mugs fill it fast. Get stunned and it drains.",
+          "kittiwake": "Level two, new trick. Every gull has a special, and yours is the LIGHTNING STRIKE. Screech to fill your Brash meter up top. Snatches fill it too. Get stunned and it drains."
+        },
+        "how": "Hold {peck} to screech until Brash says READY."
+      },
+      {
+        "mood": "amused",
+        "lay": {
+          "default": "Now call the cavalry and watch them run!",
+          "great-black-backed": "Now shake 'em down. Nobody stuns you for a bit.",
+          "kittiwake": "Now strike like lightning."
+        },
         "how": {
-          "default": "Fly above the ice cream sign, let go of {flap} and drop onto it.",
-          "realistic": "Fly above the ice cream sign, stop tapping {flap} and drop onto it.",
-          "touch": "Fly above the ice cream sign, stop pushing FLY up and drop onto it."
+          "default": "Screech again, or press {call}, to call the gang.",
+          "great-black-backed": "Screech again, or press {call}, to start the Shakedown.",
+          "kittiwake": "Screech again, or press {call}, to strike."
         }
-      },
-      {
-        "mood": "amused",
-        "lay": "Screeching builds your Brash meter, the bar at the top of the screen. Bold moves fill it too: snatches, mugs and bumps. Get stunned and it drains, so stay cocky. The higher the perch, the faster it fills.",
-        "how": "Hold {peck} to screech until the meter is full and says READY."
-      },
-      {
-        "mood": "amused",
-        "lay": "Now for the best trick in the book: call the cavalry and see them runnin for cover!!",
-        "how": "Screech again, or press {call}, to call the gang."
       }
-    ]
+    ],
+    "outro_time": 5.0,
+    "outro": {
+      "default": "That's the Gang Call! Training grabs don't count. Clock's on!",
+      "great-black-backed": "That's the Shakedown! Training grabs don't count. Clock's on!",
+      "kittiwake": "That's the Lightning Strike! Training grabs don't count. Clock's on!"
+    }
   },
   "counter_tip": {
     "default": "FOOD ON THE COUNTER!\nDIVE, THEN PECK IT",

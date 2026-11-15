@@ -513,7 +513,7 @@ func _process(delta: float) -> void:
 	wind_label.text = "CALM" if absf(game.player.wind_force) < 0.01 else "%s %d%%" % ["WIND >" if game.player.wind_force > 0 else "< WIND",roundi(absf(game.player.wind_force)*100)]
 	intro_panel.visible = game.intro > 0 and not trainer_intro
 	# The frozen prompt sits high above the gull; the lesson strip and quest row would cover it.
-	training_panel.visible = game.lesson_active() and game.running and game.intro <= 0 and not game.trainer_open and not game.peck_pause and not ((game.banner_delay > 0.0 or game.training_card_pending()) and game.training_miss_hint <= 0.0)
+	training_panel.visible = game.lesson_active() and not game.screech_landing and game.running and game.intro <= 0 and not game.trainer_open and not game.peck_pause and not ((game.banner_delay > 0.0 or game.training_card_pending()) and game.training_miss_hint <= 0.0)
 	if game.training:
 		lesson_label.text = "PRACTICE" if game.lesson >= BeachGame.TRAINING_LESSONS else "LESSON %d/%d" % [game.lesson + 1, BeachGame.TRAINING_LESSONS]
 		_set_lesson_prompt(game.training_text)
@@ -522,6 +522,10 @@ func _process(delta: float) -> void:
 	elif game.screech_lesson:
 		lesson_label.text = "LESSON %d/%d" % [mini(game.screech_step + 1, BeachGame.SCREECH_STEPS), BeachGame.SCREECH_STEPS]
 		_set_lesson_prompt(game.screech_lesson_text)
+	elif game.screech_outro > 0.0:
+		lesson_label.text = "LESSON DONE"
+		_set_lesson_prompt(game.screech_lesson_text)
+		_sync_trainer()
 	pause_button.visible = game.running
 	sync_quests()
 	if rival_score_labels.size() != game.pilots.size():
@@ -703,7 +707,7 @@ func _draw_brash() -> void:
 		for i: int in int(brash.meter):
 			draw_rect(Rect2(METER_RECT.position.x+i*5,METER_RECT.end.y+1,4,3),BeachUI.GOLD)
 	# Lesson steps 2 and 3 point at the bar: a pulsing gold outline.
-	if game.screech_lesson and game.screech_step in [1,2] and int(Time.get_ticks_msec()/300)%2 == 0:
+	if game.screech_lesson and not game.screech_landing and game.screech_step in [0,1] and int(Time.get_ticks_msec()/300)%2 == 0:
 		draw_rect(METER_RECT.grow(2),BeachUI.GOLD,false,1.0)
 
 ## Points bar right of the timer, styled like the brash meter: fills toward the pass mark,
