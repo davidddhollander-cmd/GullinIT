@@ -47,14 +47,19 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	var perch: Dictionary = game.lesson_perch()
 	check.call(not perch.is_empty() and absf(float(perch.x) - 240.0) < 40.0, "the lesson perch is the near ice-cream stand roof sign")
 	var ring: Vector2 = game.screech_lesson_target()
-	check.call(absf(ring.x - float(perch.x)) < 2.0 and ring.y > 40.0 and ring.y < 130.0, "step 1 rings the stand's roof sign")
+	check.call(absf(ring.x - float(perch.x)) < 2.0 and ring.y > 40.0 and ring.y < 130.0, "the fly-in rings the stand's roof sign")
+	# The lesson opens with the gull flying in from off screen, in the air, ignoring input.
+	var gull: BeachGull = game.player
+	check.call(game.screech_landing and gull.state == BeachGull.State.GLIDE and gull.position.x < 0.0, "the gull starts the lesson in the air, off the left edge")
+	game.input.flap_tap = true
+	game.input.touch_dive = true
+	game._physics_process(1.0 / 60)
+	game.overlay._process(0.0)
+	check.call(game.screech_landing and not game.overlay.training_panel.visible and gull.state == BeachGull.State.GLIDE and gull.position.x > -24.0 and not game.input.touch_dive, "input is ignored and the lesson strip waits during the fly-in")
+	await host.snapshot("level2-start-fly-in")
 	# Keys switch with the input device.
 	game.input.gamepad = false
 	game.input.touch_visible = false
-	check.call(game.screech_lesson_text().contains("sign"), "step 1 asks for the roof sign: " + game.screech_lesson_text())
-	game.overlay._process(0.0)
-	game.overlay.queue_redraw()
-	await host.snapshot("level2-start-lesson-1")
 	var holding: int = 0
 	for target: BeachTarget in game.spawner.targets:
 		if target.kind == "kiosk_customer" and target.food and target.position.x < 400.0:
@@ -64,15 +69,13 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	for frame: int in 30:
 		game._physics_process(1.0 / 60)
 	check.call(is_zero_approx(game.elapsed) and game.screech_step == 0, "level timer is paused during the lesson")
-	# Step 1: perch.
-	var gull: BeachGull = game.player
-	gull.support = perch
-	gull.state = BeachGull.State.GROUNDED
-	gull.velocity = Vector2.ZERO
-	gull.position = Vector2(float(perch.x), BeachGull.perch_y(perch, float(perch.x)) - float(Config.tuning.flight.feet_offset))
-	game._screech_lesson_tick(0.016)
-	check.call(game.screech_step == 1, "landing on the stand's sign finishes step 1")
-	check.call(is_equal_approx(game.brash.meter, float(game.screech_settings().start_meter)), "step 2 starts the meter at the data-driven fill")
+	# With no input at all the gull lands on the sign by itself.
+	var frames: int = 0
+	while game.screech_landing and frames < 400:
+		game._physics_process(1.0 / 60)
+		frames += 1
+	check.call(not game.screech_landing and frames < 300 and game.player.is_supported_by("kiosk", float(perch.x)) and game.screech_step == 0, "the gull glides in and lands on the sign without input")
+	check.call(is_equal_approx(game.brash.meter, float(game.screech_settings().start_meter)), "the screech step starts the meter at the data-driven fill")
 	game.camera_x = 240.0
 	game.camera.position.x = 240.0
 	game.beach.camera_x = 240.0
@@ -80,12 +83,12 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	game.overlay.queue_redraw()
 	await host.snapshot("level2-lesson-2-screech")
 	game.input.gamepad = false
-	check.call(game.screech_lesson_text().contains("Hold E/middle click to screech") and game.screech_lesson_text().contains("Higher"), "step 2 names the keyboard peck key")
+	check.call(game.screech_lesson_text().contains("Hold E/middle click to screech") and game.screech_lesson_text().contains("Higher"), "step 1 names the keyboard peck key")
 	game.input.gamepad = true
-	check.call(game.screech_lesson_text().contains("Hold X "), "step 2 names the gamepad peck button")
+	check.call(game.screech_lesson_text().contains("Hold X "), "step 1 names the gamepad peck button")
 	game.input.gamepad = false
 	game.input.touch_visible = true
-	check.call(game.screech_lesson_text().contains("Hold PECK "), "step 2 names the touch PECK button")
+	check.call(game.screech_lesson_text().contains("Hold PECK "), "step 1 names the touch PECK button")
 	game.input.touch_visible = false
 	# Screeching from the perch really fills it (a high perch, so quickly).
 	game.peck_hold_pending = true
@@ -99,11 +102,11 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	game.peck_hold_pending = false
 	game.brash.meter = 1.0
 	game._screech_lesson_tick(0.016)
-	check.call(game.screech_step == 2, "a full meter finishes step 2")
+	check.call(game.screech_step == 1, "a full meter finishes the screech step")
 	game.input.gamepad = false
-	check.call(game.screech_lesson_text().contains("press Q"), "step 3 mentions Q and the gang")
+	check.call(game.screech_lesson_text().contains("press Q"), "step 2 mentions Q and the gang")
 	game.input.touch_visible = true
-	check.call(game.screech_lesson_text().contains("CALL"), "step 3 mentions the touch CALL button")
+	check.call(game.screech_lesson_text().contains("CALL"), "step 2 mentions the touch CALL button")
 	game.input.touch_visible = false
 	# Someone is holding food in range when the gang is called.
 	game.camera_x = gull.position.x
@@ -127,9 +130,15 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	check.call(not game.screech_lesson and not game.lesson_active(), "a saved lesson is skipped on replay")
 	host.main.clear_game()
 	await host.settle()
-	# Another species never gets the herring lesson.
-	game = _fresh_level_2(host, false, "kittiwake")
-	check.call(game.player.species == "kittiwake" and not game.screech_lesson, "non-herring species skip the lesson")
+	# Every species with a power gets the lesson, worded for its own special.
+	for pair: Array in [["herring", "GANG CALL"], ["great-black-backed", "SHAKEDOWN"], ["kittiwake", "LIGHTNING STRIKE"]]:
+		game = _fresh_level_2(host, false, str(pair[0]))
+		check.call(game.screech_lesson and game.screech_landing and game._trainer_entry("screech", 0).lay.contains(str(pair[1])), "the %s lesson names its special" % pair[0])
+		host.main.clear_game()
+		await host.settle()
+	# A gull without a power has nothing to learn.
+	game = _fresh_level_2(host, false, "no_power_gull")
+	check.call(not game.screech_lesson, "a gull without a power skips the lesson")
 	host.main.clear_game()
 	await host.settle()
 	# Skipping is saved.

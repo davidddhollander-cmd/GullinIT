@@ -8,8 +8,13 @@ static func device(input: GullInput) -> String:
 		return "touch"
 	return "gamepad" if input.gamepad else "keyboard"
 
+## The player's gull species; a copy dictionary may carry a per-species variant (e.g. "kittiwake") ahead of its default.
+static var species: String = ""
+
 static func pick(value: Variant) -> String:
 	if value is Dictionary:
+		if value.has(species):
+			return str(value[species])
 		return str(value.get(GameState.control_mode(),value.get("default","")))
 	return str(value)
 

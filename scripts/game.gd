@@ -123,10 +123,14 @@ var last_nope_ms: int = -100000
 var brash: BeachBrash = BeachBrash.new()
 var squall: BeachSquall ## level 6 weather twist
 var peck_hold_touch: bool = false
-# Level 2's first-play herring lesson: perch, screech, Gang Call, grab. The level clock is paused meanwhile.
+# Level 2's first-play herring lesson: fly in to the sign, screech, Gang Call, grab. The level clock is paused meanwhile.
 var screech_lesson: bool = false
 var screech_step: int = 0
-const SCREECH_STEPS: int = 3
+const SCREECH_STEPS: int = 2
+const SCREECH_FLY_TIME: float = 3.0 ## the scripted fly-in always lands on the sign after this long
+var screech_landing: bool = false ## level 2's opening fly-in: the gull glides onto the sign by itself, input ignored
+var screech_fly_age: float = 0.0
+var screech_outro: float = 0.0 ## seconds left of Screeches' live banner after the lesson; the level clock is already running
 # The counter tip: the first serving a player sees on a counter freezes the beach once, rings the food and names the dive key.
 var counter_tip: bool = false
 var counter_tip_pos: Vector2 = Vector2.ZERO
@@ -231,9 +235,11 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	player.position = Vector2(Config.tuning.world.start_x,Config.tuning.world.start_y)
 	brash.game = self
 	add_child(brash)
-	screech_lesson = level.has("screech_lesson") and not training and player.species == "herring" and (force_lesson or not bool(GameState.entry(int(level.id)).get("screech_lesson_complete",false)))
+	TrainerScript.species = player.species
+	screech_lesson = level.has("screech_lesson") and not training and not player.species_stats().get("power",{}).is_empty() and (force_lesson or not bool(GameState.entry(int(level.id)).get("screech_lesson_complete",false)))
 	player.setup_perches(level.props)
 	player.add_sign_perches(beach.sign_layouts())
+	_screech_fly_setup()
 	_wire_sand(player)
 	player.gull_stunned.connect(_stunned)
 	player.ground_crashed.connect(_crashed)
@@ -601,14 +607,23 @@ func _physics_process(delta: float) -> void:
 	var step: float = delta * (float(Config.tuning.juice.slow_scale) if effects.slow > 0 else 1.0)
 	spawner.reset_spacing()
 	play_clock += step
+	if screech_outro > 0.0:
+		screech_outro = maxf(0.0,screech_outro-step)
+		banner_cue = maxf(0.0,banner_cue-step)
 	if not screech_lesson:
 		elapsed += step
 	wind.tick(step)
 	if squall != null:
 		squall.tick(step)
 	score.tick(step)
-	input.update_player(player,camera_x,camera_y)
-	_advance_screech_hold(step)
+	if screech_landing:
+		input.touch_dive = false
+		input.touch_peck = false
+		input.touch_slowmo = false
+		input.flap_tap = false
+	else:
+		input.update_player(player,camera_x,camera_y)
+		_advance_screech_hold(step)
 	if input.touch_dive:
 		input.touch_dive = false
 		if not training_card_pending():
@@ -626,7 +641,10 @@ func _physics_process(delta: float) -> void:
 	if input.touch_slowmo:
 		input.touch_slowmo = false
 		start_slowmo()
-	player.tick(step,wind.direction,wind.strength)
+	if screech_landing:
+		_screech_fly_step(step)
+	else:
+		player.tick(step,wind.direction,wind.strength)
 	brash.tick(step)
 	if perk_id != "bullet_time":
 		input.slowmo_ready = brash.is_full()
@@ -797,8 +815,6 @@ func _open_intro_cards() -> void:
 			_cue_banner()
 		else:
 			open_trainer(_trainer_entry("training", lesson))
-	elif trainer_cards and screech_lesson:
-		open_trainer(_trainer_entry("screech", 0))
 
 ## True while a Training Day card is queued behind a lesson toast. Dive and peck wait for the card, so the player cannot start
 ## (or finish) the lesson it is about to explain, and the aim and peck freezes never fire ahead of the card.
@@ -806,7 +822,7 @@ func training_card_pending() -> bool:
 	return training and not trainer_queue.is_empty()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if trainer_open:
+	if trainer_open or screech_landing:
 		return
 	if training_card_pending() and (event.is_action_pressed("dive") or event.is_action_pressed("peck")):
 		return
@@ -1391,7 +1407,7 @@ func banner_lesson(index: int) -> bool:
 	return trainer_cards and training and index < TRAINING_LESSONS and bool(Config.trainer.get("live_banners", true)) and Config.trainer.training.lessons[index].has("banner")
 
 func banner_active() -> bool:
-	return banner_lesson(lesson) and banner_delay <= 0.0 and not trainer_open and trainer_queue.is_empty()
+	return screech_outro > 0.0 or banner_lesson(lesson) and banner_delay <= 0.0 and not trainer_open and trainer_queue.is_empty()
 
 func _cue_banner() -> void:
 	banner_cue = BANNER_CUE_TIME
@@ -1716,7 +1732,7 @@ func training_target() -> Vector2:
 # --- Level 2 screech lesson (first herring play) -------------------------------------------
 
 func lesson_active() -> bool:
-	return training or screech_lesson
+	return training or screech_lesson or screech_outro > 0.0
 
 func screech_settings() -> Dictionary:
 	return level.get("screech_lesson",{})
@@ -1729,26 +1745,68 @@ func lesson_perch() -> Dictionary:
 			best = surface
 	return best
 
+## The lesson opens with the gull off the left edge, high above the sign. It is flown there on a scripted glide (no input).
+func _screech_fly_setup() -> void:
+	var perch: Dictionary = lesson_perch()
+	if not screech_lesson or perch.is_empty():
+		return
+	screech_landing = true
+	screech_fly_age = 0.0
+	player.state = BeachGull.State.GLIDE
+	player.position = _screech_fly_point(0.0)
+
+func _screech_perch_point() -> Vector2:
+	var perch: Dictionary = lesson_perch()
+	return Vector2(float(perch.x),BeachGull.perch_y(perch,float(perch.x))-float(Config.tuning.flight.feet_offset))
+
+## Glide path: eases out horizontally and vertically, so the gull settles onto the sign.
+func _screech_fly_point(t: float) -> Vector2:
+	var end: Vector2 = _screech_perch_point()
+	var e: float = 1.0-pow(1.0-clampf(t,0.0,1.0),2.0)
+	return Vector2(-24.0,end.y-60.0).lerp(end,e)
+
+func _screech_fly_step(step: float) -> void:
+	screech_fly_age += step
+	var t: float = screech_fly_age/SCREECH_FLY_TIME
+	if t >= 1.0:
+		_screech_land(trainer_cards)
+		return
+	var before: Vector2 = player.position
+	player.position = _screech_fly_point(t)
+	player.velocity = (player.position-before)/maxf(step,0.0001)
+	player.facing = 1.0
+	player.sprite.play(&"glide")
+
+## Seat the gull on the sign (also the skip/timeout path), set the Brash start fill and open the first card.
+func _screech_land(open_card: bool) -> void:
+	screech_landing = false
+	player.support = lesson_perch()
+	player.position = _screech_perch_point()
+	player.velocity = Vector2(0,30)
+	player.land()
+	brash.meter = maxf(brash.meter,float(screech_settings().get("start_meter",0.6)))
+	if open_card:
+		open_trainer(_trainer_entry("screech", 0))
+
 func _screech_advance() -> void:
 	screech_step += 1
 	track("lesson_complete", {"lesson": 100+screech_step, "seconds": snappedf(elapsed, 0.1)})
-	if screech_step == 1:
-		brash.meter = maxf(brash.meter,float(screech_settings().get("start_meter",0.6)))
 	if screech_step >= SCREECH_STEPS:
+		end_screech_lesson(true)
 		if trainer_cards:
-			var closing: Dictionary = Config.trainer.screech.closing
-			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing.text, input, true), "lay_source": "screech.closing.text", "lay_template": closing.text, "button": closing.button}, end_screech_lesson.bind(true))
-		else:
-			end_screech_lesson(true)
+			screech_outro = float(Config.trainer.screech.outro_time)
+			_cue_banner()
 	else:
 		effects.message(player.position-Vector2(0,24), _toast(), BeachUI.GOLD)
-		if trainer_cards and screech_step in [1, 2]:
+		if trainer_cards and screech_step == 1:
 			_queue_trainer(_trainer_entry("screech", screech_step))
 
 ## Finish (or skip) the lesson: save it, empty the meter and let the level clock run.
 func end_screech_lesson(completed: bool) -> void:
 	if not screech_lesson:
 		return
+	if screech_landing:
+		_screech_land(false)
 	screech_lesson = false
 	brash.meter = 0.0
 	_reset_practice_score()
@@ -1772,21 +1830,21 @@ func _screech_lesson_tick(delta: float) -> void:
 			target.food = true
 			target.food_sprite.show()
 			target.respawn = 0.0
+	if screech_landing:
+		return
 	match screech_step:
 		0:
-			var perch: Dictionary = lesson_perch()
-			if not perch.is_empty() and player.is_supported_by("kiosk",float(perch.x)):
-				_screech_advance()
-		1:
 			if brash.is_full():
 				_screech_advance()
-		2:
+		1:
 			if not brash.allies.is_empty():
 				_screech_advance()
 			elif not brash.is_full():
-				screech_step = 1
+				screech_step = 0
 
 func screech_lesson_text() -> String:
+	if screech_outro > 0.0:
+		return TrainerScript.line(Config.trainer.screech.outro, input)
 	return TrainerScript.line(Config.trainer.screech.strips[mini(screech_step, SCREECH_STEPS-1)], input)
 
 ## The ring over the ice cream stand's roof sign; off screen when the level has no stand.
@@ -1797,7 +1855,7 @@ func _perch_marker() -> Vector2:
 	return Vector2(float(perch.x),BeachGull.perch_y(perch,float(perch.x))-8.0)
 
 func screech_lesson_target() -> Vector2:
-	if screech_step == 0:
+	if screech_landing:
 		return _perch_marker()
 	return Vector2(-1000,-1000)
 
