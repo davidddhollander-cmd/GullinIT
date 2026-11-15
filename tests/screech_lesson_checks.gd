@@ -136,6 +136,33 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 		check.call(game.screech_lesson and game.screech_landing and game._trainer_entry("screech", 0).lay.contains(str(pair[1])), "the %s lesson names its special" % pair[0])
 		host.main.clear_game()
 		await host.settle()
+	# Task 098: every species' special (not just Gang Call's allies) completes the lesson; firing on the frame the meter fills counts too.
+	for species: String in ["herring", "great-black-backed", "kittiwake"]:
+		for same_frame: bool in [false, true]:
+			game = _fresh_level_2(host, false, species)
+			game._screech_land(false)
+			game.screech_step = 0
+			game.brash.meter = 1.0
+			if not same_frame:
+				game._screech_lesson_tick(0.016)
+				check.call(game.screech_step == 1, "%s: a full meter moves the lesson to the special step" % species)
+				game._screech_lesson_tick(0.016)
+				check.call(game.screech_step == 1, "%s: the special step waits while the meter stays full" % species)
+			game.start_slowmo()
+			game._screech_lesson_tick(0.016)
+			check.call(not game.screech_lesson and bool(GameState.entry(2).get("screech_lesson_complete", false)), "%s: firing the special ends the lesson (same frame %s)" % [species, same_frame])
+			check.call(game.screech_outro > 0.0 or not game.trainer_cards, "%s: the outro banner shows after the lesson (same frame %s)" % [species, same_frame])
+			host.main.clear_game()
+			await host.settle()
+	game = _fresh_level_2(host, false)
+	game._screech_land(false)
+	game.brash.meter = 1.0
+	game._screech_lesson_tick(0.016)
+	game.brash.meter = 0.0 # drained without firing (stunned): back to filling the meter
+	game._screech_lesson_tick(0.016)
+	check.call(game.screech_lesson and game.screech_step == 0, "a meter that drains without a special firing restarts the screech step")
+	host.main.clear_game()
+	await host.settle()
 	# A gull without a power has nothing to learn.
 	game = _fresh_level_2(host, false, "no_power_gull")
 	check.call(not game.screech_lesson, "a gull without a power skips the lesson")
