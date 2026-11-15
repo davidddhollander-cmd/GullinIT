@@ -94,7 +94,7 @@ static func _start_card_checks(suite: Node, check: Callable) -> void:
 		texts.append((node as Label).text)
 	var card: String = " ".join(texts)
 	var seconds: int = int(game.level.time_limit)
-	check.call(card.contains("TO PASS:") and card.contains(str(int(game.level.stars[0]))) and card.contains("%d:%02d" % [seconds/60,seconds%60]) and card.contains("OPTIONAL") and card.contains("QUEST POINTS COUNT") and not card.contains("STAR"),"level 2 start card shows the pass mark, optional quests and no stars line: "+card)
+	check.call(card.contains("TO PASS:") and card.contains(str(int(game.level.stars[0]))) and card.contains("%d:%02d" % [seconds/60,seconds%60]) and card.contains("OPTIONAL") and card.contains("WIN FEATHERS") and not card.contains("STAR"),"level 2 start card shows the pass mark, optional quests and no stars line: "+card)
 	check.call(game.overlay.start_button != null and game.overlay.start_button.text == "LET'S GULL IT!" and game.overlay.start_button.has_focus(),"level 2 start card has a focused LET'S GULL IT! button")
 	await suite.settle()
 	await suite.snapshot("level-2-start-card")
