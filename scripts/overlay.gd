@@ -259,8 +259,18 @@ func setup(owner_game: BeachGame) -> void:
 			# Quests sit in the small HUD font so a long list stays clear of the pass mark.
 			_small(BeachUI.label(intro,"BONUS QUESTS - OPTIONAL",8,BeachUI.GOLD))
 			for quest: Dictionary in game.quests.quests:
-				_small(BeachUI.label(intro,"- %s  +%d" % [quest.text,int(quest.bonus)],8,Color("80bcb8")))
-			_small(BeachUI.label(intro,"WIN FEATHERS TO UNLOCK GULLS/UPGRADES",8,Color("80bcb8")))
+				var row: HBoxContainer = HBoxContainer.new()
+				row.add_theme_constant_override("separation",0)
+				intro.add_child(row)
+				var teal: Color = Color("80bcb8")
+				_small(BeachUI.label(row,"- %s  +%d  +" % [quest.text,int(quest.bonus)],8,teal))
+				_feather_icon_rect(row)
+			var win: HBoxContainer = HBoxContainer.new()
+			win.add_theme_constant_override("separation",0)
+			intro.add_child(win)
+			_small(BeachUI.label(win,"WIN ",8,BeachUI.GOLD))
+			_feather_icon_rect(win)
+			_small(BeachUI.label(win,"FEATHERS TO UNLOCK GULLS/UPGRADES",8,BeachUI.GOLD))
 	trainer_intro = BeachGame.trainer_cards and game.training
 	if trainer_intro:
 		intro_panel.hide()
@@ -278,6 +288,13 @@ func setup(owner_game: BeachGame) -> void:
 	add_child(trainer_card)
 	if trainer_intro:
 		start_button = trainer_card.button
+
+func _feather_icon_rect(row: HBoxContainer) -> void:
+	var icon: TextureRect = TextureRect.new()
+	icon.texture = BeachUI.FEATHER_ICON
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(icon)
 
 ## VS intro card: "<YOUR GULL> VS GARY" with both gull sprites facing off, the arena name underneath.
 func _vs_card(card: VBoxContainer) -> void:

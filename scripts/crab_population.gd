@@ -129,6 +129,27 @@ func spawn(origin: String, camera_x: float, blue: bool = false) -> BeachCrab:
 	crab_created.emit(crab)
 	return crab
 
+## A crab dropped by a hit gull lands alive: a live crab on the ground at x, already scuttling away from the gull.
+## ponytail: colour is not recorded on the carried snack, so revived crabs are always red.
+func revive(x: float, from: Vector2, blue: bool = false) -> BeachCrab:
+	var crab := BeachCrab.new()
+	add_child(crab)
+	var ground: float = float(Config.tuning.world.ground)
+	var cx: float = clampf(x,beach_bounds.x,beach_bounds.y)
+	crab.prepare(Vector2(cx,ground),"left",1.0,blue,settings,beach_bounds,int(random.randi()))
+	crab.phase = BeachCrab.Phase.SCUTTLE
+	crab.food = true
+	crab.sprite.modulate.a = 1.0
+	crab._update_depth()
+	crab.threat_latched = true
+	crab.threat_position = from
+	crab._escape()
+	targets.append(crab)
+	crab.departed.connect(remove)
+	serial += 1
+	crab_created.emit(crab)
+	return crab
+
 func remove(crab: BeachTarget) -> void:
 	targets.erase(crab)
 	crab.queue_free()

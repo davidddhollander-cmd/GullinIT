@@ -130,4 +130,17 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(game.crabs.spawn("left",480)==null and game.crabs.targets.size()==2,"crab population respects its cap")
 	game.queue_free()
 	await host.get_tree().process_frame
+	var drop_game: BeachGame = make_game(host)
+	drop_game.stash_raids.items.append({"owner":null,"source":"dropped","food_id":"crab","position":Vector2(200,Config.tuning.world.ground-30),"velocity":Vector2(0,60),"grounded":false,"age":0.0})
+	for _step in 30:
+		drop_game.stash_raids.tick(0.05)
+	var revived: BeachCrab = drop_game.crabs.targets[0] if not drop_game.crabs.targets.is_empty() else null
+	check.call(revived!=null and revived.phase==BeachCrab.Phase.SCUTTLE and drop_game.stash_raids.items.is_empty(),"a dropped crab lands as a live scuttling crab, not a static snack")
+	if revived!=null:
+		var landed_x: float = revived.position.x
+		for _step in 20:
+			revived.tick(0.05,[drop_game.player])
+		check.call(not is_equal_approx(revived.position.x,landed_x),"a dropped crab scuttles away after landing")
+	drop_game.queue_free()
+	await host.get_tree().process_frame
 	await preload("res://tests/crab_habitat_checks.gd").run(host,check)
