@@ -689,6 +689,7 @@
       ]
     ],
     "animations": {
+      "screech": {"frames": [0, 1, 2, 3, 4, 5], "fps": 7, "loop": false, "source_left": false, "file": "res://assets/sprites/gull-kittiwake-screech-v1.png"},
       "idle": {
         "frames": [
           0
