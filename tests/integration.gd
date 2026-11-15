@@ -260,6 +260,7 @@ func run() -> void:
 	await preload("res://tests/gull_picker_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/practice_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/control_mode_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/assist_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/shop_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/analytics_checks.gd").run(self,Callable(self,"check"))
 	preload("res://tests/online_scores_checks.gd").run(self,Callable(self,"check"))

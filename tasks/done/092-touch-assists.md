@@ -1,6 +1,6 @@
 # 092 — Touch: one ASSIST setting and assist analytics
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -48,7 +48,18 @@ Touch players crash far less. Real data (26 Oct to 10 Nov): dives crash 30% of t
 - [ ] **Analytics (after the next itch upload, not blocking merge):** compare the touch crash rate per dive (sum of `level_end.crashes` / sum of `level_end.dives` where `input` = touch) against the 30% baseline (41 of 135); target 15% or less over the next ~100 touch dives, split by `assist`.
 
 ## Report
-<!-- Filled in by the implementer. -->
+Files: scripts/autoload/game_state.gd (`assist()`, `set_assist()`, `control_mode()` now returns the effective mode), scripts/input_controller.gd (aim and approach assist gated on `assist()`), scripts/menus.gd (ASSIST: ON/OFF button on the DIVE STEER row, EASY label text), scripts/game.gd (`_assist_stats()` merged into `level_start` and `_run_stats()` so `level_end` and `game_hidden` carry it), tests/assist_checks.gd (new, wired in integration.gd), tests/control_mode_checks.gd, tests/analytics_checks.gd, tests/touch_stick_checks.gd (fixtures set `options.assist`), README.md.
+Tests: before (091 tip) 17741 checks, 0 failures; after 17753 checks, 0 failures.
+Decisions:
+- One code path: `control_mode()` returns "casual" while ASSIST is on unless the saved mode is "realistic"; the saved id is never rewritten by ASSIST, and the touch default no longer hard-codes "casual" (it comes from assist() being on). An old save with `control_mode: casual` still loads as casual.
+- Slider shows the effective mode; because of that, picking NORMAL on the slider while ASSIST is on also switches ASSIST off (otherwise the stop would do nothing). Picking EASY leaves ASSIST as it was.
+- Slider text now reads "REALISTIC: TAP EVERY WINGBEAT / NORMAL: HOLD TO FLAP / EASY: AUTO PECK IN DIVES" (id unchanged).
+- Aim and approach assist stay touch-only (the `_assist_aim` path only exists on the touch stick/DIVE button, extending it to keyboard/pad/mouse was not a few lines); keyboard players who switch ASSIST on get auto-peck only. Gating on `assist()` is covered by the existing touch assist checks (they now set `options.assist = true`) but there is no explicit "assist off bends nothing" check.
+- ASSIST button sits on the DIVE STEER row (a new full-width row overflowed the 180 px screen). `touch.dive_steer_default` unchanged (0.55).
+- Touch pull-up while the DIVE stick is held: already worked (`touch_climb` is independent of `dive_finger`); a check was added.
+- Analytics: `dive_steer` is rounded to 0.01; `control_mode` is the effective mode.
+Not done: analytics comparison (post-release).
+Branch sonnet/092-touch-assists.
 
 ## Review notes
 <!-- Filled in by the reviewer. -->

@@ -242,10 +242,21 @@ const CONTROL_MODES: Array[String] = ["realistic","normal","casual"]
 
 ## How hard flying and snatching are: realistic taps every wingbeat, casual pecks dives for you.
 func control_mode() -> String:
-	var touch: bool = DisplayServer.is_touchscreen_available() or bool(options.get("touch",false))
-	var id: String = str(options.get("control_mode","casual" if touch else "normal")) ## touch players start with auto-peck
-	return id if id in CONTROL_MODES else "normal"
+	var id: String = str(options.get("control_mode","normal"))
+	if id not in CONTROL_MODES:
+		id = "normal"
+	return "casual" if assist() and id != "realistic" else id ## ASSIST means auto-peck (touch players start with it on)
+
+## ASSIST bundles auto-peck in dives with the touch aim assist. On by default for touch, off otherwise; an explicit choice wins.
+func assist() -> bool:
+	return bool(options.get("assist",DisplayServer.is_touchscreen_available() or bool(options.get("touch",false))))
+
+func set_assist(on: bool) -> void:
+	options.assist = on
+	save_progress()
 
 func set_control_mode(id: String) -> void:
 	options.control_mode = id if id in CONTROL_MODES else "normal"
+	if id == "normal" and assist():
+		options.assist = false ## the slider shows the effective mode, so asking for NORMAL switches ASSIST off
 	save_progress()

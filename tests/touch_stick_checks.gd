@@ -23,6 +23,7 @@ static func _mouse_move(input: GullInput) -> void:
 	input._input(motion)
 
 static func run(host: Node, check: Callable) -> void:
+	GameState.options.assist = true # these are touch-player checks: the aim assist belongs to ASSIST
 	var hint: Callable = Callable(host.main,"should_show_rotate_hint")
 	check.call(hint.call(Vector2i(390,844),true) and not hint.call(Vector2i(844,390),true) and not hint.call(Vector2i(390,844),false),"rotate hint shows for portrait touch only")
 	await _rework_checks(host, check)
@@ -314,6 +315,7 @@ static func run(host: Node, check: Callable) -> void:
 		check.call(host.main.screen == "pick","a touch tap presses the ARCADE button and opens the gull picker")
 	host.main._navigate("title")
 	await host.settle()
+	GameState.options.erase("assist")
 
 static func _place_target(target: BeachTarget, at: Vector2) -> void:
 	target.position += at - target.food_position()

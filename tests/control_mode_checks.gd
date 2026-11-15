@@ -29,7 +29,9 @@ static func _setting(check: Callable) -> void:
 	GameState.options.touch = true
 	check.call(GameState.control_mode() == "casual", "a fresh save on a touch device defaults to CASUAL")
 	GameState.options.control_mode = "normal"
-	check.call(GameState.control_mode() == "normal", "an explicit NORMAL choice wins on touch")
+	GameState.options.assist = false
+	check.call(GameState.control_mode() == "normal", "an explicit NORMAL choice with ASSIST off wins on touch")
+	GameState.options.erase("assist")
 	GameState.options.erase("control_mode")
 	GameState.options.touch = false
 	GameState.options.control_mode = "bogus"

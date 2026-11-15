@@ -54,6 +54,7 @@ static func run(suite: Node, check: Callable) -> void:
 	game.dismiss_intro()
 	check.call(rec.names() == ["level_start"] and rec.last("level_start").level == 2 and rec.last("level_start").mode == "arcade", "level_start fires when the level begins")
 	check.call(rec.last("level_start").has("mouse_role") and str(rec.last("level_start").mouse_role) in ["steer","dive_aim"], "level_start carries mouse_role")
+	check.call(rec.last("level_start").has("assist") and rec.last("level_start").has("control_mode") and rec.last("level_start").has("dive_steer") and game._run_stats().has("assist") and game._run_stats().has("dive_steer"),"level_start and run stats carry control_mode, assist and dive_steer")
 	var common: Dictionary = rec.last("level_start")
 	check.call(common.platform != "" and common.build == "0.1.0-demo" and common.input == "keyboard_mouse" and common["$process_person_profile"] == false, "common properties are attached")
 	check.call(rec.sent[0].api_key == "phc_test" and rec.sent[0].distinct_id.length() == 32 and rec.sent[0].has("timestamp") and rec.urls[0] == "https://eu.i.posthog.com/i/v0/e/", "capture payload and endpoint")
