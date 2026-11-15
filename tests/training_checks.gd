@@ -171,6 +171,8 @@ static func run(host: Node, check: Callable) -> void:
 	game.stash_raids.items.clear()
 	check.call(game.lesson == BeachGame.MUG_LESSON,"the first dive leads straight to the rival dummy")
 	game.stash_raids.items.clear()
+	check.call(game.training_dummy() == null,"without cards the dummy waits after lesson 5")
+	game._physics_process(BeachGame.DUMMY_EXTRA_DELAY + 0.1)
 	var dummy: RivalPilot = game.training_dummy()
 	check.call(dummy != null and dummy.dummy and game.pilots.size() == 1 and dummy.dummy_food == BeachGame.DUMMY_FOOD,"the mug lesson spawns one dummy gull holding food")
 	game.player.digestion.tick(30,false) # the earlier snacks are digested: a full belly shows the full-stomach line instead

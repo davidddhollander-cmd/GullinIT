@@ -437,6 +437,27 @@ func run() -> void:
 		await snapshot("results" if i==6 else "result-%d" % i)
 		layout(main.menus)
 		menu_font_grid(main.menus)
+	# Level start card with quests: feather icons sit level with the small quest text.
+	main.start_level(3)
+	main.game.set_physics_process(false)
+	main.game.overlay._process(0.0)
+	await snapshot("level-start-card")
+	main.clear_game()
+	await settle()
+	# Training Day: lesson-2 crumbs keep a clear gap before the lesson-3 toddler's walk range.
+	main.start_level(1)
+	var training_game: BeachGame = main.game
+	var toddler_spawn: Dictionary = {}
+	for spawn: Dictionary in training_game.level.spawns:
+		if str(spawn.type) == "toddler":
+			toddler_spawn = spawn
+	var toddler_left: float = float(toddler_spawn.x) - float(toddler_spawn.patrol_radius)
+	var last_crumb: float = -INF
+	for crumb: Dictionary in training_game.scraps.crumbs:
+		last_crumb = maxf(last_crumb,float(crumb.x))
+	check(not training_game.scraps.crumbs.is_empty() and toddler_left - last_crumb >= 60.0,"training crumbs end at least 60 px before the toddler's walk range (%d vs %d)" % [int(last_crumb),int(toddler_left)])
+	main.clear_game()
+	await settle()
 	main.casual = true
 	main.start_level(1)
 	main.game.set_physics_process(false)
