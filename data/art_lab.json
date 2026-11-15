@@ -4308,9 +4308,9 @@
     },
     {
       "title": "CRUMB LADY WALK",
-      "description": "NEW CHARACTER. SHOPPER BESIDE FOR SIZE. WALK ROW.",
+      "description": "NEW CHARACTER. SMOOTH LEFT. LIGHT PIXEL PASS RIGHT. SHOPPER BETWEEN.",
       "current": "shopper_mullet",
-      "candidate": {
+      "current_override": {
         "file": "res://assets/lab/crumb-lady-v2-sheet.png",
         "frame_w": 256,
         "frame_h": 250,
@@ -4373,15 +4373,79 @@
           }
         }
       },
+      "candidate": {
+        "file": "res://assets/lab/crumb-lady-v2-light.png",
+        "frame_w": 154,
+        "frame_h": 150,
+        "visual_scale": 0.25,
+        "animations": {
+          "idle": {
+            "frames": [
+              0.0
+            ],
+            "fps": 4,
+            "loop": true
+          },
+          "walk": {
+            "frames": [
+              0.0,
+              1.0,
+              2.0,
+              3.0,
+              4.0,
+              5.0
+            ],
+            "fps": 8,
+            "loop": true
+          },
+          "swat": {
+            "frames": [
+              6.0,
+              7.0,
+              8.0,
+              9.0,
+              10.0,
+              11.0
+            ],
+            "fps": 10,
+            "loop": false
+          },
+          "run": {
+            "frames": [
+              12.0,
+              13.0,
+              14.0,
+              15.0,
+              16.0,
+              17.0
+            ],
+            "fps": 10,
+            "loop": true
+          },
+          "sow": {
+            "frames": [
+              18.0,
+              19.0,
+              20.0,
+              21.0,
+              22.0,
+              23.0
+            ],
+            "fps": 8,
+            "loop": false
+          }
+        }
+      },
+      "reference": "shopper_mullet",
       "motion": "walk_across",
       "animation": "walk",
       "category": "characters"
     },
     {
       "title": "CRUMB LADY PANIC RUN",
-      "description": "NEW CHARACTER. PANIC RUN ROW. SHOPPER RUN BESIDE.",
+      "description": "NEW CHARACTER. PANIC RUN. SMOOTH LEFT. LIGHT PASS RIGHT.",
       "current": "shopper_mullet",
-      "candidate": {
+      "current_override": {
         "file": "res://assets/lab/crumb-lady-v2-sheet.png",
         "frame_w": 256,
         "frame_h": 250,
@@ -4444,15 +4508,79 @@
           }
         }
       },
+      "candidate": {
+        "file": "res://assets/lab/crumb-lady-v2-light.png",
+        "frame_w": 154,
+        "frame_h": 150,
+        "visual_scale": 0.25,
+        "animations": {
+          "idle": {
+            "frames": [
+              0.0
+            ],
+            "fps": 4,
+            "loop": true
+          },
+          "walk": {
+            "frames": [
+              0.0,
+              1.0,
+              2.0,
+              3.0,
+              4.0,
+              5.0
+            ],
+            "fps": 8,
+            "loop": true
+          },
+          "swat": {
+            "frames": [
+              6.0,
+              7.0,
+              8.0,
+              9.0,
+              10.0,
+              11.0
+            ],
+            "fps": 10,
+            "loop": false
+          },
+          "run": {
+            "frames": [
+              12.0,
+              13.0,
+              14.0,
+              15.0,
+              16.0,
+              17.0
+            ],
+            "fps": 10,
+            "loop": true
+          },
+          "sow": {
+            "frames": [
+              18.0,
+              19.0,
+              20.0,
+              21.0,
+              22.0,
+              23.0
+            ],
+            "fps": 8,
+            "loop": false
+          }
+        }
+      },
+      "reference": "shopper_mullet",
       "motion": "walk_across",
       "animation": "run",
       "category": "characters"
     },
     {
       "title": "CRUMB LADY HIT",
-      "description": "NEW CHARACTER. ANGRY SWAT ROW. SHOPPER SWAT BESIDE.",
+      "description": "NEW CHARACTER. ANGRY SWAT. SMOOTH LEFT. LIGHT PASS RIGHT.",
       "current": "shopper_mullet",
-      "candidate": {
+      "current_override": {
         "file": "res://assets/lab/crumb-lady-v2-sheet.png",
         "frame_w": 256,
         "frame_h": 250,
@@ -4515,15 +4643,79 @@
           }
         }
       },
+      "candidate": {
+        "file": "res://assets/lab/crumb-lady-v2-light.png",
+        "frame_w": 154,
+        "frame_h": 150,
+        "visual_scale": 0.25,
+        "animations": {
+          "idle": {
+            "frames": [
+              0.0
+            ],
+            "fps": 4,
+            "loop": true
+          },
+          "walk": {
+            "frames": [
+              0.0,
+              1.0,
+              2.0,
+              3.0,
+              4.0,
+              5.0
+            ],
+            "fps": 8,
+            "loop": true
+          },
+          "swat": {
+            "frames": [
+              6.0,
+              7.0,
+              8.0,
+              9.0,
+              10.0,
+              11.0
+            ],
+            "fps": 10,
+            "loop": false
+          },
+          "run": {
+            "frames": [
+              12.0,
+              13.0,
+              14.0,
+              15.0,
+              16.0,
+              17.0
+            ],
+            "fps": 10,
+            "loop": true
+          },
+          "sow": {
+            "frames": [
+              18.0,
+              19.0,
+              20.0,
+              21.0,
+              22.0,
+              23.0
+            ],
+            "fps": 8,
+            "loop": false
+          }
+        }
+      },
+      "reference": "shopper_mullet",
       "motion": "idle",
       "animation": "swat",
       "category": "characters"
     },
     {
       "title": "CRUMB LADY SOW CRUMBS",
-      "description": "NEW CHARACTER. SWEEPING CRUMB THROW ROW.",
+      "description": "NEW CHARACTER. CRUMB THROW. SMOOTH LEFT. LIGHT PASS RIGHT.",
       "current": "shopper_mullet",
-      "candidate": {
+      "current_override": {
         "file": "res://assets/lab/crumb-lady-v2-sheet.png",
         "frame_w": 256,
         "frame_h": 250,
@@ -4586,19 +4778,83 @@
           }
         }
       },
+      "candidate": {
+        "file": "res://assets/lab/crumb-lady-v2-light.png",
+        "frame_w": 154,
+        "frame_h": 150,
+        "visual_scale": 0.25,
+        "animations": {
+          "idle": {
+            "frames": [
+              0.0
+            ],
+            "fps": 4,
+            "loop": true
+          },
+          "walk": {
+            "frames": [
+              0.0,
+              1.0,
+              2.0,
+              3.0,
+              4.0,
+              5.0
+            ],
+            "fps": 8,
+            "loop": true
+          },
+          "swat": {
+            "frames": [
+              6.0,
+              7.0,
+              8.0,
+              9.0,
+              10.0,
+              11.0
+            ],
+            "fps": 10,
+            "loop": false
+          },
+          "run": {
+            "frames": [
+              12.0,
+              13.0,
+              14.0,
+              15.0,
+              16.0,
+              17.0
+            ],
+            "fps": 10,
+            "loop": true
+          },
+          "sow": {
+            "frames": [
+              18.0,
+              19.0,
+              20.0,
+              21.0,
+              22.0,
+              23.0
+            ],
+            "fps": 8,
+            "loop": false
+          }
+        }
+      },
+      "reference": "shopper_mullet",
       "motion": "idle",
       "animation": "sow",
       "category": "characters"
     },
     {
       "title": "PIGEON WALK V1 V2",
-      "description": "NEW PIGEON. V1 LEFT. V2 RIGHT. SHOPPER BETWEEN FOR SIZE.",
+      "description": "NEW PIGEON. V1 LEFT. V2 RIGHT. LIGHT PIXEL PASS. SHOPPER BETWEEN.",
       "current": "shopper_mullet",
       "current_override": {
-        "file": "res://assets/lab/pigeon-v1-sheet.png",
-        "frame_w": 416,
-        "frame_h": 280,
-        "visual_scale": 0.075,
+        "file": "res://assets/lab/pigeon-v1-light.png",
+        "frame_w": 125,
+        "frame_h": 84,
+        "visual_scale": 0.25,
         "animations": {
           "idle": {
             "frames": [
@@ -4653,10 +4909,10 @@
         }
       },
       "candidate": {
-        "file": "res://assets/lab/pigeon-v2-sheet.png",
-        "frame_w": 416,
-        "frame_h": 280,
-        "visual_scale": 0.075,
+        "file": "res://assets/lab/pigeon-v2-light.png",
+        "frame_w": 125,
+        "frame_h": 84,
+        "visual_scale": 0.25,
         "animations": {
           "idle": {
             "frames": [
@@ -4720,10 +4976,10 @@
       "description": "NEW PIGEON. V1 LEFT. V2 RIGHT. WINGBEAT ROW. GROUNDED FOR REVIEW.",
       "current": "shopper_mullet",
       "current_override": {
-        "file": "res://assets/lab/pigeon-v1-sheet.png",
-        "frame_w": 416,
-        "frame_h": 280,
-        "visual_scale": 0.075,
+        "file": "res://assets/lab/pigeon-v1-light.png",
+        "frame_w": 125,
+        "frame_h": 84,
+        "visual_scale": 0.25,
         "animations": {
           "idle": {
             "frames": [
@@ -4778,10 +5034,10 @@
         }
       },
       "candidate": {
-        "file": "res://assets/lab/pigeon-v2-sheet.png",
-        "frame_w": 416,
-        "frame_h": 280,
-        "visual_scale": 0.075,
+        "file": "res://assets/lab/pigeon-v2-light.png",
+        "frame_w": 125,
+        "frame_h": 84,
+        "visual_scale": 0.25,
         "animations": {
           "idle": {
             "frames": [
@@ -4845,10 +5101,10 @@
       "description": "NEW PIGEON. V1 LEFT. V2 RIGHT. GLIDE. DIVE PREP. DIVE. PULL UP.",
       "current": "shopper_mullet",
       "current_override": {
-        "file": "res://assets/lab/pigeon-v1-sheet.png",
-        "frame_w": 416,
-        "frame_h": 280,
-        "visual_scale": 0.075,
+        "file": "res://assets/lab/pigeon-v1-light.png",
+        "frame_w": 125,
+        "frame_h": 84,
+        "visual_scale": 0.25,
         "animations": {
           "idle": {
             "frames": [
@@ -4903,10 +5159,10 @@
         }
       },
       "candidate": {
-        "file": "res://assets/lab/pigeon-v2-sheet.png",
-        "frame_w": 416,
-        "frame_h": 280,
-        "visual_scale": 0.075,
+        "file": "res://assets/lab/pigeon-v2-light.png",
+        "frame_w": 125,
+        "frame_h": 84,
+        "visual_scale": 0.25,
         "animations": {
           "idle": {
             "frames": [
@@ -4970,10 +5226,10 @@
       "description": "NEW PIGEON. V1 LEFT. V2 RIGHT. SNATCH. PECK. LAND. STUNNED.",
       "current": "shopper_mullet",
       "current_override": {
-        "file": "res://assets/lab/pigeon-v1-sheet.png",
-        "frame_w": 416,
-        "frame_h": 280,
-        "visual_scale": 0.075,
+        "file": "res://assets/lab/pigeon-v1-light.png",
+        "frame_w": 125,
+        "frame_h": 84,
+        "visual_scale": 0.25,
         "animations": {
           "idle": {
             "frames": [
@@ -5028,6 +5284,73 @@
         }
       },
       "candidate": {
+        "file": "res://assets/lab/pigeon-v2-light.png",
+        "frame_w": 125,
+        "frame_h": 84,
+        "visual_scale": 0.25,
+        "animations": {
+          "idle": {
+            "frames": [
+              0.0
+            ],
+            "fps": 4,
+            "loop": true
+          },
+          "walk": {
+            "frames": [
+              1.0,
+              2.0,
+              3.0,
+              4.0,
+              5.0,
+              6.0,
+              7.0
+            ],
+            "fps": 10,
+            "loop": true
+          },
+          "flap": {
+            "frames": [
+              8.0,
+              9.0,
+              10.0,
+              11.0
+            ],
+            "fps": 8,
+            "loop": true
+          },
+          "glide": {
+            "frames": [
+              12.0,
+              13.0,
+              14.0,
+              15.0
+            ],
+            "fps": 4,
+            "loop": false
+          },
+          "act": {
+            "frames": [
+              16.0,
+              17.0,
+              18.0,
+              19.0
+            ],
+            "fps": 3,
+            "loop": false
+          }
+        }
+      },
+      "reference": "shopper_mullet",
+      "motion": "idle",
+      "animation": "act",
+      "category": "characters"
+    },
+    {
+      "title": "PIGEON V2 SMOOTH VS LIGHT",
+      "description": "NEW PIGEON. SMOOTH LEFT. LIGHT PIXEL PASS RIGHT. SHOPPER BETWEEN.",
+      "current": "shopper_mullet",
+      "current_override": {
         "file": "res://assets/lab/pigeon-v2-sheet.png",
         "frame_w": 416,
         "frame_h": 280,
@@ -5085,9 +5408,67 @@
           }
         }
       },
+      "candidate": {
+        "file": "res://assets/lab/pigeon-v2-light.png",
+        "frame_w": 125,
+        "frame_h": 84,
+        "visual_scale": 0.25,
+        "animations": {
+          "idle": {
+            "frames": [
+              0.0
+            ],
+            "fps": 4,
+            "loop": true
+          },
+          "walk": {
+            "frames": [
+              1.0,
+              2.0,
+              3.0,
+              4.0,
+              5.0,
+              6.0,
+              7.0
+            ],
+            "fps": 10,
+            "loop": true
+          },
+          "flap": {
+            "frames": [
+              8.0,
+              9.0,
+              10.0,
+              11.0
+            ],
+            "fps": 8,
+            "loop": true
+          },
+          "glide": {
+            "frames": [
+              12.0,
+              13.0,
+              14.0,
+              15.0
+            ],
+            "fps": 4,
+            "loop": false
+          },
+          "act": {
+            "frames": [
+              16.0,
+              17.0,
+              18.0,
+              19.0
+            ],
+            "fps": 3,
+            "loop": false
+          }
+        }
+      },
       "reference": "shopper_mullet",
-      "motion": "idle",
-      "animation": "act",
+      "motion": "walk_across",
+      "animation": "walk",
       "category": "characters"
     }
   ]

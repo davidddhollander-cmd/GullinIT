@@ -5,7 +5,9 @@ Usage:  python tools/prepare_lab_characters_v1.py
 Needs numpy and Pillow. Safe to re-run: it replaces the earlier "CRUMB LADY ..." / "PIGEON ..." entries.
 The sources are transparent sheets whose figures drift a little off their grid cells, so each figure is found as a
 connected blob, owned by the cell holding its centre, and copied into an equal frame with its own cell's alignment kept.
-Frames stay at source resolution; the sprites.json style visual_scale does the shrinking, as for the other characters.
+Each smooth sheet (source resolution, shown by visual_scale) also gets a "-light" twin: the pre-shrunk art at 4 art px per
+game px (1 art px = 1 screen px at 1280x720, so nothing is shrunk at draw time), alpha made crisp and the colours gently
+reduced to one shared palette per sheet. Outlines, shading and detail stay; it is a clean-up, not pixelation.
 """
 import json
 from pathlib import Path
@@ -22,6 +24,8 @@ LAB = ROOT / "data" / "art_lab.json"
 ALPHA_SEED = 100  # opaque art sits near 255, the sheets' halo is faint
 ALPHA_KEEP = 16  # below this a pixel is cleared (anti-aliased edges stay)
 CATEGORY = "characters"
+LIGHT_FACTOR_LADY = 0.6  # 256 px cell drawn at 0.15 becomes 154 px drawn at 0.25: same size, 1 art px = 1 screen px
+LIGHT_FACTOR_PIGEON = 0.3  # 0.075 -> 0.25
 
 
 def owned_labels(alpha: np.ndarray, cols: int, rows: int) -> dict[tuple[int, int], np.ndarray]:
@@ -76,6 +80,27 @@ def cut_sheet(src: Path, cols: int, rows: int, frame_w: int, frame_h: int, windo
 	return boxes
 
 
+def light_touch(smooth: Path, cols: int, rows: int, fw: int, fh: int, factor: float, colours: int, out: Path) -> tuple[int, int]:
+	"""Shrinks every frame by `factor` (area filter, premultiplied alpha), makes alpha binary and quantises the sheet to
+	`colours` colours without dithering. Returns the new frame size."""
+	new_w, new_h = round(fw * factor), round(fh * factor)
+	src = Image.open(smooth).convert("RGBA")
+	sheet = Image.new("RGBA", (cols * new_w, rows * new_h))
+	for r in range(rows):
+		for c in range(cols):
+			frame = src.crop((c * fw, r * fh, (c + 1) * fw, (r + 1) * fh)).resize((new_w, new_h), Image.LANCZOS)
+			sheet.paste(frame, (c * new_w, r * new_h))
+	arr = np.array(sheet)
+	solid = arr[:, :, 3] >= 128
+	flat = Image.fromarray(np.where(solid[:, :, None], arr[:, :, :3], 0).astype(np.uint8))
+	pal = np.array(flat.quantize(colors=colours + 1, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).convert("RGB"))
+	result = np.zeros_like(arr)
+	result[solid, :3] = pal[solid]
+	result[solid, 3] = 255
+	Image.fromarray(result).save(out, optimize=True)
+	return new_w, new_h
+
+
 def anim(frames: list[int], fps: float, loop: bool = True) -> dict:
 	return {"frames": [float(f) for f in frames], "fps": fps, "loop": loop}
 
@@ -88,17 +113,19 @@ def main() -> None:
 	lady_h = 250
 	boxes = cut_sheet(REF / "crumb-lady-v2" / "source.png", 6, 4, 256, lady_h, lambda c, cw: round(c * cw), lambda r, ch: round(r * ch), LAB_DIR / "crumb-lady-v2-sheet.png")
 	print("crumb lady frame boxes (x0,y0,x1,y1):", boxes[:3], "...")
-	lady = {"file": "res://assets/lab/crumb-lady-v2-sheet.png", "frame_w": 256, "frame_h": lady_h, "visual_scale": 0.15,
-		"animations": {"idle": anim([0], 4), "walk": anim([0, 1, 2, 3, 4, 5], 8), "swat": anim([6, 7, 8, 9, 10, 11], 10, False),
-			"run": anim([12, 13, 14, 15, 16, 17], 10), "sow": anim([18, 19, 20, 21, 22, 23], 8, False)}}
+	lady_anims = {"idle": anim([0], 4), "walk": anim([0, 1, 2, 3, 4, 5], 8), "swat": anim([6, 7, 8, 9, 10, 11], 10, False),
+		"run": anim([12, 13, 14, 15, 16, 17], 10), "sow": anim([18, 19, 20, 21, 22, 23], 8, False)}
+	lady = {"file": "res://assets/lab/crumb-lady-v2-sheet.png", "frame_w": 256, "frame_h": lady_h, "visual_scale": 0.15, "animations": lady_anims}
+	lw, lh = light_touch(LAB_DIR / "crumb-lady-v2-sheet.png", 6, 4, 256, lady_h, LIGHT_FACTOR_LADY, 128, LAB_DIR / "crumb-lady-v2-light.png")
+	lady_light = {"file": "res://assets/lab/crumb-lady-v2-light.png", "frame_w": lw, "frame_h": lh, "visual_scale": 0.25, "animations": lady_anims}
 	for title, why, motion, animation in [
-		("CRUMB LADY WALK", "NEW CHARACTER. SHOPPER BESIDE FOR SIZE. WALK ROW.", "walk_across", "walk"),
-		("CRUMB LADY PANIC RUN", "NEW CHARACTER. PANIC RUN ROW. SHOPPER RUN BESIDE.", "walk_across", "run"),
-		("CRUMB LADY HIT", "NEW CHARACTER. ANGRY SWAT ROW. SHOPPER SWAT BESIDE.", "idle", "swat"),
-		("CRUMB LADY SOW CRUMBS", "NEW CHARACTER. SWEEPING CRUMB THROW ROW.", "idle", "sow"),
+		("CRUMB LADY WALK", "NEW CHARACTER. SMOOTH LEFT. LIGHT PIXEL PASS RIGHT. SHOPPER BETWEEN.", "walk_across", "walk"),
+		("CRUMB LADY PANIC RUN", "NEW CHARACTER. PANIC RUN. SMOOTH LEFT. LIGHT PASS RIGHT.", "walk_across", "run"),
+		("CRUMB LADY HIT", "NEW CHARACTER. ANGRY SWAT. SMOOTH LEFT. LIGHT PASS RIGHT.", "idle", "swat"),
+		("CRUMB LADY SOW CRUMBS", "NEW CHARACTER. CRUMB THROW. SMOOTH LEFT. LIGHT PASS RIGHT.", "idle", "sow"),
 	]:
-		comparisons.append({"title": title, "description": why, "current": "shopper_mullet", "candidate": lady,
-			"motion": motion, "animation": animation, "category": CATEGORY})
+		comparisons.append({"title": title, "description": why, "current": "shopper_mullet", "current_override": lady, "candidate": lady_light,
+			"reference": "shopper_mullet", "motion": motion, "animation": animation, "category": CATEGORY})
 
 	# Pigeons: 4 x 5 cells (384 x 204.8). Frames are 416 x 280 windows starting 60 px above each cell so wingtips that
 	# spill over the grid are kept; masked to the owning figure so neighbours never leak in.
@@ -108,18 +135,22 @@ def main() -> None:
 		out = LAB_DIR / f"pigeon-{version}-sheet.png"
 		boxes = cut_sheet(REF / f"pigeon-{version}" / "source.png", 4, 5, pigeon_w, pigeon_h, lambda c, cw: round(c * cw) - 16, lambda r, ch: round(r * ch) - 60, out)
 		print(f"pigeon {version} frame boxes:", boxes)
-		pigeons[version] = {"file": f"res://assets/lab/pigeon-{version}-sheet.png", "frame_w": pigeon_w, "frame_h": pigeon_h, "visual_scale": 0.075,
-			"animations": {"idle": anim([0], 4), "walk": anim([1, 2, 3, 4, 5, 6, 7], 10), "flap": anim([8, 9, 10, 11], 8),
-				"glide": anim([12, 13, 14, 15], 4, False), "act": anim([16, 17, 18, 19], 3, False)}}
+		pigeon_anims = {"idle": anim([0], 4), "walk": anim([1, 2, 3, 4, 5, 6, 7], 10), "flap": anim([8, 9, 10, 11], 8),
+			"glide": anim([12, 13, 14, 15], 4, False), "act": anim([16, 17, 18, 19], 3, False)}
+		pw, ph = light_touch(out, 4, 5, pigeon_w, pigeon_h, LIGHT_FACTOR_PIGEON, 128, LAB_DIR / f"pigeon-{version}-light.png")
+		pigeons[version] = {"file": f"res://assets/lab/pigeon-{version}-sheet.png", "frame_w": pigeon_w, "frame_h": pigeon_h, "visual_scale": 0.075, "animations": pigeon_anims}
+		pigeons[version + "L"] = {"file": f"res://assets/lab/pigeon-{version}-light.png", "frame_w": pw, "frame_h": ph, "visual_scale": 0.25, "animations": pigeon_anims}
 	for title, why, motion, animation in [
-		("PIGEON WALK V1 V2", "NEW PIGEON. V1 LEFT. V2 RIGHT. SHOPPER BETWEEN FOR SIZE.", "walk_across", "walk"),
+		("PIGEON WALK V1 V2", "NEW PIGEON. V1 LEFT. V2 RIGHT. LIGHT PIXEL PASS. SHOPPER BETWEEN.", "walk_across", "walk"),
 		("PIGEON FLAP V1 V2", "NEW PIGEON. V1 LEFT. V2 RIGHT. WINGBEAT ROW. GROUNDED FOR REVIEW.", "idle", "flap"),
 		("PIGEON GLIDE DIVE V1 V2", "NEW PIGEON. V1 LEFT. V2 RIGHT. GLIDE. DIVE PREP. DIVE. PULL UP.", "idle", "glide"),
 		("PIGEON SNATCH PECK V1 V2", "NEW PIGEON. V1 LEFT. V2 RIGHT. SNATCH. PECK. LAND. STUNNED.", "idle", "act"),
 	]:
-		comparisons.append({"title": title, "description": why, "current": "shopper_mullet", "current_override": pigeons["v1"],
-			"candidate": pigeons["v2"], "reference": "shopper_mullet", "motion": motion, "animation": animation, "category": CATEGORY})
+		comparisons.append({"title": title, "description": why, "current": "shopper_mullet", "current_override": pigeons["v1L"],
+			"candidate": pigeons["v2L"], "reference": "shopper_mullet", "motion": motion, "animation": animation, "category": CATEGORY})
 
+	comparisons.append({"title": "PIGEON V2 SMOOTH VS LIGHT", "description": "NEW PIGEON. SMOOTH LEFT. LIGHT PIXEL PASS RIGHT. SHOPPER BETWEEN.", "current": "shopper_mullet",
+		"current_override": pigeons["v2"], "candidate": pigeons["v2L"], "reference": "shopper_mullet", "motion": "walk_across", "animation": "walk", "category": CATEGORY})
 	lab["comparisons"] = comparisons
 	LAB.write_text(json.dumps(lab, indent=2) + "\n", encoding="utf-8")
 
