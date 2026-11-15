@@ -53,6 +53,7 @@ const QUEST_STRIP_HEIGHT: float = 10.0 ## small-font quest row directly under th
 const SCORE_CALLOUT_TOP: float = TOP_BAR_HEIGHT + QUEST_STRIP_HEIGHT + 2.0 ## pop-ups sit below the strip
 const GOAL_PANEL: Rect2 = Rect2(232,SCORE_CALLOUT_TOP,84,43) ## slot under the quest strip kept clear for the rival board
 const POINTS_RECT: Rect2 = Rect2(185,4,40,8) ## points-to-next-star bar, mirrors the brash meter's gap around the timer (centre 156.5)
+const FEATHER_ICON_SIZE: int = 7 ## quest-card feather, matched to the small HUD font
 const HUD_FONT: Font = preload("res://assets/fonts/gull_hud.fnt")
 
 func setup(owner_game: BeachGame) -> void:
@@ -266,9 +267,9 @@ func setup(owner_game: BeachGame) -> void:
 				_small(BeachUI.label(row,"- %s  +%d  +" % [quest.text,int(quest.bonus)],8,teal))
 				_feather_icon_rect(row)
 			var win: HBoxContainer = HBoxContainer.new()
-			win.add_theme_constant_override("separation",0)
 			intro.add_child(win)
-			_small(BeachUI.label(win,"WIN ",8,BeachUI.GOLD))
+			win.add_theme_constant_override("separation",4) # about one letter-space either side of the feather
+			_small(BeachUI.label(win,"WIN",8,BeachUI.GOLD))
 			_feather_icon_rect(win)
 			_small(BeachUI.label(win,"FEATHERS TO UNLOCK GULLS/UPGRADES",8,BeachUI.GOLD))
 	trainer_intro = BeachGame.trainer_cards and game.training
@@ -292,6 +293,10 @@ func setup(owner_game: BeachGame) -> void:
 func _feather_icon_rect(row: HBoxContainer) -> void:
 	var icon: TextureRect = TextureRect.new()
 	icon.texture = BeachUI.FEATHER_ICON
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_SCALE
+	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	icon.custom_minimum_size = Vector2(FEATHER_ICON_SIZE,FEATHER_ICON_SIZE)
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(icon)

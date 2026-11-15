@@ -2,6 +2,7 @@
   "id": 1,
   "crabs": {"enabled": true},
   "name": "Training Day",
+  "scrap_max_x": 140,
   "seed": 7101,
   "tutorial": true,
   "time_limit": 105,

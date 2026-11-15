@@ -53,8 +53,10 @@ const DUMMY_FOOD: String = "crisps_bag"
 const RING_LESSON_1: Vector2 = Vector2(145,65) ## the takeoff ring, above the first palm
 const TRAINER_DELAY: float = 1.4 ## seconds between a screech or counter lesson's toast and the next pop-up
 const TRAINING_DELAY: float = 3.0 ## the same gap in Training Day: the lesson-done toast gets its moment before the next lesson starts
+const DUMMY_EXTRA_DELAY: float = 1.5 ## extra wait after lesson 5 before the sparring gull flies in
 const DUMMY_LEAD: float = 1.0 ## seconds before the mug lesson's card opens that the sparring gull arrives, so the card talks about a gull already in view
 const BANNER_CUE_TIME: float = 1.4 ## talk animation and pulse when the live banner appears or changes
+var dummy_spawn_wait: float = 0.0 ## no-cards path: counts down to the sparring gull's arrival
 var banner_delay: float = 0.0 ## counts down to the next live banner
 var advance_pending: bool = false ## a lesson's goal was met during the pause before its own card or banner: counts once that has been seen
 var banner_cue: float = 0.0
@@ -166,6 +168,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	scraps = BeachScraps.new()
 	add_child(scraps)
 	scraps.collected.connect(_scrap_collected)
+	if level.has("scrap_max_x"): # Training Day: lesson-2 crumbs stay clear of the lesson-3 toddler
+		scraps.crumbs = scraps.crumbs.filter(func(c: Dictionary) -> bool: return float(c.x) <= float(level.scrap_max_x))
 	actors = Node2D.new()
 	actors.y_sort_enabled = true
 	add_child(actors)
@@ -592,6 +596,10 @@ func _physics_process(delta: float) -> void:
 	if not running:
 		overlay.queue_redraw()
 		return
+	if dummy_spawn_wait > 0.0:
+		dummy_spawn_wait -= delta
+		if dummy_spawn_wait <= 0.0 and training and lesson == MUG_LESSON:
+			_training_dummy_setup()
 	if not trainer_queue.is_empty():
 		trainer_queue.delay -= delta
 		if training and lesson == MUG_LESSON and trainer_queue.delay <= DUMMY_LEAD:
@@ -1335,7 +1343,7 @@ func _training_advance() -> void:
 	GameState.save_training_step(lesson)
 	effects.message(player.position-Vector2(0,24),_toast(),BeachUI.GOLD,TRAINING_DELAY)
 	if lesson == MUG_LESSON and not trainer_cards:
-		_training_dummy_setup() # with cards, _process spawns it DUMMY_LEAD before the card opens
+		dummy_spawn_wait = DUMMY_EXTRA_DELAY # with cards, _process spawns it DUMMY_LEAD before the card opens
 	if lesson >= TRAINING_LESSONS:
 		if trainer_cards:
 			var closing: Dictionary = Config.trainer.training.closing
@@ -1348,7 +1356,7 @@ func _training_advance() -> void:
 		if banner_lesson(lesson):
 			banner_delay = TRAINING_DELAY
 		else:
-			_queue_trainer(_trainer_entry("training", lesson), Callable(), TRAINING_DELAY)
+			_queue_trainer(_trainer_entry("training", lesson), Callable(), TRAINING_DELAY + (DUMMY_EXTRA_DELAY if lesson == MUG_LESSON else 0.0))
 
 ## The sparring gull for the mug lesson, spawned once and handed the snack to steal.
 func _training_dummy_setup() -> void:
