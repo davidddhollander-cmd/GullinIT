@@ -69,7 +69,7 @@ static func _copy_checks(host: Node, check: Callable) -> void:
 	var touch_line: String = TrainerScript.fill("Push FLY up. Tap {dive}.",input,true)
 	check.call(touch_line == "Push %sFLY up%s. Tap %sDIVE%s." % [TrainerScript.MARK_ON,TrainerScript.MARK_OFF,TrainerScript.MARK_ON,TrainerScript.MARK_OFF],"touch literals and placeholders are each wrapped once")
 	_set_device(input,"keyboard")
-	check.call(TrainerScript.fill("Hit {peck}",input,true).contains(TrainerScript.MARK_ON + "E/mouse 3" + TrainerScript.MARK_OFF) and TrainerScript.fill("Hit {peck}",input) == "Hit E/mouse 3","key names are marked only in highlight mode")
+	check.call(TrainerScript.fill("Hit {peck}",input,true).contains(TrainerScript.MARK_ON + "E/middle click" + TrainerScript.MARK_OFF) and TrainerScript.fill("Hit {peck}",input) == "Hit E/middle click","key names are marked only in highlight mode")
 	check.call(trainer.training.lessons.size() == BeachGame.TRAINING_LESSONS and trainer.screech.lessons.size() == BeachGame.SCREECH_STEPS and trainer.screech.strips.size() == BeachGame.SCREECH_STEPS,"trainer copy covers every lesson and screech step")
 	check.call(Config.trainer.has("counter_tip") and TrainerScript.line(Config.trainer.counter_tip,input).contains("COUNTER"),"trainer copy has the counter tip")
 	_dive_cue_checks(host,check)
@@ -256,7 +256,7 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	game._training_advance()
 	check.call(not game.trainer_open and not game.trainer_queue.is_empty() and game.lesson == 2,"the next card waits a beat after the lesson-done toast")
 	game._physics_process(BeachGame.TRAINING_DELAY + 0.1)
-	check.call(game.trainer_open and card.counter_label.text == "Lesson 3/%d" % BeachGame.TRAINING_LESSONS and card.lay_label.get_parsed_text().contains("candy from a baby") and card.how_label.get_parsed_text().contains("E/mouse 3"),"the toddler lesson keeps its card, with the candy-from-a-baby line and the peck key")
+	check.call(game.trainer_open and card.counter_label.text == "Lesson 3/%d" % BeachGame.TRAINING_LESSONS and card.lay_label.get_parsed_text().contains("candy from a baby") and card.how_label.get_parsed_text().contains("E/middle click"),"the toddler lesson keeps its card, with the candy-from-a-baby line and the peck key")
 	await host.snapshot("trainer-toddler-card")
 	var before: Vector2 = game.player.position
 	var clock: float = game.elapsed
@@ -548,7 +548,7 @@ static func _counter_flow(host: Node, check: Callable) -> void:
 	await host.snapshot("trainer-counter-tip")
 	var input: GullInput = game.input
 	_set_device(input,"keyboard")
-	check.call(game.overlay.prompt_text() == "DIVE! SHIFT/MOUSE 2","the keyboard prompt names Shift")
+	check.call(game.overlay.prompt_text() == "DIVE! SHIFT/RIGHT CLICK","the keyboard prompt names Shift")
 	_set_device(input,"gamepad")
 	check.call(game.overlay.prompt_text() == "DIVE! B","the gamepad prompt names B")
 	_set_device(input,"touch")
@@ -640,9 +640,11 @@ static func _toddler_flow(host: Node, check: Callable) -> void:
 	game.player.position += (toddler.food_position() - Vector2(8,0)) - game.player.beak()
 	game._training_tick(0.016)
 	check.call(game.peck_pause and game.prompt_action == "peck","standing beside his ice cream freezes the beach on the peck prompt")
+	check.call(game.effects.texts.is_empty(),"the toddler freeze clears toasts and popups so none overlap the prompt")
 	var input: GullInput = game.input
 	_set_device(input,"keyboard")
-	check.call(game.overlay.prompt_text() == "PRESS E/MOUSE 3","the keyboard prompt names E")
+	check.call(game.overlay.prompt_text() == "PRESS E OR CLICK","the keyboard prompt names E or a click")
+	check.call(not game.overlay.prompt_text().contains("MOUSE 3"),"the keyboard prompt never says MOUSE 3")
 	_set_device(input,"gamepad")
 	check.call(game.overlay.prompt_text() == "PRESS X","the gamepad prompt names X")
 	_set_device(input,"touch")
@@ -650,11 +652,19 @@ static func _toddler_flow(host: Node, check: Callable) -> void:
 	_set_device(input,"keyboard")
 	game.overlay.queue_redraw()
 	await host.snapshot("trainer-toddler-prompt")
+	var click: InputEventMouseButton = InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	game.input.flap_tap = true
+	game._unhandled_input(click)
+	check.call(not game.peck_pause and toddler.dropped_pending and not toddler.food,"a left click ends the toddler freeze and pecks his ice cream off")
+	check.call(not game.input.flap_tap and game.player.state != BeachGull.State.WINDUP and game.player.state != BeachGull.State.STRIKE,"the left click does not also flap or start a dive")
+	game.peck_pause = true # the key path still works
 	var press: InputEventKey = InputEventKey.new()
 	press.physical_keycode = KEY_E
 	press.pressed = true
 	game._unhandled_input(press)
-	check.call(not game.peck_pause and toddler.dropped_pending and not toddler.food,"pressing peck resumes the beach and the same press knocks the ice cream off")
+	check.call(not game.peck_pause,"pressing peck still resumes the beach")
 	game._training_tick(0.016)
 	check.call(not game.peck_pause,"the toddler freeze happens only once")
 	BeachGame.trainer_cards = false
