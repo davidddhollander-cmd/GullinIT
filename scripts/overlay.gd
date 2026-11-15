@@ -215,6 +215,10 @@ func setup(owner_game: BeachGame) -> void:
 	center.mouse_filter = MOUSE_FILTER_IGNORE
 	intro_panel = BeachUI.panel(center)
 	intro_panel.mouse_filter = MOUSE_FILTER_IGNORE
+	var intro_style: StyleBoxFlat = intro_panel.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
+	intro_style.set_border_width_all(2)
+	intro_style.border_color = BeachUI.GOLD
+	intro_panel.add_theme_stylebox_override("panel",intro_style)
 	var intro: VBoxContainer = VBoxContainer.new()
 	intro_panel.add_child(intro)
 	if not game.is_vs() and not game.practice:
@@ -256,7 +260,7 @@ func setup(owner_game: BeachGame) -> void:
 			_small(BeachUI.label(intro,"BONUS QUESTS - OPTIONAL",8,BeachUI.GOLD))
 			for quest: Dictionary in game.quests.quests:
 				_small(BeachUI.label(intro,"- %s  +%d" % [quest.text,int(quest.bonus)],8,Color("80bcb8")))
-			_small(BeachUI.label(intro,"QUEST POINTS COUNT TOWARD YOUR SCORE",8,Color("80bcb8")))
+			_small(BeachUI.label(intro,"WIN FEATHERS TO UNLOCK GULLS/UPGRADES",8,Color("80bcb8")))
 	trainer_intro = BeachGame.trainer_cards and game.training
 	if trainer_intro:
 		intro_panel.hide()
