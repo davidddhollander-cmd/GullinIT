@@ -226,7 +226,7 @@ func setup(owner_game: BeachGame) -> void:
 		BeachUI.label(intro,"MUG THE DUMMY. NO TIMER.")
 		BeachUI.label(intro,"LEAVE FROM THE PAUSE MENU.",8,Color("80bcb8"))
 	elif game.training:
-		BeachUI.label(intro,"FIVE SHORT LESSONS. TAKE YOUR TIME.")
+		BeachUI.label(intro,"SIX SHORT LESSONS. TAKE YOUR TIME.")
 		BeachUI.label(intro,"NO TIMER. NO SCORE. NO MANNERS.",8,Color("80bcb8"))
 		BeachUI.label(intro,"FOLLOW THE GOLDEN RING.",8,BeachUI.GOLD)
 	else:
@@ -341,7 +341,7 @@ func _draw_aim_line(offset: Vector2) -> void:
 	var direction: Vector2 = game.player.direction
 	var ground: float = float(Config.tuning.world.ground)
 	var length: float = (ground - from.y) / direction.y if direction.y > 0.05 else AIM_LINE_LENGTH
-	var color: Color = BeachUI.GOLD if game.aim_lines_up() else BeachUI.CREAM
+	var color: Color = BeachUI.CORAL if game.player.dive_too_steep() else (BeachUI.GOLD if game.aim_lines_up() else BeachUI.CREAM)
 	draw_dashed_line(from,from + direction * minf(length,AIM_LINE_LENGTH),color,1.0,4.0)
 
 # Rival shout-out: head cropped from the rival's own sprite sheet (shouting frame) beside a line of speech.
@@ -708,7 +708,7 @@ func _draw() -> void:
 		_draw_peck_prompt(offset)
 	if game.counter_tip:
 		_draw_counter_tip(offset)
-	if game.aim_pause:
+	if game.aim_pause or game.dive_line_shown():
 		_draw_aim_line(offset)
 	var aim: Vector2 = game.player.aim-offset
 	if game.running:

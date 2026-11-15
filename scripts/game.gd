@@ -1479,6 +1479,10 @@ func _end_aim_pause() -> void:
 	input.touch_dive = false
 	_freeze_actors(false)
 
+## The dive lessons draw the dive line for the whole wind-up and strike (ponytail: arcade levels would just drop the lesson check).
+func dive_line_shown() -> bool:
+	return training and (lesson == DIVE_LESSON or lesson == MUG_LESSON) and player.state in [BeachGull.State.WINDUP,BeachGull.State.STRIKE]
+
 ## True when the frozen dive's line reaches the snack, so the overlay can turn it gold.
 func aim_lines_up() -> bool:
 	var snack: Vector2 = training_target()
@@ -1629,6 +1633,8 @@ func training_text() -> String:
 		return TrainerScript.line(live.crash, input)
 	if training_miss_hint > 0.0:
 		return TrainerScript.line(live[training_miss_line], input)
+	if (lesson == DIVE_LESSON or lesson == MUG_LESSON) and player.dive_too_steep():
+		return TrainerScript.line(live.too_steep, input)
 	if lesson >= TRAINING_LESSONS:
 		return TrainerScript.line(live.practice, input)
 	var data: Dictionary = Config.trainer.training.lessons[mini(lesson, TRAINING_LESSONS-1)]

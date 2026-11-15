@@ -885,6 +885,12 @@ func crash_risk() -> float:
 		return 0.0
 	return maxf(velocity.y,0) / float(Config.tuning.dive.crash_vertical_speed)
 
+## Training cue: a wind-up or dive steeper than dive.safe_angle (degrees below horizontal).
+func dive_too_steep() -> bool:
+	if state not in [State.WINDUP,State.STRIKE] or direction.y <= 0.0:
+		return false
+	return rad_to_deg(atan2(direction.y,absf(direction.x))) > float(Config.tuning.dive.safe_angle)
+
 func crash_warning() -> bool:
 	if crash_risk() < float(Config.tuning.dive.warning_risk):
 		return false
