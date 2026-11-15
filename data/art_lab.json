@@ -4308,13 +4308,13 @@
     },
     {
       "title": "CRUMB LADY WALK",
-      "description": "NEW CHARACTER. SMOOTH LEFT. LIGHT PIXEL PASS RIGHT. SHOPPER BETWEEN.",
+      "description": "NEW CHARACTER. LIGHT LEFT. MEDIUM PIXELS RIGHT. SHOPPER BETWEEN.",
       "current": "shopper_mullet",
       "current_override": {
-        "file": "res://assets/lab/crumb-lady-v2-sheet.png",
-        "frame_w": 256,
-        "frame_h": 250,
-        "visual_scale": 0.15,
+        "file": "res://assets/lab/crumb-lady-v2-light.png",
+        "frame_w": 154,
+        "frame_h": 150,
+        "visual_scale": 0.25,
         "animations": {
           "idle": {
             "frames": [
@@ -4374,10 +4374,10 @@
         }
       },
       "candidate": {
-        "file": "res://assets/lab/crumb-lady-v2-light.png",
-        "frame_w": 154,
-        "frame_h": 150,
-        "visual_scale": 0.25,
+        "file": "res://assets/lab/crumb-lady-v2-medium.png",
+        "frame_w": 115,
+        "frame_h": 112,
+        "visual_scale": 0.3333333333333333,
         "animations": {
           "idle": {
             "frames": [
@@ -4443,13 +4443,13 @@
     },
     {
       "title": "CRUMB LADY PANIC RUN",
-      "description": "NEW CHARACTER. PANIC RUN. SMOOTH LEFT. LIGHT PASS RIGHT.",
+      "description": "NEW CHARACTER. PANIC RUN. LIGHT LEFT. MEDIUM RIGHT.",
       "current": "shopper_mullet",
       "current_override": {
-        "file": "res://assets/lab/crumb-lady-v2-sheet.png",
-        "frame_w": 256,
-        "frame_h": 250,
-        "visual_scale": 0.15,
+        "file": "res://assets/lab/crumb-lady-v2-light.png",
+        "frame_w": 154,
+        "frame_h": 150,
+        "visual_scale": 0.25,
         "animations": {
           "idle": {
             "frames": [
@@ -4509,10 +4509,10 @@
         }
       },
       "candidate": {
-        "file": "res://assets/lab/crumb-lady-v2-light.png",
-        "frame_w": 154,
-        "frame_h": 150,
-        "visual_scale": 0.25,
+        "file": "res://assets/lab/crumb-lady-v2-medium.png",
+        "frame_w": 115,
+        "frame_h": 112,
+        "visual_scale": 0.3333333333333333,
         "animations": {
           "idle": {
             "frames": [
@@ -4578,13 +4578,13 @@
     },
     {
       "title": "CRUMB LADY HIT",
-      "description": "NEW CHARACTER. ANGRY SWAT. SMOOTH LEFT. LIGHT PASS RIGHT.",
+      "description": "NEW CHARACTER. ANGRY SWAT. LIGHT LEFT. MEDIUM RIGHT.",
       "current": "shopper_mullet",
       "current_override": {
-        "file": "res://assets/lab/crumb-lady-v2-sheet.png",
-        "frame_w": 256,
-        "frame_h": 250,
-        "visual_scale": 0.15,
+        "file": "res://assets/lab/crumb-lady-v2-light.png",
+        "frame_w": 154,
+        "frame_h": 150,
+        "visual_scale": 0.25,
         "animations": {
           "idle": {
             "frames": [
@@ -4644,10 +4644,10 @@
         }
       },
       "candidate": {
-        "file": "res://assets/lab/crumb-lady-v2-light.png",
-        "frame_w": 154,
-        "frame_h": 150,
-        "visual_scale": 0.25,
+        "file": "res://assets/lab/crumb-lady-v2-medium.png",
+        "frame_w": 115,
+        "frame_h": 112,
+        "visual_scale": 0.3333333333333333,
         "animations": {
           "idle": {
             "frames": [
@@ -4713,72 +4713,9 @@
     },
     {
       "title": "CRUMB LADY SOW CRUMBS",
-      "description": "NEW CHARACTER. CRUMB THROW. SMOOTH LEFT. LIGHT PASS RIGHT.",
+      "description": "NEW CHARACTER. CRUMB THROW. LIGHT LEFT. MEDIUM RIGHT.",
       "current": "shopper_mullet",
       "current_override": {
-        "file": "res://assets/lab/crumb-lady-v2-sheet.png",
-        "frame_w": 256,
-        "frame_h": 250,
-        "visual_scale": 0.15,
-        "animations": {
-          "idle": {
-            "frames": [
-              0.0
-            ],
-            "fps": 4,
-            "loop": true
-          },
-          "walk": {
-            "frames": [
-              0.0,
-              1.0,
-              2.0,
-              3.0,
-              4.0,
-              5.0
-            ],
-            "fps": 8,
-            "loop": true
-          },
-          "swat": {
-            "frames": [
-              6.0,
-              7.0,
-              8.0,
-              9.0,
-              10.0,
-              11.0
-            ],
-            "fps": 10,
-            "loop": false
-          },
-          "run": {
-            "frames": [
-              12.0,
-              13.0,
-              14.0,
-              15.0,
-              16.0,
-              17.0
-            ],
-            "fps": 10,
-            "loop": true
-          },
-          "sow": {
-            "frames": [
-              18.0,
-              19.0,
-              20.0,
-              21.0,
-              22.0,
-              23.0
-            ],
-            "fps": 8,
-            "loop": false
-          }
-        }
-      },
-      "candidate": {
         "file": "res://assets/lab/crumb-lady-v2-light.png",
         "frame_w": 154,
         "frame_h": 150,
@@ -4841,9 +4778,207 @@
           }
         }
       },
+      "candidate": {
+        "file": "res://assets/lab/crumb-lady-v2-medium.png",
+        "frame_w": 115,
+        "frame_h": 112,
+        "visual_scale": 0.3333333333333333,
+        "animations": {
+          "idle": {
+            "frames": [
+              0.0
+            ],
+            "fps": 4,
+            "loop": true
+          },
+          "walk": {
+            "frames": [
+              0.0,
+              1.0,
+              2.0,
+              3.0,
+              4.0,
+              5.0
+            ],
+            "fps": 8,
+            "loop": true
+          },
+          "swat": {
+            "frames": [
+              6.0,
+              7.0,
+              8.0,
+              9.0,
+              10.0,
+              11.0
+            ],
+            "fps": 10,
+            "loop": false
+          },
+          "run": {
+            "frames": [
+              12.0,
+              13.0,
+              14.0,
+              15.0,
+              16.0,
+              17.0
+            ],
+            "fps": 10,
+            "loop": true
+          },
+          "sow": {
+            "frames": [
+              18.0,
+              19.0,
+              20.0,
+              21.0,
+              22.0,
+              23.0
+            ],
+            "fps": 8,
+            "loop": false
+          }
+        }
+      },
       "reference": "shopper_mullet",
       "motion": "idle",
       "animation": "sow",
+      "category": "characters"
+    },
+    {
+      "title": "CRUMB LADY MEDIUM VS CHUNKY",
+      "description": "NEW CHARACTER. MEDIUM LEFT. CHUNKY RIGHT AT THE SHOPPER PIXEL SIZE. SHOPPER BETWEEN.",
+      "current": "shopper_mullet",
+      "current_override": {
+        "file": "res://assets/lab/crumb-lady-v2-medium.png",
+        "frame_w": 115,
+        "frame_h": 112,
+        "visual_scale": 0.3333333333333333,
+        "animations": {
+          "idle": {
+            "frames": [
+              0.0
+            ],
+            "fps": 4,
+            "loop": true
+          },
+          "walk": {
+            "frames": [
+              0.0,
+              1.0,
+              2.0,
+              3.0,
+              4.0,
+              5.0
+            ],
+            "fps": 8,
+            "loop": true
+          },
+          "swat": {
+            "frames": [
+              6.0,
+              7.0,
+              8.0,
+              9.0,
+              10.0,
+              11.0
+            ],
+            "fps": 10,
+            "loop": false
+          },
+          "run": {
+            "frames": [
+              12.0,
+              13.0,
+              14.0,
+              15.0,
+              16.0,
+              17.0
+            ],
+            "fps": 10,
+            "loop": true
+          },
+          "sow": {
+            "frames": [
+              18.0,
+              19.0,
+              20.0,
+              21.0,
+              22.0,
+              23.0
+            ],
+            "fps": 8,
+            "loop": false
+          }
+        }
+      },
+      "candidate": {
+        "file": "res://assets/lab/crumb-lady-v2-chunky.png",
+        "frame_w": 77,
+        "frame_h": 75,
+        "visual_scale": 0.5,
+        "animations": {
+          "idle": {
+            "frames": [
+              0.0
+            ],
+            "fps": 4,
+            "loop": true
+          },
+          "walk": {
+            "frames": [
+              0.0,
+              1.0,
+              2.0,
+              3.0,
+              4.0,
+              5.0
+            ],
+            "fps": 8,
+            "loop": true
+          },
+          "swat": {
+            "frames": [
+              6.0,
+              7.0,
+              8.0,
+              9.0,
+              10.0,
+              11.0
+            ],
+            "fps": 10,
+            "loop": false
+          },
+          "run": {
+            "frames": [
+              12.0,
+              13.0,
+              14.0,
+              15.0,
+              16.0,
+              17.0
+            ],
+            "fps": 10,
+            "loop": true
+          },
+          "sow": {
+            "frames": [
+              18.0,
+              19.0,
+              20.0,
+              21.0,
+              22.0,
+              23.0
+            ],
+            "fps": 8,
+            "loop": false
+          }
+        }
+      },
+      "reference": "shopper_mullet",
+      "motion": "walk_across",
+      "animation": "walk",
       "category": "characters"
     },
     {
