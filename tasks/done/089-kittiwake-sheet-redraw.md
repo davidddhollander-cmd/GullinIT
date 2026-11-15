@@ -1,6 +1,6 @@
 # 089: Kittiwake screech art
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: none
@@ -53,3 +53,4 @@ Implemented on `codex/089-kittiwake-screech-art` in `C:/Users/david/Documents/Ch
 
 ## Review notes
 
+Reviewed by Claude (Opus), 2026-11-15. Merged so David can eyeball it in game. Size and baseline match the idle. Watch for: the mantle grey is darker than David's retouched idle (about 115 vs 145), and the head, legs and outline are heavier, so frame 0 visibly pops from idle. A redo against the idle may follow if it shows in play.
