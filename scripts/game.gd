@@ -126,6 +126,7 @@ var peck_hold_touch: bool = false
 # Level 2's first-play herring lesson: fly in to the sign, screech, Gang Call, grab. The level clock is paused meanwhile.
 var screech_lesson: bool = false
 var screech_step: int = 0
+var screech_fired_base: int = 0 ## brash.powers_fired when the lesson began; any special fired since completes the lesson
 const SCREECH_STEPS: int = 2
 const SCREECH_FLY_TIME: float = 3.0 ## the scripted fly-in always lands on the sign after this long
 var screech_landing: bool = false ## level 2's opening fly-in: the gull glides onto the sign by itself, input ignored
@@ -1785,6 +1786,7 @@ func _screech_land(open_card: bool) -> void:
 	player.velocity = Vector2(0,30)
 	player.land()
 	brash.meter = maxf(brash.meter,float(screech_settings().get("start_meter",0.6)))
+	screech_fired_base = brash.powers_fired
 	if open_card:
 		open_trainer(_trainer_entry("screech", 0))
 
@@ -1832,14 +1834,16 @@ func _screech_lesson_tick(delta: float) -> void:
 			target.respawn = 0.0
 	if screech_landing:
 		return
+	if brash.powers_fired > screech_fired_base: # any species' special, even one fired the frame the meter filled
+		while screech_lesson:
+			_screech_advance()
+		return
 	match screech_step:
 		0:
 			if brash.is_full():
 				_screech_advance()
 		1:
-			if not brash.allies.is_empty():
-				_screech_advance()
-			elif not brash.is_full():
+			if not brash.is_full(): # the meter drained without a special firing (stun)
 				screech_step = 0
 
 func screech_lesson_text() -> String:
