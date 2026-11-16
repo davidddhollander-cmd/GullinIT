@@ -57,7 +57,7 @@ static func _demo_lock_checks(suite: Node, check: Callable) -> void:
 		suite.main.menus.level_select()
 		await suite.settle()
 		for button: Button in _buttons(suite.main.menus, []):
-			if button.name.begins_with("Page") or not button.text[0].is_valid_int():
+			if button.name.begins_with("Page") or not button.name.begins_with("Level"):
 				continue
 			if page == 0:
 				page0_cards += 1
@@ -76,7 +76,7 @@ static func _demo_lock_checks(suite: Node, check: Callable) -> void:
 	await suite.settle()
 	var has_four: bool = false
 	for button: Button in _buttons(suite.main.menus, []):
-		has_four = has_four or button.text.begins_with("04")
+		has_four = has_four or button.name == "Level04"
 	check.call(has_four and suite.main.menus.find_child("PagePrev", true, false) != null, "next arrow reaches level 4 and offers a back arrow")
 	await suite.snapshot("level-select-page1")
 	suite.main.menus.level_page = 0

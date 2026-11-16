@@ -104,7 +104,7 @@ func _process(delta: float) -> void:
 func _navigate(action: String, payload: Variant = null) -> void:
 	for node: CanvasItem in _scenery:
 		if is_instance_valid(node):
-			node.visible = action not in ["practice", "gull_practice"] # the gull cycler stays on the Practice menu
+			node.visible = action not in ["practice", "gull_practice", "select"] # the gull cycler stays on the Practice menu
 	match action:
 		"title":
 			clear_game()

@@ -159,15 +159,13 @@ func level_select() -> void:
 	var trained: bool = bool(GameState.entry(1).get("training_complete", false))
 	clear("STAGE 1: LEARNING THE GULLIN'","",false,BeachUI.FONT_NATIVE)
 	content.add_theme_constant_override("separation",3)
-	# Keep the outer margins: the whole wood frame must stay on screen. The frame shrinks around its content.
-	var panel: PanelContainer = content.get_parent() as PanelContainer
-	panel.size_flags_horizontal = SIZE_SHRINK_CENTER
-	panel.size_flags_vertical = SIZE_SHRINK_CENTER
+	# The panel fills the normal clear() margin area; the feather tablet sits on its top-right corner.
 	_feather_tablet()
 	var pages: int = ceili(float(Config.levels.size()) / LEVELS_PER_PAGE)
 	level_page = clampi(level_page,0,pages - 1)
 	var row: HBoxContainer = HBoxContainer.new()
 	row.add_theme_constant_override("separation",2)
+	row.size_flags_vertical = SIZE_EXPAND_FILL
 	content.add_child(row)
 	_page_arrow(row,"<",level_page > 0,-1)
 	var first_open: Button
@@ -175,18 +173,43 @@ func level_select() -> void:
 		var id: int = level.id
 		var unlocked: bool = GameState.unlocked(id)
 		var locked_demo: bool = GameState.demo_locked(id)
-		var status: String = "" if locked_demo else ("LOCKED" if not unlocked else (("REPLAY LESSONS" if trained else "BEGIN LESSON") if id == 1 else ""))
+		var status: String = "" if locked_demo else ("LOCKED" if not unlocked else (("REPLAY
+LESSONS" if trained else "BEGIN LESSON") if id == 1 else ""))
 		var words: PackedStringArray = level.name.to_upper().split(" ")
 		var last_word: String = words[words.size() - 1] if words.size() > 1 else "" # name on two lines, so every card is four lines and the status line stays at the bottom
 		words.resize(maxi(words.size() - 1,1))
 		var name_lines: String = " ".join(words) + "
 " + last_word
-		var caption: String = "%02d %s
-%s
-%s" % [id,"*".repeat(int(GameState.entry(id).get("stars",0))),name_lines,status]
+		var caption: String = name_lines + "
+" + status # number and stars are child nodes: the font gives blank lines no height
 		var button: Button = BeachUI.button(row,caption,func() -> void: choose("start",id),70)
+		button.name = "Level%02d" % id
 		button.custom_minimum_size = Vector2(70,52)
-		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART # REPLAY LESSONS wraps instead of widening the frame
+		button.size_flags_vertical = SIZE_EXPAND_FILL
+		var head: VBoxContainer = VBoxContainer.new()
+		head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		head.add_theme_constant_override("separation",2)
+		head.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+		head.offset_top = 8
+		button.add_child(head)
+		var number: Label = BeachUI.label(head,"%02d" % id,BeachUI.FONT_NATIVE,BeachUI.CREAM)
+		number.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var stars: HBoxContainer = HBoxContainer.new()
+		stars.name = "Stars"
+		stars.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		stars.alignment = BoxContainer.ALIGNMENT_CENTER
+		stars.custom_minimum_size.y = 8
+		stars.add_theme_constant_override("separation",1)
+		head.add_child(stars)
+		for i: int in int(GameState.entry(id).get("stars",0)):
+			var star: TextureRect = TextureRect.new()
+			star.texture = BeachUI.STAR_ICON
+			star.custom_minimum_size = Vector2(8,8)
+			star.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			star.stretch_mode = TextureRect.STRETCH_SCALE
+			star.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			star.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			stars.add_child(star)
 		button.size_flags_horizontal = SIZE_EXPAND_FILL
 		button.disabled = not unlocked
 		if locked_demo:
@@ -211,14 +234,50 @@ func level_select() -> void:
 func _page_arrow(row: HBoxContainer, text: String, shown: bool, step: int) -> void:
 	if not shown:
 		var gap: Control = Control.new() # keeps the cards centred when there is no page that way
-		gap.custom_minimum_size.x = 14
+		gap.custom_minimum_size.x = 12
 		row.add_child(gap)
 		return
 	var arrow: Button = BeachUI.button(row,text,func() -> void:
 		level_page += step
-		level_select(),14)
+		level_select(),12)
 	arrow.name = "PageNext" if step > 0 else "PagePrev"
-	arrow.size_flags_vertical = SIZE_EXPAND_FILL
+	arrow.custom_minimum_size = Vector2(12,16)
+	arrow.size_flags_vertical = SIZE_SHRINK_CENTER
+	arrow.add_theme_color_override("font_color",BeachUI.CREAM)
+	arrow.add_theme_color_override("font_hover_color",BeachUI.CREAM)
+	arrow.add_theme_color_override("font_pressed_color",BeachUI.CREAM)
+	arrow.add_theme_color_override("font_focus_color",BeachUI.CREAM)
+	for state: String in ["normal","hover","pressed","focus"]:
+		var box: StyleBoxFlat = StyleBoxFlat.new()
+		box.bg_color = Color(1,1,1,0.25) if state == "hover" else (Color(0,0,0,0.25) if state == "pressed" else Color(0,0,0,0)) # the wood shows through from behind
+		box.border_color = BeachUI.GOLD if state == "focus" else Color("3b2412")
+		box.set_border_width_all(1)
+		box.set_corner_radius_all(4)
+		box.content_margin_left = 1
+		box.content_margin_right = 1
+		box.content_margin_top = 0
+		box.content_margin_bottom = 0
+		arrow.add_theme_stylebox_override(state,box)
+	# plain plank cropped from the wood frame, clipped to the rounded shape
+	var clip: Panel = Panel.new()
+	clip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	clip.clip_children = CanvasItem.CLIP_CHILDREN_ONLY
+	var round_box: StyleBoxFlat = StyleBoxFlat.new()
+	round_box.set_corner_radius_all(4)
+	clip.add_theme_stylebox_override("panel",round_box)
+	clip.show_behind_parent = true
+	BeachUI.full(clip)
+	var wood: TextureRect = TextureRect.new()
+	var region: AtlasTexture = AtlasTexture.new()
+	region.atlas = BeachUI.WOOD_FRAME_HIRES
+	region.region = Rect2(45,6,24,9)
+	wood.texture = region
+	wood.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	wood.stretch_mode = TextureRect.STRETCH_SCALE
+	wood.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	BeachUI.full(wood)
+	clip.add_child(wood)
+	arrow.add_child(clip)
 
 func gull_picker() -> void:
 	clear("PICK YOUR GULL")
