@@ -155,6 +155,7 @@ func title() -> void:
 		_small_button(small,"QUIT",func() -> void: choose("quit"))
 
 const LEVELS_PER_PAGE: int = 3
+const PAGE_ARROW: Texture2D = preload("res://assets/ui/page-arrow-gold.png")
 const LEVEL_SELECT_HEIGHT: float = 126.0 ## three quarters of the full-screen board
 const LEVEL_CARD_HEAD: float = 22.0 ## number and stars sit above the name
 const LOCKED_RED: Color = Color("d12f2f")
@@ -255,53 +256,38 @@ LESSONS" if trained else "BEGIN LESSON") if id == 1 else ""))
 func _page_arrow(row: HBoxContainer, text: String, shown: bool, step: int) -> void:
 	if not shown:
 		var gap: Control = Control.new() # keeps the cards centred when there is no page that way
-		gap.custom_minimum_size.x = 16
+		gap.custom_minimum_size.x = 13
 		row.add_child(gap)
 		return
-	var arrow: Button = BeachUI.button(row,text,func() -> void:
-		level_page += step
-		level_select(),12)
+	# Gold pixel arrow (assets/ui/page-arrow-gold.png points right; the left one is mirrored).
+	var image: Image = PAGE_ARROW.get_image()
+	if step < 0:
+		image.flip_x()
+	var arrow: Button = Button.new()
 	arrow.name = "PageNext" if step > 0 else "PagePrev"
-	arrow.custom_minimum_size = Vector2(16,22)
+	arrow.tooltip_text = text
+	arrow.icon = ImageTexture.create_from_image(image)
+	arrow.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	arrow.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	arrow.custom_minimum_size = Vector2(13,17)
 	arrow.size_flags_vertical = SIZE_SHRINK_CENTER
-	arrow.add_theme_font_size_override("font_size",BeachUI.FONT_DISPLAY) # big, bold glyph
-	arrow.add_theme_color_override("font_outline_color",Color("3b2412"))
-	arrow.add_theme_constant_override("outline_size",2)
-	arrow.add_theme_color_override("font_color",BeachUI.CREAM)
-	arrow.add_theme_color_override("font_hover_color",BeachUI.CREAM)
-	arrow.add_theme_color_override("font_pressed_color",BeachUI.CREAM)
-	arrow.add_theme_color_override("font_focus_color",BeachUI.CREAM)
+	arrow.add_theme_color_override("icon_hover_color",Color(1.25,1.25,1.25))
+	arrow.add_theme_color_override("icon_focus_color",Color(1.25,1.25,1.25))
+	arrow.add_theme_color_override("icon_pressed_color",Color(0.8,0.8,0.8))
 	for state: String in ["normal","hover","pressed","focus"]:
 		var box: StyleBoxFlat = StyleBoxFlat.new()
-		box.bg_color = Color(1,1,1,0.25) if state == "hover" else (Color(0,0,0,0.25) if state == "pressed" else Color(0,0,0,0)) # the wood shows through from behind
-		box.border_color = BeachUI.GOLD if state == "focus" else Color("3b2412")
+		box.bg_color = Color(0,0,0,0)
+		box.border_color = BeachUI.GOLD if state == "focus" else Color(0,0,0,0)
 		box.set_border_width_all(1)
-		box.set_corner_radius_all(4)
-		box.content_margin_left = 1
-		box.content_margin_right = 1
-		box.content_margin_top = 0
-		box.content_margin_bottom = 0
+		box.set_corner_radius_all(3)
+		box.anti_aliasing = false
+		box.set_content_margin_all(1)
 		arrow.add_theme_stylebox_override(state,box)
-	# plain plank cropped from the wood frame, clipped to the rounded shape
-	var clip: Panel = Panel.new()
-	clip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	clip.clip_children = CanvasItem.CLIP_CHILDREN_ONLY
-	var round_box: StyleBoxFlat = StyleBoxFlat.new()
-	round_box.set_corner_radius_all(4)
-	clip.add_theme_stylebox_override("panel",round_box)
-	clip.show_behind_parent = true
-	BeachUI.full(clip)
-	var wood: TextureRect = TextureRect.new()
-	var region: AtlasTexture = AtlasTexture.new()
-	region.atlas = BeachUI.WOOD_FRAME_HIRES
-	region.region = Rect2(45,6,24,9)
-	wood.texture = region
-	wood.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	wood.stretch_mode = TextureRect.STRETCH_SCALE
-	wood.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	BeachUI.full(wood)
-	clip.add_child(wood)
-	arrow.add_child(clip)
+	arrow.pressed.connect(func() -> void:
+		Audio.play("gull_call", 1.0, -8.0)
+		level_page += step
+		level_select())
+	row.add_child(arrow)
 
 func gull_picker() -> void:
 	clear("PICK YOUR GULL")
@@ -767,8 +753,7 @@ func _gull_cycler(on_change: Callable = Callable()) -> void:
 	_small_label(content,"TAP TO SWAP GULL",Color("80bcb8")).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 func _small_button(parent: Control, text: String, action: Callable) -> Button:
-	var node: Button = BeachUI.back_button(parent,text,action,0)
-	node.size_flags_horizontal = SIZE_EXPAND_FILL
+	var node: Button = BeachUI.back_button(parent,text,action,0) # rule: buttons hug their text, never stretch
 	node.add_theme_font_override("font",SMALL_FONT)
 	node.add_theme_font_size_override("font_size",6)
 	return node
