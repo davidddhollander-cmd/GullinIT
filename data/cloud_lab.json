@@ -1,0 +1,68 @@
+{
+  "tuning": {
+    "base_speed": 1.5,
+    "wind_speed": 28.0,
+    "depth_by_size": {"small": 0.6, "medium": 1.0, "large": 1.4}
+  },
+  "winds": [
+    {"name": "CALM", "dir": 0, "strength": 0.0},
+    {"name": "L WEAK", "dir": -1, "strength": 0.2},
+    {"name": "R WEAK", "dir": 1, "strength": 0.2},
+    {"name": "L STRONG", "dir": -1, "strength": 0.65},
+    {"name": "R STRONG", "dir": 1, "strength": 0.65},
+    {"name": "GUSTS", "dir": 1, "strength": 0.4, "gust": 0.25, "gust_period": 6.0}
+  ],
+  "layouts": [
+    [
+      {"id": "fair-large-02", "x": 18, "y": 20, "scale": 0.5},
+      {"id": "fair-wisp-02", "x": 100, "y": 34, "scale": 0.5},
+      {"id": "fair-medium-01", "x": 150, "y": 50, "scale": 0.5},
+      {"id": "fair-wisp-01", "x": 40, "y": 62, "scale": 0.5},
+      {"id": "fair-wisp-03", "x": 200, "y": 70, "scale": 0.5}
+    ],
+    [
+      {"id": "fair-medium-02", "x": 10, "y": 24, "scale": 0.5},
+      {"id": "fair-large-01", "x": 110, "y": 18, "scale": 0.5},
+      {"id": "fair-wisp-03", "x": 70, "y": 56, "scale": 0.5},
+      {"id": "fair-medium-03", "x": 170, "y": 60, "scale": 0.5},
+      {"id": "fair-wisp-01", "x": 285, "y": 20, "scale": 0.5},
+      {"id": "fair-wisp-02", "x": 240, "y": 72, "scale": 0.5}
+    ],
+    [
+      {"id": "fair-large-02", "x": 150, "y": 16, "scale": 0.5},
+      {"id": "fair-medium-01", "x": 10, "y": 44, "scale": 1.0},
+      {"id": "fair-wisp-02", "x": 90, "y": 24, "scale": 0.5},
+      {"id": "fair-medium-03", "x": 205, "y": 64, "scale": 0.5},
+      {"id": "fair-wisp-01", "x": 130, "y": 66, "scale": 0.5},
+      {"id": "fair-wisp-03", "x": 280, "y": 40, "scale": 0.5},
+      {"id": "fair-medium-02", "x": 60, "y": 74, "scale": 0.5}
+    ],
+    [
+      {"id": "wind-streak-02", "x": 20, "y": 20, "scale": 0.5},
+      {"id": "wind-streak-04", "x": 150, "y": 36, "scale": 0.5},
+      {"id": "wind-streak-01", "x": 60, "y": 52, "scale": 0.5},
+      {"id": "wind-streak-03", "x": 230, "y": 66, "scale": 0.5},
+      {"id": "wind-streak-01", "x": 270, "y": 18, "scale": 0.5},
+      {"id": "wind-streak-03", "x": 110, "y": 70, "scale": 0.5}
+    ],
+    [
+      {"id": "wind-streak-04", "x": 0, "y": 18, "scale": 0.5},
+      {"id": "wind-streak-02", "x": 120, "y": 28, "scale": 0.5},
+      {"id": "wind-streak-03", "x": 40, "y": 44, "scale": 0.5},
+      {"id": "wind-streak-01", "x": 190, "y": 52, "scale": 0.5},
+      {"id": "wind-streak-04", "x": 80, "y": 66, "scale": 0.5},
+      {"id": "wind-streak-02", "x": 250, "y": 70, "scale": 0.5},
+      {"id": "wind-streak-03", "x": 275, "y": 20, "scale": 0.5}
+    ],
+    [
+      {"id": "wind-streak-03", "x": 10, "y": 16, "scale": 0.5},
+      {"id": "wind-streak-01", "x": 120, "y": 22, "scale": 0.5},
+      {"id": "wind-streak-04", "x": 20, "y": 38, "scale": 0.5},
+      {"id": "wind-streak-02", "x": 175, "y": 40, "scale": 0.5},
+      {"id": "wind-streak-01", "x": 60, "y": 58, "scale": 0.5},
+      {"id": "wind-streak-03", "x": 215, "y": 52, "scale": 0.5},
+      {"id": "wind-streak-04", "x": 140, "y": 62, "scale": 0.5},
+      {"id": "wind-streak-02", "x": 280, "y": 28, "scale": 0.5}
+    ]
+  ]
+}

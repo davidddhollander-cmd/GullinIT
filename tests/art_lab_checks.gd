@@ -2,7 +2,7 @@ extends RefCounted
 ## Art Lab (task 044): data shape, self-test parity, key toggles and export exclusion.
 
 const MOTIONS: Array[String] = ["fly_across", "dive", "walk_across", "idle", "on_sand", "in_beak", "static"]
-const LAB_FILES: Array[String] = ["scenes/art_lab.tscn", "scripts/art_lab.gd", "data/art_lab.json"]
+const LAB_FILES: Array[String] = ["scenes/art_lab.tscn", "scripts/art_lab.gd", "data/art_lab.json", "scripts/cloud_layer.gd", "data/cloud_lab.json", "assets/shaders/cloud_dusk.gdshader"]
 
 static func _key(lab: Node, keycode: Key) -> void:
 	var event: InputEventKey = InputEventKey.new()
@@ -78,6 +78,61 @@ static func run(host: Node, check: Callable) -> void:
 	_key(lab, KEY_G)
 	_key(lab, KEY_D)
 	check.call(lab.backdrop.background_art == null and not lab.backdrop.sunset, "G and D switch back")
+
+	# Task 095: separate drifting clouds (prototype, lab only).
+	var layouts: Array = lab.cloud_data.layouts
+	var signatures: Dictionary = {}
+	for layout: Array in layouts:
+		signatures[JSON.stringify(layout)] = true
+	check.call(layouts.size() == 6 and signatures.size() == 6, "six distinct cloud layouts, one per level")
+	_key(lab, KEY_K)
+	check.call(lab.new_clouds and lab.new_sky and lab.clouds != null and lab.clouds.clouds.size() == layouts[0].size(), "K shows the cloud layer on the generated sky")
+	var layer: CloudLayer = lab.clouds
+	_key(lab, KEY_L)
+	check.call(lab.cloud_layout == 1 and lab.clouds.clouds.size() == layouts[1].size(), "L cycles the layout")
+	layer = lab.clouds
+	# Drift: heading follows wind direction, bigger clouds move faster, wrap keeps x on screen.
+	layer.update(10.0, 1, 0.5)
+	var start: Array = layer.clouds.map(func(c: Dictionary) -> float: return c.x)
+	layer.update(11.0, 1, 0.5)
+	var moved_right: bool = true
+	for i: int in layer.clouds.size():
+		moved_right = moved_right and (layer.clouds[i].x > start[i] or layer.clouds[i].x < start[i] - layer.clouds[i].width) # wrapped counts
+	check.call(moved_right, "clouds drift right in a right wind")
+	var before_left: Array = layer.clouds.map(func(c: Dictionary) -> float: return c.x)
+	layer.update(12.0, -1, 0.5)
+	var moved_left: bool = true
+	for i: int in layer.clouds.size():
+		moved_left = moved_left and (layer.clouds[i].x < before_left[i] or layer.clouds[i].x > before_left[i] + layer.clouds[i].width)
+	check.call(moved_left, "clouds drift left in a left wind")
+	var slow: Dictionary = {"x": 0.0}
+	var fast: Dictionary = {"x": 0.0}
+	for cloud: Dictionary in layer.clouds:
+		if cloud.depth < 1.0 and slow.x == 0.0:
+			slow = cloud
+		if cloud.depth > 1.0 and fast.x == 0.0:
+			fast = cloud
+	check.call(slow.depth < fast.depth, "bigger clouds are nearer and drift faster")
+	var on_screen: bool = true
+	for t: int in 600:
+		layer.update(30.0 + float(t) * 0.5, 1, 0.65)
+		for cloud: Dictionary in layer.clouds:
+			on_screen = on_screen and cloud.x >= -cloud.width and cloud.x <= CloudLayer.SCREEN_W
+	check.call(on_screen, "clouds wrap so they stay within a screen width of the edges")
+	var calm_before: Array = layer.clouds.map(func(c: Dictionary) -> float: return c.x)
+	layer.update(layer.last_time, 1, 0.65) # same clock reading: a paused lab advances nothing
+	check.call(layer.clouds.map(func(c: Dictionary) -> float: return c.x) == calm_before, "a frozen clock freezes the clouds")
+	layer.update(layer.last_time + 1.0, 0, 0.0)
+	check.call(layer.clouds.map(func(c: Dictionary) -> float: return c.x) != calm_before, "calm wind still drifts slowly")
+	_key(lab, KEY_W)
+	check.call(lab.wind_mode == 1, "W cycles the wind")
+	_key(lab, KEY_D)
+	check.call(lab.clouds.clouds[0].sprite.material != null, "dusk tints the clouds")
+	_key(lab, KEY_G)
+	check.call(not lab.new_clouds and lab.clouds == null, "G off removes the clouds with the generated sky")
+	_key(lab, KEY_D)
+	lab.wind_mode = 0
+	lab.cloud_layout = 0
 	_key(lab, KEY_B)
 	check.call(lab.blind and lab.side_labels[0].text == "" and lab.side_labels[1].text == "", "B hides the labels")
 	_key(lab, KEY_B)

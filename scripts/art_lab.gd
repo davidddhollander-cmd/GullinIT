@@ -28,6 +28,11 @@ var paused: bool = false
 var step_once: bool = false
 var new_sky: bool = false ## G: generated sky/sun/sea (BeachBackgroundArt) instead of the live drawn one
 var dusk: bool = false ## D: the title screen's sunset version of the backdrop
+var new_clouds: bool = false ## K: separate drifting clouds (task 095 prototype) over a flat generated sky
+var cloud_layout: int = 0 ## L: which of the six level layouts
+var wind_mode: int = 0 ## W: index into data/cloud_lab.json "winds"
+var cloud_data: Dictionary = {}
+var clouds: CloudLayer
 var pair_x: float = REST_X
 var dir: float = 1.0
 var dive_timer: float = 0.0
@@ -53,6 +58,7 @@ func _ready() -> void:
 		return
 	for i: int in comparisons.size():
 		candidate_ids.append(_register(i, comparisons[i]))
+	cloud_data = CloudLayer.lab_data()
 	_build_backdrop()
 	stage = Node2D.new()
 	stage.y_sort_enabled = true
@@ -63,6 +69,8 @@ func _ready() -> void:
 	_select(0)
 	if OS.get_cmdline_user_args().has("--capture"):
 		_capture_run()
+	elif OS.get_cmdline_user_args().has("--capture-clouds"):
+		_capture_clouds_run()
 
 ## The backdrop reads its sky and sunset settings in setup(), so toggling them rebuilds it.
 func _build_backdrop() -> void:
@@ -75,6 +83,28 @@ func _build_backdrop() -> void:
 	add_child(backdrop)
 	move_child(backdrop, 0)
 	backdrop.setup([])
+	clouds = null
+	if new_clouds and backdrop.background_art != null:
+		var sky: Image = Image.create(320, 80, false, Image.FORMAT_RGBA8)
+		sky.fill(BeachBackgroundArt.SKY_COLOR)
+		backdrop.background_art.sky.texture = ImageTexture.create_from_image(sky) # hides the baked clouds, keeps the dusk shader's rows
+		clouds = CloudLayer.new()
+		backdrop.background_art.add_child(clouds) # after the sun, so clouds pass in front of it
+		clouds.setup(cloud_data.layouts[cloud_layout], dusk)
+		_update_clouds()
+
+## Wind as the game would feed it: direction and strength, with an optional sine gust on top.
+func _wind() -> Dictionary:
+	var wind: Dictionary = cloud_data.winds[wind_mode]
+	var strength: float = float(wind.strength)
+	if wind.has("gust"):
+		strength += float(wind.gust) * sin(backdrop.time * TAU / float(wind.gust_period))
+	return {"dir": int(wind.dir), "strength": maxf(strength, 0.0)}
+
+func _update_clouds() -> void:
+	if clouds != null:
+		var wind: Dictionary = _wind()
+		clouds.update(backdrop.time, wind.dir, wind.strength)
 
 ## A candidate is an sprites.json-shaped entry; `clone` copies a live entry first so a self-test stays short.
 func _register(i: int, entry: Dictionary) -> String:
@@ -118,7 +148,7 @@ func _build_hud() -> void:
 		side_labels.append(_label(layer, Vector2(x, 22), 80, HORIZONTAL_ALIGNMENT_CENTER))
 	reference_label = _label(layer, Vector2(120, 22), 80, HORIZONTAL_ALIGNMENT_CENTER)
 	_label(layer, Vector2(2, 161), 316, HORIZONTAL_ALIGNMENT_LEFT).text = "ARROWS PICK  TAB GROUP  Z ZOOM  B BLIND  F FILTER"
-	_label(layer, Vector2(2, 170), 316, HORIZONTAL_ALIGNMENT_LEFT).text = "I INT  P PAUSE  . STEP  C CAPTURE  G SKY  D DUSK"
+	_label(layer, Vector2(2, 170), 316, HORIZONTAL_ALIGNMENT_LEFT).text = "I INT P PAUSE . STEP C CAP G SKY D DUSK K CLD L LAY W WIND"
 
 func _label(parent: Node, at: Vector2, width: float, align: HorizontalAlignment) -> Label:
 	var label: Label = Label.new()
@@ -214,6 +244,7 @@ func _lane(i: int) -> float:
 
 func _advance(d: float) -> void:
 	backdrop.tick(d)
+	_update_clouds()
 	match motion:
 		"fly_across", "dive", "in_beak":
 			_fly(d, motion == "dive")
@@ -336,10 +367,12 @@ func _refresh_hud() -> void:
 		flags.append("BLIND")
 	if paused:
 		flags.append("PAUSED")
-	if new_sky:
+	if new_sky and not new_clouds:
 		flags.append("NEW SKY")
 	if dusk:
 		flags.append("DUSK")
+	if new_clouds:
+		flags.append("CLD L%d %s" % [cloud_layout + 1, str(cloud_data.winds[wind_mode].name).to_upper()])
 	flags_label.text = " ".join(flags)
 	flags_label.add_theme_color_override("font_color", GOLD if blind else Color("fff4da"))
 	var names: Array[String] = ["CURRENT", "PROPOSED"]
@@ -393,10 +426,21 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_window().content_scale_stretch = Window.CONTENT_SCALE_STRETCH_INTEGER if integer_scale else Window.CONTENT_SCALE_STRETCH_FRACTIONAL
 		KEY_G:
 			new_sky = not new_sky
+			new_clouds = new_clouds and new_sky
 			_build_backdrop()
 		KEY_D:
 			dusk = not dusk
 			_build_backdrop()
+		KEY_K:
+			new_clouds = not new_clouds
+			new_sky = new_sky or new_clouds # the clouds sit on the generated sky
+			_build_backdrop()
+		KEY_L:
+			cloud_layout = (cloud_layout + 1) % cloud_data.layouts.size()
+			_build_backdrop()
+		KEY_W:
+			wind_mode = (wind_mode + 1) % cloud_data.winds.size()
+			_update_clouds()
 		KEY_P:
 			paused = not paused
 		KEY_PERIOD:
@@ -438,4 +482,30 @@ func _capture_run() -> void:
 		for tag: String in ["_a", "_b", "_c"]:
 			await get_tree().create_timer(1.1).timeout
 			await capture_all(tag)
+	get_tree().quit()
+
+## `godot scenes/art_lab.tscn -- --capture-clouds`: all six cloud layouts (plus a dusk one) at 1x and 4x, drifting right in strong wind.
+func _capture_clouds_run() -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(CAPTURE_DIR))
+	new_sky = true
+	new_clouds = true
+	wind_mode = 4
+	for shot: int in 7:
+		cloud_layout = mini(shot, 5)
+		dusk = shot == 6
+		paused = false
+		_build_backdrop()
+		for frame: int in 90: # 1.5 s of drift
+			_advance(STEP)
+		paused = true # frozen, so nothing re-centres the camera on the gulls
+		for z: int in [1, 4]:
+			camera.zoom = Vector2.ONE * z
+			camera.position = Vector2(160.0, 90.0 if z == 1 else 45.0)
+			backdrop.camera_x = camera.position.x
+			backdrop.tick(0.0)
+			await get_tree().process_frame
+			await RenderingServer.frame_post_draw
+			var path: String = "%s/clouds-layout-%d%s_%dx.png" % [ProjectSettings.globalize_path(CAPTURE_DIR), cloud_layout + 1, "-dusk" if dusk else "", z]
+			get_viewport().get_texture().get_image().save_png(path)
+			print("Art Lab capture: ", path)
 	get_tree().quit()
