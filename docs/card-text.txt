@@ -286,7 +286,8 @@ Might make a fine thief out of you yet.
 NEW:  Welcome to the beach, gullster. Learn quick and nick everything.
 
 Follow the **golden ring**.
-EDIT: 
+EDIT: Welcome to the beach, young gullster.
+If you want to survive 'n thrive, you got to learn quick. Follow the **golden ring**.
 
 [training.opening.button]
 SAME: Let's gull it
@@ -458,12 +459,12 @@ EDIT:
 OLD:  Now let's get you a proper challenge.
 See the fella with the ice cream? That's yours. Timing is everything...
 NEW:  See the fella with the ice cream? That's yours.
-EDIT: 
+EDIT: Now let's get you a proper challenge. See the fella with the ice cream? That's yours...
 
 [training.lessons[4].how.default]
 OLD:  Fly in from the side, a little above him. Press {dive} and aim at a shallow slant, not straight down. Then tap {peck} as your beak reaches the cone.
-NEW:  Fly towards your target and get ready to dive. Press {dive} to dive and then tap {peck} right when your beak reaches the delicious target.
-EDIT: 
+NEW:  Fly towards your target and get ready to dive. Press {dive} to dive and tap {peck} right when your beak reaches the delicious target.
+EDIT: Fly towards your target and get ready to dive. Press {dive} to dive and get ready to tap {peck}!
 
 [training.lessons[4].how.casual]
 OLD:  Fly in from the side, a little above him. Press {dive} and aim at a shallow slant, not straight down. Casual mode does the pecking, so just fly your beak into the cone. Then aim up.
@@ -472,13 +473,13 @@ EDIT:
 
 [training.lessons[4].how.touch]
 OLD:  Fly in from the side, a little above him. Tap DIVE and aim at a shallow slant, not straight down. Then tap {peck} as your beak reaches the cone.
-NEW:  Fly towards your target and get ready to dive. Tap DIVE to dive and then tap {peck} right when your beak reaches the delicious target.
-EDIT: 
+NEW:  Fly towards your target and get ready to dive. Tap DIVE to dive and and get ready to tap {peck}!
+EDIT: Fly towards your target and get ready to dive. Tap DIVE to dive and get ready to tap {peck}!
 
 [training.lessons[4].how.touch_casual]
 OLD:  Fly in from the side, a little above him. Tap DIVE and aim at a shallow slant, not straight down. Casual mode does the pecking, so just fly your beak into the cone. Then aim up.
 NEW:  Fly towards your target and get ready to dive. Tap DIVE to dive. Easy mode does the pecking, so just fly your beak into the cone. Then aim up and climb away.
-EDIT: 
+EDIT: Fly towards your target and get ready to dive. Tap DIVE to dive. Easy mode does the pecking, so just fly your beak into the cone!
 
 [training.lessons[4].strip.default]
 OLD:  Dive at a slant, not straight down, then tap {peck}
@@ -503,7 +504,7 @@ EDIT:
 [training.lessons[5].lay]
 OLD:  Time to meet the competition. This dummy is a rival gull, and he's nicked a snack. Mugging is one of the best steals in the game. Careful though: they can mug you too.
 NEW:  Meet the competition. This dummy's nicked a snack. Mug him, but watch out: rivals mug back.
-EDIT: 
+EDIT: Now let's meet the competition. This dummy's nicked a snack. Time to mug him...
 
 [training.lessons[5].how.default]
 OLD:  Fly up and dive ({dive}) against the rival. The snack changes beaks. If a rival doesn't have a snack, you can still hit him...

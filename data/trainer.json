@@ -110,7 +110,7 @@
   "training": {
     "opening": {
       "mood": "neutral",
-      "text": "Welcome to the beach, gullster. Learn quick and nick everything.\n\nFollow the **golden ring**.",
+      "text": "Welcome to the beach, young gullster.\nIf you want to survive 'n thrive, you got to learn quick. Follow the **golden ring**.",
       "button": "Let's gull it"
     },
     "closing": {
@@ -185,12 +185,12 @@
       },
       {
         "mood": "amused",
-        "lay": "See the fella with the ice cream? That's yours.",
+        "lay": "Now let's get you a proper challenge. See the fella with the ice cream? That's yours...",
         "how": {
-          "default": "Fly towards your target and get ready to dive. Press {dive} to dive and then tap {peck} right when your beak reaches the delicious target.",
+          "default": "Fly towards your target and get ready to dive. Press {dive} to dive and get ready to tap {peck}!",
           "casual": "Fly towards your target and get ready to dive. Press {dive} to dive. Easy mode does the pecking, so just fly your beak into the cone. Then aim up and climb away.",
-          "touch": "Fly towards your target and get ready to dive. Tap DIVE to dive and then tap {peck} right when your beak reaches the delicious target.",
-          "touch_casual": "Fly towards your target and get ready to dive. Tap DIVE to dive. Easy mode does the pecking, so just fly your beak into the cone. Then aim up and climb away."
+          "touch": "Fly towards your target and get ready to dive. Tap DIVE to dive and get ready to tap {peck}!",
+          "touch_casual": "Fly towards your target and get ready to dive. Tap DIVE to dive. Easy mode does the pecking, so just fly your beak into the cone!"
         },
         "strip": {
           "default": "Aim at the snack, {dive} to dive, then tap {peck}",
@@ -201,7 +201,7 @@
       },
       {
         "mood": "amused",
-        "lay": "Meet the competition. This dummy's nicked a snack. Mug him, but watch out: rivals mug back.",
+        "lay": "Now let's meet the competition. This dummy's nicked a snack. Time to mug him...",
         "how": {
           "default": "Fly up and dive ({dive}) into the rival to steal his snack.",
           "touch": "Fly up and tap DIVE into the rival to steal his snack."
