@@ -1,6 +1,6 @@
 # 096 — Per-level clouds in the game (after art-lab approval)
 
-Status: done (awaiting David)
+Status: merged (David playtested)
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 095 (David has approved the art-lab prototype)
