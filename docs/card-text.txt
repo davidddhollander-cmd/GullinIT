@@ -1,0 +1,703 @@
+GULLIN' IT - SCREECHES CARD AND PANEL TEXT
+
+OLD = before the card shortening (commit bd0cc8f). NEW = what the game uses now (data/trainer.json).
+Write your version after EDIT: (leave it blank to keep NEW). Tell Claude when done and it copies them into data/trainer.json.
+Placeholders like {dive} {peck} {flap} become the player's keys; keep the braces. Lines that never changed say SAME.
+
+======================================================================
+NAME
+======================================================================
+
+[name]
+SAME: Screeches McCrumbs
+EDIT: 
+
+======================================================================
+LESSON_BUTTON
+======================================================================
+
+[lesson_button]
+SAME: Got it
+EDIT: 
+
+======================================================================
+KEYS
+======================================================================
+
+[keys.keyboard.flap]
+SAME: Space or left click
+EDIT: 
+
+[keys.keyboard.dive]
+SAME: Shift/right click
+EDIT: 
+
+[keys.keyboard.peck]
+SAME: E/middle click
+EDIT: 
+
+[keys.keyboard.peck_alt]
+SAME: E/middle click
+EDIT: 
+
+[keys.keyboard.steer]
+SAME: the mouse or WASD
+EDIT: 
+
+[keys.gamepad.steer]
+SAME: the left stick
+EDIT: 
+
+[keys.touch.flap]
+SAME: FLY up
+EDIT: 
+
+[keys.touch.steer]
+SAME: your thumb
+EDIT: 
+
+======================================================================
+TOUCH_EXPLAINER
+======================================================================
+
+[touch_explainer.counter]
+SAME: Touch controls
+EDIT: 
+
+[touch_explainer.lay]
+SAME: **FLY** (left): push to steer, push up to flap.
+**DIVE** (right): tap to dive, drag to aim the dive.
+EDIT: 
+
+[touch_explainer.how]
+SAME: **PECK**: bins, hold to screech.
+EDIT: 
+
+[touch_explainer.button]
+SAME: Got it
+EDIT: 
+
+======================================================================
+TOASTS
+======================================================================
+
+[toasts[0]]
+SAME: Nice one!
+EDIT: 
+
+[toasts[1]]
+SAME: Sharp work!
+EDIT: 
+
+[toasts[2]]
+SAME: Blimey! You did it!
+EDIT: 
+
+[toasts[3]]
+SAME: Not bad!
+EDIT: 
+
+[toasts[4]]
+SAME: That's my bird!
+EDIT: 
+
+======================================================================
+LIVE
+======================================================================
+
+[live.crash.default]
+SAME: Pull up, you daft gull! Hold {flap}!
+EDIT: 
+
+[live.crash.realistic]
+SAME: Pull up, you daft gull! Tap {flap} fast!
+EDIT: 
+
+[live.crash.touch]
+SAME: Pull up, you daft gull! Push FLY up!
+EDIT: 
+
+[live.peck_now.default]
+SAME: Now! Tap {peck}!
+EDIT: 
+
+[live.peck_now.casual]
+SAME: Auto peck is on. Fly into it!
+EDIT: 
+
+[live.clean]
+SAME: Grand! Aim up and climb!
+EDIT: 
+
+[live.missed]
+SAME: Missed! Pull up and dive again
+EDIT: 
+
+[live.first_miss]
+SAME: First miss is normal! Scoop it off the floor later
+EDIT: 
+
+[live.wheelie_low]
+SAME: Too low, gullster. Land on the lid.
+EDIT: 
+
+[live.bin_closer]
+SAME: Closer, gullster! Land right beside the bin.
+EDIT: 
+
+[live.too_steep]
+OLD:  Too steep! Level out a bit
+NEW:  Crash likely, reposition or pull up quickly
+EDIT: 
+
+[live.mug_miss]
+SAME: Missed! Fly up and dive against him again.
+EDIT: 
+
+[live.mug_rescue]
+SAME: He's holding still for you. Fly up and dive against him.
+EDIT: 
+
+[live.aim_freeze.default]
+OLD:  Steer with {steer}. Aim at a slant, not straight down.
+Press {dive} to go.
+NEW:  Steer with {steer}. Line up the snack.
+Press {dive} to go.
+EDIT: 
+
+[live.aim_freeze.touch]
+OLD:  Steer with {steer}. Aim at a slant, not straight down.
+Tap DIVE to go.
+NEW:  Steer with {steer}. Line up the snack.
+Tap DIVE to go.
+EDIT: 
+
+[live.dive_nudge.default]
+OLD:  Come in from the side, then press {dive}
+NEW:  Climb above him, then press {dive}
+EDIT: 
+
+[live.dive_nudge.touch]
+OLD:  Come in from the side, then tap DIVE
+NEW:  Climb above him, then tap DIVE
+EDIT: 
+
+[live.toddler_peck.default]
+SAME: Tap {peck_alt} to peck his ice cream!
+EDIT: 
+
+[live.toddler_peck.touch]
+SAME: Tap {peck_alt} to peck his ice cream!
+EDIT: 
+
+[live.toddler_pickup]
+SAME: Walk over the ice cream to eat it.
+EDIT: 
+
+[live.full_stomach]
+SAME: Finish your snack first, greedy guts.
+EDIT: 
+
+[live.practice]
+SAME: Pause, then level select, to progress
+EDIT: 
+
+[live.crash_toast]
+SAME: Ouch! Dust yourself off.
+EDIT: 
+
+======================================================================
+TIPS
+======================================================================
+
+[tips.mug_miss]
+SAME: MISSED! DIVE AGAINST HIM AGAIN
+EDIT: 
+
+[tips.wheelie_low]
+SAME: TOO LOW! LAND ON THE BIN LID
+EDIT: 
+
+[tips.bin_closer]
+SAME: CLOSER! LAND RIGHT BESIDE THE BIN
+EDIT: 
+
+======================================================================
+SCORE_WAYS
+======================================================================
+
+[score_ways[0].title]
+SAME: GROUND GRUB
+EDIT: 
+
+[score_ways[0].text]
+SAME: CRUMBS AND BIN SCRAPS. SAFE.
+EDIT: 
+
+[score_ways[0].score]
+SAME: FOOD POINTS NO COMBO
+EDIT: 
+
+[score_ways[1].title]
+SAME: THE SNATCH
+EDIT: 
+
+[score_ways[1].text]
+SAME: THE PROPER WAY. DIVE THEN PECK.
+EDIT: 
+
+[score_ways[1].score]
+SAME: COMBO UP TO X{combo}
+EDIT: 
+
+[score_ways[2].title]
+SAME: COUNTER GRAB
+EDIT: 
+
+[score_ways[2].text]
+SAME: PECK IT AS IT LANDS ON THE STALL.
+EDIT: 
+
+[score_ways[2].score]
+SAME: +{handover}% POINTS
+EDIT: 
+
+[score_ways[3].title]
+SAME: THE MUG
+EDIT: 
+
+[score_ways[3].text]
+SAME: DIVE THROUGH A RIVAL WITH FOOD.
+EDIT: 
+
+[score_ways[3].score]
+SAME: +{mugged}% POINTS
+EDIT: 
+
+======================================================================
+TRAINING
+======================================================================
+
+[training.opening.text]
+OLD:  Welcome to the beach, young gullster.
+If you want to survive 'n thrive, you got to learn quick. Follow the **golden ring**.
+
+Might make a fine thief out of you yet.
+NEW:  Welcome to the beach, gullster. Learn quick and nick everything.
+
+Follow the **golden ring**.
+EDIT: 
+
+[training.opening.button]
+SAME: Let's gull it
+EDIT: 
+
+[training.closing.text]
+OLD:  Not bad, gullster. Not bad at all. You can swoop, raid bins, bump rivals and mug them blind. Now get out there and fleece that beach.
+NEW:  Not bad, gullster. You can swoop, raid bins and mug rivals blind.
+
+Now go fleece that beach.
+EDIT: 
+
+[training.closing.first_time_text]
+OLD:  Not bad, gullster. Not bad at all.
+
+You can swoop, raid bins, bump rivals and mug them blind. Here's a feather for your trouble.
+
+Now get out there and fleece that beach.
+NEW:  Not bad, gullster. You can swoop, raid bins and mug rivals blind.
+
+Here's a feather for your trouble.
+EDIT: 
+
+[training.closing.button]
+SAME: Progress to next level
+EDIT: 
+
+[training.closing.button_alt]
+SAME: Keep practicing
+EDIT: 
+
+[training.lessons[0].lay.default]
+SAME: This is the open sand. Nothing here worth nicking, so first things first: get airborne. Gulls fly by flapping and steering.
+EDIT: 
+
+[training.lessons[0].lay.realistic]
+SAME: First things first: get airborne.
+
+You picked Realistic mode, so every wingbeat is a separate tap.
+EDIT: 
+
+[training.lessons[0].how.default]
+SAME: Hold {flap} to flap and climb. Steer with {steer} to head right. Fly through the golden ring.
+EDIT: 
+
+[training.lessons[0].how.realistic]
+SAME: Tap {flap} over and over to climb, about four or five taps a second. Steer with {steer} to head right. Fly through the golden ring.
+EDIT: 
+
+[training.lessons[0].how.touch]
+SAME: Push FLY up to flap and climb. Steer with {steer} to head right. Fly through the golden ring.
+EDIT: 
+
+[training.lessons[0].strip.default]
+SAME: Hold {flap} to take off, then steer right
+EDIT: 
+
+[training.lessons[0].strip.realistic]
+SAME: Tap {flap} to take off, then steer right
+EDIT: 
+
+[training.lessons[0].strip.touch]
+SAME: Push FLY up to take off, then steer right
+EDIT: 
+
+[training.lessons[0].strip_steer]
+SAME: Steer right with {steer} to the ring
+EDIT: 
+
+[training.lessons[0].banner.default]
+SAME: Hold {flap} to flap and climb.
+Fly right through the golden ring.
+EDIT: 
+
+[training.lessons[0].banner.realistic]
+SAME: Tap {flap} over and over to climb.
+Fly right through the golden ring.
+EDIT: 
+
+[training.lessons[0].banner.touch]
+SAME: Push FLY up to flap and climb.
+Fly right through the golden ring.
+EDIT: 
+
+[training.lessons[0].banner_steer]
+SAME: Now steer right with {steer}.
+Fly through the golden ring.
+EDIT: 
+
+[training.lessons[1].lay]
+SAME: What goes up must come down, mate. Stop flapping and you glide, and gliding means sinking. Golden crumbs on the sand are free grub.
+EDIT: 
+
+[training.lessons[1].how.default]
+SAME: Let go of {flap}, aim down and land. Then walk over a golden crumb to eat it.
+EDIT: 
+
+[training.lessons[1].how.realistic]
+SAME: Stop tapping {flap}, aim down and land. Then walk over a golden crumb to eat it.
+EDIT: 
+
+[training.lessons[1].how.touch]
+SAME: Stop pushing FLY up, aim down and land. Then walk over a golden crumb to eat it.
+EDIT: 
+
+[training.lessons[1].strip.default]
+SAME: Let go of {flap}, aim down and land
+EDIT: 
+
+[training.lessons[1].strip.realistic]
+SAME: Stop tapping {flap}, aim down and land
+EDIT: 
+
+[training.lessons[1].strip.touch]
+SAME: Stop pushing FLY up, aim down and land
+EDIT: 
+
+[training.lessons[1].banner.default]
+SAME: Let go of {flap}, aim down and land.
+Then walk over a golden crumb.
+EDIT: 
+
+[training.lessons[1].banner.realistic]
+SAME: Stop tapping {flap}, aim down and land.
+Then walk over a golden crumb.
+EDIT: 
+
+[training.lessons[1].banner.touch]
+SAME: Stop pushing FLY up, aim down and land.
+Then walk over a golden crumb.
+EDIT: 
+
+[training.lessons[2].lay]
+OLD:  Now let's try something as easy as stealing candy from a baby...
+NEW:  Easy as stealing candy from a baby...
+EDIT: 
+
+[training.lessons[2].how.default]
+SAME: Walk up to the toddler, face his ice cream and tap {peck_alt}.
+EDIT: 
+
+[training.lessons[2].how.touch]
+SAME: Walk up to the toddler, face his ice cream and tap {peck_alt}.
+EDIT: 
+
+[training.lessons[2].strip.default]
+SAME: Walk up to the toddler and tap {peck_alt} at his ice cream
+EDIT: 
+
+[training.lessons[2].strip.touch]
+SAME: Walk up to the toddler and tap {peck_alt} at his ice cream
+EDIT: 
+
+[training.lessons[3].lay]
+OLD:  Bins are a proper buffet. Let's go have a look what's in the next one...
+NEW:  Bins are a proper buffet.
+EDIT: 
+
+[training.lessons[3].how]
+OLD:  Land beside the bin and tap {peck} {n} times.
+NEW:  Land by the bin and tap {peck} {n} times.
+EDIT: 
+
+[training.lessons[3].strip]
+SAME: Land by the bin and tap {peck} {n} times
+EDIT: 
+
+[training.lessons[4].lay]
+OLD:  Now let's get you a proper challenge.
+See the fella with the ice cream? That's yours. Timing is everything...
+NEW:  See the fella with the ice cream? That's yours.
+EDIT: 
+
+[training.lessons[4].how.default]
+OLD:  Fly in from the side, a little above him. Press {dive} and aim at a shallow slant, not straight down. Then tap {peck} as your beak reaches the cone.
+NEW:  Fly towards your target and get ready to dive. Press {dive} to dive and then tap {peck} right when your beak reaches the delicious target.
+EDIT: 
+
+[training.lessons[4].how.casual]
+OLD:  Fly in from the side, a little above him. Press {dive} and aim at a shallow slant, not straight down. Casual mode does the pecking, so just fly your beak into the cone. Then aim up.
+NEW:  Fly towards your target and get ready to dive. Press {dive} to dive. Easy mode does the pecking, so just fly your beak into the cone. Then aim up and climb away.
+EDIT: 
+
+[training.lessons[4].how.touch]
+OLD:  Fly in from the side, a little above him. Tap DIVE and aim at a shallow slant, not straight down. Then tap {peck} as your beak reaches the cone.
+NEW:  Fly towards your target and get ready to dive. Tap DIVE to dive and then tap {peck} right when your beak reaches the delicious target.
+EDIT: 
+
+[training.lessons[4].how.touch_casual]
+OLD:  Fly in from the side, a little above him. Tap DIVE and aim at a shallow slant, not straight down. Casual mode does the pecking, so just fly your beak into the cone. Then aim up.
+NEW:  Fly towards your target and get ready to dive. Tap DIVE to dive. Easy mode does the pecking, so just fly your beak into the cone. Then aim up and climb away.
+EDIT: 
+
+[training.lessons[4].strip.default]
+OLD:  Dive at a slant, not straight down, then tap {peck}
+NEW:  Aim at the snack, {dive} to dive, then tap {peck}
+EDIT: 
+
+[training.lessons[4].strip.casual]
+OLD:  Dive at a slant with {dive}, your beak pecks for you
+NEW:  Dive with {dive}, your beak pecks for you
+EDIT: 
+
+[training.lessons[4].strip.touch]
+OLD:  Tap DIVE at a slant, not straight down, then tap {peck}
+NEW:  Aim at the snack, tap DIVE, then tap {peck}
+EDIT: 
+
+[training.lessons[4].strip.touch_casual]
+OLD:  Tap DIVE at a slant, your beak pecks for you
+NEW:  Tap DIVE, your beak pecks for you
+EDIT: 
+
+[training.lessons[5].lay]
+OLD:  Time to meet the competition. This dummy is a rival gull, and he's nicked a snack. Mugging is one of the best steals in the game. Careful though: they can mug you too.
+NEW:  Meet the competition. This dummy's nicked a snack. Mug him, but watch out: rivals mug back.
+EDIT: 
+
+[training.lessons[5].how.default]
+OLD:  Fly up and dive ({dive}) against the rival. The snack changes beaks. If a rival doesn't have a snack, you can still hit him...
+NEW:  Fly up and dive ({dive}) into the rival to steal his snack.
+EDIT: 
+
+[training.lessons[5].how.touch]
+OLD:  Fly up and tap DIVE against the rival. The snack changes beaks. If a rival doesn't have a snack, you can still hit him...
+NEW:  Fly up and tap DIVE into the rival to steal his snack.
+EDIT: 
+
+[training.lessons[5].strip.default]
+SAME: Fly up and dive against the dummy
+EDIT: 
+
+[training.lessons[5].strip.touch]
+SAME: Fly up and tap DIVE against the dummy
+EDIT: 
+
+======================================================================
+SCREECH
+======================================================================
+
+[screech.strips[0]]
+OLD:  (did not exist)
+NEW:  Hold {peck} to screech. Higher is louder
+EDIT: 
+
+[screech.strips[1]]
+OLD:  Hold {peck} to screech. Higher is louder
+NEW:  Brash is full! Screech again or press {call}
+EDIT: 
+
+[screech.lessons[0].lay.default]
+OLD:  (did not exist)
+NEW:  Level two, new trick. Every gull has a special, and yours is the GANG CALL. Screech to fill your Brash meter up top. Snatches, mugs and bumps fill it too. Get stunned and it drains.
+EDIT: 
+
+[screech.lessons[0].lay.great-black-backed]
+OLD:  (did not exist)
+NEW:  Level two, new trick. Every gull has a special, and yours is the SHAKEDOWN. Screech to fill your Brash meter up top. Bumps and mugs fill it fast. Get stunned and it drains.
+EDIT: 
+
+[screech.lessons[0].lay.kittiwake]
+OLD:  (did not exist)
+NEW:  Level two, new trick. Every gull has a special, and yours is the LIGHTNING STRIKE. Screech to fill your Brash meter up top. Snatches fill it too. Get stunned and it drains.
+EDIT: 
+
+[screech.lessons[0].how]
+OLD:  (did not exist)
+NEW:  Hold {peck} to screech until Brash says READY.
+EDIT: 
+
+[screech.lessons[1].lay.default]
+OLD:  (did not exist)
+NEW:  Now call the cavalry and watch them run!
+EDIT: 
+
+[screech.lessons[1].lay.great-black-backed]
+OLD:  (did not exist)
+NEW:  Now shake 'em down. Nobody stuns you for a bit.
+EDIT: 
+
+[screech.lessons[1].lay.kittiwake]
+OLD:  (did not exist)
+NEW:  Now strike like lightning.
+EDIT: 
+
+[screech.lessons[1].how.default]
+OLD:  (did not exist)
+NEW:  Screech again, or press {call}, to call the gang.
+EDIT: 
+
+[screech.lessons[1].how.great-black-backed]
+OLD:  (did not exist)
+NEW:  Screech again, or press {call}, to start the Shakedown.
+EDIT: 
+
+[screech.lessons[1].how.kittiwake]
+OLD:  (did not exist)
+NEW:  Screech again, or press {call}, to strike.
+EDIT: 
+
+[screech.outro.default]
+OLD:  (did not exist)
+NEW:  That's the Gang Call! Training grabs don't count. Clock's on!
+EDIT: 
+
+[screech.outro.great-black-backed]
+OLD:  (did not exist)
+NEW:  That's the Shakedown! Training grabs don't count. Clock's on!
+EDIT: 
+
+[screech.outro.kittiwake]
+OLD:  (did not exist)
+NEW:  That's the Lightning Strike! Training grabs don't count. Clock's on!
+EDIT: 
+
+======================================================================
+COUNTER_TIP
+======================================================================
+
+[counter_tip.default]
+SAME: FOOD ON THE COUNTER!
+DIVE, THEN PECK IT
+EDIT: 
+
+[counter_tip.casual]
+SAME: FOOD ON THE COUNTER!
+DIVE RIGHT AT IT
+EDIT: 
+
+[counter_tip.touch]
+SAME: FOOD ON THE COUNTER!
+TAP DIVE, THEN PECK
+EDIT: 
+
+[counter_tip.touch_casual]
+SAME: FOOD ON THE COUNTER!
+TAP DIVE AT IT
+EDIT: 
+
+======================================================================
+SCREECH
+======================================================================
+
+[screech.closing.text]
+OLD:  That's the Gang Call, gullster. Fill the Brash meter, call the gang, nick the lot.
+
+Anything you grabbed in training doesn't count, so make the real ones count. The clock starts now.
+NEW:  (removed)
+EDIT: 
+
+[screech.closing.button]
+OLD:  Let's go!
+NEW:  (removed)
+EDIT: 
+
+[screech.strips[0].default]
+OLD:  Land on the ice cream sign
+NEW:  (removed)
+EDIT: 
+
+[screech.strips[0].realistic]
+OLD:  Land on the ice cream sign, stop tapping {flap}
+NEW:  (removed)
+EDIT: 
+
+[screech.strips[0].touch]
+OLD:  Land on the ice cream sign
+NEW:  (removed)
+EDIT: 
+
+[screech.strips[2]]
+OLD:  Brash is full! Screech again or press {call}
+NEW:  (removed)
+EDIT: 
+
+[screech.lessons[0].lay]
+OLD:  Level two, gullster, and a new trick. A screech is a gull's best weapon, and it's louder from up high. That ice cream stand has a sign on its roof, and that's your stage.
+NEW:  (removed)
+EDIT: 
+
+[screech.lessons[0].how.default]
+OLD:  Fly above the ice cream sign, let go of {flap} and drop onto it.
+NEW:  (removed)
+EDIT: 
+
+[screech.lessons[0].how.realistic]
+OLD:  Fly above the ice cream sign, stop tapping {flap} and drop onto it.
+NEW:  (removed)
+EDIT: 
+
+[screech.lessons[0].how.touch]
+OLD:  Fly above the ice cream sign, stop pushing FLY up and drop onto it.
+NEW:  (removed)
+EDIT: 
+
+[screech.lessons[1].lay]
+OLD:  Screeching builds your Brash meter, the bar at the top of the screen. Bold moves fill it too: snatches, mugs and bumps. Get stunned and it drains, so stay cocky. The higher the perch, the faster it fills.
+NEW:  (removed)
+EDIT: 
+
+[screech.lessons[1].how]
+OLD:  Hold {peck} to screech until the meter is full and says READY.
+NEW:  (removed)
+EDIT: 
+
+[screech.lessons[2].lay]
+OLD:  Now for the best trick in the book: call the cavalry and see them runnin for cover!!
+NEW:  (removed)
+EDIT: 
+
+[screech.lessons[2].how]
+OLD:  Screech again, or press {call}, to call the gang.
+NEW:  (removed)
+EDIT: 

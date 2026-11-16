@@ -210,6 +210,8 @@ func setup(owner_game: BeachGame) -> void:
 	lesson_prompt.custom_minimum_size = Vector2(176, 10)
 	TrainerScript.snug_chips(lesson_prompt)
 	lesson_warning = BeachUI.label(lesson_column,"",8,BeachUI.CORAL)
+	lesson_warning.add_theme_font_override("font",TrainerCard.SPEECH) # GullPixel has no comma; the strip's speech font does
+	lesson_warning.add_theme_font_size_override("font_size",TrainerCard.SPEECH_SIZE)
 	lesson_warning.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lesson_warning.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lesson_warning.custom_minimum_size.x = 176.0
