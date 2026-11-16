@@ -1,0 +1,304 @@
+{
+  "version": 1,
+  "alternative": "coastal",
+  "image": "clouds-v2-alt-coastal.png",
+  "size": [
+    1152,
+    432
+  ],
+  "grid": {
+    "columns": 4,
+    "rows": 3,
+    "cell_size": [
+      288,
+      144
+    ],
+    "minimum_padding": 8
+  },
+  "region_format": "[x,y,width,height], tight, top-left origin, unscaled source pixels",
+  "palette": [
+    "#fff4da",
+    "#f0f0d4",
+    "#b8dde9",
+    "#90d0e1"
+  ],
+  "alpha": "binary: 0 or 255",
+  "clouds": [
+    {
+      "id": "fair-wisp-01",
+      "set": "fair",
+      "size": "small",
+      "region": [
+        114,
+        54,
+        58,
+        36
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        29.0,
+        18.0
+      ],
+      "source": "coastal-source.png",
+      "source_crop": [
+        0,
+        30,
+        200,
+        170
+      ]
+    },
+    {
+      "id": "fair-wisp-02",
+      "set": "fair",
+      "size": "small",
+      "region": [
+        394,
+        52,
+        75,
+        40
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        37.5,
+        20.0
+      ],
+      "source": "coastal-source.png",
+      "source_crop": [
+        200,
+        30,
+        420,
+        170
+      ]
+    },
+    {
+      "id": "fair-wisp-03",
+      "set": "fair",
+      "size": "small",
+      "region": [
+        678,
+        50,
+        84,
+        44
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        42.0,
+        22.0
+      ],
+      "source": "coastal-source.png",
+      "source_crop": [
+        420,
+        30,
+        650,
+        170
+      ]
+    },
+    {
+      "id": "fair-medium-01",
+      "set": "fair",
+      "size": "medium",
+      "region": [
+        950,
+        38,
+        116,
+        67
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        58.0,
+        33.5
+      ],
+      "source": "coastal-source.png",
+      "source_crop": [
+        650,
+        30,
+        960,
+        170
+      ]
+    },
+    {
+      "id": "fair-medium-02",
+      "set": "fair",
+      "size": "medium",
+      "region": [
+        82,
+        182,
+        124,
+        68
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        62.0,
+        34.0
+      ],
+      "source": "coastal-source.png",
+      "source_crop": [
+        0,
+        170,
+        200,
+        320
+      ]
+    },
+    {
+      "id": "fair-medium-03",
+      "set": "fair",
+      "size": "medium",
+      "region": [
+        364,
+        176,
+        135,
+        79
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        67.5,
+        39.5
+      ],
+      "source": "coastal-source.png",
+      "source_crop": [
+        200,
+        170,
+        420,
+        320
+      ]
+    },
+    {
+      "id": "fair-large-01",
+      "set": "fair",
+      "size": "large",
+      "region": [
+        624,
+        170,
+        190,
+        89
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        95.0,
+        44.5
+      ],
+      "source": "coastal-source.png",
+      "source_crop": [
+        420,
+        170,
+        650,
+        320
+      ]
+    },
+    {
+      "id": "fair-large-02",
+      "set": "fair",
+      "size": "large",
+      "region": [
+        884,
+        170,
+        248,
+        91
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        124.0,
+        45.5
+      ],
+      "source": "coastal-source.png",
+      "source_crop": [
+        650,
+        170,
+        960,
+        320
+      ]
+    },
+    {
+      "id": "wind-streak-01",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        76,
+        338,
+        134,
+        41
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        67.0,
+        20.5
+      ],
+      "source": "coastal-source.png",
+      "source_crop": [
+        0,
+        320,
+        200,
+        440
+      ]
+    },
+    {
+      "id": "wind-streak-02",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        356,
+        338,
+        151,
+        42
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        75.5,
+        21.0
+      ],
+      "source": "coastal-source.png",
+      "source_crop": [
+        200,
+        320,
+        420,
+        440
+      ]
+    },
+    {
+      "id": "wind-streak-03",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        626,
+        336,
+        186,
+        47
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        93.0,
+        23.5
+      ],
+      "source": "coastal-source.png",
+      "source_crop": [
+        420,
+        320,
+        650,
+        440
+      ]
+    },
+    {
+      "id": "wind-streak-04",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        892,
+        332,
+        232,
+        56
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        116.0,
+        28.0
+      ],
+      "source": "coastal-source.png",
+      "source_crop": [
+        650,
+        320,
+        960,
+        440
+      ]
+    }
+  ]
+}

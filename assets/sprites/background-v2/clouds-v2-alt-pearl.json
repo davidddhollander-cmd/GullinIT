@@ -1,0 +1,304 @@
+{
+  "version": 1,
+  "alternative": "pearl",
+  "image": "clouds-v2-alt-pearl.png",
+  "size": [
+    1152,
+    432
+  ],
+  "grid": {
+    "columns": 4,
+    "rows": 3,
+    "cell_size": [
+      288,
+      144
+    ],
+    "minimum_padding": 8
+  },
+  "region_format": "[x,y,width,height], tight, top-left origin, unscaled source pixels",
+  "palette": [
+    "#fff4da",
+    "#e5eddf",
+    "#b8dde9",
+    "#90d0e1"
+  ],
+  "alpha": "binary: 0 or 255",
+  "clouds": [
+    {
+      "id": "fair-wisp-01",
+      "set": "fair",
+      "size": "small",
+      "region": [
+        122,
+        62,
+        43,
+        20
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        21.5,
+        10.0
+      ],
+      "source": "pearl-source.png",
+      "source_crop": [
+        0,
+        15,
+        150,
+        120
+      ]
+    },
+    {
+      "id": "fair-wisp-02",
+      "set": "fair",
+      "size": "small",
+      "region": [
+        402,
+        56,
+        58,
+        30
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        29.0,
+        15.0
+      ],
+      "source": "pearl-source.png",
+      "source_crop": [
+        150,
+        15,
+        300,
+        120
+      ]
+    },
+    {
+      "id": "fair-wisp-03",
+      "set": "fair",
+      "size": "small",
+      "region": [
+        684,
+        52,
+        71,
+        37
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        35.5,
+        18.5
+      ],
+      "source": "pearl-source.png",
+      "source_crop": [
+        300,
+        15,
+        475,
+        120
+      ]
+    },
+    {
+      "id": "fair-medium-01",
+      "set": "fair",
+      "size": "medium",
+      "region": [
+        952,
+        50,
+        110,
+        44
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        55.0,
+        22.0
+      ],
+      "source": "pearl-source.png",
+      "source_crop": [
+        475,
+        15,
+        675,
+        120
+      ]
+    },
+    {
+      "id": "fair-medium-02",
+      "set": "fair",
+      "size": "medium",
+      "region": [
+        100,
+        194,
+        87,
+        44
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        43.5,
+        22.0
+      ],
+      "source": "pearl-source.png",
+      "source_crop": [
+        0,
+        120,
+        150,
+        235
+      ]
+    },
+    {
+      "id": "fair-medium-03",
+      "set": "fair",
+      "size": "medium",
+      "region": [
+        382,
+        194,
+        98,
+        44
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        49.0,
+        22.0
+      ],
+      "source": "pearl-source.png",
+      "source_crop": [
+        150,
+        120,
+        300,
+        235
+      ]
+    },
+    {
+      "id": "fair-large-01",
+      "set": "fair",
+      "size": "large",
+      "region": [
+        654,
+        194,
+        132,
+        41
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        66.0,
+        20.5
+      ],
+      "source": "pearl-source.png",
+      "source_crop": [
+        300,
+        120,
+        475,
+        235
+      ]
+    },
+    {
+      "id": "fair-large-02",
+      "set": "fair",
+      "size": "large",
+      "region": [
+        922,
+        188,
+        170,
+        56
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        85.0,
+        28.0
+      ],
+      "source": "pearl-source.png",
+      "source_crop": [
+        475,
+        120,
+        675,
+        235
+      ]
+    },
+    {
+      "id": "wind-streak-01",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        76,
+        338,
+        134,
+        41
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        67.0,
+        20.5
+      ],
+      "source": "coastal-source.png",
+      "source_crop": [
+        0,
+        320,
+        200,
+        440
+      ]
+    },
+    {
+      "id": "wind-streak-02",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        356,
+        338,
+        151,
+        42
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        75.5,
+        21.0
+      ],
+      "source": "coastal-source.png",
+      "source_crop": [
+        200,
+        320,
+        420,
+        440
+      ]
+    },
+    {
+      "id": "wind-streak-03",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        646,
+        338,
+        148,
+        43
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        74.0,
+        21.5
+      ],
+      "source": "pearl-source.png",
+      "source_crop": [
+        300,
+        235,
+        475,
+        340
+      ]
+    },
+    {
+      "id": "wind-streak-04",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        920,
+        338,
+        174,
+        42
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        87.0,
+        21.0
+      ],
+      "source": "pearl-source.png",
+      "source_crop": [
+        475,
+        235,
+        675,
+        340
+      ]
+    }
+  ]
+}

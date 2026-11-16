@@ -77,4 +77,52 @@ All source images were byte-compared with the image generator outputs and remain
 
 Publishing: pushed to `origin/codex/094-cloud-sprite-sheet` with explicit David approval.
 
+## Alternative versions after David's feedback — 2026-11-16
+
+Assessed all three comments as justified. The existing plate's underside is
+`#b8dde9`, compared with the first atlas's darker `#8e9b9e`; its two-colour
+cleanup also removed a mid-tone. The three wisps and first medium displayed
+at only 6, 7.5, 7.5 and 9 px high.
+
+Reprompted the built-in image generator with the actual sky plate as a style
+reference. Added two separate 12-cloud sheets and JSONs without replacing any
+first-version assets:
+
+- `assets/sprites/background-v2/clouds-v2-alt-coastal.png` + `.json`: lighter
+  plate-derived blue undersides, pale cream transition, fuller rounded shapes.
+  This is the larger option; some widths exceed the original approximate range.
+- `assets/sprites/background-v2/clouds-v2-alt-pearl.png` + `.json`: light blue
+  undersides and an extra pearl mid-tone, with more compact shapes. Recommended
+  for further layout work. First-four heights are 10, 15, 18.5 and 22 px at game
+  scale. Some small/medium widths are still above the initial approximate ranges.
+
+Both retain unscaled generated detail and use 0.5 game scale. Full sources,
+exact prompts, reproducible preparation and measured sizes are under
+`assets/reference/clouds-v2-alternatives/`; its README explains the tradeoffs.
+Pearl uses the generated Coastal shapes for two wind streaks that came out
+too round in its own generation. Per-entry source provenance is retained.
+An attempted refinement with unwanted glow was rejected, not used.
+
+Checked **both alternatives in the actual Art Lab at camera zoom 1**, with
+the first version on the left, a plate cloud in the centre, and candidate on
+the right. Saved 48 native **320x180** captures covering all 12 clouds in day
+and actual dusk shader, plus unscaled contact sheets of the first four.
+
+![First four clouds, native Art Lab 1x, Coastal left / Pearl right](../../assets/reference/clouds-v2-alternatives/small-clouds-day-1x.png)
+
+[Dusk comparison](../../assets/reference/clouds-v2-alternatives/small-clouds-dusk-1x.png)
+
+Validation: candidate asset checks pass for all 24 sprites (exact palettes,
+binary alpha, distinct silhouettes within each sheet, regular grid/gutters).
+Final Godot import exits 0 without errors. All 48 lab captures pass and are
+320x180, with no script errors. First-four day/dusk boards and representative
+large/windy captures were visually inspected. The first PNG/JSON and entire
+original reference folder have no Git diff. No runtime or level data changed.
+Full gameplay integration was not rerun for these unused art alternatives;
+the previously reported six baseline failures remain documented above.
+
+Publication: alternative assets and captures are committed locally. Automatic
+approval review requires fresh explicit approval to push these additions;
+the earlier published first version remains on the remote branch.
+
 ## Review notes
