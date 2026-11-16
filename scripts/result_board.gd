@@ -66,24 +66,25 @@ func is_vs() -> bool:
 
 func _build_training() -> void:
 	var heading: Label = BeachUI.label(self,"TRAINING COMPLETE!",BeachUI.FONT_DISPLAY,CREAM)
-	_place(heading,44,292,19)
+	_place(heading,38,212,19)
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var subheading: Label = BeachUI.label(self,"THE BEACH IS YOURS.",BeachUI.FONT_NATIVE,SEA)
-	_place(subheading,73,292,13)
+	_place(subheading,60,212,13)
 	subheading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var note_text: String = GameState.save_error if not GameState.save_error.is_empty() else "FAMILY PICNIC UNLOCKED"
 	var note: Label = BeachUI.label(self,note_text,BeachUI.FONT_NATIVE,GOLD if GameState.save_error.is_empty() else Color("ef725c"))
-	_place(note,98,292,12)
+	_place(note,78,212,12)
 	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var earned: int = int(result.get("feathers_earned",0))
 	if earned > 0:
 		var feather_note: Label = BeachUI.label(self,"+%d FEATHER  /  FEATHERS %d" % [earned,GameState.feathers()],BeachUI.FONT_NATIVE,CREAM)
-		_place(feather_note,112,292,12)
+		_place(feather_note,90,212,12)
 		feather_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var actions: HBoxContainer = HBoxContainer.new()
-	actions.position = Vector2(39,140)
-	actions.size = Vector2(242,16)
-	actions.add_theme_constant_override("separation",3)
+	actions.position = Vector2(54,108)
+	actions.size = Vector2(212,13)
+	actions.alignment = BoxContainer.ALIGNMENT_CENTER
+	actions.add_theme_constant_override("separation",4)
 	add_child(actions)
 	if GameState.unlocked(2):
 		_add_button(actions,"NEXT >","start",2)
@@ -463,8 +464,13 @@ func _quest_label(value: String, color: Color) -> Label:
 	return label
 
 func _add_button(parent: HBoxContainer, caption: String, action: String, payload: Variant = null) -> void:
-	var button := BeachUI.button(parent, caption, func() -> void: requested.emit(action, payload), 68)
-	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var training := bool(result.get("training", false))
+	var button: Button
+	if training: # the small training sign uses short buttons that hug their text
+		button = BeachUI.back_button(parent, caption, func() -> void: requested.emit(action, payload), 0)
+	else:
+		button = BeachUI.button(parent, caption, func() -> void: requested.emit(action, payload), 68)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	buttons.append(button)
 
 func _place(control: Control, y: float, width: float, height: float) -> void:
@@ -613,22 +619,26 @@ func _notification(what: int) -> void:
 
 func _draw() -> void:
 	# Ropes disappear behind the planks and meet in a shallow hanging V.
-	for x: float in [58.0, 262.0]:
+	var training := bool(result.get("training", false))
+	# The training sign is narrower and one plank shorter: it only holds a heading, two notes and the buttons.
+	var sign_left := 50.0 if training else 20.0
+	var sign_right := 270.0 if training else 300.0
+	for x: float in ([86.0, 234.0] if training else [58.0, 262.0]):
 		draw_line(Vector2(160, -9), Vector2(x, 31), Color("d9c18c"), 3.0)
 		draw_line(Vector2(160, -9), Vector2(x, 31), Color("75583b"), 1.0)
 	# Five uneven planks keep the sign readable while giving it a hand-built silhouette.
 	var plank_colors := [Color("9b5c32"), Color("aa6738"), Color("91512e"), Color("a96135"), Color("8b4b2a")]
-	for i: int in 5:
+	for i: int in (4 if training else 5):
 		var y := 29.0 + i * 25.0
-		var left := 20.0 + float((i * 7) % 5)
-		var right := 300.0 - float((i * 11) % 6)
+		var left := sign_left + float((i * 7) % 5)
+		var right := sign_right - float((i * 11) % 6)
 		draw_colored_polygon(PackedVector2Array([Vector2(left + 3, y), Vector2(right, y + 1), Vector2(right - 2, y + 27), Vector2(left, y + 25)]), plank_colors[i])
 		draw_line(Vector2(left + 7, y + 8), Vector2(right - 12, y + 7), Color(0.30, 0.16, 0.09, 0.35), 1.0)
 		draw_line(Vector2(left + 25, y + 19), Vector2(right - 26, y + 20), Color(0.91, 0.59, 0.32, 0.22), 1.0)
 		for x: float in [left + 8, right - 9]:
 			draw_circle(Vector2(x, y + 13), 2.0, Color("493427"))
 			draw_circle(Vector2(x - 0.5, y + 12.5), 0.7, Color("c0a176"))
-	if bool(result.get("training", false)) or scores_panel == null:
+	if training or scores_panel == null:
 		return
 	# Raised header plank: a short board nailed above the sign gives the stars their own backing.
 	var tab := STAR_TAB

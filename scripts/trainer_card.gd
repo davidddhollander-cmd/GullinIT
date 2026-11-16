@@ -9,7 +9,7 @@ signal dismissed
 const ATLAS: Texture2D = preload("res://assets/sprites/trainer-screeches-portraits-v1.png")
 const SPEECH: Font = preload("res://assets/fonts/gull_speech.fnt")
 const CELL: int = 256
-const PORTRAIT: int = 72
+const PORTRAIT: int = 60
 const SPEECH_SIZE: int = 10
 const FRAME_WIDTH: float = 306.0
 const FRAME_MARGIN: float = 8.0
@@ -80,7 +80,7 @@ func _init() -> void:
 	lay_label = _paragraph(column,BeachUI.CREAM)
 	how_label = _paragraph(column,BeachUI.GOLD)
 	var footer: HBoxContainer = HBoxContainer.new()
-	footer.alignment = BoxContainer.ALIGNMENT_END
+	footer.alignment = BoxContainer.ALIGNMENT_CENTER
 	footer.mouse_filter = MOUSE_FILTER_IGNORE
 	column.add_child(footer)
 	footer.add_theme_constant_override("separation",4)
