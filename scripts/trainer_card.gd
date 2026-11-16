@@ -11,10 +11,11 @@ const SPEECH: Font = preload("res://assets/fonts/gull_speech.fnt")
 const CELL: int = 256
 const PORTRAIT: int = 60
 const SPEECH_SIZE: int = 10
-const FRAME_WIDTH: float = 306.0
+const FRAME_WIDTH: float = 276.0
 const FRAME_MARGIN: float = 8.0
-const GAP: float = 6.0
-const TEXT_WIDTH: float = FRAME_WIDTH - FRAME_MARGIN * 2.0 - PORTRAIT - GAP
+const GAP: float = 4.0
+const FACE_INSET: float = 6.0 ## extra right margin so his head sits in from the frame edge
+const TEXT_WIDTH: float = FRAME_WIDTH - FRAME_MARGIN * 2.0 - FACE_INSET - PORTRAIT - GAP
 const MOODS: Dictionary = {"neutral":0,"talking":1,"amused":2,"proud":3,"wince":4}
 const TALK_STEP: float = 0.14
 static var portraits: Array[ImageTexture] = []
@@ -62,7 +63,7 @@ func _init() -> void:
 	frame.mouse_filter = MOUSE_FILTER_IGNORE
 	var style: StyleBoxFlat = frame.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
 	style.content_margin_left = FRAME_MARGIN
-	style.content_margin_right = FRAME_MARGIN
+	style.content_margin_right = FRAME_MARGIN + FACE_INSET
 	style.content_margin_top = 6
 	style.content_margin_bottom = 6
 	frame.add_theme_stylebox_override("panel",style)
@@ -79,6 +80,10 @@ func _init() -> void:
 	counter_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	lay_label = _paragraph(column,BeachUI.CREAM)
 	how_label = _paragraph(column,BeachUI.GOLD)
+	var footer_gap: Control = Control.new() # breathing room between the last line and the buttons
+	footer_gap.custom_minimum_size = Vector2(0,4)
+	footer_gap.mouse_filter = MOUSE_FILTER_IGNORE
+	column.add_child(footer_gap)
 	var footer: HBoxContainer = HBoxContainer.new()
 	footer.alignment = BoxContainer.ALIGNMENT_CENTER
 	footer.mouse_filter = MOUSE_FILTER_IGNORE
