@@ -60,8 +60,8 @@
     "mug_miss": "Missed! Fly up and dive against him again.",
     "mug_rescue": "He's holding still for you. Fly up and dive against him.",
     "aim_freeze": {
-      "default": "Steer with {steer}. Line up the snack.\nPress {dive} to go.",
-      "touch": "Steer with {steer}. Line up the snack.\nTap DIVE to go."
+      "default": "Steer with {steer}. Line up the snack.\nPress {dive} to go.\nDouble-tap {flap} to fly off.",
+      "touch": "Steer with {steer}. Line up the snack.\nTap DIVE to go.\nDouble-tap FLY to fly off."
     },
     "dive_nudge": {
       "default": "Climb above him, then press {dive}",
