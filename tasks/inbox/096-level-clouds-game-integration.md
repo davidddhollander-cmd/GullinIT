@@ -1,4 +1,4 @@
-# 095 — Per-level clouds that drift with the wind
+# 096 — Per-level clouds in the game (after art-lab approval)
 
 Status: inbox
 Author: Claude
@@ -10,6 +10,7 @@ Created: 2026-11-16
 Each level has its own cloud arrangement (different positions, sizes and mix of shapes). On levels with wind the clouds drift in the wind direction, faster in stronger wind and during gusts, and small/far clouds drift slower than big ones. Level 1 (no wind) has a very slow drift. Level 6 keeps its dusk tint on the clouds.
 
 ## Context
+- Task 095 built and tuned this in the art lab. Move that prototype into the game as-is (same layouts, tuning values and drift maths David approved); do not redesign it.
 - Task 095 built and tuned this in the art lab. Move that prototype into the game as-is (same layouts, tuning values and drift maths David approved); do not redesign it.
 - Sky is `scripts/beach_background_art.gd` (`BeachBackgroundArt`): one baked plate, pinned to the screen left edge, `update(camera_x, time)` called from `scripts/beach.gd`. The loading screen (`scripts/loading.gd`) also uses it with `BeachBackgroundArt.new(false)`.
 - Wind: `scripts/wind.gd` (`BeachWind`, `direction`, `strength`, gusts). Level wind is in `data/levels/level_0N.json`. In game, `beach.wind_dir` and `beach.strength` are already set from the player's smoothed wind (`game.gd` ~470); use those, not `BeachWind` directly.
