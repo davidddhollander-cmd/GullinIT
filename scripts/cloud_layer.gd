@@ -2,7 +2,7 @@ class_name CloudLayer
 extends Node2D
 ## Separate drifting clouds over the generated sky (task 095, art-lab prototype only; 096 moves it into the game).
 ## Pinned to the screen by its parent. Drift follows the beach clock so pause and step freeze it.
-const SHEET: String = "res://assets/sprites/background-v2/clouds-v2-alt-pearl"
+const SHEET_DIR: String = "res://assets/sprites/background-v2/"
 const DATA: String = "res://data/cloud_lab.json"
 const SCREEN_W: float = 320.0
 
@@ -23,20 +23,22 @@ func setup(layout: Array, dusk: bool) -> void:
 	clouds.clear()
 	last_time = -1.0
 	tuning = lab_data().tuning
-	var sheet: Texture2D = load(SHEET + ".png")
+	# Cloud ids are unique across sheets (pearl bubbly set, plate cut-outs), so layouts can mix them.
 	var regions: Dictionary = {}
-	for entry: Dictionary in Config.read_json(SHEET + ".json").clouds:
-		regions[entry.id] = entry
+	for sheet_name: String in tuning.sheets:
+		var texture: Texture2D = load(SHEET_DIR + sheet_name + ".png")
+		for entry: Dictionary in Config.read_json(SHEET_DIR + sheet_name + ".json").clouds:
+			regions[entry.id] = {"entry": entry, "texture": texture}
 	var tint: ShaderMaterial = null
 	if dusk:
 		tint = ShaderMaterial.new()
 		tint.shader = preload("res://assets/shaders/cloud_dusk.gdshader")
 	for placed: Dictionary in layout:
-		var source: Dictionary = regions[placed.id]
+		var source: Dictionary = regions[placed.id].entry
 		var r: Array = source.region
 		var scale_factor: float = float(placed.scale)
 		var sprite: Sprite2D = Sprite2D.new()
-		sprite.texture = sheet
+		sprite.texture = regions[placed.id].texture
 		sprite.region_enabled = true
 		sprite.region_rect = Rect2(r[0], r[1], r[2], r[3])
 		sprite.centered = false

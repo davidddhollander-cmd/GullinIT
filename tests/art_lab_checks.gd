@@ -84,7 +84,7 @@ static func run(host: Node, check: Callable) -> void:
 	var signatures: Dictionary = {}
 	for layout: Array in layouts:
 		signatures[JSON.stringify(layout)] = true
-	check.call(layouts.size() == 6 and signatures.size() == 6, "six distinct cloud layouts, one per level")
+	check.call(layouts.size() >= 6 and signatures.size() == layouts.size(), "at least six distinct cloud layouts, one per level")
 	_key(lab, KEY_K)
 	check.call(lab.new_clouds and lab.new_sky and lab.clouds != null and lab.clouds.clouds.size() == layouts[0].size(), "K shows the cloud layer on the generated sky")
 	var layer: CloudLayer = lab.clouds
