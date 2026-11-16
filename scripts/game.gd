@@ -1673,8 +1673,6 @@ func training_text() -> String:
 		return TrainerScript.line(live.crash, input)
 	if training_miss_hint > 0.0:
 		return TrainerScript.line(live[training_miss_line], input)
-	if (lesson == DIVE_LESSON or lesson == MUG_LESSON) and player.dive_too_steep():
-		return TrainerScript.line(live.too_steep, input)
 	if lesson >= TRAINING_LESSONS:
 		return TrainerScript.line(live.practice, input)
 	var data: Dictionary = Config.trainer.training.lessons[mini(lesson, TRAINING_LESSONS-1)]
@@ -1699,6 +1697,12 @@ func training_text() -> String:
 		if dummy != null and not player.can_collect_food(DUMMY_FOOD):
 			return TrainerScript.line(live.full_stomach, input)
 	return TrainerScript.line(data.banner if banner_active() else data.strip, input)
+
+## The red extra line under the strip while a dive lesson dive is too steep.
+func training_warning() -> String:
+	if (lesson == DIVE_LESSON or lesson == MUG_LESSON) and player.dive_too_steep():
+		return TrainerScript.line(Config.trainer.live.too_steep, input)
+	return ""
 
 # The bin used by the bin lessons: the ordinary sand bin, or the wheelie bin.
 func training_bin(wheelie: bool) -> Dictionary:

@@ -14,6 +14,7 @@ var training_panel: PanelContainer
 var training_center: CenterContainer
 var lesson_label: Label
 var lesson_prompt: RichTextLabel
+var lesson_warning: Label
 var pause_button: Button
 var rival_popup: PanelContainer
 var rival_popup_head: TextureRect
@@ -208,6 +209,11 @@ func setup(owner_game: BeachGame) -> void:
 	lesson_prompt.add_theme_font_size_override("normal_font_size", TrainerCard.SPEECH_SIZE)
 	lesson_prompt.custom_minimum_size = Vector2(176, 10)
 	TrainerScript.snug_chips(lesson_prompt)
+	lesson_warning = BeachUI.label(lesson_column,"",8,BeachUI.CORAL)
+	lesson_warning.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lesson_warning.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lesson_warning.custom_minimum_size.x = 176.0
+	lesson_warning.mouse_filter = MOUSE_FILTER_IGNORE
 	training_row.add_child(trainer_portrait) # Screeches stands to the right of his words
 	_build_rival_popup()
 	var center: CenterContainer = CenterContainer.new()
@@ -522,6 +528,8 @@ func _process(delta: float) -> void:
 	if game.training:
 		lesson_label.text = "PRACTICE" if game.lesson >= BeachGame.TRAINING_LESSONS else "LESSON %d/%d" % [game.lesson + 1, BeachGame.TRAINING_LESSONS]
 		_set_lesson_prompt(game.training_text)
+		lesson_warning.text = game.training_warning()
+		lesson_warning.visible = lesson_warning.text != ""
 		_sync_trainer()
 		_place_aim_strip()
 	elif game.screech_lesson:

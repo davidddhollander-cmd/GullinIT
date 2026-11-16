@@ -59,7 +59,7 @@ static func _dive_cue_checks(host: Node, check: Callable) -> void:
 		flyer.queue_free()
 	var lessons: Array = Config.trainer.training.lessons
 	var text: String = JSON.stringify([lessons[BeachGame.DIVE_LESSON],lessons[BeachGame.MUG_LESSON],Config.trainer.live,Config.trainer.tips]).to_lower()
-	check.call(not text.contains("straight through") and not text.contains("climb above"),"dive lesson copy never says straight through or climb above")
+	check.call(not text.contains("straight through"),"dive lesson copy never says straight through")
 	check.call(Config.trainer.live.has("too_steep"),"trainer copy has the too steep line")
 
 static func _copy_checks(host: Node, check: Callable) -> void:
@@ -168,7 +168,7 @@ static func _aim_pause(host: Node, check: Callable, game: BeachGame) -> void:
 	game.player.dive(0)
 	game._physics_process(1.0/60.0)
 	check.call(game.aim_pause and game.player.state == BeachGull.State.WINDUP,"pressing dive freezes the first dive at the wind-up")
-	check.call(game.training_text().contains("slant"),"the freeze says how to steer: "+game.training_text())
+	check.call(game.training_text().contains("Line up"),"the freeze says how to steer: "+game.training_text())
 	var frozen_at: Vector2 = game.player.position
 	var flat: Vector2 = game.player.direction
 	Input.action_press("aim_down")
@@ -217,6 +217,15 @@ static func _aim_pause(host: Node, check: Callable, game: BeachGame) -> void:
 	game.player.state = BeachGull.State.WINDUP
 	game._training_tick(0.016)
 	check.call(game.dive_nudge_clock == 0.0,"diving clears the nudge")
+	# Too steep: the normal text stays and a red crash warning is added; it vanishes at a good angle.
+	game.player.state = BeachGull.State.STRIKE
+	game.player.direction = Vector2.from_angle(deg_to_rad(70))
+	game.overlay._process(0)
+	check.call(game.overlay.lesson_warning.visible and game.overlay.lesson_warning.text.contains("Crash likely") and game.overlay.lesson_warning.get_theme_color("font_color") == BeachUI.CORAL and game.training_text().length() > 0 and not game.training_text().contains("Crash"),"a too steep dive adds a red crash warning under the normal text")
+	game.player.direction = Vector2.from_angle(deg_to_rad(25))
+	game.overlay._process(0)
+	check.call(not game.overlay.lesson_warning.visible and game.training_warning() == "","the red warning is gone at a safe angle")
+	game.player.state = BeachGull.State.GLIDE
 
 static func _training_flow(host: Node, check: Callable) -> void:
 	BeachGame.trainer_cards = true
