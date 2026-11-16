@@ -7,6 +7,7 @@
   "tutorial": true,
   "time_limit": 105,
   "wind": {"dir": 0, "strength": 0, "gusts": false, "flip": false},
+  "clouds": [{"id": "plate-01", "x": 18, "y": 22, "scale": 1.0}, {"id": "plate-02", "x": 125, "y": 26, "scale": 0.5}, {"id": "plate-03", "x": 205, "y": 20, "scale": 0.5}, {"id": "plate-04", "x": 60, "y": 46, "scale": 0.5}, {"id": "plate-04", "x": 150, "y": 76, "scale": 1.0}, {"id": "plate-03", "x": 262, "y": 74, "scale": 1.0}],
   "awareness_mult": 0.7,
   "stars": [100, 200, 300],
   "rivals": [],

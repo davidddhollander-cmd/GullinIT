@@ -37,14 +37,15 @@ var font: Font = preload("res://assets/fonts/gull_pixel.fnt")
 ## Generated sky/sun/sea (BeachBackgroundArt) and ground. Off draws the old flat sky and sand; set before setup().
 var use_background_art: bool = true
 var background_art: BeachBackgroundArt
+var cloud_layout: Array = [] ## the level's "clouds" placements; set before setup(), empty uses the default arrangement
 
 func setup(entries: Array, zone_entries: Array = [], world_settings: Dictionary = {}) -> void:
 	zones = zone_entries.duplicate(true)
 	world = world_settings.duplicate(true)
 	if use_background_art:
-		background_art = BeachBackgroundArt.new(sunset)
+		background_art = BeachBackgroundArt.new(sunset,cloud_layout)
 		add_child(background_art)
-		background_art.update(camera_x,time)
+		background_art.update(camera_x,time,wind_dir,strength)
 	for entry: Dictionary in entries:
 		props.append(entry)
 		bin_wobble.append(0.0)
@@ -153,7 +154,7 @@ func set_bin_full(x: float, full: bool) -> void:
 func tick(delta: float) -> void:
 	time += delta
 	if background_art != null:
-		background_art.update(camera_x,time)
+		background_art.update(camera_x,time,wind_dir,strength)
 	_update_palm_wind()
 	for i: int in props.size():
 		if is_instance_valid(bin_glints[i]):

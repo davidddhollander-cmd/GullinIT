@@ -1,6 +1,6 @@
 # 096 — Per-level clouds in the game (after art-lab approval)
 
-Status: inbox
+Status: merged (David playtested)
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 095 (David has approved the art-lab prototype)
@@ -38,5 +38,23 @@ Each level has its own cloud arrangement (different positions, sizes and mix of 
 - [ ] Docs/tuning notes updated for the new `clouds` keys
 
 ## Report
+Files changed:
+- `scripts/beach_background_art.gd`: flat sky strip instead of the baked plate, a `CloudLayer` after the sun, `update(camera_x, time, wind_dir, wind_strength)`; `_init(sunset, layout)` falls back to `Config.tuning.clouds.default_layout`.
+- `scripts/cloud_layer.gd`: reads `Config.tuning.clouds`; per-entry `depth` override so clusters drift together.
+- `scripts/beach.gd`: `cloud_layout`, passes `wind_dir`/`strength` to the sky each tick. `scripts/game.gd`: `beach.cloud_layout = level.get("clouds", [])`.
+- `data/levels/level_01..07.json`: a `clouds` list each (7 distinct layouts). `data/tuning.json`: `clouds` block (`wind_speed`, `sheets`, `depth_by_size`, `default_layout`).
+- `assets/shaders/dusk_bands.gdshaderinc` (new): the shared sunset colour table; `dusk_tint.gdshader` and `cloud_dusk.gdshader` include it.
+- `scripts/art_lab.gd`, `data/cloud_lab.json` (now wind presets only), `tests/art_lab_checks.gd`, new `tests/cloud_checks.gd` (wired in `tests/integration.tscn` runner), `export_presets.cfg` (cloud_layer.gd and cloud_dusk shader now ship; only `data/cloud_lab.json` stays excluded).
+
+Tests: headless integration 17902 checks, 6 failures. These 6 also fail on `main` (Training Day card, steer freeze text, level card quest count, 2 UI bounds) and are unrelated.
+
+Decisions / differences from the task text:
+- The game has 7 levels, not 6; layouts 1-3 are the ones David approved in the art lab, 4-7 are new arrangements from the same clouds (plate cut-outs and pearl-px clusters) for review.
+- Sheets used are `clouds-v2-plate` and `clouds-v2-pearl-px` (the approved result of 095), not the Pearl sheet in the original text. Windy levels have no special streak set any more (David dropped it).
+- Level 6 no longer has a sunset sky (earlier commit "drop the dusk tint and sunset sky"), so only the title screen uses dusk; its clouds use the default layout and are dusk-tinted. Dusk is also covered in `cloud_checks.gd`.
+- Drift follows the gull's smoothed wind (`beach.wind_dir`/`strength`), so gusts speed clouds up; calm (level 1, title, loading) means no movement.
+- Old plate file left in place, unused.
+
+Not done / not verified: no in-game playtest (only the art lab captures and tests); a real run of level 3-5 with gusts is worth eyeballing.
 
 ## Review notes
