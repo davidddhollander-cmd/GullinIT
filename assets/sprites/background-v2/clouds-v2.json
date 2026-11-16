@@ -1,0 +1,301 @@
+{
+  "version": 1,
+  "image": "clouds-v2.png",
+  "size": [
+    768,
+    336
+  ],
+  "grid": {
+    "columns": 4,
+    "rows": 3,
+    "cell_size": [
+      192,
+      112
+    ],
+    "minimum_padding": 8
+  },
+  "region_format": "[x,y,width,height], top-left origin, tightly cropped, unscaled source pixels",
+  "palette": [
+    "#fff4da",
+    "#8e9b9e"
+  ],
+  "alpha": "binary: 0 or 255",
+  "clouds": [
+    {
+      "id": "fair-wisp-01",
+      "set": "fair",
+      "size": "small",
+      "region": [
+        70,
+        50,
+        50,
+        12
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        25.0,
+        6.0
+      ],
+      "source": "clouds-wisp-source.png",
+      "source_crop": [
+        25,
+        20,
+        110,
+        80
+      ]
+    },
+    {
+      "id": "fair-wisp-02",
+      "set": "fair",
+      "size": "small",
+      "region": [
+        270,
+        48,
+        33,
+        15
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        16.5,
+        7.5
+      ],
+      "source": "clouds-source.png",
+      "source_crop": [
+        225,
+        35,
+        285,
+        80
+      ]
+    },
+    {
+      "id": "fair-wisp-03",
+      "set": "fair",
+      "size": "small",
+      "region": [
+        462,
+        48,
+        35,
+        15
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        17.5,
+        7.5
+      ],
+      "source": "clouds-source.png",
+      "source_crop": [
+        380,
+        35,
+        440,
+        80
+      ]
+    },
+    {
+      "id": "fair-medium-01",
+      "set": "fair",
+      "size": "medium",
+      "region": [
+        642,
+        46,
+        58,
+        18
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        29.0,
+        9.0
+      ],
+      "source": "clouds-source.png",
+      "source_crop": [
+        535,
+        30,
+        625,
+        85
+      ]
+    },
+    {
+      "id": "fair-medium-02",
+      "set": "fair",
+      "size": "medium",
+      "region": [
+        64,
+        152,
+        63,
+        31
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        31.5,
+        15.5
+      ],
+      "source": "clouds-source.png",
+      "source_crop": [
+        55,
+        110,
+        140,
+        170
+      ]
+    },
+    {
+      "id": "fair-medium-03",
+      "set": "fair",
+      "size": "medium",
+      "region": [
+        250,
+        150,
+        76,
+        36
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        38.0,
+        18.0
+      ],
+      "source": "clouds-source.png",
+      "source_crop": [
+        200,
+        110,
+        300,
+        170
+      ]
+    },
+    {
+      "id": "fair-large-01",
+      "set": "fair",
+      "size": "large",
+      "region": [
+        398,
+        126,
+        162,
+        81
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        81.0,
+        40.5
+      ],
+      "source": "clouds-large-source.png",
+      "source_crop": [
+        420,
+        150,
+        650,
+        270
+      ]
+    },
+    {
+      "id": "fair-large-02",
+      "set": "fair",
+      "size": "large",
+      "region": [
+        606,
+        144,
+        130,
+        46
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        65.0,
+        23.0
+      ],
+      "source": "clouds-source.png",
+      "source_crop": [
+        495,
+        100,
+        655,
+        175
+      ]
+    },
+    {
+      "id": "wind-streak-01",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        48,
+        268,
+        94,
+        21
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        47.0,
+        10.5
+      ],
+      "source": "clouds-source.png",
+      "source_crop": [
+        35,
+        205,
+        150,
+        250
+      ]
+    },
+    {
+      "id": "wind-streak-02",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        228,
+        268,
+        118,
+        24
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        59.0,
+        12.0
+      ],
+      "source": "clouds-source.png",
+      "source_crop": [
+        180,
+        205,
+        320,
+        250
+      ]
+    },
+    {
+      "id": "wind-streak-03",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        412,
+        268,
+        133,
+        24
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        66.5,
+        12.0
+      ],
+      "source": "clouds-source.png",
+      "source_crop": [
+        335,
+        205,
+        485,
+        250
+      ]
+    },
+    {
+      "id": "wind-streak-04",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        598,
+        270,
+        147,
+        20
+      ],
+      "recommended_scale": 0.5,
+      "display_size": [
+        73.5,
+        10.0
+      ],
+      "source": "clouds-source.png",
+      "source_crop": [
+        495,
+        205,
+        665,
+        250
+      ]
+    }
+  ]
+}
