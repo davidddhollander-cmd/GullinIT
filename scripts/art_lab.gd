@@ -491,9 +491,9 @@ func _capture_clouds_run() -> void:
 	new_clouds = true
 	wind_mode = 4
 	var layouts: int = cloud_data.layouts.size()
-	for shot: int in layouts + 1:
-		dusk = shot == layouts # the extra last shot repeats layout 1 at dusk
-		cloud_layout = 0 if dusk else shot
+	for shot: int in layouts * 2: # every layout by day, then every layout at dusk
+		dusk = shot >= layouts
+		cloud_layout = shot % layouts
 		paused = false
 		_build_backdrop()
 		for frame: int in 90: # 1.5 s of drift

@@ -1,6 +1,6 @@
 # 095 — Cloud layouts and wind drift: art-lab prototype
 
-Status: done (awaiting David)
+Status: merged (David approved the lab prototype; layouts 1-3 kept)
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 094
@@ -59,3 +59,9 @@ Decisions:
 Not done / notes: in paused capture frames the long flags line overlaps the lab title (cosmetic, only with the long self-test title).
 
 ## Review notes
+
+## Final state (after David's review)
+- Three layouts: 1 = flat-bottomed plate cut-outs (`clouds-v2-plate`, plate-05 dropped: cut off in the source plate), 2 and 3 = Pearl clusters shrunk to 0.4x and palette-snapped (`clouds-v2-pearl-px`), drawn at scale 1. Clusters share a depth so they drift together.
+- Calm wind means no drift (no `base_speed`).
+- Dusk checked for all three layouts (`--capture-clouds` now shoots every layout by day and at dusk).
+- Last integration run: 17895 checks, 8 failures, identical to the baseline `main` failures.
