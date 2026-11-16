@@ -217,7 +217,7 @@ func gull_picker() -> void:
 		card.disabled = not owned or soon
 		var box: VBoxContainer = VBoxContainer.new()
 		box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		box.add_theme_constant_override("separation",2)
+		box.add_theme_constant_override("separation",1) # 1 px rows leave room for the two-row SPECIAL line
 		card.add_child(box)
 		BeachUI.full(box)
 		box.offset_left = 3

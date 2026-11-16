@@ -53,7 +53,7 @@ const DUMMY_FOOD: String = "crisps_bag"
 const RING_LESSON_1: Vector2 = Vector2(145,65) ## the takeoff ring, above the first palm
 const TRAINER_DELAY: float = 1.4 ## seconds between a screech or counter lesson's toast and the next pop-up
 const TRAINING_DELAY: float = 3.0 ## the same gap in Training Day: the lesson-done toast gets its moment before the next lesson starts
-const DUMMY_EXTRA_DELAY: float = 1.5 ## extra wait after lesson 5 before the sparring gull flies in
+const DUMMY_EXTRA_DELAY: float = 3.0 ## extra wait after lesson 5 before the sparring gull flies in
 const DUMMY_LEAD: float = 1.0 ## seconds before the mug lesson's card opens that the sparring gull arrives, so the card talks about a gull already in view
 const BANNER_CUE_TIME: float = 1.4 ## talk animation and pulse when the live banner appears or changes
 var dummy_spawn_wait: float = 0.0 ## no-cards path: counts down to the sparring gull's arrival
@@ -1700,7 +1700,7 @@ func training_text() -> String:
 
 ## The red extra line under the strip while a dive lesson dive is too steep.
 func training_warning() -> String:
-	if (lesson == DIVE_LESSON or lesson == MUG_LESSON) and player.dive_too_steep():
+	if training and lesson == DIVE_LESSON and player.dive_too_steep():
 		return TrainerScript.line(Config.trainer.live.too_steep, input)
 	return ""
 

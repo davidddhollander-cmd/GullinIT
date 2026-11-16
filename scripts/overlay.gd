@@ -453,6 +453,7 @@ func _place_aim_strip() -> void:
 	if game.aim_pause:
 		lesson_prompt.custom_minimum_size.x = AIM_STRIP_WIDTH
 		shift = AIM_STRIP_SHIFT if game.player.position.x - (game.camera_x - 160.0) < 160.0 else -AIM_STRIP_SHIFT
+	lesson_warning.custom_minimum_size.x = lesson_prompt.custom_minimum_size.x # the red line wraps to the strip, so a shifted strip stays on screen
 	training_center.offset_left = shift
 	training_center.offset_right = shift
 
