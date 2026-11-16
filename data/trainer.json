@@ -167,7 +167,7 @@
       },
       {
         "mood": "amused",
-        "lay": "Easy as stealing candy from a baby...",
+        "lay": "Now let's try something as easy as stealing candy from a baby...",
         "how": {
           "default": "Walk up to the toddler, face his ice cream and tap {peck_alt}.",
           "touch": "Walk up to the toddler, face his ice cream and tap {peck_alt}."
@@ -189,7 +189,7 @@
         "how": {
           "default": "Fly towards your target and get ready to dive.\n\nPress {dive} to dive and get ready to tap {peck}!",
           "casual": "Fly towards your target and get ready to dive. Press {dive} to dive. Easy mode does the pecking, so just fly your beak into the cone!",
-          "touch": "Fly towards your target and get ready to dive. Tap DIVE to dive and get ready to tap {peck}!",
+          "touch": "Fly towards your target and get ready to dive.\n\nTap DIVE to dive and get ready to tap {peck}!",
           "touch_casual": "Fly towards your target and get ready to dive. Tap DIVE to dive. Easy mode does the pecking, so just fly your beak into the cone!"
         },
         "strip": {

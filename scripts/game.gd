@@ -73,6 +73,9 @@ var peck_pause_armed: bool = true
 var aim_pause: bool = false
 var aim_pause_armed: bool = true
 var aim_pauses_left: int = AIM_PAUSES
+var aim_pause_climb_held: bool = false
+var aim_pause_last_tap: int = -100000
+const AIM_PAUSE_DOUBLE_TAP_MSEC: int = 400 ## two FLY taps this close leave the dive freeze
 var dive_nudge_clock: float = 0.0
 var prompt_action: String = "peck" ## the press the frozen prompt waits for: peck (lesson 3) or dive (the counter lesson)
 var training_took_off: bool = false
@@ -1501,6 +1504,8 @@ func _aim_pause_check() -> void:
 		return
 	aim_pause = true
 	aim_pause_armed = false
+	aim_pause_climb_held = player.climb # a flap already held when the freeze starts is not a tap
+	aim_pause_last_tap = -100000
 	aim_pauses_left -= 1
 	_freeze_actors(true)
 
@@ -1512,6 +1517,15 @@ func _aim_pause_tick() -> void:
 		player.direction = offset.normalized()
 	if input.touch_dive:
 		_end_aim_pause()
+	# Two quick FLY taps call the dive off, so the player can fly out and line up again.
+	if player.climb and not aim_pause_climb_held:
+		var now: int = Time.get_ticks_msec()
+		if now - aim_pause_last_tap <= AIM_PAUSE_DOUBLE_TAP_MSEC:
+			_end_aim_pause()
+			player.state = BeachGull.State.GLIDE
+			aim_pauses_left += 1 # the next dive freezes again
+		aim_pause_last_tap = now
+	aim_pause_climb_held = player.climb
 	overlay.queue_redraw()
 
 func _end_aim_pause() -> void:
