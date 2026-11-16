@@ -121,8 +121,8 @@ original reference folder have no Git diff. No runtime or level data changed.
 Full gameplay integration was not rerun for these unused art alternatives;
 the previously reported six baseline failures remain documented above.
 
-Publication: alternative assets and captures are committed locally. Automatic
-approval review requires fresh explicit approval to push these additions;
-the earlier published first version remains on the remote branch.
+Publication: David explicitly approved pushing the alternatives and captures.
+They are published on `origin/codex/094-cloud-sprite-sheet` alongside the first
+version, which remains unchanged.
 
 ## Review notes
