@@ -11,6 +11,8 @@ var running: bool = false
 var intro: float = 0.0
 var intro_dismissed_elapsed: float = -1.0
 var camera_x: float = 160.0
+var camera_vx: float = 0.0
+var camera_vy: float = 0.0
 var camera_y: float = 90.0 ## rises above 90 only while the gull is above world.camera_follow_start_y
 var debug: bool = false
 var player: BeachGull
@@ -724,8 +726,13 @@ func _physics_process(delta: float) -> void:
 	spawner.camera_x = camera_x
 	spawner.tick(step,elapsed)
 	spawner.apply_spacing(step)
-	camera_x = lerpf(camera_x,clampf(player.position.x,160,float(Config.tuning.world.width)-160),1-pow(1-float(Config.tuning.world.camera_lerp),step*60))
-	camera_y = lerpf(camera_y,camera_target_y(),1-pow(1-float(Config.tuning.world.camera_y_lerp),step*60))
+	var world: Dictionary = Config.tuning.world
+	var fx: Vector2 = CameraFollow.step(camera_x,camera_vx,clampf(player.position.x,160,float(world.width)-160),player.position.x,160.0,float(world.camera_dead_zone_x),float(world.camera_smooth_time),float(world.camera_margin_x),160.0,float(world.width)-160.0,step)
+	camera_x = fx.x
+	camera_vx = fx.y
+	var fy: Vector2 = CameraFollow.step(camera_y,camera_vy,camera_target_y(),player.position.y,90.0,float(world.camera_dead_zone_y),float(world.camera_smooth_time_y),float(world.camera_margin_y),90.0-float(world.sky_extra),90.0,step)
+	camera_y = fy.x
+	camera_vy = fy.y
 	camera.position = Vector2(roundf(camera_x),roundf(camera_y))
 	camera.offset = Vector2(sin(effects.clock*65),cos(effects.clock*73))*effects.shake+effects.kick
 	if player.state == BeachGull.State.STRIKE:

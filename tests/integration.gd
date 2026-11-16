@@ -289,6 +289,7 @@ func run() -> void:
 	await pier_diner_art_checks()
 	preload("res://tests/digestion_checks.gd").run(Callable(self,"check"))
 	preload("res://tests/flight_dynamics_checks.gd").run(self,Callable(self,"check"))
+	preload("res://tests/camera_follow_checks.gd").run(Callable(self,"check"))
 	preload("res://tests/gull_tumble_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/rival_ai_checks.gd").run(self,main,Callable(self,"check"))
 	await preload("res://tests/rival_ai_checks.gd").loose_only_checks(self,main,Callable(self,"check"))
