@@ -56,16 +56,16 @@
     "first_miss": "First miss is normal! Scoop it off the floor later",
     "wheelie_low": "Too low, gullster. Land on the lid.",
     "bin_closer": "Closer, gullster! Land right beside the bin.",
-    "too_steep": "Too steep! Level out a bit",
+    "too_steep": "Crash likely, reposition or pull up quickly",
     "mug_miss": "Missed! Fly up and dive against him again.",
     "mug_rescue": "He's holding still for you. Fly up and dive against him.",
     "aim_freeze": {
-      "default": "Steer with {steer}. Aim at a slant, not straight down.\nPress {dive} to go.",
-      "touch": "Steer with {steer}. Aim at a slant, not straight down.\nTap DIVE to go."
+      "default": "Steer with {steer}. Line up the snack.\nPress {dive} to go.",
+      "touch": "Steer with {steer}. Line up the snack.\nTap DIVE to go."
     },
     "dive_nudge": {
-      "default": "Come in from the side, then press {dive}",
-      "touch": "Come in from the side, then tap DIVE"
+      "default": "Climb above him, then press {dive}",
+      "touch": "Climb above him, then tap DIVE"
     },
     "toddler_peck": {
       "default": "Tap {peck_alt} to peck his ice cream!",
@@ -187,16 +187,16 @@
         "mood": "amused",
         "lay": "See the fella with the ice cream? That's yours.",
         "how": {
-          "default": "Come in from the side, a bit above him. Press {dive}, aim at a shallow slant, then tap {peck} at the cone.",
-          "casual": "Come in from the side, a bit above him. Press {dive} and aim at a shallow slant. Easy mode pecks for you.",
-          "touch": "Come in from the side, a bit above him. Tap DIVE, aim at a shallow slant, then tap {peck} at the cone.",
-          "touch_casual": "Come in from the side, a bit above him. Tap DIVE and aim at a shallow slant. Easy mode pecks for you."
+          "default": "Fly towards your target and get ready to dive. Press {dive} to dive and then tap {peck} right when your beak reaches the delicious target.",
+          "casual": "Fly towards your target and get ready to dive. Press {dive} to dive. Easy mode does the pecking, so just fly your beak into the cone. Then aim up and climb away.",
+          "touch": "Fly towards your target and get ready to dive. Tap DIVE to dive and then tap {peck} right when your beak reaches the delicious target.",
+          "touch_casual": "Fly towards your target and get ready to dive. Tap DIVE to dive. Easy mode does the pecking, so just fly your beak into the cone. Then aim up and climb away."
         },
         "strip": {
-          "default": "Dive at a slant, not straight down, then tap {peck}",
-          "casual": "Dive at a slant with {dive}, your beak pecks for you",
-          "touch": "Tap DIVE at a slant, not straight down, then tap {peck}",
-          "touch_casual": "Tap DIVE at a slant, your beak pecks for you"
+          "default": "Aim at the snack, {dive} to dive, then tap {peck}",
+          "casual": "Dive with {dive}, your beak pecks for you",
+          "touch": "Aim at the snack, tap DIVE, then tap {peck}",
+          "touch_casual": "Tap DIVE, your beak pecks for you"
         }
       },
       {
