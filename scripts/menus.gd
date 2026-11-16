@@ -275,8 +275,8 @@ func _gull_card_body(box: VBoxContainer, id: String, owned: bool) -> void:
 	blurb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	blurb.size_flags_vertical = SIZE_EXPAND_FILL
 	_stat_rows(box,info.get("card",{}),owned)
-	# Only the herring has a power so far; the others get theirs later (docs/BRASHNESS_BACKLOG.md).
-	var special: Label = _small_label(box,"SPECIAL: " + str(info.get("power",{}).get("name","SOON")),BeachUI.GOLD if owned else Color("6b858b"))
+	# Two rows so long names (LIGHTNING STRIKE) stay inside the card; the blurb's fill gives up the row.
+	var special: Label = _small_label(box,"SPECIAL:\n" + str(info.get("power",{}).get("name","SOON")),BeachUI.GOLD if owned else Color("6b858b"))
 	special.name = "Special"
 	special.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
