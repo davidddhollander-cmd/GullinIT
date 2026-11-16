@@ -28,11 +28,11 @@ var paused: bool = false
 var step_once: bool = false
 var new_sky: bool = false ## G: generated sky/sun/sea (BeachBackgroundArt) instead of the live drawn one
 var dusk: bool = false ## D: the title screen's sunset version of the backdrop
-var new_clouds: bool = false ## K: separate drifting clouds (task 095 prototype) over a flat generated sky
-var cloud_layout: int = 0 ## L: which of the six level layouts
+var cloud_layout: int = 0 ## L: whose level's clouds the generated sky shows (index into Config.levels)
 var wind_mode: int = 0 ## W: index into data/cloud_lab.json "winds"
-var cloud_data: Dictionary = {}
-var clouds: CloudLayer
+var cloud_data: Dictionary = {} ## data/cloud_lab.json: wind presets only; the layouts live in data/levels/*.json
+var clouds: CloudLayer:
+	get: return backdrop.background_art.clouds if backdrop != null and backdrop.background_art != null else null
 var pair_x: float = REST_X
 var dir: float = 1.0
 var dive_timer: float = 0.0
@@ -58,7 +58,7 @@ func _ready() -> void:
 		return
 	for i: int in comparisons.size():
 		candidate_ids.append(_register(i, comparisons[i]))
-	cloud_data = CloudLayer.lab_data()
+	cloud_data = Config.read_json("res://data/cloud_lab.json")
 	_build_backdrop()
 	stage = Node2D.new()
 	stage.y_sort_enabled = true
@@ -78,20 +78,12 @@ func _build_backdrop() -> void:
 		backdrop.free()
 	backdrop = BeachBackdrop.new()
 	backdrop.use_background_art = new_sky
+	backdrop.cloud_layout = Config.levels[cloud_layout].get("clouds", [])
 	backdrop.sunset = dusk
 	backdrop.camera_x = camera.position.x if camera != null else 160.0
 	add_child(backdrop)
 	move_child(backdrop, 0)
 	backdrop.setup([])
-	clouds = null
-	if new_clouds and backdrop.background_art != null:
-		var sky: Image = Image.create(320, 80, false, Image.FORMAT_RGBA8)
-		sky.fill(BeachBackgroundArt.SKY_COLOR)
-		backdrop.background_art.sky.texture = ImageTexture.create_from_image(sky) # hides the baked clouds, keeps the dusk shader's rows
-		clouds = CloudLayer.new()
-		backdrop.background_art.add_child(clouds) # after the sun, so clouds pass in front of it
-		clouds.setup(cloud_data.layouts[cloud_layout], dusk)
-		_update_clouds()
 
 ## Wind as the game would feed it: direction and strength, with an optional sine gust on top.
 func _wind() -> Dictionary:
@@ -101,10 +93,11 @@ func _wind() -> Dictionary:
 		strength += float(wind.gust) * sin(backdrop.time * TAU / float(wind.gust_period))
 	return {"dir": int(wind.dir), "strength": maxf(strength, 0.0)}
 
-func _update_clouds() -> void:
-	if clouds != null:
-		var wind: Dictionary = _wind()
-		clouds.update(backdrop.time, wind.dir, wind.strength)
+## The backdrop passes these on to the clouds on its next tick, as the game does with the gull's wind.
+func _apply_wind() -> void:
+	var wind: Dictionary = _wind()
+	backdrop.wind_dir = wind.dir
+	backdrop.strength = wind.strength
 
 ## A candidate is an sprites.json-shaped entry; `clone` copies a live entry first so a self-test stays short.
 func _register(i: int, entry: Dictionary) -> String:
@@ -148,7 +141,7 @@ func _build_hud() -> void:
 		side_labels.append(_label(layer, Vector2(x, 22), 80, HORIZONTAL_ALIGNMENT_CENTER))
 	reference_label = _label(layer, Vector2(120, 22), 80, HORIZONTAL_ALIGNMENT_CENTER)
 	_label(layer, Vector2(2, 161), 316, HORIZONTAL_ALIGNMENT_LEFT).text = "ARROWS PICK  TAB GROUP  Z ZOOM  B BLIND  F FILTER"
-	_label(layer, Vector2(2, 170), 316, HORIZONTAL_ALIGNMENT_LEFT).text = "I INT P PAUSE . STEP C CAP G SKY D DUSK K CLD L LAY W WIND"
+	_label(layer, Vector2(2, 170), 316, HORIZONTAL_ALIGNMENT_LEFT).text = "I INT P PAUSE . STEP C CAP G SKY D DUSK L LEVEL W WIND"
 
 func _label(parent: Node, at: Vector2, width: float, align: HorizontalAlignment) -> Label:
 	var label: Label = Label.new()
@@ -243,8 +236,8 @@ func _lane(i: int) -> float:
 	return (-1.0 if left_slot else 1.0) * float(LANE_HALF_GAP[zoom])
 
 func _advance(d: float) -> void:
+	_apply_wind()
 	backdrop.tick(d)
-	_update_clouds()
 	match motion:
 		"fly_across", "dive", "in_beak":
 			_fly(d, motion == "dive")
@@ -367,12 +360,10 @@ func _refresh_hud() -> void:
 		flags.append("BLIND")
 	if paused:
 		flags.append("PAUSED")
-	if new_sky and not new_clouds:
-		flags.append("NEW SKY")
+	if new_sky:
+		flags.append("SKY L%d %s" % [cloud_layout + 1, str(cloud_data.winds[wind_mode].name).to_upper()])
 	if dusk:
 		flags.append("DUSK")
-	if new_clouds:
-		flags.append("CLD L%d %s" % [cloud_layout + 1, str(cloud_data.winds[wind_mode].name).to_upper()])
 	flags_label.text = " ".join(flags)
 	flags_label.add_theme_color_override("font_color", GOLD if blind else Color("fff4da"))
 	var names: Array[String] = ["CURRENT", "PROPOSED"]
@@ -426,21 +417,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_window().content_scale_stretch = Window.CONTENT_SCALE_STRETCH_INTEGER if integer_scale else Window.CONTENT_SCALE_STRETCH_FRACTIONAL
 		KEY_G:
 			new_sky = not new_sky
-			new_clouds = new_clouds and new_sky
 			_build_backdrop()
 		KEY_D:
 			dusk = not dusk
 			_build_backdrop()
-		KEY_K:
-			new_clouds = not new_clouds
-			new_sky = new_sky or new_clouds # the clouds sit on the generated sky
-			_build_backdrop()
 		KEY_L:
-			cloud_layout = (cloud_layout + 1) % cloud_data.layouts.size()
+			cloud_layout = (cloud_layout + 1) % Config.levels.size()
 			_build_backdrop()
 		KEY_W:
 			wind_mode = (wind_mode + 1) % cloud_data.winds.size()
-			_update_clouds()
 		KEY_P:
 			paused = not paused
 		KEY_PERIOD:
@@ -488,9 +473,8 @@ func _capture_run() -> void:
 func _capture_clouds_run() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(CAPTURE_DIR))
 	new_sky = true
-	new_clouds = true
 	wind_mode = 4
-	var layouts: int = cloud_data.layouts.size()
+	var layouts: int = Config.levels.size()
 	for shot: int in layouts * 2: # every layout by day, then every layout at dusk
 		dusk = shot >= layouts
 		cloud_layout = shot % layouts

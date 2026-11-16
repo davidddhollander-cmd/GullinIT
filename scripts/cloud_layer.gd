@@ -1,17 +1,13 @@
 class_name CloudLayer
 extends Node2D
-## Separate drifting clouds over the generated sky (task 095, art-lab prototype only; 096 moves it into the game).
+## Separate drifting clouds over the generated sky. Layouts live in data/levels/*.json ("clouds"), tuning in data/tuning.json ("clouds").
 ## Pinned to the screen by its parent. Drift follows the beach clock so pause and step freeze it.
 const SHEET_DIR: String = "res://assets/sprites/background-v2/"
-const DATA: String = "res://data/cloud_lab.json"
 const SCREEN_W: float = 320.0
 
 var clouds: Array[Dictionary] = [] ## {sprite, x, y, width, depth}
 var tuning: Dictionary = {}
 var last_time: float = -1.0
-
-static func lab_data() -> Dictionary:
-	return Config.read_json(DATA)
 
 func _init() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -22,7 +18,7 @@ func setup(layout: Array, dusk: bool) -> void:
 		(cloud.sprite as Sprite2D).free()
 	clouds.clear()
 	last_time = -1.0
-	tuning = lab_data().tuning
+	tuning = Config.tuning.clouds
 	# Cloud ids are unique across sheets (pearl bubbly set, plate cut-outs), so layouts can mix them.
 	var regions: Dictionary = {}
 	for sheet_name: String in tuning.sheets:

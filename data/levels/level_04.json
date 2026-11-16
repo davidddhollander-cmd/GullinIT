@@ -5,6 +5,7 @@
   "seed": 7104,
   "time_limit": 135,
   "wind": {"dir": 1, "strength": 0.3, "gusts": true, "flip": false},
+  "clouds": [{"id": "plate-02", "x": 30, "y": 20, "scale": 1.0}, {"id": "plate-01", "x": 170, "y": 24, "scale": 1.0}, {"id": "plate-03", "x": 110, "y": 52, "scale": 0.5}, {"id": "plate-04", "x": 250, "y": 46, "scale": 0.5}, {"id": "plate-03", "x": 60, "y": 76, "scale": 1.0}, {"id": "plate-04", "x": 210, "y": 74, "scale": 1.0}],
   "awareness_mult": 1.24,
   "twist": {"id": "watergun_teen_intro", "tip": {"id": "teen", "text": "WATER GUN TEEN: FLY HIGH, STAY DRY!"}},
   "quests": [

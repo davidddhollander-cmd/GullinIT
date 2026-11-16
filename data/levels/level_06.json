@@ -6,6 +6,7 @@
   "time_limit": 150,
   "authored": true,
   "wind": {"dir": 1, "strength": 0.3, "gusts": false, "flip": false},
+  "clouds": [{"id": "plate-01", "x": 20, "y": 40, "scale": 1.0}, {"id": "plate-04", "x": 120, "y": 70, "scale": 1.0}, {"id": "plate-02", "x": 150, "y": 28, "scale": 0.5}, {"id": "fair-wisp-03", "x": 190, "y": 18, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-01", "x": 216, "y": 26, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-02", "x": 70, "y": 20, "scale": 1.0, "depth": 0.9}, {"id": "plate-03", "x": 280, "y": 60, "scale": 0.5}],
   "awareness_mult": 1.35,
   "twist": {
     "id": "squall",

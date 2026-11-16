@@ -162,6 +162,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	wind.gust_warning.connect(_gust)
 	beach = BeachBackdrop.new()
 	beach.sunset = level.has("sunset")
+	beach.cloud_layout = level.get("clouds",[])
 	beach.wind_dir = wind.direction
 	beach.strength = wind.strength
 	add_child(beach)

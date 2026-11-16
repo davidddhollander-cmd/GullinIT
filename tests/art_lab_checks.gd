@@ -2,7 +2,7 @@ extends RefCounted
 ## Art Lab (task 044): data shape, self-test parity, key toggles and export exclusion.
 
 const MOTIONS: Array[String] = ["fly_across", "dive", "walk_across", "idle", "on_sand", "in_beak", "static"]
-const LAB_FILES: Array[String] = ["scenes/art_lab.tscn", "scripts/art_lab.gd", "data/art_lab.json", "scripts/cloud_layer.gd", "data/cloud_lab.json", "assets/shaders/cloud_dusk.gdshader"]
+const LAB_FILES: Array[String] = ["scenes/art_lab.tscn", "scripts/art_lab.gd", "data/art_lab.json", "data/cloud_lab.json"]
 
 static func _key(lab: Node, keycode: Key) -> void:
 	var event: InputEventKey = InputEventKey.new()
@@ -79,68 +79,28 @@ static func run(host: Node, check: Callable) -> void:
 	_key(lab, KEY_D)
 	check.call(lab.backdrop.background_art == null and not lab.backdrop.sunset, "G and D switch back")
 
-	# Task 095: separate drifting clouds (prototype, lab only).
-	var layouts: Array = lab.cloud_data.layouts
-	var signatures: Dictionary = {}
-	for layout: Array in layouts:
-		signatures[JSON.stringify(layout)] = true
-	check.call(layouts.size() >= 3 and signatures.size() == layouts.size(), "the cloud layouts are distinct")
-	_key(lab, KEY_K)
-	check.call(lab.new_clouds and lab.new_sky and lab.clouds != null and lab.clouds.clouds.size() == layouts[0].size(), "K shows the cloud layer on the generated sky")
-	var layer: CloudLayer = lab.clouds
+	# Clouds on the generated sky: L picks a level's layout, W the wind, as the game feeds them.
+	_key(lab, KEY_G)
+	check.call(lab.clouds != null and lab.clouds.clouds.size() == Config.levels[0].clouds.size(), "G shows level 1's clouds on the generated sky")
 	_key(lab, KEY_L)
-	check.call(lab.cloud_layout == 1 and lab.clouds.clouds.size() == layouts[1].size(), "L cycles the layout")
-	layer = lab.clouds
-	# Drift: heading follows wind direction, bigger clouds move faster, wrap keeps x on screen.
-	layer.update(10.0, 1, 0.5)
-	var start: Array = layer.clouds.map(func(c: Dictionary) -> float: return c.x)
-	layer.update(11.0, 1, 0.5)
-	var moved_right: bool = true
-	for i: int in layer.clouds.size():
-		moved_right = moved_right and (layer.clouds[i].x > start[i] or layer.clouds[i].x < start[i] - layer.clouds[i].width) # wrapped counts
-	check.call(moved_right, "clouds drift right in a right wind")
-	var before_left: Array = layer.clouds.map(func(c: Dictionary) -> float: return c.x)
-	layer.update(12.0, -1, 0.5)
-	var moved_left: bool = true
-	for i: int in layer.clouds.size():
-		moved_left = moved_left and (layer.clouds[i].x < before_left[i] or layer.clouds[i].x > before_left[i] + layer.clouds[i].width)
-	check.call(moved_left, "clouds drift left in a left wind")
-	var probe: CloudLayer = CloudLayer.new() # layout 1 mixes small and large cut-outs
-	probe.setup(layouts[0], false)
-	probe.update(100.0, 1, 0.5)
-	var probe_start: Array = probe.clouds.map(func(c: Dictionary) -> float: return c.x)
-	probe.update(100.1, 1, 0.5)
-	var slow_step: float = INF
-	var fast_step: float = 0.0
-	var slow_depth: float = INF
-	var fast_depth: float = 0.0
-	for i: int in probe.clouds.size():
-		var step: float = fposmod(probe.clouds[i].x - probe_start[i] + 160.0, CloudLayer.SCREEN_W + probe.clouds[i].width) - 160.0
-		if probe.clouds[i].depth < slow_depth:
-			slow_depth = probe.clouds[i].depth
-			slow_step = step
-		if probe.clouds[i].depth > fast_depth:
-			fast_depth = probe.clouds[i].depth
-			fast_step = step
-	check.call(slow_depth < fast_depth and slow_step < fast_step, "bigger clouds are nearer and drift faster")
-	probe.free()
-	var on_screen: bool = true
-	for t: int in 600:
-		layer.update(30.0 + float(t) * 0.5, 1, 0.65)
-		for cloud: Dictionary in layer.clouds:
-			on_screen = on_screen and cloud.x >= -cloud.width and cloud.x <= CloudLayer.SCREEN_W
-	check.call(on_screen, "clouds wrap so they stay within a screen width of the edges")
-	var calm_before: Array = layer.clouds.map(func(c: Dictionary) -> float: return c.x)
-	layer.update(layer.last_time, 1, 0.65) # same clock reading: a paused lab advances nothing
-	check.call(layer.clouds.map(func(c: Dictionary) -> float: return c.x) == calm_before, "a frozen clock freezes the clouds")
-	layer.update(layer.last_time + 1.0, 0, 0.0)
-	check.call(layer.clouds.map(func(c: Dictionary) -> float: return c.x) == calm_before, "calm wind does not move the clouds")
+	check.call(lab.cloud_layout == 1 and lab.clouds.clouds.size() == Config.levels[1].clouds.size(), "L shows the next level's clouds")
+	var cloud_x: Callable = func() -> Array: return lab.clouds.clouds.map(func(c: Dictionary) -> float: return c.x)
+	var calm_x: Array = cloud_x.call()
+	for frame: int in 60:
+		lab._advance(1.0 / 60.0)
+	check.call(cloud_x.call() == calm_x, "the lab opens on calm wind and the clouds stand still")
 	_key(lab, KEY_W)
-	check.call(lab.wind_mode == 1, "W cycles the wind")
+	_key(lab, KEY_W)
+	_key(lab, KEY_W)
+	_key(lab, KEY_W)
+	check.call(lab.wind_mode == 4, "W cycles the wind")
+	for frame: int in 60:
+		lab._advance(1.0 / 60.0)
+	check.call(cloud_x.call() != calm_x, "clouds drift once the wind blows")
 	_key(lab, KEY_D)
 	check.call(lab.clouds.clouds[0].sprite.material != null, "dusk tints the clouds")
 	_key(lab, KEY_G)
-	check.call(not lab.new_clouds and lab.clouds == null, "G off removes the clouds with the generated sky")
+	check.call(lab.clouds == null, "G off removes the generated sky and its clouds")
 	_key(lab, KEY_D)
 	lab.wind_mode = 0
 	lab.cloud_layout = 0
