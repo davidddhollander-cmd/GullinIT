@@ -455,5 +455,6 @@
       "cry":     {"cues": ["wah"],                            "chance": 1.0, "gap": 1.0}
     }
   },
-  "flap": {"volume_db": -13.0, "min_gap": 0.2}
+  "flap": {"volume_db": -13.0, "min_gap": 0.2},
+  "clouds": {"wind_speed": 28.0, "sheets": ["clouds-v2-plate", "clouds-v2-pearl-px"], "depth_by_size": {"small": 0.6, "medium": 1.0, "large": 1.4}, "default_layout": [{"id": "plate-01", "x": 18, "y": 22, "scale": 1.0}, {"id": "plate-02", "x": 125, "y": 26, "scale": 0.5}, {"id": "plate-03", "x": 205, "y": 20, "scale": 0.5}, {"id": "plate-04", "x": 60, "y": 46, "scale": 0.5}, {"id": "plate-04", "x": 150, "y": 76, "scale": 1.0}, {"id": "plate-03", "x": 262, "y": 74, "scale": 1.0}]}
 }

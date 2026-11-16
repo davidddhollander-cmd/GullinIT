@@ -8,6 +8,7 @@
   "boss": true,
   "objective": "OUT-EAT THE GANG",
   "wind": {"dir": 1, "strength": 0.65, "gusts": true, "flip": true},
+  "clouds": [{"id": "plate-02", "x": 40, "y": 18, "scale": 1.0}, {"id": "plate-01", "x": 190, "y": 16, "scale": 1.0}, {"id": "fair-wisp-03", "x": 120, "y": 44, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-01", "x": 150, "y": 38, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-02", "x": 140, "y": 56, "scale": 1.0, "depth": 1.0}, {"id": "plate-04", "x": 260, "y": 62, "scale": 0.5}, {"id": "plate-03", "x": 20, "y": 70, "scale": 1.0}],
   "awareness_mult": 1.4,
   "quests": [
     {"id": "l6_mug_all", "text": "MUG ALL 3 RIVALS", "event": "rival_mugged_distinct", "filter": {}, "count": 3, "bonus": 80},

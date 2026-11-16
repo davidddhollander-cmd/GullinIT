@@ -25,13 +25,24 @@ var sky: Sprite2D
 var sun: Sprite2D
 var sea: AnimatedSprite2D
 var birds: BackgroundBirds
+var clouds: CloudLayer
 var top_color: Color = SKY_COLOR
+static var flat_sky: Texture2D ## the plate's 320x80 strip in plain sky colour; the clouds are separate sprites
 
-func _init(sunset: bool) -> void:
+## layout: cloud placements from the level ({id, x, y, scale}); empty uses the default arrangement.
+func _init(sunset: bool, layout: Array = []) -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	show_behind_parent = true
 	sky = _sprite("sky-clouds-320x80.png", Vector2(0, SKY_Y))
+	if flat_sky == null:
+		var flat: Image = Image.create(320, 80, false, Image.FORMAT_RGBA8)
+		flat.fill(SKY_COLOR)
+		flat_sky = ImageTexture.create_from_image(flat)
+	sky.texture = flat_sky
 	sun = _sprite("sun-34x34.png", SUN_DAY_POS)
+	clouds = CloudLayer.new() # after the sun, so clouds pass in front of it
+	add_child(clouds)
+	clouds.setup(layout if not layout.is_empty() else Config.tuning.clouds.default_layout, sunset)
 	var frames := SpriteFrames.new()
 	for index: int in SEA_FRAMES:
 		frames.add_frame(&"default", load(ART + "sea-frame-%02d.png" % (index + 1)))
@@ -62,14 +73,15 @@ func _sprite(file: String, at: Vector2) -> Sprite2D:
 	add_child(sprite)
 	return sprite
 
-## Follows the beach clock so the sea freezes with pause and results.
-func update(camera_x: float, time: float) -> void:
+## Follows the beach clock so the sea and clouds freeze with pause and results. Calm wind (the default) leaves clouds still.
+func update(camera_x: float, time: float, wind_dir: int = 0, wind_strength: float = 0.0) -> void:
 	position.x = roundf(camera_x) - 160.0
 	sea.frame = int(time / SEA_FRAME_TIME) % SEA_FRAMES
 	birds.update(time)
+	clouds.update(time, wind_dir, wind_strength)
 
 func _draw() -> void:
-	# The sky plate is 80 px tall; flat sky fills the strip above it.
+	# The sky strip is 80 px tall; flat sky fills the area above it.
 	var extra: float = float(Config.tuning.world.sky_extra)
 	draw_rect(Rect2(0, -extra, 320, SKY_Y + extra), top_color)
 
