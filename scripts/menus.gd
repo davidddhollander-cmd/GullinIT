@@ -9,7 +9,7 @@ func _ready() -> void:
 	BeachUI.full(self)
 
 ## The Feather count: icon and number on a small bright tablet in the top-right corner. The number label is named "Feathers".
-func _feather_tablet() -> void:
+func _feather_tablet(parent: Control = null) -> void:
 	var tablet: PanelContainer = PanelContainer.new()
 	tablet.name = "FeatherTablet"
 	tablet.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -35,6 +35,9 @@ func _feather_tablet() -> void:
 	row.add_child(icon)
 	var count: Label = BeachUI.label(row,str(GameState.feathers()),BeachUI.FONT_NATIVE,BeachUI.INK)
 	count.name = "Feathers"
+	if parent != null: # in a row: the menu's layout places it
+		parent.add_child(tablet)
+		return
 	add_child(tablet)
 	tablet.position = Vector2(298.0 - tablet.get_combined_minimum_size().x,13.0) # right edge fixed
 
@@ -152,6 +155,8 @@ func title() -> void:
 		_small_button(small,"QUIT",func() -> void: choose("quit"))
 
 const LEVELS_PER_PAGE: int = 3
+const LEVEL_SELECT_HEIGHT: float = 126.0 ## three quarters of the full-screen board
+const LEVEL_CARD_HEAD: float = 22.0 ## number and stars sit above the name
 const LOCKED_RED: Color = Color("d12f2f")
 var level_page: int = 0 # kept across rebuilds and across returning from a level
 
@@ -159,8 +164,19 @@ func level_select() -> void:
 	var trained: bool = bool(GameState.entry(1).get("training_complete", false))
 	clear("STAGE 1: LEARNING THE GULLIN'","",false,BeachUI.FONT_NATIVE)
 	content.add_theme_constant_override("separation",3)
-	# The panel fills the normal clear() margin area; the feather tablet sits on its top-right corner.
-	_feather_tablet()
+	# A shorter board, centred; the feather tablet shares the title's line, inside the frame.
+	var panel: PanelContainer = content.get_parent() as PanelContainer
+	panel.size_flags_vertical = SIZE_SHRINK_CENTER
+	panel.custom_minimum_size.y = LEVEL_SELECT_HEIGHT
+	var title_row: HBoxContainer = HBoxContainer.new()
+	content.add_child(title_row)
+	content.move_child(title_row,0)
+	var title_label: Label = content.get_child(1) as Label
+	content.remove_child(title_label)
+	title_row.add_child(title_label)
+	title_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	title_label.size_flags_vertical = SIZE_SHRINK_CENTER
+	_feather_tablet(title_row)
 	var pages: int = ceili(float(Config.levels.size()) / LEVELS_PER_PAGE)
 	level_page = clampi(level_page,0,pages - 1)
 	var row: HBoxContainer = HBoxContainer.new()
@@ -186,11 +202,16 @@ LESSONS" if trained else "BEGIN LESSON") if id == 1 else ""))
 		button.name = "Level%02d" % id
 		button.custom_minimum_size = Vector2(70,52)
 		button.size_flags_vertical = SIZE_EXPAND_FILL
+		for state: String in ["normal","hover","pressed","focus","disabled"]:
+			var card_box: StyleBoxFlat = theme.get_stylebox(state,"Button").duplicate() as StyleBoxFlat
+			card_box.content_margin_top = LEVEL_CARD_HEAD # the name starts below the number and stars
+			card_box.content_margin_bottom = 4
+			button.add_theme_stylebox_override(state,card_box)
 		var head: VBoxContainer = VBoxContainer.new()
 		head.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		head.add_theme_constant_override("separation",2)
 		head.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-		head.offset_top = 8
+		head.offset_top = 4
 		button.add_child(head)
 		var number: Label = BeachUI.label(head,"%02d" % id,BeachUI.FONT_NATIVE,BeachUI.CREAM)
 		number.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -234,15 +255,18 @@ LESSONS" if trained else "BEGIN LESSON") if id == 1 else ""))
 func _page_arrow(row: HBoxContainer, text: String, shown: bool, step: int) -> void:
 	if not shown:
 		var gap: Control = Control.new() # keeps the cards centred when there is no page that way
-		gap.custom_minimum_size.x = 12
+		gap.custom_minimum_size.x = 16
 		row.add_child(gap)
 		return
 	var arrow: Button = BeachUI.button(row,text,func() -> void:
 		level_page += step
 		level_select(),12)
 	arrow.name = "PageNext" if step > 0 else "PagePrev"
-	arrow.custom_minimum_size = Vector2(12,16)
+	arrow.custom_minimum_size = Vector2(16,22)
 	arrow.size_flags_vertical = SIZE_SHRINK_CENTER
+	arrow.add_theme_font_size_override("font_size",BeachUI.FONT_DISPLAY) # big, bold glyph
+	arrow.add_theme_color_override("font_outline_color",Color("3b2412"))
+	arrow.add_theme_constant_override("outline_size",2)
 	arrow.add_theme_color_override("font_color",BeachUI.CREAM)
 	arrow.add_theme_color_override("font_hover_color",BeachUI.CREAM)
 	arrow.add_theme_color_override("font_pressed_color",BeachUI.CREAM)
