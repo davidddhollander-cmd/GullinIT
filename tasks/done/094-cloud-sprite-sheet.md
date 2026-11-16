@@ -75,6 +75,6 @@ Full validation ran with Godot 4.7.2 via `tools/validate.ps1 -Godot 'C:/Users/da
 
 All source images were byte-compared with the image generator outputs and remain unchanged. Atlas SHA-256: `9e69fd0124077607d84c2bf72c83ba4f7ade28acb9f53543e003130b88f4d95c`.
 
-Publishing: branch is local; automatic approval review rejected the push to the external GitHub remote. Push awaits explicit David approval.
+Publishing: pushed to `origin/codex/094-cloud-sprite-sheet` with explicit David approval.
 
 ## Review notes
