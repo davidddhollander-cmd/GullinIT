@@ -1,6 +1,5 @@
 {
  "tuning": {
-  "base_speed": 1.5,
   "wind_speed": 28.0,
   "depth_by_size": {
    "small": 0.6,
@@ -8,8 +7,8 @@
    "large": 1.4
   },
   "sheets": [
-   "clouds-v2-alt-pearl",
-   "clouds-v2-plate"
+   "clouds-v2-plate",
+   "clouds-v2-pearl-px"
   ]
  },
  "winds": [
@@ -90,56 +89,56 @@
     "id": "fair-medium-02",
     "x": 18,
     "y": 24,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 1.0
    },
    {
     "id": "fair-wisp-03",
     "x": 52,
     "y": 20,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 1.0
    },
    {
     "id": "fair-wisp-01",
     "x": 44,
     "y": 38,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 1.0
    },
    {
     "id": "fair-wisp-02",
     "x": 150,
     "y": 50,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 0.9
    },
    {
     "id": "fair-wisp-01",
     "x": 182,
     "y": 44,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 0.9
    },
    {
     "id": "fair-wisp-03",
     "x": 168,
     "y": 62,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 0.9
    },
    {
     "id": "fair-wisp-01",
     "x": 270,
     "y": 24,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 0.8
    },
    {
     "id": "fair-wisp-02",
     "x": 282,
     "y": 34,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 0.8
    }
   ],
@@ -148,56 +147,56 @@
     "id": "fair-wisp-02",
     "x": 84,
     "y": 22,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 1.0
    },
    {
     "id": "fair-wisp-03",
     "x": 110,
     "y": 28,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 1.0
    },
    {
     "id": "fair-wisp-01",
     "x": 132,
     "y": 20,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 1.0
    },
    {
     "id": "fair-medium-03",
     "x": 185,
     "y": 56,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 0.9
    },
    {
     "id": "fair-wisp-01",
     "x": 222,
     "y": 52,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 0.9
    },
    {
     "id": "fair-wisp-02",
     "x": 204,
     "y": 68,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 0.9
    },
    {
     "id": "fair-wisp-01",
     "x": 14,
     "y": 52,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 0.8
    },
    {
     "id": "fair-wisp-03",
     "x": 30,
     "y": 60,
-    "scale": 0.5,
+    "scale": 1.0,
     "depth": 0.8
    }
   ]

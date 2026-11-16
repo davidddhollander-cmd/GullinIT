@@ -51,12 +51,12 @@ func setup(layout: Array, dusk: bool) -> void:
 		clouds.append({"sprite": sprite, "x": float(placed.x), "y": float(placed.y), "width": width, "depth": depth})
 	_place()
 
-## wind_dir 0 (calm) still drifts right at base_speed.
+## Calm (no wind) means no drift: speed scales with the wind strength alone.
 func update(time: float, wind_dir: int, wind_strength: float) -> void:
 	var delta: float = 0.0 if last_time < 0.0 else maxf(time - last_time, 0.0)
 	last_time = time
-	var heading: float = 1.0 if wind_dir == 0 else float(signi(wind_dir))
-	var speed: float = float(tuning.base_speed) + wind_strength * float(tuning.wind_speed)
+	var heading: float = float(signi(wind_dir))
+	var speed: float = wind_strength * float(tuning.wind_speed)
 	for cloud: Dictionary in clouds:
 		var x: float = cloud.x + heading * speed * cloud.depth * delta
 		var span: float = SCREEN_W + cloud.width

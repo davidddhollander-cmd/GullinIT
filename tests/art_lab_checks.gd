@@ -134,7 +134,7 @@ static func run(host: Node, check: Callable) -> void:
 	layer.update(layer.last_time, 1, 0.65) # same clock reading: a paused lab advances nothing
 	check.call(layer.clouds.map(func(c: Dictionary) -> float: return c.x) == calm_before, "a frozen clock freezes the clouds")
 	layer.update(layer.last_time + 1.0, 0, 0.0)
-	check.call(layer.clouds.map(func(c: Dictionary) -> float: return c.x) != calm_before, "calm wind still drifts slowly")
+	check.call(layer.clouds.map(func(c: Dictionary) -> float: return c.x) == calm_before, "calm wind does not move the clouds")
 	_key(lab, KEY_W)
 	check.call(lab.wind_mode == 1, "W cycles the wind")
 	_key(lab, KEY_D)
