@@ -187,8 +187,8 @@
         "mood": "amused",
         "lay": "Now let's get you a proper challenge. See the fella with the ice cream? That's yours...",
         "how": {
-          "default": "Fly towards your target and get ready to dive. Press {dive} to dive and get ready to tap {peck}!",
-          "casual": "Fly towards your target and get ready to dive. Press {dive} to dive. Easy mode does the pecking, so just fly your beak into the cone. Then aim up and climb away.",
+          "default": "Fly towards your target and get ready to dive.\n\nPress {dive} to dive and get ready to tap {peck}!",
+          "casual": "Fly towards your target and get ready to dive. Press {dive} to dive. Easy mode does the pecking, so just fly your beak into the cone!",
           "touch": "Fly towards your target and get ready to dive. Tap DIVE to dive and get ready to tap {peck}!",
           "touch_casual": "Fly towards your target and get ready to dive. Tap DIVE to dive. Easy mode does the pecking, so just fly your beak into the cone!"
         },
