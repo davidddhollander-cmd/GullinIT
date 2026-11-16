@@ -1,6 +1,6 @@
 # 094 â€” Cloud sprite sheet (separate, transparent clouds)
 
-Status: done (awaiting David)
+Status: merged (Pearl alternative approved; use clouds-v2-alt-pearl)
 Author: Claude
 Assignee: Codex
 Depends on: none

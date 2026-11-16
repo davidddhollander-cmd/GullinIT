@@ -11,7 +11,7 @@ In the art lab (`scripts/art_lab.gd`) he can switch the sky to the new separate 
 
 ## Context
 - Art lab already toggles the generated sky (`G`) and dusk (`D`) by rebuilding `BeachBackdrop` / `BeachBackgroundArt` (`scripts/beach_background_art.gd`). The current sky is one baked plate that does not move.
-- Cloud sheet from 094: `assets/sprites/background-v2/clouds-v2.png` + `clouds-v2.json`.
+- Cloud sheet from 094: `assets/sprites/background-v2/clouds-v2-alt-pearl.png` + `clouds-v2-alt-pearl.json` (approved; at 0.5 scale; ignore the first `clouds-v2` and the Coastal alt).
 - Constraints: nearest-neighbour, 320x180 canvas, draw clouds at scale 1, 0.5 or 2 only. Invoke `godot-prompter:2d-essentials` first.
 
 ## Requirements
