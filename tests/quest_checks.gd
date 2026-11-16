@@ -217,13 +217,9 @@ static func run_game(suite: Node, check: Callable) -> void:
 	GameState.wallet = {"feathers": 7}
 	main.casual = false
 	main._navigate("select")
-	var card_two: String = ""
-	var card_one: String = ""
-	for button: Node in main.menus.find_children("*", "Button", true, false):
-		if button.text.begins_with("02"):
-			card_two = button.text
-		elif button.text.begins_with("01"):
-			card_one = button.text
+	await suite.settle()
+	var card_two: String = _card_text(main.menus,"Level02")
+	var card_one: String = _card_text(main.menus,"Level01")
 	check.call(card_two != "" and not card_two.contains("Q ") and not card_two.contains("BEST"), "level card shows stars only, no quest count or best score")
 	check.call(card_one != "" and not card_one.contains("Q "), "trained level 1 card has no quest count")
 	var feather_label: Label = main.menus.find_child("Feathers", true, false)
@@ -375,3 +371,13 @@ static func run_game(suite: Node, check: Callable) -> void:
 	GameState.save_path = saved_path
 	GameState.progress = saved_progress
 	GameState.wallet = saved_wallet
+
+## All the text on one level card: its caption plus every label on it (number, status).
+static func _card_text(menus: Node, card_name: String) -> String:
+	var card: Node = menus.find_child(card_name,true,false)
+	if card == null:
+		return ""
+	var text: String = (card as Button).text
+	for label: Node in card.find_children("*","Label",true,false):
+		text += " " + (label as Label).text
+	return text

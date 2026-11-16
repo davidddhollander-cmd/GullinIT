@@ -229,12 +229,9 @@ static func run(host: Node, check: Callable) -> void:
 	# Reproduce the player's normal route with an already-completed save.
 	var completed_entry: Dictionary = GameState.entry(1)
 	host.main._navigate("select")
-	var training_button: Button
-	for button: Button in host.main.menus.find_children("*","Button",true,false):
-		if button.text.contains("TRAINING"):
-			training_button = button
-			break
-	check.call(is_instance_valid(training_button) and training_button.text.contains("REPLAY LESSONS"),"completed Training Day card clearly offers the lessons")
+	var training_button: Button = host.main.menus.find_child("Level01",true,false) as Button
+	var status: Label = training_button.find_child("Status",true,false) as Label if training_button != null else null
+	check.call(status != null and status.text.contains("REPLAY LESSONS"),"completed Training Day card clearly offers the lessons")
 	if is_instance_valid(training_button):
 		training_button.pressed.emit()
 	game = host.main.game

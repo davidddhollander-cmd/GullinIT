@@ -168,7 +168,7 @@ static func _aim_pause(host: Node, check: Callable, game: BeachGame) -> void:
 	game.player.dive(0)
 	game._physics_process(1.0/60.0)
 	check.call(game.aim_pause and game.player.state == BeachGull.State.WINDUP,"pressing dive freezes the first dive at the wind-up")
-	check.call(game.training_text().contains("Line up"),"the freeze says how to steer: "+game.training_text())
+	check.call(game.training_text().contains("line up the snack"),"the freeze says how to steer: "+game.training_text())
 	var frozen_at: Vector2 = game.player.position
 	var flat: Vector2 = game.player.direction
 	Input.action_press("aim_down")

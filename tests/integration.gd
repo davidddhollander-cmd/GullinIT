@@ -136,7 +136,15 @@ func run() -> void:
 	pin_base_reactions() # timing checks assume base reactions; slow_adult_checks covers the global multiplier
 	capture = OS.get_cmdline_user_args().has("--capture")
 	DirAccess.make_dir_recursive_absolute("res://test-output")
+	for stale: String in DirAccess.get_files_at("res://test-output"): # saves left by earlier runs would leak into load_progress checks
+		if stale.ends_with("-save.json"):
+			DirAccess.remove_absolute("res://test-output/" + stale)
 	GameState.save_path = "res://test-output/integration-save.json"
+	# The autoload loaded the player's real save; pin the options the checks depend on.
+	GameState.options.merge({"shake": true, "touch": false, "gull": "herring"},true)
+	for key: String in ["player_name","mouse_role","mouse_role_set","assist","control_mode","dive_steer","perk"]:
+		GameState.options.erase(key)
+	GameState.wallet = {}
 	GameState.progress = {}
 	main = preload("res://scenes/main.tscn").instantiate()
 	add_child(main)

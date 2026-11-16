@@ -131,7 +131,8 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(rec.last("level_start").page_id == "page123", "game events link to the page_open that loaded them")
 	Analytics.page_id = ""
 	var presets: String = FileAccess.get_file_as_string("res://export_presets.cfg")
-	check.call(presets.contains("send('page_open')") and presets.contains(str(saved_config.get("project_key", "missing"))) and presets.contains(str(saved_config.get("host", "missing")).rstrip("/") + "/i/v0/e/"), "the web page reports page_open to the same PostHog project as the game")
+	var shipped: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/analytics.json")) # the file, not the live config an earlier suite may have left on a test key
+	check.call(presets.contains("send('page_open')") and presets.contains(str(shipped.get("project_key", "missing"))) and presets.contains(str(shipped.get("host", "missing")).rstrip("/") + "/i/v0/e/"), "the web page reports page_open to the same PostHog project as the game")
 	var saved_save: String = GameState.save_path
 	GameState.save_path = "res://test-output/analytics-save.json"
 	var tagline := Label.new()
