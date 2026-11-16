@@ -1682,7 +1682,14 @@ func lesson_toddler() -> BeachTarget:
 func training_text() -> String:
 	var live: Dictionary = Config.trainer.live
 	if aim_pause:
-		return TrainerScript.line(live.aim_freeze, input)
+		var freeze: String = TrainerScript.line(live.aim_freeze, input)
+		if player.dive_too_steep():
+			freeze += "
+" + TrainerScript.line(live.aim_freeze_high, input)
+		return freeze.replace("
+", "
+[font_size=4] [/font_size]
+") # a half-height gap between the steps
 	if player.crash_warning():
 		return TrainerScript.line(live.crash, input)
 	if training_miss_hint > 0.0:

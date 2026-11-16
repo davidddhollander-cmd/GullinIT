@@ -3,11 +3,11 @@
   "lesson_button": "Got it",
   "keys": {
     "keyboard": {
-      "flap": "Space or left click",
+      "flap": "Space/left click",
       "dive": "Shift/right click",
       "peck": "E/middle click",
       "peck_alt": "E/middle click",
-      "steer": "the mouse or WASD",
+      "steer": "the mouse/WASD",
       "call": "Q"
     },
     "gamepad": {
@@ -59,9 +59,13 @@
     "too_steep": "Crash likely, reposition or pull up quickly",
     "mug_miss": "Missed! Fly up and dive against him again.",
     "mug_rescue": "He's holding still for you. Fly up and dive against him.",
+    "aim_freeze_high": {
+      "default": "Double-tap {flap} to reposition.",
+      "touch": "Double-tap FLY to reposition."
+    },
     "aim_freeze": {
-      "default": "Steer with {steer}. Line up the snack.\nPress {dive} to go.\nDouble-tap {flap} to fly off.",
-      "touch": "Steer with {steer}. Line up the snack.\nTap DIVE to go.\nDouble-tap FLY to fly off."
+      "default": "Aim with {steer} and line up the snack.\nPress {dive} to start dive.",
+      "touch": "Aim with {steer} and line up the snack.\nTap DIVE to start dive."
     },
     "dive_nudge": {
       "default": "Climb above him, then press {dive}",
