@@ -103,7 +103,7 @@ static func feather_icon(label: Label) -> TextureRect:
 	label.add_child(icon)
 	return icon
 
-static func back_button(parent: Node, value: String, action: Callable, width: float = 0.0) -> Button: ## width 0: hugs its text (the rule for menu buttons)
+static func back_button(parent: Node, value: String, action: Callable, width: float = BACK_WIDTH) -> Button:
 	var node: Button = button(parent,value,action,width)
 	node.custom_minimum_size.y = BACK_HEIGHT
 	node.size_flags_horizontal = Control.SIZE_SHRINK_CENTER

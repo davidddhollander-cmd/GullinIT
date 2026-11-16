@@ -190,15 +190,13 @@ func level_select() -> void:
 		var id: int = level.id
 		var unlocked: bool = GameState.unlocked(id)
 		var locked_demo: bool = GameState.demo_locked(id)
-		var status: String = "" if locked_demo else ("LOCKED" if not unlocked else (("REPLAY
-LESSONS" if trained else "BEGIN LESSON") if id == 1 else ""))
+		var status: String = "" if locked_demo else ("LOCKED" if not unlocked else (("REPLAY LESSONS" if trained else "BEGIN LESSON") if id == 1 else ""))
 		var words: PackedStringArray = level.name.to_upper().split(" ")
 		var last_word: String = words[words.size() - 1] if words.size() > 1 else "" # name on two lines, so every card is four lines and the status line stays at the bottom
 		words.resize(maxi(words.size() - 1,1))
 		var name_lines: String = " ".join(words) + "
 " + last_word
-		var caption: String = name_lines + "
-" + status # number and stars are child nodes: the font gives blank lines no height
+		var caption: String = name_lines # number and stars above, the status below, are child nodes
 		var button: Button = BeachUI.button(row,caption,func() -> void: choose("start",id),70)
 		button.name = "Level%02d" % id
 		button.custom_minimum_size = Vector2(70,52)
@@ -206,7 +204,7 @@ LESSONS" if trained else "BEGIN LESSON") if id == 1 else ""))
 		for state: String in ["normal","hover","pressed","focus","disabled"]:
 			var card_box: StyleBoxFlat = theme.get_stylebox(state,"Button").duplicate() as StyleBoxFlat
 			card_box.content_margin_top = LEVEL_CARD_HEAD # the name starts below the number and stars
-			card_box.content_margin_bottom = 4
+			card_box.content_margin_bottom = 10 # the name sits centred between the stars and the status line
 			button.add_theme_stylebox_override(state,card_box)
 		var head: VBoxContainer = VBoxContainer.new()
 		head.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -234,11 +232,18 @@ LESSONS" if trained else "BEGIN LESSON") if id == 1 else ""))
 			stars.add_child(star)
 		button.size_flags_horizontal = SIZE_EXPAND_FILL
 		button.disabled = not unlocked
+		if not status.is_empty():
+			var status_label: Label = _small_label(button,status,BeachUI.GOLD if id == 1 else BeachUI.CREAM)
+			status_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+			status_label.offset_top = -11
+			status_label.offset_bottom = -3
+			status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			status_label.name = "Status"
 		if locked_demo:
 			var note: Label = _small_label(button,"FULL GAME",LOCKED_RED)
 			note.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-			note.offset_top = -13
-			note.offset_bottom = -4
+			note.offset_top = -11
+			note.offset_bottom = -3
 			note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			note.name = "FullGameNote"
 		if unlocked and first_open == null:
@@ -248,8 +253,9 @@ LESSONS" if trained else "BEGIN LESSON") if id == 1 else ""))
 	actions.add_theme_constant_override("separation",4)
 	content.add_child(actions)
 	if not GameState.feedback_url().is_empty():
-		_small_button(actions,"FEEDBACK",func() -> void: choose("feedback"))
-	_small_button(actions,"< BACK",func() -> void: choose("title"))
+		_small_button(actions,"FEEDBACK",func() -> void: choose("feedback")).size_flags_horizontal = SIZE_SHRINK_CENTER
+	_small_button(actions,"< BACK",func() -> void: choose("title")).size_flags_horizontal = SIZE_SHRINK_CENTER
+	actions.alignment = BoxContainer.ALIGNMENT_CENTER # level select: the buttons hug their text
 	if first_open != null:
 		first_open.grab_focus()
 
@@ -753,7 +759,8 @@ func _gull_cycler(on_change: Callable = Callable()) -> void:
 	_small_label(content,"TAP TO SWAP GULL",Color("80bcb8")).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 func _small_button(parent: Control, text: String, action: Callable) -> Button:
-	var node: Button = BeachUI.back_button(parent,text,action,0) # rule: buttons hug their text, never stretch
+	var node: Button = BeachUI.back_button(parent,text,action,0)
+	node.size_flags_horizontal = SIZE_EXPAND_FILL
 	node.add_theme_font_override("font",SMALL_FONT)
 	node.add_theme_font_size_override("font_size",6)
 	return node
