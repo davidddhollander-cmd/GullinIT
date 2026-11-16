@@ -51,11 +51,35 @@ static func _demo_lock_checks(suite: Node, check: Callable) -> void:
 	suite.main._navigate("select")
 	await suite.settle()
 	var full_game: int = 0
-	for button: Button in _buttons(suite.main.menus, []):
-		if "FULL GAME" in button.text:
-			full_game += 1
-			check.call(button.disabled, "full-game level card is disabled: " + button.text.replace("\n", " "))
+	var page0_cards: int = 0
+	for page: int in 3:
+		suite.main.menus.level_page = page
+		suite.main.menus.level_select()
+		await suite.settle()
+		for button: Button in _buttons(suite.main.menus, []):
+			if button.name.begins_with("Page") or not button.text[0].is_valid_int():
+				continue
+			if page == 0:
+				page0_cards += 1
+			if button.find_child("FullGameNote", false, false) != null:
+				full_game += 1
+				check.call(button.disabled, "full-game level card is disabled: " + button.text.replace("
+", " "))
+		suite.layout(suite.main.menus)
+		suite.menu_font_grid(suite.main.menus)
 	check.call(full_game == 4, "level select marks four full-game levels (found %d)" % full_game)
+	suite.main.menus.level_page = 0
+	suite.main.menus.level_select()
+	await suite.settle()
+	check.call(page0_cards == 3 and suite.main.menus.find_child("PageNext", true, false) != null and suite.main.menus.find_child("PagePrev", true, false) == null, "level select page 0 shows 3 cards and a next arrow")
+	(suite.main.menus.find_child("PageNext", true, false) as Button).pressed.emit()
+	await suite.settle()
+	var has_four: bool = false
+	for button: Button in _buttons(suite.main.menus, []):
+		has_four = has_four or button.text.begins_with("04")
+	check.call(has_four and suite.main.menus.find_child("PagePrev", true, false) != null, "next arrow reaches level 4 and offers a back arrow")
+	await suite.snapshot("level-select-page1")
+	suite.main.menus.level_page = 0
 	check.call(not "FEEDBACK" in _captions(suite.main.menus), "no feedback button without a feedback URL")
 	suite.layout(suite.main.menus)
 	suite.menu_font_grid(suite.main.menus)

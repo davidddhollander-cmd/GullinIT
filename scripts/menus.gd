@@ -38,7 +38,7 @@ func _feather_tablet() -> void:
 	add_child(tablet)
 	tablet.position = Vector2(298.0 - tablet.get_combined_minimum_size().x,13.0) # right edge fixed
 
-func clear(title: String, subtitle: String = "", card: bool = false) -> VBoxContainer:
+func clear(title: String, subtitle: String = "", card: bool = false, title_size: int = BeachUI.FONT_DISPLAY) -> VBoxContainer:
 	for child: Node in get_children():
 		remove_child(child)
 		child.queue_free()
@@ -50,7 +50,7 @@ func clear(title: String, subtitle: String = "", card: bool = false) -> VBoxCont
 		panel.size_flags_vertical = SIZE_SHRINK_CENTER
 	content = VBoxContainer.new()
 	panel.add_child(content)
-	BeachUI.label(content,title,BeachUI.FONT_DISPLAY,BeachUI.GOLD)
+	BeachUI.label(content,title,title_size,BeachUI.GOLD)
 	if not subtitle.is_empty():
 		BeachUI.label(content,subtitle,BeachUI.FONT_NATIVE,Color("a9d7d2"))
 	return content
@@ -151,49 +151,74 @@ func title() -> void:
 	if not OS.has_feature("web"):
 		_small_button(small,"QUIT",func() -> void: choose("quit"))
 
+const LEVELS_PER_PAGE: int = 3
+const LOCKED_RED: Color = Color("d12f2f")
+var level_page: int = 0 # kept across rebuilds and across returning from a level
+
 func level_select() -> void:
 	var trained: bool = bool(GameState.entry(1).get("training_complete", false))
-	clear("PICK YOUR BEACH", "ARCADE / TRAINING DAY FIRST" if not trained else "ARCADE / EARN A STAR TO MOVE ON")
-	content.add_theme_constant_override("separation",2)
-	var outer: MarginContainer = content.get_parent().get_parent() as MarginContainer
-	for edge: String in ["top","bottom","left","right"]:
-		outer.add_theme_constant_override("margin_" + edge,0)
+	clear("STAGE 1: LEARNING THE GULLIN'","",false,BeachUI.FONT_NATIVE)
+	content.add_theme_constant_override("separation",3)
+	# Keep the outer margins: the whole wood frame must stay on screen. The frame shrinks around its content.
+	var panel: PanelContainer = content.get_parent() as PanelContainer
+	panel.size_flags_horizontal = SIZE_SHRINK_CENTER
+	panel.size_flags_vertical = SIZE_SHRINK_CENTER
 	_feather_tablet()
-	# Seven cards: three on the first row (Training Day's REPLAY LESSONS card is wide), four on the second.
-	var grid: VBoxContainer = VBoxContainer.new()
-	grid.size_flags_vertical = SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("separation",2)
-	content.add_child(grid)
-	var rows: Array[HBoxContainer] = []
-	for row_index: int in 2:
-		var level_row: HBoxContainer = HBoxContainer.new()
-		level_row.size_flags_vertical = SIZE_EXPAND_FILL
-		level_row.add_theme_constant_override("separation",2)
-		grid.add_child(level_row)
-		rows.append(level_row)
-	for level: Dictionary in Config.levels:
+	var pages: int = ceili(float(Config.levels.size()) / LEVELS_PER_PAGE)
+	level_page = clampi(level_page,0,pages - 1)
+	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override("separation",2)
+	content.add_child(row)
+	_page_arrow(row,"<",level_page > 0,-1)
+	var first_open: Button
+	for level: Dictionary in Config.levels.slice(level_page * LEVELS_PER_PAGE,(level_page + 1) * LEVELS_PER_PAGE):
 		var id: int = level.id
-		var record: Dictionary = GameState.entry(id)
 		var unlocked: bool = GameState.unlocked(id)
-		var stars: String = "*".repeat(int(record.get("stars",0)))
-		var status: String = "FULL GAME" if GameState.demo_locked(id) else ("LOCKED" if not unlocked else (("REPLAY LESSONS" if trained else "BEGIN LESSON") if id == 1 else ""))
+		var locked_demo: bool = GameState.demo_locked(id)
+		var status: String = "" if locked_demo else ("LOCKED" if not unlocked else (("REPLAY LESSONS" if trained else "BEGIN LESSON") if id == 1 else ""))
+		var words: PackedStringArray = level.name.to_upper().split(" ")
+		var last_word: String = words[words.size() - 1] if words.size() > 1 else "" # name on two lines, so every card is four lines and the status line stays at the bottom
+		words.resize(maxi(words.size() - 1,1))
+		var name_lines: String = " ".join(words) + "
+" + last_word
 		var caption: String = "%02d %s
 %s
-%s" % [id,stars,level.name.to_upper().replace(" ","
-"),status]
-		var button: Button = BeachUI.button(rows[0] if id <= 3 else rows[1],caption,func() -> void: choose("start",id),60)
+%s" % [id,"*".repeat(int(GameState.entry(id).get("stars",0))),name_lines,status]
+		var button: Button = BeachUI.button(row,caption,func() -> void: choose("start",id),70)
+		button.custom_minimum_size = Vector2(70,52)
+		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART # REPLAY LESSONS wraps instead of widening the frame
 		button.size_flags_horizontal = SIZE_EXPAND_FILL
-		button.size_flags_vertical = SIZE_EXPAND_FILL
 		button.disabled = not unlocked
-		if id == 1:
-			button.grab_focus()
+		if locked_demo:
+			var note: Label = _small_label(button,"FULL GAME",LOCKED_RED)
+			note.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+			note.offset_top = -13
+			note.offset_bottom = -4
+			note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			note.name = "FullGameNote"
+		if unlocked and first_open == null:
+			first_open = button
+	_page_arrow(row,">",level_page < pages - 1,1)
 	var actions: HBoxContainer = HBoxContainer.new()
+	actions.add_theme_constant_override("separation",4)
 	content.add_child(actions)
-	var with_feedback: bool = not GameState.feedback_url().is_empty()
-	var action_width: int = 86 if with_feedback else 100
-	if with_feedback:
-		BeachUI.button(actions,"FEEDBACK",func() -> void: choose("feedback"),action_width)
-	BeachUI.back_button(actions,"< BACK",func() -> void: choose("title"))
+	if not GameState.feedback_url().is_empty():
+		_small_button(actions,"FEEDBACK",func() -> void: choose("feedback"))
+	_small_button(actions,"< BACK",func() -> void: choose("title"))
+	if first_open != null:
+		first_open.grab_focus()
+
+func _page_arrow(row: HBoxContainer, text: String, shown: bool, step: int) -> void:
+	if not shown:
+		var gap: Control = Control.new() # keeps the cards centred when there is no page that way
+		gap.custom_minimum_size.x = 14
+		row.add_child(gap)
+		return
+	var arrow: Button = BeachUI.button(row,text,func() -> void:
+		level_page += step
+		level_select(),14)
+	arrow.name = "PageNext" if step > 0 else "PagePrev"
+	arrow.size_flags_vertical = SIZE_EXPAND_FILL
 
 func gull_picker() -> void:
 	clear("PICK YOUR GULL")
