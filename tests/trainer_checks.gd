@@ -128,7 +128,7 @@ static func _copy_checks(host: Node, check: Callable) -> void:
 				var parts: PackedStringArray = pair.split("\n")
 				worst_card = maxi(worst_card,_lines(parts[0],TrainerCard.TEXT_WIDTH) + _lines(parts[1],TrainerCard.TEXT_WIDTH))
 			for strip: String in strips:
-				worst_strip = maxi(worst_strip,_lines(strip,176.0))
+				worst_strip = maxi(worst_strip,_lines(strip,BeachOverlay.STRIP_WIDTH))
 	GameState.options.erase("control_mode")
 	check.call(unresolved == 0,"no unresolved {tokens} on any device or control mode")
 	check.call(worst_card <= MAX_CARD_LINES,"every trainer card fits %d lines (worst %d)" % [MAX_CARD_LINES,worst_card])

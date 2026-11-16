@@ -43,11 +43,13 @@ var score_announcement_font_index: int = 0
 const SCORE_ANNOUNCEMENT_HOLD: float = 3.0 ## banner keeps its own hold; floating popups use juice.score_popup_hold
 const SCORE_ANNOUNCEMENT_FADE: float = BeachEffects.SCORE_MESSAGE_FADE
 const TOP_BAR_HEIGHT: int = 17
-const BANNER_PORTRAIT: float = 28.0 ## Screeches in the live lesson banner
+const BANNER_PORTRAIT: float = 24.0 ## Screeches in the live lesson banner
 const AIM_LINE_LENGTH: float = 240.0
-const AIM_STRIP_WIDTH: float = 118.0 ## the frozen first dive's strip is narrow so it can sit beside the gull
+const AIM_STRIP_WIDTH: float = 118.0
+const STRIP_WIDTH: float = 160.0 ## the centred lesson strip's text width
+const HINT_PORTRAIT: float = 34.0 ## Screeches beside the first-miss hint ## the frozen first dive's strip is narrow so it can sit beside the gull
 const AIM_STRIP_SHIFT: float = 90.0
-const BANNER_TEXT_WIDTH: float = 262.0 ## widest the text may grow beside him; the panel shrinks to fit shorter lines
+const BANNER_TEXT_WIDTH: float = 236.0 ## widest the text may grow beside him; the panel shrinks to fit shorter lines
 const TOP_BAR_FONT_SIZE: int = 6
 const TIME_WARNING: float = 20.0 ## seconds left when the timer turns red and flashes
 const QUEST_STRIP_HEIGHT: float = 10.0 ## small-font quest row directly under the top bar
@@ -171,7 +173,7 @@ func setup(owner_game: BeachGame) -> void:
 	training_panel.custom_minimum_size = Vector2.ZERO
 	var training_style: StyleBoxFlat = training_panel.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
 	training_style.content_margin_left = 5
-	training_style.content_margin_right = 5
+	training_style.content_margin_right = 9 # Screeches sits in from the right edge
 	training_style.content_margin_top = 2
 	training_style.content_margin_bottom = 2
 	training_panel.add_theme_stylebox_override("panel",training_style)
@@ -182,7 +184,7 @@ func setup(owner_game: BeachGame) -> void:
 	training_panel.add_child(training_row)
 	# Screeches McCrumbs winces and talks beside the strip while the first-miss hint shows.
 	trainer_portrait = TextureRect.new()
-	trainer_portrait.custom_minimum_size = Vector2(40,40)
+	trainer_portrait.custom_minimum_size = Vector2(HINT_PORTRAIT,HINT_PORTRAIT)
 	trainer_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	trainer_portrait.stretch_mode = TextureRect.STRETCH_SCALE
 	trainer_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -207,14 +209,14 @@ func setup(owner_game: BeachGame) -> void:
 	lesson_prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lesson_prompt.add_theme_font_override("normal_font", TrainerCard.SPEECH)
 	lesson_prompt.add_theme_font_size_override("normal_font_size", TrainerCard.SPEECH_SIZE)
-	lesson_prompt.custom_minimum_size = Vector2(176, 10)
+	lesson_prompt.custom_minimum_size = Vector2(STRIP_WIDTH, 10)
 	TrainerScript.snug_chips(lesson_prompt)
 	lesson_warning = BeachUI.label(lesson_column,"",8,BeachUI.CORAL)
 	lesson_warning.add_theme_font_override("font",TrainerCard.SPEECH) # GullPixel has no comma; the strip's speech font does
 	lesson_warning.add_theme_font_size_override("font_size",TrainerCard.SPEECH_SIZE)
 	lesson_warning.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lesson_warning.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lesson_warning.custom_minimum_size.x = 176.0
+	lesson_warning.custom_minimum_size.x = STRIP_WIDTH
 	lesson_warning.mouse_filter = MOUSE_FILTER_IGNORE
 	training_row.add_child(trainer_portrait) # Screeches stands to the right of his words
 	_build_rival_popup()
@@ -464,7 +466,7 @@ func _sync_trainer() -> void:
 	var banner: bool = game.banner_active()
 	var talking: bool = game.training_miss_hint > 0.0
 	trainer_portrait.visible = talking or banner
-	var px: float = BANNER_PORTRAIT if banner and not talking else 40.0
+	var px: float = BANNER_PORTRAIT if banner and not talking else HINT_PORTRAIT
 	trainer_portrait.custom_minimum_size = Vector2(px,px)
 	var align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_LEFT if banner else HORIZONTAL_ALIGNMENT_CENTER
 	lesson_prompt_left = banner
@@ -473,7 +475,7 @@ func _sync_trainer() -> void:
 	for part: String in lesson_prompt.get_parsed_text().split("
 "):
 		wide = maxf(wide,TrainerCard.SPEECH.get_string_size(part,HORIZONTAL_ALIGNMENT_LEFT,-1,TrainerCard.SPEECH_SIZE).x)
-	lesson_prompt.custom_minimum_size.x = minf(ceilf(wide) + 2.0,BANNER_TEXT_WIDTH) if banner else 176.0
+	lesson_prompt.custom_minimum_size.x = minf(ceilf(wide) + 2.0,BANNER_TEXT_WIDTH) if banner else STRIP_WIDTH
 	var pulse: float = game.banner_cue / BeachGame.BANNER_CUE_TIME if banner else 0.0
 	training_panel.self_modulate = Color.WHITE.lerp(Color(1.0,0.86,0.5),pulse * (0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.02)))
 	if not talking:
