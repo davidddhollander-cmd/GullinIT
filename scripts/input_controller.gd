@@ -23,6 +23,7 @@ var mouse_move_msec: int = -1000000 ## last real mouse motion
 var mouse_dive: bool = false ## the current dive was started with mouse 2
 var _was_diving: bool = false
 const PAD_DEADZONE: float = 0.3 ## stick drift below this never claims the prompts
+const MOUSE_TAKEOVER: float = 2.0 ## mouse motion (px per event) that hands flight back from the keys
 var touch_visible: bool = false
 var enabled: bool = false
 # Touch layout (logical 320x180 coordinates). Left thumb: the FLY ring rests bottom-left and any
@@ -99,7 +100,7 @@ func _input(event: InputEvent) -> void:
 	if enabled and event is InputEventKey and event.pressed and not event.is_echo() and GameState.mouse_role() == "steer":
 		for action: String in ["aim_left","aim_right","aim_up","aim_down"]:
 			if event.is_action_pressed(action):
-				GameState.set_mouse_role("dive_aim") ## first key steer: the keyboard owns flight from now on
+				GameState.key_flight = true ## key steer: the keyboard owns flight until the mouse moves again
 				break
 	# The last device used wins: pad buttons or a real stick push, otherwise keys and mouse.
 	if event is InputEventJoypadButton or (event is InputEventJoypadMotion and absf(event.axis_value) > PAD_DEADZONE):
@@ -109,6 +110,8 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventMouseMotion and not touch_recent():
 		gamepad = false
 		touch_active = false
+		if GameState.key_flight and not _was_diving and event.relative.length() > MOUSE_TAKEOVER and Input.get_vector("aim_left","aim_right","aim_up","aim_down") == Vector2.ZERO:
+			GameState.key_flight = false ## the mouse moved outside a dive with no steer key held: it steers again
 		if GameState.mouse_role() == "steer":
 			key_aim = false
 	if not enabled:

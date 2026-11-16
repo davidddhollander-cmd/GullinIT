@@ -58,6 +58,8 @@ func load_progress() -> void:
 		_anon_id = str(data.get("anon_id", ""))
 		if data.get("options") is Dictionary:
 			options.merge(data.options, true)
+			if not bool(options.get("mouse_role_set", false)):
+				options.erase("mouse_role") ## older saves locked dive_aim on a stray key press; only the options row saves it now
 
 ## Save v2 inserted Squall as level 6 and moved the Sunset Showdown boss to 7: the old level 6 record
 ## (best, stars, quests) becomes level 7's, so a beaten boss stays beaten. Level 7 also opens for
@@ -231,11 +233,17 @@ func chosen_gull() -> String:
 	return id if Config.species.species.has(id) and gull_owned(id) else "herring"
 
 ## What the mouse does in flight: "steer" (cursor is the stick) or "dive_aim" (keys steer, the cursor only aims dives).
+## key_flight: WASD took over flight this session (never saved); moving the mouse hands it back.
 func mouse_role() -> String:
-	return "dive_aim" if str(options.get("mouse_role","steer")) == "dive_aim" else "steer"
+	return "dive_aim" if key_flight or str(options.get("mouse_role","steer")) == "dive_aim" else "steer"
 
+var key_flight: bool = false
+
+## The options row: the only saved choice.
 func set_mouse_role(id: String) -> void:
 	options.mouse_role = "dive_aim" if id == "dive_aim" else "steer"
+	options.mouse_role_set = true
+	key_flight = false
 	save_progress()
 
 const CONTROL_MODES: Array[String] = ["realistic","normal","casual"]

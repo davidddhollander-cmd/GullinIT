@@ -285,7 +285,7 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(input.gamepad, "a pad button switches prompts to the pad")
 	input._input(key)
 	check.call(not input.gamepad, "a key press switches prompts back to the keyboard")
-	GameState.options.erase("mouse_role") # that key press flips a steer save to dive_aim
+	GameState.key_flight = false # that key press flips a steer save to dive_aim
 	_mouse_move(input)
 	check.call(not input.key_aim, "mouse motion hands aim back to the mouse")
 	host.main.clear_game()

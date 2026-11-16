@@ -52,9 +52,10 @@ static func run(host: Node, check: Callable) -> void:
 	input.gamepad = false
 	_key(input,KEY_W)
 	check.call(GameState.mouse_role() == "dive_aim", "first WASD press switches to dive_aim")
-	GameState.options.erase("mouse_role")
+	GameState.key_flight = false
 	GameState.load_progress()
-	check.call(GameState.mouse_role() == "dive_aim", "dive_aim persists across save and load")
+	check.call(GameState.mouse_role() == "steer", "a key switch to dive_aim is never saved")
+	GameState.key_flight = true
 	# Glide: mouse far away never moves the heading.
 	input.key_aim = true
 	_motion(input,Vector2(300,10))
@@ -97,6 +98,13 @@ static func run(host: Node, check: Callable) -> void:
 	gull.state = BeachGull.State.GLIDE
 	input.update_player(gull,160,90)
 	check.call(not input.mouse_dive, "the mouse dive flag clears when the dive ends")
+	# Moving the mouse outside a dive hands flight back to it.
+	var shove := InputEventMouseMotion.new()
+	shove.position = Vector2(120,80)
+	shove.relative = Vector2(6,0)
+	input._input(shove)
+	check.call(GameState.mouse_role() == "steer" and not GameState.key_flight, "real mouse motion outside a dive returns the mouse to steering")
+	GameState.key_flight = true
 	# Options row toggles both ways and persists.
 	host.main._navigate("options")
 	await host.settle()
@@ -112,4 +120,6 @@ static func run(host: Node, check: Callable) -> void:
 		await host.settle()
 		check.call(GameState.mouse_role() == "dive_aim", "options row flips to dive_aim")
 	GameState.options.erase("mouse_role")
+	GameState.options.erase("mouse_role_set")
+	GameState.key_flight = false
 	GameState.save_path = saved_path
