@@ -21,6 +21,7 @@ func _ready() -> void:
 	background = BeachBackdrop.new()
 	add_child(background)
 	background.sunset = true
+	background.strength = 0.12 # a lighter breeze than the beach default (0.3): the menu clouds drift slowly
 	# Only x >= ~207 shows beside the menu panel. Hut, castle and palm sit further back (y 142-148);
 	# sunbathers and towels draw above every prop (z 3).
 	background.setup([
