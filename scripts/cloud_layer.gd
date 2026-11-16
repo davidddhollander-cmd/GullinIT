@@ -62,4 +62,4 @@ func update(time: float, wind_dir: int, wind_strength: float) -> void:
 
 func _place() -> void:
 	for cloud: Dictionary in clouds:
-		(cloud.sprite as Sprite2D).position = Vector2(roundf(cloud.x), cloud.y)
+		(cloud.sprite as Sprite2D).position = Vector2(cloud.x, cloud.y) # fractional on purpose: the game renders at window resolution, so slow drift moves in sub-pixel steps
