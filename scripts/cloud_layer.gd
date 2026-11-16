@@ -47,7 +47,7 @@ func setup(layout: Array, dusk: bool) -> void:
 		add_child(sprite)
 		var width: float = float(r[2]) * scale_factor
 		# Bigger clouds read as nearer, so they drift faster.
-		var depth: float = float(tuning.depth_by_size.get(str(source.size), 1.0))
+		var depth: float = float(placed.get("depth", tuning.depth_by_size.get(str(source.size), 1.0))) # clusters set one depth so they drift together
 		clouds.append({"sprite": sprite, "x": float(placed.x), "y": float(placed.y), "width": width, "depth": depth})
 	_place()
 

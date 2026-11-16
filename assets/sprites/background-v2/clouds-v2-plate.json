@@ -1,7 +1,7 @@
 {
   "version": 1,
   "image": "clouds-v2-plate.png",
-  "note": "Cut from sky-clouds-320x80.png by removing the exact sky colour #5bc7d8; original flat-bottomed clouds, native pixels.",
+  "note": "Cut from sky-clouds-320x80.png by removing the exact sky colour #5bc7d8; original flat-bottomed clouds, native pixels. plate-05 (cut-off wisp with no underside in the source plate) was dropped.",
   "palette": [
     "#fff4da",
     "#f0f0d4",
@@ -80,24 +80,6 @@
         48,
         33,
         10
-      ]
-    },
-    {
-      "id": "plate-05",
-      "set": "plate",
-      "size": "small",
-      "region": [
-        180,
-        4,
-        22,
-        6
-      ],
-      "recommended_scale": 1.0,
-      "source_region": [
-        47,
-        66,
-        22,
-        6
       ]
     }
   ]

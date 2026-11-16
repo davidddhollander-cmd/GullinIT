@@ -51,31 +51,31 @@
    {
     "id": "plate-01",
     "x": 18,
-    "y": 16,
+    "y": 22,
     "scale": 1.0
    },
    {
     "id": "plate-02",
     "x": 125,
-    "y": 24,
+    "y": 26,
     "scale": 0.5
    },
    {
     "id": "plate-03",
     "x": 205,
-    "y": 12,
+    "y": 20,
     "scale": 0.5
    },
    {
     "id": "plate-04",
     "x": 60,
-    "y": 44,
+    "y": 46,
     "scale": 0.5
    },
    {
-    "id": "plate-05",
+    "id": "plate-04",
     "x": 150,
-    "y": 78,
+    "y": 76,
     "scale": 1.0
    },
    {
@@ -87,286 +87,118 @@
   ],
   [
    {
-    "id": "plate-02",
-    "x": 10,
-    "y": 18,
-    "scale": 1.0
-   },
-   {
-    "id": "plate-01",
-    "x": 150,
-    "y": 14,
-    "scale": 0.5
-   },
-   {
-    "id": "plate-04",
-    "x": 270,
-    "y": 16,
-    "scale": 1.0
-   },
-   {
-    "id": "plate-03",
-    "x": 80,
-    "y": 44,
-    "scale": 0.5
-   },
-   {
-    "id": "plate-05",
-    "x": 200,
-    "y": 70,
-    "scale": 1.0
-   },
-   {
-    "id": "plate-04",
-    "x": 30,
-    "y": 76,
-    "scale": 1.0
-   }
-  ],
-  [
-   {
-    "id": "fair-large-02",
-    "x": 150,
-    "y": 16,
-    "scale": 0.5
-   },
-   {
-    "id": "fair-medium-01",
-    "x": 10,
-    "y": 44,
-    "scale": 1.0
-   },
-   {
-    "id": "fair-wisp-02",
-    "x": 90,
+    "id": "fair-medium-02",
+    "x": 18,
     "y": 24,
-    "scale": 0.5
-   },
-   {
-    "id": "fair-medium-03",
-    "x": 205,
-    "y": 64,
-    "scale": 0.5
-   },
-   {
-    "id": "fair-wisp-01",
-    "x": 130,
-    "y": 66,
-    "scale": 0.5
+    "scale": 0.5,
+    "depth": 1.0
    },
    {
     "id": "fair-wisp-03",
-    "x": 280,
-    "y": 40,
-    "scale": 0.5
-   },
-   {
-    "id": "fair-medium-02",
-    "x": 60,
-    "y": 74,
-    "scale": 0.5
-   }
-  ],
-  [
-   {
-    "id": "wind-streak-02",
-    "x": 20,
+    "x": 52,
     "y": 20,
-    "scale": 0.5
+    "scale": 0.5,
+    "depth": 1.0
    },
    {
-    "id": "wind-streak-04",
-    "x": 150,
-    "y": 36,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-01",
-    "x": 60,
-    "y": 52,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-03",
-    "x": 230,
-    "y": 66,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-01",
-    "x": 270,
-    "y": 18,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-03",
-    "x": 110,
-    "y": 70,
-    "scale": 0.5
-   }
-  ],
-  [
-   {
-    "id": "wind-streak-04",
-    "x": 0,
-    "y": 18,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-02",
-    "x": 120,
-    "y": 28,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-03",
-    "x": 40,
-    "y": 44,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-01",
-    "x": 190,
-    "y": 52,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-04",
-    "x": 80,
-    "y": 66,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-02",
-    "x": 250,
-    "y": 70,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-03",
-    "x": 275,
-    "y": 20,
-    "scale": 0.5
-   }
-  ],
-  [
-   {
-    "id": "wind-streak-03",
-    "x": 10,
-    "y": 16,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-01",
-    "x": 120,
-    "y": 22,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-04",
-    "x": 20,
+    "id": "fair-wisp-01",
+    "x": 44,
     "y": 38,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-02",
-    "x": 175,
-    "y": 40,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-01",
-    "x": 60,
-    "y": 58,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-03",
-    "x": 215,
-    "y": 52,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-04",
-    "x": 140,
-    "y": 62,
-    "scale": 0.5
-   },
-   {
-    "id": "wind-streak-02",
-    "x": 280,
-    "y": 28,
-    "scale": 0.5
-   }
-  ],
-  [
-   {
-    "id": "fair-large-02",
-    "x": 18,
-    "y": 20,
-    "scale": 0.5
+    "scale": 0.5,
+    "depth": 1.0
    },
    {
     "id": "fair-wisp-02",
-    "x": 100,
-    "y": 34,
-    "scale": 0.5
-   },
-   {
-    "id": "fair-medium-01",
     "x": 150,
     "y": 50,
-    "scale": 0.5
+    "scale": 0.5,
+    "depth": 0.9
    },
    {
     "id": "fair-wisp-01",
-    "x": 40,
-    "y": 62,
-    "scale": 0.5
+    "x": 182,
+    "y": 44,
+    "scale": 0.5,
+    "depth": 0.9
    },
    {
     "id": "fair-wisp-03",
-    "x": 200,
-    "y": 70,
-    "scale": 0.5
+    "x": 168,
+    "y": 62,
+    "scale": 0.5,
+    "depth": 0.9
+   },
+   {
+    "id": "fair-wisp-01",
+    "x": 270,
+    "y": 24,
+    "scale": 0.5,
+    "depth": 0.8
+   },
+   {
+    "id": "fair-wisp-02",
+    "x": 282,
+    "y": 34,
+    "scale": 0.5,
+    "depth": 0.8
    }
   ],
   [
    {
-    "id": "fair-medium-02",
-    "x": 10,
-    "y": 24,
-    "scale": 0.5
-   },
-   {
-    "id": "fair-large-01",
-    "x": 110,
-    "y": 18,
-    "scale": 0.5
+    "id": "fair-wisp-02",
+    "x": 84,
+    "y": 22,
+    "scale": 0.5,
+    "depth": 1.0
    },
    {
     "id": "fair-wisp-03",
-    "x": 70,
-    "y": 56,
-    "scale": 0.5
-   },
-   {
-    "id": "fair-medium-03",
-    "x": 170,
-    "y": 60,
-    "scale": 0.5
+    "x": 110,
+    "y": 28,
+    "scale": 0.5,
+    "depth": 1.0
    },
    {
     "id": "fair-wisp-01",
-    "x": 285,
+    "x": 132,
     "y": 20,
-    "scale": 0.5
+    "scale": 0.5,
+    "depth": 1.0
+   },
+   {
+    "id": "fair-medium-03",
+    "x": 185,
+    "y": 56,
+    "scale": 0.5,
+    "depth": 0.9
+   },
+   {
+    "id": "fair-wisp-01",
+    "x": 222,
+    "y": 52,
+    "scale": 0.5,
+    "depth": 0.9
    },
    {
     "id": "fair-wisp-02",
-    "x": 240,
-    "y": 72,
-    "scale": 0.5
+    "x": 204,
+    "y": 68,
+    "scale": 0.5,
+    "depth": 0.9
+   },
+   {
+    "id": "fair-wisp-01",
+    "x": 14,
+    "y": 52,
+    "scale": 0.5,
+    "depth": 0.8
+   },
+   {
+    "id": "fair-wisp-03",
+    "x": 30,
+    "y": 60,
+    "scale": 0.5,
+    "depth": 0.8
    }
   ]
  ]
