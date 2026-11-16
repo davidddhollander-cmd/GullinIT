@@ -1,0 +1,158 @@
+{
+  "version": 1,
+  "image": "clouds-v2-pearl-px.png",
+  "note": "Pearl cloud art reduced to 0.4x with a box average and snapped to the four Pearl colours, drawn at scale 1. Chunkier than the 0.5x nearest-neighbour display of the original.",
+  "palette": [
+    "#fff4da",
+    "#e5eddf",
+    "#b8dde9",
+    "#90d0e1"
+  ],
+  "alpha": "binary",
+  "clouds": [
+    {
+      "id": "fair-wisp-01",
+      "set": "fair",
+      "size": "small",
+      "region": [
+        3,
+        3,
+        17,
+        8
+      ],
+      "recommended_scale": 1.0
+    },
+    {
+      "id": "fair-wisp-02",
+      "set": "fair",
+      "size": "small",
+      "region": [
+        23,
+        3,
+        23,
+        12
+      ],
+      "recommended_scale": 1.0
+    },
+    {
+      "id": "fair-wisp-03",
+      "set": "fair",
+      "size": "small",
+      "region": [
+        49,
+        3,
+        28,
+        15
+      ],
+      "recommended_scale": 1.0
+    },
+    {
+      "id": "fair-medium-01",
+      "set": "fair",
+      "size": "medium",
+      "region": [
+        80,
+        3,
+        44,
+        18
+      ],
+      "recommended_scale": 1.0
+    },
+    {
+      "id": "fair-medium-02",
+      "set": "fair",
+      "size": "medium",
+      "region": [
+        127,
+        3,
+        35,
+        18
+      ],
+      "recommended_scale": 1.0
+    },
+    {
+      "id": "fair-medium-03",
+      "set": "fair",
+      "size": "medium",
+      "region": [
+        165,
+        3,
+        39,
+        18
+      ],
+      "recommended_scale": 1.0
+    },
+    {
+      "id": "fair-large-01",
+      "set": "fair",
+      "size": "large",
+      "region": [
+        207,
+        3,
+        53,
+        16
+      ],
+      "recommended_scale": 1.0
+    },
+    {
+      "id": "fair-large-02",
+      "set": "fair",
+      "size": "large",
+      "region": [
+        263,
+        3,
+        68,
+        22
+      ],
+      "recommended_scale": 1.0
+    },
+    {
+      "id": "wind-streak-01",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        334,
+        3,
+        54,
+        16
+      ],
+      "recommended_scale": 1.0
+    },
+    {
+      "id": "wind-streak-02",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        391,
+        3,
+        60,
+        17
+      ],
+      "recommended_scale": 1.0
+    },
+    {
+      "id": "wind-streak-03",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        454,
+        3,
+        59,
+        17
+      ],
+      "recommended_scale": 1.0
+    },
+    {
+      "id": "wind-streak-04",
+      "set": "windy",
+      "size": "streak",
+      "region": [
+        516,
+        3,
+        70,
+        17
+      ],
+      "recommended_scale": 1.0
+    }
+  ]
+}
