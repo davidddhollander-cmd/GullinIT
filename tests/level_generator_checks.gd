@@ -90,6 +90,7 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 				left_stand = minf(left_stand,float(prop.x))
 		check.call(stand_count==2 and left_stand<float(family_positions["family_1"])-100.0 and kiosk_x>float(family_positions["family_1"])+300.0,"family beach has an ice-cream stand near the start and a far-end kiosk")
 		check.call(int(level.world.promenade_start)==int(level.world.width) and int(level.world.pier_start)==int(level.world.width),"family beach remains all sand")
+		check.call(level.rivals.is_empty() and not bool(level.get("rivals_after_snatch",false)) and level.has("training_dummy"),"family beach has no Gary, only the sparring dummy for the lesson")
 	elif number == 4:
 		check.call(types==["sunbather","sunbather","sunbather","kiosk_customer","kiosk_customer"],"water fight is a sunbathers strip with two shoppers and no dog")
 		check.call(stand_count==2 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1 and level.watergun_teens.size()==1,"water fight keeps both stands, Gary from the start and the teen")
@@ -101,7 +102,7 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 		check.call(types==["sunbather","kiosk_customer","kiosk_customer","kiosk_customer","pier_diner","off_lead_dog","off_lead_dog"],"boardwalk is a busy promenade of three shoppers and a diner, plus two off-lead dogs, no families")
 		check.call(not types.has("dog_owner") and not types.has("market_cleaner") and not types.has("lifeguard"),"boardwalk leaves later hazards for later levels")
 		check.call(float(level.spawns[0].x)<float(level.world.promenade_start) and float(level.spawns[1].x)>float(level.world.promenade_start) and float(level.spawns[4].x)>float(level.world.pier_start) and float(level.spawns[5].x)<float(level.world.promenade_start),"boardwalk actors occupy their zones")
-		check.call(stand_count==2 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1,"boardwalk includes both stands and Gary from the start")
+		check.call(stand_count==2 and bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1 and level.rivals[0].get("entry","")=="fly_in","boardwalk includes both stands and Gary, held back for his fly-in after the first snack")
 
 static func _check_squall_level(check: Callable, source: Dictionary, level: Dictionary) -> void:
 	var types: Array[String] = []

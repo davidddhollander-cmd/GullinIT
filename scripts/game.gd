@@ -41,11 +41,10 @@ var lesson: int = 0
 var quests: BeachQuests = BeachQuests.new()
 var feathers_earned: int = 0
 var mugged_rivals: Dictionary = {}
-const TRAINING_LESSONS: int = 6
+const TRAINING_LESSONS: int = 5
 const TODDLER_LESSON: int = 2 ## peck the ice cream off the toddler, then eat it from the sand
 const BIN_LESSON: int = 3
 const DIVE_LESSON: int = 4
-const MUG_LESSON: int = 5 ## the dummy carries food: dive through it. A bump (full stomach) passes too.
 const AIM_PAUSES: int = 2 ## how many dives of the first dive lesson freeze for steering
 const DIVE_NUDGE_TIME: float = 10.0 ## seconds without a dive before the first dive lesson says how again
 const MUG_RESCUE_MISSES: int = 3 ## missed dives before the dummy hovers still
@@ -55,10 +54,7 @@ const DUMMY_FOOD: String = "crisps_bag"
 const RING_LESSON_1: Vector2 = Vector2(145,65) ## the takeoff ring, above the first palm
 const TRAINER_DELAY: float = 1.4 ## seconds between a screech or counter lesson's toast and the next pop-up
 const TRAINING_DELAY: float = 3.0 ## the same gap in Training Day: the lesson-done toast gets its moment before the next lesson starts
-const DUMMY_EXTRA_DELAY: float = 3.0 ## extra wait after lesson 5 before the sparring gull flies in
-const DUMMY_LEAD: float = 1.0 ## seconds before the mug lesson's card opens that the sparring gull arrives, so the card talks about a gull already in view
 const BANNER_CUE_TIME: float = 1.4 ## talk animation and pulse when the live banner appears or changes
-var dummy_spawn_wait: float = 0.0 ## no-cards path: counts down to the sparring gull's arrival
 var banner_delay: float = 0.0 ## counts down to the next live banner
 var advance_pending: bool = false ## a lesson's goal was met during the pause before its own card or banner: counts once that has been seen
 var banner_cue: float = 0.0
@@ -134,7 +130,9 @@ var peck_hold_touch: bool = false
 var screech_lesson: bool = false
 var screech_step: int = 0
 var screech_fired_base: int = 0 ## brash.powers_fired when the lesson began; any special fired since completes the lesson
-const SCREECH_STEPS: int = 2
+const SCREECH_STEPS: int = 3
+const SCREECH_MUG_STEP: int = 2 ## the sparring gull carries food: dive through it. A bump (full stomach) passes too.
+const DUMMY_EXIT_DELAY: float = 1.2 ## seconds the sparring gull lingers after the lesson before it leaves the beach
 const SCREECH_FLY_TIME: float = 3.0 ## the scripted fly-in always lands on the sign after this long
 var screech_landing: bool = false ## level 2's opening fly-in: the gull glides onto the sign by itself, input ignored
 var screech_fly_age: float = 0.0
@@ -337,8 +335,6 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		if lesson >= 2:
 			player.position = Vector2(180,70)
 			player.state = BeachGull.State.GLIDE
-		if lesson >= MUG_LESSON:
-			_training_dummy_setup()
 		if trainer_cards:
 			var opening: Dictionary = Config.trainer.training.opening
 			open_trainer({"mood": opening.mood, "lay": TrainerScript.line(opening.text, input, true), "lay_source": "training.opening.text", "lay_template": opening.text, "button": opening.button}, dismiss_intro)
@@ -603,14 +599,8 @@ func _physics_process(delta: float) -> void:
 	if not running:
 		overlay.queue_redraw()
 		return
-	if dummy_spawn_wait > 0.0:
-		dummy_spawn_wait -= delta
-		if dummy_spawn_wait <= 0.0 and training and lesson == MUG_LESSON:
-			_training_dummy_setup()
 	if not trainer_queue.is_empty():
 		trainer_queue.delay -= delta
-		if training and lesson == MUG_LESSON and trainer_queue.delay <= DUMMY_LEAD:
-			_training_dummy_setup() # no-op once the dummy exists
 		if trainer_queue.delay <= 0.0:
 			var queued: Dictionary = trainer_queue
 			trainer_queue = {}
@@ -1230,8 +1220,8 @@ func _mugging() -> void:
 				_hit_sound()
 				brash.earn("bump")
 				_quest_event("rival_bumped",{"name":pilot.gull.rival_name})
-				if training and lesson == MUG_LESSON and pilot.dummy:
-					_training_advance()
+				if _mug_step() and pilot.dummy:
+					_screech_advance()
 				return
 			var value: int = pilot.mug(player.position,force)
 			if value > 0:
@@ -1244,8 +1234,8 @@ func _mugging() -> void:
 				brash.earn("mug")
 				strike_near_carrier = false
 				_learned("mug_miss")
-				if training and lesson == MUG_LESSON and pilot.dummy:
-					_training_advance()
+				if _mug_step() and pilot.dummy:
+					_screech_advance()
 				return
 
 ## Rivals mug anyone holding food: other rivals in their grace window, or the player's unswallowed snack.
@@ -1354,8 +1344,6 @@ func _training_advance() -> void:
 		track("lesson_start", {"lesson": lesson + 1})
 	GameState.save_training_step(lesson)
 	effects.message(player.position-Vector2(0,24),_toast(),BeachUI.GOLD,TRAINING_DELAY)
-	if lesson == MUG_LESSON and not trainer_cards:
-		dummy_spawn_wait = DUMMY_EXTRA_DELAY # with cards, _process spawns it DUMMY_LEAD before the card opens
 	if lesson >= TRAINING_LESSONS:
 		if trainer_cards:
 			var closing: Dictionary = Config.trainer.training.closing
@@ -1368,9 +1356,9 @@ func _training_advance() -> void:
 		if banner_lesson(lesson):
 			banner_delay = TRAINING_DELAY
 		else:
-			_queue_trainer(_trainer_entry("training", lesson), Callable(), TRAINING_DELAY + (DUMMY_EXTRA_DELAY if lesson == MUG_LESSON else 0.0))
+			_queue_trainer(_trainer_entry("training", lesson), Callable(), TRAINING_DELAY)
 
-## The sparring gull for the mug lesson, spawned once and handed the snack to steal.
+## The sparring gull for the level 2 mug step, spawned once and handed the snack to steal.
 func _training_dummy_setup() -> void:
 	if training_dummy() == null and level.has("training_dummy"):
 		pending_rivals = [level.training_dummy.duplicate(true)]
@@ -1543,7 +1531,7 @@ func _end_aim_pause() -> void:
 
 ## The dive lessons draw the dive line for the whole wind-up and strike (ponytail: arcade levels would just drop the lesson check).
 func dive_line_shown() -> bool:
-	return training and (lesson == DIVE_LESSON or lesson == MUG_LESSON) and player.state in [BeachGull.State.WINDUP,BeachGull.State.STRIKE]
+	return (training and lesson == DIVE_LESSON or _mug_step()) and player.state in [BeachGull.State.WINDUP,BeachGull.State.STRIKE]
 
 ## True when the frozen dive's line reaches the snack, so the overlay can turn it gold.
 func aim_lines_up() -> bool:
@@ -1562,14 +1550,13 @@ func _mug_miss_check() -> void:
 	was_striking = striking
 	if not ended:
 		return
-	if training:
-		if lesson == MUG_LESSON:
-			mug_misses += 1
-			var dummy: RivalPilot = training_dummy()
-			if mug_misses >= MUG_RESCUE_MISSES and dummy != null:
-				dummy.hold_still()
-			_training_hint("mug_rescue" if mug_misses >= MUG_RESCUE_MISSES else "mug_miss")
-	elif strike_near_carrier:
+	if _mug_step():
+		mug_misses += 1
+		var dummy: RivalPilot = training_dummy()
+		if mug_misses >= MUG_RESCUE_MISSES and dummy != null:
+			dummy.hold_still()
+		_training_hint("mug_rescue" if mug_misses >= MUG_RESCUE_MISSES else "mug_miss")
+	elif strike_near_carrier and not training:
 		_show_tip("mug_miss")
 	strike_near_carrier = false
 
@@ -1721,10 +1708,6 @@ func training_text() -> String:
 			return TrainerScript.line(live.toddler_pickup, input)
 		if stash_raids.nearby_toddler() != null:
 			return TrainerScript.line(live.toddler_peck, input)
-	if lesson == MUG_LESSON:
-		var dummy: RivalPilot = training_dummy()
-		if dummy != null and not player.can_collect_food(DUMMY_FOOD):
-			return TrainerScript.line(live.full_stomach, input)
 	return TrainerScript.line(data.banner if banner_active() else data.strip, input)
 
 ## The red extra line under the strip while a dive lesson dive is too steep.
@@ -1761,10 +1744,6 @@ func training_target() -> Vector2:
 		var toddler: BeachTarget = lesson_toddler()
 		if toddler != null:
 			return toddler.food_position()
-	if lesson == MUG_LESSON:
-		var dummy: RivalPilot = training_dummy()
-		if dummy != null:
-			return dummy.gull.position
 	if lesson == DIVE_LESSON:
 		for target: BeachTarget in spawner.targets:
 			if target.kind == "kiosk_customer":
@@ -1841,7 +1820,9 @@ func _screech_advance() -> void:
 			_cue_banner()
 	else:
 		effects.message(player.position-Vector2(0,24), _toast(), BeachUI.GOLD)
-		if trainer_cards and screech_step == 1:
+		if screech_step == SCREECH_MUG_STEP:
+			_training_dummy_setup()
+		if trainer_cards:
 			_queue_trainer(_trainer_entry("screech", screech_step))
 
 ## Finish (or skip) the lesson: save it, empty the meter and let the level clock run.
@@ -1853,9 +1834,26 @@ func end_screech_lesson(completed: bool) -> void:
 	screech_lesson = false
 	brash.meter = 0.0
 	_reset_practice_score()
+	player.digestion.snacks.clear() # a snack grabbed in the lesson (the mugged one too) must not score once the clock runs
+	player.digestion.progress = 0.0
+	if training_dummy() != null:
+		if completed:
+			get_tree().create_timer(DUMMY_EXIT_DELAY).timeout.connect(_remove_training_dummy)
+		else:
+			_remove_training_dummy()
 	GameState.complete_screech_lesson()
 	if completed:
 		effects.message(player.position-Vector2(0,24),"LESSON DONE",BeachUI.GOLD)
+
+func _remove_training_dummy() -> void:
+	var dummy: RivalPilot = training_dummy()
+	if dummy == null:
+		return
+	pilots.erase(dummy)
+	gulls.erase(dummy.gull)
+	dummy.gull.queue_free()
+	if is_instance_valid(overlay):
+		overlay.sync_rival_scores()
 
 ## Practice snacks don't count: the real run starts from zero with the clock.
 func _reset_practice_score() -> void:
@@ -1866,7 +1864,11 @@ func _reset_practice_score() -> void:
 	for key: String in score.bonuses:
 		score.bonuses[key] = 0
 
+func _mug_step() -> bool:
+	return screech_lesson and screech_step == SCREECH_MUG_STEP and not screech_landing
+
 func _screech_lesson_tick(delta: float) -> void:
+	training_miss_hint = maxf(0.0,training_miss_hint-delta)
 	# The shoppers by the stand keep their ice creams while the lesson runs.
 	for target: BeachTarget in spawner.targets:
 		if target.kind == "kiosk_customer" and not target.food and not target.dropped_pending and not target.leaving:
@@ -1875,8 +1877,8 @@ func _screech_lesson_tick(delta: float) -> void:
 			target.respawn = 0.0
 	if screech_landing:
 		return
-	if brash.powers_fired > screech_fired_base: # any species' special, even one fired the frame the meter filled
-		while screech_lesson:
+	if screech_step < SCREECH_MUG_STEP and brash.powers_fired > screech_fired_base: # any species' special, even one fired the frame the meter filled
+		while screech_step < SCREECH_MUG_STEP:
 			_screech_advance()
 		return
 	match screech_step:
@@ -1890,6 +1892,12 @@ func _screech_lesson_tick(delta: float) -> void:
 func screech_lesson_text() -> String:
 	if screech_outro > 0.0:
 		return TrainerScript.line(Config.trainer.screech.outro, input)
+	if _mug_step():
+		var live: Dictionary = Config.trainer.live
+		if training_miss_hint > 0.0:
+			return TrainerScript.line(live[training_miss_line], input)
+		if training_dummy() != null and not player.can_collect_food(DUMMY_FOOD):
+			return TrainerScript.line(live.full_stomach, input)
 	return TrainerScript.line(Config.trainer.screech.strips[mini(screech_step, SCREECH_STEPS-1)], input)
 
 ## The ring over the ice cream stand's roof sign; off screen when the level has no stand.
@@ -1902,6 +1910,8 @@ func _perch_marker() -> Vector2:
 func screech_lesson_target() -> Vector2:
 	if screech_landing:
 		return _perch_marker()
+	if _mug_step() and training_dummy() != null:
+		return training_dummy().gull.position
 	return Vector2(-1000,-1000)
 
 # --- Counter tip (first serving seen on a counter) -------------------------------------------

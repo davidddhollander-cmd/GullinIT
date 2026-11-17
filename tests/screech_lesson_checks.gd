@@ -118,8 +118,62 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	game.start_slowmo()
 	check.call(not game.brash.allies.is_empty(), "Q fires Gang Call on a full meter")
 	game._screech_lesson_tick(0.016)
-	check.call(not game.screech_lesson and bool(GameState.entry(2).get("screech_lesson_complete", false)), "firing Gang Call finishes and saves the lesson")
+	check.call(game.screech_lesson and game.screech_step == BeachGame.SCREECH_MUG_STEP and not bool(GameState.entry(2).get("screech_lesson_complete", false)), "firing Gang Call moves on to the mug step instead of ending the lesson")
+	# Step 3: a sparring dummy carrying a snack flies in; dive through it.
+	var dummy: RivalPilot = game.training_dummy()
+	check.call(dummy != null and dummy.dummy and game.pilots.size() == 1 and dummy.dummy_food == BeachGame.DUMMY_FOOD, "the mug step brings in one sparring dummy holding food")
+	game.player.digestion.tick(30, false)
+	game.player.support = {}
+	game.player.state = BeachGull.State.GLIDE
+	game.overlay._process(0)
+	check.call(game.overlay.lesson_label.text.contains("LESSON 3/3") and game.screech_lesson_text().contains("against the dummy") and game.screech_lesson_target() == dummy.gull.position, "the mug step names the action and rings the dummy")
+	game.brash.meter = 0.0
+	game._screech_lesson_tick(0.016)
+	check.call(game.screech_step == BeachGame.SCREECH_MUG_STEP, "an empty meter in the mug step does not send the lesson back")
+	check.call(game.trainer_cards == false or game.trainer_queue.entry.lay.contains("mug him"), "the mug card is queued behind the toast")
+	check.call(is_zero_approx(game.elapsed), "the level timer is still paused in the mug step")
+	for frame: int in range(240):
+		dummy.tick(1.0 / 60, [], {}, game.wind)
+	check.call(dummy.dives == 0 and dummy.thefts == 0 and dummy.mode == RivalPilot.Mode.PATROL and dummy.gull.position.x > 100.0 and dummy.gull.position.x < 540.0, "the dummy patrols level 2's start without hunting or diving: " + str(dummy.gull.position))
+	var hit_from: Vector2 = Vector2(200, 56)
+	dummy.gull.state = BeachGull.State.GLIDE
+	dummy.gull.invulnerable = 0.0
+	dummy.gull.position = hit_from
+	game.player.state = BeachGull.State.GLIDE
+	game.player.previous_beak = hit_from - Vector2(0, 10)
+	game.player.sweep_beak = hit_from + Vector2(0, 10)
+	game._mugging()
+	check.call(game.screech_lesson and game.screech_step == BeachGame.SCREECH_MUG_STEP, "flying through the dummy without diving does not count")
+	dummy.tick(1.0 / 60, [], {}, game.wind)
+	check.call(dummy.carry_window > 0.0 and dummy.carried > 0 and dummy.gull.carry_source.call() == BeachGame.DUMMY_FOOD, "the dummy visibly carries a muggable snack")
+	# Missing the dummy repeats the tip; after three misses it hovers still.
+	for miss: int in range(1, BeachGame.MUG_RESCUE_MISSES + 1):
+		game.training_miss_hint = 0.0
+		game.player.state = BeachGull.State.STRIKE
+		game._mug_miss_check()
+		game.player.state = BeachGull.State.GLIDE
+		game._mug_miss_check()
+		check.call(game.screech_step == BeachGame.SCREECH_MUG_STEP and game.training_miss_hint > 0.0 and game.screech_lesson_text().contains("dive against him"), "missed dive %d repeats the mug tip" % miss)
+		check.call((dummy.dummy_hold != Vector2.INF) == (miss == BeachGame.MUG_RESCUE_MISSES), "the dummy only hovers after %d misses" % BeachGame.MUG_RESCUE_MISSES)
+	game.training_miss_hint = 0.0
+	dummy.gull.state = BeachGull.State.GLIDE
+	var hover: Vector2 = dummy.dummy_hold
+	for frame: int in range(30):
+		dummy.tick(1.0 / 60, [], {}, game.wind)
+	check.call(dummy.gull.position == hover, "the rescued dummy hovers in place")
+	game.score.points = 0
+	game.player.previous_beak = hover - Vector2(0, 10)
+	game.player.sweep_beak = hover + Vector2(0, 10)
+	game.player.state = BeachGull.State.STRIKE
+	game.player.dive_speed = float(Config.tuning.dive.max_speed)
+	game._mugging()
+	check.call(dummy.dummy_food.is_empty() and not game.screech_lesson and bool(GameState.entry(2).get("screech_lesson_complete", false)), "mugging the dummy ends and saves the lesson")
+	check.call(game.player.digestion.snacks.is_empty() and game.score.points == 0, "the mugged snack does not count for the real run")
 	check.call(is_zero_approx(game.brash.meter), "the meter is empty for the real run")
+	check.call(game.screech_outro > 0.0 or not game.trainer_cards, "the outro banner shows after the mug")
+	check.call(game.training_dummy() != null, "the dummy lingers a moment after the lesson")
+	await game.get_tree().create_timer(BeachGame.DUMMY_EXIT_DELAY + 0.3).timeout
+	check.call(game.training_dummy() == null and game.pilots.is_empty() and game.gulls.size() == 1, "the dummy leaves the beach: no rival in the timed run")
 	game.effects.freeze = 0.0
 	game._physics_process(1.0 / 60)
 	check.call(game.elapsed > 0.0, "the level timer runs after the lesson")
@@ -150,7 +204,9 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 				check.call(game.screech_step == 1, "%s: the special step waits while the meter stays full" % species)
 			game.start_slowmo()
 			game._screech_lesson_tick(0.016)
-			check.call(not game.screech_lesson and bool(GameState.entry(2).get("screech_lesson_complete", false)), "%s: firing the special ends the lesson (same frame %s)" % [species, same_frame])
+			check.call(game.screech_lesson and game.screech_step == BeachGame.SCREECH_MUG_STEP and game.training_dummy() != null, "%s: firing the special moves on to the mug step (same frame %s)" % [species, same_frame])
+			game._screech_advance() # the mug
+			check.call(not game.screech_lesson and bool(GameState.entry(2).get("screech_lesson_complete", false)), "%s: the mug ends the lesson (same frame %s)" % [species, same_frame])
 			check.call(game.screech_outro > 0.0 or not game.trainer_cards, "%s: the outro banner shows after the lesson (same frame %s)" % [species, same_frame])
 			host.main.clear_game()
 			await host.settle()
@@ -163,6 +219,28 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	check.call(game.screech_lesson and game.screech_step == 0, "a meter that drains without a special firing restarts the screech step")
 	host.main.clear_game()
 	await host.settle()
+	# A bump with nothing to steal passes the mug step as well.
+	game = _fresh_level_2(host, false)
+	game._screech_land(false)
+	game.brash.meter = 1.0
+	game._screech_lesson_tick(0.016)
+	game.start_slowmo()
+	game._screech_lesson_tick(0.016)
+	check.call(game.screech_step == BeachGame.SCREECH_MUG_STEP, "the lesson reaches the mug step")
+	dummy = game.training_dummy()
+	dummy.dummy_food = ""
+	dummy.carry_window = 0.0
+	dummy.gull.state = BeachGull.State.GLIDE
+	dummy.gull.invulnerable = 0.0
+	game.player.support = {}
+	game.player.state = BeachGull.State.STRIKE
+	game.player.dive_speed = float(Config.tuning.dive.max_speed)
+	game.player.previous_beak = dummy.gull.position - Vector2(0, 10)
+	game.player.sweep_beak = dummy.gull.position + Vector2(0, 10)
+	game._mugging()
+	check.call(not game.screech_lesson, "bumping the dummy also finishes the lesson")
+	host.main.clear_game()
+	await host.settle()
 	# A gull without a power has nothing to learn.
 	game = _fresh_level_2(host, false, "no_power_gull")
 	check.call(not game.screech_lesson, "a gull without a power skips the lesson")
@@ -173,7 +251,13 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	game._quest_event("swallowed",{"food":"ice_cream","direct":true})
 	check.call(int(game.quests.quests[0].progress) == 0, "quest progress is ignored during the screech lesson")
 	game.score.points = 120
+	game._screech_land(false)
+	game.brash.meter = 1.0
+	game._screech_lesson_tick(0.016)
+	game.start_slowmo()
+	game._screech_lesson_tick(0.016)
 	game.end_screech_lesson(false)
+	check.call(game.training_dummy() == null, "skipping the lesson sends the dummy away at once")
 	check.call(game.score.points == 0, "ending the lesson resets practice points")
 	check.call(not game.screech_lesson and bool(GameState.entry(2).get("screech_lesson_complete", false)), "skipping the lesson saves it as done")
 	host.main.clear_game()

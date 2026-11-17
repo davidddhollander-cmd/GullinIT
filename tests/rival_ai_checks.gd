@@ -7,6 +7,8 @@ static func simulate(host: Node, main: Node, level: int, seconds: float) -> Dict
 	game.set_physics_process(false)
 	await host.settle()
 	game.rng.seed = 4242 + level
+	if level == 2:
+		game.pending_rivals = Config.levels[2].rivals.duplicate(true) # Gary debuts in level 3 now; these ground checks keep the level 2 beach
 	if not game.pending_rivals.is_empty():
 		game._release_rivals()
 	game.intro = 0
@@ -134,6 +136,7 @@ static func loose_only_checks(host: Node, main: Node, check: Callable) -> void:
 	game.set_physics_process(false)
 	await host.settle()
 	game.dismiss_intro()
+	game.pending_rivals = Config.levels[2].rivals.duplicate(true)
 	game._release_rivals()
 	var gary: RivalPilot = game.pilots[0]
 	game.player.position = Vector2(40, game.player.ground_y())
@@ -162,6 +165,8 @@ static func fresh(host: Node, main: Node, level: int) -> BeachGame:
 	game.set_physics_process(false)
 	await host.settle()
 	game.dismiss_intro()
+	if level == 2:
+		game.pending_rivals = Config.levels[2].rivals.duplicate(true)
 	game._release_rivals()
 	game.pending_rivals.clear()
 	return game

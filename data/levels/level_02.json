@@ -8,15 +8,14 @@
   "wind": {"dir": 1, "strength": 0, "gusts": false, "flip": false},
   "clouds": [{"id": "fair-wisp-03", "x": 24, "y": 26, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-01", "x": 52, "y": 22, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-02", "x": 38, "y": 38, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-02", "x": 150, "y": 50, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-01", "x": 180, "y": 44, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-03", "x": 270, "y": 28, "scale": 1.0, "depth": 0.8}, {"id": "fair-wisp-01", "x": 100, "y": 64, "scale": 1.0, "depth": 0.7}],
   "awareness_mult": 0.9,
-  "twist": {"id": "gary_intro"},
   "quests": [
     {"id": "l2_ice", "text": "3 CLEAN ICE CREAMS", "event": "swallowed", "filter": {"food": "ice_cream", "direct": true}, "count": 3, "bonus": 50},
     {"id": "l2_cry", "text": "MAKE A TODDLER CRY", "event": "toddler_cried", "filter": {}, "count": 1, "bonus": 30}
   ],
   "random_foods": ["ice_cream", "crisps_bag", "half_eaten_doughnut", "half_eaten_sandwich"],
   "stars": [150, 400, 550],
-  "rivals": [{"name": "Gary", "species": "great-black-backed", "speed": 0.65, "accuracy_px": 22, "mug_chance": 0.15, "loose_only": true, "entry": "fly_in", "entry_text": "THIS IS MY BEACH. GET YOUR NOSH ELSEWHERE YOU GIT!", "taunt": "GARY: OI! THAT'S MY LUNCH!", "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}}],
-  "rivals_after_snatch": true,
+  "rivals": [],
+  "training_dummy": {"name": "Dummy", "species": "herring", "speed": 0.5, "accuracy_px": 0, "mug_chance": 0, "dummy": true, "range": [150, 500], "cruise_y": 92},
   "world": {"width": 1040, "promenade_start": 1040, "pier_start": 1040, "start_x": 40, "start_y": 125},
   "screech_lesson": {"start_meter": 0.6},
   "zones": [

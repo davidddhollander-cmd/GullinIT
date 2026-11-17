@@ -540,6 +540,7 @@ func _process(delta: float) -> void:
 	elif game.screech_lesson:
 		lesson_label.text = "LESSON %d/%d" % [mini(game.screech_step + 1, BeachGame.SCREECH_STEPS), BeachGame.SCREECH_STEPS]
 		_set_lesson_prompt(game.screech_lesson_text)
+		_sync_trainer() # the wince portrait on a missed mug dive
 	elif game.screech_outro > 0.0:
 		lesson_label.text = "LESSON DONE"
 		_set_lesson_prompt(game.screech_lesson_text)
