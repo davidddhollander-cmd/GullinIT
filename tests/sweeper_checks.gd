@@ -149,6 +149,7 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(sweeper.cooldown > 0.0,"after a hit his cooldown starts")
 	# Rivals are marks too: a low rival is warned and swatted while the player stays high.
 	game = _start(suite,2)
+	game.pending_rivals = Config.levels[2].rivals.duplicate(true) # Gary now debuts in level 3; the sweeper treats any rival as a mark
 	game._release_rivals()
 	var rival: BeachGull = game.pilots[0].gull
 	game.player.position = Vector2(700.0,40.0)

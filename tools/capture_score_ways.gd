@@ -222,9 +222,9 @@ func _counter() -> void:
 	ok = serving.food and game.player.state == BeachGull.State.STRIKE
 
 func _mug() -> void:
-	GameState.progress = {"1": {"training_step": BeachGame.MUG_LESSON}}
-	_prepare(_level(0))
-	game.lesson = BeachGame.TRAINING_LESSONS
+	GameState.progress = {"1": {"training_complete": true}, "2": {"screech_lesson_complete": true}}
+	_prepare(_level(1))
+	game._training_dummy_setup() # the sparring dummy now lives in level 2 (see the screech lesson's mug step)
 	_clear_except([])
 	var dummy: RivalPilot = game.training_dummy()
 	dummy.dummy_hold = Vector2(300.0, 80.0)

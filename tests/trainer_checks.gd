@@ -58,7 +58,7 @@ static func _dive_cue_checks(host: Node, check: Callable) -> void:
 		check.call(not crashed[0] and flyer.state != BeachGull.State.STUNNED,"a dive at dive.safe_angle from %d px up does not crash" % int(drop))
 		flyer.queue_free()
 	var lessons: Array = Config.trainer.training.lessons
-	var text: String = JSON.stringify([lessons[BeachGame.DIVE_LESSON],lessons[BeachGame.MUG_LESSON],Config.trainer.live,Config.trainer.tips]).to_lower()
+	var text: String = JSON.stringify([lessons[BeachGame.DIVE_LESSON],Config.trainer.screech.lessons[BeachGame.SCREECH_MUG_STEP],Config.trainer.live,Config.trainer.tips]).to_lower()
 	check.call(not text.contains("straight through"),"dive lesson copy never says straight through")
 	check.call(Config.trainer.live.has("too_steep"),"trainer copy has the too steep line")
 
@@ -263,7 +263,7 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	for index: int in BeachGame.TRAINING_LESSONS:
 		if not game.banner_lesson(index):
 			card_lessons.append(index)
-	check.call(card_lessons == [BeachGame.TODDLER_LESSON,BeachGame.BIN_LESSON,BeachGame.DIVE_LESSON,BeachGame.MUG_LESSON],"only the toddler, the bin, the first dive and the rival dummy keep cards: "+str(card_lessons))
+	check.call(card_lessons == [BeachGame.TODDLER_LESSON,BeachGame.BIN_LESSON,BeachGame.DIVE_LESSON],"only the toddler, the bin and the first dive keep cards: "+str(card_lessons))
 	# Finishing a lesson shows a toast first, then the next card after a short beat.
 	game._training_advance()
 	check.call(not game.trainer_open and not game.trainer_queue.is_empty() and game.lesson == 2,"the next card waits a beat after the lesson-done toast")
@@ -300,7 +300,7 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	check.call(game.lesson == 3 and not game.advance_pending,"the held goal counts once its card is dismissed")
 	game.trainer_queue = {}
 	# The last lesson ends with the closing card; the result waits until it is dismissed.
-	game.lesson = BeachGame.MUG_LESSON
+	game.lesson = BeachGame.DIVE_LESSON
 	var results: Array[Dictionary] = []
 	game.level_finished.connect(func(result: Dictionary) -> void: results.append(result))
 	game._training_advance()
@@ -325,38 +325,20 @@ static func _training_flow(host: Node, check: Callable) -> void:
 	game.set_physics_process(false)
 	game.overlay.start_button.pressed.emit()
 	game.overlay.trainer_card.button.pressed.emit()
-	game.lesson = BeachGame.MUG_LESSON
+	game.lesson = BeachGame.DIVE_LESSON
 	game._training_advance()
 	game._physics_process(float(closing.delay) + 0.1)
 	check.call(game.trainer_open and not game.overlay.trainer_card.lay_label.get_parsed_text().contains("feather"),"the closing card on a replay has no Feather line")
 	game.overlay.trainer_card.button_alt.pressed.emit()
 	check.call(not game.trainer_open and game.running and game.lesson == BeachGame.TRAINING_LESSONS,"keep practicing stays on the beach")
-	# The live strip stays hidden between a finished lesson and the next card; the sparring gull arrives DUMMY_LEAD before the mug card.
-	game.trainer_queue = {}
-	game.lesson = BeachGame.DIVE_LESSON
-	game._training_advance()
-	game.overlay._process(0)
-	check.call(game.lesson == BeachGame.MUG_LESSON and game.training_dummy() == null and not game.overlay.training_panel.visible,"after the dive lesson there is no dummy and no live strip yet")
-	game._physics_process(BeachGame.TRAINING_DELAY + BeachGame.DUMMY_EXTRA_DELAY - BeachGame.DUMMY_LEAD - 0.2)
-	game.overlay._process(0)
-	check.call(game.training_dummy() == null and not game.trainer_open and not game.overlay.training_panel.visible,"the dummy still waits until the last second of the (1.5 s longer) pause")
-	game._physics_process(0.3)
-	var dummy_seen: RivalPilot = game.training_dummy()
-	check.call(dummy_seen != null and not game.trainer_open and dummy_seen.dummy_food == BeachGame.DUMMY_FOOD,"the dummy arrives about a second before the mug card")
-	game._physics_process(BeachGame.DUMMY_LEAD)
-	game.overlay._process(0)
-	check.call(game.trainer_open and game.training_dummy() == dummy_seen and not game.overlay.training_panel.visible,"the mug card opens over the same single dummy, strip still hidden")
-	game.overlay.trainer_card.button.pressed.emit()
-	game.overlay._process(0)
-	check.call(game.overlay.training_panel.visible and game.overlay.lesson_prompt.text.length() > 0,"the live strip appears once the card closes")
 	# A saved checkpoint resumes with that lesson's card, not the first.
-	GameState.progress = {"1": {"training_step": BeachGame.MUG_LESSON}}
+	GameState.progress = {"1": {"training_step": BeachGame.DIVE_LESSON}}
 	host.main.start_level(1)
 	game = host.main.game
 	game.set_physics_process(false)
 	game.overlay.start_button.pressed.emit()
-	check.call(game.trainer_open and game.overlay.trainer_card.counter_label.text == "Lesson %d/%d" % [BeachGame.MUG_LESSON+1,BeachGame.TRAINING_LESSONS] and game.overlay.trainer_card.how_label.get_parsed_text().contains("into the rival"),"resuming at the mug lesson shows the mug card")
-	await host.snapshot("trainer-lesson-5-mug")
+	check.call(game.trainer_open and game.overlay.trainer_card.counter_label.text == "Lesson %d/%d" % [BeachGame.DIVE_LESSON+1,BeachGame.TRAINING_LESSONS] and game.overlay.trainer_card.how_label.get_parsed_text().contains("get ready to dive") and game.training_dummy() == null,"resuming at the dive lesson shows the dive card and no dummy")
+	await host.snapshot("trainer-lesson-5-dive")
 	host.main.clear_game()
 
 static func _screech_flow(host: Node, check: Callable) -> void:
@@ -382,7 +364,11 @@ static func _screech_flow(host: Node, check: Callable) -> void:
 	check.call(game.trainer_open and card.how_label.get_parsed_text().contains("call the gang"),"step 3 shows the Gang Call card")
 	card.button.pressed.emit()
 	game._screech_advance()
-	check.call(not game.screech_lesson and not game.trainer_open and game.trainer_queue.is_empty() and bool(GameState.entry(2).get("screech_lesson_complete",false)),"finishing the Gang Call step ends the lesson with no closing card")
+	game._physics_process(BeachGame.TRAINER_DELAY + 0.1)
+	check.call(game.screech_lesson and game.trainer_open and card.counter_label.text == "Lesson 3/%d" % BeachGame.SCREECH_STEPS and card.lay_label.get_parsed_text().contains("mug him") and card.how_label.get_parsed_text().contains("into the rival") and game.training_dummy() != null,"step 3 shows the mug card over the sparring dummy")
+	card.button.pressed.emit()
+	game._screech_advance()
+	check.call(not game.screech_lesson and not game.trainer_open and game.trainer_queue.is_empty() and bool(GameState.entry(2).get("screech_lesson_complete",false)),"finishing the mug step ends the lesson with no closing card")
 	game.overlay._process(0.0)
 	check.call(game.screech_outro > 0.0 and game.banner_active() and game.overlay.training_panel.visible and game.overlay.trainer_portrait.visible and game.overlay.lesson_prompt.get_parsed_text().contains("Clock's on"),"Screeches' live banner announces the clock")
 	var clock: float = game.elapsed
@@ -525,10 +511,10 @@ static func _peck_pause_flow(host: Node, check: Callable) -> void:
 	# Only the first swoop lesson pauses.
 	game.player.state = BeachGull.State.GLIDE
 	game._training_tick(0.016)
-	game.lesson = BeachGame.MUG_LESSON
+	game.lesson = BeachGame.BIN_LESSON
 	_set_strike(game,customer,true)
 	game._training_tick(0.016)
-	check.call(not game.peck_pause,"the mug lesson does not pause")
+	check.call(not game.peck_pause,"other lessons do not pause")
 	await _aim_pause(host,check,game)
 	BeachGame.trainer_cards = false
 	game.lesson = BeachGame.DIVE_LESSON

@@ -119,8 +119,8 @@
     },
     "closing": {
       "mood": "proud",
-      "text": "Not bad, gullster. You can swoop, raid bins and mug rivals blind.\n\nNow go fleece that beach.",
-      "first_time_text": "Not bad, gullster. You can swoop, raid bins and mug rivals blind.\n\nHere's a feather for your trouble.",
+      "text": "Not bad, gullster. You can swoop, raid bins and nick a cone off a toddler.\n\nNow go fleece that beach.",
+      "first_time_text": "Not bad, gullster. You can swoop, raid bins and nick a cone off a toddler.\n\nHere's a feather for your trouble.",
       "button": "Progress to next level",
       "button_alt": "Keep practicing",
       "delay": 3.0
@@ -202,25 +202,17 @@
           "touch": "Aim at the snack, tap DIVE, then tap {peck}",
           "touch_casual": "Tap DIVE, your beak pecks for you"
         }
-      },
-      {
-        "mood": "amused",
-        "lay": "Now let's meet the competition. This dummy's nicked a snack. Time to mug him...",
-        "how": {
-          "default": "Fly up and dive ({dive}) into the rival to steal his snack.",
-          "touch": "Fly up and tap DIVE into the rival to steal his snack."
-        },
-        "strip": {
-          "default": "Fly up and dive against the dummy",
-          "touch": "Fly up and tap DIVE against the dummy"
-        }
       }
     ]
   },
   "screech": {
     "strips": [
       "Hold {peck} to screech. Higher is louder",
-      "Brash is full! Screech again or press {call}"
+      "Brash is full! Screech again or press {call}",
+      {
+        "default": "Fly up and dive against the dummy",
+        "touch": "Fly up and tap DIVE against the dummy"
+      }
     ],
     "lessons": [
       {
@@ -243,6 +235,14 @@
           "default": "Screech again, or press {call}, to call the gang.",
           "great-black-backed": "Screech again, or press {call}, to start the Shakedown.",
           "kittiwake": "Screech again, or press {call}, to strike."
+        }
+      },
+      {
+        "mood": "amused",
+        "lay": "One more trick. This dummy's nicked a snack. Time to mug him...",
+        "how": {
+          "default": "Fly up and dive ({dive}) into the rival to steal his snack.",
+          "touch": "Fly up and tap DIVE into the rival to steal his snack."
         }
       }
     ],

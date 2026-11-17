@@ -14,7 +14,8 @@
     {"id": "l3_bump_gary", "text": "BUMP GARY TWICE", "event": "rival_bumped", "filter": {"name": "Gary"}, "count": 2, "bonus": 40}
   ],
   "stars": [250, 550, 750],
-  "rivals": [{"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16, "mug_chance": 0.3, "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}}],
+  "rivals": [{"name": "Gary", "species": "great-black-backed", "speed": 0.65, "accuracy_px": 22, "mug_chance": 0.15, "loose_only": true, "entry": "fly_in", "entry_text": "THIS IS MY BEACH. GET YOUR NOSH ELSEWHERE YOU GIT!", "taunt": "GARY: OI! THAT'S MY LUNCH!", "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}}],
+  "rivals_after_snatch": true,
   "world": {"width": 1280, "promenade_start": 430, "pier_start": 920, "start_x": 65, "start_y": 105},
   "zones": [
     {"name": "QUIET BEACH", "from": 0, "to": 430},

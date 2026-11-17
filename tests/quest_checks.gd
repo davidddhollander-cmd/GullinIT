@@ -269,7 +269,7 @@ static func run_game(suite: Node, check: Callable) -> void:
 	check.call(bonus > 0 and int(r.base) + int(r.clean) + bonus == int(r.score), "level 2 result: earned + clean + quest bonus equals total")
 	check.call(r.quests.all(func(q: Dictionary) -> bool: return q.has("progress") and q.has("count") and q.has("bonus")), "result quests carry progress, count and bonus")
 	check.call(not run.overlay.quest_box.visible or true, "")
-	# Task 005: level 2 wind flags and one-time upwind tip; level 2 Gary taunt (the intro moved from level 3).
+	# Task 005: level 2 wind flags and one-time upwind tip; level 3 Gary taunt (the intro moved here from level 2).
 	GameState.options.tips = []
 	game = _play(main, 2)
 	check.call(game.beach.wind_flags.is_empty(), "level 2 has no flagpoles")
@@ -281,10 +281,10 @@ static func run_game(suite: Node, check: Callable) -> void:
 	game.player.state = BeachGull.State.GLIDE
 	game._physics_process(1.0 / 60)
 	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return str(t.text).begins_with("FLY INTO THE WIND")) and not ("upwind" in GameState.options.tips), "level 2 has no wind, so no upwind tip")
-	game = _play(main, 2)
+	game = _play(main, 3)
 	game._swallowed({"id": "hotdog"})
 	var gary_gull: BeachGull = game.pilots[0].gull
-	check.call(game.entry_pilot != null and not game.overlay.rival_popup.visible, "level 2: Gary flies in first, no pop-up yet")
+	check.call(game.entry_pilot != null and not game.overlay.rival_popup.visible, "level 3: Gary flies in first, no pop-up yet")
 	check.call(absf(gary_gull.position.x - game.camera_x) >= 160.0, "Gary starts off-screen")
 	game.player.invulnerable = 0.0
 	var bumped: bool = false
@@ -296,14 +296,14 @@ static func run_game(suite: Node, check: Callable) -> void:
 	check.call(bumped, "Gary reaches the player")
 	check.call(game.overlay.rival_popup.visible and "NOSH" in game.overlay.rival_popup_text.text, "Gary's head pop-up shows his line after the bump")
 	check.call(game.player.state == BeachGull.State.STUNNED, "Gary's entry bumps the player")
-	await suite.snapshot("level2-gary-entry")
-	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == "GARY JOINS THE LUNCH RUSH!"), "level 2 no longer shows the generic join message")
+	await suite.snapshot("level3-gary-entry")
+	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return t.text == "GARY JOINS THE LUNCH RUSH!"), "level 3 no longer shows the generic join message")
 	check.call(game.pilots.size() == 1 and bool(game.pilots[0].personality.get("loose_only", false)), "Gary is loose-only")
-	game = _play(main, 2)
+	game = _play(main, 3)
 	game._swallowed({"id": "hotdog", "scrap": true})
-	check.call(game.entry_pilot != null and game.pending_rivals.is_empty() and game.pilots.size() == 1, "level 2: Gary arrives after a ground scrap too, exactly once")
+	check.call(game.entry_pilot != null and game.pending_rivals.is_empty() and game.pilots.size() == 1, "level 3: Gary arrives after a ground scrap too, exactly once")
 	game._swallowed({"id": "hotdog", "scrap": true})
-	check.call(game.pilots.size() == 1, "level 2: a second scrap does not spawn Gary again")
+	check.call(game.pilots.size() == 1, "level 3: a second scrap does not spawn Gary again")
 	# Task 007: customer bite window and the mid-air bite quest (level 1 replay).
 	GameState.complete_training()
 	main._navigate("start", 1)

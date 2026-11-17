@@ -1,5 +1,5 @@
 extends Node
-const SAVE_VERSION: int = 3
+const SAVE_VERSION: int = 4
 var progress: Dictionary = {}
 var wallet: Dictionary = {"feathers": 0}
 var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false, "stats": true, "tips": [], "gull": "herring", "dev_player": false}
@@ -66,10 +66,15 @@ func load_progress() -> void:
 ## anyone who already has a record there (see unlocked), so nobody is locked out of the boss.
 ## Save v3 added the toddler lesson at Training Day lesson 3 (index 2), so the old "resume at the mug" step 4 is now 5.
 ## Every other unfinished step keeps its number: anyone past the old swoop simply meets the new lessons in order.
+## Save v4 moved the mug lesson to level 2: an unfinished Training Day at step 5 or later counts as complete (no Feather is granted).
 func migrate_progress(from_version: int = 1) -> void:
 	var training: Dictionary = entry(1)
 	if from_version < 3 and not bool(training.get("training_complete", false)) and int(training.get("training_step", 0)) == 4:
 		training.training_step = 5
+		progress["1"] = training
+	if from_version < 4 and not bool(training.get("training_complete", false)) and int(training.get("training_step", 0)) >= BeachGame.TRAINING_LESSONS:
+		training.training_complete = true # the mug lesson moved to level 2: anyone waiting at it has finished Training Day
+		training.training_step = BeachGame.TRAINING_LESSONS
 		progress["1"] = training
 	var old: Variant = progress.get("6")
 	if from_version < 2 and old is Dictionary and not progress.has("7"):
