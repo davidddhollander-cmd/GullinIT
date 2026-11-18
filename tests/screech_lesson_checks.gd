@@ -104,10 +104,7 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	game._screech_lesson_tick(0.016)
 	check.call(game.screech_step == 1, "a full meter finishes the screech step")
 	game.input.gamepad = false
-	check.call(game.screech_lesson_text().contains("press Q"), "step 2 mentions Q and the gang")
-	game.input.touch_visible = true
-	check.call(game.screech_lesson_text().contains("CALL"), "step 2 mentions the touch CALL button")
-	game.input.touch_visible = false
+	check.call(game.screech_lesson_text().contains("Screech again") and not game.screech_lesson_text().contains("press Q"), "step 2 says screech again; Q stays a hidden shortcut")
 	# Someone is holding food in range when the gang is called.
 	game.camera_x = gull.position.x
 	var in_range: int = 0
