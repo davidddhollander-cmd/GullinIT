@@ -34,6 +34,16 @@
     "how": "**PECK**: bins, hold to screech.",
     "button": "Got it"
   },
+  "role_toast": {
+    "steer": "MOUSE STEERS",
+    "dive_aim": "KEYS FLY / MOUSE AIMS DIVES"
+  },
+  "controls_card": {
+    "title": "CONTROLS",
+    "rows": [["FLY UP", "{flap}"], ["DIVE", "{dive}"], ["PECK", "{peck}"], ["STEER", "{steer}"], ["CALL", "{call}"]],
+    "mouse_steer": "MOUSE STEERS THE GULL",
+    "mouse_aim": "KEYS FLY / MOUSE AIMS DIVES"
+  },
   "toasts": [
     "Nice one!",
     "Sharp work!",
