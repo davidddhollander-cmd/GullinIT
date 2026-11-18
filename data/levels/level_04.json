@@ -12,7 +12,7 @@
   "twist": {"id": "feeding_time", "tip": {"id": "pigeons", "text": "MUG THE PIGEONS, NICK THEIR CRUMBS!"}},
   "feeding": {
     "lady": {"x": 330, "home": [180, 560]},
-    "walk_speed": 14, "interval": [8, 10], "release_frame": 3, "hand": [14, -14],
+    "walk_speed": 14, "interval": [8, 10], "release_frame": 3, "hand": [20, -14],
     "fan": [5, 8], "reach": [15, 50], "crumb_cap": 24, "fly_time": 0.45, "arc": 14,
     "swat_range": 18, "swat_cooldown": 6, "swat_hit_frame": 3, "swat_stun": 1.0,
     "flock": 6, "wander": 50, "wander_speed_mult": 0.6, "idle_rest": [0.8, 2.5], "notice": 240,

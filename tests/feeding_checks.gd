@@ -46,7 +46,7 @@ static func run(host: Node, check: Callable) -> void:
 	var cfg: Dictionary = feeding.cfg
 	check.call(feeding != null and game.scraps.crumbs.is_empty() and feeding.pigeons.size() == int(cfg.flock) and game.pilots.is_empty(),"level 4 starts with the lady, a flock and no fixed ground crumbs")
 	check.call(feeding.pigeons[0].art_id != feeding.pigeons[1].art_id and feeding.pigeons[0].art_id == feeding.pigeons[2].art_id,"the flock alternates the two pigeon sheets")
-	check.call(feeding.lady.sprite is AnimatedSprite2D and feeding.lady.get_children().size() == 1 and Config.sprites.crumb_lady.file.ends_with("crumb-lady-v2-sheet.png") and Config.sprites.pigeon_a.file.ends_with("pigeon-v1-sheet.png") and Config.sprites.pigeon_b.file.ends_with("pigeon-v2-sheet.png"),"the lady and pigeons are the supplied sheets only")
+	check.call(feeding.lady.sprite is AnimatedSprite2D and feeding.lady.get_children().size() == 1 and Config.sprites.crumb_lady.file.ends_with("crumb-lady-v2-steady-medium.png") and Config.sprites.pigeon_a.file.ends_with("pigeon-v1-light.png") and Config.sprites.pigeon_b.file.ends_with("pigeon-v2-steady-light.png"),"the lady and pigeons are the supplied sheets only")
 	# The sheets' grids line up with the sprite definitions.
 	for id: String in ["crumb_lady","pigeon_a","pigeon_b"]:
 		var art: Dictionary = Config.sprites[id]

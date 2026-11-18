@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d1lb0bmwrgdhu"
-path="res://.godot/imported/crumb-lady-v2-sheet.png-27a2fd51db208ec97992e42eb8c5d253.ctex"
+uid="uid://bo1pvui7yumyl"
+path="res://.godot/imported/crumb-lady-v2-steady-medium.png-c7ee30747be5960d1447c77bb7711651.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/crumb-lady-v2/crumb-lady-v2-sheet.png"
-dest_files=["res://.godot/imported/crumb-lady-v2-sheet.png-27a2fd51db208ec97992e42eb8c5d253.ctex"]
+source_file="res://assets/sprites/crumb-lady-v2/crumb-lady-v2-steady-medium.png"
+dest_files=["res://.godot/imported/crumb-lady-v2-steady-medium.png-c7ee30747be5960d1447c77bb7711651.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bxvnkie635o6x"
-path="res://.godot/imported/pigeon-v2-sheet.png-71fa189bd02a8a992ab29d2dca3273a7.ctex"
+uid="uid://sv10qt0u5740"
+path="res://.godot/imported/pigeon-v1-light.png-4b3bf234b034acfa992d779cabf95228.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/pigeon/pigeon-v2-sheet.png"
-dest_files=["res://.godot/imported/pigeon-v2-sheet.png-71fa189bd02a8a992ab29d2dca3273a7.ctex"]
+source_file="res://assets/sprites/pigeon/pigeon-v1-light.png"
+dest_files=["res://.godot/imported/pigeon-v1-light.png-4b3bf234b034acfa992d779cabf95228.ctex"]
 
 [params]
 

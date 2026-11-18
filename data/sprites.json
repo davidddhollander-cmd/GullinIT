@@ -5158,10 +5158,10 @@
     }
   },
   "crumb_lady": {
-    "file": "res://assets/sprites/crumb-lady-v2/crumb-lady-v2-sheet.png",
-    "frame_w": 256,
-    "frame_h": 250,
-    "visual_scale": 0.17,
+    "file": "res://assets/sprites/crumb-lady-v2/crumb-lady-v2-steady-medium.png",
+    "frame_w": 168,
+    "frame_h": 128,
+    "visual_scale": 0.3333,
     "art_height": 40,
     "sprite_offset_y": -20.6,
     "source_faces_right": true,
@@ -5173,10 +5173,10 @@
     }
   },
   "pigeon_a": {
-    "file": "res://assets/sprites/pigeon/pigeon-v1-sheet.png",
-    "frame_w": 416,
-    "frame_h": 280,
-    "visual_scale": 0.085,
+    "file": "res://assets/sprites/pigeon/pigeon-v1-light.png",
+    "frame_w": 141,
+    "frame_h": 95,
+    "visual_scale": 0.25,
     "art_height": 15,
     "sprite_offset_y": -9.1,
     "source_faces_right": true,
@@ -5195,10 +5195,10 @@
     }
   },
   "pigeon_b": {
-    "file": "res://assets/sprites/pigeon/pigeon-v2-sheet.png",
-    "frame_w": 416,
-    "frame_h": 280,
-    "visual_scale": 0.085,
+    "file": "res://assets/sprites/pigeon/pigeon-v2-steady-light.png",
+    "frame_w": 141,
+    "frame_h": 95,
+    "visual_scale": 0.25,
     "art_height": 15,
     "sprite_offset_y": -9.1,
     "source_faces_right": true,

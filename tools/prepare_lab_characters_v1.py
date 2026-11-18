@@ -20,6 +20,7 @@ import prepare_food_icons_v1 as food  # label
 ROOT = Path(__file__).resolve().parent.parent
 REF = ROOT / "assets" / "reference"
 LAB_DIR = ROOT / "assets" / "lab"
+WIRED = ROOT / "assets" / "sprites"
 LAB = ROOT / "data" / "art_lab.json"
 ALPHA_SEED = 100  # opaque art sits near 255, the sheets' halo is faint
 ALPHA_KEEP = 16  # below this a pixel is cleared (anti-aliased edges stay)
@@ -101,12 +102,12 @@ def light_touch(smooth: Path, cols: int, rows: int, fw: int, fh: int, factor: fl
 	return new_w, new_h
 
 
-def steady(src: Path, cols: int, fw: int, fh: int, frames: list[int], band: tuple[float, float], target: float | str | None, out: Path) -> None:
+def steady(src: Path, cols: int, fw: int, fh: int, frames: list[int], band: tuple[float, float], target: float | str | None, out: Path) -> tuple[int, list[float]]:
 	"""The sources draw a walker drifting across its cell (the lady slides ~57 px left per cycle, then snaps back), which plays as a
 	stutter. This slides each listed frame sideways so the centroid of the figure's `band` (fractions of its height) sits at `target`
-	("fit": the spot that keeps every frame inside its cell with the most room; None: wherever the first listed frame has it). Other frames are copied unchanged."""
+	("centre": every frame is re-cut on a canvas wide enough to hold the widest reach either side of that centroid, which is put at the canvas
+	centre so a flipped sprite turns on her body, and the new width is returned; None: wherever the first listed frame has it; number: that x). Other frames are copied unchanged."""
 	sheet = np.array(Image.open(src).convert("RGBA"))
-	result = sheet.copy()
 	anchors, spans = [], []
 	for i in frames:
 		r, c = divmod(i, cols)
@@ -116,26 +117,27 @@ def steady(src: Path, cols: int, fw: int, fh: int, frames: list[int], band: tupl
 		rows = frame[y0 + int(h * band[0]):y0 + int(h * band[1]), :, 3] >= 128
 		anchors.append(float(np.nonzero(rows)[1].mean()))
 		spans.append((int(xs.min()), int(xs.max())))
-	if target == "fit":  # goal - anchor must keep x0 + shift >= 0 and x1 + shift <= fw - 1 for every frame
-		low = max(a - x0 for a, (x0, _) in zip(anchors, spans))
-		high = min(a + fw - 1 - x1 for a, (_, x1) in zip(anchors, spans))
-		target = (low + high) / 2
-		print(f"  steady {src.name}: target x {target:.1f} (room {high - low:.0f} px)")
+	new_fw = fw
+	if target == "centre":
+		reach = max(max(a - x0, x1 + 1 - a) for a, (x0, x1) in zip(anchors, spans))
+		new_fw = 2 * int(np.ceil(reach)) + 2
+		target = new_fw / 2
 	goal = anchors[0] if target is None else target
-	for i, anchor in zip(frames, anchors):
+	result = np.zeros((sheet.shape[0], sheet.shape[1] // fw * new_fw, 4), dtype=np.uint8)
+	for i in range(sheet.shape[0] // fh * (sheet.shape[1] // fw)):
 		r, c = divmod(i, cols)
 		frame = sheet[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw]
-		dx = int(round(goal - anchor))
-		moved = np.zeros_like(frame)
-		if dx >= 0:
-			moved[:, dx:] = frame[:, :fw - dx]
-		else:
-			moved[:, :fw + dx] = frame[:, -dx:]
-		if (dx > 0 and frame[:, fw - dx:, 3].max() >= 128) or (dx < 0 and frame[:, :-dx, 3].max() >= 128):
+		dx = int(round(goal - anchors[frames.index(i)])) if i in frames else (new_fw - fw) // 2
+		moved = np.zeros((fh, new_fw, 4), dtype=np.uint8)
+		lo, hi = max(dx, 0), min(new_fw, fw + dx)
+		moved[:, lo:hi] = frame[:, lo - dx:hi - dx]
+		if frame[:, :max(-dx, 0)].size and frame[:, :max(-dx, 0), 3].max() >= 128 or frame[:, fw - max(dx + fw - new_fw, 0):].size and frame[:, fw - max(dx + fw - new_fw, 0):, 3].max() >= 128:
 			print(f"  WARNING steady {src.name} frame {i}: shift {dx} clips art")
-		result[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw] = moved
-		print(f"  steady {src.name} frame {i}: shift {dx:+d}")
+		result[r * fh:(r + 1) * fh, c * new_fw:(c + 1) * new_fw] = moved
+		if i in frames:
+			print(f"  steady {src.name} frame {i}: shift {dx:+d}")
 	Image.fromarray(result).save(out, optimize=True)
+	return new_fw, anchors
 
 
 def anim(frames: list[int], fps: float, loop: bool = True) -> dict:
@@ -156,8 +158,12 @@ def main() -> None:
 	for name, factor, colours, scale in [("light", LIGHT_FACTOR_LADY, 128, 0.25), ("medium", 0.45, 64, 1 / 3)]:
 		lw, lh = light_touch(LAB_DIR / "crumb-lady-v2-sheet.png", 6, 4, 256, lady_h, factor, colours, LAB_DIR / f"crumb-lady-v2-{name}.png")
 		lady_steps[name] = {"file": f"res://assets/lab/crumb-lady-v2-{name}.png", "frame_w": lw, "frame_h": lh, "visual_scale": scale, "animations": lady_anims}
-	steady(LAB_DIR / "crumb-lady-v2-sheet.png", 6, 256, lady_h, list(range(24)), (0.5, 0.72), "fit", LAB_DIR / "crumb-lady-v2-steady-sheet.png")
-	lw, lh = light_touch(LAB_DIR / "crumb-lady-v2-steady-sheet.png", 6, 4, 256, lady_h, 0.45, 64, LAB_DIR / "crumb-lady-v2-steady-medium.png")
+	steady_w, anchors = steady(LAB_DIR / "crumb-lady-v2-sheet.png", 6, 256, lady_h, list(range(24)), (0.5, 0.72), "centre", LAB_DIR / "crumb-lady-v2-steady-sheet.png")
+	lw, lh = light_touch(LAB_DIR / "crumb-lady-v2-steady-sheet.png", 6, 4, steady_w, lady_h, 0.45, 64, LAB_DIR / "crumb-lady-v2-steady-medium.png")
+	# In the game: same on-screen size as the old smooth lady (0.17), medium = 3 art px per game px, so shrink by 0.17 * 3.
+	WIRED.joinpath("crumb-lady-v2").mkdir(parents=True, exist_ok=True)
+	ww, wh = light_touch(LAB_DIR / "crumb-lady-v2-steady-sheet.png", 6, 4, steady_w, lady_h, 0.51, 64, WIRED / "crumb-lady-v2" / "crumb-lady-v2-steady-medium.png")
+	print(f"WIRED crumb_lady: frame_w {ww} frame_h {wh} visual_scale 0.3333; hand x change {(128 - anchors[21]) * 0.17:+.2f} game px (old frame 21 anchor {anchors[21]:.1f})")
 	lady_steady = {"file": "res://assets/lab/crumb-lady-v2-steady-medium.png", "frame_w": lw, "frame_h": lh, "visual_scale": 1 / 3, "animations": lady_anims}
 	for title, why, motion, animation in [
 		("CRUMB LADY WALK STEADY", "WALK DRIFTED 57 PX PER CYCLE. MEDIUM AS WIRED LEFT. STEADY RIGHT.", "walk_across", "walk"),
@@ -190,9 +196,13 @@ def main() -> None:
 		pw, ph = light_touch(out, 4, 5, pigeon_w, pigeon_h, LIGHT_FACTOR_PIGEON, 128, LAB_DIR / f"pigeon-{version}-light.png")
 		pigeons[version] = {"file": f"res://assets/lab/pigeon-{version}-sheet.png", "frame_w": pigeon_w, "frame_h": pigeon_h, "visual_scale": 0.075, "animations": pigeon_anims}
 		pigeons[version + "L"] = {"file": f"res://assets/lab/pigeon-{version}-light.png", "frame_w": pw, "frame_h": ph, "visual_scale": 0.25, "animations": pigeon_anims}
-	steady(LAB_DIR / "pigeon-v2-sheet.png", 4, pigeon_w, pigeon_h, list(range(1, 8)), (0.0, 0.75), None, LAB_DIR / "pigeon-v2-steady-sheet.png")
+	_, _ = steady(LAB_DIR / "pigeon-v2-sheet.png", 4, pigeon_w, pigeon_h, list(range(1, 8)), (0.0, 0.75), None, LAB_DIR / "pigeon-v2-steady-sheet.png")
 	pw, ph = light_touch(LAB_DIR / "pigeon-v2-steady-sheet.png", 4, 5, pigeon_w, pigeon_h, LIGHT_FACTOR_PIGEON, 128, LAB_DIR / "pigeon-v2-steady-light.png")
 	pigeon_steady = {"file": "res://assets/lab/pigeon-v2-steady-light.png", "frame_w": pw, "frame_h": ph, "visual_scale": 0.25, "animations": pigeon_anims}
+	WIRED.joinpath("pigeon").mkdir(parents=True, exist_ok=True)  # in the game: the old 0.085 size, 4 art px per game px
+	wa = light_touch(LAB_DIR / "pigeon-v1-sheet.png", 4, 5, pigeon_w, pigeon_h, 0.34, 128, WIRED / "pigeon" / "pigeon-v1-light.png")
+	wb = light_touch(LAB_DIR / "pigeon-v2-steady-sheet.png", 4, 5, pigeon_w, pigeon_h, 0.34, 128, WIRED / "pigeon" / "pigeon-v2-steady-light.png")
+	print(f"WIRED pigeons: frame {wa} / {wb} visual_scale 0.25")
 	comparisons.append({"title": "PIGEON V2 WALK STEADY", "description": "V2 BODY JUMPED 32 PX EVERY OTHER FRAME. LIGHT AS WIRED LEFT. STEADY RIGHT.", "current": "shopper_mullet",
 		"current_override": pigeons["v2L"], "candidate": pigeon_steady, "reference": "shopper_mullet", "motion": "walk_across", "animation": "walk", "category": CATEGORY})
 	for title, why, motion, animation in [
