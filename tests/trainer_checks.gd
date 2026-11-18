@@ -91,8 +91,8 @@ static func _copy_checks(host: Node, check: Callable) -> void:
 			texts.append(TrainerScript.line(trainer.training.opening.text,input))
 			texts.append(TrainerScript.line(trainer.training.closing.text,input))
 			texts.append(TrainerScript.line(trainer.training.closing.first_time_text,input))
-			texts.append(TrainerScript.line(trainer.screech.outro,input))
-			for variants: Variant in [trainer.screech.outro,trainer.screech.lessons[0].lay,trainer.screech.lessons[1].lay]:
+			texts.append(TrainerScript.line(trainer.screech.closing.text,input))
+			for variants: Variant in [trainer.screech.closing.text,trainer.screech.lessons[0].lay,trainer.screech.lessons[1].lay]:
 				for variant: Variant in variants.values():
 					texts.append(str(variant))
 			var pairs: Array[String] = []
@@ -365,18 +365,22 @@ static func _screech_flow(host: Node, check: Callable) -> void:
 	card.button.pressed.emit()
 	game._screech_advance()
 	game._physics_process(BeachGame.TRAINER_DELAY + 0.1)
+	check.call(not game.trainer_open and game.training_dummy() == null,"the mug card and sparring gull wait out the mug delay")
+	game._physics_process(float(Config.trainer.screech.mug_delay) + 0.1)
+	game._physics_process(BeachGame.MUG_CARD_DELAY + 0.1)
 	check.call(game.screech_lesson and game.trainer_open and card.counter_label.text == "Lesson 3/%d" % BeachGame.SCREECH_STEPS and card.lay_label.get_parsed_text().contains("mug him") and card.how_label.get_parsed_text().contains("into the rival") and game.training_dummy() != null,"step 3 shows the mug card over the sparring dummy")
 	card.button.pressed.emit()
 	game._screech_advance()
-	check.call(not game.screech_lesson and not game.trainer_open and game.trainer_queue.is_empty() and bool(GameState.entry(2).get("screech_lesson_complete",false)),"finishing the mug step ends the lesson with no closing card")
-	game.overlay._process(0.0)
-	check.call(game.screech_outro > 0.0 and game.banner_active() and game.overlay.training_panel.visible and game.overlay.trainer_portrait.visible and game.overlay.lesson_prompt.get_parsed_text().contains("Clock's on"),"Screeches' live banner announces the clock")
+	check.call(not game.screech_lesson and bool(GameState.entry(2).get("screech_lesson_complete",false)) and game.trainer_queue.has("entry"),"finishing the mug step ends the lesson and queues Screeches' closing card")
 	var clock: float = game.elapsed
+	game._physics_process(float(Config.trainer.screech.closing.delay) + 0.1)
+	check.call(game.trainer_open and card.lay_label.get_parsed_text().contains("Show me everything"),"the closing card tells the player to show what they have learned")
+	check.call(card.lay_label.get_parsed_text().contains("GANG CALL") and card.button.text == "LET'S GULL IT","the closing card names the special")
+	game._physics_process(1.0)
+	check.call(is_equal_approx(game.elapsed,clock),"the level clock waits while the closing card is open")
+	card.button.pressed.emit()
 	game._physics_process(1.0 / 60)
-	check.call(game.elapsed > clock,"the level clock runs under the banner")
-	game._physics_process(float(Config.trainer.screech.outro_time) + 0.1)
-	game.overlay._process(0.0)
-	check.call(game.screech_outro <= 0.0 and not game.overlay.training_panel.visible,"the banner goes away after a few seconds")
+	check.call(not game.trainer_open and game.elapsed > clock,"the level clock runs once the closing card is dismissed")
 	host.main.clear_game()
 
 static func _has_button(host: Node, text: String) -> bool:
