@@ -41,7 +41,7 @@ static func run(harness: Node,check: Callable) -> void:
 			check.call(bounds.size.x>=35 and bounds.size.y>=45,"market cleaner keeps the full body and visible broom in "+clip+" frame")
 	check.call(FileAccess.file_exists("res://assets/sprites/seafood_vendor.png"),"legacy seafood placeholder stays in the project but unused")
 	check.call(FileAccess.file_exists("res://assets/stage2/market-cleaner/market-cleaner-v1-comparison.png"),"stage 2 market cleaner art and preview are stored together")
-	harness.main.start_level(4)
+	harness.main.start_level(5)
 	var game: BeachGame = harness.main.game
 	game.set_physics_process(false)
 	game.intro = 0

@@ -15,7 +15,7 @@ var save_error: String = ""
 var unlock_all: bool = true
 # Demo build settings from data/demo.json: levels after last_level are always
 # locked (even with unlock_all), and feedback_url powers the feedback buttons.
-var demo: Dictionary = {"enabled": false, "last_level": 7, "feedback_url": ""}
+var demo: Dictionary = {"enabled": false, "last_level": 8, "feedback_url": ""}
 
 func _ready() -> void:
 	load_demo()
@@ -29,10 +29,10 @@ func load_demo(path: String = "res://data/demo.json") -> void:
 		demo.merge(data, true)
 
 func demo_locked(id: int) -> bool:
-	return bool(demo.get("enabled", false)) and id > int(demo.get("last_level", 7))
+	return bool(demo.get("enabled", false)) and id > int(demo.get("last_level", 8))
 
 func last_playable_level() -> int:
-	return int(demo.get("last_level", 7)) if bool(demo.get("enabled", false)) else 7
+	return int(demo.get("last_level", 8)) if bool(demo.get("enabled", false)) else 8
 
 func feedback_url() -> String:
 	return str(demo.get("feedback_url", "")).strip_edges()

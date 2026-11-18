@@ -33,7 +33,7 @@ static func run(suite: Node, check: Callable) -> void:
 	var arena: Dictionary = Config.arenas.get(ArenaId, {})
 	check.call(int(Config.vs.round_time) == 75 and Config.vs.board_prefix == "vs-" and Config.vs.opponents.gary.entry == "fly_in" and Config.vs.seed_scores.size() == 3, "data/vs.json loads into Config.vs")
 	check.call(not arena.is_empty() and arena.name == "Scrap Sands" and int(arena.world.width) == 640 and int(arena.world.promenade_start) == 240, "Scrap Sands loads into Config.arenas")
-	check.call(not Config.levels.any(func(level: Dictionary) -> bool: return str(level.id) == ArenaId) and Config.levels.size() == 7, "the arena is not an Arcade level")
+	check.call(not Config.levels.any(func(level: Dictionary) -> bool: return str(level.id) == ArenaId) and Config.levels.size() == 8, "the arena is not an Arcade level")
 	var spawns: Array = arena.spawns
 	var props: Array = arena.props
 	check.call(_count(spawns, "sunbather") == 1 and _count(spawns, "off_lead_dog") == 1 and _count(spawns, "kiosk_customer") == 3, "Scrap Sands has one sunbather, one dog, three shoppers")

@@ -3,7 +3,7 @@ extends RefCounted
 static func run(root: Node, check: Callable) -> void:
 	var game := BeachGame.new()
 	root.add_child(game)
-	game.setup(Config.levels[3],false)
+	game.setup(Config.levels[4],false)
 	game.set_physics_process(false)
 	game.running = true
 	game.intro = 0.0

@@ -1,6 +1,6 @@
 # 097 — Level 4 "Feeding Time": crumb lady and pigeons
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -38,7 +38,35 @@ A new level 4 built around a crumb lady who walks the beach throwing crumbs ever
 - [ ] Headless `tests/integration.tscn` passes with no new failures (one known failure in the play copy, "demo.json enables the three-level demo", is expected there only).
 
 ## Report
-<!-- Filled in by the implementer. -->
+Branch `sonnet/097-crumb-lady-level` (last commit: see git log; hash given in the hand-back).
+
+Files changed
+- New: `scripts/crumb_lady.gd` (enum FSM WALK/THROW/SWAT, frame-exact release and hit frames), `scripts/pigeon.gd` (enum FSM IDLE/SEEK/PECK/FLEE/AWAY/RETURN/LAND), `scripts/feeding_time.gd` (manager: throw, claim, swat, scatter), `tests/feeding_checks.gd`, `data/levels/level_04.json` (Feeding Time).
+- Art: sheets copied (not moved) to `assets/sprites/crumb-lady-v2/` and `assets/sprites/pigeon/`; registered in `data/sprites.json` as `crumb_lady`, `pigeon_a`, `pigeon_b`. Grids checked: cells line up (lady 256x250, pigeon 416x280). Foot baseline measured from the alpha bounds: lady feet at y=246 of 250, pigeon feet at y~247 of 280 (peck frame ~12 px higher in the source, ~1 px in game, left as is). Lady scale 0.17 (art height 40 like other adults), pigeon 0.085.
+- Renumber: `level_04..07.json` became `level_05..08.json` with ids bumped and quest ids shifted (l4_->l5_, l5_->l6_, squall l6_->l7_, boss l6_->l8_); `data/leaderboards.json` seed boards keyed 4-7 moved to 5-8 plus a new board 4; `config.gd` loads 8 levels; `game_state.gd` defaults 7->8; `level_generator.gd` `<=5`->`<=6`, `>=5`->`>=6`; `spawner.gd` kiosk refill `>=4`->`>=5` (so new level 4 stays light); `main.gd` level music index keeps old 4-7 tracks. Dev tools previews pointing at level indices shifted. `data/demo.json` untouched (last_level 3).
+- Reused systems: `scraps.gd` (thrown crumbs are normal `crumbs` entries flagged `thrown`, with a short arc, removed when eaten, never respawn; `collected` signal gained a `thrown` arg), `game.gd` (level flag `"scraps": false` clears the fixed row, `feeding` manager tick, `thrown` in the swallowed quest event), existing twist-tip mechanism, `gull.swatted()` for the knock and stun, `BeachCollisions.segment_hits` for the dive contact (same rule as mugging a rival, STRIKE state).
+- Data: all tuning lives in the level's `feeding` block (interval, fan, reach, cap, fly time, swat range/cooldown/stun/hit frame, flock, speeds, peck time, scatter radius, return delay).
+- Tests: shifted old level numbers in 20-odd test files; new `tests/feeding_checks.gd` wired into `tests/integration.gd`.
+
+Tests
+- Baseline on main (before changes): 17945 checks, 0 failures. Note a pre-existing SCRIPT ERROR in `food_checks` (`game.scraps.crumbs[2]` out of bounds, level 1 only keeps 2 crumbs) aborts that function in baseline and in the final run alike; not touched.
+- Final: 18574 checks, 0 failures (same pre-existing script error only).
+
+Decisions
+- Level 4 is `"authored": true`, 960 px wide, no promenade/pier, one sunbather, one kiosk customer with a kiosk, 4 bins + 1 wheelie bin (wheelie placed within 50 px of the kiosk to satisfy the shed-adjacency test), no rivals, crabs on. Quests: EAT 15 THROWN CRUMBS (+50), SCATTER PIGEONS 5 TIMES (+50). Tip: MUG THE PIGEONS, NICK THEIR CRUMBS!
+- Swat uses `gull.swatted()` (swat sound plus the standard stun/tumble), not a rival-specific path. Swat range check requires the gull GROUNDED (covers pecking); it is re-checked on the hit frame with extra slack.
+- Scatter triggers on the STRIKE (dive) state only, with a 14x10 hit box from data; neighbours are chosen by distance to the hit pigeon.
+- Scatter cue: "SHOO!" shout, sand puffs and the click sound; no new effects or audio.
+- Rival ground jobs untouched (no rivals here).
+- Cast-variety test skips level 4 (nothing to pin); its EXPECTED_CASTS index shifts for levels 5+.
+
+Saves and online boards (not migrated, per brief)
+- Local saves are keyed by level id, so existing progress under "4".."7" (stars, best, quests) now reads as the level that took that number (old Water Fight data shows on Feeding Time, and so on). Level 8 starts empty. Old 'unlocked' chain still works since unlock follows previous stars. The old save v2 boss migration ("6"->"7") is left as is.
+- Online boards are named by level id, so boards 4-7 now collect scores for the new level at that number and the old scores for old 4-7 stay under their old names, unreachable until someone moves them to 5-8. Board 8 is new.
+
+Not done
+- Panic-run row unused. No screenshots or in-game playtest by eye (headless only); pigeon and lady scale/positions are untested visually.
+
 
 ## Review notes
 <!-- Filled in by the reviewer. -->

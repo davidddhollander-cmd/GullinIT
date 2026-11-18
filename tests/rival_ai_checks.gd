@@ -86,18 +86,18 @@ static func simulate(host: Node, main: Node, level: int, seconds: float) -> Dict
 	report.hud_rows = game.overlay.rival_score_labels.size()
 	report.hud_rect = game.overlay.rival_score_panel.get_global_rect()
 	report.quest_rect = game.overlay.quest_panel.get_global_rect()
-	if level == 5 or level == 7:
+	if level == 6 or level == 8:
 		game.overlay.queue_redraw()
-		await host.snapshot("rival-score-meter" if level == 7 else "rival-score-meter-l5")
+		await host.snapshot("rival-score-meter" if level == 8 else "rival-score-meter-l5")
 	return report
 
 static func run(host: Node, main: Node, check: Callable) -> void:
-	await simulate(host, main, 5, 6.0)  # capture only
-	for level: int in [3,4,7]:
+	await simulate(host, main, 6, 6.0)  # capture only
+	for level: int in [3,5,8]:
 		var r: Dictionary = await simulate(host, main, level, 90.0)
 		print("RIVAL SIM level %d: %s" % [level,str(r)])
-		var need_thefts: int = 2 if level == 7 else 1
-		check.call(r.pilots == (3 if level == 7 else 1),"level %d rival count" % level)
+		var need_thefts: int = 2 if level == 8 else 1
+		check.call(r.pilots == (3 if level == 8 else 1),"level %d rival count" % level)
 		check.call(r.hud_visible == (r.pilots >= 1) and r.hud_rows == r.pilots,"level %d shows the rival board with any rival, one row per rival" % level)
 		check.call(r.pilots < 2 or (r.hud_rect as Rect2).end.x <= 316.0 and (r.hud_rect as Rect2).size.x <= 84.0 and (r.hud_rect as Rect2).position.y >= 17.0 and not (r.hud_rect as Rect2).intersects(r.quest_rect) and (r.hud_rect as Rect2).position.y >= 29.0,"level %d rival score meter scoreboard sits top-right under the quest strip" % level)
 		for i: int in r.pilots:
@@ -108,8 +108,8 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 		check.call(r.held_picks == 0,"level %d loose-only rivals never target held food" % level)
 		check.call(r.edge_max <= 1.5,"level %d rival never lingers at the edge (%.2f s)" % [level,r.edge_max])
 		check.call(r.out_of_bounds == 0,"level %d rivals stay inside the beach" % level)
-		if level == 7:
-			check.call(r.shared_target > 0,"level 7 rivals race for the same food (%d shared frames)" % r.shared_target)
+		if level == 8:
+			check.call(r.shared_target > 0,"level 8 rivals race for the same food (%d shared frames)" % r.shared_target)
 		check.call(r.cooldown_dives == 0,"level %d rival waits out the cooldown after a theft" % level)
 		check.call(r.escape_short == 0,"level %d rival leaves the scene of a theft" % level)
 
@@ -179,10 +179,10 @@ static func has_text(game: BeachGame, text: String) -> bool:
 
 ## Rivals race, mug each other and mug the player; personality comes from data.
 static func competition_checks(host: Node, main: Node, check: Callable) -> void:
-	var game: BeachGame = await fresh(host, main, 5)
+	var game: BeachGame = await fresh(host, main, 6)
 	var gary: RivalPilot = game.pilots[0]
 	var chip: RivalPilot = game.pilots[1]
-	check.call(gary.mug_chance() == 0.3 and chip.mug_chance() == 0.8, "level 5 profiles set mug_chance in data (Gary 0.3, Chip 0.8)")
+	check.call(gary.mug_chance() == 0.3 and chip.mug_chance() == 0.8, "level 6 profiles set mug_chance in data (Gary 0.3, Chip 0.8)")
 	var plain := RivalPilot.new()
 	plain.personality = {}
 	check.call(is_equal_approx(plain.mug_chance(), float(Config.tuning.rival.mug_chance)) and float(Config.tuning.rival.mug_range) == 90.0, "mug_chance and mug_range default from tuning")
@@ -230,7 +230,7 @@ static func competition_checks(host: Node, main: Node, check: Callable) -> void:
 	check.call(gary.target == null and gary.gull.state != BeachGull.State.STRIKE and gary.mode != RivalPilot.Mode.DIVE, "the loser drops the empty target and is not stuck diving (mode %d state %d target %s)" % [gary.mode,gary.gull.state,str(gary.target)])
 	prize.food = true
 	# Rival mugs rival.
-	game = await fresh(host, main, 5)
+	game = await fresh(host, main, 6)
 	gary = game.pilots[0]
 	chip = game.pilots[1]
 	gary.gull.position = Vector2(600, 70)
@@ -250,7 +250,7 @@ static func competition_checks(host: Node, main: Node, check: Callable) -> void:
 	game._rival_mugging()
 	check.call(chip.mugs == 1 and gary.score == 0, "a stunned victim cannot be mugged again")
 	# Rival mugs player.
-	game = await fresh(host, main, 5)
+	game = await fresh(host, main, 6)
 	gary = game.pilots[0]
 	gary.gull.position = Vector2(600, 70)
 	game.player.position = Vector2(600, 100)
@@ -268,7 +268,7 @@ static func competition_checks(host: Node, main: Node, check: Callable) -> void:
 	check.call(game.score.points <= points, "the usual stun penalty applies to the player")
 	check.call(has_text(game, "MUGGED BY GARY!"), "player sees MUGGED BY <NAME>!")
 	# Nothing to steal once swallowed.
-	game = await fresh(host, main, 5)
+	game = await fresh(host, main, 6)
 	gary = game.pilots[0]
 	gary.gull.position = Vector2(600, 70)
 	game.player.position = Vector2(600, 100)
@@ -279,7 +279,7 @@ static func competition_checks(host: Node, main: Node, check: Callable) -> void:
 	game._rival_mugging()
 	check.call(gary.mugs == 0 and game.player.state == BeachGull.State.GLIDE, "a player with nothing in the beak is not mugged")
 	# Chase behaviour: eager rivals go for a carrier in range; climbing out of reach or mug_chance 0 avoids it.
-	game = await fresh(host, main, 5)
+	game = await fresh(host, main, 6)
 	gary = game.pilots[0]
 	gary.personality = {"name": "Gary", "speed": 0.8, "accuracy_px": 16, "mug_chance": 1.0}
 	gary.gull.position = Vector2(600, 65)
@@ -303,7 +303,7 @@ static func competition_checks(host: Node, main: Node, check: Callable) -> void:
 		chased = chased or gary.chase_step(1.0 / 60, game.wind)
 	check.call(not chased and gary.mode != RivalPilot.Mode.CHASE_CARRIER, "a rival with mug_chance 0 never goes for a carrier")
 	# Whole loop: an eager rival chases, dives through and mugs a player hovering with a snack.
-	game = await fresh(host, main, 5)
+	game = await fresh(host, main, 6)
 	gary = game.pilots[0]
 	game.pilots[1].personality["mug_chance"] = 0.0
 	gary.personality["mug_chance"] = 1.0
@@ -356,7 +356,7 @@ static func ground_item(food_id: String, x: float) -> Dictionary:
 static func ground_checks(host: Node, main: Node, check: Callable) -> void:
 	var defaults: Dictionary = Config.tuning.rival.ground
 	check.call(defaults.scraps == 0.5 and defaults.bins == 0.5 and defaults.bags == 0.5 and defaults.catch == 0.5, "rival ground weights default in tuning")
-	var game: BeachGame = await fresh(host, main, 5)
+	var game: BeachGame = await fresh(host, main, 6)
 	var by_name: Dictionary = {}
 	for pilot: RivalPilot in game.pilots:
 		by_name[pilot.gull.rival_name] = pilot
@@ -400,7 +400,7 @@ static func ground_checks(host: Node, main: Node, check: Callable) -> void:
 	var wrappers: int = game.stash_raids.items.filter(func(item: Dictionary) -> bool: return bool(item.get("garbage", false))).size()
 	check.call(wrappers >= 1 and gary.score <= 15, "rival leaves garbage on the sand")
 	# Wheelie bin: top landing.
-	game = await fresh(host, main, 7)
+	game = await fresh(host, main, 8)
 	var wheelie_x: float = float(game.level.props.filter(func(prop: Dictionary) -> bool: return prop.type == "wheelie_bin")[0].x)
 	gary = isolate(game, {"scraps": 1.0, "bins": 1.0}, wheelie_x - 40.0)
 	var lid_seen: Array[bool] = [false]

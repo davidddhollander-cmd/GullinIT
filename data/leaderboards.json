@@ -105,6 +105,40 @@
   ],
   "4": [
    {
+    "name": "TIDES",
+    "score": 690
+   },
+   {
+    "name": "GULLIVER",
+    "score": 630
+   },
+   {
+    "name": "SPRAT",
+    "score": 590
+   },
+   {
+    "name": "HERRING",
+    "score": 560
+   },
+   {
+    "name": "SANDY",
+    "score": 470
+   },
+   {
+    "name": "SNAFFLE",
+    "score": 410
+   },
+   {
+    "name": "BEAKY",
+    "score": 260
+   },
+   {
+    "name": "GUSTO",
+    "score": 205
+   }
+  ],
+  "5": [
+   {
     "name": "LOLLY",
     "score": 1320
    },
@@ -137,7 +171,7 @@
     "score": 460
    }
   ],
-  "5": [
+  "6": [
    {
     "name": "SALTY",
     "score": 1640
@@ -171,7 +205,7 @@
     "score": 565
    }
   ],
-  "6": [
+  "7": [
    {
     "name": "GALE",
     "score": 1790
@@ -205,7 +239,7 @@
     "score": 560
    }
   ],
-  "7": [
+  "8": [
    {
     "name": "PIPER",
     "score": 2015

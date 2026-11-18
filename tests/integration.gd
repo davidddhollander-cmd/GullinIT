@@ -244,11 +244,11 @@ func run() -> void:
 	# Progression: L2 teaches screech and mug with a sparring dummy (no Gary), Gary debuts in L3 (gentler than his later self, alongside the two dogs), L4's headline is the water-gun teen.
 	var l2: Dictionary = Config.levels[1]
 	var l3: Dictionary = Config.levels[2]
-	var l4: Dictionary = Config.levels[3]
+	var l4: Dictionary = Config.levels[4]
 	check(l2.rivals.is_empty() and not l2.has("rivals_after_snatch") and l2.get("twist",{}).get("id","")!="gary_intro" and l2.has("training_dummy") and not Config.levels[0].has("training_dummy"),"level 2 has no Gary: its sparring dummy only teaches the mug lesson")
 	check(l3.twist.id=="off_lead_dogs" and l3.rivals.size()==1 and l3.rivals[0].name=="Gary" and bool(l3.rivals_after_snatch) and bool(l3.rivals[0].loose_only) and l3.rivals[0].has("taunt") and l3.rivals[0].entry=="fly_in","level 3 has the Gary intro")
-	check(float(l3.rivals[0].speed)<float(l4.rivals[0].speed) and float(l3.rivals[0].accuracy_px)>float(l4.rivals[0].accuracy_px) and float(l3.rivals[0].mug_chance)<float(l4.rivals[0].mug_chance),"level 3 Gary is slower, less accurate and mugs less than level 4 Gary")
-	check(l4.twist.id=="watergun_teen_intro" and l4.has("watergun_teens") and not l4.spawns.any(func(spawn: Dictionary) -> bool: return spawn.type=="off_lead_dog") and l4.quests.any(func(q: Dictionary) -> bool: return q.event=="rival_soaked"),"level 4's twist is the water-gun teen, with no dog and a soak quest")
+	check(float(l3.rivals[0].speed)<float(l4.rivals[0].speed) and float(l3.rivals[0].accuracy_px)>float(l4.rivals[0].accuracy_px) and float(l3.rivals[0].mug_chance)<float(l4.rivals[0].mug_chance),"level 3 Gary is slower, less accurate and mugs less than level 5 Gary")
+	check(l4.twist.id=="watergun_teen_intro" and l4.has("watergun_teens") and not l4.spawns.any(func(spawn: Dictionary) -> bool: return spawn.type=="off_lead_dog") and l4.quests.any(func(q: Dictionary) -> bool: return q.event=="rival_soaked"),"level 5's twist is the water-gun teen, with no dog and a soak quest")
 	main.start_level(3)
 	main.game.set_physics_process(false)
 	main.game.player.state=BeachGull.State.GLIDE
@@ -262,6 +262,7 @@ func run() -> void:
 	await preload("res://tests/watergun_vfx_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/pixelfx_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/level5_checks.gd").run(self,main,Callable(self,"check"))
+	await preload("res://tests/feeding_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/boss_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/vs_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/sky_layer_checks.gd").run(self,Callable(self,"check"))
@@ -338,7 +339,7 @@ func run() -> void:
 	check(GameState.entry(1).casual_time==45 and GameState.entry(1).best==400,"save round trip separates casual and arcade")
 	check(Config.reload_data(),"JSON reload")
 	pin_base_reactions()
-	for i: int in range(1,8):
+	for i: int in range(1,9):
 		main.start_level(i)
 		var game: BeachGame = main.game
 		game.set_physics_process(false)
@@ -395,7 +396,7 @@ func run() -> void:
 			check(not game.is_physics_processing(),"pause stops simulation")
 			main._navigate("resume")
 			game.set_physics_process(false)
-		if i==6:
+		if i==7:
 			game.camera_x = 800
 			game.camera.position.x = 800
 			game.beach.camera_x = 800
@@ -438,13 +439,13 @@ func run() -> void:
 		check(not game.running,"level %d timer completes" % i)
 		var result_board := main.menus.get_child(0) as ResultBoard
 		check(result_board != null and not result_board.complete,"result tally starts before final score reveal")
-		if i == 6:
+		if i == 7:
 			await snapshot("results-start")
 			for frame: int in range(35):
 				await get_tree().process_frame
 			await snapshot("results-mid")
 		result_board.finish_tally()
-		await snapshot("results" if i==6 else "result-%d" % i)
+		await snapshot("results" if i==7 else "result-%d" % i)
 		layout(main.menus)
 		menu_font_grid(main.menus)
 	# Level start card with quests: feather icons sit level with the small quest text.
@@ -1739,13 +1740,13 @@ func target_checks(game: BeachGame) -> void:
 	vendor.tick(0.01,game.gulls)
 	check(game.player.state==BeachGull.State.STUNNED,"broom hits after telegraph")
 	var wind: BeachWind = BeachWind.new()
-	wind.setup(Config.levels[6])
+	wind.setup(Config.levels[7])
 	wind.countdown = 1.01
 	wind.tick(0.02)
 	check(wind.warned,"gust warns one second ahead")
 	var before: int = wind.direction
 	wind.tick(1.0)
-	check(wind.direction==-before,"level 7 gust flips direction")
+	check(wind.direction==-before,"level 8 gust flips direction")
 	wind.tick(0.5)
 	check(wind.strength>wind.base,"gust ramps strength")
 
@@ -2645,7 +2646,7 @@ func female_sunbather_art_checks() -> void:
 func generated_layout_checks() -> void:
 	var layouts: Array = []
 	var moved_far: int = 0
-	for number: int in range(1,8):
+	for number: int in range(1,9):
 		main.start_level(number)
 		var game: BeachGame = main.game
 		game.set_physics_process(false)
@@ -2861,7 +2862,7 @@ func beachgoer_art_checks() -> void:
 				check(texture.get_size() == Vector2(definition.frame_w,definition.frame_h),"beachgoer aligned frame canvas")
 				check(Rect2(Vector2.ZERO,texture.atlas.get_size()).encloses(texture.region),"beachgoer atlas stays inside sheet")
 		check(frames.get_frame_texture(&"idle",0).atlas.get_image().get_mipmap_count() == 0,"pixel beachgoers preserve source pixels without mipmaps")
-	main.start_level(4)
+	main.start_level(5)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
 	game.intro = 0
@@ -3064,9 +3065,9 @@ func extended_beach_checks() -> void:
 			check(float(prop.x) >= 0 and float(prop.x) < width,"map prop stays inside level world")
 			if prop.type in ["kiosk","hotdog_stand"]:
 				stands[prop.type] = prop.x
-		check((stands.has("kiosk") or int(level.id) == 5) and (int(level.id) <= 2 or stands.has("hotdog_stand")),"each level has its authored food stands")
+		check((stands.has("kiosk") or int(level.id) == 6) and (int(level.id) <= 2 or int(level.id) == 4 or stands.has("hotdog_stand")),"each level has its authored food stands")
 	# Task 034 review set: the first playable frame of every level, before anyone moves.
-	for number: int in range(1,8):
+	for number: int in range(1,9):
 		main.start_level(number)
 		var opening_game: BeachGame = main.game
 		opening_game.set_physics_process(false)
@@ -3074,7 +3075,7 @@ func extended_beach_checks() -> void:
 		await snapshot("cast-rotation-level-%d-opening" % number)
 		main.clear_game()
 		await settle()
-	main.start_level(4)
+	main.start_level(5)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
 	game.intro = 0
@@ -3098,7 +3099,7 @@ func extended_beach_checks() -> void:
 	main.clear_game()
 	await settle()
 	# Level identity review: one render per level 2-6 around its stalls.
-	for entry: Array in [[2,820],[3,640],[4,640],[5,640],[6,940],[7,600]]:
+	for entry: Array in [[2,820],[3,640],[5,640],[6,640],[7,940],[8,600]]:
 		main.start_level(int(entry[0]))
 		game = main.game
 		game.set_physics_process(false)

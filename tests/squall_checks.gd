@@ -3,7 +3,7 @@ extends RefCounted
 const DT: float = 0.1
 
 static func _fresh(suite: Node) -> BeachGame:
-	suite.main.start_level(6)
+	suite.main.start_level(7)
 	var game: BeachGame = suite.main.game
 	game.set_physics_process(false)
 	game.running = true
@@ -37,9 +37,9 @@ static func run(suite: Node, check: Callable) -> void:
 	_order_and_saves(check)
 	var game: BeachGame = _fresh(suite)
 	var level: Dictionary = game.level
-	check.call(game.squall != null and level.name == "Thunderstorm" and str(level.twist.id) == "squall" and int(level.time_limit) == 150 and int(level.stars[0]) == 600 and int(level.stars[1]) == 950 and int(level.stars[2]) == 1250, "level 6 is Thunderstorm with the squall twist, a 150 s limit and initial 600/950/1250 stars")
+	check.call(game.squall != null and level.name == "Thunderstorm" and str(level.twist.id) == "squall" and int(level.time_limit) == 150 and int(level.stars[0]) == 600 and int(level.stars[1]) == 950 and int(level.stars[2]) == 1250, "level 7 is Thunderstorm with the squall twist, a 150 s limit and initial 600/950/1250 stars")
 	check.call(level.quests.size() == 2 and level.quests[0].event == "abandoned_looted" and level.quests[0].text == "LOOT 3 PICNICS" and level.quests[1].event == "umbrella_snatch" and level.quests[1].text == "SNATCH UNDER AN UMBRELLA" and level.has("random_quest"), "squall quests: loot 3 picnics, snatch under an umbrella, plus random")
-	check.call(game.quests.quests.size() == 3 and game.quests.quests[2].id == "l6_random", "squall rolls its random quest in slot three")
+	check.call(game.quests.quests.size() == 3 and game.quests.quests[2].id == "l7_random", "squall rolls its random quest in slot three")
 	var squall: BeachSquall = game.squall
 	var old_man: BeachTarget = _find(game, "kiosk_customer", "old_man")
 	var sunbather: BeachTarget = _find(game, "sunbather")
@@ -177,11 +177,11 @@ static func _order_and_saves(check: Callable) -> void:
 	var names: Array[String] = []
 	for level: Dictionary in Config.levels:
 		names.append(str(level.name))
-	check.call(Config.levels.size() == 7 and names == ["Training Day", "Family Picnic", "Boardwalk Bustle", "Water Fight", "Three's a Crowd", "Thunderstorm", "Sunset Showdown"], "seven levels in order, Thunderstorm at 6 and the boss at 7: %s" % str(names))
+	check.call(Config.levels.size() == 8 and names == ["Training Day", "Family Picnic", "Boardwalk Bustle", "Feeding Time", "Water Fight", "Three's a Crowd", "Thunderstorm", "Sunset Showdown"], "eight levels in order, Feeding Time at 4, Thunderstorm at 7 and the boss at 8: %s" % str(names))
 	var ids_ok: bool = true
 	for index: int in Config.levels.size():
 		ids_ok = ids_ok and int(Config.levels[index].id) == index + 1
-	check.call(ids_ok and bool(Config.levels[6].get("boss", false)) and not bool(Config.levels[5].get("boss", false)), "level ids match their order and only level 7 is the boss")
+	check.call(ids_ok and bool(Config.levels[7].get("boss", false)) and not bool(Config.levels[6].get("boss", false)), "level ids match their order and only level 8 is the boss")
 	check.call(GameState.last_playable_level() >= 3 and GameState.demo.last_level >= 3, "demo and last-level defaults cover the new level")
 	var saved_progress: Dictionary = GameState.progress.duplicate(true)
 	var saved_unlock: bool = GameState.unlock_all

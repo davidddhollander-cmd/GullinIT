@@ -85,7 +85,7 @@ static func run(host: Node, check: Callable) -> void:
 	# Dusk (the title screen's sky; no level is a sunset now) tints the clouds, day does not; an empty layout falls back to the default.
 	var dusk_beach: BeachBackdrop = BeachBackdrop.new()
 	dusk_beach.sunset = true
-	dusk_beach.cloud_layout = Config.levels[5].clouds
+	dusk_beach.cloud_layout = Config.levels[6].clouds
 	host.add_child(dusk_beach)
 	dusk_beach.setup([])
 	check.call(dusk_beach.background_art.clouds.clouds[0].sprite.material != null, "dusk tints the clouds")

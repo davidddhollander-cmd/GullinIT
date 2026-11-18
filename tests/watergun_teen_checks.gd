@@ -40,17 +40,17 @@ static func _run(teen: WatergunTeen, game: BeachGame, seconds: float) -> void:
 
 static func run(suite: Node, check: Callable) -> void:
 	var t: Dictionary = Config.tuning.watergun_teen
-	for number: int in [1, 2, 3, 6]:
+	for number: int in [1, 2, 3, 4, 7]:
 		check.call(not Config.levels[number-1].has("watergun_teens"),"level %d has no water-gun teenager" % number)
-	for number: int in [4, 5, 7]:
+	for number: int in [5, 6, 8]:
 		var placed: Array = Config.levels[number-1].get("watergun_teens",[])
-		check.call(placed.size() == (2 if number == 7 else 1),"level %d places its water-gun teenagers" % number)
+		check.call(placed.size() == (2 if number == 8 else 1),"level %d places its water-gun teenagers" % number)
 		var other: BeachGame = _fresh(suite,number)
 		check.call(other.teens.size() == placed.size() and other.teens[0].get_parent() == other.actors,"level %d spawns the teenager as an actor" % number)
 		check.call(other.spawner.targets.size() == Config.levels[number-1].spawns.filter(func(spawn: Dictionary) -> bool: return spawn.type != "off_lead_dog").size(),"level %d teenager is not a food target" % number)
 		suite.main.clear_game()
 
-	var game: BeachGame = _fresh(suite,4)
+	var game: BeachGame = _fresh(suite,5)
 	var teen: WatergunTeen = game.teens[0]
 	var player: BeachGull = game.player
 	var rival: BeachGull = game.pilots[0].gull
@@ -58,9 +58,9 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(frames.has_animation(&"shoot_high") and frames.has_animation(&"shoot_level") and frames.has_animation(&"shoot_low") and frames.has_animation(&"run") and frames.has_animation(&"alert"),"teenager frames carry the pursue and shoot clips")
 	check.call(is_equal_approx(teen.sprite.scale.x,float(Config.sprites.watergun_teen.visual_scale)) and is_equal_approx(teen.position.y,float(Config.tuning.world.ground)),"teenager is drawn at its configured scale on the sand line")
 	# Depth rule (AGENTS.md): feet level with or below a prop's base draw in front of it, feet above draw behind.
-	var bench: Dictionary = Config.levels[3].props.filter(func(prop: Dictionary) -> bool: return prop.type == "beach_bench")[0]
+	var bench: Dictionary = Config.levels[4].props.filter(func(prop: Dictionary) -> bool: return prop.type == "beach_bench")[0]
 	var base_y: float = float(bench.get("y",160))
-	var bench_z: int = game.beach.prop_sprites[Config.levels[3].props.find(bench)].z_index
+	var bench_z: int = game.beach.prop_sprites[Config.levels[4].props.find(bench)].z_index
 	check.call(game.spawner.depth_z(Vector2(float(bench.x),base_y+8.0),2) > bench_z,"a teenager in front of a bench draws over it")
 	check.call(game.spawner.depth_z(Vector2(float(bench.x),base_y-8.0),2) < bench_z,"a teenager behind a bench draws under it")
 	var spots: Array[int] = [0]
