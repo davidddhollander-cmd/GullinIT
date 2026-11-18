@@ -67,7 +67,7 @@ static func _demo_lock_checks(suite: Node, check: Callable) -> void:
 ", " "))
 		suite.layout(suite.main.menus)
 		suite.menu_font_grid(suite.main.menus)
-	check.call(full_game == 4, "level select marks four full-game levels (found %d)" % full_game)
+	check.call(full_game == 5, "level select marks five full-game levels (found %d)" % full_game)
 	suite.main.menus.level_page = 0
 	suite.main.menus.level_select()
 	await suite.settle()

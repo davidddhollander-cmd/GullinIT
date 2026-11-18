@@ -1,24 +1,22 @@
 {
   "id": 5,
   "crabs": {"enabled": true},
-  "sweeper": {"enabled": true, "range": [24, 1250]},
-  "name": "Three's a Crowd",
-  "seed": 7105,
-  "time_limit": 150,
-  "wind": {"dir": -1, "strength": 0.5, "gusts": true, "flip": false},
-  "clouds": [{"id": "fair-medium-01", "x": 60, "y": 26, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-02", "x": 108, "y": 20, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-01", "x": 100, "y": 38, "scale": 1.0, "depth": 1.0}, {"id": "fair-medium-03", "x": 200, "y": 52, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-03", "x": 240, "y": 46, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-01", "x": 226, "y": 64, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-02", "x": 8, "y": 60, "scale": 1.0, "depth": 0.8}, {"id": "fair-wisp-01", "x": 36, "y": 52, "scale": 1.0, "depth": 0.8}],
-  "awareness_mult": 1.32,
-  "twist": {"id": "chip_intro"},
+  "name": "Water Fight",
+  "seed": 7104,
+  "time_limit": 135,
+  "wind": {"dir": 1, "strength": 0.3, "gusts": true, "flip": false},
+  "clouds": [{"id": "plate-02", "x": 30, "y": 20, "scale": 1.0}, {"id": "plate-01", "x": 170, "y": 24, "scale": 1.0}, {"id": "plate-03", "x": 110, "y": 52, "scale": 0.5}, {"id": "plate-04", "x": 250, "y": 46, "scale": 0.5}, {"id": "plate-03", "x": 60, "y": 76, "scale": 1.0}, {"id": "plate-04", "x": 210, "y": 74, "scale": 1.0}],
+  "awareness_mult": 1.24,
+  "twist": {"id": "watergun_teen_intro", "tip": {"id": "teen", "text": "WATER GUN TEEN: FLY HIGH, STAY DRY!"}},
   "quests": [
-    {"id": "l5_fish", "text": "2 FRIED FISH", "event": "swallowed", "filter": {"food": "fried_fish"}, "count": 2, "bonus": 50},
-    {"id": "l5_mug_chip", "text": "MUG CHIP", "event": "swallowed", "filter": {"mugged_from": "Chip"}, "count": 1, "bonus": 60}
+    {"id": "l5_counter", "text": "PULL OFF A COUNTER", "event": "swallowed", "filter": {"handover": true}, "count": 1, "bonus": 50},
+    {"id": "l5_soak", "text": "GET A RIVAL SOAKED", "event": "rival_soaked", "filter": {}, "count": 1, "bonus": 60}
   ],
   "random_quest": {"count": [3, 5], "bonus": 40},
-  "random_foods": ["hotdog", "fried_fish"],
-  "stars": [550, 850, 1150],
+  "random_foods": ["hotdog", "fried_fish", "ice_cream", "half_eaten_doughnut", "half_eaten_pizza"],
+  "stars": [450, 700, 950],
   "rivals": [
-    {"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16, "mug_chance": 0.3, "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}},
-    {"name": "Chip", "species": "kittiwake", "speed": 1.1, "accuracy_px": 8, "mug_chance": 0.8, "after_snatch": true, "taunt": "CHIP: FINDERS KEEPERS!", "ground": {"scraps": 0.3, "bins": 0.2, "bags": 0.3, "catch": 0.8}}
+    {"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16, "mug_chance": 0.3, "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}}
   ],
   "world": {"width": 1280, "promenade_start": 430, "pier_start": 920, "start_x": 65, "start_y": 105},
   "zones": [
@@ -26,33 +24,33 @@
     {"name": "PROMENADE", "from": 430, "to": 920},
     {"name": "PIER DINING", "from": 920, "to": 1280}
   ],
-  "watergun_teens": [{"x": 830, "home": [790, 900]}],
+  "watergun_teens": [{"x": 640, "home": [600, 740]}],
   "spawns": [
-    {"type": "kiosk_customer", "x": 555, "food_id": "hotdog", "appearance": "shopper_mullet", "station": "hotdogs", "patrol_radius": 14},
-    {"type": "kiosk_customer", "x": 680, "food_id": "hotdog", "appearance": "old_man", "station": "hotdogs", "patrol_radius": 12},
-    {"type": "pier_diner", "x": 1075, "appearance": "pier_diner", "station": "pier_dining", "patrol_radius": 8},
-    {"type": "pier_diner", "x": 1150, "appearance": "pier_diner_b", "station": "pier_dining", "patrol_radius": 8},
-    {"type": "toddler", "x": 210, "family_id": "family_1", "station": "family_1", "patrol_radius": 5, "speed_mult": 0.6},
-    {"type": "picnic_family", "x": 255, "family_id": "family_1", "station": "family_1", "patrol_radius": 0},
-    {"type": "off_lead_dog", "x": 300, "home": [240, 320]}
+    {"type": "sunbather", "x": 150, "appearance": "male_blue", "station": "sun_0", "patrol_radius": 0},
+    {"type": "sunbather", "x": 250, "appearance": "female_blue", "station": "sun_2", "patrol_radius": 0},
+    {"type": "sunbather", "x": 300, "appearance": "male_red", "station": "sun_3", "patrol_radius": 0},
+    {"type": "kiosk_customer", "x": 545, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "ice_cream", "patrol_radius": 12},
+    {"type": "kiosk_customer", "x": 1190, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "hotdogs", "patrol_radius": 12}
   ],
   "props": [
-    {"type": "beach_palm", "x": 125, "y": 148},
-    {"type": "beach_palm", "x": 1230, "y": 148},
-    {"type": "beach_parasol", "x": 300, "y": 143},
-    {"type": "bin", "x": 380},
-    {"type": "beach_lamp", "x": 500, "y": 151},
-    {"type": "wheelie_bin", "x": 600},
-    {"type": "hotdog_stand", "x": 640, "customer_x": 680},
-    {"type": "fish_chips_stand", "x": 950, "customer_x": 990},
-    {"type": "beach_lamp", "x": 740, "y": 151},
-    {"type": "bin", "x": 790},
-    {"type": "bin", "x": 860},
-    {"type": "beach_bench", "x": 895, "y": 153},
-    {"type": "umbrella", "x": 1075},
+    {"type": "beach_palm", "x": 30, "y": 148},
+    {"type": "beach_parasol_blue", "x": 170, "y": 143},
+    {"type": "beach_parasol", "x": 270, "y": 143},
+    {"type": "beach_parasol_blue", "x": 320, "y": 143},
+    {"type": "beach_palm", "x": 355, "y": 148},
+    {"type": "beach_hut", "x": 390, "y": 151},
+    {"type": "beach_rocks", "x": 1000, "y": 172},
+    {"type": "beach_rocks", "x": 1235, "y": 172},
+    {"type": "bin", "x": 425},
+    {"type": "beach_lamp", "x": 465, "y": 151},
+    {"type": "kiosk", "x": 500, "customer_x": 545},
+    {"type": "wheelie_bin", "x": 715},
+    {"type": "hotdog_stand", "x": 760, "customer_x": 800},
+    {"type": "bin", "x": 816},
+    {"type": "beach_bench", "x": 850, "y": 153, "jitter": true},
+    {"type": "beach_lamp", "x": 890, "y": 151},
     {"type": "bin", "x": 1160},
-    {"type": "beach_bench", "x": 1185, "y": 153},
-    {"type": "beach_rocks", "x": 1255, "y": 172}
+    {"type": "beach_bench", "x": 1190, "y": 153}
   ],
   "map_version": 3
 }

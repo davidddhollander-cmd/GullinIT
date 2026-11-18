@@ -371,7 +371,7 @@ func tick(delta: float, elapsed: float) -> void:
 			assign_flavour(target)
 			target.facing = 1 if x < _camera_x() else -1
 			replacements.remove_at(i)
-	if int(level.id) >= 4:
+	if int(level.id) >= 5:
 		kiosk_timer -= delta
 		if kiosk_timer <= 0:
 			kiosk_timer = Config.tuning.world.kiosk_rate

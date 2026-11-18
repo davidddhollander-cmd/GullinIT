@@ -7,7 +7,7 @@ func _ready() -> void:
 	Config.tuning.juice.audio = false
 	var game := BeachGame.new()
 	add_child(game)
-	var level: Dictionary = Config.levels[3].duplicate(true)
+	var level: Dictionary = Config.levels[4].duplicate(true)
 	level.rivals = []
 	game.setup(level,false)
 	game.set_physics_process(false)

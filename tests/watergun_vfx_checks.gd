@@ -18,7 +18,7 @@ static func run(suite: Node, check: Callable) -> void:
 		check.call(frames.get_animation_loop(clip) == bool(spec.loop),
 			"%s loop mode matches its runtime role" % id)
 
-	suite.main.start_level(4)
+	suite.main.start_level(5)
 	var game: BeachGame = suite.main.game
 	game.set_physics_process(false)
 	game.running = true

@@ -52,11 +52,13 @@ static func run(harness: Node, check: Callable) -> void:
 	var holder := Node2D.new()
 	harness.add_child(holder)
 	var old_man_levels: int = 0
-	for id: int in range(1,8):
+	for id: int in range(1,9):
+		if id == 4:
+			continue # Feeding Time is the crumb lady's beach: no rotation cast to pin
 		var definition: Dictionary = Config.levels[id-1].duplicate(true)
 		var spawner := BeachSpawner.new()
 		spawner.setup(holder,definition)
-		var expected_cast: Dictionary = EXPECTED_CASTS[id-1]
+		var expected_cast: Dictionary = EXPECTED_CASTS[id-1-(1 if id >= 5 else 0)]
 		var expected: int = 0
 		for spawn: Dictionary in definition.spawns:
 			if spawn.type != "off_lead_dog":
@@ -66,7 +68,7 @@ static func run(harness: Node, check: Callable) -> void:
 		check.call(_same_looks(_looks(spawner,"sunbather"),expected_cast.sunbathers),"level %d sunbather cast matches the rotation" % id)
 		check.call(_same_looks(_looks(spawner,"pier_diner"),expected_cast.diners),"level %d diner cast matches the rotation" % id)
 		check.call(_all_distinct(_all_people_looks(spawner)),"level %d opens without two people sharing a look" % id)
-		if id in [5,7]:
+		if id in [6,8]:
 			check.call(_same_looks(_looks(spawner,"pier_diner"),PierDinerArt.APPEARANCES),"level %d opens with one of each diner look" % id)
 		if "old_man" in _looks(spawner,"kiosk_customer"):
 			old_man_levels += 1

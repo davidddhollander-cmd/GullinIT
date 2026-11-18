@@ -59,20 +59,20 @@ static func overlaps(props: Array) -> Array[String]:
 	return found
 
 static func run(check: Callable) -> void:
-	for number: int in range(1, 8):
+	for number: int in range(1, 9):
 		var level: Dictionary = Config.read_json("res://data/levels/level_%02d.json" % number)
 		var bad: Array[String] = overlaps(level.props)
 		check.call(bad.is_empty(), "level %d props do not overlap %s" % [number, str(bad)])
-		if number == 5:
+		if number == 6:
 			var family: Array = level.spawns.filter(func(spawn: Dictionary) -> bool: return spawn.get("family_id","") == "family_1")
-			check.call(family.size()==2 and family.any(func(spawn: Dictionary) -> bool: return spawn.type=="picnic_family") and family.any(func(spawn: Dictionary) -> bool: return spawn.type=="toddler"),"level 5 has one mum and one toddler sharing family_1")
+			check.call(family.size()==2 and family.any(func(spawn: Dictionary) -> bool: return spawn.type=="picnic_family") and family.any(func(spawn: Dictionary) -> bool: return spawn.type=="toddler"),"level 6 has one mum and one toddler sharing family_1")
 			for spawn: Dictionary in family:
-				check.call(float(spawn.x)<float(level.world.promenade_start),"level 5 family stays on open sand")
+				check.call(float(spawn.x)<float(level.world.promenade_start),"level 6 family stays on open sand")
 				for prop: Dictionary in level.props:
-					check.call(not actor_overlaps_prop(spawn,prop),"level 5 %s at %d clears %s at %d" % [spawn.type,int(spawn.x),prop.type,int(prop.x)])
+					check.call(not actor_overlaps_prop(spawn,prop),"level 6 %s at %d clears %s at %d" % [spawn.type,int(spawn.x),prop.type,int(prop.x)])
 					if prop.type in ["kiosk","hotdog_stand","fish_chips_stand","beach_bench"]:
 						var busy_x: float = float(prop.get("customer_x",prop.x))
-						check.call(absf(float(spawn.x)-busy_x)>=35.0,"level 5 family clears %s customer/bench spot" % prop.type)
+						check.call(absf(float(spawn.x)-busy_x)>=35.0,"level 6 family clears %s customer/bench spot" % prop.type)
 	# The checker must catch the original level 5 palm/bench clash.
 	var clash: Array = [{"type": "beach_palm", "x": 1230, "y": 148}, {"type": "beach_bench", "x": 1225, "y": 153}]
 	check.call(overlaps(clash).size() == 1, "overlap check flags a palm standing on a bench")

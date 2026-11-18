@@ -23,7 +23,7 @@ static func step(game: BeachGame, time: float, gulls: Array[BeachGull] = []) -> 
 static func run(host: Node, check: Callable) -> void:
 	var previous_audio: bool = bool(Config.tuning.juice.audio)
 	Config.tuning.juice.audio = false
-	for id: int in [3,4,5,6]:
+	for id: int in [3,5,6,7]:
 		var game := new_game(host,id)
 		var seated: Array = game.spawner.targets.filter(func(t: BeachTarget) -> bool: return t.bench_visit.phase == BenchVisit.Phase.REST and t.food)
 		check.call(seated.size() >= 1,"level %d starts with a bench occupied by a holding shopper" % id)
@@ -36,7 +36,7 @@ static func run(host: Node, check: Callable) -> void:
 				game.camera_x = at
 				game.camera.position = Vector2(at,90)
 				game.player.position = Vector2(at-200,50)
-				await host.snapshot("bench_start_level6")
+				await host.snapshot("bench_start_level7")
 			var phases: Dictionary = {}
 			var visits: int = 0
 			for i: int in 6000:
@@ -48,13 +48,13 @@ static func run(host: Node, check: Callable) -> void:
 					phases[t] = phase
 			print("BENCH SIM level %d: %d visits in 120 s" % [id,visits])
 			# Level 7 has the slow old man and sundress shopper (task 037), so it sees fewer visits.
-			check.call(visits >= (1 if id in [6,7] else 2),"level %d sees enough bench visits in 120 s (%d)" % [id,visits])
+			check.call(visits >= (1 if id in [7,8] else 2),"level %d sees enough bench visits in 120 s (%d)" % [id,visits])
 		game.queue_free()
 	# Theft victim wanders away, does not queue within 10 s, shops again later.
-	var game := new_game(host,7)
+	var game := new_game(host,8)
 	var victim: BeachTarget = game.spawner.create("kiosk_customer",700.0,{"appearance":"shopper_mullet","food_id":"hotdog"})
 	game.stalls.bind(victim)
-	check.call(victim != null,"level 7 has a free holding shopper")
+	check.call(victim != null,"level 8 has a free holding shopper")
 	if victim != null:
 		var gull := BeachGull.new()
 		host.add_child(gull)

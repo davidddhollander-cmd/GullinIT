@@ -26,6 +26,7 @@ var crabs: CrabPopulation
 var sweeper_visits: SweeperVisits
 var dogs: Array[OffLeadDog] = [] ## one per off_lead_dog spawn
 var teens: Array[WatergunTeen] = []
+var feeding: BeachFeeding ## level 4 crumb lady and pigeons
 var beach: BeachBackdrop
 var scraps: BeachScraps
 var stash_raids: BeachStashRaids
@@ -174,6 +175,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	scraps = BeachScraps.new()
 	add_child(scraps)
 	scraps.collected.connect(_scrap_collected)
+	if not bool(level.get("scraps",true)): # Feeding Time: the only ground crumbs are the ones the crumb lady throws
+		scraps.crumbs.clear()
 	if level.has("scrap_max_x"): # Training Day: lesson-2 crumbs stay clear of the lesson-3 toddler
 		scraps.crumbs = scraps.crumbs.filter(func(c: Dictionary) -> bool: return float(c.x) <= float(level.scrap_max_x))
 	actors = Node2D.new()
@@ -221,6 +224,10 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		teen.splashed.connect(func(at: Vector2) -> void: effects.water_splash(at))
 		teen.hit.connect(func(gull: BeachGull) -> void: _water_hit(gull,teen))
 		teens.append(teen)
+	if level.has("feeding"):
+		feeding = BeachFeeding.new()
+		add_child(feeding)
+		feeding.setup(self,actors)
 	stalls.setup(beach,spawner)
 	stalls.portion_created.connect(_wire_target)
 	crabs = CrabPopulation.new()
@@ -664,6 +671,8 @@ func _physics_process(delta: float) -> void:
 	for teen: WatergunTeen in teens:
 		teen.tick(step,gulls)
 		teen.z_index = spawner.depth_z(teen.position,2) # mid-lane band, same depth rule as the NPCs
+	if feeding != null:
+		feeding.tick(step)
 	_rival_taunt(step)
 	if player.state != BeachGull.State.STUNNED:
 		player.digestion.tick(step,player.state == BeachGull.State.GROUNDED)
@@ -1124,8 +1133,8 @@ func _crashed() -> void:
 	effects.impact(player.position,true)
 	Audio.play(species_cue("stun","stun"))
 
-func _scrap_collected(at: Vector2, food_id: String) -> void:
-	player.digestion.collect(food_id,{"scrap":true})
+func _scrap_collected(at: Vector2, food_id: String, thrown: bool = false) -> void:
+	player.digestion.collect(food_id,{"scrap":true,"thrown":thrown})
 	player.show_ground_peck(float(Config.tuning.world.pickup_pose_time)) # quick head-down pick-up
 	if training and lesson == 1 and player.state == BeachGull.State.GROUNDED:
 		_training_advance()
@@ -1146,7 +1155,7 @@ func _quest_completed(quest: Dictionary) -> void:
 
 func _swallowed(snack: Dictionary) -> void:
 	player.squash(float(Config.tuning.juice.swallow_bulge),float(Config.tuning.juice.swallow_bulge))
-	_quest_event("swallowed",{"food":snack.id,"direct":not snack.get("scrap",false) and not snack.get("mugged",false),"mugged_from":snack.get("mugged_from",""),"handover":snack.get("handover",false)})
+	_quest_event("swallowed",{"food":snack.id,"direct":not snack.get("scrap",false) and not snack.get("mugged",false),"mugged_from":snack.get("mugged_from",""),"thrown":snack.get("thrown",false),"handover":snack.get("handover",false)})
 	var value: int = int(snack.get("value",Config.foods[snack.id].points))
 	if snack.get("scrap",false):
 		score.points += value

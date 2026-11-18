@@ -1,56 +1,52 @@
 {
   "id": 4,
   "crabs": {"enabled": true},
-  "name": "Water Fight",
-  "seed": 7104,
-  "time_limit": 135,
-  "wind": {"dir": 1, "strength": 0.3, "gusts": true, "flip": false},
-  "clouds": [{"id": "plate-02", "x": 30, "y": 20, "scale": 1.0}, {"id": "plate-01", "x": 170, "y": 24, "scale": 1.0}, {"id": "plate-03", "x": 110, "y": 52, "scale": 0.5}, {"id": "plate-04", "x": 250, "y": 46, "scale": 0.5}, {"id": "plate-03", "x": 60, "y": 76, "scale": 1.0}, {"id": "plate-04", "x": 210, "y": 74, "scale": 1.0}],
-  "awareness_mult": 1.24,
-  "twist": {"id": "watergun_teen_intro", "tip": {"id": "teen", "text": "WATER GUN TEEN: FLY HIGH, STAY DRY!"}},
+  "name": "Feeding Time",
+  "seed": 7114,
+  "authored": true,
+  "time_limit": 120,
+  "wind": {"dir": 1, "strength": 0.1, "gusts": false, "flip": false},
+  "clouds": [{"id": "fair-wisp-02", "x": 60, "y": 22, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-03", "x": 150, "y": 28, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-01", "x": 132, "y": 20, "scale": 1.0, "depth": 1.0}, {"id": "fair-medium-03", "x": 185, "y": 56, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-01", "x": 222, "y": 52, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-02", "x": 204, "y": 68, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-01", "x": 14, "y": 52, "scale": 1.0, "depth": 0.8}, {"id": "fair-wisp-03", "x": 30, "y": 60, "scale": 1.0, "depth": 0.8}],
+  "awareness_mult": 1.0,
+  "scraps": false,
+  "twist": {"id": "feeding_time", "tip": {"id": "pigeons", "text": "MUG THE PIGEONS, NICK THEIR CRUMBS!"}},
+  "feeding": {
+    "lady": {"x": 330, "home": [180, 560]},
+    "walk_speed": 14, "interval": [8, 10], "release_frame": 3, "hand": [14, -14],
+    "fan": [5, 8], "reach": [15, 50], "crumb_cap": 24, "fly_time": 0.45, "arc": 14,
+    "swat_range": 18, "swat_cooldown": 6, "swat_hit_frame": 3, "swat_stun": 1.0,
+    "flock": 6, "wander": 50, "wander_speed_mult": 0.6, "idle_rest": [0.8, 2.5], "notice": 240,
+    "pigeon_speed": 26, "peck_time": 0.6,
+    "hit": [14, 10], "scatter_radius": 40, "return_delay": 6,
+    "flee_speed": [55, 75], "ceiling": -50, "return_dx": 120, "glide_speed": 70, "land_time": 0.3
+  },
   "quests": [
-    {"id": "l4_counter", "text": "PULL OFF A COUNTER", "event": "swallowed", "filter": {"handover": true}, "count": 1, "bonus": 50},
-    {"id": "l4_soak", "text": "GET A RIVAL SOAKED", "event": "rival_soaked", "filter": {}, "count": 1, "bonus": 60}
+    {"id": "l4_crumbs", "text": "EAT 15 THROWN CRUMBS", "event": "swallowed", "filter": {"food": "crumbs", "thrown": true}, "count": 15, "bonus": 50},
+    {"id": "l4_scatter", "text": "SCATTER PIGEONS 5 TIMES", "event": "pigeons_scattered", "filter": {}, "count": 5, "bonus": 50}
   ],
-  "random_quest": {"count": [3, 5], "bonus": 40},
-  "random_foods": ["hotdog", "fried_fish", "ice_cream", "half_eaten_doughnut", "half_eaten_pizza"],
-  "stars": [450, 700, 950],
-  "rivals": [
-    {"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16, "mug_chance": 0.3, "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}}
-  ],
-  "world": {"width": 1280, "promenade_start": 430, "pier_start": 920, "start_x": 65, "start_y": 105},
+  "stars": [200, 400, 550],
+  "rivals": [],
+  "world": {"width": 960, "promenade_start": 960, "pier_start": 960, "start_x": 65, "start_y": 105},
   "zones": [
-    {"name": "QUIET BEACH", "from": 0, "to": 430},
-    {"name": "PROMENADE", "from": 430, "to": 920},
-    {"name": "PIER DINING", "from": 920, "to": 1280}
+    {"name": "CRUMB ROW", "from": 0, "to": 560},
+    {"name": "KIOSK", "from": 560, "to": 960}
   ],
-  "watergun_teens": [{"x": 640, "home": [600, 740]}],
   "spawns": [
-    {"type": "sunbather", "x": 150, "appearance": "male_blue", "station": "sun_0", "patrol_radius": 0},
-    {"type": "sunbather", "x": 250, "appearance": "female_blue", "station": "sun_2", "patrol_radius": 0},
-    {"type": "sunbather", "x": 300, "appearance": "male_red", "station": "sun_3", "patrol_radius": 0},
-    {"type": "kiosk_customer", "x": 545, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "ice_cream", "patrol_radius": 12},
-    {"type": "kiosk_customer", "x": 1190, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "hotdogs", "patrol_radius": 12}
+    {"type": "sunbather", "x": 240, "appearance": "female_red", "station": "sun_0", "patrol_radius": 0},
+    {"type": "kiosk_customer", "x": 735, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "ice_cream", "patrol_radius": 12}
   ],
   "props": [
-    {"type": "beach_palm", "x": 30, "y": 148},
-    {"type": "beach_parasol_blue", "x": 170, "y": 143},
-    {"type": "beach_parasol", "x": 270, "y": 143},
-    {"type": "beach_parasol_blue", "x": 320, "y": 143},
-    {"type": "beach_palm", "x": 355, "y": 148},
-    {"type": "beach_hut", "x": 390, "y": 151},
-    {"type": "beach_rocks", "x": 1000, "y": 172},
-    {"type": "beach_rocks", "x": 1235, "y": 172},
-    {"type": "bin", "x": 425},
-    {"type": "beach_lamp", "x": 465, "y": 151},
-    {"type": "kiosk", "x": 500, "customer_x": 545},
-    {"type": "wheelie_bin", "x": 715},
-    {"type": "hotdog_stand", "x": 760, "customer_x": 800},
-    {"type": "bin", "x": 816},
-    {"type": "beach_bench", "x": 850, "y": 153, "jitter": true},
-    {"type": "beach_lamp", "x": 890, "y": 151},
-    {"type": "bin", "x": 1160},
-    {"type": "beach_bench", "x": 1190, "y": 153}
+    {"type": "beach_palm", "x": 60, "y": 148},
+    {"type": "beach_parasol_blue", "x": 235, "y": 143},
+    {"type": "bin", "x": 150},
+    {"type": "bin", "x": 420},
+    {"type": "beach_lamp", "x": 470, "y": 151},
+    {"type": "bin", "x": 600},
+    {"type": "beach_bench", "x": 560, "y": 153},
+    {"type": "kiosk", "x": 690, "customer_x": 735},
+    {"type": "bin", "x": 820},
+    {"type": "beach_palm", "x": 900, "y": 148},
+    {"type": "wheelie_bin", "x": 650}
   ],
   "map_version": 3
 }

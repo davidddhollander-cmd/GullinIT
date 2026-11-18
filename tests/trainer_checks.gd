@@ -446,7 +446,7 @@ static func _replay_flow(host: Node, check: Callable) -> void:
 	host.main.game.player.species = "no_power_gull"
 	host.main._navigate("pause")
 	check.call(not _has_button(host,"REPLAY LESSON"),"no replay for a gull that cannot screech")
-	host.main.start_level(4)
+	host.main.start_level(5)
 	host.main._navigate("pause")
 	check.call(not _has_button(host,"REPLAY LESSON"),"no replay outside Level 2")
 	host.main.clear_game()
