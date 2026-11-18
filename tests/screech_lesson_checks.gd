@@ -119,6 +119,10 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	check.call(not game.brash.allies.is_empty(), "Q fires Gang Call on a full meter")
 	game._screech_lesson_tick(0.016)
 	check.call(game.screech_lesson and game.screech_step == BeachGame.SCREECH_MUG_STEP and not bool(GameState.entry(2).get("screech_lesson_complete", false)), "firing Gang Call moves on to the mug step instead of ending the lesson")
+	check.call(game.training_dummy() == null and game.screech_lesson_text().contains("Get ready") and game.screech_lesson_target().x < -500.0, "no sparring gull right after the special, and the strip does not ring a missing target")
+	game._screech_lesson_tick(float(Config.trainer.screech.mug_delay) - 0.5)
+	check.call(game.training_dummy() == null, "the sparring gull is still away just before the mug delay is up")
+	game._screech_lesson_tick(0.6)
 	# Step 3: a sparring dummy carrying a snack flies in; dive through it.
 	var dummy: RivalPilot = game.training_dummy()
 	check.call(dummy != null and dummy.dummy and game.pilots.size() == 1 and dummy.dummy_food == BeachGame.DUMMY_FOOD, "the mug step brings in one sparring dummy holding food")
@@ -130,7 +134,7 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	game.brash.meter = 0.0
 	game._screech_lesson_tick(0.016)
 	check.call(game.screech_step == BeachGame.SCREECH_MUG_STEP, "an empty meter in the mug step does not send the lesson back")
-	check.call(game.trainer_cards == false or game.trainer_queue.entry.lay.contains("mug him"), "the mug card is queued behind the toast")
+	check.call(game.trainer_cards == false or game.trainer_queue.entry.lay.contains("mug him"), "the mug card is queued once the sparring gull is in view")
 	check.call(is_zero_approx(game.elapsed), "the level timer is still paused in the mug step")
 	for frame: int in range(240):
 		dummy.tick(1.0 / 60, [], {}, game.wind)
@@ -170,7 +174,7 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	check.call(dummy.dummy_food.is_empty() and not game.screech_lesson and bool(GameState.entry(2).get("screech_lesson_complete", false)), "mugging the dummy ends and saves the lesson")
 	check.call(game.player.digestion.snacks.is_empty() and game.score.points == 0, "the mugged snack does not count for the real run")
 	check.call(is_zero_approx(game.brash.meter), "the meter is empty for the real run")
-	check.call(game.screech_outro > 0.0 or not game.trainer_cards, "the outro banner shows after the mug")
+	check.call(not game.trainer_cards or (game.trainer_queue.has("entry") and game.trainer_queue.entry.lay.contains("Muggin")), "Screeches' closing card is queued after the mug")
 	check.call(game.training_dummy() != null, "the dummy lingers a moment after the lesson")
 	await game.get_tree().create_timer(BeachGame.DUMMY_EXIT_DELAY + 0.3).timeout
 	check.call(game.training_dummy() == null and game.pilots.is_empty() and game.gulls.size() == 1, "the dummy leaves the beach: no rival in the timed run")
@@ -204,10 +208,10 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 				check.call(game.screech_step == 1, "%s: the special step waits while the meter stays full" % species)
 			game.start_slowmo()
 			game._screech_lesson_tick(0.016)
-			check.call(game.screech_lesson and game.screech_step == BeachGame.SCREECH_MUG_STEP and game.training_dummy() != null, "%s: firing the special moves on to the mug step (same frame %s)" % [species, same_frame])
+			check.call(game.screech_lesson and game.screech_step == BeachGame.SCREECH_MUG_STEP and game.training_dummy() == null, "%s: firing the special moves on to the mug step, sparring gull not yet in (same frame %s)" % [species, same_frame])
 			game._screech_advance() # the mug
 			check.call(not game.screech_lesson and bool(GameState.entry(2).get("screech_lesson_complete", false)), "%s: the mug ends the lesson (same frame %s)" % [species, same_frame])
-			check.call(game.screech_outro > 0.0 or not game.trainer_cards, "%s: the outro banner shows after the lesson (same frame %s)" % [species, same_frame])
+			check.call(not game.trainer_cards or game.trainer_queue.has("entry"), "%s: Screeches' closing card is queued after the lesson (same frame %s)" % [species, same_frame])
 			host.main.clear_game()
 			await host.settle()
 	game = _fresh_level_2(host, false)
@@ -227,6 +231,7 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	game.start_slowmo()
 	game._screech_lesson_tick(0.016)
 	check.call(game.screech_step == BeachGame.SCREECH_MUG_STEP, "the lesson reaches the mug step")
+	game._screech_lesson_tick(float(Config.trainer.screech.mug_delay) + 0.1)
 	dummy = game.training_dummy()
 	dummy.dummy_food = ""
 	dummy.carry_window = 0.0

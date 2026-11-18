@@ -246,11 +246,17 @@
         }
       }
     ],
-    "outro_time": 5.0,
-    "outro": {
-      "default": "That's the Gang Call! Training grabs don't count. Clock's on!",
-      "great-black-backed": "That's the Shakedown! Training grabs don't count. Clock's on!",
-      "kittiwake": "That's the Lightning Strike! Training grabs don't count. Clock's on!"
+    "mug_delay": 5.0,
+    "mug_wait_strip": "Nice! Get ready...",
+    "closing": {
+      "mood": "proud",
+      "text": {
+        "default": "Muggin' and your **GANG CALL**, that's how a gull survives this beach. Training grabs don't count, so the rest of this level is yours. Show me everything you've learned!",
+        "great-black-backed": "Muggin' and your **SHAKEDOWN**, that's how a gull survives this beach. Training grabs don't count, so the rest of this level is yours. Show me everything you've learned!",
+        "kittiwake": "Muggin' and your **LIGHTNING STRIKE**, that's how a gull survives this beach. Training grabs don't count, so the rest of this level is yours. Show me everything you've learned!"
+      },
+      "button": "Let's gull it",
+      "delay": 1.0
     }
   },
   "counter_tip": {

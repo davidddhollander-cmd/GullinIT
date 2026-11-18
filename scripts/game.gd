@@ -132,11 +132,12 @@ var screech_step: int = 0
 var screech_fired_base: int = 0 ## brash.powers_fired when the lesson began; any special fired since completes the lesson
 const SCREECH_STEPS: int = 3
 const SCREECH_MUG_STEP: int = 2 ## the sparring gull carries food: dive through it. A bump (full stomach) passes too.
+const MUG_CARD_DELAY: float = 1.0 ## seconds between the sparring gull appearing and the mug card
 const DUMMY_EXIT_DELAY: float = 1.2 ## seconds the sparring gull lingers after the lesson before it leaves the beach
 const SCREECH_FLY_TIME: float = 3.0 ## the scripted fly-in always lands on the sign after this long
 var screech_landing: bool = false ## level 2's opening fly-in: the gull glides onto the sign by itself, input ignored
 var screech_fly_age: float = 0.0
-var screech_outro: float = 0.0 ## seconds left of Screeches' live banner after the lesson; the level clock is already running
+var mug_wait: float = 0.0 ## seconds until the sparring gull shows up after the special fires (data/trainer.json screech.mug_delay)
 # The counter tip: the first serving a player sees on a counter freezes the beach once, rings the food and names the dive key.
 var counter_tip: bool = false
 var counter_tip_pos: Vector2 = Vector2.ZERO
@@ -612,10 +613,7 @@ func _physics_process(delta: float) -> void:
 	var step: float = delta * (float(Config.tuning.juice.slow_scale) if effects.slow > 0 else 1.0)
 	spawner.reset_spacing()
 	play_clock += step
-	if screech_outro > 0.0:
-		screech_outro = maxf(0.0,screech_outro-step)
-		banner_cue = maxf(0.0,banner_cue-step)
-	if not screech_lesson:
+	if not screech_lesson and trainer_queue.is_empty(): # the clock waits for Screeches' closing card
 		elapsed += step
 	wind.tick(step)
 	if squall != null:
@@ -1415,7 +1413,7 @@ func banner_lesson(index: int) -> bool:
 	return trainer_cards and training and index < TRAINING_LESSONS and bool(Config.trainer.get("live_banners", true)) and Config.trainer.training.lessons[index].has("banner")
 
 func banner_active() -> bool:
-	return screech_outro > 0.0 or banner_lesson(lesson) and banner_delay <= 0.0 and not trainer_open and trainer_queue.is_empty()
+	return banner_lesson(lesson) and banner_delay <= 0.0 and not trainer_open and trainer_queue.is_empty()
 
 func _cue_banner() -> void:
 	banner_cue = BANNER_CUE_TIME
@@ -1753,7 +1751,7 @@ func training_target() -> Vector2:
 # --- Level 2 screech lesson (first herring play) -------------------------------------------
 
 func lesson_active() -> bool:
-	return training or screech_lesson or screech_outro > 0.0
+	return training or screech_lesson
 
 func screech_settings() -> Dictionary:
 	return level.get("screech_lesson",{})
@@ -1816,13 +1814,13 @@ func _screech_advance() -> void:
 	if screech_step >= SCREECH_STEPS:
 		end_screech_lesson(true)
 		if trainer_cards:
-			screech_outro = float(Config.trainer.screech.outro_time)
-			_cue_banner()
+			var closing: Dictionary = Config.trainer.screech.closing
+			_queue_trainer({"mood": closing.mood, "lay": TrainerScript.line(closing.text, input, true), "lay_source": "screech.closing.text", "lay_template": TrainerScript.pick(closing.text), "button": closing.button}, Callable(), float(closing.delay))
 	else:
 		effects.message(player.position-Vector2(0,24), _toast(), BeachUI.GOLD)
 		if screech_step == SCREECH_MUG_STEP:
-			_training_dummy_setup()
-		if trainer_cards:
+			mug_wait = float(Config.trainer.screech.mug_delay) # the sparring gull arrives (and the mug card with it) after this
+		elif trainer_cards:
 			_queue_trainer(_trainer_entry("screech", screech_step))
 
 ## Finish (or skip) the lesson: save it, empty the meter and let the level clock run.
@@ -1832,6 +1830,7 @@ func end_screech_lesson(completed: bool) -> void:
 	if screech_landing:
 		_screech_land(false)
 	screech_lesson = false
+	mug_wait = 0.0
 	brash.meter = 0.0
 	_reset_practice_score()
 	player.digestion.snacks.clear() # a snack grabbed in the lesson (the mugged one too) must not score once the clock runs
@@ -1841,6 +1840,7 @@ func end_screech_lesson(completed: bool) -> void:
 			get_tree().create_timer(DUMMY_EXIT_DELAY).timeout.connect(_remove_training_dummy)
 		else:
 			_remove_training_dummy()
+			trainer_queue = {} # a skipped lesson opens no more cards
 	GameState.complete_screech_lesson()
 	if completed:
 		effects.message(player.position-Vector2(0,24),"LESSON DONE",BeachUI.GOLD)
@@ -1865,7 +1865,7 @@ func _reset_practice_score() -> void:
 		score.bonuses[key] = 0
 
 func _mug_step() -> bool:
-	return screech_lesson and screech_step == SCREECH_MUG_STEP and not screech_landing
+	return screech_lesson and screech_step == SCREECH_MUG_STEP and not screech_landing and training_dummy() != null
 
 func _screech_lesson_tick(delta: float) -> void:
 	training_miss_hint = maxf(0.0,training_miss_hint-delta)
@@ -1877,6 +1877,12 @@ func _screech_lesson_tick(delta: float) -> void:
 			target.respawn = 0.0
 	if screech_landing:
 		return
+	if mug_wait > 0.0:
+		mug_wait -= delta
+		if mug_wait <= 0.0:
+			_training_dummy_setup()
+			if trainer_cards:
+				_queue_trainer(_trainer_entry("screech", SCREECH_MUG_STEP), Callable(), MUG_CARD_DELAY)
 	if screech_step < SCREECH_MUG_STEP and brash.powers_fired > screech_fired_base: # any species' special, even one fired the frame the meter filled
 		while screech_step < SCREECH_MUG_STEP:
 			_screech_advance()
@@ -1890,8 +1896,8 @@ func _screech_lesson_tick(delta: float) -> void:
 				screech_step = 0
 
 func screech_lesson_text() -> String:
-	if screech_outro > 0.0:
-		return TrainerScript.line(Config.trainer.screech.outro, input)
+	if screech_step == SCREECH_MUG_STEP and mug_wait > 0.0:
+		return Config.trainer.screech.mug_wait_strip
 	if _mug_step():
 		var live: Dictionary = Config.trainer.live
 		if training_miss_hint > 0.0:
@@ -1910,7 +1916,7 @@ func _perch_marker() -> Vector2:
 func screech_lesson_target() -> Vector2:
 	if screech_landing:
 		return _perch_marker()
-	if _mug_step() and training_dummy() != null:
+	if _mug_step():
 		return training_dummy().gull.position
 	return Vector2(-1000,-1000)
 
