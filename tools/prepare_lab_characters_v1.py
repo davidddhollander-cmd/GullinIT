@@ -101,6 +101,43 @@ def light_touch(smooth: Path, cols: int, rows: int, fw: int, fh: int, factor: fl
 	return new_w, new_h
 
 
+def steady(src: Path, cols: int, fw: int, fh: int, frames: list[int], band: tuple[float, float], target: float | str | None, out: Path) -> None:
+	"""The sources draw a walker drifting across its cell (the lady slides ~57 px left per cycle, then snaps back), which plays as a
+	stutter. This slides each listed frame sideways so the centroid of the figure's `band` (fractions of its height) sits at `target`
+	("fit": the spot that keeps every frame inside its cell with the most room; None: wherever the first listed frame has it). Other frames are copied unchanged."""
+	sheet = np.array(Image.open(src).convert("RGBA"))
+	result = sheet.copy()
+	anchors, spans = [], []
+	for i in frames:
+		r, c = divmod(i, cols)
+		frame = sheet[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw]
+		ys, xs = np.nonzero(frame[:, :, 3] >= 128)
+		y0, h = ys.min(), ys.max() - ys.min()
+		rows = frame[y0 + int(h * band[0]):y0 + int(h * band[1]), :, 3] >= 128
+		anchors.append(float(np.nonzero(rows)[1].mean()))
+		spans.append((int(xs.min()), int(xs.max())))
+	if target == "fit":  # goal - anchor must keep x0 + shift >= 0 and x1 + shift <= fw - 1 for every frame
+		low = max(a - x0 for a, (x0, _) in zip(anchors, spans))
+		high = min(a + fw - 1 - x1 for a, (_, x1) in zip(anchors, spans))
+		target = (low + high) / 2
+		print(f"  steady {src.name}: target x {target:.1f} (room {high - low:.0f} px)")
+	goal = anchors[0] if target is None else target
+	for i, anchor in zip(frames, anchors):
+		r, c = divmod(i, cols)
+		frame = sheet[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw]
+		dx = int(round(goal - anchor))
+		moved = np.zeros_like(frame)
+		if dx >= 0:
+			moved[:, dx:] = frame[:, :fw - dx]
+		else:
+			moved[:, :fw + dx] = frame[:, -dx:]
+		if (dx > 0 and frame[:, fw - dx:, 3].max() >= 128) or (dx < 0 and frame[:, :-dx, 3].max() >= 128):
+			print(f"  WARNING steady {src.name} frame {i}: shift {dx} clips art")
+		result[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw] = moved
+		print(f"  steady {src.name} frame {i}: shift {dx:+d}")
+	Image.fromarray(result).save(out, optimize=True)
+
+
 def anim(frames: list[int], fps: float, loop: bool = True) -> dict:
 	return {"frames": [float(f) for f in frames], "fps": fps, "loop": loop}
 
@@ -119,6 +156,17 @@ def main() -> None:
 	for name, factor, colours, scale in [("light", LIGHT_FACTOR_LADY, 128, 0.25), ("medium", 0.45, 64, 1 / 3)]:
 		lw, lh = light_touch(LAB_DIR / "crumb-lady-v2-sheet.png", 6, 4, 256, lady_h, factor, colours, LAB_DIR / f"crumb-lady-v2-{name}.png")
 		lady_steps[name] = {"file": f"res://assets/lab/crumb-lady-v2-{name}.png", "frame_w": lw, "frame_h": lh, "visual_scale": scale, "animations": lady_anims}
+	steady(LAB_DIR / "crumb-lady-v2-sheet.png", 6, 256, lady_h, list(range(24)), (0.5, 0.72), "fit", LAB_DIR / "crumb-lady-v2-steady-sheet.png")
+	lw, lh = light_touch(LAB_DIR / "crumb-lady-v2-steady-sheet.png", 6, 4, 256, lady_h, 0.45, 64, LAB_DIR / "crumb-lady-v2-steady-medium.png")
+	lady_steady = {"file": "res://assets/lab/crumb-lady-v2-steady-medium.png", "frame_w": lw, "frame_h": lh, "visual_scale": 1 / 3, "animations": lady_anims}
+	for title, why, motion, animation in [
+		("CRUMB LADY WALK STEADY", "WALK DRIFTED 57 PX PER CYCLE. MEDIUM AS WIRED LEFT. STEADY RIGHT.", "walk_across", "walk"),
+		("CRUMB LADY SOW STEADY", "SOW DRIFTED 46 PX. MEDIUM AS WIRED LEFT. STEADY RIGHT.", "idle", "sow"),
+		("CRUMB LADY HIT STEADY", "HIT DRIFTED 51 PX. MEDIUM AS WIRED LEFT. STEADY RIGHT.", "idle", "swat"),
+		("CRUMB LADY PANIC STEADY", "PANIC RUN DRIFTED 39 PX. MEDIUM AS WIRED LEFT. STEADY RIGHT.", "walk_across", "run"),
+	]:
+		comparisons.append({"title": title, "description": why, "current": "shopper_mullet", "current_override": lady_steps["medium"], "candidate": lady_steady,
+			"reference": "shopper_mullet", "motion": motion, "animation": animation, "category": CATEGORY})
 	for title, why, motion, animation in [
 		("CRUMB LADY WALK", "NEW CHARACTER. LIGHT LEFT. MEDIUM PIXELS RIGHT. SHOPPER BETWEEN.", "walk_across", "walk"),
 		("CRUMB LADY PANIC RUN", "NEW CHARACTER. PANIC RUN. LIGHT LEFT. MEDIUM RIGHT.", "walk_across", "run"),
@@ -142,6 +190,11 @@ def main() -> None:
 		pw, ph = light_touch(out, 4, 5, pigeon_w, pigeon_h, LIGHT_FACTOR_PIGEON, 128, LAB_DIR / f"pigeon-{version}-light.png")
 		pigeons[version] = {"file": f"res://assets/lab/pigeon-{version}-sheet.png", "frame_w": pigeon_w, "frame_h": pigeon_h, "visual_scale": 0.075, "animations": pigeon_anims}
 		pigeons[version + "L"] = {"file": f"res://assets/lab/pigeon-{version}-light.png", "frame_w": pw, "frame_h": ph, "visual_scale": 0.25, "animations": pigeon_anims}
+	steady(LAB_DIR / "pigeon-v2-sheet.png", 4, pigeon_w, pigeon_h, list(range(1, 8)), (0.0, 0.75), None, LAB_DIR / "pigeon-v2-steady-sheet.png")
+	pw, ph = light_touch(LAB_DIR / "pigeon-v2-steady-sheet.png", 4, 5, pigeon_w, pigeon_h, LIGHT_FACTOR_PIGEON, 128, LAB_DIR / "pigeon-v2-steady-light.png")
+	pigeon_steady = {"file": "res://assets/lab/pigeon-v2-steady-light.png", "frame_w": pw, "frame_h": ph, "visual_scale": 0.25, "animations": pigeon_anims}
+	comparisons.append({"title": "PIGEON V2 WALK STEADY", "description": "V2 BODY JUMPED 32 PX EVERY OTHER FRAME. LIGHT AS WIRED LEFT. STEADY RIGHT.", "current": "shopper_mullet",
+		"current_override": pigeons["v2L"], "candidate": pigeon_steady, "reference": "shopper_mullet", "motion": "walk_across", "animation": "walk", "category": CATEGORY})
 	for title, why, motion, animation in [
 		("PIGEON WALK V1 V2", "NEW PIGEON. V1 LEFT. V2 RIGHT. LIGHT PIXEL PASS. SHOPPER BETWEEN.", "walk_across", "walk"),
 		("PIGEON FLAP V1 V2", "NEW PIGEON. V1 LEFT. V2 RIGHT. WINGBEAT ROW. GROUNDED FOR REVIEW.", "idle", "flap"),
