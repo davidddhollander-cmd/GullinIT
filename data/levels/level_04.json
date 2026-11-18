@@ -24,7 +24,7 @@
     "tumble_speed": 80, "tumble_up": 110, "tumble_gravity": 420, "tumble_spin": 14, "tumble_bounce": 0.35, "tumble_drag": 90, "tumble_gull_scale": 0.4,
     "aggro_eat": [2, 3], "aggro_count": 2, "aggro_notice": 160, "aggro_speed": 75, "aggro_time": 4.0, "aggro_range": 260, "aggro_hit": [14, 12], "aggro_stun": 0.6, "aggro_force": 0.5,
     "bin_chance": 0.4, "bin_range": 190, "bin_stand": 10,
-    "intro": {"view": 150, "seconds": 5.0, "line": "Get rid of those stinking city rats, they're eating our nosh!", "tip": "DIVING INTO PIGEONS WILL SCARE THEM", "tip_side": 40, "tip_y": 100}
+    "intro": {"view": 150, "seconds": 5.0, "line": "Get rid of those stinking city rats, they're eating our nosh!", "tip": "DIVING INTO PIGEONS WILL SCARE THEM", "tip_seconds": 8.0}
   },
   "quests": [
     {"id": "l4_crumbs", "text": "EAT 8 THROWN CRUMBS", "event": "swallowed", "filter": {"food": "crumbs", "thrown": true}, "count": 8, "bonus": 50},

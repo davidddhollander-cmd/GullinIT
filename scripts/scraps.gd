@@ -33,6 +33,17 @@ func tick(delta: float, gull: BeachGull) -> void:
 			crumbs.remove_at(i) # thrown crumbs are eaten for good (by the gull or a pigeon)
 	queue_redraw()
 
+const VARIANTS_SHEET: Texture2D = preload("res://assets/sprites/food-crumbs-variants-v1.png")
+var variant_textures: Dictionary = {}
+
+func _variant_texture(index: int, variant: Dictionary) -> Texture2D:
+	if not variant_textures.has(index):
+		var atlas: AtlasTexture = AtlasTexture.new()
+		atlas.atlas = VARIANTS_SHEET
+		atlas.region = Rect2(variant.region[0],variant.region[1],variant.region[2],variant.region[3])
+		variant_textures[index] = atlas
+	return variant_textures[index]
+
 func _draw() -> void:
 	for crumb: Dictionary in crumbs:
 		if crumb.wait <= 0:
@@ -44,11 +55,17 @@ func _draw() -> void:
 			var display_size: Array = definition.get("display_size",definition.size)
 			var size: Vector2 = Vector2(display_size[0],display_size[1])
 			var texture: Texture2D = Config.frames(definition.sprite).get_frame_texture(&"idle",0)
+			var tint: Color = Color(1.18,1.12,1.0)
+			if definition.has("variants"): # shape, size and toast picked by position
+				var index: int = posmod(int(float(crumb.x)*13.0),definition.variants.size())
+				var variant: Dictionary = definition.variants[index]
+				texture = _variant_texture(index,variant)
+				size = Vector2(variant.size[0],variant.size[1])
+				tint = Color(variant.tint[0],variant.tint[1],variant.tint[2])
 			var rect: Rect2 = Rect2(point-Vector2(size.x*0.5,size.y),size)
 			if crumb.food_id == "crumbs":
-				texture = Config.frames("food_crumbs_variants").get_frame_texture(&"idle",posmod(int(float(crumb.x)*13.0),5)) # shape picked by position
 				draw_texture_rect(texture,Rect2(rect.position+Vector2(0,1),size),false,Color("754a39"))
-				draw_texture_rect(texture,rect,false,Color(1.18,1.12,1.0))
+				draw_texture_rect(texture,rect,false,tint)
 			else:
 				draw_texture_rect(texture,rect,false)
 			if collector == null or collector.can_collect_food(crumb.food_id):

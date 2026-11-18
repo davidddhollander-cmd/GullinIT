@@ -370,6 +370,8 @@ func _twist_tip() -> void:
 	effects.message(Vector2(camera_x,84.0),str(tip.text),BeachUI.GOLD,float(Config.tuning.juice.tip_time),0.0)
 
 var pigeon_intro_done: bool = false
+var side_tip: String = "" ## shown in the overlay's top-left hint box until side_tip_until
+var side_tip_until: float = 0.0
 
 ## Level 4: the first time a pigeon comes into view, Screeches pops up on the live panel and a side tip explains the dive scare.
 func _pigeon_intro() -> void:
@@ -382,7 +384,8 @@ func _pigeon_intro() -> void:
 			pigeon_intro_done = true
 			var head: Texture2D = TrainerCard.portrait_textures()[int(TrainerCard.MOODS.talking)]
 			overlay.show_rival_popup(str(Config.trainer.name),head,str(intro.line),float(intro.seconds),true)
-			effects.message(Vector2(camera_x + signf(dx) * float(intro.tip_side),float(intro.tip_y)),str(intro.tip),BeachUI.GOLD,float(intro.seconds),0.0)
+			side_tip = str(intro.tip)
+			side_tip_until = elapsed + float(intro.tip_seconds)
 			return
 
 # Shows a released rival's taunt after a delay, never while the score banner is up, below the rival so the tag stays clear.

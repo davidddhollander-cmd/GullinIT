@@ -917,6 +917,8 @@ func input_word(kind: String) -> String:
 func context_hint() -> Dictionary:
 	if game == null or not game.running:
 		return {}
+	if game.elapsed < game.side_tip_until and not (game.player.state == BeachGull.State.STRIKE and game.player.crash_warning()):
+		return {"text":game.side_tip}
 	var peck: String = input_word("peck")
 	var flap: String = input_word("flap")
 	# During lessons the panel already gives the ground and peck instruction;
