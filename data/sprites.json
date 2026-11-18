@@ -2158,6 +2158,12 @@
       }
     }
   },
+  "food_crumbs_variants": {
+    "file": "res://assets/sprites/food-crumbs-variants-v1.png",
+    "frame_w": 275,
+    "frame_h": 216,
+    "animations": {"idle": {"frames": [0, 1, 2, 3, 4], "fps": 1.0, "loop": true}}
+  },
   "food_crumbs": {
     "file": "res://assets/sprites/food_bites.png",
     "frame_w": 275.0,

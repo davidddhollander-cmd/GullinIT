@@ -428,7 +428,14 @@ func _build_rival_popup() -> void:
 	rival_popup_text.custom_minimum_size = Vector2(176,0)
 	rival_popup.hide()
 
-func show_rival_popup(rival_name: String, head: Texture2D, text: String, seconds: float) -> void:
+## speech: use the trainer's speech font (it has commas; GullPixel does not).
+func show_rival_popup(rival_name: String, head: Texture2D, text: String, seconds: float, speech: bool = false) -> void:
+	if speech:
+		rival_popup_text.add_theme_font_override("font",TrainerCard.SPEECH)
+		rival_popup_text.add_theme_font_size_override("font_size",TrainerCard.SPEECH_SIZE)
+	else:
+		rival_popup_text.remove_theme_font_override("font")
+		rival_popup_text.add_theme_font_size_override("font_size",8)
 	rival_popup_head.texture = head
 	rival_popup_name.text = rival_name.to_upper()
 	rival_popup_text.text = text

@@ -46,6 +46,7 @@ func _draw() -> void:
 			var texture: Texture2D = Config.frames(definition.sprite).get_frame_texture(&"idle",0)
 			var rect: Rect2 = Rect2(point-Vector2(size.x*0.5,size.y),size)
 			if crumb.food_id == "crumbs":
+				texture = Config.frames("food_crumbs_variants").get_frame_texture(&"idle",posmod(int(float(crumb.x)*13.0),5)) # shape picked by position
 				draw_texture_rect(texture,Rect2(rect.position+Vector2(0,1),size),false,Color("754a39"))
 				draw_texture_rect(texture,rect,false,Color(1.18,1.12,1.0))
 			else:

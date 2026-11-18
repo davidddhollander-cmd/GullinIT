@@ -369,6 +369,22 @@ func _twist_tip() -> void:
 	GameState.save_progress()
 	effects.message(Vector2(camera_x,84.0),str(tip.text),BeachUI.GOLD,float(Config.tuning.juice.tip_time),0.0)
 
+var pigeon_intro_done: bool = false
+
+## Level 4: the first time a pigeon comes into view, Screeches pops up on the live panel and a side tip explains the dive scare.
+func _pigeon_intro() -> void:
+	var intro: Dictionary = level.feeding.get("intro",{})
+	if pigeon_intro_done or intro.is_empty():
+		return
+	for pigeon: BeachPigeon in feeding.pigeons:
+		var dx: float = pigeon.position.x - camera_x
+		if absf(dx) < float(intro.view):
+			pigeon_intro_done = true
+			var head: Texture2D = TrainerCard.portrait_textures()[int(TrainerCard.MOODS.talking)]
+			overlay.show_rival_popup(str(Config.trainer.name),head,str(intro.line),float(intro.seconds),true)
+			effects.message(Vector2(camera_x + signf(dx) * float(intro.tip_side),float(intro.tip_y)),str(intro.tip),BeachUI.GOLD,float(intro.seconds),0.0)
+			return
+
 # Shows a released rival's taunt after a delay, never while the score banner is up, below the rival so the tag stays clear.
 func _rival_taunt(step: float) -> void:
 	if taunt_wait < 0.0 or pilots.is_empty():
@@ -673,6 +689,7 @@ func _physics_process(delta: float) -> void:
 		teen.z_index = spawner.depth_z(teen.position,2) # mid-lane band, same depth rule as the NPCs
 	if feeding != null:
 		feeding.tick(step)
+		_pigeon_intro()
 	_rival_taunt(step)
 	if player.state != BeachGull.State.STUNNED:
 		player.digestion.tick(step,player.state == BeachGull.State.GROUNDED)
