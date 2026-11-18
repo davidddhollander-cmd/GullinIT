@@ -777,7 +777,7 @@ func _small_label(parent: Control, text: String, color: Color) -> Label:
 	node.add_theme_font_size_override("font_size",6)
 	return node
 
-func pause(skippable: bool = false, replay: String = "", practice: bool = false) -> void:
+func pause(skippable: bool = false, replay: String = "", practice: bool = false, input: GullInput = null) -> void:
 	clear("TAKING A BREATHER", "YOUR LUNCH CAN WAIT.")
 	# A compact box: half the usual menu, 8 px heading, 6 px subtitle and 13 px buttons.
 	var panel: PanelContainer = content.get_parent() as PanelContainer
@@ -803,6 +803,13 @@ func pause(skippable: bool = false, replay: String = "", practice: bool = false)
 			if is_instance_valid(rules):
 				rules.grab_focus()))
 	_small_button(pair,"OPTIONS",func() -> void: choose("options_pause")).size_flags_horizontal = SIZE_EXPAND_FILL
+	if input != null:
+		var controls: Button = _small_button(content,"CONTROLS",func() -> void: pass)
+		controls.name = "ControlsButton"
+		controls.pressed.connect(func() -> void:
+			ControlsCard.open(self,input).closed.connect(func() -> void:
+				if is_instance_valid(controls):
+					controls.grab_focus()))
 	_small_button(content,"PRACTICE MENU" if practice else "LEVEL SELECT",func() -> void: choose("practice" if practice else "select"))
 
 ## Practice hub: the two score cards, then the open-ended session on Scrap Sands with the chosen gull.

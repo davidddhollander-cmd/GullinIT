@@ -210,7 +210,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 				if not lesson_running:
 					if int(game.level.id) == 2 and not game.player.species_stats().get("power",{}).is_empty() and game.level.has("screech_lesson"):
 						replay = "screech_lesson"
-				menus.pause(lesson_running,replay,game.practice)
+				menus.pause(lesson_running,replay,game.practice,game.input)
 				Audio.duck_music(true)
 		"skip_lesson":
 			if is_instance_valid(game):

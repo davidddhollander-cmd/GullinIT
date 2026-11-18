@@ -34,6 +34,16 @@
     "how": "**PECK**: bins, hold to screech.",
     "button": "Got it"
   },
+  "role_toast": {
+    "steer": "MOUSE STEERS",
+    "dive_aim": "KEYS FLY / MOUSE AIMS DIVES"
+  },
+  "controls_card": {
+    "title": "CONTROLS",
+    "rows": [["FLY UP", "{flap}"], ["DIVE", "{dive}"], ["PECK", "{peck}"], ["STEER", "{steer}"]],
+    "mouse_steer": "MOUSE STEERS THE GULL",
+    "mouse_aim": "KEYS FLY / MOUSE AIMS DIVES"
+  },
   "toasts": [
     "Nice one!",
     "Sharp work!",
@@ -208,7 +218,7 @@
   "screech": {
     "strips": [
       "Hold {peck} to screech. Higher is louder",
-      "Brash is full! Screech again or press {call}",
+      "Brash is full! Screech again to use it",
       {
         "default": "Fly up and dive against the dummy",
         "touch": "Fly up and tap DIVE against the dummy"
@@ -232,9 +242,9 @@
           "kittiwake": "Now strike like lightning."
         },
         "how": {
-          "default": "Screech again, or press {call}, to call the gang.",
-          "great-black-backed": "Screech again, or press {call}, to start the Shakedown.",
-          "kittiwake": "Screech again, or press {call}, to strike."
+          "default": "Screech again to call the gang.",
+          "great-black-backed": "Screech again to start the Shakedown.",
+          "kittiwake": "Screech again to strike."
         }
       },
       {

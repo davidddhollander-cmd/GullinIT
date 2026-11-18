@@ -518,8 +518,32 @@ func _score_hop(delta: float, counting: bool) -> void:
 func _exit_tree() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
+const ROLE_TOAST_TIME: float = 1.5
+const ROLE_TOAST_GAP: float = 3.0 ## rapid mouse/key flips never show more often than this
+var role_seen: String = ""
+var role_toast: String = ""
+var role_toast_left: float = 0.0
+var role_toast_cool: float = 0.0
+
+## Says why the mouse changed job (steer <-> dive aim); keyboard and mouse only.
+func tick_role_toast(delta: float) -> void:
+	role_toast_left = maxf(0.0,role_toast_left-delta)
+	if role_toast_left > 0.0:
+		queue_redraw()
+	role_toast_cool = maxf(0.0,role_toast_cool-delta)
+	var role: String = GameState.mouse_role()
+	if role_seen.is_empty() or not game.running or TrainerScript.device(game.input) != "keyboard":
+		role_seen = role
+		return
+	if role != role_seen and role_toast_cool <= 0.0: # held back by the gap: shown later if it still differs
+		role_seen = role
+		role_toast = str(Config.trainer.role_toast[role])
+		role_toast_left = ROLE_TOAST_TIME
+		role_toast_cool = ROLE_TOAST_GAP
+
 func _process(delta: float) -> void:
 	tick_flash()
+	tick_role_toast(delta)
 	var hide_cursor: bool = game.input.enabled and GameState.mouse_role() == "dive_aim" and not game.input.gamepad and not game.input.touch_active and game.input.mouse_fresh()
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN if hide_cursor else Input.MOUSE_MODE_VISIBLE
 	if game.peck_pause or game.aim_pause:
@@ -799,6 +823,12 @@ func _draw() -> void:
 			if danger:
 				draw_rect(hint_box,Color("ef725c"),false,1.0)
 			draw_string(HUD_FONT,hint_box.position+Vector2(3,7),str(hint.text),HORIZONTAL_ALIGNMENT_LEFT,-1,6,Color("ef725c") if danger else BeachUI.CREAM)
+		if role_toast_left > 0.0:
+			var toast_w: float = ceilf(font.get_string_size(role_toast,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x) + 8.0
+			var toast_y: float = (training_panel.get_global_rect().end.y + 2.0 if game.lesson_active() else SCORE_CALLOUT_TOP + 37.0)
+			var toast_box: Rect2 = Rect2(roundf(160.0-toast_w*0.5),roundf(toast_y),toast_w,11.0)
+			draw_rect(toast_box,Color(0.09,0.20,0.26,0.85*minf(1.0,role_toast_left*4.0)))
+			draw_string(font,toast_box.position+Vector2(4,9),role_toast,HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color(BeachUI.CREAM,minf(1.0,role_toast_left*4.0)))
 		if game.player.landing_aim() and game.player.state != BeachGull.State.GROUNDED:
 			var landing_x: float = clampf(aim.x,8,312)
 			draw_line(Vector2(landing_x-6,159),Vector2(landing_x+6,159),BeachUI.CREAM,2)
