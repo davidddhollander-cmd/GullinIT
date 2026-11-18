@@ -17,11 +17,32 @@ func setup(owner_game: BeachGame, actors: Node2D) -> void:
 	lady.setup(cfg,int(game.level.seed)+11)
 	lady.threw.connect(_throw)
 	lady.swatted.connect(_swat)
-	for i: int in int(cfg.flock):
-		var pigeon: BeachPigeon = BeachPigeon.new()
-		actors.add_child(pigeon)
-		pigeon.setup(self,"pigeon_a" if i%2 == 0 else "pigeon_b",lady.position.x+rng.randf_range(-float(cfg.wander),float(cfg.wander)),int(game.level.seed)+17+i)
-		pigeons.append(pigeon)
+	for flock: Dictionary in cfg.flocks:
+		for i: int in int(flock.size):
+			var pigeon: BeachPigeon = BeachPigeon.new()
+			actors.add_child(pigeon)
+			pigeon.setup(self,"pigeon_a" if pigeons.size()%2 == 0 else "pigeon_b",float(flock.x),int(game.level.seed)+17+pigeons.size())
+			pigeons.append(pigeon)
+	for x: float in cfg.seed_crumbs: # crumbs already on the sand at the start; thrown-type, so they never respawn
+		game.scraps.crumbs.append({"x":x,"wait":0.0,"food_id":"crumbs","thrown":true})
+
+## A spot within `wander` of the pigeon's home that keeps `min_gap` from every other pigeon's spot (best of a few tries).
+func free_spot(pigeon: BeachPigeon) -> float:
+	var best: float = pigeon.home
+	var best_gap: float = -1.0
+	for i: int in 8:
+		var x: float = pigeon.home+pigeon.rng.randf_range(-float(cfg.wander),float(cfg.wander))
+		var gap: float = 1e9
+		for other: BeachPigeon in pigeons:
+			if other != pigeon:
+				for at: float in other.spots():
+					gap = minf(gap,absf(at-x))
+		if gap >= float(cfg.min_gap):
+			return x
+		if gap > best_gap:
+			best = x
+			best_gap = gap
+	return best
 
 func tick(step: float) -> void:
 	lady.tick(step,game.player)
@@ -68,13 +89,24 @@ func _check_scatter() -> void:
 	for pigeon: BeachPigeon in pigeons:
 		if pigeon.grounded() and BeachCollisions.segment_hits(gull.previous_beak,gull.sweep_beak,pigeon.position+Vector2(0,-6),Vector2(float(hit[0]),float(hit[1]))):
 			scatter_around(pigeon,gull.position.x)
+			gull.swatted(float(cfg.pigeon_stun),pigeon.position,float(cfg.pigeon_force)) # bump back, scaled by the species' stun multiplier
 			return
 
+## The hit pigeon is bumped and stays; every other grounded pigeon within the scatter radius flies off.
 func scatter_around(hit_pigeon: BeachPigeon, from_x: float) -> void:
+	hit_pigeon.bump(signf(hit_pigeon.position.x-from_x))
+	game.effects.sand_puff(hit_pigeon.position,true)
 	for pigeon: BeachPigeon in pigeons:
-		if pigeon.grounded() and pigeon.position.distance_to(hit_pigeon.position) <= float(cfg.scatter_radius):
+		if pigeon != hit_pigeon and pigeon.grounded() and pigeon.position.distance_to(hit_pigeon.position) <= float(cfg.scatter_radius):
 			game.effects.sand_puff(pigeon.position,true)
 			pigeon.scatter(signf(pigeon.position.x-from_x))
 	game.effects.shout(hit_pigeon.position-Vector2(0,16),"SHOO!",BeachUI.GOLD)
 	Audio.play("click")
 	game._quest_event("pigeons_scattered")
+
+## Shakedown: every grounded pigeon within `radius` of the gull flies off and returns after the normal delay.
+func scare_pigeons(at: float, radius: float) -> void:
+	for pigeon: BeachPigeon in pigeons:
+		if pigeon.grounded() and absf(pigeon.position.x-at) <= radius:
+			game.effects.sand_puff(pigeon.position,true)
+			pigeon.scatter(1.0 if pigeon.position.x >= at else -1.0)

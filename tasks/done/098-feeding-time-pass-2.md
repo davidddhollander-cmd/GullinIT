@@ -1,6 +1,6 @@
 # 098 — Feeding Time pass 2: boardwalk, two flocks, bumps
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 097
@@ -38,7 +38,21 @@ David's playtest notes on level 4 "Feeding Time" (task 097): add more boardwalk 
 - [ ] `tests/feeding_checks.gd` updated and extended for each point above. Headless `tests/integration.tscn` has no new failures.
 
 ## Report
-<!-- Filled in by the implementer. -->
+**Branch** `sonnet/098-feeding-time-pass-2`. **Tests:** headless `tests/integration.tscn`: 18613 checks, 0 failures (baseline 18574). One `SCRIPT ERROR` at `integration.gd:2488` (`food_checks`, level 1 `scraps.crumbs[2]`) appears in the log; unrelated to level 4 and not counted as a failure.
+
+**Files:** `data/levels/level_04.json`, `scripts/feeding_time.gd`, `scripts/pigeon.gd`, `scripts/shakedown.gd` (2 lines in `_scare`), `tests/feeding_checks.gd`.
+
+**Tuning:** world width 1100, `promenade_start` 260, `pier_start` 1100 (boardwalk to the end); zones BEACH 0-260 / CRUMB ROW 260-800 / KIOSK 800-1100. `flocks` 4 at x 380 + 4 at x 720, `min_gap` 9, `wander` 50, lady patrol [300, 800] starting at 450. `seed_crumbs` 14 (340-412 and 690-762), `crumb_cap` 30. `pecks` 3, `peck_time` 0.3, `peck_gap` 0.2. `bump_stun` 1.5, `bump_knock` 5, `pigeon_stun` 0.35, `pigeon_force` 0.3.
+
+**Decisions:**
+- New `BeachPigeon.State.STUNNED` (kept the enum style); `grounded()` excludes it so a stunned pigeon can't be re-hit and isn't scattered by neighbours' bumps. Shakedown's repeating pulse scares it once it recovers.
+- `BeachFeeding.free_spot()` picks a wander/landing x near the pigeon's own home with the min gap (best of 8 tries); `spots()` on the pigeon exposes position/dest/landing x for that.
+- Bump-back uses `gull.swatted(pigeon_stun, pigeon.position, pigeon_force)`, so the species `stun` multiplier applies (black-back 0.245 s, herring 0.35, kittiwake 0.40). No extra carry-drop logic.
+- Shakedown scare radius = `CrowdPanic.settings().panic_radius` (170), the same as dogs/teens, via `BeachFeeding.scare_pigeons()` called from `_scare()` (null-safe on other levels).
+- Peck sprite is one frame, so a peck = head down (`peck_time`), head up (`peck_gap`, idle frame), repeated; the crumb is removed only after the last peck, and a gull pickup mid-peck stops the pigeon.
+- Props re-placed to keep the bench-has-bin and wheelie-near-shed rules; prop-overlap test passes.
+- Test helper `_park_pigeons` now also moves `home` so parked pigeons stay away.
+
 
 ## Review notes
 <!-- Filled in by the reviewer. -->

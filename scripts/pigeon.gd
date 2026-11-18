@@ -1,9 +1,10 @@
 class_name BeachPigeon
 extends Node2D
-## Level 4 pigeon. Loiters near the crumb lady, walks to the nearest unclaimed thrown crumb and eats it.
-## A gull dive scatters it: it flies up and off-screen, waits, then glides back in and lands by the lady.
+## Level 4 pigeon. Loiters around its flock's home, walks to the nearest unclaimed thrown crumb and eats it in a few pecks.
+## A gull dive bumps it (STUNNED crouch, stays put); Shakedown or a bump nearby scatters it: it flies up and off-screen,
+## waits, then glides back in and lands at its home.
 ## In the air (FLEE, AWAY, RETURN) it can neither be mugged nor eat. Tuning is the level's `feeding` block.
-enum State { IDLE, SEEK, PECK, FLEE, AWAY, RETURN, LAND }
+enum State { IDLE, SEEK, PECK, FLEE, AWAY, RETURN, LAND, STUNNED }
 var state: State = State.IDLE
 var cfg: Dictionary
 var feeding: BeachFeeding
@@ -17,14 +18,18 @@ var resting: bool = true
 var crumb: Dictionary = {}
 var vel: Vector2 = Vector2.ZERO
 var landing_x: float = 0.0
+var home: float = 0.0
+var pecks_left: int = 0
+var head_down: bool = true
 
-func setup(owner_feeding: BeachFeeding, art_name: String, x: float, seed_value: int) -> void:
+func setup(owner_feeding: BeachFeeding, art_name: String, home_x: float, seed_value: int) -> void:
 	feeding = owner_feeding
+	home = home_x
 	cfg = feeding.cfg
 	art_id = art_name
 	rng.seed = seed_value
 	var art: Dictionary = Config.sprites[art_id]
-	position = Vector2(x,float(Config.tuning.world.ground))
+	position = Vector2(home_x,float(Config.tuning.world.ground))
 	sprite = AnimatedSprite2D.new()
 	sprite.sprite_frames = Config.frames(art_id)
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -32,6 +37,13 @@ func setup(owner_feeding: BeachFeeding, art_name: String, x: float, seed_value: 
 	sprite.position.y = float(art.sprite_offset_y)
 	add_child(sprite)
 	_idle()
+	position.x = dest # start spread out from the rest of the flock
+
+## x positions other pigeons should keep their distance from: where it is, where it is heading, where it will land.
+func spots() -> Array[float]:
+	if state in [State.AWAY,State.RETURN,State.LAND]:
+		return [landing_x]
+	return [position.x,dest] if state == State.IDLE else [position.x]
 
 func grounded() -> bool:
 	return state in [State.IDLE,State.SEEK,State.PECK,State.LAND]
@@ -40,7 +52,7 @@ func _idle() -> void:
 	state = State.IDLE
 	resting = true
 	timer = rng.randf_range(float(cfg.idle_rest[0]),float(cfg.idle_rest[1]))
-	dest = feeding.lady.position.x+rng.randf_range(-float(cfg.wander),float(cfg.wander))
+	dest = feeding.free_spot(self)
 
 func _play(clip: StringName) -> void:
 	sprite.flip_h = facing < 0.0
@@ -53,11 +65,23 @@ func _walk(to_x: float, speed: float, delta: float) -> bool:
 	position.x = move_toward(position.x,to_x,speed*delta)
 	return is_equal_approx(position.x,to_x)
 
-## Mugged by the gull: fly up and away from it, then stay gone until the return delay is over.
-func scatter(away: float) -> void:
+## Struck by a dive: knocked back a few px, crouches stunned in place, then carries on.
+func bump(away: float) -> void:
+	release_crumb()
+	state = State.STUNNED
+	facing = -away if away != 0.0 else facing
+	position.x = clampf(position.x+away*float(cfg.bump_knock),12.0,float(Config.tuning.world.width)-12.0)
+	timer = float(cfg.bump_stun)
+	_play(&"stunned")
+
+func release_crumb() -> void:
 	if not crumb.is_empty():
 		crumb.erase("claim")
 		crumb = {}
+
+## Mugged by the gull: fly up and away from it, then stay gone until the return delay is over.
+func scatter(away: float) -> void:
+	release_crumb()
 	state = State.FLEE
 	facing = away if away != 0.0 else (1.0 if rng.randf() < 0.5 else -1.0)
 	vel = Vector2(facing*float(cfg.flee_speed[0]),-float(cfg.flee_speed[1]))
@@ -86,16 +110,29 @@ func tick(delta: float) -> void:
 				_play(&"walk")
 				if _walk(float(crumb.x),float(cfg.pigeon_speed),delta):
 					state = State.PECK
+					pecks_left = int(cfg.pecks)
+					head_down = true
 					timer = float(cfg.peck_time)
-		State.PECK:
-			_play(&"peck")
+		State.PECK: # head down for peck_time, head up for peck_gap, `pecks` times; the gull can steal it until the last
+			_play(&"peck" if head_down else &"idle")
 			timer -= delta
 			if bool(crumb.get("gone",false)):
 				crumb = {}
 				_idle()
 			elif timer <= 0.0:
-				crumb.gone = true
-				crumb = {}
+				if head_down:
+					pecks_left -= 1
+					if pecks_left <= 0:
+						crumb.gone = true
+						crumb = {}
+						_idle()
+						return
+				head_down = not head_down
+				timer = float(cfg.peck_time) if head_down else float(cfg.peck_gap)
+		State.STUNNED:
+			_play(&"stunned")
+			timer -= delta
+			if timer <= 0.0:
 				_idle()
 		State.FLEE:
 			_play(&"wingbeat")
@@ -107,7 +144,7 @@ func tick(delta: float) -> void:
 		State.AWAY:
 			timer -= delta
 			if timer <= 0.0:
-				landing_x = feeding.lady.position.x+rng.randf_range(-float(cfg.wander),float(cfg.wander))
+				landing_x = feeding.free_spot(self)
 				var side: float = 1.0 if rng.randf() < 0.5 else -1.0
 				position = Vector2(landing_x+side*float(cfg.return_dx),float(cfg.ceiling))
 				facing = -side

@@ -11,12 +11,14 @@
   "scraps": false,
   "twist": {"id": "feeding_time", "tip": {"id": "pigeons", "text": "MUG THE PIGEONS, NICK THEIR CRUMBS!"}},
   "feeding": {
-    "lady": {"x": 330, "home": [180, 560]},
+    "lady": {"x": 450, "home": [300, 800]},
     "walk_speed": 14, "interval": [8, 10], "release_frame": 3, "hand": [14, -14],
-    "fan": [5, 8], "reach": [15, 50], "crumb_cap": 24, "fly_time": 0.45, "arc": 14,
+    "fan": [5, 8], "reach": [15, 50], "crumb_cap": 30, "fly_time": 0.45, "arc": 14,
     "swat_range": 18, "swat_cooldown": 6, "swat_hit_frame": 3, "swat_stun": 1.0,
-    "flock": 6, "wander": 50, "wander_speed_mult": 0.6, "idle_rest": [0.8, 2.5], "notice": 240,
-    "pigeon_speed": 26, "peck_time": 0.6,
+    "flocks": [{"x": 380, "size": 4}, {"x": 720, "size": 4}], "min_gap": 9, "wander": 50,
+    "seed_crumbs": [340, 352, 364, 376, 388, 400, 412, 690, 702, 714, 726, 738, 750, 762], "wander_speed_mult": 0.6, "idle_rest": [0.8, 2.5], "notice": 240,
+    "pigeon_speed": 26, "pecks": 3, "peck_time": 0.3, "peck_gap": 0.2,
+    "bump_stun": 1.5, "bump_knock": 5, "pigeon_stun": 0.35, "pigeon_force": 0.3,
     "hit": [14, 10], "scatter_radius": 40, "return_delay": 6,
     "flee_speed": [55, 75], "ceiling": -50, "return_dx": 120, "glide_speed": 70, "land_time": 0.3
   },
@@ -26,27 +28,30 @@
   ],
   "stars": [200, 380, 520],
   "rivals": [],
-  "world": {"width": 960, "promenade_start": 960, "pier_start": 960, "start_x": 65, "start_y": 105},
+  "world": {"width": 1100, "promenade_start": 260, "pier_start": 1100, "start_x": 65, "start_y": 105},
   "zones": [
-    {"name": "CRUMB ROW", "from": 0, "to": 560},
-    {"name": "KIOSK", "from": 560, "to": 960}
+    {"name": "BEACH", "from": 0, "to": 260},
+    {"name": "CRUMB ROW", "from": 260, "to": 800},
+    {"name": "KIOSK", "from": 800, "to": 1100}
   ],
   "spawns": [
-    {"type": "sunbather", "x": 240, "appearance": "female_red", "station": "sun_0", "patrol_radius": 0},
-    {"type": "kiosk_customer", "x": 735, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "ice_cream", "patrol_radius": 12}
+    {"type": "sunbather", "x": 200, "appearance": "female_red", "station": "sun_0", "patrol_radius": 0},
+    {"type": "kiosk_customer", "x": 985, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "ice_cream", "patrol_radius": 12}
   ],
   "props": [
     {"type": "beach_palm", "x": 60, "y": 148},
-    {"type": "beach_parasol_blue", "x": 235, "y": 143},
-    {"type": "bin", "x": 150},
-    {"type": "bin", "x": 420},
-    {"type": "beach_lamp", "x": 470, "y": 151},
-    {"type": "bin", "x": 600},
-    {"type": "beach_bench", "x": 560, "y": 153},
-    {"type": "kiosk", "x": 690, "customer_x": 735},
-    {"type": "bin", "x": 820},
-    {"type": "beach_palm", "x": 900, "y": 148},
-    {"type": "wheelie_bin", "x": 650}
+    {"type": "beach_parasol_blue", "x": 205, "y": 143},
+    {"type": "bin", "x": 130},
+    {"type": "bin", "x": 290},
+    {"type": "beach_lamp", "x": 320, "y": 151},
+    {"type": "beach_bench", "x": 520, "y": 153},
+    {"type": "beach_lamp", "x": 585, "y": 151},
+    {"type": "bin", "x": 548},
+    {"type": "wheelie_bin", "x": 895},
+    {"type": "beach_lamp", "x": 860, "y": 151},
+    {"type": "bin", "x": 830},
+    {"type": "kiosk", "x": 940, "customer_x": 985},
+    {"type": "beach_palm", "x": 1060, "y": 148}
   ],
   "map_version": 3
 }

@@ -154,6 +154,8 @@ func _scare() -> void:
 		if is_instance_valid(actor) and is_nan(actor.flee_to) and absf(actor.position.x-at) <= radius:
 			actor.flee_to = clampf(at+(1.0 if actor.position.x >= at else -1.0)*radius*1.5,12.0,float(Config.tuning.world.width)-12.0)
 			scared.append(actor)
+	if game.feeding != null:
+		game.feeding.scare_pigeons(at,radius)
 
 func _shake() -> void:
 	if _knock_around(float(settings().shake_radius)) > 0 and impact_left <= 0.0:
