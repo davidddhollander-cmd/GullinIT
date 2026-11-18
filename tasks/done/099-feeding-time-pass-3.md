@@ -1,6 +1,6 @@
 # 099 — Feeding Time pass 3: pigeon tumble, pigeons bump back, brash, bin pecking (+ food_checks fix)
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 098
@@ -41,7 +41,13 @@ Also fix a long-standing script error in `food_checks`.
 - [ ] `tests/feeding_checks.gd` extended for each point. Headless `tests/integration.tscn` passes with no failures and no SCRIPT ERROR lines.
 
 ## Report
-<!-- Filled in by the implementer. -->
+Branch `sonnet/099-feeding-time-pass-3`.
+- Files: scripts/pigeon.gd (states TUMBLE, AGGRO, BIN_WALK, BIN_PECK; bump(), annoy(), go_home()), scripts/feeding_time.gd (aggro count/trigger, claim_bin, brash on bump), scripts/stash_raids.gd (`peck_bin_as_pigeon` reuses `_peck_bin`), scripts/game.gd (counts thrown crumbs eaten), data/levels/level_04.json, data/tuning.json, tests/feeding_checks.gd, tests/integration.gd.
+- Tests: 18653 checks, 0 failures, no SCRIPT ERROR (baseline 18613). food_checks now runs to the end (about 21 more checks reached); feeding_checks gained about 19.
+- New tuning: level_04 feeding `tumble_speed` 80, `tumble_up` 110, `tumble_gravity` 420, `tumble_spin` 14, `tumble_bounce` 0.35, `tumble_drag` 90, `tumble_gull_scale` 0.4, `aggro_eat` [2,3], `aggro_count` 2, `aggro_notice` 160, `aggro_speed` 75, `aggro_time` 4.0, `aggro_range` 260, `aggro_hit` [14,12], `aggro_stun` 0.6, `aggro_force` 0.5, `bin_chance` 0.4, `bin_range` 120 (from pigeon home), `bin_stand` 10; removed `bump_knock`. tuning.brash `pigeon_bump` 0.5.
+- Decisions: food_checks now starts level 2 (level 1's scrap_max_x leaves no single_chip). pigeon_bump is 0.5, not 0.25: any gull stun costs `brash.stun` (-0.25), so 0.25 netted zero; 0.5 nets +0.25 per bump. Aggro waits (count kept) until a grounded pigeon is within notice, the gull is not stunned and no wave is running. Pigeon bin pecks use `world.bin_pecks` (4) head-down pecks with the crumb peck rhythm; pecks carry over from the gull's own. Pigeon RNG is only drawn for bins when bin_chance > 0 (keeps existing seeded tests stable); tests set bin_chance 0 and eat_goal 99 outside their own checks.
+- Not done: no screenshots or in-game visual tuning (values untested by eye).
+
 
 ## Review notes
 <!-- Filled in by the reviewer. -->

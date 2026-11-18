@@ -1,6 +1,7 @@
 extends RefCounted
 ## Level 4 "Feeding Time": level order, the crumb lady's throw and swat, pigeons eating crumbs, and the mug scatter.
 const DT: float = 1.0 / 20.0
+static var _ok: Callable
 
 static func _fresh(host: Node) -> BeachGame:
 	host.main.start_level(4)
@@ -10,6 +11,8 @@ static func _fresh(host: Node) -> BeachGame:
 	game.intro = 0.0
 	game.player.position = Vector2(800.0,100.0) # well clear of the lady and the flock
 	game.player.state = BeachGull.State.GLIDE
+	game.feeding.eat_goal = 99 # aggro and bin pecking have their own checks below
+	game.feeding.cfg.bin_chance = 0.0
 	return game
 
 static func _step(game: BeachGame, seconds: float) -> void:
@@ -36,6 +39,7 @@ static func _park_pigeons(game: BeachGame) -> void:
 		pigeon.home = 40.0 # idle wandering stays over there too
 
 static func run(host: Node, check: Callable) -> void:
+	_ok = check
 	var ids: Array = Config.levels.map(func(level: Dictionary) -> int: return int(level.id))
 	check.call(Config.levels.size() == 8 and ids == [1,2,3,4,5,6,7,8] and Config.levels[3].name == "Feeding Time" and Config.levels[4].name == "Water Fight" and Config.levels[7].name == "Sunset Showdown","eight levels in order with Feeding Time at 4 and the boss at 8")
 	var level: Dictionary = Config.levels[3]
@@ -204,8 +208,26 @@ static func run(host: Node, check: Callable) -> void:
 	gull.sweep_beak = hit.position+Vector2(0.0,-4.0)
 	var progress: int = game.quests.quests[1].progress
 	feeding._check_scatter()
-	check.call(hit.state == BeachPigeon.State.STUNNED and hit.sprite.animation == &"stunned" and near.state == BeachPigeon.State.FLEE and far.state != BeachPigeon.State.FLEE,"a dive bumps the pigeon into a crouch and scatters its neighbours within 40 px")
-	check.call(absf(hit.position.x-400.0) > 0.0 and absf(hit.position.x-400.0) <= float(cfg.bump_knock)+0.01,"the bump knocks the pigeon back a few px")
+	check.call(hit.state == BeachPigeon.State.TUMBLE and near.state == BeachPigeon.State.FLEE and far.state != BeachPigeon.State.FLEE,"a dive bumps the pigeon into a crouch and scatters its neighbours within 40 px")
+	# The bumped pigeon arcs away, spins, bounces once, slides and crouches.
+	var ground: float = float(Config.tuning.world.ground)
+	var peak: float = ground
+	var spun: bool = false
+	var bounced: bool = false
+	var crouched: bool = false
+	var hittable: bool = false
+	for i: int in int(float(cfg.bump_stun)/DT)+4:
+		hit.tick(DT)
+		peak = minf(peak,hit.position.y)
+		spun = spun or absf(hit.sprite.rotation) > 0.3
+		bounced = bounced or hit.tumble_bounced
+		crouched = crouched or (hit.state == BeachPigeon.State.STUNNED and hit.sprite.animation == &"stunned")
+		hittable = hittable or (hit.grounded() and hit.state != BeachPigeon.State.IDLE)
+	check.call(hit.position.x > 400.0+10.0 and peak < ground-8.0 and spun and crouched and is_zero_approx(hit.sprite.rotation) and is_equal_approx(hit.position.y,ground),"a bumped pigeon arcs away, spins, lands and crouches stunned")
+	check.call(bounced and not hittable,"it bounces on the sand and cannot be mugged or eat while it tumbles")
+	hit.state = BeachPigeon.State.STUNNED # back into the crouch for the rest of the checks
+	hit.timer = float(cfg.bump_stun)
+	hit.position.x = 400.0
 	check.call(gull.state == BeachGull.State.STUNNED and gull.timer > 0.0 and gull.timer <= float(cfg.pigeon_stun)*gull.stun_mult+0.01,"the bump stuns the gull briefly (%.2f s)" % gull.timer)
 	check.call(game.quests.quests[1].progress == progress+1,"a scatter reports pigeons_scattered to the quest")
 	gull.state = BeachGull.State.STRIKE
@@ -327,6 +349,144 @@ static func run(host: Node, check: Callable) -> void:
 		gull.velocity = Vector2.ZERO
 		game._physics_process(1.0/60.0)
 	check.call(throws[0] >= 2 and game.feeding.thrown_on_ground() <= int(cfg.crumb_cap),"the real game loop keeps the lady throwing and the flock eating (%d throws)" % throws[0])
+	_pass3(game)
 	host.main.clear_game()
 	await host.settle()
 
+## Pass 3: brash from bumps, aggro wave, bin pecking. `check` is the harness's; results go through the module-level `_ok`.
+static func _pass3(game: BeachGame) -> void:
+	var feeding: BeachFeeding = game.feeding
+	var cfg: Dictionary = feeding.cfg
+	var gull: BeachGull = game.player
+	var ground: float = float(Config.tuning.world.ground)
+	_reset(game)
+	_park_pigeons(game)
+	gull.state = BeachGull.State.GLIDE
+	gull.invulnerable = 0.0
+	gull.stun_mult = 1.0
+	_ok.call(float(Config.tuning.brash.pigeon_bump) > 0.0 and float(Config.tuning.brash.pigeon_bump) < float(Config.tuning.brash.dog_bump),"pigeon_bump brash is below a dog bump")
+	var pigeon: BeachPigeon = feeding.pigeons[0]
+	pigeon.position = Vector2(400.0,ground)
+	pigeon._idle()
+	gull.state = BeachGull.State.STRIKE
+	gull.position = Vector2(380.0,ground-12.0)
+	gull.previous_beak = pigeon.position+Vector2(-12.0,-14.0)
+	gull.sweep_beak = pigeon.position+Vector2(0.0,-4.0)
+	game.brash.meter = 0.5
+	var meter: float = game.brash.meter
+	feeding._check_scatter()
+	var filled: float = game.brash.meter-meter
+	var fill: Dictionary = game.brash.power().get("fill",{})
+	var expect: float = float(Config.tuning.brash.pigeon_bump)*float(fill.get("pigeon_bump",1.0))+float(Config.tuning.brash.stun)*float(fill.get("stun",1.0)) # the bump also stuns the gull, which costs brash
+	_ok.call(game.brash.power().is_empty() or is_equal_approx(filled,expect),"bumping a pigeon fills the brash meter by pigeon_bump (%.2f)" % filled)
+	_reset(game)
+	pigeon.sprite.rotation = 0.0
+	gull.invulnerable = 0.0
+	gull.state = BeachGull.State.GLIDE
+	gull.position = Vector2(800.0,100.0)
+	# Aggro: eating 2-3 thrown crumbs sends the nearest grounded pigeons (at most aggro_count) at the gull.
+	_park_pigeons(game)
+	for i: int in 3:
+		var p: BeachPigeon = feeding.pigeons[i]
+		p.position = Vector2(740.0+float(i)*8.0,ground)
+		p._idle()
+	feeding.eaten = 0
+	feeding.eat_goal = 2
+	feeding.player_ate_crumb()
+	feeding.tick(DT)
+	_ok.call(not feeding.aggro_active(),"one eaten crumb is not enough to annoy the pigeons")
+	feeding.player_ate_crumb()
+	gull.state = BeachGull.State.STUNNED
+	feeding.tick(DT)
+	_ok.call(not feeding.aggro_active(),"no aggro while the gull is stunned")
+	gull.state = BeachGull.State.GLIDE
+	feeding.tick(DT)
+	var angry: Array = feeding.pigeons.filter(func(p: BeachPigeon) -> bool: return p.state == BeachPigeon.State.AGGRO)
+	_ok.call(angry.size() == int(cfg.aggro_count) and feeding.eaten == 0 and feeding.eat_goal >= int(cfg.aggro_eat[0]) and feeding.eat_goal <= int(cfg.aggro_eat[1]),"the threshold sends %d pigeons into aggro and resets the count" % angry.size())
+	_ok.call(angry[0].sprite.animation == &"wingbeat" and not angry[0].grounded(),"an aggro pigeon is airborne on the wingbeat row")
+	feeding.eaten = 99
+	var before_wave: int = feeding.pigeons.filter(func(p: BeachPigeon) -> bool: return p.state == BeachPigeon.State.AGGRO).size()
+	feeding.tick(DT)
+	_ok.call(feeding.pigeons.filter(func(p: BeachPigeon) -> bool: return p.state == BeachPigeon.State.AGGRO).size() == before_wave,"only one aggro wave at a time")
+	feeding.eaten = 0
+	# It flies at the gull and bumps it, then goes home.
+	gull.position = Vector2(700.0,ground-20.0)
+	gull.velocity = Vector2.ZERO
+	var bumper: BeachPigeon = angry[0]
+	var bumped: bool = false
+	for i: int in int(float(cfg.aggro_time)/DT):
+		feeding.tick(DT)
+		if gull.state == BeachGull.State.STUNNED:
+			bumped = true
+			break
+	_ok.call(bumped and gull.timer <= float(cfg.aggro_stun)*gull.stun_mult+0.01 and gull.timer > 0.0 and bumper.state == BeachPigeon.State.RETURN,"an aggro pigeon bumps the gull (stun %.2f s) and heads home" % gull.timer)
+	var timers: Dictionary = {}
+	for species: String in ["great-black-backed","herring","kittiwake"]:
+		gull.state = BeachGull.State.GLIDE
+		gull.stun_mult = float(Config.species.species[species].stun)
+		gull.invulnerable = 0.0
+		bumper.position = gull.position
+		bumper.annoy()
+		bumper.tick(DT)
+		timers[species] = gull.timer
+	gull.stun_mult = 1.0
+	_ok.call(timers["great-black-backed"] < timers["herring"] and timers["herring"] < timers["kittiwake"],"the pigeon bump is shortest for the black-back and longest for the kittiwake")
+	for i: int in int(20.0/DT):
+		feeding.tick(DT)
+	_ok.call(bumper.grounded() and is_equal_approx(bumper.position.y,ground),"the pigeon lands back at its home after the bump")
+	# Missing: the gull gets away, or the time runs out; the pigeon goes home.
+	gull.state = BeachGull.State.GLIDE
+	gull.invulnerable = 0.0
+	bumper.position = Vector2(740.0,ground)
+	bumper.annoy()
+	gull.position = Vector2(740.0+float(cfg.aggro_range)+60.0,40.0)
+	bumper.tick(DT)
+	_ok.call(bumper.state == BeachPigeon.State.RETURN and gull.state != BeachGull.State.STUNNED,"a pigeon gives up when the gull gets away")
+	bumper.position = Vector2(740.0,ground)
+	bumper.annoy()
+	bumper.timer = 0.0
+	gull.position = Vector2(740.0,ground-100.0)
+	bumper.tick(DT)
+	_ok.call(bumper.state == BeachPigeon.State.RETURN,"aggro times out and the pigeon goes home")
+	# Shakedown cancels aggro: those pigeons scatter instead.
+	gull.position = Vector2(740.0,ground-20.0)
+	bumper.position = Vector2(744.0,ground-30.0)
+	bumper.annoy()
+	feeding.scare_pigeons(gull.position.x,60.0)
+	_ok.call(bumper.state == BeachPigeon.State.FLEE,"Shakedown scatters aggro pigeons instead")
+	for p: BeachPigeon in feeding.pigeons:
+		p.sprite.rotation = 0.0
+		p.position = Vector2(40.0,ground)
+		p._idle()
+	gull.state = BeachGull.State.GLIDE
+	gull.position = Vector2(800.0,100.0)
+	# Bins: a pigeon with no crumbs walks to a nearby ground bin, pecks it open, and the spill is left for the gull.
+	var bin: Dictionary = game.stash_raids.bins.filter(func(b: Dictionary) -> bool: return not b.requires_top_landing and absf(float(b.x)-380.0) <= float(cfg.bin_range))[0]
+	var picker: BeachPigeon = feeding.pigeons[0]
+	var other: BeachPigeon = feeding.pigeons[1]
+	picker.home = 380.0
+	other.home = 380.0
+	picker.position = Vector2(370.0,ground)
+	picker.resting = true
+	picker.timer = 0.0
+	picker.state = BeachPigeon.State.IDLE
+	cfg.bin_chance = 1.0
+	game.scraps.crumbs.clear()
+	var items_before: int = game.stash_raids.items.size()
+	var remaining: int = int(bin.remaining)
+	picker.tick(DT)
+	_ok.call(picker.state == BeachPigeon.State.BIN_WALK and bin.has("pigeon"),"a pigeon with no crumbs claims a nearby ground bin")
+	_ok.call(game.stash_raids.bins.all(func(b: Dictionary) -> bool: return b.has("pigeon") == is_same(b,bin)) and feeding.claim_bin(other).get("x",-1.0) != float(bin.x),"at most one pigeon per bin")
+	_ok.call(feeding.pigeons.all(func(p: BeachPigeon) -> bool: return p.bin.is_empty() or not p.bin.requires_top_landing),"wheelie bins that need a top landing are skipped")
+	var pecks: int = 0
+	var was_peck: bool = false
+	for i: int in int(30.0/DT):
+		picker.tick(DT)
+		var down: bool = picker.state == BeachPigeon.State.BIN_PECK and picker.sprite.animation == &"peck"
+		pecks += 1 if down and not was_peck else 0
+		was_peck = down
+		if int(bin.remaining) < remaining:
+			break
+	_ok.call(int(bin.remaining) < remaining and game.stash_raids.items.size() > items_before and pecks == int(Config.tuning.world.bin_pecks),"the pigeon pecks the bin %d times and the last peck spills it (%d pecks)" % [int(Config.tuning.world.bin_pecks),pecks])
+	_ok.call(not bin.has("pigeon") and picker.state == BeachPigeon.State.IDLE and game.stash_raids.items.size() > items_before,"the pigeon is free again and leaves the spill for the gull")
+	cfg.bin_chance = 0.0

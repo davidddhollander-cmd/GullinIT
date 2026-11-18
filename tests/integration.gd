@@ -2477,7 +2477,7 @@ func food_checks() -> void:
 		check(frame != null and Rect2(Vector2.ZERO,frame.atlas.get_size()).encloses(frame.region),"food artwork is inside atlas: "+id)
 		check(Vector2(definition.size[0],definition.size[1]) == Vector2(definition.pickup_radius[0],definition.pickup_radius[1])*2,"pickup size matches food artwork: "+id)
 	check(categories == {"small":3,"medium":5,"large":4},"all twelve foods including crabs belong to requested categories")
-	main.start_level(1)
+	main.start_level(2) # level 1 keeps only the crumbs near its start (scrap_max_x); level 2 has the full row
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
 	game.intro = 0
@@ -2485,8 +2485,9 @@ func food_checks() -> void:
 	var gull: BeachGull = game.player
 	gull.position.y = gull.ground_y()
 	gull.land()
-	var chip: Dictionary = game.scraps.crumbs[2]
-	check(chip.food_id == "single_chip","ground has single chips alongside crumbs")
+	var chips: Array = game.scraps.crumbs.filter(func(c: Dictionary) -> bool: return c.food_id == "single_chip")
+	check(not chips.is_empty(),"ground has single chips alongside crumbs")
+	var chip: Dictionary = chips[0]
 	gull.position.x = float(chip.x)-gull.facing*float(Config.tuning.dive.beak_offset)
 	game.scraps.tick(0,gull)
 	eat_pending(game)

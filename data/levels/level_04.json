@@ -18,9 +18,12 @@
     "flocks": [{"x": 380, "size": 4}, {"x": 720, "size": 4}], "min_gap": 9, "wander": 50,
     "seed_crumbs": [340, 352, 364, 376, 388, 400, 412, 690, 702, 714, 726, 738, 750, 762], "wander_speed_mult": 0.6, "idle_rest": [0.8, 2.5], "notice": 240,
     "pigeon_speed": 26, "pecks": 3, "peck_time": 0.3, "peck_gap": 0.2,
-    "bump_stun": 1.5, "bump_knock": 5, "pigeon_stun": 0.35, "pigeon_force": 0.3,
+    "bump_stun": 1.5, "pigeon_stun": 0.35, "pigeon_force": 0.3,
     "hit": [14, 10], "scatter_radius": 40, "return_delay": 6,
-    "flee_speed": [55, 75], "ceiling": -50, "return_dx": 120, "glide_speed": 70, "land_time": 0.3
+    "flee_speed": [55, 75], "ceiling": -50, "return_dx": 120, "glide_speed": 70, "land_time": 0.3,
+    "tumble_speed": 80, "tumble_up": 110, "tumble_gravity": 420, "tumble_spin": 14, "tumble_bounce": 0.35, "tumble_drag": 90, "tumble_gull_scale": 0.4,
+    "aggro_eat": [2, 3], "aggro_count": 2, "aggro_notice": 160, "aggro_speed": 75, "aggro_time": 4.0, "aggro_range": 260, "aggro_hit": [14, 12], "aggro_stun": 0.6, "aggro_force": 0.5,
+    "bin_chance": 0.4, "bin_range": 120, "bin_stand": 10
   },
   "quests": [
     {"id": "l4_crumbs", "text": "EAT 8 THROWN CRUMBS", "event": "swallowed", "filter": {"food": "crumbs", "thrown": true}, "count": 8, "bonus": 50},

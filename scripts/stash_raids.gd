@@ -17,6 +17,7 @@ var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var visual_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var peck_cooldown: float = 0.0
 var bins: Array[Dictionary] = []
+var pigeon_facing: float = 0.0 # non-zero while a pigeon is the one pecking
 var shine_clock: float = 0.0
 var actor: BeachGull ## set while a rival pecks, so the player's code path serves any gull
 
@@ -36,6 +37,15 @@ func peck_as(who: BeachGull) -> bool:
 	peck_cooldown = 0.0
 	var ok: bool = peck()
 	actor = null
+	peck_cooldown = saved_cooldown
+	return ok
+
+## A pigeon pecks a bin through the same path as a gull, without touching the player's peck cooldown.
+func peck_bin_as_pigeon(bin: Dictionary, facing: float) -> bool:
+	var saved_cooldown: float = peck_cooldown
+	pigeon_facing = facing
+	var ok: bool = _peck_bin(bin)
+	pigeon_facing = 0.0
 	peck_cooldown = saved_cooldown
 	return ok
 
@@ -222,7 +232,7 @@ func _peck_bin(bin: Dictionary) -> bool:
 	var wheelie: bool = str(bin.type) == BeachBackdrop.WHEELIE_BIN_TYPE
 	game.effects.whisper(content_position-Vector2(0,20),"RATTLE!")
 	game.beach.wobble_bin(float(bin.x),progress,final_hit)
-	game.effects.peck_contact(content_position,Vector2(_gull().facing,-0.35),progress,"bin")
+	game.effects.peck_contact(content_position,Vector2(pigeon_facing if pigeon_facing != 0.0 else _gull().facing,-0.35),progress,"bin")
 	Audio.play("bin_rattle",0.90+0.20*progress)
 	if final_hit:
 		bin.pecks = 0
