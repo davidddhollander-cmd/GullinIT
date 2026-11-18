@@ -1135,6 +1135,8 @@ func _crashed() -> void:
 
 func _scrap_collected(at: Vector2, food_id: String, thrown: bool = false) -> void:
 	player.digestion.collect(food_id,{"scrap":true,"thrown":thrown})
+	if thrown and feeding != null:
+		feeding.player_ate_crumb()
 	player.show_ground_peck(float(Config.tuning.world.pickup_pose_time)) # quick head-down pick-up
 	if training and lesson == 1 and player.state == BeachGull.State.GROUNDED:
 		_training_advance()
