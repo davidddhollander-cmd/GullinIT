@@ -29,12 +29,12 @@
     "shelters": ["beach_hut", "umbrella", "beach_bench"]
   },
   "quests": [
-    {"id": "l7_loot", "text": "LOOT 3 PICNICS", "event": "abandoned_looted", "filter": {}, "count": 3, "bonus": 60},
+    {"id": "l7_loot", "text": "LOOT 2 PICNICS", "event": "abandoned_looted", "filter": {}, "count": 2, "bonus": 60},
     {"id": "l7_umbrella", "text": "SNATCH UNDER AN UMBRELLA", "event": "umbrella_snatch", "filter": {}, "count": 1, "bonus": 60}
   ],
-  "random_quest": {"count": [3, 5], "bonus": 40},
+  "random_quest": {"count": [2, 3], "bonus": 40},
   "random_foods": ["hotdog", "fried_fish", "ice_cream"],
-  "stars": [600, 950, 1250],
+  "stars": [370, 650, 950],
   "rivals": [
     {"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16, "mug_chance": 0.3, "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}},
     {"name": "Chip", "species": "kittiwake", "speed": 1.1, "accuracy_px": 8, "mug_chance": 0.8, "after_snatch": true, "taunt": "CHIP: FINDERS KEEPERS!", "ground": {"scraps": 0.3, "bins": 0.2, "bags": 0.3, "catch": 0.8}}

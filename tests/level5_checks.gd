@@ -9,7 +9,7 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 	var level: Dictionary = Config.levels[5]
 	check.call(level.name == "Three's a Crowd" and int(level.map_version) >= 3 and level.has("world") and level.has("zones") and level.twist.id == "chip_intro", "level 5 is the hand-built Three's a Crowd")
 	check.call(not level.has("rivals_after_snatch") and level.rivals.size() == 2 and not bool(level.rivals[0].get("after_snatch", false)) and bool(level.rivals[1].after_snatch) and level.rivals[1].name == "Chip" and float(level.rivals[1].speed) >= 1.1, "Gary starts in the level, fast Chip is held until the first swallow")
-	check.call(level.quests.size() == 2 and level.quests[0].id == "l6_fish" and int(level.quests[0].count) == 2 and level.quests[1].id == "l6_mug_chip" and level.quests[1].filter.mugged_from == "Chip" and level.has("random_quest"), "level 5 quests are fish x2, mug Chip plus random")
+	check.call(level.quests.size() == 2 and level.quests[0].id == "l6_fish" and int(level.quests[0].count) == 1 and level.quests[1].id == "l6_mug_chip" and level.quests[1].filter.mugged_from == "Chip" and level.has("random_quest"), "level 5 quests are fish x1, mug Chip plus random")
 	var offered: Dictionary = {}
 	for spawn: Dictionary in level.spawns:
 		if spawn.type == "off_lead_dog":

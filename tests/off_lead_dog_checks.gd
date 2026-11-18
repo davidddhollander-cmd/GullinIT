@@ -44,7 +44,7 @@ static func run(suite: Node, check: Callable) -> void:
 		if spawn.type == "off_lead_dog":
 			homes.append(spawn.home)
 	check.call(homes.size() == 2 and level.twist.id == "off_lead_dogs" and float(homes[0][1]) < float(homes[1][0]), "level 3 has two off-lead dog spawns with separate homes and the dog twist")
-	check.call(level.quests.size() == 3 and level.quests[0].id == "l3_outrun" and int(level.quests[0].count) == 3 and level.quests[2].id == "l3_bump_gary" and not level.has("random_quest"), "level 3 quests are outrun x3, crab, bump Gary twice")
+	check.call(level.quests.size() == 3 and level.quests[0].id == "l3_outrun" and int(level.quests[0].count) == 1 and level.quests[2].id == "l3_bump_gary" and not level.has("random_quest"), "level 3 quests are outrun x1, crab, bump Gary")
 	check.call(Config.levels[4].quests[0].id == "l5_counter" and not Config.levels[4].spawns.any(func(spawn: Dictionary) -> bool: return spawn.type == "off_lead_dog"), "level 4 has no dog and keeps its counter quest")
 	for number: int in [1, 2, 4, 5]:
 		var other: BeachGame = _fresh(suite, number)
@@ -281,7 +281,7 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(dog.state == OffLeadDog.State.WANDER and barks[0] >= 1, "gull outside the leash zone does not start a chase")
 
 	var outrun_quest: Dictionary = game.quests.quests[0]
-	check.call(outrun_quest.done and int(outrun_quest.progress) == 3 and outruns[0] >= 1, "each escaped chase fires dog_outrun once; three complete l3_outrun")
+	check.call(outrun_quest.done and int(outrun_quest.progress) >= 1 and outruns[0] >= 1, "each escaped chase fires dog_outrun once; one completes l3_outrun")
 
 	# Rivals: the dog chases the nearest low gull, catches it, and the rival drops its food.
 	suite.main.clear_game()

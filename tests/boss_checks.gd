@@ -102,14 +102,12 @@ static func run(suite: Node, check: Callable) -> void:
 	game.player.state = BeachGull.State.GROUNDED
 	_player_mug(suite, game, bev, -1.0)
 	check.call(bev.carried == 0 and game.score.items >= 1 and game.quests.quests[0].progress == 1, "mugging Bev from behind works")
+	_player_mug(suite, game, bev, -1.0)
+	check.call(game.quests.quests[0].progress == 1 and not game.quests.quests[0].done, "mugging the same rival again does not advance l8_mug_all")
 	# Gary and Chip have no guard; each different rival counts once.
 	_player_mug(suite, game, gary, 1.0)
 	check.call(gary.carried == 0 and game.quests.quests[0].progress == 2, "Gary can be mugged from the front")
-	_player_mug(suite, game, gary, 1.0)
-	_player_mug(suite, game, bev, -1.0)
-	check.call(game.quests.quests[0].progress == 2 and not game.quests.quests[0].done, "mugging the same rival again does not advance l8_mug_all")
-	_player_mug(suite, game, chip, -1.0)
-	check.call(game.quests.quests[0].done and game.quests.quests[0].id == "l8_mug_all", "l8_mug_all completes on the third different rival")
+	check.call(game.quests.quests[0].done and game.quests.quests[0].id == "l8_mug_all", "l8_mug_all completes on the second different rival")
 	# Rival on Bev: same rear-only rule.
 	bev.gull.position = Vector2(500.0, 70.0)
 	bev.gull.facing = 1.0

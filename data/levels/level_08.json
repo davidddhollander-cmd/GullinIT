@@ -11,12 +11,12 @@
   "clouds": [{"id": "plate-02", "x": 40, "y": 18, "scale": 1.0}, {"id": "plate-01", "x": 190, "y": 16, "scale": 1.0}, {"id": "fair-wisp-03", "x": 120, "y": 44, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-01", "x": 150, "y": 38, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-02", "x": 140, "y": 56, "scale": 1.0, "depth": 1.0}, {"id": "plate-04", "x": 260, "y": 62, "scale": 0.5}, {"id": "plate-03", "x": 20, "y": 70, "scale": 1.0}],
   "awareness_mult": 1.4,
   "quests": [
-    {"id": "l8_mug_all", "text": "MUG ALL 3 RIVALS", "event": "rival_mugged_distinct", "filter": {}, "count": 3, "bonus": 80},
+    {"id": "l8_mug_all", "text": "MUG 2 RIVALS", "event": "rival_mugged_distinct", "filter": {}, "count": 2, "bonus": 80},
     {"id": "l8_double", "text": "WIN BY DOUBLE", "event": "boss_double", "filter": {}, "count": 1, "bonus": 100}
   ],
-  "random_quest": {"count": [3, 5], "bonus": 40},
+  "random_quest": {"count": [2, 3], "bonus": 40},
   "random_foods": ["fried_fish", "hotdog", "ice_cream", "crisps_bag"],
-  "stars": [700, 1050, 1400],
+  "stars": [420, 750, 1100],
   "rivals": [
     {"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16, "mug_chance": 0.3, "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}},
     {"name": "Chip", "species": "kittiwake", "speed": 0.8, "accuracy_px": 10, "mug_chance": 0.8, "ground": {"scraps": 0.3, "bins": 0.2, "bags": 0.3, "catch": 0.8}},

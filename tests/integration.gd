@@ -248,7 +248,7 @@ func run() -> void:
 	check(l2.rivals.is_empty() and not l2.has("rivals_after_snatch") and l2.get("twist",{}).get("id","")!="gary_intro" and l2.has("training_dummy") and not Config.levels[0].has("training_dummy"),"level 2 has no Gary: its sparring dummy only teaches the mug lesson")
 	check(l3.twist.id=="off_lead_dogs" and l3.rivals.size()==1 and l3.rivals[0].name=="Gary" and bool(l3.rivals_after_snatch) and bool(l3.rivals[0].loose_only) and l3.rivals[0].has("taunt") and l3.rivals[0].entry=="fly_in","level 3 has the Gary intro")
 	check(float(l3.rivals[0].speed)<float(l4.rivals[0].speed) and float(l3.rivals[0].accuracy_px)>float(l4.rivals[0].accuracy_px) and float(l3.rivals[0].mug_chance)<float(l4.rivals[0].mug_chance),"level 3 Gary is slower, less accurate and mugs less than level 5 Gary")
-	check(l4.twist.id=="watergun_teen_intro" and l4.has("watergun_teens") and not l4.spawns.any(func(spawn: Dictionary) -> bool: return spawn.type=="off_lead_dog") and l4.quests.any(func(q: Dictionary) -> bool: return q.event=="rival_soaked"),"level 5's twist is the water-gun teen, with no dog and a soak quest")
+	check(l4.twist.id=="watergun_teen_intro" and l4.has("watergun_teens") and not l4.spawns.any(func(spawn: Dictionary) -> bool: return spawn.type=="off_lead_dog") and l4.quests.any(func(q: Dictionary) -> bool: return q.event=="mid_air_bite"),"level 5's twist is the water-gun teen, with no dog and a mid-air bite quest")
 	main.start_level(3)
 	main.game.set_physics_process(false)
 	main.game.player.state=BeachGull.State.GLIDE

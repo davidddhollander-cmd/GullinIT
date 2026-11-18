@@ -21,10 +21,10 @@
     "flee_speed": [55, 75], "ceiling": -50, "return_dx": 120, "glide_speed": 70, "land_time": 0.3
   },
   "quests": [
-    {"id": "l4_crumbs", "text": "EAT 15 THROWN CRUMBS", "event": "swallowed", "filter": {"food": "crumbs", "thrown": true}, "count": 15, "bonus": 50},
-    {"id": "l4_scatter", "text": "SCATTER PIGEONS 5 TIMES", "event": "pigeons_scattered", "filter": {}, "count": 5, "bonus": 50}
+    {"id": "l4_crumbs", "text": "EAT 8 THROWN CRUMBS", "event": "swallowed", "filter": {"food": "crumbs", "thrown": true}, "count": 8, "bonus": 50},
+    {"id": "l4_scatter", "text": "SCATTER PIGEONS 3 TIMES", "event": "pigeons_scattered", "filter": {}, "count": 3, "bonus": 50}
   ],
-  "stars": [200, 400, 550],
+  "stars": [200, 380, 520],
   "rivals": [],
   "world": {"width": 960, "promenade_start": 960, "pier_start": 960, "start_x": 65, "start_y": 105},
   "zones": [

@@ -38,7 +38,7 @@ static func run(host: Node, check: Callable) -> void:
 	var ids: Array = Config.levels.map(func(level: Dictionary) -> int: return int(level.id))
 	check.call(Config.levels.size() == 8 and ids == [1,2,3,4,5,6,7,8] and Config.levels[3].name == "Feeding Time" and Config.levels[4].name == "Water Fight" and Config.levels[7].name == "Sunset Showdown","eight levels in order with Feeding Time at 4 and the boss at 8")
 	var level: Dictionary = Config.levels[3]
-	check.call(level.rivals.is_empty() and level.crabs.enabled and not bool(level.scraps) and level.twist.tip.text == "MUG THE PIGEONS, NICK THEIR CRUMBS!" and int(level.stars[0]) == 200 and int(level.time_limit) == 120,"Feeding Time has no rivals, crabs on, no fixed scrap row, its twist tip and 200/400/550 stars")
+	check.call(level.rivals.is_empty() and level.crabs.enabled and not bool(level.scraps) and level.twist.tip.text == "MUG THE PIGEONS, NICK THEIR CRUMBS!" and int(level.stars[0]) == 200 and int(level.time_limit) == 120,"Feeding Time has no rivals, crabs on, no fixed scrap row, its twist tip and a 200 pass mark")
 	var bins: int = level.props.filter(func(p: Dictionary) -> bool: return p.type == "bin").size()
 	check.call(bins >= 3 and bins <= 4 and level.props.any(func(p: Dictionary) -> bool: return p.type == "wheelie_bin"),"Feeding Time has 3-4 bins and a wheelie bin")
 	var game: BeachGame = _fresh(host)
@@ -97,7 +97,7 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(game.scraps.crumbs.size() == count,"eaten thrown crumbs never respawn")
 	gull.state = BeachGull.State.GLIDE
 	gull.position = Vector2(800.0,100.0)
-	check.call(game.quests.quests[0].progress == 1,"eating a thrown crumb counts for EAT 15 THROWN CRUMBS")
+	check.call(game.quests.quests[0].progress == 1,"eating a thrown crumb counts for EAT 8 THROWN CRUMBS")
 
 	# The ground crumb cap is respected.
 	_reset(game)

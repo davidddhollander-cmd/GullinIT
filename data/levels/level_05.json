@@ -10,11 +10,11 @@
   "twist": {"id": "watergun_teen_intro", "tip": {"id": "teen", "text": "WATER GUN TEEN: FLY HIGH, STAY DRY!"}},
   "quests": [
     {"id": "l5_counter", "text": "PULL OFF A COUNTER", "event": "swallowed", "filter": {"handover": true}, "count": 1, "bonus": 50},
-    {"id": "l5_soak", "text": "GET A RIVAL SOAKED", "event": "rival_soaked", "filter": {}, "count": 1, "bonus": 60}
+    {"id": "l5_midair", "text": "2 MID-AIR BITES", "event": "mid_air_bite", "filter": {}, "count": 2, "bonus": 60}
   ],
-  "random_quest": {"count": [3, 5], "bonus": 40},
+  "random_quest": {"count": [2, 3], "bonus": 40},
   "random_foods": ["hotdog", "fried_fish", "ice_cream", "half_eaten_doughnut", "half_eaten_pizza"],
-  "stars": [450, 700, 950],
+  "stars": [260, 500, 720],
   "rivals": [
     {"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16, "mug_chance": 0.3, "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}}
   ],

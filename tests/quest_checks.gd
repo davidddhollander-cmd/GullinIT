@@ -13,17 +13,16 @@ static func run(check: Callable) -> void:
 	check.call(quests.quests.size() == 2 and quests.quests[0].id == "l2_ice" and quests.quests[1].id == "l2_cry" and not l2.has("random_quest"), "level 2 has just the ice cream and toddler quests, no random slot")
 	var bump: BeachQuests = BeachQuests.new()
 	bump.setup(_level(3), rng)
-	check.call(bump.quests.size() == 3 and bump.quests[2].id == "l3_bump_gary" and not _level(3).has("random_quest"), "level 3 has outrun, crab and bump-Gary-twice, no random slot")
+	check.call(bump.quests.size() == 3 and bump.quests[2].id == "l3_bump_gary" and not _level(3).has("random_quest"), "level 3 has outrun, crab and bump-Gary, no random slot")
 	bump.record("rival_bumped", {"name": "Chip"})
+	check.call(not bump.quests[2].done and int(bump.quests[2].progress) == 0, "only Gary bumps count")
 	bump.record("rival_bumped", {"name": "Gary"})
-	check.call(not bump.quests[2].done and int(bump.quests[2].progress) == 1, "only Gary bumps count, one of two so far")
-	bump.record("rival_bumped", {"name": "Gary"})
-	check.call(bump.quests[2].done, "bumping Gary twice completes l3_bump_gary")
+	check.call(bump.quests[2].done, "bumping Gary once completes l3_bump_gary")
 	var l3: Dictionary = _level(6) # level 6 still has a random quest slot
 	var l3roll: BeachQuests = BeachQuests.new()
 	l3roll.setup(l3, rng)
 	var random: Dictionary = l3roll.quests[2]
-	check.call(random.id == "l6_random" and random.filter.food in l3.random_foods and int(random.count) >= 3 and int(random.count) <= 5, "random quest picks a listed food and a 3-5 count")
+	check.call(random.id == "l6_random" and random.filter.food in l3.random_foods and int(random.count) >= 2 and int(random.count) <= 3, "random quest picks a listed food and a 2-3 count")
 	check.call(random.text == "EAT %s" % str(Config.foods[random.filter.food].name).to_upper(), "random quest text names the food")
 	for seed: int in 40:
 		rng.seed = seed

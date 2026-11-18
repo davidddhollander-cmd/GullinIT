@@ -37,8 +37,8 @@ static func run(suite: Node, check: Callable) -> void:
 	_order_and_saves(check)
 	var game: BeachGame = _fresh(suite)
 	var level: Dictionary = game.level
-	check.call(game.squall != null and level.name == "Thunderstorm" and str(level.twist.id) == "squall" and int(level.time_limit) == 150 and int(level.stars[0]) == 600 and int(level.stars[1]) == 950 and int(level.stars[2]) == 1250, "level 7 is Thunderstorm with the squall twist, a 150 s limit and initial 600/950/1250 stars")
-	check.call(level.quests.size() == 2 and level.quests[0].event == "abandoned_looted" and level.quests[0].text == "LOOT 3 PICNICS" and level.quests[1].event == "umbrella_snatch" and level.quests[1].text == "SNATCH UNDER AN UMBRELLA" and level.has("random_quest"), "squall quests: loot 3 picnics, snatch under an umbrella, plus random")
+	check.call(game.squall != null and level.name == "Thunderstorm" and str(level.twist.id) == "squall" and int(level.time_limit) == 150 and int(level.stars[0]) == 370 and int(level.stars[1]) == 650 and int(level.stars[2]) == 950, "level 7 is Thunderstorm with the squall twist, a 150 s limit and 370/650/950 stars")
+	check.call(level.quests.size() == 2 and level.quests[0].event == "abandoned_looted" and level.quests[0].text == "LOOT 2 PICNICS" and level.quests[1].event == "umbrella_snatch" and level.quests[1].text == "SNATCH UNDER AN UMBRELLA" and level.has("random_quest"), "squall quests: loot 2 picnics, snatch under an umbrella, plus random")
 	check.call(game.quests.quests.size() == 3 and game.quests.quests[2].id == "l7_random", "squall rolls its random quest in slot three")
 	var squall: BeachSquall = game.squall
 	var old_man: BeachTarget = _find(game, "kiosk_customer", "old_man")
@@ -86,7 +86,7 @@ static func run(suite: Node, check: Callable) -> void:
 	game.player.digestion.snacks.clear()
 	var looted: int = 0
 	for item: Dictionary in _abandoned(game):
-		if looted >= 3:
+		if looted >= 2:
 			break
 		game.player.digestion.snacks.clear()
 		game.player.digestion.rest = 0.0
@@ -98,10 +98,10 @@ static func run(suite: Node, check: Callable) -> void:
 		if game.stash_raids.items.size() < before:
 			looted += 1
 		check.call(int(game.quests.quests[0].progress) == looted, "loot quest counts abandoned pickup %d" % looted)
-	check.call(looted == 3 and game.quests.quests[0].done, "three looted abandoned foods complete LOOT 3 PICNICS")
+	check.call(looted == 2 and game.quests.quests[0].done, "two looted abandoned foods complete LOOT 2 PICNICS")
 	# Rivals do not feed the loot quest.
 	var progress: int = int(game.quests.quests[0].progress)
-	check.call(not _abandoned(game).is_empty() or progress == 3, "other abandoned food remains for the rivals")
+	check.call(not _abandoned(game).is_empty() or progress == 2, "other abandoned food remains for the rivals")
 	# Clearing: the wind eases, rain stops, people drift back.
 	game.player.state = BeachGull.State.GROUNDED
 	_run_to(game, 48.2)
