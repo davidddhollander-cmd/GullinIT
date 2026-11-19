@@ -17,13 +17,15 @@ var slowmo_ready: bool = false ## set by the game; the touch button only exists 
 var aim_finger: int = NO_FINGER
 var dive_finger: int = NO_FINGER ## finger on the DIVE button (overlay pressed state; blocks re-triggering while held)
 var gamepad: bool = false ## last device used was a pad; prompts show pad buttons
-var key_aim: bool = false ## WASD/arrows steer like a stick until the mouse or a touch takes over
+var key_aim: bool = false ## A/D/S/arrows steer like a stick until the mouse or a touch takes over
 var mouse_pos: Vector2 = Vector2.ZERO ## last mouse position seen in _input (viewport coords)
 var mouse_move_msec: int = -1000000 ## last real mouse motion
 var mouse_dive: bool = false ## the current dive was started with mouse 2
 var _was_diving: bool = false
 const PAD_DEADZONE: float = 0.3 ## stick drift below this never claims the prompts
-const MOUSE_TAKEOVER: float = 2.0 ## mouse motion (px per event) that hands flight back from the keys
+var steer_key_msec: int = -1000000 ## last time a steer key (A/D/S/arrows) was pressed or held
+var _travel_px: float = 0.0 ## mouse travel inside the current takeover window
+var _travel_start_msec: int = 0
 var touch_visible: bool = false
 var enabled: bool = false
 # Touch layout (logical 320x180 coordinates). Left thumb: the FLY ring rests bottom-left and any
@@ -48,7 +50,7 @@ static func on_peck_button(point: Vector2) -> bool:
 	return point.distance_to(PECK_CENTER) <= PECK_RADIUS + TOUCH_SLOP
 
 static func register_actions() -> void:
-	var keys: Dictionary = {"climb":[KEY_SPACE],"dive":[KEY_SHIFT],"pause":[KEY_ESCAPE],"restart":[KEY_R],"slowmo":[KEY_Q],"fullscreen":[KEY_F11],"debug":[KEY_F1],"reload":[KEY_F2],"aim_left":[KEY_A,KEY_LEFT],"aim_right":[KEY_D,KEY_RIGHT],"aim_up":[KEY_W,KEY_UP],"aim_down":[KEY_S,KEY_DOWN]}
+	var keys: Dictionary = {"climb":[KEY_W,KEY_UP],"dive":[KEY_SHIFT],"pause":[KEY_ESCAPE],"restart":[KEY_R],"slowmo":[KEY_Q],"fullscreen":[KEY_F11],"debug":[KEY_F1],"reload":[KEY_F2],"aim_left":[KEY_A,KEY_LEFT],"aim_right":[KEY_D,KEY_RIGHT],"aim_up":[],"aim_down":[KEY_S,KEY_DOWN]}
 	for action: String in keys:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action,0.2)
@@ -98,8 +100,9 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("dive") and not event.is_echo():
 		mouse_dive = event is InputEventMouseButton
 	if enabled and event is InputEventKey and event.pressed and not event.is_echo() and GameState.mouse_role() == "steer":
-		for action: String in ["aim_left","aim_right","aim_up","aim_down"]:
+		for action: String in ["aim_left","aim_right","aim_down"]: # W/Up only flap, they never switch to key flight
 			if event.is_action_pressed(action):
+				steer_key_msec = Time.get_ticks_msec()
 				GameState.key_flight = true ## key steer: the keyboard owns flight until the mouse moves again
 				break
 	# The last device used wins: pad buttons or a real stick push, otherwise keys and mouse.
@@ -110,8 +113,14 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventMouseMotion and not touch_recent():
 		gamepad = false
 		touch_active = false
-		if GameState.key_flight and not _was_diving and event.relative.length() > MOUSE_TAKEOVER and Input.get_vector("aim_left","aim_right","aim_up","aim_down") == Vector2.ZERO:
-			GameState.key_flight = false ## the mouse moved outside a dive with no steer key held: it steers again
+		var now: int = Time.get_ticks_msec()
+		if now-_travel_start_msec > int(float(Config.tuning.input.mouse_takeover_window)*1000.0):
+			_travel_start_msec = now
+			_travel_px = 0.0
+		_travel_px += event.relative.length()
+		if GameState.key_flight and not _was_diving and _travel_px >= float(Config.tuning.input.mouse_takeover_px) and now-steer_key_msec >= int(float(Config.tuning.input.mouse_takeover_idle)*1000.0):
+			GameState.key_flight = false ## a deliberate mouse move, outside a dive, after the steer keys rested: it steers again
+			_travel_px = 0.0
 		if GameState.mouse_role() == "steer":
 			key_aim = false
 	if not enabled:
@@ -184,6 +193,7 @@ func update_player(gull: BeachGull, camera_x: float, camera_y: float = 90.0) -> 
 		_aim_with_touch(gull) ## a thumb on a stick beats stray key, pad or mouse state
 	elif stick.length() > 0.15:
 		key_aim = not gamepad # keys share the aim actions with the pad stick
+		steer_key_msec = Time.get_ticks_msec()
 		_aim_with_stick(gull,stick)
 	elif not gamepad and not touch_active and dive_aim_active(gull):
 		gull.aim = mouse_pos + Vector2(camera_x-160,camera_y-90)

@@ -58,7 +58,11 @@
     "mouse_ignore_after_touch": 0.5
   },
   "input": {
-    "mouse_aim_fresh": 1.5
+    "mouse_aim_fresh": 1.5,
+    "mouse_takeover_px": 48,
+    "mouse_takeover_window": 0.4,
+    "mouse_takeover_idle": 0.75,
+    "role_toast_max": 2
   },
   "control_modes": {
     "realistic_tap_interval": 0.15

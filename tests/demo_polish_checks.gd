@@ -178,7 +178,7 @@ static func _hint_checks(suite: Node, check: Callable) -> void:
 	await suite.settle()
 	_top_bar_checks(overlay,check)
 	var hint: Dictionary = overlay.context_hint()
-	check.call(not hint.is_empty() and "SPACE" in str(hint.text), "grounded hint uses keyboard wording: " + str(hint))
+	check.call(not hint.is_empty() and "W/UP" in str(hint.text), "grounded hint uses keyboard wording: " + str(hint))
 	game.input.touch_visible = true
 	check.call("FLY UP" in str(overlay.context_hint().text), "grounded hint uses touch wording")
 	game.input.touch_visible = false

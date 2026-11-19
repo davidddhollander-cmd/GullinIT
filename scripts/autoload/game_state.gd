@@ -238,7 +238,7 @@ func chosen_gull() -> String:
 	return id if Config.species.species.has(id) and gull_owned(id) else "herring"
 
 ## What the mouse does in flight: "steer" (cursor is the stick) or "dive_aim" (keys steer, the cursor only aims dives).
-## key_flight: WASD took over flight this session (never saved); moving the mouse hands it back.
+## key_flight: A/D/S/arrows took over flight this session (never saved); moving the mouse hands it back.
 func mouse_role() -> String:
 	return "dive_aim" if key_flight or str(options.get("mouse_role","steer")) == "dive_aim" else "steer"
 

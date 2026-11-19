@@ -524,6 +524,7 @@ var role_seen: String = ""
 var role_toast: String = ""
 var role_toast_left: float = 0.0
 var role_toast_cool: float = 0.0
+var role_toast_count: int = 0 ## shown this run; capped by tuning input.role_toast_max
 
 ## Says why the mouse changed job (steer <-> dive aim); keyboard and mouse only.
 func tick_role_toast(delta: float) -> void:
@@ -537,6 +538,9 @@ func tick_role_toast(delta: float) -> void:
 		return
 	if role != role_seen and role_toast_cool <= 0.0: # held back by the gap: shown later if it still differs
 		role_seen = role
+		if role_toast_count >= int(Config.tuning.input.role_toast_max):
+			return
+		role_toast_count += 1
 		role_toast = str(Config.trainer.role_toast[role])
 		role_toast_left = ROLE_TOAST_TIME
 		role_toast_cool = ROLE_TOAST_GAP
@@ -938,7 +942,7 @@ func input_word(kind: String) -> String:
 		return kind.to_upper()
 	match kind:
 		"flap":
-			return "A" if game.input.gamepad else "SPACE"
+			return "A" if game.input.gamepad else "W/UP"
 		"peck":
 			return "X" if game.input.gamepad else "E/MIDDLE CLICK"
 	return kind.to_upper()
