@@ -22,6 +22,14 @@ func apply_level_world(level: Dictionary) -> void:
 	tuning.world.merge(level.get("world",{}),true)
 	tuning.world.beach_max_x = minf(float(tuning.world.width)-20,float(tuning.world.promenade_start)-20)
 	tuning.world.beach_scatter_max_x = minf(float(tuning.world.width)-12,float(tuning.world.promenade_start)-12)
+	if tuning.world.has("beach_start"): # boardwalk first, sand from beach_start to the right edge
+		tuning.world.beach_min_x = float(tuning.world.beach_start)+20
+		tuning.world.beach_max_x = float(tuning.world.width)-20
+		tuning.world.beach_scatter_max_x = float(tuning.world.width)-12
+
+## Sand under x: before the promenade, or past a right-hand beach_start.
+func on_sand(x: float) -> bool:
+	return x < float(tuning.world.promenade_start) or x >= float(tuning.world.get("beach_start",INF))
 
 func _ready() -> void:
 	reload_data()

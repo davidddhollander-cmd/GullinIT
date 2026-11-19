@@ -207,7 +207,7 @@ func wind_tick(delta: float, camera_x: float, gull: BeachGull, camera_y: float =
 		var at := Vector2(camera_x+feather_rng.randf_range(-170.0,170.0),feather_rng.randf_range(14.0+camera_y-90.0,float(Config.tuning.world.ground)-8.0))
 		var life: float = feather_rng.randf_range(0.5,0.9)
 		particles.append({"streak":true,"at":at,"dir":heading,"length":6.0+feather_rng.randf()*8.0+8.0*strength,"v":heading*(70.0+60.0*strength),"gravity":0.0,"life":life,"duration":life,"color":Color(1.0,0.96,0.85,0.32)})
-		if strength >= float(t.wind_sand_min) and at.x < float(Config.tuning.world.promenade_start):
+		if strength >= float(t.wind_sand_min) and Config.on_sand(at.x):
 			var sand_life: float = feather_rng.randf_range(0.35,0.6)
 			var ground: float = float(Config.tuning.world.ground)
 			particles.append({"at":Vector2(at.x,ground-feather_rng.randf_range(0.0,7.0)),"v":Vector2(heading.x*(80.0+50.0*strength),-feather_rng.randf_range(0.0,6.0)),"gravity":0.0,"life":sand_life,"duration":sand_life,"color":Color("d4ad78"),"size":Vector2(2,1),"sand":true})
@@ -270,7 +270,7 @@ func ground_slam(at: Vector2, facing: float) -> void:
 		return
 	var t: Dictionary = Config.tuning.juice
 	var base := Vector2(at.x,float(Config.tuning.world.ground))
-	if base.x < float(Config.tuning.world.promenade_start):
+	if Config.on_sand(base.x):
 		pixelfx("pixelfx_heavy_landing",base,Vector2(facing,0.0),null,float(t.slam_scale))
 		sand_puff(base,true)
 	for side: float in [-1.0,1.0]:
@@ -287,14 +287,14 @@ func swat_hit(at: Vector2, heading: Vector2) -> void:
 func brush_dust(at: Vector2, push_dir: float) -> void:
 	if not bool(Config.tuning.juice.particles):
 		return
-	if at.x < float(Config.tuning.world.promenade_start):
+	if Config.on_sand(at.x):
 		for i: int in 2:
 			var life: float = feather_rng.randf_range(0.22,0.34)
 			particles.append({"at":at+Vector2(push_dir*feather_rng.randf_range(0.0,3.0),-1),"v":Vector2(push_dir*feather_rng.randf_range(14.0,34.0),-feather_rng.randf_range(8.0,22.0)),"life":life,"duration":life,"color":Color("d4ad78"),"size":Vector2(2,1) if i == 0 else Vector2(1,1),"sand":true})
 	wind_stripes(at+Vector2(-push_dir*3.0,-3.0),Vector2(push_dir,0.0),1,8.0,0.0)
 
 func sand_puff(at: Vector2, taking_off: bool = false) -> void:
-	if not bool(Config.tuning.juice.particles) or at.x >= float(Config.tuning.world.promenade_start):
+	if not bool(Config.tuning.juice.particles) or not Config.on_sand(at.x):
 		return
 	for i: int in 5:
 		var side: float = float(i - 2)

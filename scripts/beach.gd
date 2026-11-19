@@ -207,8 +207,9 @@ func _draw() -> void:
 		for x: int in range(0,int(width),320):
 			draw_texture(SHORELINE_ART,Vector2(x,120),tint)
 			draw_texture(SAND_ART,Vector2(x,140),tint)
-	draw_rect(Rect2(promenade,151,pier-promenade,14),Color("c18e68")*tint)
-	for x: int in range(int(promenade),int(pier),16):
+	var walk_end: float = minf(pier,float(world.get("beach_start",pier)))
+	draw_rect(Rect2(promenade,151,walk_end-promenade,14),Color("c18e68")*tint)
+	for x: int in range(int(promenade),int(walk_end),16):
 		draw_line(Vector2(x,151),Vector2(x,165),Color("a57b5c")*tint)
 	draw_rect(Rect2(pier,158,width-pier,5),Color("9b6650")*tint)
 	draw_rect(Rect2(pier,157,width-pier,2),Color("efb984")*tint)

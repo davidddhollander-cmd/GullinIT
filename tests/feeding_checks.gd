@@ -54,7 +54,7 @@ static func run(host: Node, check: Callable) -> void:
 	# More boardwalk, and crumbs on the floor from the start.
 	var world: Dictionary = level.world
 	check.call(float(world.promenade_start) <= 300.0 and float(world.width)-float(world.promenade_start) > float(world.width)*0.7 and level.zones[level.zones.size()-1].to == world.width,"most of Feeding Time is boardwalk (starts at %d of %d)" % [int(world.promenade_start),int(world.width)])
-	check.call(cfg.seed_crumbs.size() >= 12 and cfg.seed_crumbs.size() <= 16 and game.scraps.crumbs.size() == cfg.seed_crumbs.size() and game.scraps.crumbs.all(func(c: Dictionary) -> bool: return c.thrown and c.food_id == "crumbs" and not c.has("fly")) and feeding.thrown_on_ground() == cfg.seed_crumbs.size() and int(cfg.crumb_cap) >= cfg.seed_crumbs.size()+int(cfg.fan[1]),"12-16 thrown-type crumbs are on the ground at the start and count toward the cap")
+	check.call(cfg.seed_crumbs.size() >= 30 and game.scraps.crumbs.size() == cfg.seed_crumbs.size() and game.scraps.crumbs.all(func(c: Dictionary) -> bool: return c.thrown and c.food_id == "crumbs" and not c.has("fly")) and feeding.thrown_on_ground() == cfg.seed_crumbs.size() and int(cfg.crumb_cap) >= cfg.seed_crumbs.size()+int(cfg.fan[1]),"30+ thrown-type crumbs are on the ground at the start and count toward the cap")
 	# Each flock clusters at its own home, with the minimum gap, and the lady's patrol reaches both.
 	var spread_ok: bool = true
 	var gap_ok: bool = true

@@ -23,6 +23,8 @@ static func run(host: Node, check: Callable) -> void:
 	for level: Dictionary in Config.levels:
 		var pop: CrabPopulation = population(host,level)
 		var expected_end: float = minf(float(level.get("world",{}).get("promenade_start",Config.default_world.promenade_start)),float(level.get("world",{}).get("width",Config.default_world.width)))-12.0
+		if level.get("world",{}).has("beach_start"): # right-hand beach
+			expected_end = float(level.world.width)-12.0
 		check.call(is_equal_approx(pop.beach_bounds.y,expected_end),"crab habitat follows level boundary: "+str(level.id))
 		var valid: bool = true
 		var arrivals: int = 0

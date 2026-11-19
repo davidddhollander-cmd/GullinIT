@@ -24,6 +24,8 @@ func setup(level: Dictionary, props: Array, people: BeachSpawner = null) -> void
 	world.merge(level.get("world",{}),true)
 	width = float(world.width)
 	beach_bounds = Vector2(12.0,minf(width,minf(float(world.promenade_start),float(world.pier_start)))-12.0)
+	if world.has("beach_start"):
+		beach_bounds = Vector2(float(world.beach_start)+12.0,width-12.0)
 	random.seed = int(level.seed)+73021
 	wait = float(settings.first_delay)
 

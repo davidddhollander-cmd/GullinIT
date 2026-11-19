@@ -13,16 +13,16 @@
   "feeding": {
     "lady": {"x": 450, "home": [300, 800]},
     "walk_speed": 14, "interval": [8, 10], "release_frame": 3, "hand": [20, -14],
-    "fan": [5, 8], "reach": [15, 50], "crumb_cap": 30, "fly_time": 0.45, "arc": 14,
+    "fan": [5, 8], "reach": [15, 50], "crumb_cap": 48, "fly_time": 0.45, "arc": 14,
     "swat_range": 18, "swat_cooldown": 6, "swat_hit_frame": 3, "swat_stun": 1.0,
     "flocks": [{"x": 380, "size": 6}, {"x": 720, "size": 5}], "min_gap": 9, "wander": 50,
-    "seed_crumbs": [340, 352, 364, 376, 388, 400, 412, 690, 702, 714, 726, 738, 750, 762], "wander_speed_mult": 0.6, "idle_rest": [0.8, 2.5], "notice": 240,
+    "seed_crumbs": [344, 347, 347, 351, 353, 354, 356, 357, 358, 361, 364, 371, 372, 383, 391, 402, 405, 405, 406, 408, 415, 416, 689, 689, 696, 705, 718, 720, 724, 725, 728, 733, 738, 746, 747, 748, 749, 749, 751, 753], "wander_speed_mult": 0.6, "idle_rest": [0.8, 2.5], "notice": 240,
     "pigeon_speed": 26, "pecks": 3, "peck_time": 0.3, "peck_gap": 0.2,
     "bump_stun": 1.5, "pigeon_stun": 0.35, "pigeon_force": 0.3,
     "hit": [14, 10], "scatter_radius": 40, "return_delay": 6,
     "flee_speed": [55, 75], "circle_y": [70, 100], "circle_r": [45, 14], "circle_speed": 2.0, "return_dx": 120, "glide_speed": 70, "land_time": 0.3,
     "tumble_speed": 80, "tumble_up": 110, "tumble_gravity": 420, "tumble_spin": 14, "tumble_bounce": 0.35, "tumble_drag": 90, "tumble_gull_scale": 0.4,
-    "aggro_eat": [2, 3], "aggro_count": 2, "aggro_notice": 160, "aggro_speed": 75, "aggro_time": 4.0, "aggro_range": 260, "aggro_hit": [14, 12], "aggro_stun": 0.6, "aggro_force": 0.5,
+    "aggro_eat": [1, 2], "aggro_count": 3, "aggro_notice": 200, "aggro_speed": 95, "aggro_time": 5.5, "aggro_range": 300, "aggro_hit": [16, 14], "aggro_stun": 0.7, "aggro_force": 0.6,
     "feathers": {"hit": 55, "hit_spread": 2.2, "scare": 6, "size": 0.55, "tint": [0.62, 0.64, 0.7]}, "air_hit": 14,
     "sfx": {"coo_gap": [2.5, 5.5], "coo_db": -8, "scared_db": -2, "takeoff_db": -6},
     "bin_chance": 0.4, "bin_range": 190, "bin_stand": 10,
@@ -34,30 +34,29 @@
   ],
   "stars": [200, 380, 520],
   "rivals": [],
-  "world": {"width": 1100, "promenade_start": 260, "pier_start": 1100, "start_x": 65, "start_y": 105},
+  "world": {"width": 1100, "promenade_start": 0, "beach_start": 840, "pier_start": 1100, "start_x": 30, "start_y": 105},
   "zones": [
-    {"name": "BEACH", "from": 0, "to": 260},
-    {"name": "CRUMB ROW", "from": 260, "to": 800},
-    {"name": "KIOSK", "from": 800, "to": 1100}
+    {"name": "KIOSK", "from": 0, "to": 300},
+    {"name": "CRUMB ROW", "from": 300, "to": 840},
+    {"name": "BEACH", "from": 840, "to": 1100}
   ],
   "spawns": [
-    {"type": "sunbather", "x": 200, "appearance": "female_red", "station": "sun_0", "patrol_radius": 0},
-    {"type": "kiosk_customer", "x": 985, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "ice_cream", "patrol_radius": 12}
+    {"type": "sunbather", "x": 900, "appearance": "female_red", "station": "sun_0", "patrol_radius": 0},
+    {"type": "kiosk_customer", "x": 185, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "ice_cream", "patrol_radius": 12}
   ],
   "props": [
-    {"type": "beach_palm", "x": 60, "y": 148},
-    {"type": "beach_parasol_blue", "x": 205, "y": 143},
-    {"type": "bin", "x": 130},
-    {"type": "bin", "x": 290},
-    {"type": "beach_lamp", "x": 320, "y": 151},
-    {"type": "beach_bench", "x": 520, "y": 153},
-    {"type": "beach_lamp", "x": 585, "y": 151},
-    {"type": "bin", "x": 548},
-    {"type": "wheelie_bin", "x": 895},
-    {"type": "beach_lamp", "x": 860, "y": 151},
-    {"type": "bin", "x": 830},
-    {"type": "kiosk", "x": 940, "customer_x": 985},
-    {"type": "beach_palm", "x": 1060, "y": 148}
+    {"type": "beach_lamp", "x": 60, "y": 151},
+    {"type": "wheelie_bin", "x": 95},
+    {"type": "kiosk", "x": 140, "customer_x": 185},
+    {"type": "bin", "x": 270},
+    {"type": "beach_lamp", "x": 515, "y": 151},
+    {"type": "bin", "x": 552},
+    {"type": "beach_bench", "x": 580, "y": 153},
+    {"type": "beach_lamp", "x": 780, "y": 151},
+    {"type": "bin", "x": 810},
+    {"type": "beach_parasol_blue", "x": 895, "y": 143},
+    {"type": "bin", "x": 970},
+    {"type": "beach_palm", "x": 1040, "y": 148}
   ],
   "map_version": 3
 }

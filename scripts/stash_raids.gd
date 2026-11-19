@@ -338,7 +338,7 @@ func tick(delta: float) -> void:
 					item.rotation = float(item.get("rest_angle",clampf(float(item.get("rotation",0.0)),-0.4,0.4)))
 					item.angular_velocity = 0.0
 		# Sand sources cannot throw food onto the paved promenade; bins already on the promenade or pier spill beside themselves.
-		if item.get("source","") == "bin" and float(item.get("bin_x",0.0)) > float(t.beach_scatter_max_x):
+		if item.get("source","") == "bin" and not Config.on_sand(float(item.get("bin_x",0.0))):
 			item.position.x = clampf(float(item.position.x),float(item.bin_x)-BIN_SPILL_SPREAD,float(item.bin_x)+BIN_SPILL_SPREAD)
 		elif item.get("source","") == "bin" or (item.get("owner") is BeachTarget and item.owner.kind == "sunbather"):
 			item.position.x = clampf(float(item.position.x),float(t.beach_min_x),float(t.beach_scatter_max_x))

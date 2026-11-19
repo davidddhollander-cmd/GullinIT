@@ -1768,7 +1768,7 @@ func stash_raid_checks() -> void:
 		var pier_start: float = float(world.get("pier_start",Config.tuning.world.pier_start))
 		for spawn: Dictionary in definition.spawns:
 			if spawn.type == "sunbather":
-				check(float(spawn.x) < promenade_start,"sunbather level placement remains on sand before promenade")
+				check(float(spawn.x) < promenade_start or float(spawn.x) >= float(world.get("beach_start",INF)),"sunbather level placement remains on sand")
 		for prop: Dictionary in definition.props:
 			if prop.type == "bin":
 				var beside_bench: bool = definition.props.any(func(other: Dictionary) -> bool: return other.type == "beach_bench" and absf(float(other.x)-float(prop.x)) <= 40.0)
