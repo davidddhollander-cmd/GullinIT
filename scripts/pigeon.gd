@@ -24,6 +24,10 @@ var pecks_left: int = 0
 var head_down: bool = true
 var bin: Dictionary = {}
 var tumble_bounced: bool = false
+var circle_center: Vector2 = Vector2.ZERO ## scared: loops low over the beach around this point
+var circle_angle: float = 0.0
+var circle_y: float = 0.0
+var circle_dir: float = 1.0
 
 func setup(owner_feeding: BeachFeeding, art_name: String, home_x: float, seed_value: int) -> void:
 	feeding = owner_feeding
@@ -105,6 +109,7 @@ func scatter(away: float) -> void:
 	facing = away if away != 0.0 else (1.0 if rng.randf() < 0.5 else -1.0)
 	vel = Vector2(facing*float(cfg.flee_speed[0]),-float(cfg.flee_speed[1]))
 	timer = float(cfg.return_delay)
+	circle_y = rng.randf_range(float(cfg.circle_y[0]),float(cfg.circle_y[1]))
 
 func tick(delta: float) -> void:
 	var ground: float = float(Config.tuning.world.ground)
@@ -223,18 +228,26 @@ func tick(delta: float) -> void:
 			_play(&"wingbeat")
 			position += vel*delta
 			timer -= delta
-			if position.y <= float(cfg.ceiling):
+			if position.y <= circle_y: # level off low and start looping instead of leaving the screen
 				state = State.AWAY
-				visible = false
+				var r: Vector2 = Vector2(cfg.circle_r[0],cfg.circle_r[1])
+				circle_angle = PI if facing > 0.0 else 0.0
+				circle_dir = facing
+				var width: float = float(Config.tuning.world.width)
+				circle_center = Vector2(clampf(position.x+facing*r.x,r.x+10.0,width-r.x-10.0),position.y)
 		State.AWAY:
+			_play(&"wingbeat")
 			timer -= delta
+			circle_angle += float(cfg.circle_speed)*delta*circle_dir # loop on upward from where it levelled off
+			var r: Vector2 = Vector2(cfg.circle_r[0],cfg.circle_r[1])
+			var target: Vector2 = circle_center+Vector2(cos(circle_angle)*r.x,sin(circle_angle)*r.y)
+			var to_target: Vector2 = target-position
+			if absf(to_target.x) > 0.3:
+				facing = signf(to_target.x)
+			position = position.move_toward(target,float(cfg.flee_speed[0])*1.6*delta)
 			if timer <= 0.0:
 				landing_x = feeding.free_spot(self)
-				var side: float = 1.0 if rng.randf() < 0.5 else -1.0
-				position = Vector2(landing_x+side*float(cfg.return_dx),float(cfg.ceiling))
-				facing = -side
 				state = State.RETURN
-				visible = true
 		State.RETURN:
 			_play(&"glide")
 			var to_ground: Vector2 = Vector2(landing_x,ground)-position

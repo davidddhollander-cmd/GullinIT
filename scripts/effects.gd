@@ -300,7 +300,8 @@ func sand_puff(at: Vector2, taking_off: bool = false) -> void:
 		var side: float = float(i - 2)
 		particles.append({"at":at + Vector2(side * 2.0, -1),"v":Vector2(side * 10.0, -12.0 - float(i % 2) * 5.0 - (5.0 if taking_off else 0.0)),"life":0.22,"duration":0.22,"color":Color("d4ad78"),"size":Vector2(2,1),"sand":true})
 
-func feather_burst(at: Vector2, impulse: Vector2, amount: int) -> void:
+## tint and size_scale restyle the feathers (pigeons: small and grey).
+func feather_burst(at: Vector2, impulse: Vector2, amount: int, tint: Color = Color.WHITE, size_scale: float = 1.0) -> void:
 	if not bool(Config.tuning.juice.particles):
 		return
 	for i: int in mini(amount,40):
@@ -311,7 +312,7 @@ func feather_burst(at: Vector2, impulse: Vector2, amount: int) -> void:
 			"life":life,"duration":life,"angle":feather_rng.randf_range(-PI,PI),
 			"spin":feather_rng.randf_range(-5,5),"phase":feather_rng.randf_range(0,TAU),
 			"texture":FEATHER_TEXTURES[feather_rng.randi_range(0,FEATHER_TEXTURES.size()-1)],
-			"size":Vector2.ONE*feather_rng.randf_range(5.0,9.0),
+			"size":Vector2.ONE*feather_rng.randf_range(5.0,9.0)*size_scale,"tint":tint,
 		})
 	queue_redraw()
 
@@ -553,7 +554,8 @@ func _draw() -> void:
 			var alpha: float = clampf(float(item.life)/0.4,0.0,1.0)
 			var flutter: float = sin((float(item.duration)-float(item.life))*9.0+float(item.phase))
 			draw_set_transform(item.at,item.angle,Vector2(0.6+absf(flutter)*0.4,1.0))
-			draw_texture_rect(item.texture,Rect2(-item.size*0.5,item.size),false,Color(1,1,1,alpha))
+			var tint: Color = item.get("tint",Color.WHITE)
+			draw_texture_rect(item.texture,Rect2(-item.size*0.5,item.size),false,Color(tint.r,tint.g,tint.b,alpha))
 			draw_set_transform(Vector2.ZERO)
 			continue
 		if item.get("texture_particle",false):

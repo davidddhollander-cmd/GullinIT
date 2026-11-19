@@ -271,7 +271,7 @@ static func run(host: Node, check: Callable) -> void:
 	while t < float(cfg.return_delay)+12.0 and landed_at < 0.0:
 		t += DT
 		_step(game,DT)
-		away = away or (near.state == BeachPigeon.State.AWAY and not near.visible)
+		away = away or near.state == BeachPigeon.State.AWAY
 		if returned_at < 0.0 and near.state == BeachPigeon.State.RETURN:
 			returned_at = t
 		if near.state in [BeachPigeon.State.LAND,BeachPigeon.State.IDLE] and returned_at >= 0.0:

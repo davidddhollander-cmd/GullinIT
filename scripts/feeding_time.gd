@@ -138,17 +138,25 @@ func _check_scatter() -> void:
 func scatter_around(hit_pigeon: BeachPigeon, from_x: float) -> void:
 	hit_pigeon.bump(signf(hit_pigeon.position.x-from_x),game.player.velocity.length())
 	game.effects.sand_puff(hit_pigeon.position,true)
+	feathers(hit_pigeon,game.player.velocity,int(cfg.feathers.hit))
 	for pigeon: BeachPigeon in pigeons:
 		if pigeon != hit_pigeon and pigeon.grounded() and pigeon.position.distance_to(hit_pigeon.position) <= float(cfg.scatter_radius):
 			game.effects.sand_puff(pigeon.position,true)
+			feathers(pigeon,Vector2.ZERO,int(cfg.feathers.scare))
 			pigeon.scatter(signf(pigeon.position.x-from_x))
 	game.effects.shout(hit_pigeon.position-Vector2(0,16),"SHOO!",BeachUI.GOLD)
 	Audio.play("click")
 	game._quest_event("pigeons_scattered")
+
+## Small grey pigeon feathers (level `feeding.feathers`).
+func feathers(pigeon: BeachPigeon, impulse: Vector2, amount: int) -> void:
+	var f: Dictionary = cfg.feathers
+	game.effects.feather_burst(pigeon.position-Vector2(0,6),impulse,amount,Color(f.tint[0],f.tint[1],f.tint[2]),float(f.size))
 
 ## Shakedown: every grounded pigeon within `radius` of the gull flies off and returns after the normal delay.
 func scare_pigeons(at: float, radius: float) -> void:
 	for pigeon: BeachPigeon in pigeons:
 		if (pigeon.grounded() or pigeon.state == BeachPigeon.State.AGGRO) and absf(pigeon.position.x-at) <= radius:
 			game.effects.sand_puff(pigeon.position,true)
+			feathers(pigeon,Vector2.ZERO,int(cfg.feathers.scare))
 			pigeon.scatter(1.0 if pigeon.position.x >= at else -1.0)
