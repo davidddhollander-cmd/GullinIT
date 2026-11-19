@@ -2,7 +2,7 @@
   "id": 6,
   "crabs": {"enabled": true},
   "sweeper": {"enabled": true, "range": [24, 1250]},
-  "thumb": "gull_kittiwake",
+  "thumb": ["thumb_head_herring", "thumb_head_kittiwake", "thumb_head_great_black_backed"],
   "name": "Three's a Crowd",
   "seed": 7105,
   "time_limit": 150,

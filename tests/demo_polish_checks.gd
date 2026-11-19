@@ -78,6 +78,10 @@ static func _demo_lock_checks(suite: Node, check: Callable) -> void:
 	for button: Button in _buttons(suite.main.menus, []):
 		has_four = has_four or button.name == "Level04"
 	check.call(has_four and suite.main.menus.find_child("PagePrev", true, false) != null, "next arrow reaches level 4 and offers a back arrow")
+	var card6: Button = suite.main.menus.find_child("Level06", true, false) as Button
+	var thumb6: Control = card6.find_child("Thumb", true, false) as Control if card6 != null else null
+	check.call(thumb6 != null and thumb6.get_child_count() == 3 and Rect2(Vector2.ZERO, card6.size).encloses(Rect2(thumb6.global_position - card6.global_position, thumb6.size)), "level 6 card shows three gull heads inside the card")
+	check.call(thumb6 != null and thumb6.global_position.y >= card6.global_position.y + 12 and absf(thumb6.global_position.x + thumb6.size.x * 0.5 - card6.global_position.x - card6.size.x * 0.5) < 2.0, "level card thumbnail sits centred below the number row")
 	await suite.snapshot("level-select-page1")
 	suite.main.menus.level_page = 0
 	check.call(not "FEEDBACK" in _captions(suite.main.menus), "no feedback button without a feedback URL")

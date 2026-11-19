@@ -157,7 +157,8 @@ func title() -> void:
 const LEVELS_PER_PAGE: int = 3
 const PAGE_ARROW: Texture2D = preload("res://assets/ui/page-arrow-gold.png")
 const LEVEL_SELECT_HEIGHT: float = 126.0 ## three quarters of the full-screen board
-const LEVEL_CARD_HEAD: float = 22.0 ## number and stars sit above the name
+const LEVEL_CARD_HEAD: float = 34.0 ## number+stars row, then the thumbnail, sit above the name
+const LEVEL_CARD_HEIGHT: float = 64.0 ## number row 8 + thumb 18 + two-line name 18 + status 8 + gaps
 const LOCKED_RED: Color = Color("d12f2f")
 var level_page: int = 0 # kept across rebuilds and across returning from a level
 
@@ -199,12 +200,12 @@ func level_select() -> void:
 		var caption: String = name_lines # number and stars above, the status below, are child nodes
 		var button: Button = BeachUI.button(row,caption,func() -> void: choose("start",id),70)
 		button.name = "Level%02d" % id
-		button.custom_minimum_size = Vector2(70,52)
+		button.custom_minimum_size = Vector2(70,LEVEL_CARD_HEIGHT)
 		button.size_flags_vertical = SIZE_EXPAND_FILL
 		for state: String in ["normal","hover","pressed","focus","disabled"]:
 			var card_box: StyleBoxFlat = theme.get_stylebox(state,"Button").duplicate() as StyleBoxFlat
 			card_box.content_margin_top = LEVEL_CARD_HEAD # the name starts below the number and stars
-			card_box.content_margin_bottom = 10 # the name sits centred between the stars and the status line
+			card_box.content_margin_bottom = 11 # the name sits centred between the thumbnail and the status line
 			button.add_theme_stylebox_override(state,card_box)
 		var head: VBoxContainer = VBoxContainer.new()
 		head.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -212,15 +213,18 @@ func level_select() -> void:
 		head.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 		head.offset_top = 4
 		button.add_child(head)
-		var number: Label = BeachUI.label(head,"%02d" % id,BeachUI.FONT_NATIVE,BeachUI.CREAM)
-		number.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var number_row: HBoxContainer = HBoxContainer.new() # "03 ***" on one centred row
+		number_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		number_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		number_row.add_theme_constant_override("separation",3)
+		head.add_child(number_row)
+		BeachUI.label(number_row,"%02d" % id,BeachUI.FONT_NATIVE,BeachUI.CREAM)
 		var stars: HBoxContainer = HBoxContainer.new()
 		stars.name = "Stars"
 		stars.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		stars.alignment = BoxContainer.ALIGNMENT_CENTER
-		stars.custom_minimum_size.y = 8
+		stars.size_flags_vertical = SIZE_SHRINK_CENTER
 		stars.add_theme_constant_override("separation",1)
-		head.add_child(stars)
+		number_row.add_child(stars)
 		for i: int in int(GameState.entry(id).get("stars",0)):
 			var star: TextureRect = TextureRect.new()
 			star.texture = BeachUI.STAR_ICON
@@ -232,7 +236,7 @@ func level_select() -> void:
 			stars.add_child(star)
 		button.size_flags_horizontal = SIZE_EXPAND_FILL
 		button.disabled = not unlocked
-		_level_thumb(button,str(level.get("thumb","")),unlocked)
+		_level_thumb(head,level.get("thumb",""),unlocked)
 		if not status.is_empty():
 			var status_label: Label = _small_label(button,status,BeachUI.GOLD if id == 1 else BeachUI.CREAM)
 			status_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
@@ -260,37 +264,57 @@ func level_select() -> void:
 	if first_open != null:
 		first_open.grab_focus()
 
-const LEVEL_THUMB_SIZE: float = 18.0 ## icon box in the card's top-left corner, left of the stars
+const LEVEL_THUMB_H: float = 18.0 ## thumbnail row height, between the number row and the name
+const LEVEL_THUMB_W: float = 58.0 ## widest the row of icons may be inside a 70 px card
 
-## Small themed icon from the level's "thumb" ("sprite_id" or "sprite_id:animation"), trimmed to its
-## opaque pixels and fit-scaled with nearest filtering. Unknown or missing ids add nothing.
-func _level_thumb(button: Button, thumb: String, unlocked: bool) -> void:
-	var parts: PackedStringArray = thumb.split(":")
-	if thumb.is_empty() or not Config.sprites.has(parts[0]):
+## Themed icon(s) from the level's "thumb": "sprite_id[:animation]" or an array of them, side by side
+## and centred. Each is trimmed to its opaque pixels; one shared nearest-filter scale keeps relative
+## sizes. Unknown or missing ids are skipped, and no row is added if none load.
+func _level_thumb(head: VBoxContainer, thumb: Variant, unlocked: bool) -> void:
+	var specs: Array = thumb if thumb is Array else [str(thumb)]
+	var images: Array[Image] = []
+	for spec: Variant in specs:
+		var parts: PackedStringArray = str(spec).split(":")
+		if parts[0].is_empty() or not Config.sprites.has(parts[0]):
+			continue
+		var animation: StringName = StringName(parts[1] if parts.size() > 1 else "idle")
+		var frames: SpriteFrames = Config.frames(parts[0])
+		if not frames.has_animation(animation) or frames.get_frame_count(animation) == 0:
+			continue
+		var image: Image = frames.get_frame_texture(animation,0).get_image()
+		if image == null or image.is_empty():
+			continue
+		var used: Rect2i = image.get_used_rect()
+		if used.size.x > 0 and used.size.y > 0:
+			images.append(image.get_region(used))
+	if images.is_empty():
 		return
-	var animation: StringName = StringName(parts[1] if parts.size() > 1 else "idle")
-	var frames: SpriteFrames = Config.frames(parts[0])
-	if not frames.has_animation(animation) or frames.get_frame_count(animation) == 0:
-		return
-	var texture: Texture2D = frames.get_frame_texture(animation,0)
-	var image: Image = texture.get_image()
-	if image == null or image.is_empty():
-		return
-	var used: Rect2i = image.get_used_rect()
-	if used.size.x <= 0 or used.size.y <= 0:
-		return
-	var icon: TextureRect = TextureRect.new()
-	icon.name = "Thumb"
-	icon.texture = ImageTexture.create_from_image(image.get_region(used))
-	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.position = Vector2(3,3)
-	icon.size = Vector2(LEVEL_THUMB_SIZE,LEVEL_THUMB_SIZE)
+	var gap: int = 2
+	var max_h: float = 0.0
+	var sum_w: float = float(gap * (images.size() - 1))
+	for image: Image in images:
+		max_h = maxf(max_h,image.get_height())
+		sum_w += image.get_width()
+	var fit: float = minf(LEVEL_THUMB_H / max_h,(LEVEL_THUMB_W - gap * (images.size() - 1)) / (sum_w - gap * (images.size() - 1)))
+	var row: HBoxContainer = HBoxContainer.new()
+	row.name = "Thumb"
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation",gap)
+	row.custom_minimum_size.y = LEVEL_THUMB_H
 	if not unlocked:
-		icon.modulate = Color(0.25,0.25,0.25,0.6) # locked: a dark silhouette
-	button.add_child(icon)
+		row.modulate = Color(0.25,0.25,0.25,0.6) # locked: dark silhouettes
+	head.add_child(row)
+	for image: Image in images:
+		var icon: TextureRect = TextureRect.new()
+		icon.texture = ImageTexture.create_from_image(image)
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_SCALE
+		icon.size_flags_vertical = SIZE_SHRINK_CENTER
+		icon.custom_minimum_size = Vector2(roundf(image.get_width() * fit),roundf(image.get_height() * fit))
+		row.add_child(icon)
 
 func _page_arrow(row: HBoxContainer, text: String, shown: bool, step: int) -> void:
 	if not shown:

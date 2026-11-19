@@ -5217,5 +5217,8 @@
     }
   },
   "thumb_water_gun": {"file": "res://assets/sprites/level-thumbs/water-gun-thumb-v1.png", "frame_w": 64, "frame_h": 45, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}},
-  "thumb_lightning": {"file": "res://assets/sprites/level-thumbs/lightning-bolt-thumb-v1.png", "frame_w": 42, "frame_h": 64, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}}
+  "thumb_lightning": {"file": "res://assets/sprites/level-thumbs/lightning-bolt-thumb-v1.png", "frame_w": 42, "frame_h": 64, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}},
+  "thumb_head_herring": {"file": "res://assets/sprites/level-thumbs/gull-herring-head-v1.png", "frame_w": 27, "frame_h": 17, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}},
+  "thumb_head_kittiwake": {"file": "res://assets/sprites/level-thumbs/gull-kittiwake-head-v1.png", "frame_w": 21, "frame_h": 14, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}},
+  "thumb_head_great_black_backed": {"file": "res://assets/sprites/level-thumbs/gull-great-black-backed-head-v1.png", "frame_w": 35, "frame_h": 22, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}}
 }
