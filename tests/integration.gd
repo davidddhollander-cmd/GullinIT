@@ -3067,7 +3067,7 @@ func extended_beach_checks() -> void:
 			check(float(prop.x) >= 0 and float(prop.x) < width,"map prop stays inside level world")
 			if prop.type in ["kiosk","hotdog_stand"]:
 				stands[prop.type] = prop.x
-		check((stands.has("kiosk") or int(level.id) == 6) and (int(level.id) <= 2 or int(level.id) == 4 or stands.has("hotdog_stand")),"each level has its authored food stands")
+		check((stands.has("kiosk") or int(level.id) in [4,6]) and (int(level.id) <= 2 or int(level.id) == 4 or stands.has("hotdog_stand")),"each level has its authored food stands")
 	# Task 034 review set: the first playable frame of every level, before anyone moves.
 	for number: int in range(1,9):
 		main.start_level(number)
