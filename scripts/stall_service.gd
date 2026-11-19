@@ -239,6 +239,7 @@ func _intercept(stand: FoodStall, portion: StallPortion, gull: BeachGull) -> voi
 		buyer.reaction.theft(buyer,gull,portion.last_theft_direct)
 		buyer.recover = float(Config.tuning.world.recover_time)
 		buyer.respawn = float(Config.tuning.world.stall_retry_wait)
+		buyer.queue_backup_snack()
 		if buyer.kind == "pier_diner":
 			buyer.diner_meal = BeachTarget.DinerMeal.DINING
 		# Counter interception bypasses BeachTarget._finish_theft, so present the

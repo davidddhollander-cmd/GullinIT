@@ -111,6 +111,7 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(game.score.items==1,"interception scores one item")
 	# Keep the robbed buyer out of later fixtures while the longer preparation runs.
 	shopper.respawn = 100
+	shopper.snack = BeachTarget.Snack.NONE # no backup snack: it would walk back into the later family fixtures
 	# All three appearances and the reverse-facing hotdog stall receive normally.
 	for appearance: String in ShopperArt.APPEARANCES:
 		var buyer := game.spawner.create("kiosk_customer",373,{"food_id":"hotdog","appearance":appearance})

@@ -995,10 +995,17 @@ func claim_dropped(gull: BeachGull) -> bool:
 	_finish_theft(gull,alert >= 1.0 or defense > 0)
 	return true
 
+func _backup_snack_due() -> bool:
+	return kind == "kiosk_customer" and snack == Snack.NONE and backup_left > 0 and not food_id.is_empty() and food_id == preferred_food_id
+
+func queue_backup_snack() -> void:
+	if _backup_snack_due():
+		snack = Snack.PENDING
+
 func _finish_theft(gull: BeachGull, risky: bool) -> void:
 	thefts += 1
 	var snack_stolen: bool = snack in [Snack.REVEAL,Snack.EATING]
-	var queue_snack: bool = kind == "kiosk_customer" and snack == Snack.NONE and backup_left > 0 and not food_id.is_empty() and food_id == preferred_food_id
+	var queue_snack: bool = _backup_snack_due()
 	if kind == "pier_diner":
 		diner_meal = DinerMeal.DINING
 	respawn = rng.randf_range(Config.tuning.world.respawn_min, Config.tuning.world.respawn_max)

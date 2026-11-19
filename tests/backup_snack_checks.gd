@@ -77,6 +77,24 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(_until(game,40.0,func() -> bool: return victim.snack == BeachTarget.Snack.NONE and victim.bench_visit.phase == BenchVisit.Phase.NONE) and not victim.food and victim.food_id == "hotdog","the seated snack ends and the shopper stands up to re-buy")
 	game.queue_free()
 
+	# Counter interception (gull snatches the portion off the stall counter) also queues the backup snack.
+	game = BenchWander.new_game(host,8)
+	victim = game.spawner.create("kiosk_customer",700.0,{"appearance":"shopper_mullet","food_id":"hotdog"})
+	game.stalls.bind(victim)
+	victim.backup_id = "cookie"
+	victim.food = false
+	var portion := StallPortion.new()
+	host.add_child(portion)
+	portion.prepare("hotdog",RandomNumberGenerator.new(),victim)
+	var counter_gull := BeachGull.new()
+	host.add_child(counter_gull)
+	game.stalls._intercept(null,portion,counter_gull)
+	check.call(victim.snack == BeachTarget.Snack.PENDING,"counter interception queues the backup snack")
+	check.call(_until(game,20.0,func() -> bool: return victim.snack == BeachTarget.Snack.EATING) and victim.food and victim.food_id == "cookie","after a counter theft the shopper holds their backup snack instead of re-buying")
+	portion.queue_free()
+	counter_gull.queue_free()
+	game.queue_free()
+
 	# Standing reveal (the old man has no seated art): behind the body at the hip, rising to the hand.
 	game = BenchWander.new_game(host,8)
 	victim = game.spawner.create("kiosk_customer",700.0,{"appearance":"old_man","food_id":"hotdog"})
