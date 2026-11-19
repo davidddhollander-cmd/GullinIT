@@ -3,11 +3,11 @@
   "lesson_button": "Got it",
   "keys": {
     "keyboard": {
-      "flap": "Space/left click",
+      "flap": "W/Up/left click",
       "dive": "Shift/right click",
       "peck": "E/middle click",
       "peck_alt": "E/middle click",
-      "steer": "the mouse/WASD",
+      "steer": "the mouse/A S D",
       "call": "Q"
     },
     "gamepad": {

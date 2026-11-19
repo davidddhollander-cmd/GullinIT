@@ -51,7 +51,10 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(GameState.mouse_role() == "steer", "a gamepad press never changes mouse_role")
 	input.gamepad = false
 	_key(input,KEY_W)
-	check.call(GameState.mouse_role() == "dive_aim", "first WASD press switches to dive_aim")
+	_key(input,KEY_UP)
+	check.call(GameState.mouse_role() == "steer", "W and Up arrow (flap) leave mouse steering alone")
+	_key(input,KEY_A)
+	check.call(GameState.mouse_role() == "dive_aim", "first A/D/S/arrow press switches to dive_aim")
 	GameState.key_flight = false
 	GameState.load_progress()
 	check.call(GameState.mouse_role() == "steer", "a key switch to dive_aim is never saved")
@@ -102,6 +105,14 @@ static func run(host: Node, check: Callable) -> void:
 	var shove := InputEventMouseMotion.new()
 	shove.position = Vector2(120,80)
 	shove.relative = Vector2(6,0)
+	input.steer_key_msec = -1000000
+	input._input(shove)
+	check.call(GameState.key_flight, "a small mouse nudge does not hand flight back")
+	input.steer_key_msec = Time.get_ticks_msec()
+	shove.relative = Vector2(60,0)
+	input._input(shove)
+	check.call(GameState.key_flight, "a long mouse move right after a steer key does not hand flight back")
+	input.steer_key_msec = -1000000
 	input._input(shove)
 	check.call(GameState.mouse_role() == "steer" and not GameState.key_flight, "real mouse motion outside a dive returns the mouse to steering")
 	GameState.key_flight = true

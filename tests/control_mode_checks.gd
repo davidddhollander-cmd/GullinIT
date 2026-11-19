@@ -76,7 +76,7 @@ static func _input(host: Node, check: Callable) -> void:
 	input.enabled = true
 	var gull: BeachGull = _airborne(host, "realistic")
 	var press: InputEventKey = InputEventKey.new()
-	press.physical_keycode = KEY_SPACE
+	press.physical_keycode = KEY_W
 	press.pressed = true
 	input._input(press)
 	check.call(input.flap_tap, "a flap key press latches in _input")
@@ -88,7 +88,12 @@ static func _input(host: Node, check: Callable) -> void:
 	input._input(up_only)
 	var w_key: InputEventKey = InputEventKey.new()
 	w_key.physical_keycode = KEY_W
-	check.call(not input.flap_tap and up_only.is_action("aim_up") and not up_only.is_action("climb") and w_key.is_action("aim_up") and press.is_action("climb"), "Space flaps and Up arrow and W aim up without flapping")
+	check.call(input.flap_tap and up_only.is_action("climb") and not up_only.is_action("aim_up") and w_key.is_action("climb") and not w_key.is_action("aim_up") and press.is_action("climb"), "W and Up arrow flap and no longer aim up")
+	var space: InputEventKey = InputEventKey.new()
+	space.physical_keycode = KEY_SPACE
+	check.call(not space.is_action("climb") and not space.is_action("aim_up") and not space.is_action("aim_down"), "Space is unbound")
+	check.call(GameState.mouse_role() == "steer" and not GameState.key_flight, "flapping with W/Up never switches to key flight")
+	input.flap_tap = false
 	input._input(press)
 	input.update_player(gull, 0.0)
 	check.call(gull.flap_tap_pending and not input.flap_tap, "update_player hands the latched tap to the gull once")
@@ -245,7 +250,6 @@ static func run(suite: Node, check: Callable) -> void:
 	_setting(check)
 	await _picker(suite, check)
 	_input(suite, check)
-	GameState.key_flight = false # the W press above flips it to dive_aim
 	_realistic(suite, check)
 	await _casual(suite, check)
 	_rivals(suite, check)
