@@ -33,6 +33,7 @@ static func run(host: Node, check: Callable) -> void:
 	var got: bool = _until(game,20.0,func() -> bool: return victim.snack == BeachTarget.Snack.EATING)
 	check.call(got and victim.food and victim.food_id == victim.backup_id and victim.backup_left == 0,"after the sulk the shopper holds their backup snack (%s)" % victim.food_id)
 	var seat_used: bool = victim.bench_visit.phase != BenchVisit.Phase.NONE
+	print("BACKUP SNACK bench used: ",seat_used)
 	var finished: bool = _until(game,40.0,func() -> bool: return victim.snack == BeachTarget.Snack.NONE)
 	check.call(finished and not victim.food and victim.food_id == "hotdog" and victim.respawn > 0.0,"the snack runs out after its bites: empty hands, preferred food restored (bench=%s)" % str(seat_used))
 	var rebought: bool = _until(game,60.0,func() -> bool: return victim.food and victim.snack == BeachTarget.Snack.NONE)
@@ -50,6 +51,30 @@ static func run(host: Node, check: Callable) -> void:
 	var stolen_id: String = victim.food_id
 	var thefts: int = victim.thefts
 	check.call(_steal(host,victim) and stolen_id == "cookie" and victim.snack == BeachTarget.Snack.NONE and victim.food_id == "hotdog" and not victim.food and victim.thefts == thefts+1,"a stolen snack restores the preferred food and re-buys normally")
+	game.queue_free()
+
+	# Bench reveal: the shopper sits empty-handed and the snack appears during sit_down.
+	game = BenchWander.new_game(host,8)
+	victim = game.spawner.create("kiosk_customer",700.0,{"appearance":"shopper_mullet","food_id":"hotdog"})
+	game.stalls.bind(victim)
+	for seat: Dictionary in game.spawner.benches.seats:
+		seat.owner = null # free every bench and stand the shopper beside the first
+	var seat_x: float = float(game.spawner.benches.seats[0].ground.x)
+	victim.position = Vector2(seat_x-40.0,float(game.spawner.benches.seats[0].ground.y))
+	victim.routine.bounds = Vector2(20.0,float(Config.tuning.world.width)-20.0)
+	_steal(host,victim)
+	var sat: bool = false
+	var empty_handed: bool = true
+	for i: int in 1500:
+		victim.alert = 0.0 # a calm shopper, so a free seat is taken
+		_step(game,DT)
+		if victim.bench_visit.phase == BenchVisit.Phase.APPROACH or (victim.bench_visit.phase == BenchVisit.Phase.SIT and victim.snack == BeachTarget.Snack.ARRIVING):
+			empty_handed = empty_handed and not victim.food and not victim.food_sprite.visible
+		sat = sat or victim.bench_visit.phase == BenchVisit.Phase.SIT
+		if victim.snack == BeachTarget.Snack.EATING:
+			break
+	check.call(sat and empty_handed and victim.snack == BeachTarget.Snack.EATING and victim.food and victim.food_sprite.visible and victim.bench_visit.anchored() and victim.food_id == victim.backup_id,"bench reveal: sits empty-handed, snack appears while sitting")
+	check.call(_until(game,40.0,func() -> bool: return victim.snack == BeachTarget.Snack.NONE and victim.bench_visit.phase == BenchVisit.Phase.NONE) and not victim.food and victim.food_id == "hotdog","the seated snack ends and the shopper stands up to re-buy")
 	game.queue_free()
 
 	# Standing reveal (the old man has no seated art): behind the body at the hip, rising to the hand.
