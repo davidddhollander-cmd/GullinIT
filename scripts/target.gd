@@ -22,6 +22,7 @@ var snack_timer: float = 0.0
 var snack_bites_left: int = 0
 var food_base_scale: Vector2 = Vector2.ONE
 var dropped_pending: bool = false
+var gives_up_drops: bool = false # set by the spawner for shoppers in real levels (training re-uses the knocked food)
 var dropped_item: Dictionary = {}
 var drop_retrieve: bool = false
 var drop_pickup_time: float = 0.0
@@ -963,6 +964,8 @@ func knock_food(gull: BeachGull, lift: float = 1.0) -> bool:
 	var impulse: Vector2 = gull.velocity.normalized()*float(Config.tuning.world.drop_impulse_side)+Vector2(0,-float(Config.tuning.world.drop_impulse_up)*lift)
 	food_knocked.emit(self,food_id,food_position(),impulse)
 	bench_visit.interrupt(self)
+	if gives_up_drops and not drop_retrieve and not dropped_item.is_empty():
+		give_up_dropped()
 	update_art_pose(false)
 	return true
 
@@ -984,7 +987,29 @@ func recover_dropped() -> void:
 	recover = 0.0
 	update_art_pose(false)
 
-func claim_dropped(gull: BeachGull) -> bool:
+## The shopper will not fetch this food: they sulk and move on (backup snack or re-buy) while it stays on the floor.
+func give_up_dropped() -> void:
+	if dropped_item.get("owner") == self:
+		dropped_item.given_up = true # a stall portion owns its own item and scores it through its own theft path
+	dropped_item = {}
+	dropped_pending = false
+	drop_retrieve = false
+	_sulk_stroll()
+	queue_backup_snack()
+
+func claim_dropped(gull: BeachGull, item: Dictionary = {}) -> bool:
+	if bool(item.get("given_up",false)):
+		# Score the floor item's own food; the shopper's current snack/re-buy state is left alone.
+		if not gull.can_collect_food(str(item.food_id)):
+			return false
+		var held: String = food_id
+		food_id = str(item.food_id)
+		thefts += 1
+		last_theft_direct = false
+		last_theft_handover = false
+		snatched.emit(self,gull,alert >= 1.0 or defense > 0)
+		food_id = held
+		return true
 	if not dropped_pending or not gull.can_collect_food(food_id):
 		return false
 	dropped_pending = false
@@ -1002,13 +1027,7 @@ func queue_backup_snack() -> void:
 	if _backup_snack_due():
 		snack = Snack.PENDING
 
-func _finish_theft(gull: BeachGull, risky: bool) -> void:
-	thefts += 1
-	var snack_stolen: bool = snack in [Snack.REVEAL,Snack.EATING]
-	var queue_snack: bool = _backup_snack_due()
-	if kind == "pier_diner":
-		diner_meal = DinerMeal.DINING
-	respawn = rng.randf_range(Config.tuning.world.respawn_min, Config.tuning.world.respawn_max)
+func _sulk_stroll() -> void:
 	if kind in ["kiosk_customer","pier_diner"]:
 		# Sulk (the reaction), then stroll away from the stall before queueing again.
 		respawn = rng.randf_range(float(Config.tuning.world.theft_wander_min), float(Config.tuning.world.theft_wander_max))
@@ -1018,6 +1037,15 @@ func _finish_theft(gull: BeachGull, risky: bool) -> void:
 			# Rivals refuse food at the world edge; keep the sulk-stroll inside their reach.
 			var margin: float = float(Config.tuning.rival.edge_margin)+10.0
 			routine.destination = clampf(routine.destination,margin,float(Config.tuning.world.width)-margin)
+
+func _finish_theft(gull: BeachGull, risky: bool) -> void:
+	thefts += 1
+	var snack_stolen: bool = snack in [Snack.REVEAL,Snack.EATING]
+	var queue_snack: bool = _backup_snack_due()
+	if kind == "pier_diner":
+		diner_meal = DinerMeal.DINING
+	respawn = rng.randf_range(Config.tuning.world.respawn_min, Config.tuning.world.respawn_max)
+	_sulk_stroll()
 	recover = Config.tuning.world.recover_time
 	alert = 1.0
 	var stolen_purchase_serial: int = purchase_trip_serial

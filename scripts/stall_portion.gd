@@ -44,6 +44,8 @@ func track_dropped(item: Dictionary) -> void:
 		recipient.dropped_item = item
 		recipient.drop_retrieve = drop_retrieve
 		recipient.drop_pickup_time = 0.0
+		if recipient.gives_up_drops and not drop_retrieve:
+			recipient.give_up_dropped()
 
 func _draw() -> void:
 	if not food:

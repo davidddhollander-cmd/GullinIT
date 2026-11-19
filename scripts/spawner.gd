@@ -89,6 +89,7 @@ func create(kind: String, x: float, spawn: Dictionary = {}) -> BeachTarget:
 	target.routine.setup(target,level,spawn)
 	target.bench_visit.registry = benches
 	target.bench_visit.enabled = int(level.id) > 2 and kind == "kiosk_customer"
+	target.gives_up_drops = int(level.id) > 2 and kind == "kiosk_customer"
 	if int(level.id) <= 2:
 		target.backup_left = 0 # training shoppers must always be restored to their lesson food
 	if kind == "sunbather":

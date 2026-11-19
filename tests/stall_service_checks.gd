@@ -254,7 +254,7 @@ static func boundary_checks(host: Node, check: Callable) -> void:
 				check.call(game.score.points==25 and game.score.bonuses.Handover==0,"handover modifier expires exactly with the exposed item")
 			"ground":
 				portion.knock_food(player)
-				check.call(portion.dropped_pending and buyer.dropped_pending and game.stalls.requests.is_empty(),"knockdown cancels receipt and links normal dropped-food recovery")
+				check.call(portion.dropped_pending and buyer.dropped_pending == (portion.drop_retrieve or not buyer.gives_up_drops) and game.stalls.requests.is_empty(),"knockdown cancels receipt and links normal dropped-food recovery")
 				player.state = BeachGull.State.GROUNDED
 				player.position = Vector2(220,150)
 				portion.dropped_item.position = player.beak()

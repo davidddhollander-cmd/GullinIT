@@ -114,4 +114,39 @@ static func run(host: Node, check: Callable) -> void:
 	var done: bool = _until(game,30.0,func() -> bool: return victim.snack == BeachTarget.Snack.NONE)
 	check.call(done and not victim.food and victim.food_id == "hotdog","standing snack is finished after its bites")
 	game.queue_free()
+	# A knocked food the shopper will not fetch (ice cream): they give it up, move on to the snack, and the floor item still scores.
+	game = BenchWander.new_game(host,8)
+	victim = game.spawner.create("kiosk_customer",700.0,{"appearance":"shopper_mullet","food_id":"ice_cream"})
+	game.stalls.bind(victim)
+	victim.backup_id = "cookie"
+	var player: BeachGull = game.player
+	check.call(victim.knock_food(player) and not victim.drop_retrieve and not victim.dropped_pending,"an unretrievable knocked food is given up at once")
+	check.call(game.stash_raids.items.size() == 1 and bool(game.stash_raids.items[0].get("given_up",false)),"the given-up food stays on the floor")
+	check.call(victim.snack == BeachTarget.Snack.PENDING and victim.food_id == "ice_cream","the given-up shopper queues the backup snack")
+	check.call(_until(game,30.0,func() -> bool: return victim.snack == BeachTarget.Snack.EATING) and victim.food_id == "cookie","a shopper whose ice cream was knocked down is not stuck: they hold the backup snack")
+	var loose: Dictionary = game.stash_raids.items[0]
+	loose.grounded = true
+	loose.age = 5.0
+	loose.velocity = Vector2.ZERO
+	player.state = BeachGull.State.GROUNDED
+	player.position = Vector2(loose.position.x,float(loose.position.y)+8.0)
+	loose.position = player.beak()
+	player.previous_beak = player.beak()
+	player.sweep_beak = player.beak()
+	var thefts_before: int = victim.thefts
+	game.stash_raids.tick(0.01)
+	check.call(game.stash_raids.items.is_empty() and player.digestion.snacks.size() == 1 and str(player.digestion.snacks[0].id) == "ice_cream","eating the given-up floor item scores the ice cream, not the shopper's snack")
+	check.call(victim.thefts == thefts_before+1 and victim.snack == BeachTarget.Snack.EATING and victim.food_id == "cookie" and victim.food,"the floor eat leaves the shopper's snack untouched")
+	game.queue_free()
+
+	# With the backup snack used up, an abandoned knocked food sends the shopper back to the stall.
+	game = BenchWander.new_game(host,8)
+	victim = game.spawner.create("kiosk_customer",700.0,{"appearance":"shopper_mullet","food_id":"ice_cream"})
+	game.stalls.bind(victim)
+	victim.backup_left = 0
+	victim.knock_food(game.player)
+	check.call(victim.snack == BeachTarget.Snack.NONE and not victim.dropped_pending and victim.respawn > 0.0,"no backup left: the shopper just gives up and strolls")
+	var rebuying: bool = _until(game,80.0,func() -> bool: return victim.food and victim.food_id == "ice_cream" and not victim.dropped_pending)
+	check.call(rebuying,"the shopper then re-buys at the stall")
+	game.queue_free()
 	Config.tuning.juice.audio = previous_audio

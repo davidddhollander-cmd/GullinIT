@@ -225,7 +225,7 @@ static func _panic_and_shake_checks(host: Node, check: Callable) -> void:
 	player.position = holder.food_position()+Vector2(4,-3)
 	player.state = BeachGull.State.GLIDE
 	sim(game,0.02)
-	check.call(not holder.food and holder.dropped_pending and bystander.food,"touching a person makes their food drop, and only theirs")
+	check.call(not holder.food and holder.dropped_pending == (holder.drop_retrieve or not holder.gives_up_drops) and bystander.food,"touching a person makes their food drop, and only theirs")
 	check.call(game.stash_raids.items.any(func(item: Dictionary) -> bool: return item.owner == holder and item.food_id == "hotdog"),"the dropped food is a loose ground item")
 	# Rivals with food drop it too.
 	game.pending_rivals = [{"name":"TESTER","speed":1.0}]

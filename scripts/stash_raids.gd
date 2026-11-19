@@ -358,7 +358,7 @@ func tick(delta: float) -> void:
 					break
 		if taker != null:
 			if item.get("source","") == "near_miss":
-				if is_instance_valid(item.owner) and item.owner.claim_dropped(taker):
+				if is_instance_valid(item.owner) and item.owner.claim_dropped(taker,item):
 					items.remove_at(index)
 				continue
 			items.remove_at(index)
