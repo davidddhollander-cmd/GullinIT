@@ -92,7 +92,7 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 		check.call(int(level.world.promenade_start)==int(level.world.width) and int(level.world.pier_start)==int(level.world.width),"family beach remains all sand")
 		check.call(level.rivals.is_empty() and not bool(level.get("rivals_after_snatch",false)) and level.has("training_dummy"),"family beach has no Gary, only the sparring dummy for the lesson")
 	elif number == 4:
-		check.call(types==["sunbather","kiosk_customer"] and level.rivals.is_empty(),"feeding time keeps its light authored roster")
+		check.call(types==["sunbather"] and level.rivals.is_empty(),"feeding time keeps its light authored roster")
 	elif number == 5:
 		check.call(types==["sunbather","sunbather","sunbather","kiosk_customer","kiosk_customer"],"water fight is a sunbathers strip with two shoppers and no dog")
 		check.call(stand_count==2 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1 and level.watergun_teens.size()==1,"water fight keeps both stands, Gary from the start and the teen")

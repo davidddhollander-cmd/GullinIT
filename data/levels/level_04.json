@@ -37,18 +37,16 @@
   "rivals": [],
   "world": {"width": 1100, "promenade_start": 0, "beach_start": 840, "pier_start": 1100, "start_x": 30, "start_y": 105},
   "zones": [
-    {"name": "KIOSK", "from": 0, "to": 300},
+    {"name": "BOARDWALK", "from": 0, "to": 300},
     {"name": "CRUMB ROW", "from": 300, "to": 840},
     {"name": "BEACH", "from": 840, "to": 1100}
   ],
   "spawns": [
-    {"type": "sunbather", "x": 900, "appearance": "female_red", "station": "sun_0", "patrol_radius": 0},
-    {"type": "kiosk_customer", "x": 185, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "ice_cream", "patrol_radius": 12}
+    {"type": "sunbather", "x": 900, "appearance": "female_red", "station": "sun_0", "patrol_radius": 0}
   ],
   "props": [
     {"type": "beach_lamp", "x": 60, "y": 151},
     {"type": "wheelie_bin", "x": 95},
-    {"type": "kiosk", "x": 140, "customer_x": 185},
     {"type": "bin", "x": 270},
     {"type": "beach_lamp", "x": 515, "y": 151},
     {"type": "bin", "x": 552},
