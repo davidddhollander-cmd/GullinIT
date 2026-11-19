@@ -1,6 +1,7 @@
 {
   "id": 3,
   "crabs": {"enabled": true},
+  "thumb": "gull_great_black_backed",
   "name": "Boardwalk Bustle",
   "seed": 7113,
   "time_limit": 135,

@@ -232,6 +232,7 @@ func level_select() -> void:
 			stars.add_child(star)
 		button.size_flags_horizontal = SIZE_EXPAND_FILL
 		button.disabled = not unlocked
+		_level_thumb(button,str(level.get("thumb","")),unlocked)
 		if not status.is_empty():
 			var status_label: Label = _small_label(button,status,BeachUI.GOLD if id == 1 else BeachUI.CREAM)
 			status_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
@@ -258,6 +259,38 @@ func level_select() -> void:
 	actions.alignment = BoxContainer.ALIGNMENT_CENTER # level select: the buttons hug their text
 	if first_open != null:
 		first_open.grab_focus()
+
+const LEVEL_THUMB_SIZE: float = 18.0 ## icon box in the card's top-left corner, left of the stars
+
+## Small themed icon from the level's "thumb" ("sprite_id" or "sprite_id:animation"), trimmed to its
+## opaque pixels and fit-scaled with nearest filtering. Unknown or missing ids add nothing.
+func _level_thumb(button: Button, thumb: String, unlocked: bool) -> void:
+	var parts: PackedStringArray = thumb.split(":")
+	if thumb.is_empty() or not Config.sprites.has(parts[0]):
+		return
+	var animation: StringName = StringName(parts[1] if parts.size() > 1 else "idle")
+	var frames: SpriteFrames = Config.frames(parts[0])
+	if not frames.has_animation(animation) or frames.get_frame_count(animation) == 0:
+		return
+	var texture: Texture2D = frames.get_frame_texture(animation,0)
+	var image: Image = texture.get_image()
+	if image == null or image.is_empty():
+		return
+	var used: Rect2i = image.get_used_rect()
+	if used.size.x <= 0 or used.size.y <= 0:
+		return
+	var icon: TextureRect = TextureRect.new()
+	icon.name = "Thumb"
+	icon.texture = ImageTexture.create_from_image(image.get_region(used))
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.position = Vector2(3,3)
+	icon.size = Vector2(LEVEL_THUMB_SIZE,LEVEL_THUMB_SIZE)
+	if not unlocked:
+		icon.modulate = Color(0.25,0.25,0.25,0.6) # locked: a dark silhouette
+	button.add_child(icon)
 
 func _page_arrow(row: HBoxContainer, text: String, shown: bool, step: int) -> void:
 	if not shown:

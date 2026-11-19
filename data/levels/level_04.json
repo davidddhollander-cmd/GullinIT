@@ -1,6 +1,7 @@
 {
   "id": 4,
   "crabs": {"enabled": true},
+  "thumb": "pigeon_b",
   "name": "Feeding Time",
   "seed": 7114,
   "authored": true,

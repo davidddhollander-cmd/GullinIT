@@ -1,6 +1,7 @@
 {
   "id": 8,
   "crabs": {"enabled": true},
+  "thumb": "gull_great_black_backed:idle_enraged",
   "name": "Sunset Showdown",
   "seed": 7106,
   "time_limit": 150,

@@ -1,6 +1,7 @@
 {
   "id": 5,
   "crabs": {"enabled": true},
+  "thumb": "thumb_water_gun",
   "name": "Water Fight",
   "seed": 7104,
   "time_limit": 135,

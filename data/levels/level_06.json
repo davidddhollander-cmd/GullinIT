@@ -2,6 +2,7 @@
   "id": 6,
   "crabs": {"enabled": true},
   "sweeper": {"enabled": true, "range": [24, 1250]},
+  "thumb": "gull_kittiwake",
   "name": "Three's a Crowd",
   "seed": 7105,
   "time_limit": 150,

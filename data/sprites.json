@@ -5215,5 +5215,7 @@
       "land": {"frames": [18], "fps": 1, "loop": true},
       "stunned": {"frames": [19], "fps": 1, "loop": true}
     }
-  }
+  },
+  "thumb_water_gun": {"file": "res://assets/sprites/level-thumbs/water-gun-thumb-v1.png", "frame_w": 64, "frame_h": 45, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}},
+  "thumb_lightning": {"file": "res://assets/sprites/level-thumbs/lightning-bolt-thumb-v1.png", "frame_w": 42, "frame_h": 64, "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}}
 }

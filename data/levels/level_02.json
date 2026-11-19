@@ -2,6 +2,7 @@
   "id": 2,
   "crabs": {"enabled": true},
   "sweeper": {"enabled": true, "range": [24, 1010]},
+  "thumb": "food_ice_cream_vanilla",
   "name": "Family Picnic",
   "seed": 7102,
   "time_limit": 120,
