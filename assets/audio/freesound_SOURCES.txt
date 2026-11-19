@@ -1,0 +1,8 @@
+Freesound sources (Creative Commons 0: public domain, no attribution required). Cut with
+tools/make_pigeon_sfx.py on 2026-11-19 (mono, fades, peak -3 dBFS).
+
+pigeon_coo_1..3.ogg     <- 701282__5ro4__pigeon-walking-and-cooing.wav (single coos at 21.7 s, 23.5 s, 17.8 s)
+pigeon_scared_1..2.ogg  <- same file, short coos sped up 1.7x / 1.55x (higher, startled)
+pigeon_takeoff.ogg      <- 611106__5ro4__pigeon-flying-wing-whistle.wav (first 0.9 s)
+
+Pages: https://freesound.org/people/5ro4/sounds/701282/ and https://freesound.org/people/5ro4/sounds/611106/

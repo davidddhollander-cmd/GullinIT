@@ -301,14 +301,14 @@ func sand_puff(at: Vector2, taking_off: bool = false) -> void:
 		particles.append({"at":at + Vector2(side * 2.0, -1),"v":Vector2(side * 10.0, -12.0 - float(i % 2) * 5.0 - (5.0 if taking_off else 0.0)),"life":0.22,"duration":0.22,"color":Color("d4ad78"),"size":Vector2(2,1),"sand":true})
 
 ## tint and size_scale restyle the feathers (pigeons: small and grey).
-func feather_burst(at: Vector2, impulse: Vector2, amount: int, tint: Color = Color.WHITE, size_scale: float = 1.0) -> void:
+func feather_burst(at: Vector2, impulse: Vector2, amount: int, tint: Color = Color.WHITE, size_scale: float = 1.0, spread: float = 1.0) -> void:
 	if not bool(Config.tuning.juice.particles):
 		return
-	for i: int in mini(amount,40):
+	for i: int in mini(amount,80):
 		var life: float = feather_rng.randf_range(0.8,1.35)
 		particles.append({
 			"feather":true,"at":at+Vector2(feather_rng.randf_range(-4,4),feather_rng.randf_range(-4,4)),
-			"v":impulse*0.25+Vector2(feather_rng.randf_range(-42,42),feather_rng.randf_range(-55,-12)),
+			"v":impulse*0.25+Vector2(feather_rng.randf_range(-42,42),feather_rng.randf_range(-55,-12))*spread,
 			"life":life,"duration":life,"angle":feather_rng.randf_range(-PI,PI),
 			"spin":feather_rng.randf_range(-5,5),"phase":feather_rng.randf_range(0,TAU),
 			"texture":FEATHER_TEXTURES[feather_rng.randi_range(0,FEATHER_TEXTURES.size()-1)],

@@ -23,7 +23,8 @@
     "flee_speed": [55, 75], "circle_y": [70, 100], "circle_r": [45, 14], "circle_speed": 2.0, "return_dx": 120, "glide_speed": 70, "land_time": 0.3,
     "tumble_speed": 80, "tumble_up": 110, "tumble_gravity": 420, "tumble_spin": 14, "tumble_bounce": 0.35, "tumble_drag": 90, "tumble_gull_scale": 0.4,
     "aggro_eat": [2, 3], "aggro_count": 2, "aggro_notice": 160, "aggro_speed": 75, "aggro_time": 4.0, "aggro_range": 260, "aggro_hit": [14, 12], "aggro_stun": 0.6, "aggro_force": 0.5,
-    "feathers": {"hit": 16, "scare": 6, "size": 0.55, "tint": [0.62, 0.64, 0.7]},
+    "feathers": {"hit": 55, "hit_spread": 2.2, "scare": 6, "size": 0.55, "tint": [0.62, 0.64, 0.7]}, "air_hit": 14,
+    "sfx": {"coo_gap": [2.5, 5.5], "coo_db": -8, "scared_db": -2, "takeoff_db": -6},
     "bin_chance": 0.4, "bin_range": 190, "bin_stand": 10,
     "intro": {"view": 150, "seconds": 5.0, "line": "Get rid of those stinking city rats, they're eating our nosh!", "tip": "DIVING INTO PIGEONS WILL SCARE THEM", "tip_seconds": 8.0}
   },

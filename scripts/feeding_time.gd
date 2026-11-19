@@ -47,6 +47,19 @@ func free_spot(pigeon: BeachPigeon) -> float:
 			best_gap = gap
 	return best
 
+var coo_wait: float = 1.5
+
+## Now and then a grounded pigeon on screen coos.
+func _coo(step: float) -> void:
+	coo_wait -= step
+	if coo_wait > 0.0:
+		return
+	var s: Dictionary = cfg.sfx
+	coo_wait = randf_range(float(s.coo_gap[0]),float(s.coo_gap[1]))
+	var seen: Array[BeachPigeon] = pigeons.filter(func(p: BeachPigeon) -> bool: return p.grounded() and absf(p.position.x-game.camera_x) < 160.0)
+	if not seen.is_empty():
+		Audio.play(Audio.pick(["pigeon_coo_1","pigeon_coo_2","pigeon_coo_3"]),randf_range(0.92,1.08),float(s.coo_db))
+
 func tick(step: float) -> void:
 	lady.tick(step,game.player)
 	lady.z_index = game.spawner.depth_z(lady.position,2)
@@ -56,6 +69,7 @@ func tick(step: float) -> void:
 	for pigeon: BeachPigeon in pigeons:
 		pigeon.tick(step)
 		pigeon.z_index = game.spawner.depth_z(pigeon.position,2)
+	_coo(step)
 
 ## Called when the player eats a thrown crumb.
 func player_ate_crumb() -> void:
@@ -124,39 +138,53 @@ func _swat(gull: BeachGull) -> void:
 ## A dive peck through a grounded pigeon scatters it and every grounded pigeon within the scatter radius.
 func _check_scatter() -> void:
 	var gull: BeachGull = game.player
-	if gull.state != BeachGull.State.STRIKE:
+	if gull.state not in [BeachGull.State.STRIKE,BeachGull.State.GLIDE]:
 		return
 	var hit: Array = cfg.hit
 	for pigeon: BeachPigeon in pigeons:
-		if pigeon.grounded() and BeachCollisions.segment_hits(gull.previous_beak,gull.sweep_beak,pigeon.position+Vector2(0,-6),Vector2(float(hit[0]),float(hit[1]))):
+		if _air_hit(gull,pigeon) or (gull.state == BeachGull.State.STRIKE and pigeon.grounded() and BeachCollisions.segment_hits(gull.previous_beak,gull.sweep_beak,pigeon.position+Vector2(0,-6),Vector2(float(hit[0]),float(hit[1])))):
 			scatter_around(pigeon,gull.position.x)
 			game.brash.earn("pigeon_bump")
 			gull.swatted(float(cfg.pigeon_stun),pigeon.position,float(cfg.pigeon_force)) # bump back, scaled by the species' stun multiplier
 			return
 
+## A flying gull body-checks a pigeon in the air. An attacking (AGGRO) pigeon only goes down to a dive, so it can still land its peck.
+func _air_hit(gull: BeachGull, pigeon: BeachPigeon) -> bool:
+	var airborne: bool = pigeon.state in [BeachPigeon.State.FLEE,BeachPigeon.State.AWAY,BeachPigeon.State.RETURN] or (pigeon.state == BeachPigeon.State.AGGRO and gull.state == BeachGull.State.STRIKE)
+	return airborne and gull.position.distance_to(pigeon.position+Vector2(0,-6)) <= float(cfg.air_hit)
+
 ## The hit pigeon is bumped and stays; every other grounded pigeon within the scatter radius flies off.
 func scatter_around(hit_pigeon: BeachPigeon, from_x: float) -> void:
 	hit_pigeon.bump(signf(hit_pigeon.position.x-from_x),game.player.velocity.length())
-	game.effects.sand_puff(hit_pigeon.position,true)
-	feathers(hit_pigeon,game.player.velocity,int(cfg.feathers.hit))
+	if hit_pigeon.position.y >= float(Config.tuning.world.ground)-1.0:
+		game.effects.sand_puff(hit_pigeon.position,true)
+	feathers(hit_pigeon,game.player.velocity,int(cfg.feathers.hit),float(cfg.feathers.hit_spread))
+	Audio.play(Audio.pick(["pigeon_scared_1","pigeon_scared_2"]),randf_range(0.95,1.1),float(cfg.sfx.scared_db))
+	var flew: bool = false
 	for pigeon: BeachPigeon in pigeons:
 		if pigeon != hit_pigeon and pigeon.grounded() and pigeon.position.distance_to(hit_pigeon.position) <= float(cfg.scatter_radius):
 			game.effects.sand_puff(pigeon.position,true)
 			feathers(pigeon,Vector2.ZERO,int(cfg.feathers.scare))
 			pigeon.scatter(signf(pigeon.position.x-from_x))
+			flew = true
+	if flew:
+		Audio.play("pigeon_takeoff",1.0,float(cfg.sfx.takeoff_db))
 	game.effects.shout(hit_pigeon.position-Vector2(0,16),"SHOO!",BeachUI.GOLD)
-	Audio.play("click")
 	game._quest_event("pigeons_scattered")
 
 ## Small grey pigeon feathers (level `feeding.feathers`).
-func feathers(pigeon: BeachPigeon, impulse: Vector2, amount: int) -> void:
+func feathers(pigeon: BeachPigeon, impulse: Vector2, amount: int, spread: float = 1.0) -> void:
 	var f: Dictionary = cfg.feathers
-	game.effects.feather_burst(pigeon.position-Vector2(0,6),impulse,amount,Color(f.tint[0],f.tint[1],f.tint[2]),float(f.size))
+	game.effects.feather_burst(pigeon.position-Vector2(0,6),impulse,amount,Color(f.tint[0],f.tint[1],f.tint[2]),float(f.size),spread)
 
 ## Shakedown: every grounded pigeon within `radius` of the gull flies off and returns after the normal delay.
 func scare_pigeons(at: float, radius: float) -> void:
+	var flew: bool = false
 	for pigeon: BeachPigeon in pigeons:
 		if (pigeon.grounded() or pigeon.state == BeachPigeon.State.AGGRO) and absf(pigeon.position.x-at) <= radius:
 			game.effects.sand_puff(pigeon.position,true)
 			feathers(pigeon,Vector2.ZERO,int(cfg.feathers.scare))
 			pigeon.scatter(1.0 if pigeon.position.x >= at else -1.0)
+			flew = true
+	if flew:
+		Audio.play("pigeon_takeoff",1.0,float(cfg.sfx.takeoff_db))
