@@ -20,10 +20,10 @@ func anchored() -> bool:
 	return phase in [Phase.SIT,Phase.REST,Phase.STAND]
 
 func eligible(owner: BeachTarget) -> bool:
-	return enabled and registry != null and owner.kind == "kiosk_customer" and owner.food and not owner.leaving and not owner.service_locked and not owner.dropped_pending and owner.reaction.mode.is_empty() and owner.reaction.swat_timer < 0 and owner.recover <= 0 and owner.alert < 0.4 and ShopperArt.supports_bench(owner)
+	return enabled and registry != null and owner.kind == "kiosk_customer" and (owner.food or owner.snack == BeachTarget.Snack.ARRIVING) and not owner.leaving and not owner.service_locked and not owner.dropped_pending and owner.reaction.mode.is_empty() and owner.reaction.swat_timer < 0 and owner.recover <= 0 and owner.alert < 0.4 and ShopperArt.supports_bench(owner)
 
 func consider(owner: BeachTarget, force: bool = false) -> bool:
-	if phase != Phase.NONE or cooldown > 0 or not eligible(owner):
+	if phase != Phase.NONE or (cooldown > 0 and owner.snack != BeachTarget.Snack.ARRIVING) or not eligible(owner):
 		return false
 	# One roll per destination/purchase; never per frame.
 	cooldown = owner.routine.random.randf_range(float(Config.tuning.bench.cooldown_min),float(Config.tuning.bench.cooldown_max))
@@ -79,7 +79,7 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 	if registry == null or not registry.owns(seat,owner):
 		finish(owner)
 		return false
-	if not owner.food or owner.leaving or owner.service_locked or owner.dropped_pending or not owner.reaction.mode.is_empty():
+	if (not owner.food and owner.snack != BeachTarget.Snack.ARRIVING) or owner.leaving or owner.service_locked or owner.dropped_pending or not owner.reaction.mode.is_empty():
 		interrupt(owner)
 		if phase == Phase.NONE:
 			return false
@@ -105,6 +105,9 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 		owner.facing = seat_facing
 		if phase == Phase.SIT or phase == Phase.STAND:
 			timer = maxf(0.0,timer-delta)
+			# Empty-handed arrival: the snack appears at sit_down frame 2, hand low at the hip.
+			if phase == Phase.SIT and owner.snack == BeachTarget.Snack.ARRIVING and progress() >= 2.0/owner.sprite.sprite_frames.get_frame_count(&"sit_down"):
+				owner.reveal_seated()
 			if timer <= 0:
 				if phase == Phase.STAND:
 					finish(owner)
@@ -115,12 +118,16 @@ func tick(owner: BeachTarget, delta: float, gulls: Array[BeachGull]) -> bool:
 				next_bite = 1.3
 		elif phase == Phase.REST:
 			rest_time -= delta
+			var biting_before: bool = bite > 0.0
 			bite = maxf(0.0,bite-delta)
+			if biting_before and bite <= 0.0:
+				owner.snack_bitten()
 			next_bite -= delta
 			if next_bite <= 0:
 				bite = 0.8
-				next_bite = owner.routine.random.randf_range(2.0,3.5)
-			if rest_time <= 0:
+				var snack_cfg: Dictionary = Config.tuning.backup_snack
+				next_bite = owner.routine.random.randf_range(float(snack_cfg.bite_wait_min),float(snack_cfg.bite_wait_max)) if owner.snack == BeachTarget.Snack.EATING else owner.routine.random.randf_range(2.0,3.5)
+			if rest_time <= 0 and owner.snack != BeachTarget.Snack.EATING:
 				interrupt(owner)
 		owner.update_art_pose(false)
 		if anchored():
