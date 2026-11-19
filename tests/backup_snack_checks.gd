@@ -149,4 +149,16 @@ static func run(host: Node, check: Callable) -> void:
 	var rebuying: bool = _until(game,80.0,func() -> bool: return victim.food and victim.food_id == "ice_cream" and not victim.dropped_pending)
 	check.call(rebuying,"the shopper then re-buys at the stall")
 	game.queue_free()
+
+	# A knocked backup cookie is never fetched: the shopper drops the snack flow and re-buys.
+	game = BenchWander.new_game(host,8)
+	victim = game.spawner.create("kiosk_customer",700.0,{"appearance":"shopper_mullet","food_id":"ice_cream"})
+	game.stalls.bind(victim)
+	victim.backup_id = "cookie"
+	victim.take(game.player)
+	_until(game,30.0,func() -> bool: return victim.snack == BeachTarget.Snack.EATING)
+	victim.knock_food(game.player)
+	check.call(victim.snack == BeachTarget.Snack.NONE and victim.food_id == "ice_cream" and not victim.dropped_pending,"a dropped backup cookie ends the snack")
+	check.call(_until(game,80.0,func() -> bool: return victim.food and victim.food_id == "ice_cream"),"after a dropped cookie the shopper re-buys at the stall")
+	game.queue_free()
 	Config.tuning.juice.audio = previous_audio

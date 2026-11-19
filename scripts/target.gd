@@ -994,6 +994,8 @@ func give_up_dropped() -> void:
 	dropped_item = {}
 	dropped_pending = false
 	drop_retrieve = false
+	if snack in [Snack.REVEAL,Snack.EATING]:
+		_end_snack() # a dropped backup snack is the end of it: back to the preferred food and re-buy
 	_sulk_stroll()
 	queue_backup_snack()
 
