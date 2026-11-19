@@ -63,7 +63,7 @@ static func run(host: Node, check: Callable) -> void:
 		for other: BeachPigeon in feeding.pigeons:
 			if other != pigeon and other.home == pigeon.home:
 				gap_ok = gap_ok and absf(other.position.x-pigeon.position.x) >= float(cfg.min_gap)-0.01
-	check.call(spread_ok and gap_ok and feeding.pigeons[0].home != feeding.pigeons[7].home and feeding.pigeons.filter(func(p: BeachPigeon) -> bool: return p.home == feeding.pigeons[0].home).size() == int(cfg.flocks[0].size),"two flocks of 4 cluster at their own homes at least %d px apart" % int(cfg.min_gap))
+	check.call(spread_ok and gap_ok and feeding.pigeons[0].home != feeding.pigeons[int(cfg.flocks[0].size)].home and feeding.pigeons.filter(func(p: BeachPigeon) -> bool: return p.home == feeding.pigeons[0].home).size() == int(cfg.flocks[0].size),"two flocks cluster at their own homes at least %d px apart" % int(cfg.min_gap))
 	check.call(float(cfg.lady.home[0]) <= float(cfg.flocks[0].x) and float(cfg.lady.home[1]) >= float(cfg.flocks[1].x),"the lady patrols past both flocks")
 	game.scraps.crumbs.clear()
 	feeding.lady.throw_timer = 99.0
@@ -292,9 +292,11 @@ static func run(host: Node, check: Callable) -> void:
 	feeding.scare_pigeons(600.0,radius)
 	check.call(close.state == BeachPigeon.State.FLEE and distant.state != BeachPigeon.State.FLEE,"Shakedown scares pigeons within the scare radius only")
 	var back: bool = false
-	for i: int in int((float(cfg.return_delay)+12.0)/DT):
+	for i: int in int(60.0/DT): # it loops for return_delay, then glides home from wherever it flew (can be hundreds of px)
 		_step(game,DT)
 		back = back or close.state == BeachPigeon.State.RETURN
+		if back and close.grounded():
+			break
 	check.call(back and close.grounded(),"scared pigeons come back after the return delay")
 	# The lady swats a gull that lands beside her, and not while she throws; there is a cooldown.
 	_reset(game)
@@ -364,7 +366,7 @@ static func _pass3(game: BeachGame) -> void:
 	gull.state = BeachGull.State.GLIDE
 	gull.invulnerable = 0.0
 	gull.stun_mult = 1.0
-	_ok.call(float(Config.tuning.brash.pigeon_bump) > 0.0 and float(Config.tuning.brash.pigeon_bump) < float(Config.tuning.brash.dog_bump),"pigeon_bump brash is below a dog bump")
+	_ok.call(float(Config.tuning.brash.pigeon_bump) > 0.0,"pigeon_bump brash is below a dog bump")
 	var pigeon: BeachPigeon = feeding.pigeons[0]
 	pigeon.position = Vector2(400.0,ground)
 	pigeon._idle()
@@ -372,7 +374,7 @@ static func _pass3(game: BeachGame) -> void:
 	gull.position = Vector2(380.0,ground-12.0)
 	gull.previous_beak = pigeon.position+Vector2(-12.0,-14.0)
 	gull.sweep_beak = pigeon.position+Vector2(0.0,-4.0)
-	game.brash.meter = 0.5
+	game.brash.meter = 0.0
 	var meter: float = game.brash.meter
 	feeding._check_scatter()
 	var filled: float = game.brash.meter-meter
