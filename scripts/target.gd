@@ -12,6 +12,15 @@ var flash_left: float = 0.0 ## hit flash seconds remaining (this person only)
 var seen_time: float = 0.0
 var food: bool = true
 var food_id: String = ""
+## Kiosk shoppers carry one backup snack: after their preferred food is stolen they eat it (bench or standing reveal) before re-buying.
+enum Snack { NONE, PENDING, ARRIVING, REVEAL, EATING }
+var snack: Snack = Snack.NONE
+var preferred_food_id: String = ""
+var backup_left: int = 0
+var backup_id: String = ""
+var snack_timer: float = 0.0
+var snack_bites_left: int = 0
+var food_base_scale: Vector2 = Vector2.ONE
 var dropped_pending: bool = false
 var dropped_item: Dictionary = {}
 var drop_retrieve: bool = false
@@ -257,6 +266,15 @@ func setup(type: String, x: float, random: RandomNumberGenerator, mult: float, s
 	if kind == "picnic_family":
 		food_id = "crisps_bag"
 	food = not food_id.is_empty()
+	preferred_food_id = food_id
+	if kind == "kiosk_customer":
+		var backup: Dictionary = Config.tuning.backup_snack
+		var snacks: Array = backup.foods
+		backup_left = int(backup.count) if not snacks.is_empty() else 0
+		# A private rng: drawing from the shared one would reshuffle every later spawn.
+		var pick: RandomNumberGenerator = RandomNumberGenerator.new()
+		pick.seed = hash("%s%d" % [food_id,int(x)])
+		backup_id = str(snacks[pick.randi_range(0,snacks.size()-1)]) if backup_left > 0 else ""
 	if kind == "picnic_family":
 		supply_crisps = int(Config.tuning.world.family_crisp_bags)
 		supply_cookies = int(Config.tuning.world.family_cookie_reserve)
@@ -318,6 +336,7 @@ func refresh_art() -> void:
 		food_sprite.play(&"idle")
 		var texture: Texture2D = food_sprite.sprite_frames.get_frame_texture(&"idle",0)
 		food_sprite.scale = Vector2(definition.size[0],definition.size[1]) / texture.get_size()
+		food_base_scale = food_sprite.scale
 	food_sprite.position = Vector2(Config.tuning.world.food_offset_x, Config.tuning.world.food_offset_y)
 	food_sprite.visible = food
 	update_art_pose()
@@ -425,7 +444,9 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	if kind == "pier_diner" and diner_meal == DinerMeal.RETURN and food and not dropped_pending:
 		_tick_diner_return(delta,gulls)
 		return
-	if not food and not dropped_pending and not food_id.is_empty() and kind not in ["toddler", "picnic_family", "sunbather"]:
+	if snack != Snack.NONE and not dropped_pending:
+		_tick_snack(delta)
+	if not food and not dropped_pending and snack == Snack.NONE and not food_id.is_empty() and kind not in ["toddler", "picnic_family", "sunbather"]:
 		respawn -= delta
 		if respawn <= 0:
 			if kind in ["kiosk_customer","pier_diner"]:
@@ -444,7 +465,7 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	var customer_pause: bool = kind == "kiosk_customer" and not food and recover > float(t.recover_time)-0.5
 	if kind == "kiosk_customer":
 		_tick_bite(delta)
-		customer_pause = customer_pause or biting > 0.0
+		customer_pause = customer_pause or biting > 0.0 or snack == Snack.REVEAL or (snack == Snack.EATING and food)
 	var whistle_pause: bool = kind == "lifeguard" and lifeguard_whistle_time > 0
 	if routine.enabled and not customer_pause and not whistle_pause:
 		moved = routine.tick(self,delta)
@@ -473,15 +494,82 @@ func _tick_bite(delta: float) -> void:
 		biting = maxf(0.0, biting-delta)
 		if not food or leaving or recover > 0 or not reaction.mode.is_empty() or reaction.swat_timer >= 0:
 			biting = 0.0
+		elif biting <= 0.0:
+			snack_bitten()
 		return
 	if bite_wait < 0.0:
-		bite_wait = rng.randf_range(float(cfg.interval_min), float(cfg.interval_max))
+		var snack_cfg: Dictionary = Config.tuning.backup_snack
+		bite_wait = rng.randf_range(float(snack_cfg.bite_wait_min), float(snack_cfg.bite_wait_max)) if snack == Snack.EATING else rng.randf_range(float(cfg.interval_min), float(cfg.interval_max))
 	if not food or leaving or recover > 0 or not reaction.mode.is_empty() or dropped_pending:
 		return
 	bite_wait -= delta
 	if bite_wait <= 0.0 and not was_moving:
 		biting = float(cfg.duration)
 		bite_wait = -1.0
+
+func _tick_snack(delta: float) -> void:
+	var cfg: Dictionary = Config.tuning.backup_snack
+	match snack:
+		Snack.PENDING:
+			# Wait out the sulk, then try for a seat; no seat (or no seated art) means a standing reveal.
+			if recover <= 0.0 and reaction.mode.is_empty() and not leaving and not service_locked:
+				backup_left -= 1
+				snack = Snack.ARRIVING
+				if not bench_visit.consider(self,true):
+					_begin_standing_reveal()
+		Snack.ARRIVING:
+			# The bench walk was cancelled (a warning, a scare): eat standing instead.
+			if bench_visit.phase == BenchVisit.Phase.NONE:
+				_begin_standing_reveal()
+		Snack.REVEAL:
+			snack_timer += delta
+			if snack_timer >= float(cfg.reveal_hold):
+				snack = Snack.EATING
+				snack_bites_left = int(cfg.bites)
+				bite_wait = -1.0
+				move_child(food_sprite,-1)
+				food_sprite.scale = food_base_scale
+				update_art_pose(false)
+
+func _hold_snack() -> void:
+	food_id = backup_id
+	food = true
+	refresh_art()
+
+func _begin_standing_reveal() -> void:
+	snack = Snack.REVEAL
+	snack_timer = 0.0
+	move_child(food_sprite,0) # drawn behind the body until it has slid up to the hand
+	_hold_snack()
+
+## Seated shoppers sit empty-handed; the snack appears at the low-hand frame of sit_down.
+func reveal_seated() -> void:
+	snack = Snack.EATING
+	snack_bites_left = int(Config.tuning.backup_snack.bites)
+	bite_wait = -1.0
+	_hold_snack()
+
+## 0..1 slide of the standing reveal (the last reveal_time of reveal_hold).
+func reveal_progress() -> float:
+	var cfg: Dictionary = Config.tuning.backup_snack
+	return clampf((snack_timer-(float(cfg.reveal_hold)-float(cfg.reveal_time)))/float(cfg.reveal_time),0.0,1.0)
+
+func snack_bitten() -> void:
+	if snack != Snack.EATING or not food:
+		return
+	snack_bites_left -= 1
+	if snack_bites_left > 0:
+		return
+	food = false
+	respawn = float(Config.tuning.backup_snack.rebuy_delay)
+	_end_snack()
+
+## Back to the preferred food; the normal re-buy flow takes over from here.
+func _end_snack() -> void:
+	snack = Snack.NONE
+	food_id = preferred_food_id
+	move_child(food_sprite,-1)
+	refresh_art()
 
 func purchase_stall_type() -> String:
 	if food_id == "fried_fish":
@@ -909,6 +997,8 @@ func claim_dropped(gull: BeachGull) -> bool:
 
 func _finish_theft(gull: BeachGull, risky: bool) -> void:
 	thefts += 1
+	var snack_stolen: bool = snack in [Snack.REVEAL,Snack.EATING]
+	var queue_snack: bool = kind == "kiosk_customer" and snack == Snack.NONE and backup_left > 0 and not food_id.is_empty() and food_id == preferred_food_id
 	if kind == "pier_diner":
 		diner_meal = DinerMeal.DINING
 	respawn = rng.randf_range(Config.tuning.world.respawn_min, Config.tuning.world.respawn_max)
@@ -933,6 +1023,11 @@ func _finish_theft(gull: BeachGull, risky: bool) -> void:
 	snatched.emit(self, gull, risky)
 	reaction.theft(self,gull,last_theft_direct)
 	bench_visit.interrupt(self)
+	# The gull was paid for the snack above; from here the shopper is back to the normal re-buy flow.
+	if snack_stolen:
+		_end_snack()
+	elif queue_snack:
+		snack = Snack.PENDING
 	if info.twist == "cry":
 		toddler_cry_timer = float(Config.tuning.world.toddler_cry_duration)
 		toddler_run_speed = 0.0

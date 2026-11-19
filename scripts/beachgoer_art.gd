@@ -28,3 +28,8 @@ static func align_food(target: BeachTarget) -> void:
 	var sequence: Array = anchors.get(String(target.sprite.animation),[[10,-22]])
 	var anchor: Array = sequence[mini(target.sprite.frame,sequence.size()-1)]
 	target.food_sprite.position = Vector2(float(anchor[0])*target.facing,float(anchor[1]))
+	if target.snack == BeachTarget.Snack.REVEAL:
+		# Backup snack rises from behind the hip to the hand, growing to full size.
+		var rise: float = target.reveal_progress()
+		target.food_sprite.position = Vector2(target.food_sprite.position.x,-12.0).lerp(target.food_sprite.position,rise)
+		target.food_sprite.scale = target.food_base_scale*lerpf(0.6,1.0,rise)

@@ -178,6 +178,7 @@
     "lifeguard": {"min_distance": 100, "max_distance": 160, "pause_min": 2, "pause_max": 4}
   },
   "bench": {"chance": 0.8, "cooldown_min": 6.0, "cooldown_max": 12.0, "reach": 320.0, "approach_speed": 1.0},
+  "backup_snack": {"count": 1, "foods": ["crisps_bag", "cookie"], "bites": 4, "rebuy_delay": 1.5, "reveal_time": 0.3, "reveal_hold": 0.5, "bite_wait_min": 1.0, "bite_wait_max": 1.8},
   "bite": {"duration": 0.6, "interval_min": 4.0, "interval_max": 7.0},
   "world": {
     "width": 1280,
