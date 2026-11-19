@@ -33,8 +33,9 @@ func setup(owner_game: BeachGame, actors: Node2D) -> void:
 func free_spot(pigeon: BeachPigeon) -> float:
 	var best: float = pigeon.home
 	var best_gap: float = -1.0
-	for i: int in 8:
-		var x: float = pigeon.home+pigeon.rng.randf_range(-float(cfg.wander),float(cfg.wander))
+	var w: float = float(cfg.wander)
+	for i: int in 48: # a few random tries for variety, then an even sweep (~2.5 px steps) so a crowded flock still finds any free slot
+		var x: float = pigeon.home+(pigeon.rng.randf_range(-w,w) if i < 8 else float(i-8)*2.0*w/39.0-w)
 		var gap: float = 1e9
 		for other: BeachPigeon in pigeons:
 			if other != pigeon:
