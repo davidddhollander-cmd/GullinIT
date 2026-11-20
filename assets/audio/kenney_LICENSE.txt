@@ -20,3 +20,6 @@
 
 	Follow on Twitter for updates:
 	http://twitter.com/KenneyNL
+
+Task 103 uses two cuts of this pack (Kenney Interface Sounds, CC0): snatch_3.ogg <- Audio/confirmation_003.ogg and snatch_4.ogg <- Audio/glass_001.ogg
+(leading silence trimmed, at most 0.4 s, 30 ms fade out, peak -3 dBFS, loudness matched to snatch.wav; tools/make_sfx_103.py).
