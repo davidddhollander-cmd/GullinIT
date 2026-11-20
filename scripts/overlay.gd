@@ -1,5 +1,8 @@
 ﻿class_name BeachOverlay
 extends Control
+const PECK_RANGE_GREEN: Color = Color("6fd36b") ## lesson 3 ring colour while the beak is in peck range
+const PECK_RANGE_OUTER_RADIUS: float = 16.0
+const PECK_RANGE_PULSE_MS: int = 500
 var game: BeachGame
 var font: Font = preload("res://assets/fonts/gull_pixel.fnt")
 var score_label: Label
@@ -806,8 +809,13 @@ func _draw() -> void:
 		if game.training:
 			var training_target: Vector2 = game.training_target() - offset
 			if training_target.x >= 4 and training_target.x <= 316 and training_target.y >= 28 and training_target.y <= 165:
-				draw_arc(training_target,12,0,TAU,24,BeachUI.GOLD,2)
-				draw_arc(training_target,16,0,TAU,24,Color(1.0,0.95,0.7,0.55),1)
+				if game.training_peck_in_range():
+					# In peck range: green, plus a pulsing outer ring so the cue does not rely on colour alone.
+					draw_arc(training_target,12,0,TAU,24,PECK_RANGE_GREEN,2)
+					draw_arc(training_target,PECK_RANGE_OUTER_RADIUS+(Time.get_ticks_msec()%PECK_RANGE_PULSE_MS)/float(PECK_RANGE_PULSE_MS)*3.0,0,TAU,24,PECK_RANGE_GREEN,2)
+				else:
+					draw_arc(training_target,12,0,TAU,24,BeachUI.GOLD,2)
+					draw_arc(training_target,16,0,TAU,24,Color(1.0,0.95,0.7,0.55),1)
 			elif game.training_target().x > -900.0 and (training_target.x < 4 or training_target.x > 316) and Time.get_ticks_msec() % 700 < 450:
 				# The lesson target is on another part of the beach: flash an edge arrow toward it.
 				var side: float = -1.0 if training_target.x < 4 else 1.0

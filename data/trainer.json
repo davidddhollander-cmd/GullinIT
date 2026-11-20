@@ -82,8 +82,8 @@
       "touch": "Climb above him, then tap DIVE"
     },
     "toddler_peck": {
-      "default": "Tap {peck_alt} to peck his ice cream!",
-      "touch": "Tap {peck_alt} to peck his ice cream!"
+      "default": "Ring green! Tap {peck_alt} to peck his ice cream!",
+      "touch": "Ring green! Tap {peck_alt} to peck his ice cream!"
     },
     "toddler_pickup": "Walk over the ice cream to eat it.",
     "full_stomach": "Finish your snack first, greedy guts.",
@@ -183,12 +183,12 @@
         "mood": "amused",
         "lay": "Now let's try something as easy as stealing candy from a baby...",
         "how": {
-          "default": "Walk up to the toddler, face his ice cream and tap {peck_alt}.",
-          "touch": "Walk up to the toddler, face his ice cream and tap {peck_alt}."
+          "default": "Walk up to the toddler, face his ice cream and tap {peck_alt}. The ring turns green when you are close enough.",
+          "touch": "Walk up to the toddler, face his ice cream and tap {peck_alt}. The ring turns green when you are close enough."
         },
         "strip": {
-          "default": "Walk up to the toddler and tap {peck_alt} at his ice cream",
-          "touch": "Walk up to the toddler and tap {peck_alt} at his ice cream"
+          "default": "Get the ring green, then tap {peck_alt}",
+          "touch": "Get the ring green, then tap {peck_alt}"
         }
       },
       {

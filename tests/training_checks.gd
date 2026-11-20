@@ -67,6 +67,21 @@ static func run(host: Node, check: Callable) -> void:
 	game.player.position += (toddler.food_position() - Vector2(8,0)) - game.player.beak()
 	check.call(game.stash_raids.nearby_toddler() == toddler and game.training_text().contains("peck his ice cream"),"beside the toddler the strip names the peck key")
 	check.call(game.peck_pause == false,"pop-ups off: the toddler lesson never freezes")
+	# Task 100: the lesson 3 ring turns green exactly when the real peck range test passes.
+	check.call(game.training_peck_in_range(),"lesson 3 ring is green with the beak in peck range")
+	var in_range_pos: Vector2 = game.player.position
+	game.player.position.x -= float(Config.tuning.world.peck_reach) + 8.0
+	check.call(not game.training_peck_in_range() and game.stash_raids.nearby_toddler() == null,"lesson 3 ring stays gold when the beak is out of peck range")
+	game.player.position = in_range_pos
+	check.call(game.training_peck_in_range(),"lesson 3 ring turns green again when the gull returns")
+	game.lesson = BeachGame.BIN_LESSON
+	check.call(not game.training_peck_in_range(),"the peck-range ring applies to lesson 3 only")
+	game.lesson = BeachGame.TODDLER_LESSON
+	var ring_lines: Array = []
+	for variant: String in ["default","touch"]:
+		ring_lines.append(Config.trainer.training.lessons[2].how[variant])
+		ring_lines.append(Config.trainer.training.lessons[2].strip[variant])
+	check.call(ring_lines.all(func(line: String) -> bool: return line.contains("ring")) and ring_lines.size() == 4,"lesson 3 card and strip text mention the ring in every variant")
 	# A direct beak snatch of the cone also finishes the lesson (else the empty toddler soft-locks it); rewind afterwards.
 	check.call(toddler.take(game.player) and game.lesson == BeachGame.BIN_LESSON,"snatching the toddler's cone directly advances the lesson")
 	game.lesson = BeachGame.TODDLER_LESSON

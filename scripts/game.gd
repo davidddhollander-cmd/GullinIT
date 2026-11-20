@@ -1752,6 +1752,10 @@ func training_bin(wheelie: bool) -> Dictionary:
 			return bin
 	return {}
 
+## Lesson 3 only: true while a ground peck would reach the toddler's ice cream. Uses the real peck range test (nearby_toddler), so the ring never lies.
+func training_peck_in_range() -> bool:
+	return training and lesson == TODDLER_LESSON and stash_raids.nearby_toddler() != null
+
 func training_target() -> Vector2:
 	if lesson == BIN_LESSON:
 		var bin: Dictionary = training_bin(false)

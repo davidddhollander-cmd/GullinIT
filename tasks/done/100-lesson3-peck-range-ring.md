@@ -1,6 +1,6 @@
 # 100 — Lesson 3 ring shows when the cone is in peck range
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none
@@ -32,7 +32,18 @@ In training lesson 3 (the first peck), the gold ring around the target should vi
 - [ ] `./tools/validate.ps1` passes with no new failures.
 
 ## Report
-<!-- Filled in by the implementer. -->
+**Files:** `scripts/game.gd` (new `training_peck_in_range()`), `scripts/overlay.gd` (green ring + pulsing outer ring, named constants), `data/trainer.json` (lesson 3 how/strip + `live.toddler_peck`), `tests/training_checks.gd` (5 new checks).
+
+**Tests:** baseline on untouched branch: 18516 checks, 0 failures. After: 18521 checks, 0 failures.
+
+**Decisions:**
+- Lesson 3 is index 2 (`TODDLER_LESSON`). In-range = `stash_raids.nearby_toddler() != null`, the exact test the ground peck uses (facing, reach, vertical tolerance), so no second copy of the rule. It is false once the cone is dropped, so the ring goes back to gold for the "walk over it" step.
+- In range: green ring (`6fd36b`) plus a pulsing outer ring (radius 16 to 19 over 0.5 s). Constants are named in overlay.gd. Out of range: unchanged gold.
+- Text: how "...The ring turns green when you are close enough."; strip "Get the ring green, then tap {peck_alt}" (a longer strip failed the 2-line strip-fit test); live line "Ring green! Tap {peck_alt} to peck his ice cream!". Only default and touch variants exist for lesson 3 (no realistic variant), all updated.
+
+**Not done / unverified:** no screenshot capture; the ring colour and pulse have not been seen in the real game.
+
+**Branch:** sonnet/100-lesson3-peck-range-ring
 
 ## Review notes
 <!-- Filled in by the reviewer. -->
