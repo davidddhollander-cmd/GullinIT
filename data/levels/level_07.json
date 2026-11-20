@@ -58,7 +58,6 @@
   ],
   "props": [
     {"type": "beach_lifebuoy_flat", "x": 410, "y": 146},
-    {"type": "beach_shells", "x": 610, "y": 138},
     {"type": "beach_palm", "x": 60, "y": 148},
     {"type": "beach_parasol", "x": 160, "y": 143},
     {"type": "beach_lamp", "x": 285, "y": 151},
