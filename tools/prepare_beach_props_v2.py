@@ -15,12 +15,12 @@ import prepare_beach_props_v1 as v1
 PAL = np.array([[int(m.group(1)[i:i + 2], 16) for i in (0, 2, 4)] for line in (v1.ROOT / "tools/art_audit/palette.hex").read_text().splitlines()
 				if (m := re.search(r"([0-9a-fA-F]{6})", line))], dtype=float)
 SPRITES = v1.ROOT / "data" / "sprites.json"
-FINE = {"BUCKET AND SPADE"}  # kept on the finer 4x grid (visual_scale 0.25): preferred less pixelated
+FINE = {"BUCKET AND SPADE", "SHELLS"}  # kept on the finer 4x grid (visual_scale 0.25): preferred less pixelated
 ART_SCALE = 2  # art px per game px: 2x the world grid (same as the cast); v1 used 4, which read too fine next to the props
 # name -> (sprite id, v2 width in game px, palette blend weight, soft outline)
 V2 = {
 	"BEACH BALL": ("beach_ball", 6, 0.45, False),
-	"SHELLS": ("beach_shells", 7, 0.5, True),
+	"SHELLS": ("beach_shells", 7, 0.5, False),
 	"JET SKI": ("beach_jet_ski", 36, 0.5, False),
 	"LIFEBUOY HUNG": ("beach_lifebuoy_hung", 8, 0.5, False),
 	"BUCKET AND SPADE": ("beach_bucket", 11, 0.8, False),

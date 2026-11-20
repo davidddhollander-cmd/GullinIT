@@ -338,9 +338,9 @@
       "candidate": {
         "clone": "beach_rocks",
         "file": "res://assets/sprites/beach-props-v1/shells-v2.png",
-        "frame_w": 14,
-        "frame_h": 11,
-        "visual_scale": 0.5
+        "frame_w": 28,
+        "frame_h": 23,
+        "visual_scale": 0.25
       },
       "reference": "shopper_mullet",
       "motion": "static",

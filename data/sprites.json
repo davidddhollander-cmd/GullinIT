@@ -2566,9 +2566,9 @@
   },
   "beach_shells": {
     "file": "res://assets/sprites/beach-props-v1/shells-v2.png",
-    "frame_w": 14,
-    "frame_h": 11,
-    "visual_scale": 0.5,
+    "frame_w": 28,
+    "frame_h": 23,
+    "visual_scale": 0.25,
     "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}
   },
   "beach_jet_ski": {
