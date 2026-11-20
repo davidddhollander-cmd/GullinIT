@@ -356,7 +356,7 @@
     "wander_speed": 22, "run_speed": 78, "rest_min": 0.6, "rest_max": 1.5,
     "alert_time": 0.55, "fire_range": 105, "aim_time": 0.2, "muzzle_time": 0.08, "recover_time": 0.1,
     "shot_cooldown": 0.12, "shots_per_engagement": 10, "chase_timeout": 10.0, "give_up_time": 1.4, "rearm_time": 5.0,
-    "shot_speed": 170, "shot_range": 150, "lead": 0.5, "hit_radius": [10, 7], "hit_stun": 0.5
+    "shot_speed": 170, "shot_range": 150, "lead": 0.5, "hit_radius": [10, 7], "hit_stun": 0.5, "min_separation": 60
   },
   "brash": {
     "snatch": 0.15, "handover": 0.08, "mug": 0.2, "bump": 0.34, "dog_bump": 0.6, "pigeon_bump": 1.0, "stun": -0.25,

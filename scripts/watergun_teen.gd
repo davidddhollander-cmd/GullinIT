@@ -24,6 +24,7 @@ var paused: bool = false
 var flee_to: float = NAN ## Shakedown: run to this x and stay there until come_home()
 var aim_clip: StringName = &"shoot_level"
 var target: BeachGull
+var others: Array[WatergunTeen] = [] ## the other teens; set by game.gd
 var shots: Array[BeachWaterShot] = []
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var sprite: AnimatedSprite2D
@@ -79,7 +80,34 @@ func _face(x: float) -> void:
 
 func _move(target_x: float, speed: float, delta: float) -> void:
 	_face(target_x)
-	position.x = clampf(move_toward(position.x,target_x,speed*delta),maxf(12.0,home.x-float(_t().leash)),minf(float(Config.tuning.world.width)-12.0,home.y+float(_t().leash)))
+	position.x = clampf(_keep_apart(move_toward(position.x,target_x,speed*delta)),maxf(12.0,home.x-float(_t().leash)),minf(float(Config.tuning.world.width)-12.0,home.y+float(_t().leash)))
+
+# Never step to within min_separation of a teen we were clear of: stop short on our own side.
+func _keep_apart(x: float) -> float:
+	var sep: float = float(_t().min_separation)
+	for o: WatergunTeen in others:
+		if absf(position.x-o.position.x) >= sep and absf(x-o.position.x) < sep:
+			x = o.position.x+signf(position.x-o.position.x)*sep
+	return x
+
+func _planted() -> bool:
+	return state == State.AIM or state == State.FIRE or state == State.RECOVER
+
+# Safety net (spawn, scares, shoves): a teen that is not planted walks apart at run speed.
+# Between two free teens only the higher instance id yields; a planted teen is never moved.
+func _separate(delta: float) -> bool:
+	var sep: float = float(_t().min_separation)
+	if _planted():
+		return false
+	for o: WatergunTeen in others:
+		var d: float = position.x-o.position.x
+		if absf(d) < sep-0.01 and (o._planted() or get_instance_id() > o.get_instance_id()):
+			var side: float = signf(d) if d != 0.0 else (1.0 if home.x >= o.home.x else -1.0)
+			var goal: float = clampf(o.position.x+side*sep,maxf(12.0,home.x-float(_t().leash)),minf(float(Config.tuning.world.width)-12.0,home.y+float(_t().leash)))
+			_face(goal)
+			position.x = move_toward(position.x,goal,float(_t().run_speed)*delta)
+			return true
+	return false
 
 ## The scare is over: back to patrolling.
 func come_home() -> void:
@@ -117,11 +145,14 @@ func tick(delta: float, gulls: Array[BeachGull]) -> void:
 	shot_gap = maxf(0.0,shot_gap-delta)
 	rearm = maxf(0.0,rearm-delta)
 	var clip: StringName = &"idle"
+	if _separate(delta):
+		_animate(&"run")
+		return
 	if not is_nan(flee_to):
 		state = State.PATROL
 		target = null
 		_face(flee_to)
-		position.x = move_toward(position.x,flee_to,float(t.run_speed)*delta)
+		position.x = _keep_apart(move_toward(position.x,flee_to,float(t.run_speed)*delta))
 		_animate(&"idle" if is_equal_approx(position.x,flee_to) else &"run")
 		return
 	match state:

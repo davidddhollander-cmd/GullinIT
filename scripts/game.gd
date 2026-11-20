@@ -230,6 +230,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		teen.splashed.connect(func(at: Vector2) -> void: effects.water_splash(at))
 		teen.hit.connect(func(gull: BeachGull) -> void: _water_hit(gull,teen))
 		teens.append(teen)
+		for other: WatergunTeen in teens:
+			other.others.assign(teens.filter(func(t: WatergunTeen) -> bool: return t != other))
 	if level.has("feeding"):
 		feeding = BeachFeeding.new()
 		add_child(feeding)
