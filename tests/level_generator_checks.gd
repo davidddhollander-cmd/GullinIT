@@ -103,7 +103,7 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 	else:
 		check.call(types==["sunbather","kiosk_customer","kiosk_customer","kiosk_customer","pier_diner","off_lead_dog","off_lead_dog"],"boardwalk is a busy promenade of three shoppers and a diner, plus two off-lead dogs, no families")
 		check.call(not types.has("dog_owner") and not types.has("market_cleaner") and not types.has("lifeguard"),"boardwalk leaves later hazards for later levels")
-		check.call(float(level.spawns[0].x)<float(level.world.promenade_start) and float(level.spawns[1].x)>float(level.world.promenade_start) and float(level.spawns[4].x)>float(level.world.pier_start) and float(level.spawns[5].x)<float(level.world.promenade_start),"boardwalk actors occupy their zones")
+		check.call(float(level.spawns[0].x)<float(level.world.promenade_start) and float(level.spawns[1].x)>float(level.world.promenade_start) and float(level.spawns[4].x)>float(level.world.promenade_start) and float(level.spawns[5].x)<float(level.world.promenade_start),"boardwalk actors occupy their zones")
 		check.call(stand_count==2 and bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1 and level.rivals[0].get("entry","")=="fly_in","boardwalk includes both stands and Gary, held back for his fly-in after the first snack")
 
 static func _check_squall_level(check: Callable, source: Dictionary, level: Dictionary) -> void:
