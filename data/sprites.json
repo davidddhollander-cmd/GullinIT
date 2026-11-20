@@ -2537,44 +2537,44 @@
     }
   },
   "beach_ball": {
-    "file": "res://assets/sprites/beach-props-v1/beach-ball-v1.png",
-    "frame_w": 48,
-    "frame_h": 46,
+    "file": "res://assets/sprites/beach-props-v1/beach-ball-v2.png",
+    "frame_w": 24,
+    "frame_h": 23,
     "visual_scale": 0.25,
     "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}
   },
   "beach_bucket": {
-    "file": "res://assets/sprites/beach-props-v1/bucket-and-spade-v1.png",
-    "frame_w": 80,
-    "frame_h": 64,
+    "file": "res://assets/sprites/beach-props-v1/bucket-and-spade-v2.png",
+    "frame_w": 44,
+    "frame_h": 35,
     "visual_scale": 0.25,
     "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}
   },
   "beach_lifebuoy_flat": {
-    "file": "res://assets/sprites/beach-props-v1/lifebuoy-flat-v1.png",
-    "frame_w": 104,
-    "frame_h": 65,
+    "file": "res://assets/sprites/beach-props-v1/lifebuoy-flat-v2.png",
+    "frame_w": 56,
+    "frame_h": 35,
     "visual_scale": 0.25,
     "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}
   },
   "beach_lifebuoy_hung": {
-    "file": "res://assets/sprites/beach-props-v1/lifebuoy-hung-v1.png",
-    "frame_w": 64,
-    "frame_h": 93,
+    "file": "res://assets/sprites/beach-props-v1/lifebuoy-hung-v2.png",
+    "frame_w": 32,
+    "frame_h": 46,
     "visual_scale": 0.25,
     "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}
   },
   "beach_shells": {
-    "file": "res://assets/sprites/beach-props-v1/shells-v1.png",
-    "frame_w": 72,
-    "frame_h": 59,
+    "file": "res://assets/sprites/beach-props-v1/shells-v2.png",
+    "frame_w": 28,
+    "frame_h": 23,
     "visual_scale": 0.25,
     "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}
   },
   "beach_jet_ski": {
-    "file": "res://assets/sprites/beach-props-v1/jet-ski-v1.png",
-    "frame_w": 176,
-    "frame_h": 97,
+    "file": "res://assets/sprites/beach-props-v1/jet-ski-v2.png",
+    "frame_w": 144,
+    "frame_h": 79,
     "visual_scale": 0.25,
     "animations": {"idle": {"frames": [0], "fps": 1, "loop": true}}
   },
