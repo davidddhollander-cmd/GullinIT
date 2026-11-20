@@ -19,3 +19,5 @@ bb_screech_*, bb_shakedown (task 080): re-rendered at 0.6x speed (about -8.8 sem
 dog_bark_1..2.ogg   real barks, see pixabay_SOURCES.txt. Without a *dog*bark* source make_sfx.py ships only the generated dog_bark.ogg below.
 dog_bark.ogg        noisy glottal burst through "a" formants plus a short "rf" noise tail
 whistle.ogg         two-tone sine trill (2.8 / 3.35 kHz, 22 Hz) with pea-rattle amplitude modulation and breath noise
+
+snatch_1..2.ogg, score_1..2.ogg (task 103, tools/make_sfx_103.py): synthesised triangle/square note arpeggios with a bell shimmer (snatch_1 D5-F#5-A5, snatch_2 F5-A5-C6, score_1 G5-D6-G6, score_2 C5-E5-G5-C6), loudness matched to snatch.wav / score.ogg.
