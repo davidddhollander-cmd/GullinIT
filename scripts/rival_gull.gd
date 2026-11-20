@@ -7,7 +7,7 @@ extends RefCounted
 ## Rivals compete: they ignore each other's food claims and mug each other.
 ## LAND glides down beside a ground job (item, crumb, bin, sunbather bag), WALK strolls to it, PECK taps
 ## a bin or bag open like the player; RECOVER doubles as the take-off. Personality: the `ground` weights.
-enum Mode { PATROL, STALK, LINE_UP, DIVE, ESCAPE, RECOVER, CHASE_CARRIER, LAND, WALK, PECK }
+enum Mode { PATROL, STALK, LINE_UP, DIVE, ESCAPE, RECOVER, CHASE_CARRIER, LAND, WALK, PECK, SPOOK }
 const GROUND_MODES: Array[Mode] = [Mode.LAND, Mode.WALK, Mode.PECK]
 const COLOURS: Array[Color] = [Color("a5c7e6"), Color("d3b9e8"), Color("a4d8c4")]
 var gull: BeachGull
@@ -44,8 +44,10 @@ var ground_time: float = 0.0
 var ground_rest: float = 0.0
 var avoid: Array[Dictionary] = [] ## {ref, time}: jobs to keep away from for a while (they went nowhere)
 var mug_timer: float = 0.0
-var dodge_left: float = 0.0 ## seconds of sidestep remaining
-var dodge_dir: float = 0.0
+var spook_left: float = 0.0 ## seconds left flying away from a dive it read
+var spook_dir: float = 1.0
+var spook_cooldown: float = 0.0
+var spook_base: float = -1.0 ## the rival's normal speed_factor while a burst is on
 var reacting: float = -1.0 ## time left before this rival reads the incoming dive; -1 = not watching one
 var diver_seen: bool = false ## this player dive was already answered
 var hits_taken: int = 0 ## player hits taken lately: each makes the rival warier (faster to react)
@@ -121,6 +123,12 @@ func tick(delta: float, targets: Array[BeachTarget], claims: Dictionary, wind: B
 	if dummy:
 		dummy_step(delta, wind)
 		return
+	if gull.state == BeachGull.State.STUNNED and spook_left > 0.0:
+		end_spook()
+	if spook_left > 0.0 and leave <= 0.0:
+		spook_step(delta)
+		gull.tick(delta, wind.direction, wind.strength)
+		return
 	if leave > 0:
 		mode = Mode.ESCAPE
 		leave -= delta
@@ -177,22 +185,16 @@ func reaction_time() -> float:
 	return base * maxf(float(r.wary_floor),pow(float(r.wary_factor),hits_taken))
 
 ## No dice: a diver above and in line, inside read_range, starts the reaction clock. When it runs out the rival
-## breaks away (a grounded one takes off, an airborne one dives away sideways and down). Whether that is in time
-## is plain physics: a slow dive leaves time to clear the hit box, a fast one lands. Works at any height (high sky too).
+## spooks: it flaps away from the diver under its own flight (a grounded one takes off). Whether that gets it clear
+## is plain physics: a slow or distant dive can't catch it, a fast or close one does. Works at any height (high sky too).
 func evade(delta: float) -> void:
 	var r: Dictionary = Config.tuning.rival
+	spook_cooldown = maxf(0.0, spook_cooldown - delta)
 	if hits_taken > 0:
 		wary_left -= delta
 		if wary_left <= 0.0:
 			hits_taken -= 1
 			wary_left = float(r.wary_decay)
-	if gull.state != BeachGull.State.GLIDE:
-		dodge_left = 0.0 # stunned, landed or mid-dive: the sidestep is over
-	if dodge_left > 0.0:
-		var step: float = minf(delta,dodge_left)
-		dodge_left -= step
-		gull.position.x = clampf(gull.position.x + dodge_dir * float(r.dodge_distance) / float(r.dodge_time) * step,12.0,world_width() - 12.0)
-		gull.position.y += float(r.dodge_drop) / float(r.dodge_time) * step
 	var diver: BeachGull = game.player if game != null else null
 	if diver == null or diver.state != BeachGull.State.STRIKE:
 		diver_seen = false
@@ -201,7 +203,7 @@ func evade(delta: float) -> void:
 	var gap: float = gull.position.y - diver.position.y
 	var airborne: bool = gull.state == BeachGull.State.GLIDE and not mode in GROUND_MODES
 	var grounded: bool = gull.state == BeachGull.State.GROUNDED
-	if diver_seen or not (airborne or grounded) or gap < 0.0 or absf(diver.position.x - gull.position.x) > float(r.dodge_range_x) or gull.position.distance_to(diver.position) > float(r.read_range):
+	if diver_seen or spook_cooldown > 0.0 or spook_left > 0.0 or not (airborne or grounded) or gap < 0.0 or absf(diver.position.x - gull.position.x) > float(r.dodge_range_x) or gull.position.distance_to(diver.position) > float(r.read_range):
 		reacting = -1.0
 		return
 	if reacting < 0.0:
@@ -212,18 +214,35 @@ func evade(delta: float) -> void:
 	diver_seen = true
 	reacting = -1.0
 	dodges += 1
-	if grounded:
-		# Only a carrier can be mugged on the sand; flying up would make a food-less rival hittable, so it stays put.
-		if carry_window > 0.0 and carried > 0:
-			take_off()
-		return
-	dodge_dir = signf(gull.position.x - diver.position.x)
-	if dodge_dir == 0.0:
-		dodge_dir = -gull.facing
-	var landing: float = gull.position.x + dodge_dir * float(r.dodge_distance)
-	if landing < edge_margin() * 0.5 or landing > world_width() - edge_margin() * 0.5:
-		dodge_dir = -dodge_dir
-	dodge_left = float(r.dodge_time)
+	spook_dir = signf(gull.position.x - diver.position.x)
+	if spook_dir == 0.0:
+		spook_dir = -gull.facing
+	if (world_width() - gull.position.x if spook_dir > 0.0 else gull.position.x) < 120.0:
+		spook_dir = -spook_dir # a wall behind: break the other way
+	spook_left = float(r.flee_time)
+	if spook_base < 0.0:
+		spook_base = gull.speed_factor
+	gull.speed_factor = spook_base * float(r.spook_speed) # a startled burst of wingbeats
+	spook_cooldown = float(r.flee_time) + float(r.spook_cooldown)
+	work = {}
+	eat_timer = 0.0
+	chase_prey = null
+	ground_rest = maxf(ground_rest, 1.0)
+	mode = Mode.SPOOK
+
+func spook_step(delta: float) -> void:
+	spook_left -= delta
+	gull.aim = Vector2(clampf(gull.position.x + spook_dir * 320.0, edge_margin(), world_width() - edge_margin()), cruise() - float(Config.tuning.rival.spook_climb))
+	gull.climb = gull.state != BeachGull.State.WINDUP and gull.position.y + gull.velocity.y * 0.25 > gull.aim.y
+	if spook_left <= 0.0:
+		end_spook()
+		mode = Mode.RECOVER
+
+func end_spook() -> void:
+	spook_left = 0.0
+	if spook_base >= 0.0:
+		gull.speed_factor = spook_base
+		spook_base = -1.0
 
 func hold_still() -> void:
 	if dummy_hold == Vector2.INF:

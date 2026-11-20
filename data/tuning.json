@@ -333,7 +333,7 @@
     "work_timeout": 12.0,
     "avoid_time": 15.0,
     "read_range": 110, "dodge_range_x": 34, "reaction_default": 0.3, "wary_factor": 0.75, "wary_floor": 0.5, "wary_decay": 20.0,
-    "dodge_distance": 36, "dodge_time": 0.25, "dodge_drop": 12,
+    "flee_time": 1.2, "spook_climb": 0, "spook_speed": 4.0, "spook_cooldown": 3.0,
     "contest_bonus": 1.6, "contest_range": 70
   },
   "boss": {"bounce_stun": 0.6, "player_shove_radius": 20, "player_shove_stun": 0.4},

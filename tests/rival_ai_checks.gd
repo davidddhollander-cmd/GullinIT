@@ -480,8 +480,8 @@ static func ground_captures(host: Node, main: Node) -> void:
 	game.camera.position = Vector2(roundf(game.camera_x), 90)
 	await host.snapshot("rival-eats-scrap")
 
-## Rivals read an incoming dive (slower species and fresh rivals take longer) and break away: a slow dive is
-## evaded, a fast one lands, a first hit makes the rival quicker, and nothing is random.
+## Rivals read an incoming dive (slower species and fresh rivals take longer), then spook: a burst of flight away
+## from the diver (a grounded rival takes off). Warier after a player hit, nothing random.
 static func dodge_checks(host: Node, main: Node, check: Callable) -> void:
 	var game: BeachGame = await fresh(host, main, 6)
 	var r: Dictionary = Config.tuning.rival
@@ -494,64 +494,60 @@ static func dodge_checks(host: Node, main: Node, check: Callable) -> void:
 		gary.hits_taken = 0
 		base[id] = gary.reaction_time()
 	check.call(base.kittiwake < base.herring and base.herring < base["great-black-backed"], "reaction times from data: kittiwake quickest, herring quicker, black-back slow")
-	# A diver falls at `speed` straight at the rival; true when the rival is still inside the hit box at impact.
-	var lands := func(species: String, hits: int, speed: float) -> bool:
-		gary.gull.species = species
-		gary.hits_taken = hits
-		gary.gull.state = BeachGull.State.GLIDE
-		gary.mode = RivalPilot.Mode.PATROL
-		gary.gull.position = Vector2(400.0, 80.0)
-		gary.dodge_left = 0.0
-		gary.diver_seen = false
-		gary.reacting = -1.0
-		game.player.state = BeachGull.State.STRIKE
-		game.player.position = Vector2(404.0, 80.0 - float(r.read_range) * 0.9)
-		var dt: float = 1.0 / 60.0
-		while game.player.position.y < gary.gull.position.y:
-			game.player.position.y += speed * dt
-			gary.evade(dt)
-		var hit: bool = absf(game.player.position.x - gary.gull.position.x) < float(Config.tuning.rival.mug_hit[0])
-		game.player.state = BeachGull.State.GROUNDED
-		gary.evade(dt)
-		return hit
-	for id: String in ["kittiwake", "herring", "great-black-backed"]:
-		check.call(not lands.call(id, 0, 110.0), "%s evades a slow dive" % id)
-	check.call(lands.call("great-black-backed", 0, 300.0) and lands.call("herring", 0, 300.0), "a fast dive lands on a herring or black-back")
-	check.call(not lands.call("kittiwake", 0, 300.0), "a kittiwake reads even a fast dive")
-	check.call(lands.call("great-black-backed", 0, 300.0) and lands.call("great-black-backed", 0, 300.0), "the same fast dive repeated lands the same: no dice")
 	gary.gull.species = "herring"
 	gary.hits_taken = 1
-	var window_found: bool = false
-	for speed: float in range(150, 341, 10):
-		window_found = window_found or (lands.call("herring", 0, speed) and not lands.call("herring", 1, speed))
-	gary.gull.species = "herring"
-	gary.hits_taken = 1
-	check.call(gary.reaction_time() < base.herring and window_found, "after a hit a herring reacts faster and evades a dive speed it used to take")
+	var warier: float = gary.reaction_time()
 	gary.hits_taken = 99
-	check.call(is_equal_approx(gary.reaction_time(), base.herring * float(r.wary_floor)), "wariness has a floor")
-	var hits_before: int = gary.hits_taken
-	gary.gull.state = BeachGull.State.GLIDE
-	gary.bump(Vector2(0, 0), 1.0)
-	check.call(gary.hits_taken == hits_before, "a bump alone (e.g. by another rival) does not make a rival warier")
+	check.call(warier < base.herring and is_equal_approx(gary.reaction_time(), base.herring * float(r.wary_floor)), "a hit makes a rival react faster, down to a floor")
 	gary.hits_taken = 1
 	gary.wary_left = 0.01
 	gary.evade(0.05)
 	check.call(gary.hits_taken == 0, "wariness fades with time")
-	# A grounded rival takes off to get away.
-	gary.gull.state = BeachGull.State.GROUNDED
-	gary.mode = RivalPilot.Mode.PECK
-	gary.hits_taken = 0
-	gary.gull.position = Vector2(400.0, float(gary.gull.ground_y()))
-	game.player.state = BeachGull.State.STRIKE
-	game.player.position = Vector2(402.0, gary.gull.position.y - 60.0)
+	gary.bump(Vector2(0, 0), 1.0)
+	check.call(gary.hits_taken == 0, "a bump alone (e.g. by another rival) does not make a rival warier")
+	# Reads a dive: nothing until the reaction time has passed, then it flaps away from the diver.
+	var setup := func(state: BeachGull.State, mode: RivalPilot.Mode) -> void:
+		gary.end_spook()
+		gary.spook_cooldown = 0.0
+		gary.diver_seen = false
+		gary.reacting = -1.0
+		gary.hits_taken = 0
+		gary.gull.speed_factor = 1.0
+		gary.gull.state = state
+		gary.mode = mode
+		gary.gull.velocity = Vector2.ZERO
+		gary.gull.position = Vector2(400.0, 65.0 if state == BeachGull.State.GLIDE else gary.gull.ground_y())
+		game.player.state = BeachGull.State.STRIKE
+		game.player.position = Vector2(396.0, gary.gull.position.y - 60.0)
+	setup.call(BeachGull.State.GLIDE, RivalPilot.Mode.PATROL)
+	gary.evade(base.herring * 0.5)
+	check.call(gary.mode == RivalPilot.Mode.PATROL and gary.spook_left <= 0.0, "a rival has not reacted before its reaction time is up")
+	gary.evade(base.herring)
+	check.call(gary.mode == RivalPilot.Mode.SPOOK and gary.spook_dir > 0.0 and gary.gull.speed_factor > 1.0, "after its reaction time it spooks away from the diver with a burst of speed")
+	for i: int in 40:
+		gary.spook_step(1.0 / 60.0)
+		gary.gull.tick(1.0 / 60.0, 0, 0.0)
+	check.call(gary.gull.position.x > 430.0, "the spooked rival really flies away under its own flight")
+	for i: int in 90:
+		gary.spook_step(1.0 / 60.0)
+	check.call(gary.mode == RivalPilot.Mode.RECOVER and is_equal_approx(gary.gull.speed_factor, 1.0), "the burst ends and the normal speed comes back")
 	gary.diver_seen = false
-	for i: int in 60:
-		gary.evade(1.0 / 60.0)
-	check.call(gary.mode == RivalPilot.Mode.PECK and gary.gull.state == BeachGull.State.GROUNDED, "a grounded rival with no food stays put (it is not hittable on the sand)")
-	gary.carry_window = 5.0
-	gary.carried = 20
-	gary.diver_seen = false
-	for i: int in 60:
-		gary.evade(1.0 / 60.0)
-	check.call(gary.mode == RivalPilot.Mode.RECOVER, "a grounded carrier takes off when it reads a dive")
+	gary.reacting = -1.0
+	gary.evade(1.0)
+	check.call(gary.mode == RivalPilot.Mode.RECOVER, "a spooked rival does not spook again straight away")
+	setup.call(BeachGull.State.GLIDE, RivalPilot.Mode.PATROL)
+	gary.evade(1.0)
+	gary.gull.state = BeachGull.State.STUNNED
+	gary.tick(0.016, [], {}, game.wind)
+	check.call(gary.spook_left <= 0.0 and is_equal_approx(gary.gull.speed_factor, 1.0), "a rival hit mid-flight drops the burst")
+	# A grounded rival with no food reads a dive too, and takes off.
+	setup.call(BeachGull.State.GROUNDED, RivalPilot.Mode.PECK)
+	gary.evade(1.0)
+	check.call(gary.mode == RivalPilot.Mode.SPOOK and gary.work.is_empty(), "a grounded rival reads the dive and takes off")
+	# Below the diver does not count.
+	setup.call(BeachGull.State.GLIDE, RivalPilot.Mode.PATROL)
+	game.player.position.y = gary.gull.position.y + 20.0
+	gary.evade(1.0)
+	check.call(gary.mode == RivalPilot.Mode.PATROL, "a diver below the rival is no threat")
 	game.player.state = BeachGull.State.GROUNDED
+	gary.end_spook()
