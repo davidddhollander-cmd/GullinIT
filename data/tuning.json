@@ -337,8 +337,8 @@
     "walk_range": 120,
     "work_timeout": 12.0,
     "avoid_time": 15.0,
-    "read_range": 150, "dodge_range_x": 48, "reaction_default": 0.3, "wary_factor": 0.75, "wary_floor": 0.5, "wary_decay": 20.0,
-    "flee_time": 1.2, "spook_climb": 0, "spook_speed": 3.0, "spook_cooldown": 3.0,
+    "read_range": 190, "dodge_range_x": 48, "reaction_default": 0.3, "wary_factor": 0.75, "wary_floor": 0.5, "wary_decay": 20.0,
+    "flee_time": 1.8, "spook_climb": 0, "spook_speed": 3.0, "spook_cooldown": 3.0,
     "contest_bonus": 1.6, "contest_range": 70
   },
   "boss": {"bounce_stun": 0.6, "player_shove_radius": 20, "player_shove_stun": 0.4},
