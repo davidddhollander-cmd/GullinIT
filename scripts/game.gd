@@ -853,6 +853,7 @@ func _miss_cue(reason: String) -> void:
 	if training_miss_hint > 0.0 or overlay.score_announcement.visible:
 		return
 	miss_cue_ready_at = elapsed + float(Config.tuning.juice.miss_cue_cooldown)
+	overlay.score_announcement.add_theme_font_override("font",overlay.score_announcement_fonts[1]) # the hot red score font
 	overlay.show_callout(str(Config.trainer.miss_cues[reason]))
 
 ## How close the beak must be to the snack for a peck pressed now to reach it before the window closes.

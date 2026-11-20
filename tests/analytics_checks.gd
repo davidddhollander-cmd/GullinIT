@@ -91,7 +91,7 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(game.dive_stats.dives == 2 and game.dive_stats.dive_overshoots == 1, "a dive pulled up short of the snack is not an overshoot")
 	# Task 101: why a dive missed. Dive 1 pecked while the snack was out of reach (early); the cue is on screen.
 	var cue_texts: Callable = func() -> Array: return ([game.overlay.score_announcement.text] if game.overlay.score_announcement.visible else [])
-	check.call(game.miss_stats == {"miss_early": 1, "miss_far": 0} and "TOO EARLY" in cue_texts.call(), "a peck pressed out of reach shows TOO EARLY and counts miss_early")
+	check.call(game.miss_stats == {"miss_early": 1, "miss_far": 0} and "MISS! TOO EARLY!" in cue_texts.call(), "a peck pressed out of reach shows TOO EARLY and counts miss_early")
 	check.call(game.overlay.score_announcement.get_parent().offset_top == BeachOverlay.SCORE_CALLOUT_TOP, "the miss callout sits in the top score slot")
 	# Dive 3: no peck, flew past the snack, inside the cue cooldown: counted, no second cue.
 	game.overlay.score_announcement.hide()
