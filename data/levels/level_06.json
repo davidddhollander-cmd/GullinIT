@@ -50,9 +50,9 @@
     {"type": "bin", "x": 735},
     {"type": "beach_bench", "x": 773, "y": 153},
     {"type": "umbrella", "x": 850},
+    {"type": "beach_palm", "x": 899, "y": 148, "flip": true, "scale": 0.870968},
     {"type": "umbrella", "x": 960},
-    {"type": "beach_lamp", "x": 1020, "y": 151},
-    {"type": "beach_palm", "x": 1075, "y": 148}
+    {"type": "beach_lamp", "x": 1020, "y": 151}
   ],
   "map_version": 3
 }

@@ -24,6 +24,14 @@ static func run(check: Callable) -> void:
 				signatures[JSON.stringify(level.props)] = true
 		check.call(JSON.stringify(source)==original,"generator leaves authored recipe intact")
 	check.call(signatures.size()==8,"all eight levels have distinct scenery arrangements")
+	var palm_xs: Array[float] = []
+	for number: int in range(1,9):
+		for prop: Dictionary in Config.read_json("res://data/levels/level_%02d.json" % number).props:
+			if prop.type == "beach_palm":
+				palm_xs.append(float(prop.x))
+	palm_xs.sort()
+	for i: int in range(1,palm_xs.size()):
+		check.call(palm_xs[i]-palm_xs[i-1]>=70.0,"palms never share a spot across levels")
 
 static func _check_palms(check: Callable, level: Dictionary) -> void:
 	var palms: Array[float] = []

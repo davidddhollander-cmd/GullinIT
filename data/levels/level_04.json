@@ -55,7 +55,7 @@
     {"type": "bin", "x": 810},
     {"type": "beach_parasol_blue", "x": 895, "y": 143},
     {"type": "bin", "x": 970},
-    {"type": "beach_palm", "x": 1040, "y": 148}
+    {"type": "beach_palm", "x": 1020, "y": 148, "flip": true}
   ],
   "map_version": 3
 }
