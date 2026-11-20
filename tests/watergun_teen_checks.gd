@@ -44,7 +44,7 @@ static func run(suite: Node, check: Callable) -> void:
 		check.call(not Config.levels[number-1].has("watergun_teens"),"level %d has no water-gun teenager" % number)
 	for number: int in [5, 6, 8]:
 		var placed: Array = Config.levels[number-1].get("watergun_teens",[])
-		check.call(placed.size() == (2 if number == 8 else 1),"level %d places its water-gun teenagers" % number)
+		check.call(placed.size() == (2 if number == 5 or number == 8 else 1),"level %d places its water-gun teenagers" % number)
 		var other: BeachGame = _fresh(suite,number)
 		check.call(other.teens.size() == placed.size() and other.teens[0].get_parent() == other.actors,"level %d spawns the teenager as an actor" % number)
 		check.call(other.spawner.targets.size() == Config.levels[number-1].spawns.filter(func(spawn: Dictionary) -> bool: return spawn.type != "off_lead_dog").size(),"level %d teenager is not a food target" % number)
@@ -103,7 +103,7 @@ static func run(suite: Node, check: Callable) -> void:
 	_put(player,Vector2(teen.position.x+40.0,level_y-float(t.aim_max_dy)-10.0))
 	teen.tick(DT,game.gulls)
 	check.call(teen.state == WatergunTeen.State.PATROL,"a gull flying above aiming height is safe")
-	teen.home = Vector2(450.0,460.0)
+	teen.home = Vector2(100.0,110.0)
 	_put(player,Vector2(teen.position.x+30.0,level_y))
 	teen.tick(DT,game.gulls)
 	check.call(teen.state == WatergunTeen.State.PATROL,"a gull inside notice_radius but outside the leash is ignored")
@@ -123,8 +123,8 @@ static func run(suite: Node, check: Callable) -> void:
 	_run(teen,game,0.15)
 	check.call(teen.state == WatergunTeen.State.PURSUE,"he starts pursuing after the alert")
 	var before: float = teen.position.x
-	_run(teen,game,0.5)
-	var speed: float = (teen.position.x-before)/0.5
+	_run(teen,game,0.3)
+	var speed: float = (teen.position.x-before)/0.3
 	check.call(absf(speed-float(t.run_speed)) < 3.0 and speed > float(Config.tuning.flight.ground_speed) and speed < float(Config.tuning.flight.max_speed),"pursuit speed sits between gull walking and flying")
 
 	# Aim pose follows the mark's height.
@@ -163,7 +163,7 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(teen.target == rival,"he picks the nearest gull, which can be a rival")
 	_run(teen,game,float(t.alert_time)+0.3)
 	_run(teen,game,float(t.aim_time)+0.3)
-	_run(teen,game,0.6)
+	_run(teen,game,0.1) # first hit lands at ~1.1 s; stop before the rival's 0.5 s stun ends and the faster volley re-hits it
 	check.call(hits[0] == 1 and rival.state == BeachGull.State.STUNNED and player.state != BeachGull.State.STUNNED,"a water shot stuns a rival and spares the player")
 
 	# A swerving gull can dodge: it leaves the shot line after the shot is fired.
@@ -195,6 +195,31 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(teen.state == WatergunTeen.State.PATROL,"he is still deaf to gulls just before the rearm ends")
 	_run(teen,game,0.1)
 	check.call(teen.state == WatergunTeen.State.SPOT,"he notices gulls again after rearming")
+
+	# Cadence: 4 shots in 2 s from the first aim (shots land at 0.2, 0.7, 1.2, 1.7 s; the 5th is due at 2.2 s).
+	_reset(teen,game)
+	shots_seen[0] = 0
+	teen.state = WatergunTeen.State.PURSUE
+	teen.target = player
+	for i: int in 120:
+		_put(player,Vector2(teen.position.x+60.0,level_y)) # a hit would stun him and end the volley, so keep resetting him
+		teen.tick(DT,game.gulls)
+		for shot: BeachWaterShot in teen.shots:
+			shot.queue_free()
+		teen.shots.clear()
+	check.call(shots_seen[0] == 4,"a planted teenager fires 4 shots in 2 s (got %d)" % shots_seen[0])
+
+	# Chase: a low gull just past the end of his home range still draws him out across the beach.
+	_reset(teen,game)
+	teen.position.x = 200.0
+	teen.home = Vector2(60.0,360.0)
+	teen.state = WatergunTeen.State.PURSUE
+	teen.target = player
+	for i: int in 240:
+		_put(player,Vector2(teen.position.x+float(t.fire_range)+15.0,level_y))
+		teen.tick(DT,game.gulls)
+	check.call(teen.position.x > teen.home.y+60.0 and teen.state == WatergunTeen.State.PURSUE and teen._in_leash(player.position.x),"he chases a low gull well past his home range, inside the leash")
+	_reset(teen,game)
 
 	# Pausing freezes the sprite.
 	game.set_paused(true)
