@@ -136,11 +136,12 @@ func pick(cues: Array, start: int = -1) -> String:
 			return str(cues[(start+i)%cues.size()])
 	return ""
 
-## The first cue in `cues` the lab approved, else the first that isn't rejected, else "" (plays nothing).
-func first_allowed(cues: Array) -> String:
-	for cue: Variant in cues:
-		if approved_cues.has(CUE_FILES.get(str(cue),str(cue))) and not rejected(str(cue)):
-			return str(cue)
+## A random cue among those in `cues` the lab approved (cosmetic RNG), else the first that isn't
+## rejected, else "" (plays nothing).
+func choose(cues: Array) -> String:
+	var approved: Array = cues.filter(func(c: Variant) -> bool: return approved_cues.has(CUE_FILES.get(str(c),str(c))) and not rejected(str(c)))
+	if not approved.is_empty():
+		return str(approved[fx_rng.randi()%approved.size()])
 	for cue: Variant in cues:
 		if not rejected(str(cue)):
 			return str(cue)
@@ -148,7 +149,7 @@ func first_allowed(cues: Array) -> String:
 
 ## A data value that is one cue name or a list of candidates -> the cue to play.
 func resolve(cue: Variant) -> String:
-	return first_allowed(cue) if cue is Array else str(cue)
+	return choose(cue) if cue is Array else str(cue)
 
 ## The cue for `key` in tuning.sfx (a candidate list).
 func sfx(key: String) -> String:

@@ -231,15 +231,18 @@ static func _variant_checks(check: Callable, blackback: BeachGame) -> void:
 		Audio.set_approvals(sounds)
 	var list: Array = ["a","b","c"]
 	Audio.set_approvals({})
-	check.call(Audio.first_allowed(["snatch_1","snatch_2"]) == "snatch_1","helper: nothing approved picks the first")
+	check.call(Audio.choose(["snatch_1","snatch_2"]) == "snatch_1","helper: nothing approved picks the first")
 	set_verdicts.call({"snatch_1": "rejected","snatch_3": "approved"})
-	check.call(Audio.first_allowed(["snatch_1","snatch_2","snatch_3","snatch_4"]) == "snatch_3","helper: an approved cue beats an earlier unreviewed one")
+	check.call(Audio.choose(["snatch_1","snatch_2","snatch_3","snatch_4"]) == "snatch_3","helper: an approved cue beats an earlier unreviewed one")
 	set_verdicts.call({"snatch_1": "rejected","snatch_2": "unreviewed"})
-	check.call(Audio.first_allowed(["snatch_1","snatch_2","snatch_3"]) == "snatch_2","helper: rejected cues are skipped")
+	check.call(Audio.choose(["snatch_1","snatch_2","snatch_3"]) == "snatch_2","helper: rejected cues are skipped")
 	set_verdicts.call({"snatch_1": "approved","snatch_2": "approved"})
-	check.call(Audio.first_allowed(["snatch_2","snatch_1"]) == "snatch_2","helper: the first approved in list order wins")
+	var seen: Dictionary = {}
+	for i: int in 40:
+		seen[Audio.choose(["snatch_3","snatch_2","snatch_1"])] = true
+	check.call(seen.size() == 2 and seen.has("snatch_1") and seen.has("snatch_2"),"helper: approved cues rotate at random, unreviewed ones are left out")
 	set_verdicts.call({"snatch_1": "rejected","snatch_2": "rejected"})
-	check.call(Audio.first_allowed(["snatch_1","snatch_2"]) == "" and list.size() == 3,"helper: all rejected returns an empty cue")
+	check.call(Audio.choose(["snatch_1","snatch_2"]) == "" and list.size() == 3,"helper: all rejected returns an empty cue")
 	# snatch and combo-up go through it, keeping the pitch-up
 	Audio.set_approvals({})
 	var player: AudioStreamPlayer = Audio.play(Audio.sfx("snatch"),1.16)
