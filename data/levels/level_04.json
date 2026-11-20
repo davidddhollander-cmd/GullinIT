@@ -45,6 +45,7 @@
     {"type": "sunbather", "x": 900, "appearance": "female_red", "station": "sun_0", "patrol_radius": 0}
   ],
   "props": [
+    {"type": "beach_shells", "x": 936, "y": 140},
     {"type": "beach_lamp", "x": 60, "y": 151},
     {"type": "wheelie_bin", "x": 95},
     {"type": "bin", "x": 270},

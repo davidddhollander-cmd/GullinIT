@@ -1,7 +1,7 @@
 {
   "id": 6,
   "crabs": {"enabled": true},
-  "sweeper": {"enabled": true, "range": [24, 1250]},
+  "sweeper": {"enabled": true, "range": [24, 1090]},
   "thumb": ["thumb_head_herring", "thumb_head_kittiwake", "thumb_head_great_black_backed"],
   "name": "Three's a Crowd",
   "seed": 7105,
@@ -21,39 +21,39 @@
     {"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16, "mug_chance": 0.3, "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}},
     {"name": "Chip", "species": "kittiwake", "speed": 1.1, "accuracy_px": 8, "mug_chance": 0.8, "after_snatch": true, "taunt": "CHIP: FINDERS KEEPERS!", "ground": {"scraps": 0.3, "bins": 0.2, "bags": 0.3, "catch": 0.8}}
   ],
-  "world": {"width": 1280, "promenade_start": 430, "pier_start": 920, "start_x": 65, "start_y": 105},
+  "world": {"width": 1120, "promenade_start": 600, "pier_start": 600, "start_x": 65, "start_y": 105},
   "zones": [
-    {"name": "QUIET BEACH", "from": 0, "to": 430},
-    {"name": "PROMENADE", "from": 430, "to": 920},
-    {"name": "PIER DINING", "from": 920, "to": 1280}
+    {"name": "FAMILY BEACH", "from": 0, "to": 600},
+    {"name": "PIER DINING", "from": 600, "to": 1120}
   ],
-  "watergun_teens": [{"x": 830, "home": [790, 900]}],
+  "watergun_teens": [{"x": 750, "home": [700, 800]}],
   "spawns": [
-    {"type": "kiosk_customer", "x": 555, "food_id": "hotdog", "appearance": "shopper_mullet", "station": "hotdogs", "patrol_radius": 14},
-    {"type": "kiosk_customer", "x": 680, "food_id": "hotdog", "appearance": "old_man", "station": "hotdogs", "patrol_radius": 12},
-    {"type": "pier_diner", "x": 1075, "appearance": "pier_diner", "station": "pier_dining", "patrol_radius": 8},
-    {"type": "pier_diner", "x": 1150, "appearance": "pier_diner_b", "station": "pier_dining", "patrol_radius": 8},
+    {"type": "kiosk_customer", "x": 410, "food_id": "hotdog", "appearance": "shopper_mullet", "station": "hotdogs", "patrol_radius": 14},
+    {"type": "kiosk_customer", "x": 365, "food_id": "hotdog", "appearance": "old_man", "station": "hotdogs", "patrol_radius": 12},
+    {"type": "pier_diner", "x": 850, "appearance": "pier_diner", "station": "pier_dining", "patrol_radius": 8},
+    {"type": "pier_diner", "x": 960, "appearance": "pier_diner_b", "station": "pier_dining", "patrol_radius": 8},
     {"type": "toddler", "x": 210, "family_id": "family_1", "station": "family_1", "patrol_radius": 5, "speed_mult": 0.6},
     {"type": "picnic_family", "x": 255, "family_id": "family_1", "station": "family_1", "patrol_radius": 0},
     {"type": "off_lead_dog", "x": 300, "home": [240, 320]}
   ],
   "props": [
-    {"type": "beach_palm", "x": 125, "y": 148},
-    {"type": "beach_palm", "x": 1230, "y": 148},
-    {"type": "beach_parasol", "x": 300, "y": 143},
-    {"type": "bin", "x": 380},
-    {"type": "beach_lamp", "x": 500, "y": 151},
-    {"type": "wheelie_bin", "x": 600},
-    {"type": "hotdog_stand", "x": 640, "customer_x": 680},
-    {"type": "fish_chips_stand", "x": 950, "customer_x": 990},
-    {"type": "beach_lamp", "x": 740, "y": 151},
-    {"type": "bin", "x": 790},
-    {"type": "bin", "x": 860},
-    {"type": "beach_bench", "x": 895, "y": 153},
-    {"type": "umbrella", "x": 1075},
-    {"type": "bin", "x": 1160},
-    {"type": "beach_bench", "x": 1185, "y": 153},
-    {"type": "beach_rocks", "x": 1255, "y": 172}
+    {"type": "beach_shells", "x": 36, "y": 146},
+    {"type": "beach_ball", "x": 84, "y": 138},
+    {"type": "beach_parasol", "x": 135, "y": 143},
+    {"type": "beach_castle", "x": 178, "y": 171, "jitter": true},
+    {"type": "beach_chair_blue", "x": 290, "y": 151},
+    {"type": "beach_rocks", "x": 335, "y": 172},
+    {"type": "hotdog_stand", "x": 450, "customer_x": 410},
+    {"type": "wheelie_bin", "x": 500},
+    {"type": "beach_bench", "x": 545, "y": 153},
+    {"type": "bin", "x": 582},
+    {"type": "fish_chips_stand", "x": 660, "customer_x": 700},
+    {"type": "bin", "x": 735},
+    {"type": "beach_bench", "x": 773, "y": 153},
+    {"type": "umbrella", "x": 850},
+    {"type": "umbrella", "x": 960},
+    {"type": "beach_lamp", "x": 1020, "y": 151},
+    {"type": "beach_palm", "x": 1075, "y": 148}
   ],
   "map_version": 3
 }

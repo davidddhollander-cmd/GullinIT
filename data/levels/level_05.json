@@ -19,39 +19,41 @@
   "rivals": [
     {"name": "Gary", "species": "great-black-backed", "speed": 0.8, "accuracy_px": 16, "mug_chance": 0.3, "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}}
   ],
-  "world": {"width": 1280, "promenade_start": 430, "pier_start": 920, "start_x": 65, "start_y": 105},
+  "world": {"width": 1280, "promenade_start": 700, "pier_start": 1020, "start_x": 65, "start_y": 105},
   "zones": [
-    {"name": "QUIET BEACH", "from": 0, "to": 430},
-    {"name": "PROMENADE", "from": 430, "to": 920},
-    {"name": "PIER DINING", "from": 920, "to": 1280}
+    {"name": "SUN BEACH", "from": 0, "to": 700},
+    {"name": "PROMENADE", "from": 700, "to": 1020},
+    {"name": "PIER", "from": 1020, "to": 1280}
   ],
-  "watergun_teens": [{"x": 640, "home": [600, 740]}],
+  "watergun_teens": [{"x": 560, "home": [480, 640]}],
   "spawns": [
-    {"type": "sunbather", "x": 150, "appearance": "male_blue", "station": "sun_0", "patrol_radius": 0},
-    {"type": "sunbather", "x": 250, "appearance": "female_blue", "station": "sun_2", "patrol_radius": 0},
-    {"type": "sunbather", "x": 300, "appearance": "male_red", "station": "sun_3", "patrol_radius": 0},
-    {"type": "kiosk_customer", "x": 545, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "ice_cream", "patrol_radius": 12},
-    {"type": "kiosk_customer", "x": 1190, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "hotdogs", "patrol_radius": 12}
+    {"type": "sunbather", "x": 170, "appearance": "male_blue", "station": "sun_0", "patrol_radius": 0},
+    {"type": "sunbather", "x": 310, "appearance": "female_blue", "station": "sun_2", "patrol_radius": 0},
+    {"type": "sunbather", "x": 600, "appearance": "male_red", "station": "sun_3", "patrol_radius": 0},
+    {"type": "kiosk_customer", "x": 445, "food_id": "hotdog", "appearance": "shopper_sundress", "station": "hotdogs", "patrol_radius": 12},
+    {"type": "kiosk_customer", "x": 815, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "ice_cream", "patrol_radius": 12}
   ],
   "props": [
-    {"type": "beach_palm", "x": 30, "y": 148},
+    {"type": "beach_ball", "x": 80, "y": 146},
+    {"type": "beach_lifebuoy_flat", "x": 560, "y": 140},
     {"type": "beach_parasol_blue", "x": 170, "y": 143},
-    {"type": "beach_parasol", "x": 270, "y": 143},
-    {"type": "beach_parasol_blue", "x": 320, "y": 143},
-    {"type": "beach_palm", "x": 355, "y": 148},
-    {"type": "beach_hut", "x": 390, "y": 151},
-    {"type": "beach_rocks", "x": 1000, "y": 172},
-    {"type": "beach_rocks", "x": 1235, "y": 172},
-    {"type": "bin", "x": 425},
-    {"type": "beach_lamp", "x": 465, "y": 151},
-    {"type": "kiosk", "x": 500, "customer_x": 545},
-    {"type": "wheelie_bin", "x": 715},
-    {"type": "hotdog_stand", "x": 760, "customer_x": 800},
-    {"type": "bin", "x": 816},
-    {"type": "beach_bench", "x": 850, "y": 153, "jitter": true},
-    {"type": "beach_lamp", "x": 890, "y": 151},
-    {"type": "bin", "x": 1160},
-    {"type": "beach_bench", "x": 1190, "y": 153}
+    {"type": "beach_chair_blue", "x": 215, "y": 151},
+    {"type": "beach_castle", "x": 252, "y": 171, "jitter": true},
+    {"type": "beach_parasol", "x": 310, "y": 143},
+    {"type": "bin", "x": 352},
+    {"type": "hotdog_stand", "x": 400, "customer_x": 445},
+    {"type": "beach_hut", "x": 520, "y": 151},
+    {"type": "beach_parasol_blue", "x": 600, "y": 143},
+    {"type": "beach_palm", "x": 665, "y": 148},
+    {"type": "beach_lamp", "x": 760, "y": 151},
+    {"type": "kiosk", "x": 860, "customer_x": 815},
+    {"type": "wheelie_bin", "x": 905},
+    {"type": "beach_bench", "x": 950, "y": 153},
+    {"type": "bin", "x": 987},
+    {"type": "fish_chips_stand", "x": 1100, "customer_x": 1140},
+    {"type": "bin", "x": 1147},
+    {"type": "beach_bench", "x": 1185, "y": 153},
+    {"type": "umbrella", "x": 1240}
   ],
   "map_version": 3
 }
