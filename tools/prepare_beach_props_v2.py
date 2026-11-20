@@ -16,14 +16,14 @@ PAL = np.array([[int(m.group(1)[i:i + 2], 16) for i in (0, 2, 4)] for line in (v
 				if (m := re.search(r"([0-9a-fA-F]{6})", line))], dtype=float)
 SPRITES = v1.ROOT / "data" / "sprites.json"
 ART_SCALE = 2  # art px per game px: 2x the world grid (same as the cast); v1 used 4, which read too fine next to the props
-# name -> (sprite id, v2 width in game px, palette blend weight)
+# name -> (sprite id, v2 width in game px, palette blend weight, soft outline)
 V2 = {
-	"BEACH BALL": ("beach_ball", 6, 0.45),
-	"SHELLS": ("beach_shells", 7, 0.5),
-	"JET SKI": ("beach_jet_ski", 36, 0.5),
-	"LIFEBUOY HUNG": ("beach_lifebuoy_hung", 8, 0.5),
-	"BUCKET AND SPADE": ("beach_bucket", 11, 0.8),
-	"LIFEBUOY FLAT": ("beach_lifebuoy_flat", 14, 0.8),
+	"BEACH BALL": ("beach_ball", 6, 0.45, False),
+	"SHELLS": ("beach_shells", 7, 0.5, True),
+	"JET SKI": ("beach_jet_ski", 36, 0.5, False),
+	"LIFEBUOY HUNG": ("beach_lifebuoy_hung", 8, 0.5, False),
+	"BUCKET AND SPADE": ("beach_bucket", 11, 0.8, True),
+	"LIFEBUOY FLAT": ("beach_lifebuoy_flat", 14, 0.8, False),
 }
 
 
@@ -45,6 +45,17 @@ def blend(art: np.ndarray, weight: float, swap: bool) -> np.ndarray:
 	return out
 
 
+def colour_outline(art: np.ndarray, shade: float = 0.55) -> np.ndarray:
+	"""Near-black outline pixels take a darkened copy of the nearest fill colour (dark red on red, brown on shell)."""
+	out = art.copy()
+	dark = (art[..., 3] > 0) & ((art[..., :3] @ [0.299, 0.587, 0.114]) < 70)
+	ys, xs = np.nonzero((art[..., 3] > 0) & ~dark)
+	for y, x in zip(*np.nonzero(dark)):
+		i = np.argmin((ys - y) ** 2 + (xs - x) ** 2)
+		out[y, x, :3] = (art[ys[i], xs[i], :3] * shade).astype(np.uint8)
+	return out
+
+
 def main() -> None:
 	rgba = np.array(Image.open(v1.SHEET).convert("RGBA"))
 	mask = rgba[:, :, 3] >= v1.ALPHA_MIN
@@ -54,7 +65,8 @@ def main() -> None:
 	text = SPRITES.read_text(encoding="utf-8")
 	lab = json.loads(v1.LAB.read_text(encoding="utf-8-sig"))
 	for name, (row, col), _w, live, why in v1.PROPS:
-		sid, width, weight = V2[name]
+		sid, width, weight, soft = V2[name]
+		v1.food.OUTLINE_SHARE = 0.5 if soft else 0.20  # soft: a block is outline only when mostly outline
 		mine = [b for b in boxes if int((b[1] + b[3]) / 2 // cell) == row and int((b[0] + b[2]) / 2 // cell) == col]
 		box = (min(b[0] for b in mine), min(b[1] for b in mine), max(b[2] for b in mine), max(b[3] for b in mine))
 		own = np.zeros_like(mask)
@@ -62,6 +74,8 @@ def main() -> None:
 		# never upscale the sheet (it leaves gaps): the jet ski's source is 200 px wide, so it is drawn at native size and scaled in game
 		art = v1.food.reduce_item(rgb, own, box, min(width * ART_SCALE, box[2] - box[0]) / (box[2] - box[0]))
 		art = blend(art, weight, swap=name == "LIFEBUOY FLAT")
+		if soft:
+			art = colour_outline(art)
 		h, w = art.shape[:2]
 		scale = round(width / w, 4)
 		slug = name.lower().replace(" ", "-")
