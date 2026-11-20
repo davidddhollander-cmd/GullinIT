@@ -44,6 +44,13 @@ var ground_time: float = 0.0
 var ground_rest: float = 0.0
 var avoid: Array[Dictionary] = [] ## {ref, time}: jobs to keep away from for a while (they went nowhere)
 var mug_timer: float = 0.0
+var dodge_left: float = 0.0 ## seconds of sidestep remaining
+var dodge_dir: float = 0.0
+var dodge_cooldown: float = 0.0
+var dodge_memory: float = 0.0 ## player dives seen lately; spamming makes the rival wiser
+var recent_dives: int = 0
+var diver_seen: bool = false ## this player dive was already judged
+var dodges: int = 0
 var mugs: int = 0
 ## Training Day dummy: patrols back and forth, never hunts, dives or mugs, and only carries food when armed.
 var dummy: bool = false
@@ -109,6 +116,8 @@ func tick(delta: float, targets: Array[BeachTarget], claims: Dictionary, wind: B
 			avoid.remove_at(i)
 	if threat.x >= 0.0:
 		threat_x = threat.x
+	if not dummy:
+		evade(delta)
 	if dummy:
 		dummy_step(delta, wind)
 		return
@@ -155,6 +164,47 @@ func dummy_step(delta: float, wind: BeachWind) -> void:
 	if dummy_hold != Vector2.INF and gull.state != BeachGull.State.STUNNED:
 		gull.position = dummy_hold
 		gull.velocity = Vector2.ZERO
+
+## Chance to sidestep the next dive: low for a first dive, wiser for each recent one (so spam fails).
+func dodge_chance() -> float:
+	var r: Dictionary = Config.tuning.rival
+	return minf(float(r.dodge_chance_max), float(r.dodge_chance) + float(r.dodge_chance_step) * maxi(0, recent_dives - 1))
+
+## A diving player above and close gets one dodge roll per dive; a dive begun too close to react to still lands.
+## Works at any height, so it covers the high sky too. Mid-dive, grounded, stunned or fleeing-with-theft rivals can't.
+func evade(delta: float) -> void:
+	var r: Dictionary = Config.tuning.rival
+	dodge_cooldown = maxf(0.0, dodge_cooldown - delta)
+	dodge_memory = maxf(0.0, dodge_memory - delta)
+	if dodge_memory <= 0.0:
+		recent_dives = 0
+	if dodge_left > 0.0:
+		dodge_left -= delta
+		gull.position.x = clampf(gull.position.x + dodge_dir * float(r.dodge_distance) / float(r.dodge_time) * delta, 12.0, world_width() - 12.0)
+	var diver: BeachGull = game.player if game != null else null
+	if diver == null or diver.state != BeachGull.State.STRIKE:
+		diver_seen = false
+		return
+	if diver_seen or gull.state != BeachGull.State.GLIDE or mode in GROUND_MODES or dodge_cooldown > 0.0:
+		return
+	var gap: float = gull.position.y - diver.position.y
+	if absf(diver.position.x - gull.position.x) > float(r.dodge_range_x) or gap > float(r.dodge_max_gap) or gap < 0.0:
+		return
+	diver_seen = true
+	recent_dives += 1
+	dodge_memory = float(r.dodge_memory)
+	if gap < float(r.dodge_min_gap) or rng.randf() >= dodge_chance():
+		return
+	dodge_dir = signf(gull.position.x - diver.position.x)
+	if dodge_dir == 0.0:
+		dodge_dir = -gull.facing
+	var landing: float = gull.position.x + dodge_dir * float(r.dodge_distance)
+	if landing < edge_margin() * 0.5 or landing > world_width() - edge_margin() * 0.5:
+		dodge_dir = -dodge_dir
+	dodge_left = float(r.dodge_time)
+	dodge_cooldown = float(r.dodge_cooldown)
+	dodges += 1
+	game.effects.message(gull.position - Vector2(0, 16), "WHOOSH!", Color("fff4da"))
 
 func hold_still() -> void:
 	if dummy_hold == Vector2.INF:
@@ -224,6 +274,8 @@ func pick_target(targets: Array[BeachTarget], claims: Dictionary) -> void:
 		var score: float = float(candidate.food_value()) / (distance + 80.0)
 		if candidate.alert >= 1.0:
 			score *= 0.7
+		if game != null and absf(game.player.position.x - candidate.food_position().x) <= float(Config.tuning.rival.contest_range) and game.player.state != BeachGull.State.GROUNDED:
+			score *= float(Config.tuning.rival.contest_bonus) # contest food the player is closing on
 		if candidate == target:
 			score *= 1.3
 			current = score

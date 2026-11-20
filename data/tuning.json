@@ -331,7 +331,9 @@
     "ground_cooldown": 1.0,
     "walk_range": 120,
     "work_timeout": 12.0,
-    "avoid_time": 15.0
+    "avoid_time": 15.0,
+    "dodge_range_x": 34, "dodge_min_gap": 28, "dodge_max_gap": 110, "dodge_chance": 0.4, "dodge_chance_step": 0.25, "dodge_chance_max": 0.9,
+    "dodge_memory": 5.0, "dodge_distance": 36, "dodge_time": 0.25, "dodge_cooldown": 0.5, "contest_bonus": 1.6, "contest_range": 70
   },
   "boss": {"bounce_stun": 0.6, "player_shove_radius": 20, "player_shove_stun": 0.4},
   "wind_flag": {"flap_speed": 7.0, "base_reach": 7, "wind_reach": 3.0, "intro_lift": 14, "intro_reach": 12},

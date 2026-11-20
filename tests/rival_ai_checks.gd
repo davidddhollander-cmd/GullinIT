@@ -479,3 +479,55 @@ static func ground_captures(host: Node, main: Node) -> void:
 	game.camera_x = clampf(gary.gull.position.x, 160.0, 1120.0)
 	game.camera.position = Vector2(roundf(game.camera_x), 90)
 	await host.snapshot("rival-eats-scrap")
+
+## Rivals sidestep a dive from above; late dives still land and spamming raises the odds instead of landing every time.
+static func dodge_checks(host: Node, main: Node, check: Callable) -> void:
+	var game: BeachGame = await fresh(host, main, 6)
+	var r: Dictionary = Config.tuning.rival
+	var saved: float = float(r.dodge_chance)
+	var gary: RivalPilot = game.pilots[0]
+	for pilot: RivalPilot in game.pilots:
+		pilot.gull.state = BeachGull.State.GROUNDED
+	check.call(float(r.dodge_distance) > float(r.mug_hit[0]) * 0.5 and gary.game == game, "dodge distance clears the hit box and comes from data")
+	var dodge_once := func(gap: float) -> float:
+		gary.gull.state = BeachGull.State.GLIDE
+		gary.mode = RivalPilot.Mode.PATROL
+		gary.gull.position = Vector2(400.0, 80.0)
+		gary.dodge_cooldown = 0.0
+		gary.diver_seen = false
+		game.player.state = BeachGull.State.STRIKE
+		game.player.position = Vector2(404.0, 80.0 - gap)
+		for i: int in 20:
+			gary.evade(1.0 / 60.0)
+		return absf(gary.gull.position.x - 400.0)
+	var saved_max: float = float(r.dodge_chance_max)
+	r.dodge_chance = 1.0
+	r.dodge_chance_max = 1.0
+	gary.recent_dives = 0
+	check.call(dodge_once.call(50.0) >= float(r.dodge_distance) * 0.9 and gary.dodges == 1, "a rival sidesteps a dive coming from above")
+	check.call(dodge_once.call(10.0) < 1.0, "a dive begun too close to react to still lands")
+	var all_dodged: bool = true
+	game.player.state = BeachGull.State.GLIDE
+	gary.evade(0.1)
+	gary.recent_dives = 0
+	for n: int in 5:
+		all_dodged = all_dodged and dodge_once.call(50.0) >= float(r.dodge_distance) * 0.9
+		game.player.state = BeachGull.State.GLIDE
+		gary.evade(0.0)
+	check.call(all_dodged, "five quick dives from above are all dodged")
+	r.dodge_chance = saved
+	r.dodge_chance_max = saved_max
+	gary.recent_dives = 1
+	var first: float = gary.dodge_chance()
+	gary.recent_dives = 4
+	check.call(first < 0.5 and gary.dodge_chance() > first and gary.dodge_chance() <= float(r.dodge_chance_max) and first < 1.0, "a first dive can land; spamming raises the dodge chance but never to certainty")
+	game.player.state = BeachGull.State.GROUNDED
+	gary.gull.state = BeachGull.State.STUNNED
+	gary.dodge_left = 0.0
+	gary.diver_seen = false
+	game.player.state = BeachGull.State.STRIKE
+	game.player.position = Vector2(gary.gull.position.x, gary.gull.position.y - 50.0)
+	var before: float = gary.dodges
+	gary.evade(0.1)
+	check.call(gary.dodges == before, "a stunned rival cannot dodge")
+	game.player.state = BeachGull.State.GROUNDED
