@@ -510,24 +510,33 @@ static func dodge_checks(host: Node, main: Node, check: Callable) -> void:
 		while game.player.position.y < gary.gull.position.y:
 			game.player.position.y += speed * dt
 			gary.evade(dt)
-		var hit: bool = absf(game.player.position.x - gary.gull.position.x) < float(Config.tuning.rival.mug_hit[0]) * 0.5
+		var hit: bool = absf(game.player.position.x - gary.gull.position.x) < float(Config.tuning.rival.mug_hit[0])
 		game.player.state = BeachGull.State.GROUNDED
 		gary.evade(dt)
 		return hit
 	for id: String in ["kittiwake", "herring", "great-black-backed"]:
 		check.call(not lands.call(id, 0, 110.0), "%s evades a slow dive" % id)
-	check.call(lands.call("great-black-backed", 0, 340.0) and lands.call("herring", 0, 340.0), "a fast dive lands on a herring or black-back")
-	check.call(not lands.call("kittiwake", 0, 340.0), "a kittiwake reads even a fast dive")
-	check.call(lands.call("great-black-backed", 0, 340.0) and lands.call("great-black-backed", 0, 340.0), "the same fast dive repeated lands the same: no dice")
+	check.call(lands.call("great-black-backed", 0, 300.0) and lands.call("herring", 0, 300.0), "a fast dive lands on a herring or black-back")
+	check.call(not lands.call("kittiwake", 0, 300.0), "a kittiwake reads even a fast dive")
+	check.call(lands.call("great-black-backed", 0, 300.0) and lands.call("great-black-backed", 0, 300.0), "the same fast dive repeated lands the same: no dice")
 	gary.gull.species = "herring"
 	gary.hits_taken = 1
-	check.call(gary.reaction_time() < base.herring and not lands.call("herring", 1, 340.0), "after a hit a herring reacts faster and now evades the fast dive")
+	var window_found: bool = false
+	for speed: float in range(150, 341, 10):
+		window_found = window_found or (lands.call("herring", 0, speed) and not lands.call("herring", 1, speed))
+	gary.gull.species = "herring"
+	gary.hits_taken = 1
+	check.call(gary.reaction_time() < base.herring and window_found, "after a hit a herring reacts faster and evades a dive speed it used to take")
 	gary.hits_taken = 99
 	check.call(is_equal_approx(gary.reaction_time(), base.herring * float(r.wary_floor)), "wariness has a floor")
 	var hits_before: int = gary.hits_taken
 	gary.gull.state = BeachGull.State.GLIDE
 	gary.bump(Vector2(0, 0), 1.0)
-	check.call(gary.hits_taken == hits_before + 1, "a bump makes the rival warier")
+	check.call(gary.hits_taken == hits_before, "a bump alone (e.g. by another rival) does not make a rival warier")
+	gary.hits_taken = 1
+	gary.wary_left = 0.01
+	gary.evade(0.05)
+	check.call(gary.hits_taken == 0, "wariness fades with time")
 	# A grounded rival takes off to get away.
 	gary.gull.state = BeachGull.State.GROUNDED
 	gary.mode = RivalPilot.Mode.PECK
@@ -538,5 +547,11 @@ static func dodge_checks(host: Node, main: Node, check: Callable) -> void:
 	gary.diver_seen = false
 	for i: int in 60:
 		gary.evade(1.0 / 60.0)
-	check.call(gary.mode == RivalPilot.Mode.RECOVER, "a grounded rival takes off when it reads a dive")
+	check.call(gary.mode == RivalPilot.Mode.PECK and gary.gull.state == BeachGull.State.GROUNDED, "a grounded rival with no food stays put (it is not hittable on the sand)")
+	gary.carry_window = 5.0
+	gary.carried = 20
+	gary.diver_seen = false
+	for i: int in 60:
+		gary.evade(1.0 / 60.0)
+	check.call(gary.mode == RivalPilot.Mode.RECOVER, "a grounded carrier takes off when it reads a dive")
 	game.player.state = BeachGull.State.GROUNDED

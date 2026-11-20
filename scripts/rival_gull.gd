@@ -48,7 +48,8 @@ var dodge_left: float = 0.0 ## seconds of sidestep remaining
 var dodge_dir: float = 0.0
 var reacting: float = -1.0 ## time left before this rival reads the incoming dive; -1 = not watching one
 var diver_seen: bool = false ## this player dive was already answered
-var hits_taken: int = 0 ## each hit makes the rival warier (faster to react)
+var hits_taken: int = 0 ## player hits taken lately: each makes the rival warier (faster to react)
+var wary_left: float = 0.0 ## time until the oldest hit is forgotten
 var dodges: int = 0
 var mugs: int = 0
 ## Training Day dummy: patrols back and forth, never hunts, dives or mugs, and only carries food when armed.
@@ -164,6 +165,11 @@ func dummy_step(delta: float, wind: BeachWind) -> void:
 		gull.position = dummy_hold
 		gull.velocity = Vector2.ZERO
 
+## Called by the game when the player lands a hit (other rivals' mugs don't count).
+func learn_from_hit() -> void:
+	hits_taken += 1
+	wary_left = float(Config.tuning.rival.wary_decay)
+
 ## How long this rival takes to read a dive: its species' base time, shortened after every hit taken.
 func reaction_time() -> float:
 	var r: Dictionary = Config.tuning.rival
@@ -175,6 +181,13 @@ func reaction_time() -> float:
 ## is plain physics: a slow dive leaves time to clear the hit box, a fast one lands. Works at any height (high sky too).
 func evade(delta: float) -> void:
 	var r: Dictionary = Config.tuning.rival
+	if hits_taken > 0:
+		wary_left -= delta
+		if wary_left <= 0.0:
+			hits_taken -= 1
+			wary_left = float(r.wary_decay)
+	if gull.state != BeachGull.State.GLIDE:
+		dodge_left = 0.0 # stunned, landed or mid-dive: the sidestep is over
 	if dodge_left > 0.0:
 		var step: float = minf(delta,dodge_left)
 		dodge_left -= step
@@ -200,7 +213,9 @@ func evade(delta: float) -> void:
 	reacting = -1.0
 	dodges += 1
 	if grounded:
-		take_off() # fly away
+		# Only a carrier can be mugged on the sand; flying up would make a food-less rival hittable, so it stays put.
+		if carry_window > 0.0 and carried > 0:
+			take_off()
 		return
 	dodge_dir = signf(gull.position.x - diver.position.x)
 	if dodge_dir == 0.0:
@@ -278,7 +293,7 @@ func pick_target(targets: Array[BeachTarget], claims: Dictionary) -> void:
 		var score: float = float(candidate.food_value()) / (distance + 80.0)
 		if candidate.alert >= 1.0:
 			score *= 0.7
-		if game != null and absf(game.player.position.x - candidate.food_position().x) <= float(Config.tuning.rival.contest_range) and game.player.state != BeachGull.State.GROUNDED:
+		if game != null and absf(game.player.position.x - candidate.food_position().x) <= float(Config.tuning.rival.contest_range) and game.player.state in [BeachGull.State.GLIDE, BeachGull.State.WINDUP, BeachGull.State.STRIKE]:
 			score *= float(Config.tuning.rival.contest_bonus) # contest food the player is closing on
 		if candidate == target:
 			score *= 1.3
@@ -455,7 +470,6 @@ func took_food(value: int) -> void:
 func mug(attacker: Vector2 = Vector2.INF, force: float = -1.0) -> int:
 	if carry_window <= 0 or carried <= 0:
 		return 0
-	hits_taken += 1
 	var value: int = carried
 	carried = 0
 	dummy_food = ""
@@ -477,7 +491,6 @@ func bump(attacker: Vector2, force: float = -1.0) -> int:
 	if force == 0.0:
 		return 0
 	var was_down: bool = gull.state == BeachGull.State.STUNNED
-	hits_taken += 1
 	leave = 0
 	chase_prey = null
 	work = {}
