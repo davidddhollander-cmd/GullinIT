@@ -94,8 +94,8 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 	elif number == 4:
 		check.call(types==["sunbather"] and level.rivals.is_empty(),"feeding time keeps its light authored roster")
 	elif number == 5:
-		check.call(types==["sunbather","sunbather","sunbather","kiosk_customer","kiosk_customer"],"water fight is a sunbathers strip with two shoppers and no dog")
-		check.call(stand_count==2 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1 and level.watergun_teens.size()==1,"water fight keeps both stands, Gary from the start and the teen")
+		check.call(types==["sunbather","kiosk_customer","kiosk_customer"],"water fight has one edge sunbather and two shoppers, no dog")
+		check.call(stand_count==2 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1 and level.watergun_teens.size()==2,"water fight keeps both stands, Gary from the start and two teens")
 	elif number == 6:
 		check.call(types==["kiosk_customer","kiosk_customer","pier_diner","pier_diner","toddler","picnic_family","off_lead_dog"],"three's a crowd has two shoppers, both pier diners and one mum with one toddler, plus a dog by the family")
 		check.call(family_positions.size()==1 and children.size()==1,"level 5 adds exactly one linked family pair")
