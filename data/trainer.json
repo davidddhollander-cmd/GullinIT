@@ -64,9 +64,6 @@
     "clean": "Grand! Aim up and climb!",
     "missed": "Missed! Pull up and dive again",
     "first_miss": "First miss is normal! Scoop it off the floor later",
-    "miss_early": "Too early! Peck when the snack is close",
-    "miss_far": "Too far! Peck right as you reach it",
-    "miss_aim": "Aim the line at the snack first",
     "wheelie_low": "Too low, gullster. Land on the lid.",
     "bin_closer": "Closer, gullster! Land right beside the bin.",
     "too_steep": "Crash likely, reposition or pull up quickly",
@@ -94,9 +91,8 @@
     "crash_toast": "Ouch! Dust yourself off."
   },
   "miss_cues": {
-    "early": "TOO EARLY",
-    "far": "TOO FAR",
-    "aim": "AIM AT THE FOOD"
+    "early": "MISS! TOO EARLY!",
+    "far": "MISS! TOO FAR!"
   },
   "tips": {
     "mug_miss": "MISSED! DIVE AGAINST HIM AGAIN",

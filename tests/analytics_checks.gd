@@ -72,6 +72,7 @@ static func run(suite: Node, check: Callable) -> void:
 			break
 	check.call(snack != null, "level 2 has a snack to dive at")
 	var gull: BeachGull = game.player
+	game.overlay.score_announcement.hide() # a swallow banner would win over the cue
 	gull.position = snack.food_position() + Vector2(-60, -40)
 	gull.direction = (snack.food_position() - gull.position).normalized()
 	game._dive_began()
@@ -89,10 +90,11 @@ static func run(suite: Node, check: Callable) -> void:
 	game._dive_tick()
 	check.call(game.dive_stats.dives == 2 and game.dive_stats.dive_overshoots == 1, "a dive pulled up short of the snack is not an overshoot")
 	# Task 101: why a dive missed. Dive 1 pecked while the snack was out of reach (early); the cue is on screen.
-	var cue_texts: Callable = func() -> Array: return game.effects.texts.map(func(t: Dictionary) -> String: return str(t.text))
-	check.call(game.miss_stats == {"miss_early": 1, "miss_far": 0, "miss_aim": 0} and "TOO EARLY" in cue_texts.call(), "a peck pressed out of reach shows TOO EARLY and counts miss_early")
+	var cue_texts: Callable = func() -> Array: return ([game.overlay.score_announcement.text] if game.overlay.score_announcement.visible else [])
+	check.call(game.miss_stats == {"miss_early": 1, "miss_far": 0} and "MISS! TOO EARLY!" in cue_texts.call(), "a peck pressed out of reach shows TOO EARLY and counts miss_early")
+	check.call(game.overlay.score_announcement.get_parent().offset_top == BeachOverlay.SCORE_CALLOUT_TOP, "the miss callout sits in the top score slot")
 	# Dive 3: no peck, flew past the snack, inside the cue cooldown: counted, no second cue.
-	game.effects.texts.clear()
+	game.overlay.score_announcement.hide()
 	gull.position = snack.food_position() + Vector2(-60, -40)
 	gull.direction = (snack.food_position() - gull.position).normalized()
 	game._dive_began()
@@ -102,7 +104,7 @@ static func run(suite: Node, check: Callable) -> void:
 	gull.state = BeachGull.State.GLIDE
 	game._dive_tick()
 	check.call(game.miss_stats.miss_far == 1 and cue_texts.call().is_empty(), "passing the snack counts miss_far but the cue waits out its cooldown")
-	# Dive 4: after the cooldown, a dive aimed at nothing says AIM AT THE FOOD.
+	# Dive 4: after the cooldown, dives with no pecked or passed snack give no cue (no aim tip exists).
 	game.elapsed += float(Config.tuning.juice.miss_cue_cooldown) + 1.0
 	gull.position = Vector2(0, -500)
 	gull.direction = Vector2.DOWN
@@ -111,7 +113,7 @@ static func run(suite: Node, check: Callable) -> void:
 	game._dive_tick()
 	gull.state = BeachGull.State.GLIDE
 	game._dive_tick()
-	check.call(game.miss_stats.miss_aim == 0 and cue_texts.call().is_empty(), "a dive with no food anywhere gives no miss cue and no miss_aim")
+	check.call(cue_texts.call().is_empty() and game.miss_stats.size() == 2, "a dive with no food anywhere gives no miss cue")
 	gull.position = snack.food_position() + Vector2(0, -40)
 	gull.direction = Vector2.UP
 	game._dive_began()
@@ -119,9 +121,14 @@ static func run(suite: Node, check: Callable) -> void:
 	game._dive_tick()
 	gull.state = BeachGull.State.GLIDE
 	game._dive_tick()
-	check.call(game.miss_stats.miss_aim == 1 and "AIM AT THE FOOD" in cue_texts.call(), "a dive with food nearby but off the aim line shows AIM AT THE FOOD")
+	check.call(cue_texts.call().is_empty() and game.miss_stats == {"miss_early": 1, "miss_far": 1}, "a dive off the aim line gives no cue")
+	# A score announcement on screen wins over a due miss callout.
+	game.elapsed += float(Config.tuning.juice.miss_cue_cooldown) + 1.0
+	game.overlay.show_score_announcement("ice_cream", 5)
+	game._miss_cue("far")
+	check.call("+5" in game.overlay.score_announcement.text and game.miss_stats.miss_far == 2, "a score announcement on screen wins over the miss callout")
 	# Dive 5: a snatch shows and counts nothing.
-	game.effects.texts.clear()
+	game.overlay.score_announcement.hide()
 	game.elapsed += float(Config.tuning.juice.miss_cue_cooldown) + 1.0
 	game._dive_began()
 	game.dive_hit = true
@@ -129,13 +136,13 @@ static func run(suite: Node, check: Callable) -> void:
 	game._dive_tick()
 	gull.state = BeachGull.State.GLIDE
 	game._dive_tick()
-	check.call(cue_texts.call().is_empty() and game.miss_stats == {"miss_early": 1, "miss_far": 1, "miss_aim": 1}, "a successful snatch shows no miss cue")
+	check.call(cue_texts.call().is_empty() and game.miss_stats == {"miss_early": 1, "miss_far": 2}, "a successful snatch shows no miss cue")
 	game.elapsed = 12.34
 	game._crashed()
 	game.finish()
 	var ended: Dictionary = rec.last("level_end")
 	check.call(ended.dives == 6 and ended.dive_pecks == 1 and ended.dive_snatches == 0 and ended.dive_overshoots == 2, "level_end reports dive outcomes")
-	check.call(ended.miss_early == 1 and ended.miss_far == 1 and ended.miss_aim == 1, "level_end reports miss reasons")
+	check.call(ended.miss_early == 1 and ended.miss_far == 2 and not ended.has("miss_aim"), "level_end reports miss reasons")
 	check.call(ended.has("mouse_role"), "level_end carries mouse_role")
 	check.call(rec.names().count("level_end") == 1 and ended.level == 2 and ended.mode == "arcade" and ended.has("score") and ended.has("stars") and ended.crashes == 1 and is_equal_approx(ended.seconds, 12.3) and ended.outcome in ["completed", "failed"], "level_end fires on finish with its properties")
 	main.clear_game()

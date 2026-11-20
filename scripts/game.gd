@@ -105,9 +105,7 @@ var taunt_text: String = ""
 var crashes: int = 0
 # Dive outcomes for level_end analytics (player feedback F1: are dives overshooting?).
 var dive_stats: Dictionary = {"dives":0,"dive_pecks":0,"dive_snatches":0,"dive_overshoots":0}
-var miss_stats: Dictionary = {"miss_early":0,"miss_far":0,"miss_aim":0} ## why dives ended without a snatch; rides on level_end
-var dive_food_near: bool = false ## snatchable food was within assist range at dive start, in the cone or not
-var dive_aimed: bool = false ## the dive began with a snatchable target on the aim line
+var miss_stats: Dictionary = {"miss_early":0,"miss_far":0} ## why dives ended without a snatch; rides on level_end
 var dive_pecked: bool = false
 var dive_peck_early: bool = false ## a peck was pressed while the food was still out of reach ahead
 var miss_cue_ready_at: float = 0.0
@@ -832,8 +830,6 @@ func _dive_began() -> void:
 	var t: Dictionary = Config.tuning.touch
 	dive_target = assist_target(player.position,player.direction,float(t.assist_range),deg_to_rad(float(t.assist_angle)))
 	dive_side = signf(dive_target.food_position().x-player.position.x) if dive_target != null else 0.0
-	dive_aimed = dive_target != null
-	dive_food_near = dive_aimed or assist_target(player.position,player.direction,float(t.assist_range),PI) != null
 
 # A dive ends when the gull leaves WINDUP/STRIKE; ending past the lined-up snack without a snatch is an overshoot.
 func _dive_tick() -> void:
@@ -844,7 +840,7 @@ func _dive_tick() -> void:
 	if passed:
 		dive_stats.dive_overshoots += 1
 	if not dive_hit:
-		_miss_cue(("aim" if dive_food_near else "") if not dive_aimed else ("early" if dive_peck_early else ("far" if passed or dive_pecked else "")))
+		_miss_cue("early" if dive_peck_early else ("far" if passed or dive_pecked else ""))
 
 ## Why a dive ended without a snatch: counts it for analytics and shows a short callout (rate-limited, never over a lesson card). "" shows nothing.
 func _miss_cue(reason: String) -> void:
@@ -853,12 +849,12 @@ func _miss_cue(reason: String) -> void:
 	miss_stats["miss_"+reason] += 1
 	if elapsed < miss_cue_ready_at or trainer_open or training_card_pending():
 		return
+	# A score announcement on screen wins: the callout is dropped (counted, cooldown untouched). An active first-miss hint is the one message in training.
+	if training_miss_hint > 0.0 or overlay.score_announcement.visible:
+		return
 	miss_cue_ready_at = elapsed + float(Config.tuning.juice.miss_cue_cooldown)
-	if training:
-		if training_miss_hint <= 0.0: # an active first-miss hint is the one message
-			_training_hint("miss_"+reason)
-	else:
-		effects.message(Vector2(camera_x,84.0),str(Config.trainer.miss_cues[reason]),BeachUI.GOLD,float(Config.tuning.juice.tip_time),0.0)
+	overlay.score_announcement.add_theme_font_override("font",BeachOverlay.MISS_FONT)
+	overlay.show_callout(str(Config.trainer.miss_cues[reason]))
 
 ## How close the beak must be to the snack for a peck pressed now to reach it before the window closes.
 func dive_peck_reach() -> float:
