@@ -1,6 +1,6 @@
 # 103 — SFX pass 2: point jingle, Black Back calls from real recordings, "oh no" voice
 
-Status: done
+Status: merged
 Author: Claude (Opus)
 Assignee: Claude Sonnet
 Depends on: 085
@@ -85,3 +85,6 @@ Measurements: source "oh no" f0 median 369 Hz (oh 464, no 357). Output f0: man 1
 
 Decisions: voice loudness matched on active RMS to the mean of the existing voices of each register; rubberband formants move with pitch. Added `Audio.first_allowed`, `Audio.resolve` (string or list) and `Audio.sfx(key)` (reads new `tuning.sfx.snatch|score`); all `Audio.play("snatch")` calls and combo-up use it; species `sfx` map and power `sound` accept arrays (`game.species_cue`, `brashness.fire`). `oh_no` added to `theft` and `give_up` cues and to `VOICE_LINES`. Old snatch/score/bb_* kept as last fallbacks. Two older assertions (shakedown sound, black-back screech) updated to the list form. The helper is deterministic (first approved, else first not rejected), so the Black Back plays candidate 1 until David picks.
 Not done: nothing listening-tested; lab categories unchanged (names already fit the Gull / Black Back / UI / Voices regexes and group as _N variants).
+
+## Review notes
+Opus, 2026-11-20: approved. Dropped a stray tests/backup_snack_checks.gd.uid from the commit. Candidate 1 of each list plays until David approves another in the lab.
