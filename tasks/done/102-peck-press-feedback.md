@@ -1,6 +1,6 @@
 # 102 — Every peck press gives feedback, and ground eating stops dropping presses
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 101
@@ -34,7 +34,22 @@ Pressing the peck/eat button always does something visible or audible, even when
 - [ ] `./tools/validate.ps1` passes with no new failures.
 
 ## Report
-<!-- Filled in by the implementer. -->
+**Files:** `scripts/game.gd` (`_ground_peck_miss`, `peck_buffered`, `PECK_WHIFF_DB`, buffered-press fire in `_physics_process`), `scripts/stash_raids.gd` (`has_peck_target`), new `tests/peck_spam_checks.gd` wired into `tests/integration.gd`.
+
+**Tests:** 18533 checks, 0 failures (task 101 left 18526; 7 new checks).
+
+**Root cause (reproduced headless with E key events, gull standing beside a bin, 3 s of tapping):**
+1. Every grounded peck (bin, bag, toddler) shares `world.peck_cooldown` = 0.18 s in `stash_raids.peck()`. A press inside it returned false and was dropped with no pose, no sound. Before the fix: tapping at 5/s landed 15 of 15; at 6.7/s only 10 of 20; at 10/s 15 of 30. So anyone mashing faster than about 5.5/s lost roughly half of presses, silently.
+2. A press with nothing in reach also gave no feedback (only the near-bin tip text).
+3. Not a cause: the `peck_hold_pending` screech-hold deferral (the press fires on release; quick taps are well under the 0.24 s hold) and the peck animation timer swallowed nothing in the repro. Side finding: in mouse-aim the gull walks toward the cursor on the ground, so a player whose cursor is off the gull drifts out of reach mid-spam and every press then misses; my first repro lost all but one press this way. That is control design, left alone.
+
+**Fix:** cooldown and rate cap unchanged. (a) A press during the cooldown with food in reach is held (one deep) and fires when the cooldown ends, so near-cap tapping loses nothing. (b) Any grounded press that eats nothing plays the ground-peck pose and a quiet whiff (reused `empty_tap` cue, -12 dB, SFX bus via the existing `Audio.play` Stream playback path, so no new sound or bus work). Held presses show the pose now and land with the normal effect. Dive pecks (`attempt_peck`, peck window) untouched.
+
+**Exploit check (gp-12):** not changed, not measured against dives in play. From tuning: a bin holds 9 snacks and gives 3 per 4 pecks, so at the 5.5/s cap a bin empties in about 2.2 s (roughly 4 snacks/s); a sunbather bag gives 2 per 3 pecks but holds 3. Supply is finite, the stomach digests slowly and sunbathers wake and swat, so it is not unlimited, but ground raiding is clearly fast next to a dive cycle. The fix does not raise the ceiling (5.5 pecks/s before and after); it only stops losing presses below it. Holding left/right while spamming makes the press fire at once instead of on release and does not change the rate. If the ground route proves too strong, tune `world.peck_cooldown`, `bin_pecks` or `bin_burst`, not done here.
+
+**Not done / unverified:** no audio listened to in the real game; the feel of the held press is untested by hand.
+
+**Branch:** sonnet/102-peck-press-feedback
 
 ## Review notes
 <!-- Filled in by the reviewer. -->

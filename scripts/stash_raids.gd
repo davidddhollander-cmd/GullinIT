@@ -78,6 +78,10 @@ func nearby_bin(include_empty: bool = false) -> Dictionary:
 			nearest = bin
 	return nearest
 
+## Something a ground peck from here would hit once the cooldown ends.
+func has_peck_target() -> bool:
+	return nearby_toddler() != null or has_nearby_source()
+
 func has_nearby_source() -> bool:
 	return nearby_stash(true) != null or not nearby_bin(true).is_empty()
 

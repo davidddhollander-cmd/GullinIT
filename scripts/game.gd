@@ -125,7 +125,9 @@ var perk_id: String = ""
 var bullet_meter: float = 0.0
 var slowmo_end_msec: int = -1 ## real-clock end of bullet time (-1 = off); Engine.time_scale slows delta, so never count it
 const SCREECH_HOLD_TIME: float = 0.24
+const PECK_WHIFF_DB: float = -12.0 ## quiet, so spamming the peck key stays calm
 var peck_hold_pending: bool = false
+var peck_buffered: bool = false ## a ground peck pressed during the cooldown, fired when it ends
 var peck_hold_elapsed: float = 0.0
 var screech_audio: AudioStreamPlayer
 var last_nope_ms: int = -100000
@@ -660,6 +662,11 @@ func _physics_process(delta: float) -> void:
 	else:
 		input.update_player(player,camera_x,camera_y)
 		_advance_screech_hold(step)
+		if peck_buffered and (player.state != BeachGull.State.GROUNDED or not running):
+			peck_buffered = false
+		elif peck_buffered and stash_raids.peck_cooldown <= 0.0:
+			peck_buffered = false
+			_peck()
 	if input.touch_dive:
 		input.touch_dive = false
 		if not training_card_pending():
@@ -964,6 +971,16 @@ func _peck() -> void:
 			player.show_ground_peck()
 		else:
 			_bin_peck_tip()
+			_ground_peck_miss()
+
+## A grounded press that ate nothing still answers: the peck animation, and a quiet whiff unless the press is only waiting for the
+## peck cooldown (one press is held and fires the moment it ends, so a rate just above the cooldown loses nothing).
+func _ground_peck_miss() -> void:
+	player.show_ground_peck()
+	if stash_raids.peck_cooldown > 0.0 and not peck_buffered and stash_raids.has_peck_target():
+		peck_buffered = true
+		return
+	Audio.play("empty_tap",1.0,PECK_WHIFF_DB)
 
 func _can_screech() -> bool:
 	return player != null and not training and player.detailed_art and player.sprite.sprite_frames.has_animation(&"screech") and player.state == BeachGull.State.GROUNDED and not player.climb and absf(player.velocity.x) <= 1.0 and Input.get_vector("aim_left","aim_right","aim_up","aim_down").length() <= 0.15 and (input == null or input.touch_stick().length() <= 0.15)
@@ -1020,6 +1037,7 @@ func set_paused(value: bool) -> void:
 		end_slowmo()
 		peck_hold_pending = false
 		peck_hold_touch = false
+		peck_buffered = false
 		_stop_screech(false)
 	brash.lightning.set_paused(value)
 	set_physics_process(not value)
