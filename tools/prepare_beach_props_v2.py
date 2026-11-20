@@ -15,6 +15,7 @@ import prepare_beach_props_v1 as v1
 PAL = np.array([[int(m.group(1)[i:i + 2], 16) for i in (0, 2, 4)] for line in (v1.ROOT / "tools/art_audit/palette.hex").read_text().splitlines()
 				if (m := re.search(r"([0-9a-fA-F]{6})", line))], dtype=float)
 SPRITES = v1.ROOT / "data" / "sprites.json"
+ART_SCALE = 2  # art px per game px: 2x the world grid (same as the cast); v1 used 4, which read too fine next to the props
 # name -> (sprite id, v2 width in game px, palette blend weight)
 V2 = {
 	"BEACH BALL": ("beach_ball", 6, 0.45),
@@ -59,7 +60,7 @@ def main() -> None:
 		own = np.zeros_like(mask)
 		own[box[1]:box[3], box[0]:box[2]] = mask[box[1]:box[3], box[0]:box[2]]
 		# never upscale the sheet (it leaves gaps): the jet ski's source is 200 px wide, so it is drawn at native size and scaled in game
-		art = v1.food.reduce_item(rgb, own, box, min(width * v1.ART_SCALE, box[2] - box[0]) / (box[2] - box[0]))
+		art = v1.food.reduce_item(rgb, own, box, min(width * ART_SCALE, box[2] - box[0]) / (box[2] - box[0]))
 		art = blend(art, weight, swap=name == "LIFEBUOY FLAT")
 		h, w = art.shape[:2]
 		scale = round(width / w, 4)

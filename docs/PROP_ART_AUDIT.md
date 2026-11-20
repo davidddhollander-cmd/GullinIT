@@ -61,7 +61,7 @@ python tools/art_audit/prop_candidates.py > test-output/prop_audit/metrics.md
 
 ## Fixes (v2)
 
-`tools/prepare_beach_props_v2.py` re-runs v1's reduction from the high-res sheet at new widths (never resamples the v1 PNGs), then blends each colour toward its nearest `palette.hex` colour. v1 PNGs are untouched. All six stay at `visual_scale` 0.25.
+`tools/prepare_beach_props_v2.py` re-runs v1's reduction from the high-res sheet at new widths (never resamples the v1 PNGs), then blends each colour toward its nearest `palette.hex` colour. v1 PNGs are untouched. Cut on a 2x grid (`ART_SCALE` 2, `visual_scale` 0.5): pixels match the cast, one step finer than the 1:1 props.
 
 These props only ever sit in the medium and far background (base y ~148 and above, behind every walker), so they are sized at about 0.55x their foreground scale next to the 40 px adult.
 
