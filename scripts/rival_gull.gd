@@ -232,7 +232,7 @@ func evade(delta: float) -> void:
 
 func spook_step(delta: float) -> void:
 	spook_left -= delta
-	gull.aim = Vector2(clampf(gull.position.x + spook_dir * 320.0, edge_margin(), world_width() - edge_margin()), cruise() - float(Config.tuning.rival.spook_climb))
+	gull.aim = Vector2(clampf(gull.position.x + spook_dir * 320.0, edge_margin(), world_width() - edge_margin()), minf(gull.position.y, cruise()) - float(Config.tuning.rival.spook_climb))
 	gull.climb = gull.state != BeachGull.State.WINDUP and gull.position.y + gull.velocity.y * 0.25 > gull.aim.y
 	if spook_left <= 0.0:
 		end_spook()
