@@ -1293,6 +1293,7 @@ func _mugging() -> void:
 					continue
 				strike_near_carrier = false
 				var bump_loss: int = pilot.bump(player.position,force)
+				pilot.learn_from_hit()
 				if bump_loss > 0:
 					effects.score_message(pilot.gull.position-Vector2(0,30),"-%d" % bump_loss,Color("ff8a7a"))
 				effects.snatch_contact(pilot.gull.position,player.velocity,false,clampf(force/float(Config.tuning.tumble.impact.max_force),0.0,1.0))
@@ -1305,6 +1306,7 @@ func _mugging() -> void:
 				return
 			var value: int = pilot.mug(player.position,force)
 			if value > 0:
+				pilot.learn_from_hit()
 				if not mugged_rivals.has(pilot.gull.rival_name):
 					mugged_rivals[pilot.gull.rival_name] = true
 					_quest_event("rival_mugged_distinct")

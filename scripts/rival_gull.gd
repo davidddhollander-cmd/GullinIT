@@ -7,7 +7,7 @@ extends RefCounted
 ## Rivals compete: they ignore each other's food claims and mug each other.
 ## LAND glides down beside a ground job (item, crumb, bin, sunbather bag), WALK strolls to it, PECK taps
 ## a bin or bag open like the player; RECOVER doubles as the take-off. Personality: the `ground` weights.
-enum Mode { PATROL, STALK, LINE_UP, DIVE, ESCAPE, RECOVER, CHASE_CARRIER, LAND, WALK, PECK }
+enum Mode { PATROL, STALK, LINE_UP, DIVE, ESCAPE, RECOVER, CHASE_CARRIER, LAND, WALK, PECK, SPOOK }
 const GROUND_MODES: Array[Mode] = [Mode.LAND, Mode.WALK, Mode.PECK]
 const COLOURS: Array[Color] = [Color("a5c7e6"), Color("d3b9e8"), Color("a4d8c4")]
 var gull: BeachGull
@@ -44,6 +44,15 @@ var ground_time: float = 0.0
 var ground_rest: float = 0.0
 var avoid: Array[Dictionary] = [] ## {ref, time}: jobs to keep away from for a while (they went nowhere)
 var mug_timer: float = 0.0
+var spook_left: float = 0.0 ## seconds left flying away from a dive it read
+var spook_dir: float = 1.0
+var spook_cooldown: float = 0.0
+var spook_base: float = -1.0 ## the rival's normal speed_factor while a burst is on
+var reacting: float = -1.0 ## time left before this rival reads the incoming dive; -1 = not watching one
+var diver_seen: bool = false ## this player dive was already answered
+var hits_taken: int = 0 ## player hits taken lately: each makes the rival warier (faster to react)
+var wary_left: float = 0.0 ## time until the oldest hit is forgotten
+var dodges: int = 0
 var mugs: int = 0
 ## Training Day dummy: patrols back and forth, never hunts, dives or mugs, and only carries food when armed.
 var dummy: bool = false
@@ -109,8 +118,16 @@ func tick(delta: float, targets: Array[BeachTarget], claims: Dictionary, wind: B
 			avoid.remove_at(i)
 	if threat.x >= 0.0:
 		threat_x = threat.x
+	if not dummy:
+		evade(delta)
 	if dummy:
 		dummy_step(delta, wind)
+		return
+	if gull.state == BeachGull.State.STUNNED and spook_left > 0.0:
+		end_spook()
+	if spook_left > 0.0 and leave <= 0.0:
+		spook_step(delta)
+		gull.tick(delta, wind.direction, wind.strength)
 		return
 	if leave > 0:
 		mode = Mode.ESCAPE
@@ -155,6 +172,77 @@ func dummy_step(delta: float, wind: BeachWind) -> void:
 	if dummy_hold != Vector2.INF and gull.state != BeachGull.State.STUNNED:
 		gull.position = dummy_hold
 		gull.velocity = Vector2.ZERO
+
+## Called by the game when the player lands a hit (other rivals' mugs don't count).
+func learn_from_hit() -> void:
+	hits_taken += 1
+	wary_left = float(Config.tuning.rival.wary_decay)
+
+## How long this rival takes to read a dive: its species' base time, shortened after every hit taken.
+func reaction_time() -> float:
+	var r: Dictionary = Config.tuning.rival
+	var base: float = float(personality.get("reaction",gull.species_stats().get("reaction",r.reaction_default)))
+	return base * maxf(float(r.wary_floor),pow(float(r.wary_factor),hits_taken))
+
+## No dice: a diver above and in line, inside read_range, starts the reaction clock. When it runs out the rival
+## spooks: it flaps away from the diver under its own flight (a grounded one takes off). Whether that gets it clear
+## is plain physics: a slow or distant dive can't catch it, a fast or close one does. Works at any height (high sky too).
+func evade(delta: float) -> void:
+	var r: Dictionary = Config.tuning.rival
+	spook_cooldown = maxf(0.0, spook_cooldown - delta)
+	if hits_taken > 0:
+		wary_left -= delta
+		if wary_left <= 0.0:
+			hits_taken -= 1
+			wary_left = float(r.wary_decay)
+	var diver: BeachGull = game.player if game != null else null
+	if diver == null or diver.state != BeachGull.State.STRIKE:
+		diver_seen = false
+		reacting = -1.0
+		return
+	var gap: float = gull.position.y - diver.position.y
+	var airborne: bool = gull.state == BeachGull.State.GLIDE and not mode in GROUND_MODES
+	var grounded: bool = gull.state == BeachGull.State.GROUNDED
+	if diver_seen or spook_cooldown > 0.0 or spook_left > 0.0 or not (airborne or grounded) or gap < 0.0 or absf(diver.position.x - gull.position.x) > float(r.dodge_range_x) or gull.position.distance_to(diver.position) > float(r.read_range):
+		reacting = -1.0
+		return
+	if reacting < 0.0:
+		reacting = reaction_time()
+	reacting -= delta
+	if reacting > 0.0:
+		return
+	diver_seen = true
+	reacting = -1.0
+	dodges += 1
+	spook_dir = signf(gull.position.x - diver.position.x)
+	if spook_dir == 0.0:
+		spook_dir = -gull.facing
+	if (world_width() - gull.position.x if spook_dir > 0.0 else gull.position.x) < 120.0:
+		spook_dir = -spook_dir # a wall behind: break the other way
+	spook_left = float(r.flee_time)
+	if spook_base < 0.0:
+		spook_base = gull.speed_factor
+	gull.speed_factor = spook_base * float(r.spook_speed) # a startled burst of wingbeats
+	spook_cooldown = float(r.flee_time) + float(r.spook_cooldown)
+	work = {}
+	eat_timer = 0.0
+	chase_prey = null
+	ground_rest = maxf(ground_rest, 1.0)
+	mode = Mode.SPOOK
+
+func spook_step(delta: float) -> void:
+	spook_left -= delta
+	gull.aim = Vector2(clampf(gull.position.x + spook_dir * 320.0, edge_margin(), world_width() - edge_margin()), minf(gull.position.y, cruise()) - float(Config.tuning.rival.spook_climb))
+	gull.climb = gull.state != BeachGull.State.WINDUP and gull.position.y + gull.velocity.y * 0.25 > gull.aim.y
+	if spook_left <= 0.0:
+		end_spook()
+		mode = Mode.RECOVER
+
+func end_spook() -> void:
+	spook_left = 0.0
+	if spook_base >= 0.0:
+		gull.speed_factor = spook_base
+		spook_base = -1.0
 
 func hold_still() -> void:
 	if dummy_hold == Vector2.INF:
@@ -224,6 +312,8 @@ func pick_target(targets: Array[BeachTarget], claims: Dictionary) -> void:
 		var score: float = float(candidate.food_value()) / (distance + 80.0)
 		if candidate.alert >= 1.0:
 			score *= 0.7
+		if game != null and absf(game.player.position.x - candidate.food_position().x) <= float(Config.tuning.rival.contest_range) and game.player.state in [BeachGull.State.GLIDE, BeachGull.State.WINDUP, BeachGull.State.STRIKE]:
+			score *= float(Config.tuning.rival.contest_bonus) # contest food the player is closing on
 		if candidate == target:
 			score *= 1.3
 			current = score
