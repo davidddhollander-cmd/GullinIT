@@ -68,14 +68,14 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(game.stash_raids.nearby_toddler() == toddler and game.training_text().contains("peck his ice cream"),"beside the toddler the strip names the peck key")
 	check.call(game.peck_pause == false,"pop-ups off: the toddler lesson never freezes")
 	# Task 100: the lesson 3 ring turns green exactly when the real peck range test passes.
-	check.call(game.training_peck_in_range(),"lesson 3 ring is green with the beak in peck range")
+	check.call(game.training_ring_green(),"lesson 3 ring is green with the beak in peck range")
 	var in_range_pos: Vector2 = game.player.position
 	game.player.position.x -= float(Config.tuning.world.peck_reach) + 8.0
-	check.call(not game.training_peck_in_range() and game.stash_raids.nearby_toddler() == null,"lesson 3 ring stays gold when the beak is out of peck range")
+	check.call(not game.training_ring_green() and game.stash_raids.nearby_toddler() == null,"lesson 3 ring stays gold when the beak is out of peck range")
 	game.player.position = in_range_pos
-	check.call(game.training_peck_in_range(),"lesson 3 ring turns green again when the gull returns")
+	check.call(game.training_ring_green(),"lesson 3 ring turns green again when the gull returns")
 	game.lesson = BeachGame.BIN_LESSON
-	check.call(not game.training_peck_in_range(),"the peck-range ring applies to lesson 3 only")
+	check.call(not game.training_ring_green(),"the bin lesson ring stays gold away from the bin")
 	game.lesson = BeachGame.TODDLER_LESSON
 	var ring_lines: Array = []
 	for variant: String in ["default","touch"]:
@@ -138,8 +138,10 @@ static func run(host: Node, check: Callable) -> void:
 		game.stash_raids.peck_cooldown = 0
 		game._peck()
 		check.call(game.lesson == BeachGame.BIN_LESSON and game.training_text().contains("Closer"),"a peck just out of the bin's reach says land closer, try %d" % (attempt+1))
+	check.call(not game.training_ring_green() and game.stash_raids.nearby_bin().is_empty(),"bin lesson ring stays gold out of the bin's reach")
 	game.training_miss_hint = 0.0
 	game.player.position = Vector2(float(plain_bin.x),game.player.ground_y())
+	check.call(game.training_ring_green() and not game.stash_raids.nearby_bin().is_empty(),"bin lesson ring turns green once a peck would reach the bin")
 	for tap: int in range(int(Config.tuning.world.bin_pecks)):
 		game.stash_raids.peck_cooldown = 0
 		game._peck()
@@ -170,6 +172,19 @@ static func run(host: Node, check: Callable) -> void:
 	check.call(bool(entry.get("training_complete",false)) and int(entry.get("training_step",0)) == BeachGame.TRAINING_LESSONS and GameState.unlocked(2),"completion persists checkpoint and unlocks family beach: "+str(entry))
 	check.call(not entry.has("best") and not entry.has("stars") and not entry.has("casual_time") and results[0].stars == 0,"training completion grants no stars or practice record")
 	check.call(game.training_dummy() == null,"Training Day has no sparring dummy any more")
+	# Dive lesson ring: green while the dive line is on the snack or the beak is in peck reach, gold otherwise.
+	game.lesson = BeachGame.DIVE_LESSON
+	game.player.state = BeachGull.State.GROUNDED
+	check.call(not game.training_ring_green(),"dive lesson ring is gold while the gull is not diving")
+	var snack: Vector2 = game.training_target()
+	game.player.state = BeachGull.State.STRIKE
+	game.player.position = snack - Vector2(0,60)
+	game.player.direction = Vector2.DOWN
+	check.call(game.aim_lines_up() and game.training_ring_green(),"dive lesson ring is green when the dive line is on the snack")
+	game.player.direction = Vector2.RIGHT
+	game.player.position = snack + Vector2(0,-200)
+	check.call(not game.training_ring_green(),"dive lesson ring stays gold when the dive line misses the snack")
+	game.player.state = BeachGull.State.GROUNDED
 	# A landed gull after a clean snatch still passes after a few seconds.
 	game.running = true
 	game.lesson = BeachGame.DIVE_LESSON

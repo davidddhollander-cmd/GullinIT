@@ -198,8 +198,8 @@
       {
         "mood": "neutral",
         "lay": "Bins are a proper buffet.",
-        "how": "Land by the bin and tap {peck} {n} times.",
-        "strip": "Land by the bin and tap {peck} {n} times"
+        "how": "Land by the bin and tap {peck} {n} times. The ring turns green when you are close enough.",
+        "strip": "Land by the bin, ring green, tap {peck} {n} times"
       },
       {
         "mood": "amused",

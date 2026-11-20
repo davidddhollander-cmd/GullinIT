@@ -1803,9 +1803,18 @@ func training_bin(wheelie: bool) -> Dictionary:
 			return bin
 	return {}
 
-## Lesson 3 only: true while a ground peck would reach the toddler's ice cream. Uses the real peck range test (nearby_toddler), so the ring never lies.
-func training_peck_in_range() -> bool:
-	return training and lesson == TODDLER_LESSON and stash_raids.nearby_toddler() != null
+## True while the lesson's action would reach its target, so the overlay turns the ring green. Uses the real range tests, so the ring never lies.
+## Toddler and bin lessons: a ground peck would land. Dive lesson: the dive line is on the snack, or the beak is in peck reach of it.
+func training_ring_green() -> bool:
+	if not training:
+		return false
+	if lesson == TODDLER_LESSON:
+		return stash_raids.nearby_toddler() != null
+	if lesson == BIN_LESSON:
+		return not stash_raids.nearby_bin().is_empty()
+	if lesson == DIVE_LESSON and player.state in [BeachGull.State.WINDUP,BeachGull.State.STRIKE]:
+		return aim_lines_up() or player.beak().distance_to(training_target()) <= dive_peck_reach()
+	return false
 
 func training_target() -> Vector2:
 	if lesson == BIN_LESSON:

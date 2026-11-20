@@ -1,6 +1,6 @@
 ﻿class_name BeachOverlay
 extends Control
-const PECK_RANGE_GREEN: Color = Color("6fd36b") ## lesson 3 ring colour while the beak is in peck range
+const PECK_RANGE_GREEN: Color = Color("6fd36b") ## training ring colour while the action would reach its target
 const PECK_RANGE_OUTER_RADIUS: float = 16.0
 const PECK_RANGE_PULSE_MS: int = 500
 var game: BeachGame
@@ -811,7 +811,7 @@ func _draw() -> void:
 		if game.training:
 			var training_target: Vector2 = game.training_target() - offset
 			if training_target.x >= 4 and training_target.x <= 316 and training_target.y >= 28 and training_target.y <= 165:
-				if game.training_peck_in_range():
+				if game.training_ring_green():
 					# In peck range: green, plus a pulsing outer ring so the cue does not rely on colour alone.
 					draw_arc(training_target,12,0,TAU,24,PECK_RANGE_GREEN,2)
 					draw_arc(training_target,PECK_RANGE_OUTER_RADIUS+(Time.get_ticks_msec()%PECK_RANGE_PULSE_MS)/float(PECK_RANGE_PULSE_MS)*3.0,0,TAU,24,PECK_RANGE_GREEN,2)
