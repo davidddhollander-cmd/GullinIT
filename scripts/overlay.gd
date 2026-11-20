@@ -114,6 +114,7 @@ func setup(owner_game: BeachGame) -> void:
 	score_announcement = BeachUI.label(announcement_row,"",BeachUI.FONT_DISPLAY,Color.WHITE)
 	score_announcement.custom_minimum_size = Vector2(304,16)
 	score_announcement.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	score_announcement.add_theme_font_size_override("font_size",13) # slightly smaller than the 16 px display size
 	score_announcement.add_theme_font_override("font",score_announcement_fonts[0])
 	score_announcement.add_theme_color_override("font_shadow_color",Color(0.0,0.0,0.0,0.65))
 	score_announcement.add_theme_constant_override("shadow_offset_x",1)
