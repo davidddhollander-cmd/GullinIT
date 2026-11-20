@@ -61,15 +61,17 @@ python tools/art_audit/prop_candidates.py > test-output/prop_audit/metrics.md
 
 ## Fixes (v2)
 
-`tools/prepare_beach_props_v2.py` re-runs v1's reduction from the sheet at new widths, then blends each colour toward its nearest `palette.hex` colour. `tools/strip_litter_outline.py` strips the litter ring (originals kept in `assets/reference/litter-cutouts-v1/`). v1 PNGs are untouched.
+`tools/prepare_beach_props_v2.py` re-runs v1's reduction from the high-res sheet at new widths (never resamples the v1 PNGs), then blends each colour toward its nearest `palette.hex` colour. v1 PNGs are untouched. All six stay at `visual_scale` 0.25.
 
-| Prop | Size (game px) | Blend | sat | pal | Status |
+These props only ever sit in the medium and far background (base y ~148 and above, behind every walker), so they are sized at about 0.55x their foreground scale next to the 40 px adult.
+
+| Prop | Width on screen (game px) | Blend | sat | pal | Status |
 | --- | --- | --- | --- | --- | --- |
-| `beach_bucket` | 20×16 | 0.8 | 0.84 → 0.67 | 0.10 → 1.0 | fixed |
-| `beach_lifebuoy_flat` | 26×16, orange → red | 0.8 | 0.81 → 0.62 | 0.18 → 1.0 | fixed |
-| `beach_ball` | 12 → 10 wide | 0.45 | 0.74 → 0.60 | 0.35 → 0.74 | resized + palette tweak |
-| `beach_shells` | 18 → 12 | 0.5 | 0.69 → 0.61 | 0.40 → 1.0 | resized + palette tweak |
-| `beach_jet_ski` | 44 → 64 | 0.5 | 0.73 → 0.65 | 0.28 → 0.85 | resized + palette tweak |
-| `beach_lifebuoy_hung` | 16 → 14 | 0.5 | 0.70 → 0.64 | 0.36 → 0.93 | resized + palette tweak |
+| `beach_bucket` | 20 -> 11 | 0.8 | 0.84 -> 0.67 | 0.10 -> 1.0 | palette fixed, background size |
+| `beach_lifebuoy_flat` | 26 -> 14, orange -> red | 0.8 | 0.81 -> 0.62 | 0.18 -> 1.0 | palette fixed, background size |
+| `beach_ball` | 12 -> 6 | 0.45 | 0.74 -> 0.60 | 0.35 -> 0.74 | resized + palette tweak |
+| `beach_shells` | 18 -> 7 | 0.5 | 0.69 -> 0.61 | 0.40 -> 1.0 | resized + palette tweak |
+| `beach_jet_ski` | 44 -> 36 | 0.5 | 0.73 -> 0.65 | 0.28 -> 0.85 | resized + palette tweak |
+| `beach_lifebuoy_hung` | 16 -> 8 | 0.5 | 0.70 -> 0.64 | 0.36 -> 0.93 | resized + palette tweak |
 
-The jet ski's source is only 200 px wide, so it is kept at native size (204×112) and drawn at `visual_scale` 0.3137 (a 4× cell would need upscaling and leaves gaps). The 10 new litter pieces: luma < 70 edge pixels removed for 2 passes, then cropped; dark share one pixel inside the edge is now 0.00–0.35 (was 0.42–0.96). Fixed; not yet wired into `LITTER_KINDS`.
+Sat/pal figures were measured at the previous v2 sizes; the palette pass is the same. Sizes are one number each in `V2` in the script: change it and re-run. The new litter cut-outs are left as supplied (outline fix dropped for now).

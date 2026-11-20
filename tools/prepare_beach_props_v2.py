@@ -17,12 +17,12 @@ PAL = np.array([[int(m.group(1)[i:i + 2], 16) for i in (0, 2, 4)] for line in (v
 SPRITES = v1.ROOT / "data" / "sprites.json"
 # name -> (sprite id, v2 width in game px, palette blend weight)
 V2 = {
-	"BEACH BALL": ("beach_ball", 10, 0.45),
-	"SHELLS": ("beach_shells", 12, 0.5),
-	"JET SKI": ("beach_jet_ski", 64, 0.5),
-	"LIFEBUOY HUNG": ("beach_lifebuoy_hung", 14, 0.5),
-	"BUCKET AND SPADE": ("beach_bucket", 20, 0.8),
-	"LIFEBUOY FLAT": ("beach_lifebuoy_flat", 26, 0.8),
+	"BEACH BALL": ("beach_ball", 6, 0.45),
+	"SHELLS": ("beach_shells", 7, 0.5),
+	"JET SKI": ("beach_jet_ski", 36, 0.5),
+	"LIFEBUOY HUNG": ("beach_lifebuoy_hung", 8, 0.5),
+	"BUCKET AND SPADE": ("beach_bucket", 11, 0.8),
+	"LIFEBUOY FLAT": ("beach_lifebuoy_flat", 14, 0.8),
 }
 
 

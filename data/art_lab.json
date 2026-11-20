@@ -258,8 +258,8 @@
       "candidate": {
         "clone": "beach_castle",
         "file": "res://assets/sprites/beach-props-v1/bucket-and-spade-v2.png",
-        "frame_w": 80,
-        "frame_h": 64,
+        "frame_w": 44,
+        "frame_h": 35,
         "visual_scale": 0.25
       },
       "reference": "shopper_mullet",
@@ -273,8 +273,8 @@
       "candidate": {
         "clone": "beach_castle",
         "file": "res://assets/sprites/beach-props-v1/beach-ball-v2.png",
-        "frame_w": 40,
-        "frame_h": 39,
+        "frame_w": 24,
+        "frame_h": 23,
         "visual_scale": 0.25
       },
       "reference": "shopper_mullet",
@@ -288,8 +288,8 @@
       "candidate": {
         "clone": "beach_chair",
         "file": "res://assets/sprites/beach-props-v1/lifebuoy-hung-v2.png",
-        "frame_w": 56,
-        "frame_h": 81,
+        "frame_w": 32,
+        "frame_h": 46,
         "visual_scale": 0.25
       },
       "reference": "shopper_mullet",
@@ -303,8 +303,8 @@
       "candidate": {
         "clone": "beach_chair",
         "file": "res://assets/sprites/beach-props-v1/lifebuoy-flat-v2.png",
-        "frame_w": 104,
-        "frame_h": 65,
+        "frame_w": 56,
+        "frame_h": 35,
         "visual_scale": 0.25
       },
       "reference": "shopper_mullet",
@@ -318,8 +318,8 @@
       "candidate": {
         "clone": "beach_rocks",
         "file": "res://assets/sprites/beach-props-v1/shells-v2.png",
-        "frame_w": 48,
-        "frame_h": 39,
+        "frame_w": 28,
+        "frame_h": 23,
         "visual_scale": 0.25
       },
       "reference": "shopper_mullet",
@@ -333,9 +333,9 @@
       "candidate": {
         "clone": "beach_rocks",
         "file": "res://assets/sprites/beach-props-v1/jet-ski-v2.png",
-        "frame_w": 204,
-        "frame_h": 112,
-        "visual_scale": 0.3137
+        "frame_w": 144,
+        "frame_h": 79,
+        "visual_scale": 0.25
       },
       "reference": "shopper_mullet",
       "motion": "static",
