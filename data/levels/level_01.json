@@ -24,6 +24,8 @@
     {"type": "toddler", "x": 245, "station": "toddler", "patrol_radius": 5, "speed_mult": 0.6}
   ],
   "props": [
+    {"type": "beach_ball", "x": 60, "y": 146},
+    {"type": "beach_shells", "x": 194, "y": 138},
     {"type": "beach_palm", "x": 145, "y": 148},
     {"type": "beach_palm", "x": 370, "y": 148},
     {"type": "beach_palm", "x": 665, "y": 148},

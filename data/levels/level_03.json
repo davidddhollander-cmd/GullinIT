@@ -33,6 +33,8 @@
     {"type": "off_lead_dog", "x": 330, "home": [270, 400]}
   ],
   "props": [
+    {"type": "beach_jet_ski", "x": 178, "y": 138},
+    {"type": "beach_shells", "x": 286, "y": 146},
     {"type": "beach_parasol_blue", "x": 235, "y": 143},
     {"type": "beach_palm", "x": 380, "y": 148},
     {"type": "bin", "x": 440},
