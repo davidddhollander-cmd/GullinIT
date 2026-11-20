@@ -1,6 +1,54 @@
 {
  "version": 1,
  "sounds": {
+  "assets/audio/bb_dive.ogg": {
+   "status": "approved",
+   "note": "",
+   "sha1": "6559467cc63703492b8a36e5e58d22b573511b6f",
+   "reviewed": "2026-11-20T20:37:36"
+  },
+  "assets/audio/bb_screech_long.ogg": {
+   "status": "rejected",
+   "note": "",
+   "sha1": "15f662a1253f2de8856076d78195a4808723fc87",
+   "reviewed": "2026-11-20T20:36:27"
+  },
+  "assets/audio/bb_screech_long_1.ogg": {
+   "status": "approved",
+   "note": "",
+   "sha1": "0641ab4aacf808b16810f66b078ce96794694fc7",
+   "reviewed": "2026-11-20T20:36:26"
+  },
+  "assets/audio/bb_screech_long_3.ogg": {
+   "status": "approved",
+   "note": "",
+   "sha1": "ed5f0661123da588c3ae0b18c7648155af4702ff",
+   "reviewed": "2026-11-20T20:36:53"
+  },
+  "assets/audio/bb_screech_short_2.ogg": {
+   "status": "approved",
+   "note": "",
+   "sha1": "65465238e4b43d35303f5f2af0c365029b9c8a1d",
+   "reviewed": "2026-11-20T20:36:39"
+  },
+  "assets/audio/bb_screech_short_3.ogg": {
+   "status": "approved",
+   "note": "",
+   "sha1": "8141dde551400697ebb8f7e0e9c195c34de13319",
+   "reviewed": "2026-11-20T20:36:38"
+  },
+  "assets/audio/bb_shakedown_2.ogg": {
+   "status": "approved",
+   "note": "",
+   "sha1": "23760d29f5c1f027454b501c1c449af82517329a",
+   "reviewed": "2026-11-20T20:37:09"
+  },
+  "assets/audio/bb_slam.ogg": {
+   "status": "approved",
+   "note": "",
+   "sha1": "bc3769c37221f21b55718373d5ee69341f4b850d",
+   "reviewed": "2026-11-20T20:37:19"
+  },
   "assets/audio/dog_bark.ogg": {
    "status": "rejected",
    "note": "",
@@ -54,6 +102,12 @@
    "note": "",
    "sha1": "778f174aeb2eb8c2e456bfdb9ab5b50bb766a911",
    "reviewed": "2026-11-11T14:33:11"
+  },
+  "assets/audio/snatch_2.ogg": {
+   "status": "approved",
+   "note": "",
+   "sha1": "6b9773d8014c6ed54b072fb185dbb7c6d2ba0a73",
+   "reviewed": "2026-11-20T20:37:45"
   },
   "assets/audio/swat_thwack.ogg": {
    "status": "approved",
@@ -288,6 +342,18 @@
    "note": "",
    "sha1": "09c43dd9f855cdcc37bfcaafd31ddf66377193e8",
    "reviewed": "2026-11-11T14:29:31"
+  },
+  "assets/audio/voice_oh_no_man.ogg": {
+   "status": "approved",
+   "note": "",
+   "sha1": "af7ce6b811a895f4878d4d343b5efa7803262f5e",
+   "reviewed": "2026-11-20T20:38:27"
+  },
+  "assets/audio/voice_oh_no_woman.ogg": {
+   "status": "rejected",
+   "note": "",
+   "sha1": "44eab648e846d63b8ccd13cf32379aa8bca39113",
+   "reviewed": "2026-11-20T20:38:18"
   },
   "assets/audio/voice_oi_kid.ogg": {
    "status": "approved",
