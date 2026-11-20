@@ -106,6 +106,6 @@ for group, ids in (("in use", IN_USE), ("candidate", CANDIDATES)):
         print(row(measure(k, e["file"].replace("res://", ""), float(e.get("visual_scale", 1.0)), e["frame_w"], e["frame_h"])))
 print("| **ground strips, litter, user sheets (scale 1.0 shown)** |" + " |" * 15)
 for name, f, s in EXTRA:
-    r = measure(name, f, s)
+    r = measure(name, f, s) if Path(f).exists() else None
     if r:
         print(row(r))

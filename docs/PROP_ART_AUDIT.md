@@ -58,3 +58,18 @@ python tools/art_audit/prop_candidates.py > test-output/prop_audit/metrics.md
 - **Outline:** in-use props have a dark edge on 61–100% of the silhouette; all 1:1 candidates fall in that range except `pier.png` (0%). The ground strips have none, like the in-use ground.
 - **Light:** most in-use props are brighter in the top half (+4 to +54 luma), but bin, wheelie bin and castle are not (−6 to −32), so the measure is loose. Candidates sit inside that spread (tower −1, sign −2, boards +3, bucket −29) and none shows a side light that clashes; by eye all read as lit from the front/top.
 - **Base:** all props have 0–1 empty rows under the art (the lifeguard's 6 are handled by its `sprite_offset_y`), so they sit on their base y without floating.
+
+## Fixes (v2)
+
+`tools/prepare_beach_props_v2.py` re-runs v1's reduction from the sheet at new widths, then blends each colour toward its nearest `palette.hex` colour. `tools/strip_litter_outline.py` strips the litter ring (originals kept in `assets/reference/litter-cutouts-v1/`). v1 PNGs are untouched.
+
+| Prop | Size (game px) | Blend | sat | pal | Status |
+| --- | --- | --- | --- | --- | --- |
+| `beach_bucket` | 20×16 | 0.8 | 0.84 → 0.67 | 0.10 → 1.0 | fixed |
+| `beach_lifebuoy_flat` | 26×16, orange → red | 0.8 | 0.81 → 0.62 | 0.18 → 1.0 | fixed |
+| `beach_ball` | 12 → 10 wide | 0.45 | 0.74 → 0.60 | 0.35 → 0.74 | resized + palette tweak |
+| `beach_shells` | 18 → 12 | 0.5 | 0.69 → 0.61 | 0.40 → 1.0 | resized + palette tweak |
+| `beach_jet_ski` | 44 → 64 | 0.5 | 0.73 → 0.65 | 0.28 → 0.85 | resized + palette tweak |
+| `beach_lifebuoy_hung` | 16 → 14 | 0.5 | 0.70 → 0.64 | 0.36 → 0.93 | resized + palette tweak |
+
+The jet ski's source is only 200 px wide, so it is kept at native size (204×112) and drawn at `visual_scale` 0.3137 (a 4× cell would need upscaling and leaves gaps). The 10 new litter pieces: luma < 70 edge pixels removed for 2 passes, then cropped; dark share one pixel inside the edge is now 0.00–0.35 (was 0.42–0.96). Fixed; not yet wired into `LITTER_KINDS`.
