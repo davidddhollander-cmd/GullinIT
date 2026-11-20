@@ -53,6 +53,9 @@ static func run(suite: Node, check: Callable) -> void:
 	var game: BeachGame = _fresh(suite,5)
 	var teen: WatergunTeen = game.teens[0]
 	var player: BeachGull = game.player
+	var pair: Array[WatergunTeen] = [game.teens[0],game.teens[1]]
+	teen.others.clear() # the single-teen checks below run alone
+	pair[1].others.clear()
 	var rival: BeachGull = game.pilots[0].gull
 	var frames: SpriteFrames = teen.sprite.sprite_frames
 	check.call(frames.has_animation(&"shoot_high") and frames.has_animation(&"shoot_level") and frames.has_animation(&"shoot_low") and frames.has_animation(&"run") and frames.has_animation(&"alert"),"teenager frames carry the pursue and shoot clips")
@@ -235,6 +238,50 @@ static func run(suite: Node, check: Callable) -> void:
 	var empty: Array[BeachGull] = []
 	check.call(shot.tick(0.5,empty) == null and shot.landed and is_equal_approx(shot.position.y,float(Config.tuning.world.ground)),"a water shot ends on the sand line")
 	shot.queue_free()
+	# Two teens never overlap: shared low gull, spawn overlap, and a planted teen is not shoved.
+	var sep: float = float(t.min_separation)
+	var a: WatergunTeen = pair[0]
+	var b: WatergunTeen = pair[1]
+	a.others.assign([b])
+	b.others.assign([a])
+	for gull: BeachGull in game.gulls:
+		gull.position = Vector2(1250.0,30.0)
+	a.home = Vector2(60.0,360.0)
+	b.home = Vector2(360.0,680.0)
+	a.position.x = 250.0
+	b.position.x = 480.0
+	a._patrol()
+	b._patrol()
+	var worst: float = INF
+	var fired_before: int = a.shots_fired + b.shots_fired
+	var fired_any: bool = false
+	for i: int in 240:
+		_put(player,Vector2(360.0,level_y+30.0))
+		a.tick(DT,game.gulls)
+		b.tick(DT,game.gulls)
+		worst = minf(worst,absf(a.position.x-b.position.x))
+		fired_any = fired_any or a.shots_fired > 0 or b.shots_fired > 0 or not a.shots.is_empty() or not b.shots.is_empty()
+	check.call(worst >= sep-1.0 and fired_any,"two teens chasing one gull keep their distance and still fire (closest %.1f)" % worst)
+	_park_all(game)
+	a.state = WatergunTeen.State.PATROL
+	b.state = WatergunTeen.State.PATROL
+	a.position.x = 300.0
+	b.position.x = 310.0
+	for i: int in 120:
+		a.tick(DT,game.gulls)
+		b.tick(DT,game.gulls)
+	check.call(absf(a.position.x-b.position.x) >= sep-1.0,"teens spawned 10 px apart walk apart (gap %.1f)" % absf(a.position.x-b.position.x))
+	a.state = WatergunTeen.State.AIM
+	a.target = player
+	_put(player,Vector2(a.position.x+40.0,level_y))
+	a.timer = 99.0
+	b.state = WatergunTeen.State.PATROL
+	b.position.x = a.position.x+10.0
+	var planted_x: float = a.position.x
+	for i: int in 60:
+		a.tick(DT,game.gulls)
+		b.tick(DT,game.gulls)
+	check.call(is_equal_approx(a.position.x,planted_x) and absf(b.position.x-a.position.x) >= sep-1.0,"a teen in AIM is not shoved; the other gives way")
 	suite.main.clear_game()
 	await suite.settle()
 
