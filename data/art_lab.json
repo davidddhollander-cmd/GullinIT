@@ -373,7 +373,7 @@
     },
     {
       "title": "BG PROP OLD VS NEW BEACH BALL",
-      "description": "LEFT: PREVIOUS (V1). RIGHT: NOW (V2, BACKGROUND SIZE, PALETTE PASS, 2X GRID)",
+      "description": "LEFT OLD V1 - RIGHT NEW V2",
       "current": "beach_ball",
       "current_override": {
         "file": "res://assets/sprites/beach-props-v1/beach-ball-v1.png",
@@ -395,7 +395,7 @@
     },
     {
       "title": "BG PROP OLD VS NEW BUCKET AND SPADE",
-      "description": "LEFT: PREVIOUS (V1). RIGHT: NOW (V2, BACKGROUND SIZE, PALETTE PASS, 2X GRID)",
+      "description": "LEFT OLD V1 - RIGHT NEW V2",
       "current": "beach_bucket",
       "current_override": {
         "file": "res://assets/sprites/beach-props-v1/bucket-and-spade-v1.png",
@@ -417,7 +417,7 @@
     },
     {
       "title": "BG PROP OLD VS NEW SHELLS",
-      "description": "LEFT: PREVIOUS (V1). RIGHT: NOW (V2, BACKGROUND SIZE, PALETTE PASS, 2X GRID)",
+      "description": "LEFT OLD V1 - RIGHT NEW V2",
       "current": "beach_shells",
       "current_override": {
         "file": "res://assets/sprites/beach-props-v1/shells-v1.png",
@@ -439,7 +439,7 @@
     },
     {
       "title": "BG PROP OLD VS NEW JET SKI",
-      "description": "LEFT: PREVIOUS (V1). RIGHT: NOW (V2, BACKGROUND SIZE, PALETTE PASS, 2X GRID)",
+      "description": "LEFT OLD V1 - RIGHT NEW V2",
       "current": "beach_jet_ski",
       "current_override": {
         "file": "res://assets/sprites/beach-props-v1/jet-ski-v1.png",
@@ -461,7 +461,7 @@
     },
     {
       "title": "BG PROP OLD VS NEW LIFEBUOY FLAT",
-      "description": "LEFT: PREVIOUS (V1). RIGHT: NOW (V2, BACKGROUND SIZE, PALETTE PASS, 2X GRID)",
+      "description": "LEFT OLD V1 - RIGHT NEW V2",
       "current": "beach_lifebuoy_flat",
       "current_override": {
         "file": "res://assets/sprites/beach-props-v1/lifebuoy-flat-v1.png",
@@ -483,7 +483,7 @@
     },
     {
       "title": "BG PROP OLD VS NEW LIFEBUOY HUNG",
-      "description": "LEFT: PREVIOUS (V1). RIGHT: NOW (V2, BACKGROUND SIZE, PALETTE PASS, 2X GRID)",
+      "description": "LEFT OLD V1 - RIGHT NEW V2",
       "current": "beach_lifebuoy_hung",
       "current_override": {
         "file": "res://assets/sprites/beach-props-v1/lifebuoy-hung-v1.png",

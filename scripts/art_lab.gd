@@ -189,6 +189,7 @@ func _select(i: int) -> void:
 			for slot: int in 2:
 				var node: Node2D = pair[slot].node
 				node.set_meta(&"ground", float(depths[row]))
+				node.set_meta(&"row", row)
 				node.z_index = depths.filter(func(y: Variant) -> bool: return float(y) < float(depths[row])).size() # nearer (larger y) in front
 				if row > 0:
 					extra_sides.append({"side": pair[slot], "slot": slot})
@@ -232,6 +233,7 @@ func _make(id: String, species: String, gull_path: bool, motion: String) -> Dict
 		else:
 			sprite.play(wanted)
 		sprite.set_meta(&"half_height", float(def.frame_h) * sprite.scale.y * 0.5 - float(comparisons[index].get("drop", 0.0))) # drop: art sits above its cell bottom, e.g. a towel
+		sprite.set_meta(&"width", float(def.frame_w) * sprite.scale.x)
 		sprite.set_meta(&"source_left", bool(def.get("animations", {}).get("walk", {}).get("source_left", false)))
 		stage.add_child(sprite)
 		if motion == "in_beak":
@@ -314,6 +316,8 @@ func _place() -> void:
 		var x: float = pair_x + _lane(int(p.slot))
 		if side.gull == null:
 			var node: AnimatedSprite2D = side.node
+			var stagger: float = float(node.get_meta(&"row", 0)) * roundf(0.6 * float(node.get_meta(&"width", 0.0))) # far rows recede outward from the centre
+			x += stagger * signf(_lane(int(p.slot)))
 			node.position = Vector2(x, float(node.get_meta(&"ground", GROUND)) - float(node.get_meta(&"half_height", 8.0)))
 		else:
 			(side.gull as BeachGull).position.x = x
