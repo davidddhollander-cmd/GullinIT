@@ -275,6 +275,7 @@ func run() -> void:
 	await preload("res://tests/shop_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/analytics_checks.gd").run(self,Callable(self,"check"))
 	preload("res://tests/peck_spam_checks.gd").run(self,Callable(self,"check"))
+	preload("res://tests/litter_fling_checks.gd").run(self,Callable(self,"check"))
 	preload("res://tests/online_scores_checks.gd").run(self,Callable(self,"check"))
 	preload("res://tests/sunbather_reactions_checks.gd").run_checks(Callable(self,"check"))
 	preload("res://tests/retro_environment_checks.gd").run_checks(Callable(self,"check"))

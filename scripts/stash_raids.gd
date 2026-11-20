@@ -105,6 +105,39 @@ func nearby_toddler() -> BeachTarget:
 			nearest = target
 	return nearest
 
+## Nearest resting litter just ahead of the beak (player only): a ground peck at it flings it.
+func nearby_litter() -> Dictionary:
+	if actor != null or _gull().state != BeachGull.State.GROUNDED:
+		return {}
+	var beak: Vector2 = _gull().beak()
+	var reach: float = float(Config.tuning.world.peck_reach)
+	var tolerance: float = float(Config.tuning.world.litter_peck_vertical_tolerance)
+	var nearest: Dictionary = {}
+	var distance: float = INF
+	for item: Dictionary in items:
+		if not bool(item.get("garbage",false)) or not bool(item.grounded) or bool(item.get("recovered",false)):
+			continue
+		var forward_gap: float = (float(item.position.x)-beak.x)*_gull().facing
+		if forward_gap < 0.0 or forward_gap > reach or absf(float(item.position.y)-beak.y) > tolerance or forward_gap >= distance:
+			continue
+		distance = forward_gap
+		nearest = item
+	return nearest
+
+## The peck kicks the litter up and away from the gull; the normal falling and landing code tumbles it to rest a short way off.
+func _fling_litter(item: Dictionary) -> bool:
+	var t: Dictionary = Config.tuning.world
+	var direction: float = _gull().facing
+	peck_cooldown = float(t.peck_cooldown)
+	item.grounded = false
+	item.velocity = Vector2(direction*visual_rng.randf_range(float(t.litter_fling_speed_min),float(t.litter_fling_speed_max)),-visual_rng.randf_range(float(t.litter_fling_lift_min),float(t.litter_fling_lift_max)))
+	item.angular_velocity = direction*visual_rng.randf_range(float(Config.tuning.juice.trash_spin_min),float(Config.tuning.juice.trash_spin_max))
+	item.rest_angle = visual_rng.randf_range(-PI,PI)
+	game.effects.peck_contact(item.position,Vector2(direction,-0.5),0.3,"hard")
+	Audio.play("click")
+	queue_redraw()
+	return true
+
 func nearby_stash(include_empty: bool = false) -> BeachTarget:
 	if _gull().state != BeachGull.State.GROUNDED:
 		return null
@@ -146,6 +179,9 @@ func peck() -> bool:
 		var bin: Dictionary = nearby_bin()
 		if not bin.is_empty():
 			return _peck_bin(bin)
+		var litter: Dictionary = nearby_litter()
+		if not litter.is_empty():
+			return _fling_litter(litter)
 		owner = nearby_stash(true)
 		if owner != null:
 			return _peck_empty(owner.stash_position()-Vector2(0,10))
