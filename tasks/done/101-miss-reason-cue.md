@@ -55,4 +55,4 @@ Peck window opens at the press in this game, so "window not open yet" is modelle
 **Branch:** sonnet/101-miss-reason-cue
 
 ## Review notes
-<!-- Filled in by the reviewer. -->
+Review fix (follow-up commit on the 102 branch): an aim miss now counts only when snatchable food was within the touch assist range at dive start but outside the cone (`dive_food_near`, found with `assist_target` at a 180 degree angle). Dives with no food nearby (rival, dog, bin, ground) show nothing and add no `miss_aim`. The game does not record non-food dive intent, so that case is covered by the no-food-nearby rule only. Tests added for both cases; full run 18534 checks, 0 failures.

@@ -111,7 +111,15 @@ static func run(suite: Node, check: Callable) -> void:
 	game._dive_tick()
 	gull.state = BeachGull.State.GLIDE
 	game._dive_tick()
-	check.call(game.miss_stats.miss_aim == 1 and "AIM AT THE FOOD" in cue_texts.call(), "a dive with no target shows AIM AT THE FOOD")
+	check.call(game.miss_stats.miss_aim == 0 and cue_texts.call().is_empty(), "a dive with no food anywhere gives no miss cue and no miss_aim")
+	gull.position = snack.food_position() + Vector2(0, -40)
+	gull.direction = Vector2.UP
+	game._dive_began()
+	gull.state = BeachGull.State.STRIKE
+	game._dive_tick()
+	gull.state = BeachGull.State.GLIDE
+	game._dive_tick()
+	check.call(game.miss_stats.miss_aim == 1 and "AIM AT THE FOOD" in cue_texts.call(), "a dive with food nearby but off the aim line shows AIM AT THE FOOD")
 	# Dive 5: a snatch shows and counts nothing.
 	game.effects.texts.clear()
 	game.elapsed += float(Config.tuning.juice.miss_cue_cooldown) + 1.0
@@ -126,7 +134,7 @@ static func run(suite: Node, check: Callable) -> void:
 	game._crashed()
 	game.finish()
 	var ended: Dictionary = rec.last("level_end")
-	check.call(ended.dives == 5 and ended.dive_pecks == 1 and ended.dive_snatches == 0 and ended.dive_overshoots == 2, "level_end reports dive outcomes")
+	check.call(ended.dives == 6 and ended.dive_pecks == 1 and ended.dive_snatches == 0 and ended.dive_overshoots == 2, "level_end reports dive outcomes")
 	check.call(ended.miss_early == 1 and ended.miss_far == 1 and ended.miss_aim == 1, "level_end reports miss reasons")
 	check.call(ended.has("mouse_role"), "level_end carries mouse_role")
 	check.call(rec.names().count("level_end") == 1 and ended.level == 2 and ended.mode == "arcade" and ended.has("score") and ended.has("stars") and ended.crashes == 1 and is_equal_approx(ended.seconds, 12.3) and ended.outcome in ["completed", "failed"], "level_end fires on finish with its properties")

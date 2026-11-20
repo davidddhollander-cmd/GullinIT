@@ -106,6 +106,7 @@ var crashes: int = 0
 # Dive outcomes for level_end analytics (player feedback F1: are dives overshooting?).
 var dive_stats: Dictionary = {"dives":0,"dive_pecks":0,"dive_snatches":0,"dive_overshoots":0}
 var miss_stats: Dictionary = {"miss_early":0,"miss_far":0,"miss_aim":0} ## why dives ended without a snatch; rides on level_end
+var dive_food_near: bool = false ## snatchable food was within assist range at dive start, in the cone or not
 var dive_aimed: bool = false ## the dive began with a snatchable target on the aim line
 var dive_pecked: bool = false
 var dive_peck_early: bool = false ## a peck was pressed while the food was still out of reach ahead
@@ -832,6 +833,7 @@ func _dive_began() -> void:
 	dive_target = assist_target(player.position,player.direction,float(t.assist_range),deg_to_rad(float(t.assist_angle)))
 	dive_side = signf(dive_target.food_position().x-player.position.x) if dive_target != null else 0.0
 	dive_aimed = dive_target != null
+	dive_food_near = dive_aimed or assist_target(player.position,player.direction,float(t.assist_range),PI) != null
 
 # A dive ends when the gull leaves WINDUP/STRIKE; ending past the lined-up snack without a snatch is an overshoot.
 func _dive_tick() -> void:
@@ -842,7 +844,7 @@ func _dive_tick() -> void:
 	if passed:
 		dive_stats.dive_overshoots += 1
 	if not dive_hit:
-		_miss_cue("aim" if not dive_aimed else ("early" if dive_peck_early else ("far" if passed or dive_pecked else "")))
+		_miss_cue(("aim" if dive_food_near else "") if not dive_aimed else ("early" if dive_peck_early else ("far" if passed or dive_pecked else "")))
 
 ## Why a dive ended without a snatch: counts it for analytics and shows a short callout (rate-limited, never over a lesson card). "" shows nothing.
 func _miss_cue(reason: String) -> void:
