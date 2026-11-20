@@ -1,6 +1,6 @@
 # 100 — Lesson 3 ring shows when the cone is in peck range
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: none

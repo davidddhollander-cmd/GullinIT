@@ -1,6 +1,6 @@
 # 101 — Miss cue that says why a dive missed
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 100

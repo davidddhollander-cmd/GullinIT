@@ -1,6 +1,6 @@
 # 102 — Every peck press gives feedback, and ground eating stops dropping presses
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 101
