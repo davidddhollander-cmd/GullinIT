@@ -46,10 +46,9 @@ var avoid: Array[Dictionary] = [] ## {ref, time}: jobs to keep away from for a w
 var mug_timer: float = 0.0
 var dodge_left: float = 0.0 ## seconds of sidestep remaining
 var dodge_dir: float = 0.0
-var dodge_cooldown: float = 0.0
-var dodge_memory: float = 0.0 ## player dives seen lately; spamming makes the rival wiser
-var recent_dives: int = 0
-var diver_seen: bool = false ## this player dive was already judged
+var reacting: float = -1.0 ## time left before this rival reads the incoming dive; -1 = not watching one
+var diver_seen: bool = false ## this player dive was already answered
+var hits_taken: int = 0 ## each hit makes the rival warier (faster to react)
 var dodges: int = 0
 var mugs: int = 0
 ## Training Day dummy: patrols back and forth, never hunts, dives or mugs, and only carries food when armed.
@@ -165,35 +164,43 @@ func dummy_step(delta: float, wind: BeachWind) -> void:
 		gull.position = dummy_hold
 		gull.velocity = Vector2.ZERO
 
-## Chance to sidestep the next dive: low for a first dive, wiser for each recent one (so spam fails).
-func dodge_chance() -> float:
+## How long this rival takes to read a dive: its species' base time, shortened after every hit taken.
+func reaction_time() -> float:
 	var r: Dictionary = Config.tuning.rival
-	return minf(float(r.dodge_chance_max), float(r.dodge_chance) + float(r.dodge_chance_step) * maxi(0, recent_dives - 1))
+	var base: float = float(personality.get("reaction",gull.species_stats().get("reaction",r.reaction_default)))
+	return base * maxf(float(r.wary_floor),pow(float(r.wary_factor),hits_taken))
 
-## A diving player above and close gets one dodge roll per dive; a dive begun too close to react to still lands.
-## Works at any height, so it covers the high sky too. Mid-dive, grounded, stunned or fleeing-with-theft rivals can't.
+## No dice: a diver above and in line, inside read_range, starts the reaction clock. When it runs out the rival
+## breaks away (a grounded one takes off, an airborne one dives away sideways and down). Whether that is in time
+## is plain physics: a slow dive leaves time to clear the hit box, a fast one lands. Works at any height (high sky too).
 func evade(delta: float) -> void:
 	var r: Dictionary = Config.tuning.rival
-	dodge_cooldown = maxf(0.0, dodge_cooldown - delta)
-	dodge_memory = maxf(0.0, dodge_memory - delta)
-	if dodge_memory <= 0.0:
-		recent_dives = 0
 	if dodge_left > 0.0:
-		dodge_left -= delta
-		gull.position.x = clampf(gull.position.x + dodge_dir * float(r.dodge_distance) / float(r.dodge_time) * delta, 12.0, world_width() - 12.0)
+		var step: float = minf(delta,dodge_left)
+		dodge_left -= step
+		gull.position.x = clampf(gull.position.x + dodge_dir * float(r.dodge_distance) / float(r.dodge_time) * step,12.0,world_width() - 12.0)
+		gull.position.y += float(r.dodge_drop) / float(r.dodge_time) * step
 	var diver: BeachGull = game.player if game != null else null
 	if diver == null or diver.state != BeachGull.State.STRIKE:
 		diver_seen = false
-		return
-	if diver_seen or gull.state != BeachGull.State.GLIDE or mode in GROUND_MODES or dodge_cooldown > 0.0:
+		reacting = -1.0
 		return
 	var gap: float = gull.position.y - diver.position.y
-	if absf(diver.position.x - gull.position.x) > float(r.dodge_range_x) or gap > float(r.dodge_max_gap) or gap < 0.0:
+	var airborne: bool = gull.state == BeachGull.State.GLIDE and not mode in GROUND_MODES
+	var grounded: bool = gull.state == BeachGull.State.GROUNDED
+	if diver_seen or not (airborne or grounded) or gap < 0.0 or absf(diver.position.x - gull.position.x) > float(r.dodge_range_x) or gull.position.distance_to(diver.position) > float(r.read_range):
+		reacting = -1.0
+		return
+	if reacting < 0.0:
+		reacting = reaction_time()
+	reacting -= delta
+	if reacting > 0.0:
 		return
 	diver_seen = true
-	recent_dives += 1
-	dodge_memory = float(r.dodge_memory)
-	if gap < float(r.dodge_min_gap) or rng.randf() >= dodge_chance():
+	reacting = -1.0
+	dodges += 1
+	if grounded:
+		take_off() # fly away
 		return
 	dodge_dir = signf(gull.position.x - diver.position.x)
 	if dodge_dir == 0.0:
@@ -202,9 +209,6 @@ func evade(delta: float) -> void:
 	if landing < edge_margin() * 0.5 or landing > world_width() - edge_margin() * 0.5:
 		dodge_dir = -dodge_dir
 	dodge_left = float(r.dodge_time)
-	dodge_cooldown = float(r.dodge_cooldown)
-	dodges += 1
-	game.effects.message(gull.position - Vector2(0, 16), "WHOOSH!", Color("fff4da"))
 
 func hold_still() -> void:
 	if dummy_hold == Vector2.INF:
@@ -451,6 +455,7 @@ func took_food(value: int) -> void:
 func mug(attacker: Vector2 = Vector2.INF, force: float = -1.0) -> int:
 	if carry_window <= 0 or carried <= 0:
 		return 0
+	hits_taken += 1
 	var value: int = carried
 	carried = 0
 	dummy_food = ""
@@ -472,6 +477,7 @@ func bump(attacker: Vector2, force: float = -1.0) -> int:
 	if force == 0.0:
 		return 0
 	var was_down: bool = gull.state == BeachGull.State.STUNNED
+	hits_taken += 1
 	leave = 0
 	chase_prey = null
 	work = {}
