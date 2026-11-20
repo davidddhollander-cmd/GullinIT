@@ -91,8 +91,9 @@ func _apply_prop_art(sprite: AnimatedSprite2D, entry: Dictionary) -> void:
 	if entry.type in ["kiosk","hotdog_stand","fish_chips_stand"]:
 		sprite.z_index = FoodStall.DRAW_DEPTH
 	var definition: Dictionary = Config.sprites[entry.type]
-	var scale_factor: float = float(definition.get("visual_scale",1.0))
+	var scale_factor: float = prop_scale(entry)
 	sprite.scale = Vector2.ONE * scale_factor
+	sprite.flip_h = bool(entry.get("flip",false))
 	sprite.position = Vector2(entry.x,float(entry.get("y",160))-float(definition.frame_h)*scale_factor*0.5)
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	sprite.material = null
@@ -102,6 +103,7 @@ func _apply_prop_art(sprite: AnimatedSprite2D, entry: Dictionary) -> void:
 		# The palm frame covers its entire 44 x 62 texture, so the shader can
 		# sample its transparent border directly, just like the approved pilot.
 		leaves.set_shader_parameter("phase",fposmod(float(entry.x)*0.037,TAU))
+		leaves.set_shader_parameter("mirror",-1.0 if sprite.flip_h else 1.0) # flip_h reverses the shader's UV x, so sway the other way
 		sprite.material = leaves
 		palm_materials.append(leaves)
 	if entry.type == WHEELIE_BIN_TYPE:
@@ -110,6 +112,10 @@ func _apply_prop_art(sprite: AnimatedSprite2D, entry: Dictionary) -> void:
 		sprite.material = sharpen
 	if entry.type == "umbrella":
 		sprite.position.y = 125
+
+## Sprite draw scale of a placed prop: the sprite's visual_scale times the level entry's optional "scale".
+static func prop_scale(entry: Dictionary) -> float:
+	return float(Config.sprites[entry.type].get("visual_scale",1.0))*float(entry.get("scale",1.0))
 
 func _refresh() -> void:
 	palm_materials.clear()
@@ -339,7 +345,7 @@ func _sign_hits_prop(x: int,board_width: int,entries: Array,board_height: int = 
 		if not Config.sprites.has(entry.type):
 			continue
 		var sprite: Dictionary = Config.sprites[entry.type]
-		var scale_factor: float = float(sprite.get("visual_scale",1.0))
+		var scale_factor: float = prop_scale(entry)
 		var prop_y: float = float(entry.get("y",160))
 		if entry.type == "umbrella":
 			prop_y = 125.0 + float(sprite.frame_h)*scale_factor*0.5

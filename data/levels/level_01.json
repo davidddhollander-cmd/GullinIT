@@ -25,11 +25,10 @@
   ],
   "props": [
     {"type": "beach_ball", "x": 60, "y": 146},
+    {"type": "beach_palm", "x": 152, "y": 148, "flip": true},
     {"type": "beach_bucket", "x": 194, "y": 138},
-    {"type": "beach_palm", "x": 145, "y": 148},
-    {"type": "beach_palm", "x": 370, "y": 148},
-    {"type": "beach_palm", "x": 665, "y": 148},
     {"type": "bin", "x": 326},
+    {"type": "beach_palm", "x": 366, "y": 148, "scale": 0.935484},
     {"type": "beach_parasol_blue", "x": 455, "y": 143},
     {"type": "beach_chair_blue", "x": 474, "y": 151},
     {"type": "beach_castle", "x": 518, "y": 171, "jitter": true},

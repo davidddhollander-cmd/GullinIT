@@ -42,7 +42,7 @@
     {"type": "hotdog_stand", "x": 400, "customer_x": 445},
     {"type": "beach_hut", "x": 520, "y": 151},
     {"type": "beach_parasol_blue", "x": 600, "y": 143},
-    {"type": "beach_palm", "x": 665, "y": 148},
+    {"type": "beach_palm", "x": 658, "y": 148},
     {"type": "beach_lamp", "x": 760, "y": 151},
     {"type": "kiosk", "x": 860, "customer_x": 815},
     {"type": "wheelie_bin", "x": 905},

@@ -14,6 +14,12 @@ static func run(game: BeachGame, check: Callable) -> void:
 		if material == null:
 			continue
 		phases[material.get_shader_parameter("phase")] = true
+		var sprite: AnimatedSprite2D = beach.prop_sprites[i]
+		var entry: Dictionary = beach.props[i]
+		var expected: float = float(Config.sprites.beach_palm.get("visual_scale",1.0))*float(entry.get("scale",1.0))
+		check.call(sprite.flip_h==bool(entry.get("flip",false)) and is_equal_approx(sprite.scale.x,expected),"palm honours its flip and scale fields")
+		check.call(is_equal_approx(sprite.position.y+float(Config.sprites.beach_palm.frame_h)*expected*0.5,float(entry.get("y",160))),"scaled palm stays planted on its base y")
+		check.call(is_equal_approx(float(material.get_shader_parameter("mirror")),-1.0 if sprite.flip_h else 1.0),"mirrored palm sways the same world direction")
 		check.call(is_equal_approx(float(material.get_shader_parameter("wind_strength")),float(game.level.wind.strength)),"palm starts with its level's wind strength")
 		check.call(is_equal_approx(float(material.get_shader_parameter("wind_direction")),float(game.level.wind.dir)),"palm starts with its level's wind direction")
 	check.call(palms>=1 and beach.palm_materials.size()==palms,"every palm is connected to gameplay wind")

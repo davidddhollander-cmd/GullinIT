@@ -58,12 +58,11 @@
   ],
   "props": [
     {"type": "beach_lifebuoy_flat", "x": 410, "y": 146},
-    {"type": "beach_palm", "x": 60, "y": 148},
     {"type": "beach_parasol", "x": 160, "y": 143},
     {"type": "beach_lamp", "x": 285, "y": 151},
     {"type": "kiosk", "x": 330, "customer_x": 370},
     {"type": "bin", "x": 455},
-    {"type": "beach_palm", "x": 650, "y": 148},
+    {"type": "beach_palm", "x": 582, "y": 148, "scale": 0.903226},
     {"type": "bin", "x": 715},
     {"type": "beach_hut", "x": 800, "y": 151},
     {"type": "beach_bench", "x": 850, "y": 153},

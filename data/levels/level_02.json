@@ -36,9 +36,9 @@
   ],
   "props": [
     {"type": "beach_bucket", "x": 110, "y": 146},
+    {"type": "beach_palm", "x": 436, "y": 148, "flip": true, "scale": 0.903226},
     {"type": "beach_ball", "x": 610, "y": 146},
     {"type": "bin", "x": 22},
-    {"type": "beach_palm", "x": 70, "y": 148},
     {"type": "beach_parasol_blue", "x": 150, "y": 143},
     {"type": "kiosk", "x": 240, "customer_x": 290},
     {"type": "bin", "x": 560},

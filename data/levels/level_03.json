@@ -35,7 +35,7 @@
   "props": [
     {"type": "beach_jet_ski", "x": 178, "y": 138},
     {"type": "beach_parasol_blue", "x": 235, "y": 143},
-    {"type": "beach_palm", "x": 380, "y": 148},
+    {"type": "beach_palm", "x": 294, "y": 148, "scale": 0.870968},
     {"type": "bin", "x": 440},
     {"type": "wheelie_bin", "x": 512},
     {"type": "hotdog_stand", "x": 560, "customer_x": 600},

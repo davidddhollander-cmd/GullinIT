@@ -4,6 +4,8 @@ render_mode unshaded;
 // Approved leaf sway for the complete 44 x 62 palm texture.
 uniform float wind_strength : hint_range(0.0, 1.0) = 0.55;
 uniform float wind_direction : hint_range(-1.0, 1.0) = 1.0;
+// -1 for a mirrored (flip_h) palm so the fronds still lean the same world direction.
+uniform float mirror : hint_range(-1.0, 1.0) = 1.0;
 uniform float phase : hint_range(0.0, 6.283185) = 0.0;
 // Negative uses the live clock. Gameplay supplies its pausable beach clock;
 // the standalone preview supplies exact times for capture.
@@ -35,7 +37,7 @@ void fragment() {
 	float bend = 0.48 + 0.43 * sin(t + frond_phase)
 		+ 0.09 * sin(2.0 * t + frond_phase + 1.2);
 	float amplitude = 1.75 * clamp(wind_strength, 0.0, 1.0) * weight;
-	vec2 motion = vec2(wind_direction * amplitude * bend,
+	vec2 motion = vec2(wind_direction * mirror * amplitude * bend,
 		amplitude * 0.24 * sin(2.0 * t + frond_phase + 0.8));
 	vec2 sample_uv = (pixel - motion) / SOURCE_SIZE;
 	if (any(lessThan(sample_uv, vec2(0.0))) || any(greaterThanEqual(sample_uv, vec2(1.0)))) {
