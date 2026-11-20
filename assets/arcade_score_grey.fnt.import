@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://6ufcelwrxdxj"
+path="res://.godot/imported/arcade_score_grey.fnt-f43c77a6f6ccfa0de82d94173dd09dac.fontdata"
+
+[deps]
+
+source_file="res://assets/arcade_score_grey.fnt"
+dest_files=["res://.godot/imported/arcade_score_grey.fnt-f43c77a6f6ccfa0de82d94173dd09dac.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2

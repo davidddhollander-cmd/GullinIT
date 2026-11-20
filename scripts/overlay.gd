@@ -42,6 +42,7 @@ var score_announcement_fonts: Array[Font] = [
 	preload("res://assets/arcade_score_blue.fnt"),
 	preload("res://assets/arcade_score_hot.fnt"),
 ]
+const MISS_FONT: Font = preload("res://assets/arcade_score_grey.fnt") ## grey recolour for miss callouts
 var score_announcement_font_index: int = 0
 const SCORE_ANNOUNCEMENT_HOLD: float = 3.0 ## banner keeps its own hold; floating popups use juice.score_popup_hold
 const SCORE_ANNOUNCEMENT_FADE: float = BeachEffects.SCORE_MESSAGE_FADE
