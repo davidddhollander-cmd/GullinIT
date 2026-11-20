@@ -105,6 +105,11 @@ var taunt_text: String = ""
 var crashes: int = 0
 # Dive outcomes for level_end analytics (player feedback F1: are dives overshooting?).
 var dive_stats: Dictionary = {"dives":0,"dive_pecks":0,"dive_snatches":0,"dive_overshoots":0}
+var miss_stats: Dictionary = {"miss_early":0,"miss_far":0,"miss_aim":0} ## why dives ended without a snatch; rides on level_end
+var dive_aimed: bool = false ## the dive began with a snatchable target on the aim line
+var dive_pecked: bool = false
+var dive_peck_early: bool = false ## a peck was pressed while the food was still out of reach ahead
+var miss_cue_ready_at: float = 0.0
 var dive_live: bool = false
 var dive_hit: bool = false
 var dive_target: BeachTarget = null
@@ -282,6 +287,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	)
 	player.peck_started.connect(func() -> void:
 		dive_stats.dive_pecks += 1
+		dive_pecked = true
+		dive_peck_early = dive_live and is_instance_valid(dive_target) and dive_target.food and signf(dive_target.food_position().x-player.position.x) == dive_side and player.beak().distance_to(dive_target.food_position()) > dive_peck_reach()
 		effects.shout(player.beak(),"PECK!",BeachUI.GOLD)
 		Audio.play("click")
 	)
@@ -797,7 +804,7 @@ func _assist_stats() -> Dictionary:
 	return {"control_mode": GameState.control_mode(), "assist": GameState.assist(), "dive_steer": snappedf(GameState.dive_steer(), 0.01)}
 
 func _run_stats() -> Dictionary:
-	var stats: Dictionary = _assist_stats().merged({"level": int(level.id), "mode": mode_name(), "mouse_role": GameState.mouse_role(), "seconds": snappedf(elapsed, 0.1), "play_seconds": snappedf(play_clock, 0.1), "crashes": crashes, "lesson": mini(lesson + 1, TRAINING_LESSONS) if training else 0}).merged(dive_stats)
+	var stats: Dictionary = _assist_stats().merged({"level": int(level.id), "mode": mode_name(), "mouse_role": GameState.mouse_role(), "seconds": snappedf(elapsed, 0.1), "play_seconds": snappedf(play_clock, 0.1), "crashes": crashes, "lesson": mini(lesson + 1, TRAINING_LESSONS) if training else 0}).merged(dive_stats).merged(miss_stats)
 	return stats.merged(_lesson_stats()) if training else stats
 
 func _lesson_stats() -> Dictionary:
@@ -811,18 +818,42 @@ func _dive_began() -> void:
 	dive_stats.dives += 1
 	dive_live = true
 	dive_hit = false
+	dive_peck_early = false
+	dive_pecked = false
 	# ponytail: the intended snack is guessed as the nearest one along the dive line (the touch-assist cone); use real intent if an aim marker lands.
 	var t: Dictionary = Config.tuning.touch
 	dive_target = assist_target(player.position,player.direction,float(t.assist_range),deg_to_rad(float(t.assist_angle)))
 	dive_side = signf(dive_target.food_position().x-player.position.x) if dive_target != null else 0.0
+	dive_aimed = dive_target != null
 
 # A dive ends when the gull leaves WINDUP/STRIKE; ending past the lined-up snack without a snatch is an overshoot.
 func _dive_tick() -> void:
 	if not dive_live or player.state in [BeachGull.State.WINDUP,BeachGull.State.STRIKE]:
 		return
 	dive_live = false
-	if not dive_hit and dive_side != 0.0 and is_instance_valid(dive_target) and dive_target.food and signf(dive_target.food_position().x-player.position.x) != dive_side:
+	var passed: bool = not dive_hit and dive_side != 0.0 and is_instance_valid(dive_target) and dive_target.food and signf(dive_target.food_position().x-player.position.x) != dive_side
+	if passed:
 		dive_stats.dive_overshoots += 1
+	if not dive_hit:
+		_miss_cue("aim" if not dive_aimed else ("early" if dive_peck_early else ("far" if passed or dive_pecked else "")))
+
+## Why a dive ended without a snatch: counts it for analytics and shows a short callout (rate-limited, never over a lesson card). "" shows nothing.
+func _miss_cue(reason: String) -> void:
+	if reason.is_empty():
+		return
+	miss_stats["miss_"+reason] += 1
+	if elapsed < miss_cue_ready_at or trainer_open or training_card_pending():
+		return
+	miss_cue_ready_at = elapsed + float(Config.tuning.juice.miss_cue_cooldown)
+	if training:
+		if training_miss_hint <= 0.0: # an active first-miss hint is the one message
+			_training_hint("miss_"+reason)
+	else:
+		effects.message(Vector2(camera_x,84.0),str(Config.trainer.miss_cues[reason]),BeachUI.GOLD,float(Config.tuning.juice.tip_time),0.0)
+
+## How close the beak must be to the snack for a peck pressed now to reach it before the window closes.
+func dive_peck_reach() -> float:
+	return player.dive_speed*float(Config.tuning.dive.peck_window)*0.5+6.0
 
 func dismiss_intro() -> void:
 	_begin_lesson_stats()
@@ -1493,7 +1524,7 @@ func _peck_pause_check() -> void:
 		return
 	if not peck_pause_armed or peck_pause or player.peck_used or player.peck_time > 0.0:
 		return
-	var reach: float = player.dive_speed * float(Config.tuning.dive.peck_window) * 0.5 + 6.0
+	var reach: float = dive_peck_reach()
 	for target: BeachTarget in spawner.targets:
 		if target.kind == "kiosk_customer" and target.food and not target.leaving and player.beak().distance_to(target.food_position()) <= reach:
 			peck_pause = true

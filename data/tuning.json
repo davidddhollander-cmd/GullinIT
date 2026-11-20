@@ -415,6 +415,7 @@
     "taunt_time": 2.0,
     "taunt_delay": 1.5,
     "tip_time": 3.0,
+    "miss_cue_cooldown": 4.0,
     "feathers": 8,
     "peck_contact_count": 3,
     "peck_contact_life": 0.2,

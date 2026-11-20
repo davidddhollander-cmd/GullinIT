@@ -1,6 +1,6 @@
 # 101 — Miss cue that says why a dive missed
 
-Status: inbox
+Status: done
 Author: Claude
 Assignee: Claude Sonnet
 Depends on: 100
@@ -37,7 +37,22 @@ When a dive ends without a snatch, tell the player in a few words why: pecked to
 - [ ] `./tools/validate.ps1` passes with no new failures.
 
 ## Report
-<!-- Filled in by the implementer. -->
+**Files:** `scripts/game.gd` (`_dive_tick`, `_miss_cue`, `dive_peck_reach`, peck_started handler, `miss_stats` merged into `_run_stats`), `data/trainer.json` (`miss_cues` callouts, `live.miss_early/far/aim` for training), `data/tuning.json` (`juice.miss_cue_cooldown` 4.0 s), `tests/analytics_checks.gd`.
+
+**Tests:** 18526 checks, 0 failures (task 100 left 18521; 5 new checks, plus the existing level_end dive checks updated for the extra dives).
+
+**Reason rules** (checked when a dive ends without a snatch; priority order):
+- aim: no snatchable target on the aim line when the dive began (`dive_target == null`).
+- early: a peck was pressed while the snack was still ahead and farther than the real peck reach (same formula the lesson peck-freeze uses, now shared as `dive_peck_reach()`).
+- far: the gull passed the snack (existing overshoot test), or a peck was pressed in reach and still missed.
+- otherwise nothing (e.g. pulled up before reaching it with no peck).
+Peck window opens at the press in this game, so "window not open yet" is modelled as "pressed out of reach".
+
+**Behaviour:** counts always go up (`miss_early`, `miss_far`, `miss_aim` on `level_end`, kept in a separate dict so `dive_stats` and lesson stats are unchanged). The callout uses the tip-style floating text at screen top, at most once per 4 s, and is skipped while a trainer card is open or queued. In training the reason shows on the lesson strip through the existing training-hint path, and only when the first-miss hint is not already showing.
+
+**Not done / unverified:** the training strip route has no automated test; the callout look in game is unseen. Dive aim assist, peck window and physics are untouched.
+
+**Branch:** sonnet/101-miss-reason-cue
 
 ## Review notes
 <!-- Filled in by the reviewer. -->
