@@ -79,7 +79,7 @@ func fire() -> bool:
 	var p: Dictionary = power()
 	if str(p.id) != "shakedown": # Shakedown has its own rear-up and slam
 		game.effects.message(game.player.position-Vector2(0,24),str(p.name)+"!",BeachUI.GOLD)
-	Audio.play(str(p.get("sound","gang_call")),float(p.get("pitch",1.0)),-2.0)
+	Audio.play(Audio.resolve(p.get("sound","gang_call")),float(p.get("pitch",1.0)),-2.0)
 	game.effects.sound_wave(game.player.beak())
 	powers_fired += 1
 	game.track("power_fired",{"power":str(p.id),"level":int(game.level.get("id",0))})

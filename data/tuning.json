@@ -464,15 +464,16 @@
       "old_man": {"register": "man", "pitch": [0.86, 0.94]}
     },
     "events": {
-      "theft":   {"cues": ["hey", "oi", "my_chips", "no_no"], "chance": 1.0, "gap": 0.3},
+      "theft":   {"cues": ["hey", "oi", "my_chips", "no_no", "oh_no"], "chance": 1.0, "gap": 0.3},
       "notice":  {"cues": ["huh", "whoa", "eek"],             "chance": 0.8, "gap": 0.9},
       "warning": {"cues": ["shoo", "hey", "get_off"],         "chance": 0.3, "gap": 1.5},
       "swat":    {"cues": ["hah", "gotcha"],                  "chance": 0.8, "gap": 0.9},
-      "give_up": {"cues": ["aww", "ugh", "hmph"],             "chance": 0.5, "gap": 1.5},
+      "give_up": {"cues": ["aww", "ugh", "hmph", "oh_no"],             "chance": 0.5, "gap": 1.5},
       "panic":   {"cues": ["aah", "eek"],                     "chance": 1.0, "gap": 4.0},
       "cry":     {"cues": ["wah"],                            "chance": 1.0, "gap": 1.0}
     }
   },
+  "sfx": {"snatch": ["snatch_1", "snatch_2", "snatch_3", "snatch_4", "snatch"], "score": ["score_1", "score_2", "score"]},
   "flap": {"volume_db": -13.0, "min_gap": 0.2},
   "clouds": {"wind_speed": 28.0, "sheets": ["clouds-v2-plate", "clouds-v2-pearl-px"], "depth_by_size": {"small": 0.6, "medium": 1.0, "large": 1.4}, "default_layout": [{"id": "plate-01", "x": 18, "y": 22, "scale": 1.0}, {"id": "plate-02", "x": 125, "y": 26, "scale": 0.5}, {"id": "plate-03", "x": 205, "y": 20, "scale": 0.5}, {"id": "plate-04", "x": 60, "y": 46, "scale": 0.5}, {"id": "plate-04", "x": 150, "y": 76, "scale": 1.0}, {"id": "plate-03", "x": 262, "y": 74, "scale": 1.0}]}
 }

@@ -33,14 +33,17 @@ static func run(host: Node, check: Callable) -> void:
 			for register: String in Audio.VOICE_REGISTERS:
 				found += 1 if Audio.streams.has("voice_%s_%s" % [line,register]) else 0
 			check.call(found == (1 if line == "wah" else 3) and Audio.streams.has("voice_%s_kid" % line),"event %s line %s loads for its registers" % [event,line])
-	check.call(Config.species.species["great-black-backed"].power.sound == "bb_shakedown","shakedown fires bb_shakedown")
+	check.call(Config.species.species["great-black-backed"].power.sound.back() == "bb_shakedown","shakedown keeps bb_shakedown as the last fallback")
 
 	var blackback: BeachGame = SHAKEDOWN.fixture(host,"great-black-backed")
 	var herring: BeachGame = SHAKEDOWN.fixture(host,"herring")
+	Audio.set_approvals({}) # David's lab verdicts must not change what this checks
 	check.call(blackback.species_cue("dive","dive") == "bb_dive" and blackback.species_cue("stun","stun") == "bb_stun","black-back maps dive and stun to bb_ cues")
-	check.call(blackback.species_cue("screech_long","screech_long") == "bb_screech_long" and blackback.species_cue("screech_short","screech_short") == "bb_screech_short","black-back maps both screeches")
+	check.call(blackback.species_cue("screech_long","screech_long") == "bb_screech_long_1" and blackback.species_cue("screech_short","screech_short") == "bb_screech_short_1","black-back maps both screeches to their first candidate")
 	check.call(herring.species_cue("dive","dive") == "dive" and herring.species_cue("screech_long","screech_long") == "screech_long","other species fall back to the default cue")
 	check.call(blackback.species_cue("unmapped","fallback") == "fallback","an unmapped key falls back")
+	_variant_checks(check,blackback)
+	Audio.set_approvals(Audio._read_approvals())
 
 	var a := Node.new()
 	var b := Node.new()
@@ -215,6 +218,58 @@ static func _waves(host: Node, check: Callable) -> void:
 		GameState.progress["2"] = saved_shop
 	Audio.stop_ambience(0.0)
 	Audio.ambience_tween.custom_step(1.0)
+
+## Task 103: "first approved, else first not rejected" for snatch, combo-up and the Black Back, with injected approvals.
+static func _variant_checks(check: Callable, blackback: BeachGame) -> void:
+	for cue: String in Audio.VARIANT_CUES + ["voice_oh_no_man","voice_oh_no_woman","voice_oh_no_kid"]:
+		var stream: Variant = Audio.streams.get(cue)
+		check.call(stream is AudioStreamOggVorbis and (stream as AudioStreamOggVorbis).get_length() > 0.1 and _ogg_bytes(stream) > 1500,"task 103 cue loads and is not silent: "+cue)
+	var set_verdicts: Callable = func(verdicts: Dictionary) -> void:
+		var sounds: Dictionary = {}
+		for stem: String in verdicts:
+			sounds["assets/audio/%s.ogg" % stem] = {"status": verdicts[stem]}
+		Audio.set_approvals(sounds)
+	var list: Array = ["a","b","c"]
+	Audio.set_approvals({})
+	check.call(Audio.first_allowed(["snatch_1","snatch_2"]) == "snatch_1","helper: nothing approved picks the first")
+	set_verdicts.call({"snatch_1": "rejected","snatch_3": "approved"})
+	check.call(Audio.first_allowed(["snatch_1","snatch_2","snatch_3","snatch_4"]) == "snatch_3","helper: an approved cue beats an earlier unreviewed one")
+	set_verdicts.call({"snatch_1": "rejected","snatch_2": "unreviewed"})
+	check.call(Audio.first_allowed(["snatch_1","snatch_2","snatch_3"]) == "snatch_2","helper: rejected cues are skipped")
+	set_verdicts.call({"snatch_1": "approved","snatch_2": "approved"})
+	check.call(Audio.first_allowed(["snatch_2","snatch_1"]) == "snatch_2","helper: the first approved in list order wins")
+	set_verdicts.call({"snatch_1": "rejected","snatch_2": "rejected"})
+	check.call(Audio.first_allowed(["snatch_1","snatch_2"]) == "" and list.size() == 3,"helper: all rejected returns an empty cue")
+	# snatch and combo-up go through it, keeping the pitch-up
+	Audio.set_approvals({})
+	var player: AudioStreamPlayer = Audio.play(Audio.sfx("snatch"),1.16)
+	check.call(player != null and player.stream == Audio.streams["snatch_1"] and is_equal_approx(player.pitch_scale,1.16),"snatch plays the first candidate with its tier pitch-up")
+	set_verdicts.call({"snatch_1": "rejected","snatch_4": "approved"})
+	check.call(Audio.sfx("snatch") == "snatch_4","snatch plays the approved candidate")
+	set_verdicts.call({"snatch_1": "rejected","snatch_2": "rejected","snatch_3": "rejected","snatch_4": "rejected"})
+	check.call(Audio.sfx("snatch") == "snatch" and Audio.play(Audio.sfx("snatch")) != null,"snatch falls back to the old snatch.wav")
+	set_verdicts.call({"snatch_1": "rejected","snatch_2": "rejected","snatch_3": "rejected","snatch_4": "rejected","snatch": "rejected"})
+	check.call(Audio.sfx("snatch") == "" and Audio.play(Audio.sfx("snatch")) == null,"snatch is silent only when every option is rejected")
+	set_verdicts.call({"score_1": "rejected"})
+	check.call(Audio.sfx("score") == "score_2","combo-up skips a rejected candidate")
+	set_verdicts.call({"score_1": "rejected","score_2": "rejected","score": "rejected"})
+	check.call(Audio.sfx("score") == "","combo-up is silent when every option is rejected")
+	# the Black Back cue and its power
+	set_verdicts.call({"bb_screech_long_1": "rejected","bb_screech_long_2": "approved"})
+	check.call(blackback.species_cue("screech_long","screech_long") == "bb_screech_long_2","black-back screech plays the approved candidate")
+	set_verdicts.call({"bb_screech_long_1": "rejected","bb_screech_long_2": "rejected","bb_screech_long_3": "rejected"})
+	check.call(blackback.species_cue("screech_long","screech_long") == "bb_screech_long","black-back screech falls back to the old call")
+	set_verdicts.call({"bb_shakedown_1": "rejected"})
+	check.call(Audio.resolve(Config.species.species["great-black-backed"].power.sound) == "bb_shakedown_2","shakedown sound goes through the helper")
+	check.call(Audio.resolve("gang_call") == "gang_call","a plain cue name still resolves to itself")
+
+## Encoded size of an Ogg stream: a silent file packs into a few hundred bytes, a real call into kilobytes.
+static func _ogg_bytes(stream: AudioStreamOggVorbis) -> int:
+	var total: int = 0
+	for page: Variant in stream.packet_sequence.packet_data:
+		for packet: Variant in page:
+			total += (packet as PackedByteArray).size()
+	return total
 
 ## Task 083: SFX Lab verdicts, with an injected approvals map instead of the real file.
 static func _verdict_checks(check: Callable, speaker: Node, game: BeachGame) -> void:

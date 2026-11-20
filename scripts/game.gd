@@ -210,7 +210,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		dog.dazed.connect(func() -> void: dog.stars = effects.pixelfx("pixelfx_stunned",Vector2(0,-22),Vector2.RIGHT,dog))
 		dog.outrun.connect(func() -> void:
 			effects.message(player.position-Vector2(0,18),"OUTRUN!",BeachUI.GOLD)
-			Audio.play("snatch")
+			Audio.play(Audio.sfx("snatch"))
 			_quest_event("dog_outrun")
 		)
 		dogs.append(dog)
@@ -266,7 +266,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	_wire_sand(player)
 	player.gull_stunned.connect(_stunned)
 	player.ground_crashed.connect(_crashed)
-	score.combo_changed.connect(func(tier: int) -> void: Audio.play("score",1.0+tier*0.06,-4.0))
+	score.combo_changed.connect(func(tier: int) -> void: Audio.play(Audio.sfx("score"),1.0+tier*0.06,-4.0))
 	score.combo_rose.connect(func(tier: int) -> void: effects.combo_pop(player.position,str(Config.tuning.score.tiers[tier])))
 	player.dive_started.connect(_dive_began)
 	player.wing_stroke.connect(_wing_stroke)
@@ -303,7 +303,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 			_scrap_collected(at,food_id)
 		else:
 			effects.snatch_contact(at,player.velocity,false)
-			Audio.play("snatch",1+score.tier*0.08)
+			Audio.play(Audio.sfx("snatch"),1+score.tier*0.08)
 			player.digestion.collect(food_id)
 			if training and lesson == TODDLER_LESSON:
 				_training_advance()
@@ -1012,7 +1012,7 @@ func _wing_stroke() -> void:
 	Audio.flap(float(flap.get("pitch",1.0)),float(flap.get("volume_db",0.0)))
 
 func species_cue(key: String, default: String) -> String:
-	return str(player.species_stats().get("sfx",{}).get(key,default))
+	return Audio.resolve(player.species_stats().get("sfx",{}).get(key,default))
 
 ## A bump or bonk is a knock, not a reward: a random gull-hit sound (cosmetic RNG).
 func _hit_sound() -> void:
@@ -1083,7 +1083,7 @@ func _snatched(target: BeachTarget, gull: BeachGull, risky: bool) -> void:
 			if handover:
 				brash.earn("handover")
 		effects.snatch_contact(contact_at,gull.velocity,handover,effects.snatch_weight(target.food_id,score.tier))
-		Audio.play("snatch",1+score.tier*0.08)
+		Audio.play(Audio.sfx("snatch"),1+score.tier*0.08)
 		if handover:
 			effects.message(target.food_position()-Vector2(0,12),"COUNTER +%d%%!" % roundi(float(Config.tuning.score.handover)*100),BeachUI.GOLD)
 	else:
@@ -1216,7 +1216,7 @@ func _quest_event(event: String, data: Dictionary = {}) -> void:
 func _quest_completed(quest: Dictionary) -> void:
 	score.points += int(quest.bonus)
 	effects.message(player.position-Vector2(0,22),"QUEST! +%d" % int(quest.bonus),BeachUI.GOLD)
-	Audio.play("snatch")
+	Audio.play(Audio.sfx("snatch"))
 	if GameState.complete_quest(int(level.id),str(quest.id)):
 		feathers_earned += 1
 		quest.feather = true
@@ -1230,7 +1230,7 @@ func _swallowed(snack: Dictionary) -> void:
 		score.points += value
 		effects.score_message(player.position,"+%d" % value,Color("ffc65c"))
 		effects.collect_burst(player.position+Vector2(0,6),str(snack.id))
-		Audio.play("snatch")
+		Audio.play(Audio.sfx("snatch"))
 		overlay.show_score_announcement(str(snack.id),value)
 	else:
 		if not first_steal_sent:
@@ -1307,7 +1307,7 @@ func _mugging() -> void:
 					mugged_rivals[pilot.gull.rival_name] = true
 					_quest_event("rival_mugged_distinct")
 				effects.snatch_contact(pilot.gull.position,player.velocity,false)
-				Audio.play("snatch",1+score.tier*0.08)
+				Audio.play(Audio.sfx("snatch"),1+score.tier*0.08)
 				player.digestion.collect(pilot.carried_food_id,{"value":value,"upwind":player.upwind,"mugged":true,"mugged_from":pilot.gull.rival_name,"blue":pilot.carried_blue})
 				brash.earn("mug")
 				strike_near_carrier = false

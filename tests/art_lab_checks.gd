@@ -129,6 +129,11 @@ static func run(host: Node, check: Callable) -> void:
 	for i: int in count:
 		if not categories.has(lab._category(i)):
 			categories.append(lab._category(i))
+	var runs: int = 0
+	for i: int in count:
+		if i == 0 or lab._category(i) != lab._category(i - 1):
+			runs += 1
+	check.call(runs == categories.size(), "every category is one contiguous run (arrows reach all entries)")
 	for _i: int in categories.size() - 2: # one Tab is already done above; the last one wraps
 		_key(lab, KEY_TAB)
 	check.call(lab.index != 0, "Tab stays on the last category until it wraps")

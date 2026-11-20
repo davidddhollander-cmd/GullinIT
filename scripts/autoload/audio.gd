@@ -21,7 +21,8 @@ var music_tween: Tween
 ## Cosmetic randomness only: never touch the level-seeded rng, or level determinism breaks.
 var fx_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 const BB_CUES: Array[String] = ["bb_screech_long", "bb_screech_short", "bb_dive", "bb_stun", "bb_hit", "bb_shakedown", "bb_slam", "bb_stomp"]
-const VOICE_LINES: Array[String] = ["hey", "oi", "my_chips", "no_no", "whoa", "huh", "eek", "shoo", "get_off", "hah", "gotcha", "aww", "ugh", "hmph", "aah", "wah"]
+const VARIANT_CUES: Array[String] = ["snatch_1", "snatch_2", "snatch_3", "snatch_4", "score_1", "score_2", "bb_screech_long_1", "bb_screech_long_2", "bb_screech_long_3", "bb_screech_short_1", "bb_screech_short_2", "bb_screech_short_3", "bb_shakedown_1", "bb_shakedown_2"] ## task 103 candidates the lab picks between
+const VOICE_LINES: Array[String] = ["oh_no", "hey", "oi", "my_chips", "no_no", "whoa", "huh", "eek", "shoo", "get_off", "hah", "gotcha", "aww", "ugh", "hmph", "aah", "wah"]
 const VOICE_REGISTERS: Array[String] = ["man", "woman", "kid"]
 const MISC_CUES: Array[String] = ["dog_bark", "whistle", "swat_thwack", "wing_flap_1", "wing_flap_2", "pigeon_coo_1", "pigeon_coo_2", "pigeon_coo_3", "pigeon_scared_1", "pigeon_scared_2", "pigeon_takeoff"]
 var dog_barks: Array[String] = [] ## "dog_bark_1..": real recorded barks when present, else the generated "dog_bark"
@@ -59,7 +60,7 @@ func _ready() -> void:
 	for cue: String in ["bag_thump", "bin_rattle", "stash_release", "release_accent", "empty_tap"]:
 		streams[cue] = _stash_stream(cue)
 	streams["gull_call"] = GULL_CALL
-	for cue: String in ["screech_long", "screech_short", "gang_call", "gull_hit_1", "gull_hit_2", "gull_hit_3", "score", "ui_confirm", "ui_back", "ui_error", "level_end", "level_end_fail", "thunder_1", "thunder_2"] + BB_CUES + MISC_CUES:
+	for cue: String in ["screech_long", "screech_short", "gang_call", "gull_hit_1", "gull_hit_2", "gull_hit_3", "score", "ui_confirm", "ui_back", "ui_error", "level_end", "level_end_fail", "thunder_1", "thunder_2"] + BB_CUES + MISC_CUES + VARIANT_CUES:
 		streams[cue] = load("res://assets/audio/%s.ogg" % cue)
 	for line: String in VOICE_LINES:
 		for register: String in VOICE_REGISTERS:
@@ -134,6 +135,24 @@ func pick(cues: Array, start: int = -1) -> String:
 		if not rejected(str(cues[(start+i)%cues.size()])):
 			return str(cues[(start+i)%cues.size()])
 	return ""
+
+## The first cue in `cues` the lab approved, else the first that isn't rejected, else "" (plays nothing).
+func first_allowed(cues: Array) -> String:
+	for cue: Variant in cues:
+		if approved_cues.has(CUE_FILES.get(str(cue),str(cue))) and not rejected(str(cue)):
+			return str(cue)
+	for cue: Variant in cues:
+		if not rejected(str(cue)):
+			return str(cue)
+	return ""
+
+## A data value that is one cue name or a list of candidates -> the cue to play.
+func resolve(cue: Variant) -> String:
+	return first_allowed(cue) if cue is Array else str(cue)
+
+## The cue for `key` in tuning.sfx (a candidate list).
+func sfx(key: String) -> String:
+	return resolve(Config.tuning.get("sfx",{}).get(key,[key]))
 
 # Switches the soundtrack, fading the old track out and the new one in. Calling it
 # with the track that is already playing only restores full volume.

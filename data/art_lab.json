@@ -257,14 +257,19 @@
       "current": "beach_castle",
       "candidate": {
         "clone": "beach_castle",
-        "file": "res://assets/sprites/beach-props-v1/bucket-and-spade-v1.png",
-        "frame_w": 80,
-        "frame_h": 64,
-        "visual_scale": 0.25
+        "file": "res://assets/sprites/beach-props-v1/bucket-and-spade-v2.png",
+        "frame_w": 22,
+        "frame_h": 18,
+        "visual_scale": 0.5
       },
       "reference": "shopper_mullet",
       "motion": "static",
-      "category": "bgprops"
+      "category": "bgprops",
+      "depths": [
+        148,
+        142,
+        136
+      ]
     },
     {
       "title": "BG PROP BEACH BALL",
@@ -272,14 +277,19 @@
       "current": "beach_castle",
       "candidate": {
         "clone": "beach_castle",
-        "file": "res://assets/sprites/beach-props-v1/beach-ball-v1.png",
-        "frame_w": 48,
-        "frame_h": 46,
-        "visual_scale": 0.25
+        "file": "res://assets/sprites/beach-props-v1/beach-ball-v2.png",
+        "frame_w": 12,
+        "frame_h": 12,
+        "visual_scale": 0.5
       },
       "reference": "shopper_mullet",
       "motion": "static",
-      "category": "bgprops"
+      "category": "bgprops",
+      "depths": [
+        148,
+        142,
+        136
+      ]
     },
     {
       "title": "BG PROP LIFEBUOY HUNG",
@@ -287,14 +297,19 @@
       "current": "beach_chair",
       "candidate": {
         "clone": "beach_chair",
-        "file": "res://assets/sprites/beach-props-v1/lifebuoy-hung-v1.png",
-        "frame_w": 64,
-        "frame_h": 93,
-        "visual_scale": 0.25
+        "file": "res://assets/sprites/beach-props-v1/lifebuoy-hung-v2.png",
+        "frame_w": 16,
+        "frame_h": 23,
+        "visual_scale": 0.5
       },
       "reference": "shopper_mullet",
       "motion": "static",
-      "category": "bgprops"
+      "category": "bgprops",
+      "depths": [
+        148,
+        142,
+        136
+      ]
     },
     {
       "title": "BG PROP LIFEBUOY FLAT",
@@ -302,14 +317,19 @@
       "current": "beach_chair",
       "candidate": {
         "clone": "beach_chair",
-        "file": "res://assets/sprites/beach-props-v1/lifebuoy-flat-v1.png",
-        "frame_w": 104,
-        "frame_h": 65,
-        "visual_scale": 0.25
+        "file": "res://assets/sprites/beach-props-v1/lifebuoy-flat-v2.png",
+        "frame_w": 28,
+        "frame_h": 18,
+        "visual_scale": 0.5
       },
       "reference": "shopper_mullet",
       "motion": "static",
-      "category": "bgprops"
+      "category": "bgprops",
+      "depths": [
+        148,
+        142,
+        136
+      ]
     },
     {
       "title": "BG PROP SHELLS",
@@ -317,14 +337,19 @@
       "current": "beach_rocks",
       "candidate": {
         "clone": "beach_rocks",
-        "file": "res://assets/sprites/beach-props-v1/shells-v1.png",
-        "frame_w": 72,
-        "frame_h": 59,
-        "visual_scale": 0.25
+        "file": "res://assets/sprites/beach-props-v1/shells-v2.png",
+        "frame_w": 14,
+        "frame_h": 11,
+        "visual_scale": 0.5
       },
       "reference": "shopper_mullet",
       "motion": "static",
-      "category": "bgprops"
+      "category": "bgprops",
+      "depths": [
+        148,
+        142,
+        136
+      ]
     },
     {
       "title": "BG PROP JET SKI",
@@ -332,14 +357,151 @@
       "current": "beach_rocks",
       "candidate": {
         "clone": "beach_rocks",
+        "file": "res://assets/sprites/beach-props-v1/jet-ski-v2.png",
+        "frame_w": 72,
+        "frame_h": 40,
+        "visual_scale": 0.5
+      },
+      "reference": "shopper_mullet",
+      "motion": "static",
+      "category": "bgprops",
+      "depths": [
+        148,
+        142,
+        136
+      ]
+    },
+    {
+      "title": "BG PROP OLD VS NEW BEACH BALL",
+      "description": "LEFT OLD V1 - RIGHT NEW V2",
+      "current": "beach_ball",
+      "current_override": {
+        "file": "res://assets/sprites/beach-props-v1/beach-ball-v1.png",
+        "frame_w": 48,
+        "frame_h": 46,
+        "visual_scale": 0.25
+      },
+      "candidate": {
+        "clone": "beach_ball"
+      },
+      "reference": "shopper_mullet",
+      "motion": "static",
+      "category": "bgprops",
+      "depths": [
+        148,
+        142,
+        136
+      ]
+    },
+    {
+      "title": "BG PROP OLD VS NEW BUCKET AND SPADE",
+      "description": "LEFT OLD V1 - RIGHT NEW V2",
+      "current": "beach_bucket",
+      "current_override": {
+        "file": "res://assets/sprites/beach-props-v1/bucket-and-spade-v1.png",
+        "frame_w": 80,
+        "frame_h": 64,
+        "visual_scale": 0.25
+      },
+      "candidate": {
+        "clone": "beach_bucket"
+      },
+      "reference": "shopper_mullet",
+      "motion": "static",
+      "category": "bgprops",
+      "depths": [
+        148,
+        142,
+        136
+      ]
+    },
+    {
+      "title": "BG PROP OLD VS NEW SHELLS",
+      "description": "LEFT OLD V1 - RIGHT NEW V2",
+      "current": "beach_shells",
+      "current_override": {
+        "file": "res://assets/sprites/beach-props-v1/shells-v1.png",
+        "frame_w": 72,
+        "frame_h": 59,
+        "visual_scale": 0.25
+      },
+      "candidate": {
+        "clone": "beach_shells"
+      },
+      "reference": "shopper_mullet",
+      "motion": "static",
+      "category": "bgprops",
+      "depths": [
+        148,
+        142,
+        136
+      ]
+    },
+    {
+      "title": "BG PROP OLD VS NEW JET SKI",
+      "description": "LEFT OLD V1 - RIGHT NEW V2",
+      "current": "beach_jet_ski",
+      "current_override": {
         "file": "res://assets/sprites/beach-props-v1/jet-ski-v1.png",
         "frame_w": 176,
         "frame_h": 97,
         "visual_scale": 0.25
       },
+      "candidate": {
+        "clone": "beach_jet_ski"
+      },
       "reference": "shopper_mullet",
       "motion": "static",
-      "category": "bgprops"
+      "category": "bgprops",
+      "depths": [
+        148,
+        142,
+        136
+      ]
+    },
+    {
+      "title": "BG PROP OLD VS NEW LIFEBUOY FLAT",
+      "description": "LEFT OLD V1 - RIGHT NEW V2",
+      "current": "beach_lifebuoy_flat",
+      "current_override": {
+        "file": "res://assets/sprites/beach-props-v1/lifebuoy-flat-v1.png",
+        "frame_w": 104,
+        "frame_h": 65,
+        "visual_scale": 0.25
+      },
+      "candidate": {
+        "clone": "beach_lifebuoy_flat"
+      },
+      "reference": "shopper_mullet",
+      "motion": "static",
+      "category": "bgprops",
+      "depths": [
+        148,
+        142,
+        136
+      ]
+    },
+    {
+      "title": "BG PROP OLD VS NEW LIFEBUOY HUNG",
+      "description": "LEFT OLD V1 - RIGHT NEW V2",
+      "current": "beach_lifebuoy_hung",
+      "current_override": {
+        "file": "res://assets/sprites/beach-props-v1/lifebuoy-hung-v1.png",
+        "frame_w": 64,
+        "frame_h": 93,
+        "visual_scale": 0.25
+      },
+      "candidate": {
+        "clone": "beach_lifebuoy_hung"
+      },
+      "reference": "shopper_mullet",
+      "motion": "static",
+      "category": "bgprops",
+      "depths": [
+        148,
+        142,
+        136
+      ]
     },
     {
       "title": "FOOD 01 PIZZA SLICE CHEESE",

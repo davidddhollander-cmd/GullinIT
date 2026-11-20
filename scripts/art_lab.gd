@@ -38,6 +38,7 @@ var dir: float = 1.0
 var dive_timer: float = 0.0
 var ground_timer: float = 0.0
 var sides: Array[Dictionary] = [] ## [current, proposed]: {node, gull, item}
+var extra_sides: Array[Dictionary] = [] ## entry "depths": the pair repeated at the other ground ys ({side, slot, ground}); sides[] is the first depth
 var reference_side: Dictionary = {} ## optional unmodified cast reference, fixed between the A/B pair at 1x
 var backdrop: BeachBackdrop
 var camera: Camera2D
@@ -178,8 +179,23 @@ func _select(i: int) -> void:
 		var live_def: Dictionary = Config.sprites[current_id]
 		live.scale = Vector2(entry.current_size[0], entry.current_size[1]) / Vector2(float(live_def.frame_w), float(live_def.frame_h))
 	reference_side = {}
+	extra_sides = []
+	var depths: Array = entry.get("depths", []) if motion == "static" and not gulls else []
+	if not depths.is_empty():
+		for row: int in depths.size(): # backdrop props: one pair per ground y, nearer rows in front, the reference adult (GROUND) in front of all
+			var pair: Array[Dictionary] = sides.duplicate()
+			if row > 0:
+				pair = [_make(current_id, species[0], gulls, motion), _make(candidate_ids[index], species[1], gulls, motion)]
+			for slot: int in 2:
+				var node: Node2D = pair[slot].node
+				node.set_meta(&"ground", float(depths[row]))
+				node.set_meta(&"row", row)
+				node.z_index = depths.filter(func(y: Variant) -> bool: return float(y) < float(depths[row])).size() # nearer (larger y) in front
+				if row > 0:
+					extra_sides.append({"side": pair[slot], "slot": slot})
 	if entry.has("reference") and not gulls:
 		reference_side = _make(str(entry.reference), "", false, motion)
+		(reference_side.node as Node2D).z_index = maxi(depths.size(), 1) if not depths.is_empty() else 0
 	var flies: bool = motion in ["fly_across", "dive", "in_beak"]
 	pair_x = TRAVEL_MIN + 40.0 if flies else REST_X
 	dir = 1.0
@@ -217,6 +233,7 @@ func _make(id: String, species: String, gull_path: bool, motion: String) -> Dict
 		else:
 			sprite.play(wanted)
 		sprite.set_meta(&"half_height", float(def.frame_h) * sprite.scale.y * 0.5 - float(comparisons[index].get("drop", 0.0))) # drop: art sits above its cell bottom, e.g. a towel
+		sprite.set_meta(&"width", float(def.frame_w) * sprite.scale.x)
 		sprite.set_meta(&"source_left", bool(def.get("animations", {}).get("walk", {}).get("source_left", false)))
 		stage.add_child(sprite)
 		if motion == "in_beak":
@@ -292,12 +309,16 @@ func _fly(d: float, diving: bool) -> void:
 	pair_x = (sides[0].gull as BeachGull).position.x - _lane(0)
 
 func _place() -> void:
-	for i: int in 2:
-		var side: Dictionary = sides[i]
-		var x: float = pair_x + _lane(i)
+	var placed: Array[Dictionary] = [{"side": sides[0], "slot": 0}, {"side": sides[1], "slot": 1}]
+	placed.append_array(extra_sides)
+	for p: Dictionary in placed:
+		var side: Dictionary = p.side
+		var x: float = pair_x + _lane(int(p.slot))
 		if side.gull == null:
 			var node: AnimatedSprite2D = side.node
-			node.position = Vector2(x, GROUND - float(node.get_meta(&"half_height", 8.0)))
+			var stagger: float = float(node.get_meta(&"row", 0)) * roundf(0.6 * float(node.get_meta(&"width", 0.0))) # far rows recede outward from the centre
+			x += stagger * signf(_lane(int(p.slot)))
+			node.position = Vector2(x, float(node.get_meta(&"ground", GROUND)) - float(node.get_meta(&"half_height", 8.0)))
 		else:
 			(side.gull as BeachGull).position.x = x
 			if side.item != null:
@@ -378,6 +399,8 @@ func _apply_filter() -> void:
 		for node: Variant in [side.node, side.item]:
 			if node != null:
 				_filter_tree(node, mode)
+	for p: Dictionary in extra_sides:
+		_filter_tree(p.side.node, mode)
 	if not reference_side.is_empty():
 		_filter_tree(reference_side.node, mode)
 

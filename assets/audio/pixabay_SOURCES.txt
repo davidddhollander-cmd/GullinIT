@@ -12,3 +12,9 @@ dog_bark_1..2.ogg <- freesound_community-small-dog-barking-84707.mp3 (two loudes
 menu_waves.ogg <- freesound_community-gentle-ocean-waves-birdsong-and-gull-7109.mp3 (52 s from 18 s in, mono, 3 s equal-power tail-to-head crossfade seam, -20 LUFS, peak -3.2 dBFS; tools/make_menu_waves.py)
 
 Pages: https://pixabay.com/sound-effects/ (search the numeric IDs above; the dog bark is /nature-small-dog-barking-84707/).
+
+Task 103 (tools/make_sfx_103.py; sources stay in the Pixabay folder, only the processed cuts are in the repo):
+bb_screech_long_1..3.ogg  <- freesound_community-herring-gull-1-27057.mp3 (long calls at 8.44-9.18 s, 10.30-11.08 s, 14.60-15.32 s, each with 40 ms before / 60 ms after; slowed to 0.60x / 0.55x / 0.68x, octave-down layer, tanh saturation, 280 Hz body, 3.5 kHz roll-off, 38 Hz growl, rms matched to bb_screech_long)
+bb_screech_short_1..3.ogg <- freesound_community-herring-gull-1-27057.mp3 (single kyow/kek calls at 9.36-9.50 s, 15.78-15.94 s, 11.92-12.10 s; same chain at 0.60x / 0.55x / 0.65x, rms matched to bb_screech_short)
+bb_shakedown_1..2.ogg     <- freesound_community-herring-gull-2-64026.mp3 (12.74-14.44 s and 14.60-16.50 s; same chain at 0.58x / 0.62x, harder saturation, 3.4 s cap, rms matched to bb_shakedown)
+voice_oh_no_man|woman|kid.ogg <- kalsstockmedia-human-voice-saying-oh-no-301694.mp3 (0.12-1.66 s; source f0 about 370 Hz; rubberband pitch ratios 0.42 / 0.62 / 0.88 with the duration kept, 8 ms fade in, 30 ms fade out, rms matched to the existing voices of that register)
