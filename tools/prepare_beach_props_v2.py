@@ -15,6 +15,7 @@ import prepare_beach_props_v1 as v1
 PAL = np.array([[int(m.group(1)[i:i + 2], 16) for i in (0, 2, 4)] for line in (v1.ROOT / "tools/art_audit/palette.hex").read_text().splitlines()
 				if (m := re.search(r"([0-9a-fA-F]{6})", line))], dtype=float)
 SPRITES = v1.ROOT / "data" / "sprites.json"
+FINE = {"BUCKET AND SPADE"}  # kept on the finer 4x grid (visual_scale 0.25): preferred less pixelated
 ART_SCALE = 2  # art px per game px: 2x the world grid (same as the cast); v1 used 4, which read too fine next to the props
 # name -> (sprite id, v2 width in game px, palette blend weight, soft outline)
 V2 = {
@@ -22,7 +23,7 @@ V2 = {
 	"SHELLS": ("beach_shells", 7, 0.5, True),
 	"JET SKI": ("beach_jet_ski", 36, 0.5, False),
 	"LIFEBUOY HUNG": ("beach_lifebuoy_hung", 8, 0.5, False),
-	"BUCKET AND SPADE": ("beach_bucket", 11, 0.8, True),
+	"BUCKET AND SPADE": ("beach_bucket", 11, 0.8, False),
 	"LIFEBUOY FLAT": ("beach_lifebuoy_flat", 14, 0.8, False),
 }
 
@@ -72,7 +73,7 @@ def main() -> None:
 		own = np.zeros_like(mask)
 		own[box[1]:box[3], box[0]:box[2]] = mask[box[1]:box[3], box[0]:box[2]]
 		# never upscale the sheet (it leaves gaps): the jet ski's source is 200 px wide, so it is drawn at native size and scaled in game
-		art = v1.food.reduce_item(rgb, own, box, min(width * ART_SCALE, box[2] - box[0]) / (box[2] - box[0]))
+		art = v1.food.reduce_item(rgb, own, box, min(width * (4 if name in FINE else ART_SCALE), box[2] - box[0]) / (box[2] - box[0]))
 		art = blend(art, weight, swap=name == "LIFEBUOY FLAT")
 		if soft:
 			art = colour_outline(art)

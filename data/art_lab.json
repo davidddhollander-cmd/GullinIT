@@ -258,9 +258,9 @@
       "candidate": {
         "clone": "beach_castle",
         "file": "res://assets/sprites/beach-props-v1/bucket-and-spade-v2.png",
-        "frame_w": 22,
-        "frame_h": 18,
-        "visual_scale": 0.5
+        "frame_w": 44,
+        "frame_h": 35,
+        "visual_scale": 0.25
       },
       "reference": "shopper_mullet",
       "motion": "static",
