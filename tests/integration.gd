@@ -141,7 +141,7 @@ func run() -> void:
 			DirAccess.remove_absolute("res://test-output/" + stale)
 	GameState.save_path = "res://test-output/integration-save.json"
 	# The autoload loaded the player's real save; pin the options the checks depend on.
-	GameState.options.merge({"shake": true, "touch": false, "gull": "herring"},true)
+	GameState.options.merge({"shake": true, "touch": false, "gull": "herring", "stats": true, "dev_player": false},true)
 	for key: String in ["player_name","mouse_role","mouse_role_set","assist","control_mode","dive_steer","perk"]:
 		GameState.options.erase(key)
 	GameState.wallet = {}

@@ -215,8 +215,11 @@ static func run(suite: Node, check: Callable) -> void:
 	game.dismiss_intro()
 	var final: Dictionary = _finish(game, 90, 30)
 	game.track_end("completed", final)
-	var started: Dictionary = sent.filter(func(e: Dictionary) -> bool: return e.event == "level_start")[0].properties
-	var ended: Dictionary = sent.filter(func(e: Dictionary) -> bool: return e.event == "level_end")[0].properties
+	var starts: Array = sent.filter(func(e: Dictionary) -> bool: return e.event == "level_start")
+	var ends: Array = sent.filter(func(e: Dictionary) -> bool: return e.event == "level_end")
+	check.call(not starts.is_empty() and not ends.is_empty(), "a VS match sends level_start and level_end")
+	var started: Dictionary = starts[0].properties if not starts.is_empty() else {"mode": "", "arena": "", "opponent": ""}
+	var ended: Dictionary = ends[0].properties if not ends.is_empty() else {"mode": "", "arena": "", "opponent": "", "won": false, "margin": 0}
 	check.call(started.mode == "vs" and started.arena == ArenaId and started.opponent == "gary", "level_start carries mode vs, arena and opponent")
 	check.call(ended.mode == "vs" and ended.arena == ArenaId and ended.opponent == "gary" and ended.won == true and ended.margin == 60, "level_end carries won and margin")
 	Analytics.config = saved_config
