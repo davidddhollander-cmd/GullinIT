@@ -26,7 +26,7 @@
   ],
   "world": {"width": 1120, "promenade_start": 600, "pier_start": 600, "start_x": 65, "start_y": 105},
   "zones": [
-    {"name": "FAMILY BEACH", "from": 0, "to": 600},
+    {"name": "FAMILY BEACH", "sign_x": 170, "from": 0, "to": 600},
     {"name": "PIER DINING", "from": 600, "to": 1120}
   ],
   "watergun_teens": [{"x": 750, "home": [700, 800]}],

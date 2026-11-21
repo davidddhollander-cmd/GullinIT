@@ -22,7 +22,7 @@
   "rivals": [],
   "world": {"width": 1280, "promenade_start": 1280, "pier_start": 1280, "start_x": 40, "start_y": 125},
   "zones": [
-    {"name": "DOG WALK", "from": 0, "to": 500},
+    {"name": "DOG WALK", "sign_x": 310, "from": 0, "to": 500},
     {"name": "PICNIC LAWN", "from": 500, "to": 900},
     {"name": "KIOSK END", "from": 900, "to": 1280}
   ],

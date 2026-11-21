@@ -252,14 +252,22 @@ func sign_zones() -> Array:
 func sign_layouts() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	var width: int = roundi(float(world.get("width",Config.tuning.world.width)))
-	for zone: Dictionary in sign_zones():
+	# One signpost per level: the zone carrying "sign_x" (its preferred board x), else the first zone.
+	var chosen_zone: Dictionary = {}
+	for z: Dictionary in sign_zones():
+		if z.has("sign_x"):
+			chosen_zone = z
+			break
+	if chosen_zone.is_empty():
+		chosen_zone = sign_zones()[0]
+	for zone: Dictionary in [chosen_zone]:
 		var arrows: Array[Dictionary] = _sign_destinations(zone)
 		var board_width: int = 28
 		for arrow: Dictionary in arrows:
 			board_width = maxi(board_width,ceili(SignArt.FONT.get_string_size(arrow.label,HORIZONTAL_ALIGNMENT_LEFT,-1,SignArt.FONT_SIZE).x)+4)
 		var min_x: int = maxi(0,int(zone.from)+4)
 		var max_x: int = mini(int(zone.to),width)-board_width-4
-		var desired: int = clampi(int(zone.from)+28,min_x,maxi(min_x,max_x))
+		var desired: int = clampi(int(zone.get("sign_x",int(zone.from)+28)),min_x,maxi(min_x,max_x))
 		var chosen: int = -1
 		if max_x >= min_x:
 			for x: int in range(desired,max_x+1):

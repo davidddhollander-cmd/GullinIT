@@ -23,7 +23,7 @@
   "screech_lesson": {"start_meter": 0.6},
   "zones": [
     {"name": "ICE CREAM", "from": 0, "to": 360},
-    {"name": "FAMILY BAY", "from": 360, "to": 620},
+    {"name": "FAMILY BAY", "sign_x": 450, "from": 360, "to": 620},
     {"name": "SUNBATHERS", "from": 620, "to": 775},
     {"name": "SNACK KIOSK", "from": 775, "to": 1040}
   ],

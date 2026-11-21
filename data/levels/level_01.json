@@ -15,7 +15,7 @@
   "world": {"width": 800, "promenade_start": 800, "pier_start": 800, "start_x": 70, "start_y": 150},
   "zones": [
     {"name": "OPEN SAND", "from": 0, "to": 220},
-    {"name": "BINS", "from": 220, "to": 385},
+    {"name": "BINS", "sign_x": 240, "from": 220, "to": 385},
     {"name": "PARASOLS", "from": 385, "to": 550},
     {"name": "SNACK KIOSK", "from": 550, "to": 800}
   ],
