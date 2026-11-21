@@ -43,8 +43,12 @@ static func display_name(talo_identifier: String) -> String:
 	return talo_identifier.get_slice("#", 0)
 
 ## Board names: levels keep "<board_prefix><id>" (level-3); a VS matchup is "vs-<arena>-<opponent>".
+## A level may carry a "board" number that keeps its older board after levels were renumbered (Water Fight is level 6 but still scores on level-5).
 func level_board(level_id: int) -> String:
-	return "%s%d" % [config.board_prefix, level_id]
+	var number: int = level_id
+	if level_id >= 1 and level_id <= Config.levels.size():
+		number = int(Config.levels[level_id - 1].get("board", level_id))
+	return "%s%d" % [config.board_prefix, number]
 
 static func vs_board(arena_id: String, opponent_id: String) -> String:
 	return "%s%s-%s" % [Config.vs.board_prefix, arena_id, opponent_id]

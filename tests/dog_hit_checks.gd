@@ -1,6 +1,6 @@
 extends RefCounted
 ## A bumped off-lead dog tumbles like a gull: thrown in an arc, spinning, dazed with stars, then cooldown.
-## Drives the Level 3 dog directly on simulated ticks (no real-time timers).
+## Drives the Level 7 dog directly on simulated ticks (no real-time timers).
 const DT: float = 1.0 / 60.0
 
 static func _fresh(suite: Node, level: int) -> BeachGame:
@@ -21,7 +21,7 @@ static func run(suite: Node, check: Callable) -> void:
 	var width: float = float(Config.tuning.world.width)
 	var ground: float = float(Config.tuning.world.ground)
 	var fx_on: bool = bool(Config.tuning.juice.particles) and bool(Config.tuning.juice.get("pixelfx", false))
-	var game: BeachGame = _fresh(suite, 3)
+	var game: BeachGame = _fresh(suite, 7)
 	var dog: OffLeadDog = game.dogs[0]
 	var gull: BeachGull = game.player
 	var bumps: Array[int] = [0]

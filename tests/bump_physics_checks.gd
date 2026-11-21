@@ -20,7 +20,7 @@ static func _victim(host: Node, at: Vector2, species: String) -> BeachGull:
 	return gull
 
 static func _fresh(host: Node) -> BeachGame:
-	host.main.start_level(8)
+	host.main.start_level(9)
 	var game: BeachGame = host.main.game
 	game.set_physics_process(false)
 	game.running = true

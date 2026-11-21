@@ -309,10 +309,10 @@ static func run(host: Node, check: Callable) -> void:
 	host.main.start_level(3)
 	game = host.main.game
 	game.set_physics_process(false)
-	check.call(game.pilots.is_empty() and game.pending_rivals.size() == 1,"level 3: Gary waits offscreen until the first swallowed snack")
+	check.call(game.pending_rivals.is_empty() and game.pilots.size() == 1 and game.pilots[0].gull.rival_name == "Gary","level 3: Gary is on the beach from the start")
+	game.dismiss_intro()
+	check.call(game.entry_pilot == game.pilots[0] and game.entry_profile.entry == "fly_in","level 3: Gary makes his fly-in debut as the run starts")
 	game._swallowed({"id":"ice_cream"})
-	check.call(game.pending_rivals.is_empty() and game.pilots.size() == 1 and game.pilots[0].gull.visible and game.pilots[0].gull.rival_name == "Gary","level 3: first swallowed snack releases Gary once")
-	check.call(game.entry_pilot == game.pilots[0] and game.entry_profile.entry == "fly_in","level 3: Gary makes his fly-in debut")
 	game._swallowed({"id":"ice_cream"})
 	check.call(game.pilots.size() == 1,"later food does not spawn duplicate rivals")
 	host.main.clear_game()

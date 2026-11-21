@@ -5,6 +5,7 @@ const EXPECTED_CASTS: Array[Dictionary] = [
 	{"shoppers":["kiosk_customer"], "sunbathers":[], "diners":[]},
 	{"shoppers":["kiosk_customer", "shopper_sundress", "shopper_mullet"], "sunbathers":["male_red"], "diners":[]},
 	{"shoppers":["shopper_mullet", "old_man", "kiosk_customer"], "sunbathers":["female_red"], "diners":["pier_diner"]},
+	{"shoppers":["old_man", "kiosk_customer"], "sunbathers":["female_red", "male_blue"], "diners":[]},
 	{"shoppers":["kiosk_customer", "shopper_sundress"], "sunbathers":["male_blue"], "diners":[]},
 	{"shoppers":["shopper_mullet", "old_man"], "sunbathers":[], "diners":["pier_diner", "pier_diner_b"]},
 	{"shoppers":["kiosk_customer", "old_man", "shopper_sundress"], "sunbathers":["female_red", "male_blue"], "diners":["pier_diner"]},
@@ -52,7 +53,7 @@ static func run(harness: Node, check: Callable) -> void:
 	var holder := Node2D.new()
 	harness.add_child(holder)
 	var old_man_levels: int = 0
-	for id: int in range(1,9):
+	for id: int in range(1,10):
 		if id == 4:
 			continue # Feeding Time is the crumb lady's beach: no rotation cast to pin
 		var definition: Dictionary = Config.levels[id-1].duplicate(true)
@@ -68,7 +69,7 @@ static func run(harness: Node, check: Callable) -> void:
 		check.call(_same_looks(_looks(spawner,"sunbather"),expected_cast.sunbathers),"level %d sunbather cast matches the rotation" % id)
 		check.call(_same_looks(_looks(spawner,"pier_diner"),expected_cast.diners),"level %d diner cast matches the rotation" % id)
 		check.call(_all_distinct(_all_people_looks(spawner)),"level %d opens without two people sharing a look" % id)
-		if id in [6,8]:
+		if id in [7,9]:
 			check.call(_same_looks(_looks(spawner,"pier_diner"),PierDinerArt.APPEARANCES),"level %d opens with one of each diner look" % id)
 		if "old_man" in _looks(spawner,"kiosk_customer"):
 			old_man_levels += 1

@@ -41,7 +41,7 @@ static func _park_pigeons(game: BeachGame) -> void:
 static func run(host: Node, check: Callable) -> void:
 	_ok = check
 	var ids: Array = Config.levels.map(func(level: Dictionary) -> int: return int(level.id))
-	check.call(Config.levels.size() == 8 and ids == [1,2,3,4,5,6,7,8] and Config.levels[3].name == "Feeding Time" and Config.levels[4].name == "Water Fight" and Config.levels[7].name == "Sunset Showdown","eight levels in order with Feeding Time at 4 and the boss at 8")
+	check.call(Config.levels.size() == 9 and ids == [1,2,3,4,5,6,7,8,9] and Config.levels[3].name == "Feeding Time" and Config.levels[4].name == "Dog Day Afternoon" and Config.levels[5].name == "Water Fight" and Config.levels[8].name == "Sunset Showdown","nine levels in order with Feeding Time at 4, Dog Day Afternoon at 5 and the boss at 9")
 	var level: Dictionary = Config.levels[3]
 	check.call(level.rivals.is_empty() and level.crabs.enabled and not bool(level.scraps) and level.twist.tip.text == "MUG THE PIGEONS, NICK THEIR CRUMBS!" and int(level.stars[0]) == 200 and int(level.time_limit) == 120,"Feeding Time has no rivals, crabs on, no fixed scrap row, its twist tip and a 200 pass mark")
 	var bins: int = level.props.filter(func(p: Dictionary) -> bool: return p.type == "bin").size()

@@ -1,7 +1,7 @@
 # 104 Level rework: Gary in level 3, new level 5 "Dog Day Afternoon"
 
 Assignee: sonnet
-Status: inbox
+Status: done
 Depends on: none
 
 ## Goal
@@ -52,3 +52,27 @@ Take the off-lead dogs out of level 3 and make Gary (great black-back) its twist
 - `./tools/validate.ps1` passes with no new failures; report check counts.
 
 ## Report
+Branch `sonnet/104-level-rework-dog-day-afternoon`.
+
+**Tests:** baseline (before changes) `INTEGRATION: 17899 checks, 0 failures`; after `INTEGRATION: 19996 checks, 0 failures` (`tools/validate.ps1`, headless).
+
+**Files changed**
+- Levels: `level_05..08.json` renamed to `06..09` (ids updated); new authored `level_05.json` "Dog Day Afternoon"; `level_03.json` reworked; `demo.json` last_level 4; `leaderboards.json` shifted (new level 5 seeded from level 4 scaled x1.15).
+- Code: `config.gd` (LEVEL_COUNT 9), `game_state.gd` (SAVE_VERSION 5 migration, `unlocked` flag), `online_scores.gd` (`board` field), `off_lead_dog.gd` (breed support), `game.gd` (breed spawn, bark alert, per-dog bump box, `dog_outrun` carries breed, Gary fly-in at run start), `level_generator.gd`, `main.gd` (music mapping), tuning/sprites/dog_art json, two new sprite sheets plus `.import` files.
+- Tests: all renumbered; new checks in `off_lead_dog_checks.gd` (breeds, depth, bark alert, 4 dogs on level 5, no dogs on level 3), `squall_checks.gd` (v4 to v5 save migration, v1 chain), `quest_checks.gd` (MUG GARY).
+- Tools previews: indices shifted.
+
+**Decisions**
+- Breeds live in `tuning.json` `off_lead_dog_breeds` (sprite, optional draw scale/offset, tuning overrides merged over `off_lead_dog`; `bark_alert_radius` is a generic key). No breed = terrier reads the live base block, so levels 7-9 are unchanged. Small dogs = breed `small_dog`, terrier sheet at scale 0.375 (offset -13.5 = -36 x scale).
+- Quest ids kept (`l5_counter` etc.; saved data references them); only `lN_random` ids follow the level, migrated in the save step. Migration is versioned (v5): records for 5-8 move to 6-9, new level 5 opens when level 4 is cleared, or via `{"unlocked": true}` for saves that had Water Fight.
+- Online leaderboards: levels carry `board` (old level number) so live Talo boards keep their scores; new level 5 uses `level-9`.
+- Level 3: MUG GARY uses the `swallowed` + `mugged_from: Gary` pattern (same as MUG CHIP); BUMP GARY kept (different action). Gary speed 0.75, `rivals_after_snatch` dropped; to keep his fly-in debut, the run-start fly-in now applies to any released rival with `entry: fly_in` (was VS only). Star thresholds unchanged (dogs gone, Gary harder: about neutral).
+- Level 5: width 1280, all sand, 2 dog_owners (relaxed the "dog owner never spawns" test to allow level 5), hotdog stand + kiosk, one palm (palms must be 70 px apart across all levels), quests OUTRUN THE SHEPHERD (60), EAT A CRAB (40), OUTRUN 3 DOGS (50); stars 230/440/620.
+- `level_generator`: `id <= 7` stays on the authored-jitter branch (Three's a Crowd is not flagged authored).
+- Music: levels 6-9 keep their old tracks; level 5 plays "beach".
+- Level select already pages 3 per page, so 9 cards fit in 3 pages.
+
+**Not done / notes**
+- No rendered/visual playtest of level 5 or the new sprites in game (headless only); breed tuning numbers are first-pass.
+- Docs under `docs/` still mention old level numbers.
+

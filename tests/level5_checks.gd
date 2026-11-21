@@ -1,12 +1,12 @@
 extends RefCounted
-## Level 5 "Three's a Crowd": hand-built layout, Chip's delayed debut and taunt, rival-vs-rival sim.
+## Level 7 "Three's a Crowd": hand-built layout, Chip's delayed debut and taunt, rival-vs-rival sim.
 
 static func _rect(game: BeachGame, item: Dictionary) -> Rect2:
 	var width: float = game.effects.font.get_string_size(item.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 8).x
 	return Rect2(item.at - Vector2(width * 0.5 + 2.0, 8.0), Vector2(width + 4.0, 11.0))
 
 static func run(host: Node, main: Node, check: Callable) -> void:
-	var level: Dictionary = Config.levels[5]
+	var level: Dictionary = Config.levels[6]
 	check.call(level.name == "Three's a Crowd" and int(level.map_version) >= 3 and level.has("world") and level.has("zones") and level.twist.id == "chip_intro", "level 5 is the hand-built Three's a Crowd")
 	check.call(not level.has("rivals_after_snatch") and level.rivals.size() == 2 and not bool(level.rivals[0].get("after_snatch", false)) and bool(level.rivals[1].after_snatch) and level.rivals[1].name == "Chip" and float(level.rivals[1].speed) >= 1.1, "Gary starts in the level, fast Chip is held until the first swallow")
 	check.call(level.quests.size() == 2 and level.quests[0].id == "l6_fish" and int(level.quests[0].count) == 1 and level.quests[1].id == "l6_mug_chip" and level.quests[1].filter.mugged_from == "Chip" and level.has("random_quest"), "level 5 quests are fish x1, mug Chip plus random")
@@ -20,7 +20,7 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 	for food: String in level.random_foods:
 		check.call(offered.has(food), "random quest food %s appears in level 5" % food)
 	# Debut: only Gary at the start, Chip and his taunt after the first swallowed snack.
-	main.start_level(6)
+	main.start_level(7)
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
 	await host.settle()
@@ -69,7 +69,7 @@ static func run(host: Node, main: Node, check: Callable) -> void:
 	var mug: Array = game.quests.quests.filter(func(q: Dictionary) -> bool: return q.id == "l6_mug_chip")
 	check.call(mug.size() == 1 and mug[0].done, "mugging Chip completes l6_mug_chip")
 	# Rival sim: both rivals dive and steal, and they contest food.
-	var r: Dictionary = await preload("res://tests/rival_ai_checks.gd").simulate(host, main, 6, 90.0)
+	var r: Dictionary = await preload("res://tests/rival_ai_checks.gd").simulate(host, main, 7, 90.0)
 	print("RIVAL SIM level 5: %s" % str(r))
 	check.call(r.pilots == 2, "level 5 sim has Gary and Chip")
 	for i: int in r.pilots:

@@ -40,7 +40,7 @@ static func _demo_lock_checks(suite: Node, check: Callable) -> void:
 	var saved_unlock: bool = GameState.unlock_all
 	var saved_progress: Dictionary = GameState.progress.duplicate(true)
 	GameState.load_demo()
-	check.call(int(GameState.demo.last_level) == 3, "data/demo.json caps the demo at level 3 (enabled is toggled for itch builds)")
+	check.call(int(GameState.demo.last_level) == 4, "data/demo.json caps the demo at level 4 (enabled is toggled for itch builds)")
 	GameState.demo = {"enabled": true, "last_level": 3, "feedback_url": ""}
 	GameState.unlock_all = true
 	check.call(GameState.unlocked(3) and not GameState.unlocked(4) and not GameState.unlocked(5) and not GameState.unlocked(6) and not GameState.unlocked(7), "demo locks levels 4-7 even with unlock_all")
@@ -67,7 +67,7 @@ static func _demo_lock_checks(suite: Node, check: Callable) -> void:
 ", " "))
 		suite.layout(suite.main.menus)
 		suite.menu_font_grid(suite.main.menus)
-	check.call(full_game == 5, "level select marks five full-game levels (found %d)" % full_game)
+	check.call(full_game == 6, "level select marks six full-game levels (found %d)" % full_game)
 	suite.main.menus.level_page = 0
 	suite.main.menus.level_select()
 	await suite.settle()
@@ -78,9 +78,11 @@ static func _demo_lock_checks(suite: Node, check: Callable) -> void:
 	for button: Button in _buttons(suite.main.menus, []):
 		has_four = has_four or button.name == "Level04"
 	check.call(has_four and suite.main.menus.find_child("PagePrev", true, false) != null, "next arrow reaches level 4 and offers a back arrow")
-	var card6: Button = suite.main.menus.find_child("Level06", true, false) as Button
+	(suite.main.menus.find_child("PageNext", true, false) as Button).pressed.emit()
+	await suite.settle()
+	var card6: Button = suite.main.menus.find_child("Level07", true, false) as Button
 	var thumb6: Control = card6.find_child("Thumb", true, false) as Control if card6 != null else null
-	check.call(thumb6 != null and thumb6.get_child_count() == 3 and Rect2(Vector2.ZERO, card6.size).encloses(Rect2(thumb6.global_position - card6.global_position, thumb6.size)), "level 6 card shows three gull heads inside the card")
+	check.call(thumb6 != null and thumb6.get_child_count() == 3 and Rect2(Vector2.ZERO, card6.size).encloses(Rect2(thumb6.global_position - card6.global_position, thumb6.size)), "level 7 card shows three gull heads inside the card")
 	check.call(thumb6 != null and thumb6.global_position.y >= card6.global_position.y + 12 and absf(thumb6.global_position.x + thumb6.size.x * 0.5 - card6.global_position.x - card6.size.x * 0.5) < 2.0, "level card thumbnail sits centred below the number row")
 	await suite.snapshot("level-select-page1")
 	suite.main.menus.level_page = 0

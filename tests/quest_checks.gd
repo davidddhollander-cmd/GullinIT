@@ -13,16 +13,21 @@ static func run(check: Callable) -> void:
 	check.call(quests.quests.size() == 2 and quests.quests[0].id == "l2_ice" and quests.quests[1].id == "l2_cry" and not l2.has("random_quest"), "level 2 has just the ice cream and toddler quests, no random slot")
 	var bump: BeachQuests = BeachQuests.new()
 	bump.setup(_level(3), rng)
-	check.call(bump.quests.size() == 3 and bump.quests[2].id == "l3_bump_gary" and not _level(3).has("random_quest"), "level 3 has outrun, crab and bump-Gary, no random slot")
+	check.call(bump.quests.size() == 3 and bump.quests[2].id == "l3_bump_gary" and not _level(3).has("random_quest"), "level 3 has mug-Gary, crab and bump-Gary, no random slot")
+	check.call(bump.quests[0].id == "l3_mug_gary" and bump.quests[0].text == "MUG GARY" and int(bump.quests[0].bonus) == 60, "level 3 swaps the dog quest for MUG GARY worth 60")
+	bump.record("swallowed", {"food": "hotdog", "mugged_from": "Chip"})
+	check.call(not bump.quests[0].done, "mugging Chip does not count for MUG GARY")
+	bump.record("swallowed", {"food": "hotdog", "mugged_from": "Gary"})
+	check.call(bump.quests[0].done, "eating food mugged from Gary completes MUG GARY")
 	bump.record("rival_bumped", {"name": "Chip"})
 	check.call(not bump.quests[2].done and int(bump.quests[2].progress) == 0, "only Gary bumps count")
 	bump.record("rival_bumped", {"name": "Gary"})
 	check.call(bump.quests[2].done, "bumping Gary once completes l3_bump_gary")
-	var l3: Dictionary = _level(6) # level 6 still has a random quest slot
+	var l3: Dictionary = _level(7) # level 7 (Three's a Crowd) still has a random quest slot
 	var l3roll: BeachQuests = BeachQuests.new()
 	l3roll.setup(l3, rng)
 	var random: Dictionary = l3roll.quests[2]
-	check.call(random.id == "l6_random" and random.filter.food in l3.random_foods and int(random.count) >= 2 and int(random.count) <= 3, "random quest picks a listed food and a 2-3 count")
+	check.call(random.id == "l7_random" and random.filter.food in l3.random_foods and int(random.count) >= 2 and int(random.count) <= 3, "random quest picks a listed food and a 2-3 count")
 	check.call(random.text == "EAT %s" % str(Config.foods[random.filter.food].name).to_upper(), "random quest text names the food")
 	for seed: int in 40:
 		rng.seed = seed
@@ -30,15 +35,15 @@ static func run(check: Callable) -> void:
 		roll.setup(l3, rng)
 		check.call(roll.quests[2].filter.food in l3.random_foods, "random food always from random_foods (seed %d)" % seed)
 	# Every random food must be a real food, and levels 1 has no random slot.
-	for id: int in [2, 6]:
+	for id: int in [2, 7]:
 		for food: String in _level(id).random_foods:
 			check.call(Config.foods.has(food), "level %d random food exists: %s" % [id, food])
 	var l1: BeachQuests = BeachQuests.new()
 	l1.setup(_level(1), rng)
 	check.call(l1.quests.is_empty() and not _level(1).has("quests") and not _level(1).has("random_quest"), "Training Day has no quests")
 	var l3q: BeachQuests = BeachQuests.new()
-	l3q.setup(_level(6), rng)
-	check.call(l3q.quests.size() == 3 and l3q.quests[0].id == "l6_fish" and l3q.quests[2].id == "l6_random", "level 6 has two quests plus random")
+	l3q.setup(_level(7), rng)
+	check.call(l3q.quests.size() == 3 and l3q.quests[0].id == "l6_fish" and l3q.quests[2].id == "l7_random", "level 7 has two quests plus random")
 
 	var fired: Array[String] = []
 	quests.quest_completed.connect(func(q: Dictionary) -> void: fired.append(q.id))
@@ -106,9 +111,9 @@ static func _start_card_checks(suite: Node, check: Callable) -> void:
 	game.overlay.start_button.pressed.emit()
 	check.call(game.running and game.player.state != BeachGull.State.STRIKE,"the button starts level 2 without a dive")
 	GameState.progress = {}
-	main.start_level(8)
+	main.start_level(9)
 	await suite.settle()
-	await suite.snapshot("level-7-start-card")
+	await suite.snapshot("level-9-start-card")
 
 static func _play(main: Node, level: int) -> BeachGame:
 	main.start_level(level)
@@ -281,7 +286,7 @@ static func run_game(suite: Node, check: Callable) -> void:
 	game._physics_process(1.0 / 60)
 	check.call(not game.effects.texts.any(func(t: Dictionary) -> bool: return str(t.text).begins_with("FLY INTO THE WIND")) and not ("upwind" in GameState.options.tips), "level 2 has no wind, so no upwind tip")
 	game = _play(main, 3)
-	game._swallowed({"id": "hotdog"})
+	check.call(game.pilots.size() == 1 and game.pending_rivals.is_empty(), "level 3: Gary is on the beach from the start")
 	var gary_gull: BeachGull = game.pilots[0].gull
 	check.call(game.entry_pilot != null and not game.overlay.rival_popup.visible, "level 3: Gary flies in first, no pop-up yet")
 	check.call(absf(gary_gull.position.x - game.camera_x) >= 160.0, "Gary starts off-screen")
@@ -300,9 +305,9 @@ static func run_game(suite: Node, check: Callable) -> void:
 	check.call(game.pilots.size() == 1 and bool(game.pilots[0].personality.get("loose_only", false)), "Gary is loose-only")
 	game = _play(main, 3)
 	game._swallowed({"id": "hotdog", "scrap": true})
-	check.call(game.entry_pilot != null and game.pending_rivals.is_empty() and game.pilots.size() == 1, "level 3: Gary arrives after a ground scrap too, exactly once")
+	check.call(game.entry_pilot != null and game.pending_rivals.is_empty() and game.pilots.size() == 1, "level 3: Gary is there already, exactly once")
 	game._swallowed({"id": "hotdog", "scrap": true})
-	check.call(game.pilots.size() == 1, "level 3: a second scrap does not spawn Gary again")
+	check.call(game.pilots.size() == 1, "level 3: eating a scrap does not spawn Gary again")
 	# Task 007: customer bite window and the mid-air bite quest (level 1 replay).
 	GameState.complete_training()
 	main._navigate("start", 1)

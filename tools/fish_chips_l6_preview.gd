@@ -9,7 +9,7 @@ func _ready() -> void:
 	Config.tuning.juice.audio = false
 	game = BeachGame.new()
 	add_child(game)
-	var level: Dictionary = Config.levels[7].duplicate(true)
+	var level: Dictionary = Config.levels[8].duplicate(true)
 	level.rivals = []
 	level.crabs = {"enabled":false}
 	game.setup(level,false)

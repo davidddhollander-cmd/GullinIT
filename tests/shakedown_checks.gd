@@ -382,12 +382,12 @@ static func _end_checks(host: Node, check: Callable) -> void:
 static func _board_checks(host: Node, check: Callable) -> void:
 	GameState.progress = {"1": {"training_step": 7, "training_complete": true}, "2": {"screech_lesson_complete": true}}
 	var texts: Array = []
-	for setup: Array in [[5,true],[5,false],[3,true]]:
+	for setup: Array in [[6,true],[6,false],[3,true]]:
 		Config.levels[int(setup[0])-1]["player_species"] = BLACKBACK
 		host.main.start_level(int(setup[0]))
 		Config.levels[int(setup[0])-1].erase("player_species")
 		var game: BeachGame = host.main.game
-		game.quests.quests = game.quests.quests.slice(0,2 if int(setup[0]) == 5 else 3)
+		game.quests.quests = game.quests.quests.slice(0,2 if int(setup[0]) == 6 else 3)
 		game.set_physics_process(false)
 		game.intro = 0.0
 		game.running = true
@@ -400,12 +400,12 @@ static func _board_checks(host: Node, check: Callable) -> void:
 		var quests: int = game.quests.quests.size()
 		var shown: bool = board.captions.any(func(label: Label) -> bool: return label.text == "POWERS")
 		texts.append([int(setup[0]),quests,bool(setup[1]),shown])
-		if int(setup[0]) == 5 and bool(setup[1]):
+		if int(setup[0]) == 6 and bool(setup[1]):
 			check.call(quests <= 2 and shown,"POWERS row shows on a board with room")
 			board.finish_tally()
 			var row: Label = board.rows.filter(func(label: Label) -> bool: return board.captions.any(func(c: Label) -> bool: return c.text == "POWERS" and c.position == label.position))[0]
 			check.call(row.text == "1","POWERS row counts the powers")
-		elif int(setup[0]) == 5:
+		elif int(setup[0]) == 6:
 			check.call(not shown,"POWERS row is hidden when no power was fired")
 		else:
 			check.call(quests >= 3 and not shown,"POWERS row is hidden when the board has no room (3 quests)")

@@ -3,7 +3,7 @@ extends RefCounted
 const DT: float = 0.1
 
 static func _fresh(suite: Node) -> BeachGame:
-	suite.main.start_level(7)
+	suite.main.start_level(8)
 	var game: BeachGame = suite.main.game
 	game.set_physics_process(false)
 	game.running = true
@@ -39,7 +39,7 @@ static func run(suite: Node, check: Callable) -> void:
 	var level: Dictionary = game.level
 	check.call(game.squall != null and level.name == "Thunderstorm" and str(level.twist.id) == "squall" and int(level.time_limit) == 150 and int(level.stars[0]) == 370 and int(level.stars[1]) == 650 and int(level.stars[2]) == 950, "level 7 is Thunderstorm with the squall twist, a 150 s limit and 370/650/950 stars")
 	check.call(level.quests.size() == 2 and level.quests[0].event == "abandoned_looted" and level.quests[0].text == "LOOT 2 PICNICS" and level.quests[1].event == "umbrella_snatch" and level.quests[1].text == "SNATCH UNDER AN UMBRELLA" and level.has("random_quest"), "squall quests: loot 2 picnics, snatch under an umbrella, plus random")
-	check.call(game.quests.quests.size() == 3 and game.quests.quests[2].id == "l7_random", "squall rolls its random quest in slot three")
+	check.call(game.quests.quests.size() == 3 and game.quests.quests[2].id == "l8_random", "squall rolls its random quest in slot three")
 	var squall: BeachSquall = game.squall
 	var old_man: BeachTarget = _find(game, "kiosk_customer", "old_man")
 	var sunbather: BeachTarget = _find(game, "sunbather")
@@ -177,23 +177,23 @@ static func _order_and_saves(check: Callable) -> void:
 	var names: Array[String] = []
 	for level: Dictionary in Config.levels:
 		names.append(str(level.name))
-	check.call(Config.levels.size() == 8 and names == ["Training Day", "Family Picnic", "Boardwalk Bustle", "Feeding Time", "Water Fight", "Three's a Crowd", "Thunderstorm", "Sunset Showdown"], "eight levels in order, Feeding Time at 4, Thunderstorm at 7 and the boss at 8: %s" % str(names))
+	check.call(Config.levels.size() == 9 and names == ["Training Day", "Family Picnic", "Boardwalk Bustle", "Feeding Time", "Dog Day Afternoon", "Water Fight", "Three's a Crowd", "Thunderstorm", "Sunset Showdown"], "nine levels in order, Dog Day Afternoon at 5, Thunderstorm at 8 and the boss at 9: %s" % str(names))
 	var ids_ok: bool = true
 	for index: int in Config.levels.size():
 		ids_ok = ids_ok and int(Config.levels[index].id) == index + 1
-	check.call(ids_ok and bool(Config.levels[7].get("boss", false)) and not bool(Config.levels[6].get("boss", false)), "level ids match their order and only level 8 is the boss")
+	check.call(ids_ok and bool(Config.levels[8].get("boss", false)) and not bool(Config.levels[7].get("boss", false)), "level ids match their order and only level 9 is the boss")
 	check.call(GameState.last_playable_level() >= 3 and GameState.demo.last_level >= 3, "demo and last-level defaults cover the new level")
 	var saved_progress: Dictionary = GameState.progress.duplicate(true)
 	var saved_unlock: bool = GameState.unlock_all
 	var saved_demo: Dictionary = GameState.demo.duplicate()
 	var saved_path: String = GameState.save_path
-	GameState.demo = {"enabled": false, "last_level": 7, "feedback_url": ""}
+	GameState.demo = {"enabled": false, "last_level": 9, "feedback_url": ""}
 	GameState.unlock_all = false
 	GameState.progress = {"5": {"stars": 1}}
-	check.call(GameState.unlocked(6) and not GameState.unlocked(7), "Thunderstorm opens after level 5; the boss waits for Thunderstorm")
+	check.call(GameState.unlocked(6) and not GameState.unlocked(7), "Water Fight opens after level 5; the next level waits for it")
 	GameState.progress = {"5": {"stars": 1}, "6": {"stars": 1}}
-	check.call(GameState.unlocked(7), "the boss opens once Squall is cleared")
-	# A version 1 save: its level 6 record was the boss.
+	check.call(GameState.unlocked(7), "a level opens once its predecessor is cleared")
+	# A version 1 save: its level 6 record was the boss; v2 moves it to 7 and v5 (Dog Day Afternoon) to 8, and Water Fight 5 to 6.
 	GameState.save_path = "user://squall_migration_test.json"
 	var old_save: Dictionary = {"version": 1, "progress": {"5": {"stars": 2, "best": 900}, "6": {"stars": 3, "best": 1500, "quests": ["l6_mug_all", "l6_random"]}, "stage1_complete": true}, "wallet": {"feathers": 4}}
 	var file: FileAccess = FileAccess.open(GameState.save_path, FileAccess.WRITE)
@@ -201,15 +201,30 @@ static func _order_and_saves(check: Callable) -> void:
 	file.close()
 	GameState.progress = {}
 	GameState.load_progress()
-	var boss: Dictionary = GameState.entry(7)
-	check.call(not GameState.progress.has("6") and int(boss.get("stars", 0)) == 3 and int(boss.get("best", 0)) == 1500 and boss.quests == ["l6_mug_all", "l7_random"], "an old save's boss record moves from level 6 to level 7")
-	check.call(GameState.unlocked(7) and GameState.unlocked(6) and bool(GameState.progress.get("stage1_complete", false)) and GameState.feathers() == 4, "a beaten boss stays unlocked, with the shop flag and feathers kept")
+	var boss: Dictionary = GameState.entry(8)
+	check.call(not GameState.progress.has("7") and int(boss.get("stars", 0)) == 3 and int(boss.get("best", 0)) == 1500 and boss.quests == ["l6_mug_all", "l8_random"] and int(GameState.entry(6).get("stars", 0)) == 2, "an old save's boss record moves from level 6 to level 8 and Water Fight from 5 to 6")
+	check.call(GameState.unlocked(8) and GameState.unlocked(7) and bool(GameState.progress.get("stage1_complete", false)) and GameState.feathers() == 4, "a beaten boss stays unlocked, with the shop flag and feathers kept")
 	GameState.save_progress()
 	var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(GameState.save_path))
-	check.call(saved is Dictionary and int(saved.version) == GameState.SAVE_VERSION and saved.progress.has("7") and not saved.progress.has("6"), "the migrated save is written back as the new version")
+	check.call(saved is Dictionary and int(saved.version) == GameState.SAVE_VERSION and saved.progress.has("8") and saved.progress.has("6") and not saved.progress.has("7"), "the migrated save is written back as the new version")
 	GameState.progress = {}
 	GameState.load_progress()
-	check.call(int(GameState.entry(7).get("stars", 0)) == 3 and GameState.entry(6).is_empty(), "a migrated save is not migrated twice")
+	check.call(int(GameState.entry(8).get("stars", 0)) == 3 and GameState.entry(7).is_empty() and int(GameState.entry(6).get("stars", 0)) == 2, "a migrated save is not migrated twice")
+	# Save v4 -> v5 (Dog Day Afternoon becomes level 5): Water Fight stars land on level 6, later records follow, level 5 opens.
+	var v4_save: Dictionary = {"version": 4, "progress": {"1": {"training_complete": true}, "2": {"stars": 1}, "3": {"stars": 2}, "4": {"stars": 1}, "5": {"stars": 3, "best": 800, "quests": ["l5_counter", "l5_random"]}, "6": {"stars": 1, "best": 400}, "7": {"stars": 2}, "8": {"stars": 1, "best": 1200}}, "wallet": {"feathers": 2}}
+	file = FileAccess.open(GameState.save_path, FileAccess.WRITE)
+	file.store_string(JSON.stringify(v4_save))
+	file.close()
+	GameState.progress = {}
+	GameState.load_progress()
+	var water_fight: Dictionary = GameState.entry(6)
+	check.call(int(water_fight.get("stars", 0)) == 3 and int(water_fight.get("best", 0)) == 800 and water_fight.quests == ["l5_counter", "l6_random"], "an old save's Water Fight stars, best and quests appear on level 6")
+	check.call(int(GameState.entry(7).get("stars", 0)) == 1 and int(GameState.entry(8).get("stars", 0)) == 2 and int(GameState.entry(9).get("best", 0)) == 1200, "old levels 6-8 move up to 7-9")
+	GameState.unlock_all = false
+	check.call(GameState.unlocked(5) and not GameState.entry(5).has("stars"), "the new level 5 is open but unplayed for a save that reached Water Fight")
+	GameState.progress = {"4": {"stars": 1}}
+	check.call(GameState.unlocked(5) and not GameState.unlocked(6), "level 5 opens once level 4 is cleared; Water Fight waits for it")
+	GameState.unlock_all = false
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(GameState.save_path))
 	GameState.save_path = saved_path
 	GameState.progress = saved_progress
