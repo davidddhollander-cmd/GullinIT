@@ -102,8 +102,8 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 	elif number == 4:
 		check.call(types==["sunbather"] and level.rivals.is_empty(),"feeding time keeps its light authored roster")
 	elif number == 5:
-		check.call(types==["sunbather","dog_owner","kiosk_customer","sunbather","toddler","picnic_family","dog_owner","kiosk_customer","off_lead_dog","off_lead_dog","off_lead_dog","off_lead_dog"] and types.count("off_lead_dog")==4,"dog day afternoon has sunbathers, a family, two dog owners, two shoppers and four free dogs")
-		check.call(stand_count==2 and level.rivals.is_empty(),"dog day afternoon keeps both stands and has no rival")
+		check.call(types==["dog_owner","kiosk_customer","toddler","picnic_family","dog_owner","kiosk_customer","off_lead_dog","off_lead_dog","off_lead_dog","off_lead_dog"] and types.count("off_lead_dog")==4,"dog day afternoon has no sunbathers: a family, two dog owners, two shoppers and four free dogs")
+		check.call(stand_count==2 and level.rivals.size()==1 and str(level.rivals[0].name)=="Gary" and str(level.rivals[0].get("entry",""))=="fly_in","dog day afternoon keeps both stands and Gary flies back in")
 	elif number == 6:
 		check.call(types==["sunbather","kiosk_customer","kiosk_customer"],"water fight has one edge sunbather and two shoppers, no dog")
 		check.call(stand_count==2 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1 and level.watergun_teens.size()==2,"water fight keeps both stands, Gary from the start and two teens")

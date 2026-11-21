@@ -363,10 +363,10 @@
       }
     },
     "german_shepherd": {
-      "sprite": "german_shepherd",
+      "sprite": "german_shepherd", "visual_scale": 0.6, "sprite_offset_y": -21.6,
       "tuning": {
         "run_speed": 118, "windup": 0.3, "notice_radius": 95, "leap_range": 32, "leap_height": 56, "leap_lift": 44, "leap_speed": 120, "leap_cooldown": 0.6,
-        "catch_radius": 10, "mouth_x": 11, "chase_timeout": 12.0, "lose_radius": 200, "cooldown": 3.0, "bark_gap": 2.0, "leash": 300, "dog_bump_hit": [24, 12]
+        "catch_radius": 11, "mouth_x": 13, "chase_timeout": 12.0, "lose_radius": 200, "cooldown": 3.0, "bark_gap": 2.0, "leash": 300, "dog_bump_hit": [29, 14]
       }
     },
     "small_dog": {

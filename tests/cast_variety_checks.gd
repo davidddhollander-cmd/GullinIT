@@ -5,7 +5,7 @@ const EXPECTED_CASTS: Array[Dictionary] = [
 	{"shoppers":["kiosk_customer"], "sunbathers":[], "diners":[]},
 	{"shoppers":["kiosk_customer", "shopper_sundress", "shopper_mullet"], "sunbathers":["male_red"], "diners":[]},
 	{"shoppers":["shopper_mullet", "old_man", "kiosk_customer"], "sunbathers":["female_red"], "diners":["pier_diner"]},
-	{"shoppers":["old_man", "kiosk_customer"], "sunbathers":["female_red", "male_blue"], "diners":[]},
+	{"shoppers":["old_man", "kiosk_customer"], "sunbathers":[], "diners":[]},
 	{"shoppers":["kiosk_customer", "shopper_sundress"], "sunbathers":["male_blue"], "diners":[]},
 	{"shoppers":["shopper_mullet", "old_man"], "sunbathers":[], "diners":["pier_diner", "pier_diner_b"]},
 	{"shoppers":["kiosk_customer", "old_man", "shopper_sundress"], "sunbathers":["female_red", "male_blue"], "diners":["pier_diner"]},
