@@ -2,7 +2,7 @@
   "id": 5,
   "board": 9,
   "crabs": {"enabled": true},
-  "thumb": "golden_retriever:idle",
+  "thumb": "thumb_head_small_dog",
   "name": "Dog Day Afternoon",
   "seed": 7115,
   "authored": true,
