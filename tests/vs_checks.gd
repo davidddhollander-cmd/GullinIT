@@ -25,6 +25,19 @@ static func _finish(game: BeachGame, mine: int, rival: int) -> Dictionary:
 	game.level_finished.disconnect(catcher)
 	return box[0] if not box.is_empty() else {}
 
+## Global rects of every direct child of the intro card's VBox, top to bottom.
+static func _card_rects(game: BeachGame) -> Array[Rect2]:
+	var rects: Array[Rect2] = []
+	for child: Node in game.overlay.intro_panel.get_child(0).get_children():
+		rects.append((child as Control).get_global_rect())
+	return rects
+
+static func _rows_clear(rects: Array[Rect2]) -> bool:
+	for i: int in range(1, rects.size()):
+		if rects[i].position.y < rects[i - 1].end.y - 0.01:
+			return false
+	return true
+
 static func run(suite: Node, check: Callable) -> void:
 	var main: Node = suite.main
 	main.clear_game()
@@ -79,6 +92,11 @@ static func run(suite: Node, check: Callable) -> void:
 	main._navigate("vs_start", {"arena": ArenaId, "opponents": ["gary"]})
 	var game: BeachGame = main.game
 	game.set_physics_process(false)
+	await suite.settle()
+	var one: Array[Rect2] = _card_rects(game)
+	check.call(Rect2(0, 0, 320, 180).encloses(game.overlay.intro_panel.get_global_rect()) and _rows_clear(one), "the one-rival intro card fits the canvas without overlapping rows")
+	check.call(one.size() == 5, "the one-rival card is YOU / VS / GARY / arena / go")
+	await suite.snapshot("vs-intro-1-rival")
 	check.call(game.is_vs() and game.level.rivals.size() == 1 and game.level.rivals[0].name == "Gary" and int(game.level.time_limit) == 75 and game.level.vs.opponents == ["gary"], "start_vs builds a one-rival, 75 second VS level")
 	check.call(JSON.stringify(Config.arenas[ArenaId]) == before and Config.arenas[ArenaId].rivals.is_empty(), "start_vs leaves the source arena untouched")
 	check.call(main.screen == "game" and game.pilots.size() == 1 and game.player.position.x < 100.0 and game.mode_name() == "vs", "the round starts with Gary on the beach and the player on the left")
@@ -262,13 +280,18 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(game.intro > 0.0 and game.overlay.intro_panel.get_children().size() > 0, "the four-rival intro card builds")
 	var card_rect: Rect2 = game.overlay.intro_panel.get_global_rect()
 	check.call(Rect2(0, 0, 320, 180).encloses(card_rect), "the four-rival intro card fits the canvas")
+	await suite.settle()
+	var five: Array[Rect2] = _card_rects(game)
+	check.call(five.size() == 11 and _rows_clear(five), "the four-rival intro is a single list: 5 gull rows, 4 VS lines, arena, go, no overlap %d %s" % [five.size(), str(five)])
 	await suite.snapshot("vs-intro-4-rivals")
 	game.dismiss_intro()
 	check.call(game.entry_pilot != null and game.fly_in_queue.size() == 3, "rivals fly in one at a time, the rest wait their turn")
+	check.call(Config.vs.opponents.keys().all(func(id: String) -> bool: return not bool(Config.vs.opponents[id].get("entry_bump", true))), "every VS opponent enters without bumping")
 	var first: RivalPilot = game.entry_pilot
 	game.entry_age = 99.0
 	game._fly_in_step(0.016)
 	check.call(game.entry_pilot != null and game.entry_pilot != first and game.fly_in_queue.size() == 2, "the next rival flies in after the first taunt")
+	check.call(game.player.state != BeachGull.State.STUNNED, "a VS rival's fly-in does not stun the player")
 	await suite.settle()
 	game.overlay._process(0.0)
 	check.call(game.overlay.rival_score_labels.size() == 4, "the rival meter lists all four rivals")

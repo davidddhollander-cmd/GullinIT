@@ -16,6 +16,7 @@
       "accuracy_px": 16,
       "mug_chance": 0.3,
       "entry": "fly_in",
+      "entry_bump": false,
       "entry_text": "THIS IS MY BEACH. GET YOUR NOSH ELSEWHERE YOU GIT!",
       "ground": {
         "scraps": 0.9,
@@ -32,6 +33,7 @@
       "accuracy_px": 22,
       "mug_chance": 0.15,
       "entry": "fly_in",
+      "entry_bump": false,
       "entry_text": "OI! THIS PROM'S SPOKEN FOR, DEARIE. SHOO!",
       "ground": {
         "scraps": 0.8,
@@ -48,6 +50,7 @@
       "accuracy_px": 8,
       "mug_chance": 0.8,
       "entry": "fly_in",
+      "entry_bump": false,
       "entry_text": "FINDERS KEEPERS, YOU DAFT GULL!",
       "ground": {
         "scraps": 0.3,
@@ -64,6 +67,7 @@
       "accuracy_px": 12,
       "mug_chance": 0.5,
       "entry": "fly_in",
+      "entry_bump": false,
       "entry_text": "SID'S IN. HOPE YOU LIKE COMING SECOND, MATE!",
       "ground": {
         "scraps": 0.5,
@@ -84,6 +88,7 @@
       "shove_stun": 0.4,
       "mug_from_behind": true,
       "entry": "fly_in",
+      "entry_bump": false,
       "entry_text": "BEV'S BEACH NOW, LOVE. MIND YOUR CHIPS!",
       "ground": {
         "scraps": 0.6,
@@ -100,6 +105,7 @@
       "accuracy_px": 6,
       "mug_chance": 0.6,
       "entry": "fly_in",
+      "entry_bump": false,
       "entry_text": "NIGE HERE. I'LL HAVE YOUR CHIPS AND YOUR PRIDE!",
       "ground": {
         "scraps": 0.8,
