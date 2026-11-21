@@ -42,7 +42,7 @@ func identifier() -> String:
 static func display_name(talo_identifier: String) -> String:
 	return talo_identifier.get_slice("#", 0)
 
-## Board names: levels keep "<board_prefix><id>" (level-3); a VS matchup is "vs-<arena>-<opponent>".
+## Board names: levels keep "<board_prefix><id>" (level-3); a VS board is "vs-<arena>-<rival count>" (vs-scrap_sands-3).
 ## A level may carry a "board" number that keeps its older board after levels were renumbered (Water Fight is level 6 but still scores on level-5).
 func level_board(level_id: int) -> String:
 	var number: int = level_id
@@ -50,8 +50,8 @@ func level_board(level_id: int) -> String:
 		number = int(Config.levels[level_id - 1].get("board", level_id))
 	return "%s%d" % [config.board_prefix, number]
 
-static func vs_board(arena_id: String, opponent_id: String) -> String:
-	return "%s%s-%s" % [Config.vs.board_prefix, arena_id, opponent_id]
+static func vs_board(arena_id: String, rival_count: int) -> String:
+	return "%s%s-%d" % [Config.vs.board_prefix, arena_id, rival_count]
 
 # Posts the player's best to the named board (score 0 posts nothing, it only fetches), then calls done(entries) with the board view
 # (top entries plus the player's own rank) for ResultBoard.set_high_scores; [] on failure.

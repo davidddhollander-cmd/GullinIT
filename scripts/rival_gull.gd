@@ -9,7 +9,7 @@ extends RefCounted
 ## a bin or bag open like the player; RECOVER doubles as the take-off. Personality: the `ground` weights.
 enum Mode { PATROL, STALK, LINE_UP, DIVE, ESCAPE, RECOVER, CHASE_CARRIER, LAND, WALK, PECK, SPOOK }
 const GROUND_MODES: Array[Mode] = [Mode.LAND, Mode.WALK, Mode.PECK]
-const COLOURS: Array[Color] = [Color("a5c7e6"), Color("d3b9e8"), Color("a4d8c4")]
+const COLOURS: Array[Color] = [Color("a5c7e6"), Color("d3b9e8"), Color("a4d8c4"),Color("f0d9a0")]
 var gull: BeachGull
 var target: BeachTarget
 var personality: Dictionary

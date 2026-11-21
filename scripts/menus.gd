@@ -500,14 +500,15 @@ func vs_menu() -> void:
 	picks.alignment = BoxContainer.ALIGNMENT_CENTER
 	columns2.add_child(picks)
 	var arena: ButtonGroup = _vs_row(picks,"ARENA","ArenaRow",Array(Config.vs.arenas).filter(func(id: String) -> bool: return Config.arenas.has(id)).map(func(id: String) -> Array: return [id,str(Config.arenas[id].name).to_upper()]),true)
-	var opponent: ButtonGroup = _vs_row(picks,"OPPONENT","OpponentRow",Config.vs.opponents.keys().map(func(id: String) -> Array: return [id,"%s\n%s" % [str(Config.vs.opponents[id].name).to_upper(),str(Config.vs.opponents[id].blurb)]]))
+	var slots: Array = ["gary","","",""] ## rival ids in slot order; slot 1 is never empty
+	var slot_buttons: Array[Button] = _vs_slots(picks,slots)
 	# Scores and the name share the right-hand column, so two stacked arena cards still fit on the left.
 	var side: VBoxContainer = VBoxContainer.new()
 	side.add_theme_constant_override("separation",2)
 	side.alignment = BoxContainer.ALIGNMENT_CENTER
 	side.size_flags_horizontal = SIZE_EXPAND_FILL
 	columns2.add_child(side)
-	var refresh_scores: Callable = _vs_scores(side,arena,opponent)
+	var refresh_scores: Callable = _vs_scores(side,arena,slots)
 	BeachUI.label(side,"YOUR NAME",BeachUI.FONT_NATIVE,BeachUI.GOLD).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var field: LineEdit = LineEdit.new()
 	field.name = "NameField"
@@ -530,8 +531,9 @@ func vs_menu() -> void:
 			field.text = clean
 			field.caret_column = clean.length())
 	side.add_child(field)
-	for group: ButtonGroup in [arena,opponent]:
-		group.pressed.connect(func(_button: BaseButton) -> void: refresh_scores.call())
+	arena.pressed.connect(func(_button: BaseButton) -> void: refresh_scores.call())
+	for button: Button in slot_buttons:
+		button.pressed.connect(refresh_scores) # the slot's own handler (connected first) has already cycled it
 	refresh_scores.call()
 	var actions: HBoxContainer = HBoxContainer.new()
 	right.add_child(actions)
@@ -542,7 +544,7 @@ func vs_menu() -> void:
 	var fight: Button = BeachUI.back_button(actions,"FIGHT!",func() -> void:
 		var name_text: String = OnlineScores.clean_name(field.text)
 		OnlineScores.set_player_name(name_text if not name_text.is_empty() else str(Config.vs.default_name))
-		choose("vs_start",{"arena": str(arena.get_pressed_button().get_meta("id")),"opponent": str(opponent.get_pressed_button().get_meta("id"))}))
+		choose("vs_start",{"arena": str(arena.get_pressed_button().get_meta("id")),"opponents": slots.filter(func(id: String) -> bool: return not id.is_empty())}))
 	fight.name = "FightButton"
 	field.text_submitted.connect(func(_text: String) -> void: fight.grab_focus())
 	fight.grab_focus()
@@ -582,9 +584,47 @@ func _vs_row(parent: Control, caption: String, row_name: String, entries: Array,
 		card.button_pressed = row.get_child_count() == 1
 	return group
 
+## Four numbered opponent bars. Clicking (or confirming) a bar cycles it to the next rival; slots 2-4 pass through EMPTY too.
+func _vs_slots(parent: Control, slots: Array) -> Array[Button]:
+	BeachUI.label(parent,"OPPONENTS",BeachUI.FONT_NATIVE,BeachUI.GOLD).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var column: VBoxContainer = VBoxContainer.new()
+	column.name = "OpponentRow"
+	column.add_theme_constant_override("separation",1)
+	parent.add_child(column)
+	var buttons: Array[Button] = []
+	for i: int in slots.size():
+		var bar: Button = _small_button(column,"",func() -> void: pass)
+		bar.name = "Slot%d" % (i + 1)
+		bar.custom_minimum_size = Vector2(0,11)
+		bar.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		buttons.append(bar)
+		bar.pressed.connect(func() -> void:
+			slots[i] = vs_cycle(slots,i)
+			_vs_slot_text(buttons,slots))
+	_vs_slot_text(buttons,slots)
+	return buttons
+
+func _vs_slot_text(buttons: Array[Button], slots: Array) -> void:
+	for i: int in buttons.size():
+		var id: String = str(slots[i])
+		buttons[i].text = "%d. EMPTY" % (i + 1) if id.is_empty() else "%d. %s  %s" % [i + 1,str(Config.vs.opponents[id].name).to_upper(),str(Config.vs.opponents[id].blurb)]
+		buttons[i].modulate = Color(0.55,0.55,0.55) if id.is_empty() else Color.WHITE
+
+## The rival slot `index` shows next: the roster in order, then EMPTY (not for slot 1), skipping rivals in other slots.
+func vs_cycle(slots: Array, index: int) -> String:
+	var order: Array = Config.vs.opponents.keys()
+	if index > 0:
+		order.append("")
+	var start: int = order.find(str(slots[index]))
+	for step: int in range(1,order.size() + 1):
+		var id: String = order[(start + step) % order.size()]
+		if id.is_empty() or not id in slots:
+			return id
+	return str(slots[index])
+
 ## SCORES TO BEAT: an inset with the top rows of the selected matchup's board. Shows the seed scores while loading,
 ## offline or on an empty reply. Returns a refresh Callable to call when the arena or opponent changes.
-func _vs_scores(parent: Control, arena: ButtonGroup, opponent: ButtonGroup) -> Callable:
+func _vs_scores(parent: Control, arena: ButtonGroup, slots: Array) -> Callable:
 	var panel: PanelContainer = PanelContainer.new()
 	panel.name = "ScoresToBeat"
 	panel.size_flags_horizontal = SIZE_EXPAND_FILL
@@ -626,7 +666,7 @@ func _vs_scores(parent: Control, arena: ButtonGroup, opponent: ButtonGroup) -> C
 		ticket[0] += 1
 		var mine: int = ticket[0]
 		fill.call(seed_rows)
-		var board: String = OnlineScores.vs_board(str(arena.get_pressed_button().get_meta("id")),str(opponent.get_pressed_button().get_meta("id")))
+		var board: String = OnlineScores.vs_board(str(arena.get_pressed_button().get_meta("id")),slots.filter(func(id: String) -> bool: return not id.is_empty()).size())
 		OnlineScores.top(board,func(rows: Array) -> void:
 			if mine != ticket[0] or not is_instance_valid(grid) or rows.is_empty():
 				return

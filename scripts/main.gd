@@ -91,7 +91,7 @@ func _ready() -> void:
 		_navigate("start",1)
 	elif not _vs_args().is_empty():
 		# dev entry: straight into a round; --vs=bin_beach picks the arena
-		_navigate("vs_start",{"arena": str(_vs_args()[0]).trim_prefix("--vs=") if str(_vs_args()[0]).contains("=") else "scrap_sands","opponent": "gary"})
+		_navigate("vs_start",{"arena": str(_vs_args()[0]).trim_prefix("--vs=") if str(_vs_args()[0]).contains("=") else "scrap_sands","opponents": ["gary"]})
 	elif OS.get_cmdline_user_args().has("--vs-menu"):
 		_navigate("vs_menu") # dev entry: straight to the VS menu
 
@@ -176,7 +176,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 				var replay_training: bool = int(payload) == 1 and bool(GameState.entry(1).get("training_complete",false))
 				start_level(int(payload),replay_training)
 		"vs_start":
-			start_vs(str(payload.arena),str(payload.opponent))
+			start_vs(str(payload.arena),Array(payload.opponents))
 		"vs_menu":
 			vs = true
 			clear_game()
@@ -194,7 +194,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 				start_practice()
 				return
 			if is_instance_valid(game) and not game.level.get("vs",{}).is_empty():
-				start_vs(str(vs_round.arena),str(vs_round.opponent))
+				start_vs(str(vs_round.arena),vs_round.opponents)
 				return
 			var replaying_training: bool = is_instance_valid(game) and game.training and bool(GameState.entry(1).get("training_complete", false))
 			var replaying_lesson: bool = is_instance_valid(game) and (game.screech_lesson and bool(GameState.entry(current_level).get("screech_lesson_complete",false)))
@@ -261,15 +261,19 @@ func start_level(id: int, force_training: bool = false, force_lesson: bool = fal
 	_start_game(Config.levels[id-1],force_training,force_lesson)
 	Audio.play_music("synth" if id == 1 else Audio.LEVEL_MUSIC[(id - (4 if id >= 5 else 2)) % Audio.LEVEL_MUSIC.size()])
 
-## A VS round on a deep copy of the arena (the source stays untouched) with the one opponent as its rival.
-func start_vs(arena_id: String, opponent_id: String) -> void:
-	if not Config.arenas.has(arena_id) or not Config.vs.opponents.has(opponent_id):
+## A VS round on a deep copy of the arena (the source stays untouched) with the chosen opponents (1-4) as its rivals.
+func start_vs(arena_id: String, opponent_ids: Array) -> void:
+	var ids: Array = []
+	for id: Variant in opponent_ids:
+		if Config.vs.opponents.has(str(id)) and str(id) not in ids and ids.size() < int(Config.vs.max_opponents):
+			ids.append(str(id))
+	if not Config.arenas.has(arena_id) or ids.is_empty():
 		return
 	var round_level: Dictionary = Config.arenas[arena_id].duplicate(true)
-	round_level.rivals = [Config.vs.opponents[opponent_id].duplicate(true)]
+	round_level.rivals = ids.map(func(id: String) -> Dictionary: return Config.vs.opponents[id].duplicate(true))
 	round_level.time_limit = Config.vs.round_time
-	round_level.vs = {"opponent": opponent_id}
-	vs_round = {"arena": arena_id,"opponent": opponent_id}
+	round_level.vs = {"opponents": ids}
+	vs_round = {"arena": arena_id,"opponents": ids}
 	_start_game(round_level,false,false)
 	Audio.play_music(Audio.LEVEL_MUSIC[0])
 

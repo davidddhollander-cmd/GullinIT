@@ -111,10 +111,13 @@ func _build() -> void:
 	# A stunned run has no clean bonus; that row shows what the stuns and crashes cost instead,
 	# with EARNED POINTS counted before the losses so the column still adds up to TOTAL.
 	if is_vs():
-		var rival := str(Config.vs.opponents[level.vs.opponent].name).to_upper()
-		_add_count_row("YOU", int(result.base), 74, "%d", GOLD)
-		_add_count_row(rival, int(result.rival_best), 86)
-		_add_count_row("WON BY" if bool(result.won) else "LOST BY", absi(int(result.margin)), 106, "%d", GOLD if bool(result.won) else Color("ef725c"))
+		# Placings 1st-5th (you and up to four rivals), then the margin over the best rival.
+		var place := 0
+		for entry: Dictionary in result.placings:
+			var mine: bool = bool(entry.me)
+			_add_count_row("%d. %s" % [place + 1, str(entry.name)], int(entry.score), 68.0 + place * 9.0, "%d", GOLD if mine else CREAM)
+			place += 1
+		_add_count_row("WON BY" if bool(result.won) else "LOST BY", absi(int(result.margin)), 120, "%d", GOLD if bool(result.won) else Color("ef725c"))
 	else:
 		var lost := int(result.get("lost", 0))
 		if int(result.stuns) > 0:
@@ -168,7 +171,7 @@ func _build() -> void:
 	actions.add_theme_constant_override("separation", 3)
 	add_child(actions)
 	if is_vs():
-		_add_button(actions, "REMATCH", "vs_start", {"arena": str(level.id), "opponent": str(level.vs.opponent)})
+		_add_button(actions, "REMATCH", "vs_start", {"arena": str(level.id), "opponents": level.vs.opponents})
 		_add_button(actions, "VS MENU", "vs_menu")
 	else:
 		if passed and int(level.id) < Config.levels.size() and GameState.unlocked(int(level.id) + 1):
@@ -251,7 +254,7 @@ func _best() -> int:
 	return maxi(int(GameState.entry(int(level.id)).get("best", 0)), int(result.score))
 
 func _board() -> String:
-	return OnlineScores.vs_board(str(level.id), str(level.vs.opponent)) if is_vs() else OnlineScores.level_board(int(level.id))
+	return OnlineScores.vs_board(str(level.id), level.vs.opponents.size()) if is_vs() else OnlineScores.level_board(int(level.id))
 
 # The real board replaces the seeded one once Talo answers; offline keeps the seeds.
 func _show_online(entries: Array) -> void:
