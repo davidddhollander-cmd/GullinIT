@@ -38,7 +38,7 @@
   "world": {"width": 1100, "promenade_start": 0, "beach_start": 840, "pier_start": 1100, "start_x": 30, "start_y": 105},
   "zones": [
     {"name": "BOARDWALK", "from": 0, "to": 300},
-    {"name": "CRUMB ROW", "from": 300, "to": 840},
+    {"name": "CRUMB ROW", "sign_x": 590, "from": 300, "to": 840},
     {"name": "BEACH", "from": 840, "to": 1100}
   ],
   "spawns": [

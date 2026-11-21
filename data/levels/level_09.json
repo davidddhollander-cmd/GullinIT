@@ -27,7 +27,7 @@
   ],
   "world": {"width": 1280, "promenade_start": 360, "pier_start": 760, "start_x": 65, "start_y": 105},
   "zones": [
-    {"name": "QUIET BEACH", "from": 0, "to": 360},
+    {"name": "QUIET BEACH", "sign_x": 100, "from": 0, "to": 360},
     {"name": "PROMENADE", "from": 360, "to": 760},
     {"name": "PIER", "from": 760, "to": 1280}
   ],
