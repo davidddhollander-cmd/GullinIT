@@ -6,7 +6,7 @@ extends Node2D
 const ART: String = "res://assets/sprites/background-v2/"
 const HORIZON_Y: float = 94.0
 ## Screen x where the horizon strip's left edge sits at the level start (camera_x 160).
-const HORIZON_START_X: float = 90.0
+const HORIZON_START_X: float = 90.0 ## default when a level has no "horizon_x"
 const SKY_Y: float = HORIZON_Y - 80.0
 const SKY_COLOR: Color = Color8(91, 199, 216)
 const SEA_FRAME_TIME: float = 0.15
@@ -29,11 +29,13 @@ var sea: AnimatedSprite2D
 var birds: BackgroundBirds
 var clouds: CloudLayer
 var horizon: Sprite2D ## optional distant strip (assets/sprites/horizon-v1), null when the level has none
+var horizon_x: float = HORIZON_START_X
 var top_color: Color = SKY_COLOR
 static var flat_sky: Texture2D ## the plate's 320x80 strip in plain sky colour; the clouds are separate sprites
 
 ## layout: cloud placements from the level ({id, x, y, scale}); empty uses the default arrangement.
-func _init(sunset: bool, layout: Array = [], horizon_id: String = "") -> void:
+func _init(sunset: bool, layout: Array = [], horizon_id: String = "", start_x: float = HORIZON_START_X) -> void:
+	horizon_x = start_x
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	show_behind_parent = true
 	sky = _sprite("sky-clouds-320x80.png", Vector2(0, SKY_Y))
@@ -91,7 +93,7 @@ func _sprite(file: String, at: Vector2) -> Sprite2D:
 func update(camera_x: float, time: float, wind_dir: int = 0, wind_strength: float = 0.0) -> void:
 	position.x = roundf(camera_x) - 160.0
 	if horizon: # 0.1x parallax in whole pixels, wrapping at the strip's 640 px
-		horizon.region_rect.position.x = fposmod(roundf((camera_x - 160.0) * 0.1) - HORIZON_START_X, 640.0)
+		horizon.region_rect.position.x = fposmod(roundf((camera_x - 160.0) * 0.1) - horizon_x, 640.0)
 	sea.frame = int(time / SEA_FRAME_TIME) % SEA_FRAMES
 	birds.update(time)
 	clouds.update(time, wind_dir, wind_strength)

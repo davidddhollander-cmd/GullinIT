@@ -8,6 +8,8 @@
   "seed": 7105,
   "time_limit": 150,
   "wind": {"dir": -1, "strength": 0.5, "gusts": true, "flip": false},
+  "horizon": "headland-lighthouse-blue",
+  "horizon_x": -240,
   "clouds": [{"id": "fair-medium-01", "x": 60, "y": 26, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-02", "x": 108, "y": 20, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-01", "x": 100, "y": 38, "scale": 1.0, "depth": 1.0}, {"id": "fair-medium-03", "x": 200, "y": 52, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-03", "x": 240, "y": 46, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-01", "x": 226, "y": 64, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-02", "x": 8, "y": 60, "scale": 1.0, "depth": 0.8}, {"id": "fair-wisp-01", "x": 36, "y": 52, "scale": 1.0, "depth": 0.8}],
   "awareness_mult": 1.32,
   "twist": {"id": "chip_intro"},
