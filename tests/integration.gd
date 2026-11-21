@@ -351,7 +351,7 @@ func run() -> void:
 		game.set_physics_process(false)
 		await settle()
 		check(game.spawner.targets.size()==Config.levels[i-1].spawns.filter(func(spawn: Dictionary) -> bool: return spawn.type != "off_lead_dog").size(),"level %d spawns" % i)
-		check(game.pilots.size()+game.pending_rivals.size()==Config.levels[i-1].rivals.size(),"level %d rivals" % i)
+		check(game.pilots.size()+game.pending_rivals.size()+game.distance_rivals.size()==Config.levels[i-1].rivals.size(),"level %d rivals" % i)
 		if not game.pilots.is_empty():
 			check(game.pilots[0].gull.position.x <= 320 and game.pilots[0].gull.visible,"first rival appears in the opening view")
 		check(int(game.level.time_limit) >= 90,"level %d allows a full beach route" % i)

@@ -96,9 +96,12 @@ var pending_rivals: Array = []
 const FLY_IN_SPEED: float = 1.5
 const FLY_IN_BUMP_RANGE: float = 14.0
 const FLY_IN_TIMEOUT: float = 6.0
+const FLY_IN_ARRIVE_RANGE: float = 12.0 ## a non-bumping entry ends once the rival reaches its spot beside the player
 var entry_pilot: RivalPilot ## rival currently flying in to bump the player (scripted, not AI-driven)
 var entry_profile: Dictionary
+var fly_in_queue: Array = [] ## profiles still waiting for their fly-in (VS lineups enter one after another)
 var entry_age: float = 0.0
+var distance_rivals: Array = [] ## rival profiles with "entry_at_x": they fly in once the player gets that far along the beach
 var taunt_wait: float = -1.0
 var taunt_rival: String = ""
 var taunt_text: String = ""
@@ -321,6 +324,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 			_training_advance()
 	)
 	pending_rivals = level.rivals.duplicate(true)
+	distance_rivals = pending_rivals.filter(func(p: Dictionary) -> bool: return p.has("entry_at_x"))
+	pending_rivals = pending_rivals.filter(func(p: Dictionary) -> bool: return p not in distance_rivals)
 	var held: bool = bool(level.get("rivals_after_snatch",false))
 	var later: Array = pending_rivals.filter(func(p: Dictionary) -> bool: return held or bool(p.get("after_snatch",false)))
 	pending_rivals = pending_rivals.filter(func(p: Dictionary) -> bool: return p not in later)
@@ -432,24 +437,30 @@ func _start_fly_in(profile: Dictionary) -> void:
 	entry_profile = profile
 	entry_age = 0.0
 	var side: float = 1.0 if camera_x + 190.0 <= float(Config.tuning.world.width) else -1.0
+	if str(profile.get("entry_side","")) == "left":
+		side = -1.0
 	entry_pilot.gull.position = Vector2(camera_x + side * 190.0,clampf(player.position.y - 10.0,30.0,110.0))
 	entry_pilot.gull.speed_factor = FLY_IN_SPEED
 
-func _rival_head() -> AtlasTexture:
+func _rival_head(species: String = "great-black-backed") -> AtlasTexture:
 	var head: AtlasTexture = AtlasTexture.new()
-	head.atlas = preload("res://assets/sprites/gull-great-black-backed-carry-v1.png")
+	var path: String = "res://assets/sprites/gull-%s-carry-v1.png" % species
+	head.atlas = load(path) if ResourceLoader.exists(path) else preload("res://assets/sprites/gull-great-black-backed-carry-v1.png")
 	head.region = Rect2(104,80,48,48)
 	return head
 
 func _fly_in_step(step: float) -> void:
 	var gull: BeachGull = entry_pilot.gull
 	entry_age += step
-	gull.aim = player.position
-	gull.climb = gull.position.y > player.position.y
+	var bumps: bool = bool(entry_profile.get("entry_bump",true)) ## false: pull up beside the player instead of barging them
+	var side: float = signf(gull.position.x - player.position.x)
+	gull.aim = player.position if bumps else player.position + Vector2(28.0 * (side if side != 0.0 else -1.0),-14.0)
+	gull.climb = gull.position.y > gull.aim.y
 	gull.tick(step,wind.direction,wind.strength)
 	var force: float = gull.bump_force_on(player)
-	var hit: bool = force > 0.0 and gull.position.distance_to(player.position) < FLY_IN_BUMP_RANGE
-	if not hit and entry_age < FLY_IN_TIMEOUT:
+	var hit: bool = bumps and force > 0.0 and gull.position.distance_to(player.position) < FLY_IN_BUMP_RANGE
+	var arrived: bool = not bumps and gull.position.distance_to(gull.aim) < FLY_IN_ARRIVE_RANGE
+	if not hit and not arrived and entry_age < FLY_IN_TIMEOUT:
 		return
 	gull.speed_factor = float(entry_profile.speed)
 	if hit:
@@ -458,8 +469,13 @@ func _fly_in_step(step: float) -> void:
 		_hit_sound()
 	entry_pilot.cooldown = 2.0
 	entry_pilot.mode = RivalPilot.Mode.RECOVER
-	overlay.show_rival_popup(str(entry_profile.name),_rival_head(),str(entry_profile.entry_text),float(Config.tuning.juice.taunt_time) * 2.5)
+	overlay.show_rival_popup(str(entry_profile.name),_rival_head(str(entry_profile.get("species","great-black-backed"))),str(entry_profile.entry_text),float(Config.tuning.juice.taunt_time) * 2.5)
 	entry_pilot = null
+	_next_fly_in()
+
+func _next_fly_in() -> void:
+	if entry_pilot == null and not fly_in_queue.is_empty():
+		_start_fly_in(fly_in_queue.pop_front())
 
 func _release_rivals() -> void:
 	for profile: Dictionary in pending_rivals:
@@ -467,7 +483,8 @@ func _release_rivals() -> void:
 		rival.z_index = 4
 		rival.rival = true
 		add_child(rival)
-		rival.position = Vector2(clampf(player.position.x+90,30,float(Config.tuning.world.width)-30),65)
+		# Each rival starts 56 px further along (and alternately higher) so a VS lineup never stacks.
+		rival.position = Vector2(clampf(player.position.x+90+pilots.size()*56.0,30,float(Config.tuning.world.width)-30),65-(pilots.size()%2)*14.0)
 		_wire_sand(rival)
 		gulls.append(rival)
 		var pilot: RivalPilot = RivalPilot.new()
@@ -733,6 +750,14 @@ func _physics_process(delta: float) -> void:
 			carriers.append(pilot.gull)
 	if not player.digestion.snacks.is_empty() and player.state != BeachGull.State.STUNNED and player.invulnerable <= 0.0:
 		carriers.append(player)
+	for profile: Dictionary in distance_rivals.duplicate():
+		if player.position.x >= float(profile.entry_at_x) and entry_pilot == null:
+			distance_rivals.erase(profile)
+			var held: Array = pending_rivals
+			pending_rivals = [profile]
+			_release_rivals()
+			pending_rivals = held
+			_start_fly_in(profile)
 	for pilot: RivalPilot in pilots:
 		pilot.prey = carriers
 		if pilot == entry_pilot:
@@ -809,8 +834,15 @@ func track_hidden() -> void:
 	if not end_tracked and intro_dismissed_elapsed >= 0.0:
 		track("game_hidden", _run_stats(), true)
 
+## You and the rivals, best score first (a tie puts you below the rival, as a tie loses).
+func _vs_placings() -> Array:
+	var rows: Array = pilots.map(func(pilot: RivalPilot) -> Dictionary: return {"name": pilot.gull.rival_name.to_upper(),"score": pilot.score,"me": false})
+	rows.append({"name": "YOU","score": score.points,"me": true})
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.score > b.score or (a.score == b.score and not a.me and b.me))
+	return rows
+
 func _vs_stats() -> Dictionary:
-	return {"arena": str(level.id), "opponent": str(level.vs.opponent)} if is_vs() else {}
+	return {"arena": str(level.id), "opponent": ",".join(level.vs.opponents), "rivals": level.vs.opponents.size()} if is_vs() else {}
 
 func _assist_stats() -> Dictionary:
 	return {"control_mode": GameState.control_mode(), "assist": GameState.assist(), "dive_steer": snappedf(GameState.dive_steer(), 0.01)}
@@ -880,7 +912,8 @@ func dismiss_intro() -> void:
 	overlay.intro_panel.hide()
 	for pilot: RivalPilot in pilots:
 		if str(pilot.personality.get("entry","")) == "fly_in":
-			_start_fly_in(pilot.personality) # a rival on the beach from the start (VS opponent, level 3 Gary) crashes in as the run starts
+			fly_in_queue.append(pilot.personality) # a rival on the beach from the start (VS opponent, level 3 Gary) crashes in as the run starts
+	_next_fly_in() # VS lineups crash in one at a time, so each taunt gets its turn
 	if input.touch_visible and not GullInput.touch_explained and not is_vs():
 		GullInput.touch_explained = true ## once per app session, right after the first intro card
 		open_trainer(Config.trainer.touch_explainer,_open_intro_cards)
@@ -1396,6 +1429,7 @@ func finish() -> void:
 	if vs:
 		result.vs = true # not BeachBoss.verdict: that one sets the stage flag
 		result.rival_best = BeachBoss.best_rival(self)
+		result.placings = _vs_placings()
 		result.margin = score.points - int(result.rival_best)
 		result.won = int(result.margin) > 0 # a tie is a loss
 	result.powers = brash.powers_fired

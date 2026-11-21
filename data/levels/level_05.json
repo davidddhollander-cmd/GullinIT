@@ -19,7 +19,7 @@
     {"id": "l5_hotdog", "text": "EAT A HOT DOG", "event": "swallowed", "filter": {"food": "hotdog"}, "count": 1, "bonus": 50}
   ],
   "stars": [230, 440, 620],
-  "rivals": [{"name": "Gary", "species": "great-black-backed", "speed": 0.75, "accuracy_px": 22, "mug_chance": 0.15, "loose_only": true, "entry": "fly_in", "entry_text": "AH, YOU'RE HERE AGAIN? DON'T GET YOUR WINGS CHEWED OFF, LITTLE GIT!", "taunt": "GARY: OI! THAT'S MY LUNCH!", "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}}],
+  "rivals": [{"name": "Gary", "species": "great-black-backed", "speed": 0.75, "accuracy_px": 22, "mug_chance": 0.15, "loose_only": true, "entry": "fly_in", "entry_at_x": 300, "entry_side": "left", "entry_bump": false, "entry_text": "AH YOU'RE HERE AGAIN? DON'T GET YOUR WINGS CHEWED OFF LITTLE GIT!", "taunt": "GARY: OI! THAT'S MY LUNCH!", "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}}],
   "world": {"width": 1280, "promenade_start": 1280, "pier_start": 1280, "start_x": 40, "start_y": 125},
   "zones": [
     {"name": "DOG WALK", "sign_x": 310, "from": 0, "to": 500},

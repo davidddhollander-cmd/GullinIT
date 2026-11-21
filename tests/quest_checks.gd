@@ -308,6 +308,19 @@ static func run_game(suite: Node, check: Callable) -> void:
 	check.call(game.entry_pilot != null and game.pending_rivals.is_empty() and game.pilots.size() == 1, "level 3: Gary is there already, exactly once")
 	game._swallowed({"id": "hotdog", "scrap": true})
 	check.call(game.pilots.size() == 1, "level 3: eating a scrap does not spawn Gary again")
+	game = _play(main, 5)
+	game._physics_process(1.0 / 60)
+	check.call(game.pilots.is_empty() and game.entry_pilot == null, "level 5: Gary waits until the player gets along the beach")
+	game.player.position.x = 320.0
+	game.player.invulnerable = 0.0
+	game._physics_process(1.0 / 60)
+	check.call(game.entry_pilot != null and game.entry_pilot.gull.position.x < game.camera_x - 150.0, "level 5: Gary flies in from the left once the player passes x 300")
+	for _i: int in 600:
+		game._physics_process(1.0 / 60)
+		if game.entry_pilot == null:
+			break
+	check.call(game.entry_pilot == null and game.overlay.rival_popup.visible and "CHEWED" in game.overlay.rival_popup_text.text, "level 5: Gary pulls up and says his line")
+	check.call(game.player.state != BeachGull.State.STUNNED, "level 5: Gary's entry does not bump the player")
 	# Task 007: customer bite window and the mid-air bite quest (level 1 replay).
 	GameState.complete_training()
 	main._navigate("start", 1)
