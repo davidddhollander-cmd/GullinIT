@@ -267,12 +267,38 @@ func level_select() -> void:
 const LEVEL_THUMB_H: float = 18.0 ## thumbnail row height, between the number row and the name
 const LEVEL_THUMB_W: float = 58.0 ## widest the row of icons may be inside a 70 px card
 
+## Thumbs shown smaller than the shared fit, and with the cut-off neck edge rounded (image only, source PNG untouched)
+const THUMB_ROUND_NECK: Dictionary = {"thumb_head_small_dog": 0.82}
+const NECK_ROUND_ROWS: int = 5
+
+## Insets the bottom rows of a trimmed image along a quarter-ellipse so a flat cut reads as rounded
+func _round_bottom(image: Image) -> void:
+	var h: int = image.get_height()
+	var top: int = h - NECK_ROUND_ROWS
+	for y: int in range(top,h):
+		var first: int = -1
+		var last: int = -1
+		for x: int in image.get_width():
+			if image.get_pixel(x,y).a > 0.0:
+				if first < 0:
+					first = x
+				last = x
+		if first < 0:
+			continue
+		var t: float = (y + 0.5 - top) / NECK_ROUND_ROWS
+		var keep: float = (last - first + 1) * 0.5 * sqrt(maxf(0.0,1.0 - t * t))
+		var mid: float = (first + last + 1) * 0.5
+		for x: int in range(first,last + 1):
+			if absf(x + 0.5 - mid) > keep:
+				image.set_pixel(x,y,Color(0,0,0,0))
+
 ## Themed icon(s) from the level's "thumb": "sprite_id[:animation]" or an array of them, side by side
 ## and centred. Each is trimmed to its opaque pixels; one shared nearest-filter scale keeps relative
 ## sizes. Unknown or missing ids are skipped, and no row is added if none load.
 func _level_thumb(head: VBoxContainer, thumb: Variant, unlocked: bool) -> void:
 	var specs: Array = thumb if thumb is Array else [str(thumb)]
 	var images: Array[Image] = []
+	var scales: Array[float] = []
 	for spec: Variant in specs:
 		var parts: PackedStringArray = str(spec).split(":")
 		if parts[0].is_empty() or not Config.sprites.has(parts[0]):
@@ -286,7 +312,12 @@ func _level_thumb(head: VBoxContainer, thumb: Variant, unlocked: bool) -> void:
 			continue
 		var used: Rect2i = image.get_used_rect()
 		if used.size.x > 0 and used.size.y > 0:
-			images.append(image.get_region(used))
+			var trimmed: Image = image.get_region(used)
+			var shrink: float = THUMB_ROUND_NECK.get(parts[0],1.0)
+			if shrink < 1.0:
+				_round_bottom(trimmed)
+			images.append(trimmed)
+			scales.append(shrink)
 	if images.is_empty():
 		return
 	var gap: int = 2
@@ -305,7 +336,8 @@ func _level_thumb(head: VBoxContainer, thumb: Variant, unlocked: bool) -> void:
 	if not unlocked:
 		row.modulate = Color(0.25,0.25,0.25,0.6) # locked: dark silhouettes
 	head.add_child(row)
-	for image: Image in images:
+	for i: int in images.size():
+		var image: Image = images[i]
 		var icon: TextureRect = TextureRect.new()
 		icon.texture = ImageTexture.create_from_image(image)
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -313,7 +345,7 @@ func _level_thumb(head: VBoxContainer, thumb: Variant, unlocked: bool) -> void:
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_SCALE
 		icon.size_flags_vertical = SIZE_SHRINK_CENTER
-		icon.custom_minimum_size = Vector2(roundf(image.get_width() * fit),roundf(image.get_height() * fit))
+		icon.custom_minimum_size = Vector2(roundf(image.get_width() * fit * scales[i]),roundf(image.get_height() * fit * scales[i]))
 		row.add_child(icon)
 
 func _page_arrow(row: HBoxContainer, text: String, shown: bool, step: int) -> void:
