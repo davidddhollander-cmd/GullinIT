@@ -259,7 +259,7 @@ func start_level(id: int, force_training: bool = false, force_lesson: bool = fal
 	current_level = id
 	vs_round = {}
 	_start_game(Config.levels[id-1],force_training,force_lesson)
-	Audio.play_music("synth" if id == 1 else Audio.LEVEL_MUSIC[(id - (3 if id >= 5 else 2)) % Audio.LEVEL_MUSIC.size()])
+	Audio.play_music("synth" if id == 1 else Audio.LEVEL_MUSIC[(id - (4 if id >= 5 else 2)) % Audio.LEVEL_MUSIC.size()])
 
 ## A VS round on a deep copy of the arena (the source stays untouched) with the one opponent as its rival.
 func start_vs(arena_id: String, opponent_id: String) -> void:

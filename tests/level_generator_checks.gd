@@ -2,7 +2,7 @@ extends RefCounted
 
 static func run(check: Callable) -> void:
 	var signatures: Dictionary = {}
-	for number: int in range(1,9):
+	for number: int in range(1,10):
 		var source: Dictionary = Config.read_json("res://data/levels/level_%02d.json" % number)
 		var original: String = JSON.stringify(source)
 		for variation: int in 20:
@@ -10,11 +10,11 @@ static func run(check: Callable) -> void:
 			recipe.seed = int(source.seed)+variation*100
 			var level: Dictionary = BeachLevelGenerator.generate(recipe,Config.layout_rules)
 			check.call(level == BeachLevelGenerator.generate(recipe,Config.layout_rules),"same seed reproduces complete layout")
-			check.call(not JSON.stringify(level.spawns).contains("dog_owner"),"dog owner never spawns")
+			check.call(number == 5 or not JSON.stringify(level.spawns).contains("dog_owner"),"dog owners only walk Dog Day Afternoon")
 			_check_palms(check,level)
-			if number <= 6:
+			if number <= 7:
 				_check_opening_level(check,source,level,number)
-			elif number == 7:
+			elif number == 8:
 				_check_squall_level(check,source,level)
 			elif bool(source.get("authored",false)):
 				_check_boss_level(check,source,level)
@@ -23,9 +23,9 @@ static func run(check: Callable) -> void:
 			if variation == 0:
 				signatures[JSON.stringify(level.props)] = true
 		check.call(JSON.stringify(source)==original,"generator leaves authored recipe intact")
-	check.call(signatures.size()==8,"all eight levels have distinct scenery arrangements")
+	check.call(signatures.size()==9,"all nine levels have distinct scenery arrangements")
 	var palm_xs: Array[float] = []
-	for number: int in range(1,9):
+	for number: int in range(1,10):
 		for prop: Dictionary in Config.read_json("res://data/levels/level_%02d.json" % number).props:
 			if prop.type == "beach_palm":
 				palm_xs.append(float(prop.x))
@@ -102,17 +102,20 @@ static func _check_opening_level(check: Callable, source: Dictionary, level: Dic
 	elif number == 4:
 		check.call(types==["sunbather"] and level.rivals.is_empty(),"feeding time keeps its light authored roster")
 	elif number == 5:
+		check.call(types==["sunbather","dog_owner","kiosk_customer","sunbather","toddler","picnic_family","dog_owner","kiosk_customer","off_lead_dog","off_lead_dog","off_lead_dog","off_lead_dog"] and types.count("off_lead_dog")==4,"dog day afternoon has sunbathers, a family, two dog owners, two shoppers and four free dogs")
+		check.call(stand_count==2 and level.rivals.is_empty(),"dog day afternoon keeps both stands and has no rival")
+	elif number == 6:
 		check.call(types==["sunbather","kiosk_customer","kiosk_customer"],"water fight has one edge sunbather and two shoppers, no dog")
 		check.call(stand_count==2 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1 and level.watergun_teens.size()==2,"water fight keeps both stands, Gary from the start and two teens")
-	elif number == 6:
+	elif number == 7:
 		check.call(types==["kiosk_customer","kiosk_customer","pier_diner","pier_diner","toddler","picnic_family","off_lead_dog"],"three's a crowd has two shoppers, both pier diners and one mum with one toddler, plus a dog by the family")
 		check.call(family_positions.size()==1 and children.size()==1,"level 5 adds exactly one linked family pair")
 		check.call(stand_count==1 and kiosk_x<0.0 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==2,"three's a crowd has a single grill (no kiosk) and two rivals")
 	else:
-		check.call(types==["sunbather","kiosk_customer","kiosk_customer","kiosk_customer","pier_diner","off_lead_dog","off_lead_dog"],"boardwalk is a busy promenade of three shoppers and a diner, plus two off-lead dogs, no families")
+		check.call(types==["sunbather","kiosk_customer","kiosk_customer","kiosk_customer","pier_diner"],"boardwalk is a busy promenade of three shoppers and a diner, no dogs, no families")
 		check.call(not types.has("dog_owner") and not types.has("market_cleaner") and not types.has("lifeguard"),"boardwalk leaves later hazards for later levels")
-		check.call(float(level.spawns[0].x)<float(level.world.promenade_start) and float(level.spawns[1].x)>float(level.world.promenade_start) and float(level.spawns[4].x)>float(level.world.promenade_start) and float(level.spawns[5].x)<float(level.world.promenade_start),"boardwalk actors occupy their zones")
-		check.call(stand_count==2 and bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1 and level.rivals[0].get("entry","")=="fly_in","boardwalk includes both stands and Gary, held back for his fly-in after the first snack")
+		check.call(float(level.spawns[0].x)<float(level.world.promenade_start) and float(level.spawns[1].x)>float(level.world.promenade_start) and float(level.spawns[4].x)>float(level.world.promenade_start),"boardwalk actors occupy their zones")
+		check.call(stand_count==2 and not bool(level.get("rivals_after_snatch",false)) and level.rivals.size()==1 and level.rivals[0].get("entry","")=="fly_in","boardwalk includes both stands and Gary, flying in from the start")
 
 static func _check_squall_level(check: Callable, source: Dictionary, level: Dictionary) -> void:
 	var types: Array[String] = []

@@ -351,6 +351,32 @@
     "sniff_min": 1.5, "sniff_max": 3.0, "rest_min": 0.5, "rest_max": 1.2, "dog_bump_hit": [20, 10],
     "tumble_speed": 80, "tumble_up": 120, "tumble_gravity": 420, "tumble_spin": 12, "tumble_daze": 1.2
   },
+  "off_lead_dog_breeds": {
+    "_note": "A spawn's \"breed\" picks an entry here; none = the plain terrier with the off_lead_dog block above. Each entry names its sprite (data/sprites.json), may override the draw scale (sprite_offset_y = -36 * visual_scale keeps the paws on the sand) and lists off_lead_dog tuning keys to override. bark_alert_radius: a bark puts humans this close to the dog on alert.",
+    "golden_retriever": {
+      "sprite": "golden_retriever",
+      "tuning": {
+        "run_speed": 70, "wander_speed": 22, "windup": 0.7, "notice_radius": 60, "leap_height": 38, "leap_lift": 30,
+        "chase_timeout": 4.0, "lose_radius": 105, "min_chase": 1.2, "cooldown": 3.0,
+        "rest_min": 1.6, "rest_max": 3.2, "sniff_min": 2.5, "sniff_max": 5.0
+      }
+    },
+    "german_shepherd": {
+      "sprite": "german_shepherd",
+      "tuning": {
+        "run_speed": 118, "windup": 0.3, "notice_radius": 95, "leap_range": 32, "leap_height": 56, "leap_lift": 44, "leap_speed": 120, "leap_cooldown": 0.6,
+        "catch_radius": 10, "mouth_x": 11, "chase_timeout": 12.0, "lose_radius": 200, "cooldown": 3.0, "bark_gap": 2.0, "leash": 300, "dog_bump_hit": [24, 12]
+      }
+    },
+    "small_dog": {
+      "sprite": "off_lead_dog", "visual_scale": 0.375, "sprite_offset_y": -13.5,
+      "tuning": {
+        "run_speed": 110, "wander_speed": 40, "windup": 0.2, "notice_radius": 80, "leap_range": 18, "leap_height": 24, "leap_time": 0.4, "leap_lift": 16, "leap_speed": 90,
+        "catch_radius": 7, "mouth_x": 6, "mouth_y": -5, "chase_timeout": 2.5, "lose_radius": 110, "min_chase": 1.0, "cooldown": 2.5, "bark_gap": 0.8,
+        "rest_min": 0.3, "rest_max": 0.8, "dog_bump_hit": [14, 8], "bark_alert_radius": 70
+      }
+    }
+  },
   "watergun_teen": {
     "notice_radius": 140, "lose_radius": 260, "leash": 450, "aim_max_dy": 70, "aim_band": 6,
     "wander_speed": 22, "run_speed": 78, "rest_min": 0.6, "rest_max": 1.5,

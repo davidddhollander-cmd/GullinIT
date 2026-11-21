@@ -7,7 +7,7 @@ static func generate(definition: Dictionary, rules: Dictionary) -> Dictionary:
 	random.seed = int(level.seed)
 	# The opening levels are paced as authored routes. Jitter is visual only and
 	# never changes their roster, landmark order, or the space around the start.
-	if int(level.id) <= 6 or bool(level.get("authored",false)):
+	if int(level.id) <= 7 or bool(level.get("authored",false)): # level 7 (Three's a Crowd) is not flagged authored
 		for spawn: Dictionary in level.spawns:
 			spawn.x = float(spawn.x) + random.randi_range(-3,3)
 		for prop: Dictionary in level.props:
@@ -115,7 +115,7 @@ static func generate(definition: Dictionary, rules: Dictionary) -> Dictionary:
 		{"type":"beach_palm","x":965,"y":148},
 		{"type":"beach_castle" if int(level.seed)%2 else "beach_rocks","x":495,"y":173},
 		{"type":"beach_lamp","x":822,"y":151},{"type":"beach_bench","x":1250,"y":153},{"type":"bin","x":1218}])
-	if int(level.id)>=6:
+	if int(level.id)>=7:
 		for spawn: Dictionary in spawns:
 			if spawn.type == "pier_diner":
 				props.append({"type":"umbrella","x":spawn.x})

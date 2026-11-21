@@ -1,5 +1,5 @@
 extends Node
-const SAVE_VERSION: int = 4
+const SAVE_VERSION: int = 5
 var progress: Dictionary = {}
 var wallet: Dictionary = {"feathers": 0}
 var options: Dictionary = {"Master": 0.8, "SFX": 0.8, "Music": 0.35, "shake": true, "touch": false, "stats": true, "tips": [], "gull": "herring", "dev_player": false}
@@ -15,7 +15,7 @@ var save_error: String = ""
 var unlock_all: bool = true
 # Demo build settings from data/demo.json: levels after last_level are always
 # locked (even with unlock_all), and feedback_url powers the feedback buttons.
-var demo: Dictionary = {"enabled": false, "last_level": 8, "feedback_url": ""}
+var demo: Dictionary = {"enabled": false, "last_level": 9, "feedback_url": ""}
 
 func _ready() -> void:
 	load_demo()
@@ -29,10 +29,10 @@ func load_demo(path: String = "res://data/demo.json") -> void:
 		demo.merge(data, true)
 
 func demo_locked(id: int) -> bool:
-	return bool(demo.get("enabled", false)) and id > int(demo.get("last_level", 8))
+	return bool(demo.get("enabled", false)) and id > int(demo.get("last_level", 9))
 
 func last_playable_level() -> int:
-	return int(demo.get("last_level", 8)) if bool(demo.get("enabled", false)) else 8
+	return int(demo.get("last_level", 9)) if bool(demo.get("enabled", false)) else 9
 
 func feedback_url() -> String:
 	return str(demo.get("feedback_url", "")).strip_edges()
@@ -67,6 +67,8 @@ func load_progress() -> void:
 ## Save v3 added the toddler lesson at Training Day lesson 3 (index 2), so the old "resume at the mug" step 4 is now 5.
 ## Every other unfinished step keeps its number: anyone past the old swoop simply meets the new lessons in order.
 ## Save v4 moved the mug lesson to level 2: an unfinished Training Day at step 5 or later counts as complete (no Feather is granted).
+## Save v5 inserted Dog Day Afternoon as level 5: the old levels 5-8 (Water Fight to Sunset Showdown) become 6-9, so their records move up one
+## (best, stars, quests; a "lN_random" quest id follows its level). A save that had Water Fight unlocked keeps the new level 5 open too.
 func migrate_progress(from_version: int = 1) -> void:
 	var training: Dictionary = entry(1)
 	if from_version < 3 and not bool(training.get("training_complete", false)) and int(training.get("training_step", 0)) == 4:
@@ -84,6 +86,18 @@ func migrate_progress(from_version: int = 1) -> void:
 			done[done.find("l6_random")] = "l7_random"
 		progress["7"] = moved
 		progress.erase("6")
+	if from_version < 5:
+		var had_water_fight: bool = progress.has("5") or int(entry(4).get("stars", 0)) > 0 or entry(4).has("casual_time")
+		for old_id: int in [8, 7, 6, 5]:
+			var record: Variant = progress.get(str(old_id))
+			progress.erase(str(old_id))
+			if record is Dictionary:
+				var done: Array = record.get("quests", [])
+				if "l%d_random" % old_id in done:
+					done[done.find("l%d_random" % old_id)] = "l%d_random" % (old_id + 1)
+				progress[str(old_id + 1)] = record
+		if had_water_fight:
+			progress["5"] = {"unlocked": true} ## the new level 5 opens for anyone who had reached Water Fight
 
 func save_progress() -> void:
 	var file: FileAccess = FileAccess.open(save_path + ".tmp", FileAccess.WRITE)
@@ -181,7 +195,7 @@ func unlocked(id: int) -> bool:
 	if id == 1 or unlock_all:
 		return true
 	var own: Dictionary = entry(id)
-	if int(own.get("stars", 0)) > 0 or own.has("casual_time"):
+	if int(own.get("stars", 0)) > 0 or own.has("casual_time") or bool(own.get("unlocked", false)):
 		return true # already cleared (e.g. a migrated boss record)
 	var previous: Dictionary = entry(id - 1)
 	return int(previous.get("stars", 0)) > 0 or previous.has("casual_time") or (id == 2 and bool(previous.get("training_complete", false)))

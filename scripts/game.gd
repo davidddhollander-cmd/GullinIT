@@ -195,10 +195,11 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 			continue
 		var dog: OffLeadDog = OffLeadDog.new()
 		actors.add_child(dog)
-		dog.setup(float(spawn.x),spawn.home,int(level.seed)+5+dogs.size())
+		dog.setup(float(spawn.x),spawn.home,int(level.seed)+5+dogs.size(),str(spawn.get("breed","")))
 		dog.barked.connect(func() -> void:
 			effects.message(dog.position-Vector2(0,24),"WOOF!",BeachUI.GOLD)
 			Audio.bark()
+			_bark_alert(dog)
 		)
 		dog.caught.connect(func() -> void:
 			effects.shout(dog.position-Vector2(0,24),"GOTCHA!",Color("ef725c"))
@@ -211,7 +212,7 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 		dog.outrun.connect(func() -> void:
 			effects.message(player.position-Vector2(0,18),"OUTRUN!",BeachUI.GOLD)
 			Audio.play(Audio.sfx("snatch"))
-			_quest_event("dog_outrun")
+			_quest_event("dog_outrun",{"breed":dog.breed_id})
 		)
 		dogs.append(dog)
 	for spawn: Dictionary in level.get("watergun_teens",[]):
@@ -874,10 +875,9 @@ func dismiss_intro() -> void:
 	running = true
 	input.enabled = true
 	overlay.intro_panel.hide()
-	if is_vs():
-		for pilot: RivalPilot in pilots:
-			if str(pilot.personality.get("entry","")) == "fly_in":
-				_start_fly_in(pilot.personality) # the opponent crashes in as the round starts
+	for pilot: RivalPilot in pilots:
+		if str(pilot.personality.get("entry","")) == "fly_in":
+			_start_fly_in(pilot.personality) # a rival on the beach from the start (VS opponent, level 3 Gary) crashes in as the run starts
 	if input.touch_visible and not GullInput.touch_explained and not is_vs():
 		GullInput.touch_explained = true ## once per app session, right after the first intro card
 		open_trainer(Config.trainer.touch_explainer,_open_intro_cards)
@@ -1121,10 +1121,19 @@ func _stunned() -> void:
 func _dog_bump_check() -> void:
 	if not player.bumps_dogs or player.state != BeachGull.State.STRIKE:
 		return
-	var box: Array = Config.tuning.off_lead_dog.dog_bump_hit
 	for dog: OffLeadDog in dogs:
+		var box: Array = dog.bump_box()
 		if BeachCollisions.segment_hits(player.previous_beak,player.sweep_beak,dog.position-Vector2(0,float(box[1])),Vector2(float(box[0]),float(box[1]))):
 			dog.bump(player)
+
+## A yappy breed's bark puts the humans near it on alert, like a whistle.
+func _bark_alert(dog: OffLeadDog) -> void:
+	var radius: float = dog.bark_alert_radius()
+	if radius <= 0.0:
+		return
+	for target: BeachTarget in spawner.targets:
+		if target.position.distance_to(dog.position) <= radius:
+			target.alert = 1
 
 func _dog_bumped(gull: BeachGull, dog: OffLeadDog) -> void:
 	effects.snatch_contact(dog.position-Vector2(0,8),gull.velocity,false)

@@ -1,5 +1,5 @@
 extends RefCounted
-## Drives the Level 3 terrier (the second of its two dogs) directly: set positions, tick, read state. No full run needed.
+## Drives the Level 7 terrier directly: set positions, tick, read state. No full run needed.
 const DT: float = 1.0 / 60.0
 
 static func _fresh(suite: Node, level: int) -> BeachGame:
@@ -36,41 +36,51 @@ static func _reset(dog: OffLeadDog, x: float) -> void:
 static func run(suite: Node, check: Callable) -> void:
 	var t: Dictionary = Config.tuning.off_lead_dog
 	var width: float = float(Config.tuning.world.width)
-	# Level 3 data: two off-lead dogs with separate homes; levels 5-7 keep one.
-	var level: Dictionary = Config.levels[2]
-	check.call(level.name == "Boardwalk Bustle" and int(level.map_version) >= 3 and level.has("world") and level.has("zones"), "level 3 is the hand-built Boardwalk Bustle")
-	var homes: Array = []
-	for spawn: Dictionary in level.spawns:
-		if spawn.type == "off_lead_dog":
-			homes.append(spawn.home)
-	check.call(homes.size() == 2 and level.twist.id == "off_lead_dogs" and float(homes[0][1]) < float(homes[1][0]), "level 3 has two off-lead dog spawns with separate homes and the dog twist")
-	check.call(level.quests.size() == 3 and level.quests[0].id == "l3_outrun" and int(level.quests[0].count) == 1 and level.quests[2].id == "l3_bump_gary" and not level.has("random_quest"), "level 3 quests are outrun x1, crab, bump Gary")
-	check.call(Config.levels[4].quests[0].id == "l5_counter" and not Config.levels[4].spawns.any(func(spawn: Dictionary) -> bool: return spawn.type == "off_lead_dog"), "level 4 has no dog and keeps its counter quest")
-	for number: int in [1, 2, 4, 5]:
+	# Level data: Boardwalk Bustle (3) has no dogs now; Dog Day Afternoon (5) has four; levels 7-9 keep their one terrier.
+	var level: Dictionary = Config.levels[6] # Three's a Crowd: one plain terrier, the fixture for the behaviour checks below
+	var three: Dictionary = Config.levels[2]
+	check.call(three.name == "Boardwalk Bustle" and int(three.map_version) >= 3 and three.has("world") and three.has("zones"), "level 3 is the hand-built Boardwalk Bustle")
+	check.call(not three.spawns.any(func(spawn: Dictionary) -> bool: return spawn.type == "off_lead_dog") and three.twist.id == "gary_intro", "level 3 has no off-lead dogs; Gary is its twist")
+	check.call(Config.levels[5].quests[0].id == "l5_counter" and not Config.levels[5].spawns.any(func(spawn: Dictionary) -> bool: return spawn.type == "off_lead_dog"), "Water Fight (6) has no dog and keeps its counter quest")
+	for number: int in [1, 2, 3, 4, 6]:
 		var other: BeachGame = _fresh(suite, number)
 		check.call(other.dogs.is_empty(), "level %d has no off-lead dog" % number)
 		suite.main.clear_game()
-	var five: BeachGame = _fresh(suite, 6)
-	check.call(five.dogs.size() == 1, "level 6 has an off-lead dog by the family")
+	var dog_day: BeachGame = _fresh(suite, 5)
+	check.call(dog_day.dogs.size() == 4, "level 5 (Dog Day Afternoon) spawns 4 dogs")
+	var breeds: Array[String] = []
+	var homes: Array = []
+	for each: OffLeadDog in dog_day.dogs:
+		breeds.append(each.breed_id)
+		homes.append(each.home)
+	var homes_unique: bool = true
+	for i: int in homes.size():
+		for j: int in range(i + 1, homes.size()):
+			homes_unique = homes_unique and homes[i] != homes[j]
+	check.call(breeds.count("golden_retriever") == 1 and breeds.count("german_shepherd") == 1 and breeds.count("small_dog") == 2 and homes_unique, "level 5 has a golden, a shepherd and two small dogs, each with its own home")
+	await _breed_checks(suite, check, dog_day)
 	suite.main.clear_game()
-	var six: BeachGame = _fresh(suite, 7)
-	check.call(six.dogs.size() == 1, "level 7 has an off-lead dog")
+	await suite.settle()
+	var five: BeachGame = _fresh(suite, 7)
+	check.call(five.dogs.size() == 1 and five.dogs[0].breed_id.is_empty(), "level 7 has the plain terrier by the family")
 	suite.main.clear_game()
-	var seven: BeachGame = _fresh(suite, 8)
-	check.call(seven.dogs.size() == 1, "level 8 has an off-lead dog")
+	var six: BeachGame = _fresh(suite, 8)
+	check.call(six.dogs.size() == 1 and six.dogs[0].breed_id.is_empty(), "level 8 has the plain terrier")
 	suite.main.clear_game()
-	var game: BeachGame = _fresh(suite, 3)
-	check.call(game.dogs.size() == 2 and game.dogs[0] != game.dogs[1] and game.dogs[0].home != game.dogs[1].home and game.dogs[0].home.y < game.dogs[1].home.x, "level 3 spawns two independent dogs with their own homes")
-	var dog: OffLeadDog = game.dogs[1]
-	check.call(game.spawner.targets.size() == level.spawns.size() - 2, "dogs are their own actors, not targets")
-	game.dogs[0].state = OffLeadDog.State.CHASE
-	check.call(dog.state != OffLeadDog.State.CHASE, "one dog's state does not drive the other")
+	var seven: BeachGame = _fresh(suite, 9)
+	check.call(seven.dogs.size() == 1 and seven.dogs[0].breed_id.is_empty(), "level 9 has the plain terrier")
+	suite.main.clear_game()
+	var game: BeachGame = _fresh(suite, 7)
+	var dog: OffLeadDog = game.dogs[0]
+	check.call(game.spawner.targets.size() == level.spawns.size() - 1, "dogs are their own actors, not targets")
 	var barks: Array[int] = [0]
 	var outruns: Array[int] = [0]
 	var catches: Array[int] = [0]
 	dog.barked.connect(func() -> void: barks[0] += 1)
 	dog.outrun.connect(func() -> void: outruns[0] += 1)
 	dog.caught.connect(func() -> void: catches[0] += 1)
+	var outrun_probe: Dictionary = {"id": "t_outrun", "text": "T", "event": "dog_outrun", "filter": {}, "count": 1, "bonus": 0, "progress": 0, "done": false}
+	game.quests.quests.append(outrun_probe)
 	game.quests.quests.append({"id": "t_caught", "text": "T", "event": "dog_caught", "filter": {}, "count": 1, "bonus": 0, "progress": 0, "done": false})
 
 	# Wander: stays in its home range, sniffs, never leaves the world.
@@ -280,17 +290,14 @@ static func run(suite: Node, check: Callable) -> void:
 	_run(dog, game, 1.0)
 	check.call(dog.state == OffLeadDog.State.WANDER and barks[0] >= 1, "gull outside the leash zone does not start a chase")
 
-	var outrun_quest: Dictionary = game.quests.quests[0]
-	check.call(outrun_quest.done and int(outrun_quest.progress) >= 1 and outruns[0] >= 1, "each escaped chase fires dog_outrun once; one completes l3_outrun")
+	check.call(outrun_probe.done and int(outrun_probe.progress) >= 1 and outruns[0] >= 1, "each escaped chase fires dog_outrun once; one completes an outrun quest")
 
 	# Rivals: the dog chases the nearest low gull, catches it, and the rival drops its food.
 	suite.main.clear_game()
 	await suite.settle()
-	game = _fresh(suite, 3)
-	dog = game.dogs[1]
-	game.pending_rivals = Config.levels[2].rivals.duplicate(true)
-	game._release_rivals()
-	var pilot: RivalPilot = game.pilots[0]
+	game = _fresh(suite, 7)
+	dog = game.dogs[0]
+	var pilot: RivalPilot = game.pilots[0] # Gary is on the beach from the start
 	var rivals: Array[BeachGull] = [pilot.gull]
 	pilot.gull.state = BeachGull.State.GROUNDED
 	pilot.gull.invulnerable = 0.0
@@ -321,8 +328,8 @@ static func run(suite: Node, check: Callable) -> void:
 	# Rendered review shots (no-op without --capture).
 	suite.main.clear_game()
 	await suite.settle()
-	game = _fresh(suite, 3)
-	dog = game.dogs[1]
+	game = _fresh(suite, 7)
+	dog = game.dogs[0]
 	_reset(dog, 250.0)
 	dog.state = OffLeadDog.State.CHASE
 	dog.chase_time = 0.5
@@ -350,3 +357,67 @@ static func _frame_camera(game: BeachGame, x: float) -> void:
 	game.camera.position.x = x
 	game.beach.camera_x = x
 	game.beach.queue_redraw()
+
+## Breeds are data (tuning.off_lead_dog_breeds): speeds, leaps and sizes differ without per-breed code.
+static func _breed_checks(suite: Node, check: Callable, game: BeachGame) -> void:
+	var base: Dictionary = Config.tuning.off_lead_dog
+	var golden: OffLeadDog = game.dogs[0]
+	var small: OffLeadDog = game.dogs[1]
+	var shepherd: OffLeadDog = game.dogs[2]
+	var small_b: OffLeadDog = game.dogs[3]
+	check.call(float(golden._t().run_speed) < float(base.run_speed) and float(base.run_speed) < float(shepherd._t().run_speed) and float(small._t().run_speed) > float(base.run_speed) * 0.99, "golden is slower than the terrier, shepherd faster, small dog quick")
+	check.call(float(shepherd._t().leap_height) > float(golden._t().leap_height) and float(golden._t().leap_height) > float(small._t().leap_height) and float(shepherd._t().leap_lift) > float(golden._t().leap_lift) and float(small._t().leap_lift) < float(base.leap_lift), "shepherd leaps highest, small dogs only reach a very low gull")
+	check.call(float(shepherd._t().chase_timeout) > float(base.chase_timeout) and float(golden._t().chase_timeout) < float(base.chase_timeout) and float(small._t().chase_timeout) < float(golden._t().chase_timeout), "the shepherd chases longest, the golden gives up sooner, small dogs dash briefly")
+	check.call(float(golden._t().sniff_max) > float(base.sniff_max) and float(golden._t().rest_max) > float(base.rest_max), "the golden sniffs and idles more")
+	check.call(golden.sprite.sprite_frames == Config.frames("golden_retriever") and shepherd.sprite.sprite_frames == Config.frames("german_shepherd") and small.sprite.sprite_frames == Config.frames("off_lead_dog"), "each breed uses its own full source sheet; small dogs use the terrier sheet")
+	check.call(small.sprite.scale.x < golden.sprite.scale.x and is_equal_approx(small.sprite.scale.x, small_b.sprite.scale.x), "small dogs are drawn smaller")
+	for each: OffLeadDog in game.dogs:
+		each.tick(1.0 / 60.0, game.player)
+		check.call(is_equal_approx(each.sprite.position.y, each.sprite_offset_y() - each.air) and absf(each.sprite_offset_y() + 36.0 * each.sprite.scale.x) < 0.01, "%s paws sit on the sand (offset follows scale)" % (each.breed_id if not each.breed_id.is_empty() else "terrier"))
+	# A small dog's bark puts the people next to it on alert; a shepherd's does not.
+	var neighbour: BeachTarget = game.spawner.targets[0]
+	var far_neighbour: BeachTarget = game.spawner.targets[1]
+	neighbour.alert = 0.0
+	far_neighbour.alert = 0.0
+	neighbour.position = Vector2(small.position.x + 30.0, neighbour.position.y)
+	far_neighbour.position = Vector2(small.position.x + small.bark_alert_radius() + 80.0, far_neighbour.position.y)
+	small.barked.emit()
+	check.call(is_equal_approx(neighbour.alert, 1.0) and far_neighbour.alert < 1.0, "a small dog's bark alerts the humans near it, not far ones")
+	neighbour.alert = 0.0
+	neighbour.position = Vector2(shepherd.position.x + 20.0, neighbour.position.y)
+	shepherd.barked.emit()
+	check.call(neighbour.alert == 0.0, "a shepherd's bark alerts nobody (bark_alert_radius is data)")
+	# Leap reach: a gull 44 px up is leapt at by the shepherd but not by a golden or a small dog.
+	for each: OffLeadDog in [shepherd, golden, small]:
+		each.home = Vector2(each.position.x - 20.0, each.position.x + 1000.0)
+		each.state = OffLeadDog.State.CHASE
+		each.leap_gap = 0.0
+		game.player.state = BeachGull.State.GLIDE
+		game.player.invulnerable = 0.0
+		game.player.position = Vector2(each.position.x + 10.0, float(Config.tuning.world.ground) - 44.0)
+		each.tick(1.0 / 60.0, game.player)
+	check.call(shepherd.state == OffLeadDog.State.LEAP and golden.state != OffLeadDog.State.LEAP and small.state != OffLeadDog.State.LEAP, "only the shepherd leaps at a gull 44 px up")
+	# Depth rule (AGENTS.md rule 6): a new breed and a small dog, beside a bench, a bin and a stall.
+	game.running = true
+	game.set_physics_process(false)
+	var level: Dictionary = game.level
+	for dog: OffLeadDog in [shepherd, small]:
+		dog.state = OffLeadDog.State.WANDER
+		dog.resting = true
+		dog.timer = 99.0
+		game.player.state = BeachGull.State.GROUNDED
+		game.player.position = Vector2(2000.0, game.player.ground_y())
+		for type: String in ["beach_bench", "bin", "hotdog_stand"]:
+			var prop: Dictionary = level.props.filter(func(candidate: Dictionary) -> bool: return candidate.type == type)[0]
+			var base_y: float = float(prop.get("y", 160))
+			var prop_z: int = FoodStall.DRAW_DEPTH if type == "hotdog_stand" else game.beach.prop_sprites[level.props.find(prop)].z_index
+			dog.position = Vector2(float(prop.x), base_y + 8.0)
+			game._physics_process(1.0 / 60.0)
+			var front_z: int = dog.z_index
+			dog.position = Vector2(float(prop.x), base_y - 8.0)
+			game._physics_process(1.0 / 60.0)
+			var back_z: int = dog.z_index
+			check.call(front_z > prop_z and front_z >= 3, "%s feet below a %s base draw in front of it" % [dog.breed_id, type])
+			check.call(back_z < prop_z, "%s feet above a %s base draw behind it" % [dog.breed_id, type])
+			# Against characters: a walker with feet in front draws over a dog behind the prop, and the reverse.
+			check.call(game.spawner.depth_z(Vector2(float(prop.x), base_y + 8.0), 2) > back_z and game.spawner.depth_z(Vector2(float(prop.x), base_y - 8.0), 2) < front_z, "%s and a walker at the same %s order by their feet" % [dog.breed_id, type])

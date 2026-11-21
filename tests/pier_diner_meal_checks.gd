@@ -164,7 +164,7 @@ static func run(host: Node, check: Callable) -> void:
 		await host.get_tree().process_frame
 
 	# Real levels: each pier diner buys fried fish at that level's fish & chips stand.
-	for index: int in [2,5,6]:
+	for index: int in [2,6,7]:
 		var real := BeachGame.new()
 		host.add_child(real)
 		var definition: Dictionary = Config.levels[index].duplicate(true)

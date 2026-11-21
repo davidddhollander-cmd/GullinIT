@@ -8,15 +8,14 @@
   "wind": {"dir": -1, "strength": 0.2, "gusts": false, "flip": false},
   "clouds": [{"id": "fair-wisp-02", "x": 84, "y": 22, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-03", "x": 110, "y": 28, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-01", "x": 132, "y": 20, "scale": 1.0, "depth": 1.0}, {"id": "fair-medium-03", "x": 185, "y": 56, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-01", "x": 222, "y": 52, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-02", "x": 204, "y": 68, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-01", "x": 14, "y": 52, "scale": 1.0, "depth": 0.8}, {"id": "fair-wisp-03", "x": 30, "y": 60, "scale": 1.0, "depth": 0.8}],
   "awareness_mult": 1.08,
-  "twist": {"id": "off_lead_dogs", "tip": {"id": "dogs", "text": "OFF-LEAD DOGS: STAY ABOVE THEM!"}},
+  "twist": {"id": "gary_intro", "tip": {"id": "gary", "text": "GARY: THE BEACH BULLY"}},
   "quests": [
-    {"id": "l3_outrun", "text": "OUTRUN A DOG", "event": "dog_outrun", "filter": {}, "count": 1, "bonus": 60},
+    {"id": "l3_mug_gary", "text": "MUG GARY", "event": "swallowed", "filter": {"mugged_from": "Gary"}, "count": 1, "bonus": 60},
     {"id": "l3_crab", "text": "EAT A CRAB", "event": "swallowed", "filter": {"food": "crab"}, "count": 1, "bonus": 40},
     {"id": "l3_bump_gary", "text": "BUMP GARY", "event": "rival_bumped", "filter": {"name": "Gary"}, "count": 1, "bonus": 40}
   ],
   "stars": [180, 400, 600],
-  "rivals": [{"name": "Gary", "species": "great-black-backed", "speed": 0.65, "accuracy_px": 22, "mug_chance": 0.15, "loose_only": true, "entry": "fly_in", "entry_text": "THIS IS MY BEACH. GET YOUR NOSH ELSEWHERE YOU GIT!", "taunt": "GARY: OI! THAT'S MY LUNCH!", "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}}],
-  "rivals_after_snatch": true,
+  "rivals": [{"name": "Gary", "species": "great-black-backed", "speed": 0.75, "accuracy_px": 22, "mug_chance": 0.15, "loose_only": true, "entry": "fly_in", "entry_text": "THIS IS MY BEACH. GET YOUR NOSH ELSEWHERE YOU GIT!", "taunt": "GARY: OI! THAT'S MY LUNCH!", "ground": {"scraps": 0.9, "bins": 0.9, "bags": 0.6, "catch": 0.7}}],
   "world": {"width": 1280, "promenade_start": 480, "pier_start": 1280, "start_x": 65, "start_y": 105},
   "zones": [
     {"name": "QUIET BEACH", "from": 0, "to": 480},
@@ -28,9 +27,7 @@
     {"type": "kiosk_customer", "x": 600, "food_id": "hotdog", "appearance": "old_man", "station": "hotdogs", "patrol_radius": 12},
     {"type": "kiosk_customer", "x": 840, "food_id": "ice_cream", "appearance": "kiosk_customer", "station": "promenade_stroll", "patrol_radius": 24},
     {"type": "kiosk_customer", "x": 1195, "food_id": "ice_cream", "appearance": "shopper_mullet", "station": "ice_cream", "patrol_radius": 12},
-    {"type": "pier_diner", "x": 1005, "appearance": "pier_diner", "station": "pier_dining", "patrol_radius": 8},
-    {"type": "off_lead_dog", "x": 120, "home": [60, 200]},
-    {"type": "off_lead_dog", "x": 330, "home": [270, 400]}
+    {"type": "pier_diner", "x": 1005, "appearance": "pier_diner", "station": "pier_dining", "patrol_radius": 8}
   ],
   "props": [
     {"type": "beach_jet_ski", "x": 178, "y": 138},

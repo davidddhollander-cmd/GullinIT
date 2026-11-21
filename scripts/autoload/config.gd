@@ -1,6 +1,7 @@
 extends Node
 ## JSON is the single source of gameplay tuning. Reload is transactional.
 signal reloaded
+const LEVEL_COUNT: int = 9 ## data/levels/level_01..09.json
 var tuning: Dictionary = {}
 var targets: Dictionary = {}
 var foods: Dictionary = {}
@@ -52,7 +53,7 @@ func reload_data() -> bool:
 		next[key] = read_json("res://data/%s.json" % key)
 	var next_levels: Array[Dictionary] = []
 	var next_layout: Dictionary = read_json("res://data/level_layout.json")
-	for i: int in range(1, 9):
+	for i: int in range(1, LEVEL_COUNT + 1):
 		next_levels.append(read_json("res://data/levels/level_%02d.json" % i))
 	var next_arenas: Dictionary = {}
 	for file: String in DirAccess.get_files_at("res://data/arenas"):

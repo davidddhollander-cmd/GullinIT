@@ -1,6 +1,7 @@
 class_name OffLeadDog
 extends Node2D
-## Level 4 terrier: wanders, warns, chases on the sand and in low flight, leaps, catches.
+## Off-lead dog: wanders, warns, chases on the sand and in low flight, leaps, catches.
+## A spawn's breed (tuning.off_lead_dog_breeds) swaps the sprite and overrides tuning keys; no breed = the plain terrier.
 ## It chases the nearest low gull (the player, or a rival when chase_rivals is on) and never touches food.
 signal barked
 signal caught
@@ -34,21 +35,42 @@ var tumble_vz: float = 0.0
 var tumble_turn: float = 0.0 ## sprite spin, radians per second
 var tumble_landed: bool = false ## true during the daze after landing
 var stars: AnimatedSprite2D ## daze stars, owned by this dog and freed when the daze ends
+var breed: Dictionary = {} ## tuning.off_lead_dog_breeds entry, empty for the terrier
+var breed_tuning: Dictionary = {} ## base tuning merged with the breed's overrides; empty for the terrier (reads the live base block)
+var sprite_id: String = "off_lead_dog"
+var breed_id: String = "" ## "" = terrier; quests filter dog_outrun by it
 
-func setup(x: float, home_range: Array, seed_value: int) -> void:
-	var art: Dictionary = Config.sprites.off_lead_dog
+func setup(x: float, home_range: Array, seed_value: int, breed_name: String = "") -> void:
+	breed = Config.tuning.get("off_lead_dog_breeds",{}).get(breed_name,{})
+	breed_id = breed_name if not breed.is_empty() else ""
+	if not breed.is_empty():
+		sprite_id = str(breed.get("sprite","off_lead_dog"))
+		breed_tuning = Config.tuning.off_lead_dog.merged(breed.get("tuning",{}),true)
+	var art: Dictionary = Config.sprites[sprite_id]
 	rng.seed = seed_value
 	home = Vector2(float(home_range[0]), float(home_range[1]))
 	position = Vector2(x, float(Config.tuning.world.ground))
 	sprite = AnimatedSprite2D.new()
-	sprite.sprite_frames = Config.frames("off_lead_dog")
+	sprite.sprite_frames = Config.frames(sprite_id)
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	sprite.scale = Vector2.ONE * float(art.visual_scale)
+	sprite.scale = Vector2.ONE * float(breed.get("visual_scale",art.visual_scale))
 	add_child(sprite)
 	_wander()
 
 func _t() -> Dictionary:
-	return Config.tuning.off_lead_dog
+	return breed_tuning if not breed_tuning.is_empty() else Config.tuning.off_lead_dog
+
+## Where the sprite sits so the paws stay on the sand line at this dog's draw scale.
+func sprite_offset_y() -> float:
+	return float(breed.get("sprite_offset_y",Config.sprites[sprite_id].sprite_offset_y))
+
+## Humans within this many px are put on alert by a bark (0 = barks alert nobody).
+func bark_alert_radius() -> float:
+	return float(_t().get("bark_alert_radius",0.0))
+
+## Hit box [w, h] a black-back dive must sweep through to bump this dog.
+func bump_box() -> Array:
+	return _t().dog_bump_hit
 
 func _process(delta: float) -> void:
 	if flash_left > 0.0:
@@ -325,7 +347,7 @@ func _cooldown(sniff: bool) -> void:
 
 func _animate(clip: StringName, rate: float) -> void:
 	sprite.flip_h = facing < 0
-	sprite.position.y = float(Config.sprites.off_lead_dog.sprite_offset_y) - air
+	sprite.position.y = sprite_offset_y() - air
 	if sprite.animation != clip or (not sprite.is_playing() and clip != &"leap" and clip != &"catch"):
 		sprite.play(clip)
 	sprite.speed_scale = 0.0 if paused else rate
