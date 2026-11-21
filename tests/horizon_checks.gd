@@ -8,10 +8,15 @@ static func run(host: Node, check: Callable) -> void:
 	with.setup([])
 	var strip: Sprite2D = with.background_art.horizon
 	check.call(strip != null and strip.position.y + strip.region_rect.size.y == 94.0 and strip.texture.get_height() == 24, "level 5 horizon strip ends on y 93")
+	with.background_art.update(160.0, 0.0)
+	# Region starts 90 px before strip x 0 (wrapped), so strip col 6 lands at screen x 96: the lighthouse is on screen.
+	check.call(strip.region_rect.position.x == 550.0, "horizon strip starts 90 px in from the left edge at the level start")
 	with.background_art.update(1234.0, 0.0)
-	check.call(strip.region_rect.position.x == 123.0, "horizon scrolls 0.1x in whole pixels")
-	with.background_art.update(6455.0, 0.0) # 645.5 rounds to 646, wraps to 6
-	check.call(strip.region_rect.position.x == 6.0, "horizon offset wraps at 640")
+	check.call(strip.region_rect.position.x == 17.0, "horizon scrolls 0.1x in whole pixels")
+	with.background_art.update(160.0 + 300.0, 0.0) # 30 - 90 = -60 wraps to 580
+	check.call(strip.region_rect.position.x == 580.0, "horizon offset wraps below 0")
+	with.background_art.update(160.0 + 7300.0, 0.0) # 730 - 90 = 640 wraps to 0
+	check.call(strip.region_rect.position.x == 0.0, "horizon offset wraps at 640")
 	var without: BeachBackdrop = BeachBackdrop.new()
 	without.horizon = Config.levels[7].get("horizon", "")
 	host.add_child(without)

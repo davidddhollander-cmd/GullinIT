@@ -5,6 +5,8 @@ extends Node2D
 
 const ART: String = "res://assets/sprites/background-v2/"
 const HORIZON_Y: float = 94.0
+## Screen x where the horizon strip's left edge sits at the level start (camera_x 160).
+const HORIZON_START_X: float = 90.0
 const SKY_Y: float = HORIZON_Y - 80.0
 const SKY_COLOR: Color = Color8(91, 199, 216)
 const SEA_FRAME_TIME: float = 0.15
@@ -89,7 +91,7 @@ func _sprite(file: String, at: Vector2) -> Sprite2D:
 func update(camera_x: float, time: float, wind_dir: int = 0, wind_strength: float = 0.0) -> void:
 	position.x = roundf(camera_x) - 160.0
 	if horizon: # 0.1x parallax in whole pixels, wrapping at the strip's 640 px
-		horizon.region_rect.position.x = fposmod(roundf(camera_x * 0.1), 640.0)
+		horizon.region_rect.position.x = fposmod(roundf((camera_x - 160.0) * 0.1) - HORIZON_START_X, 640.0)
 	sea.frame = int(time / SEA_FRAME_TIME) % SEA_FRAMES
 	birds.update(time)
 	clouds.update(time, wind_dir, wind_strength)
