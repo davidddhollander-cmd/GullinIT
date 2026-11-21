@@ -42,4 +42,10 @@ func _ready() -> void:
 	await at(5, 160.0, "L5_x160")
 	await at(7, 160.0, "L7_x160")
 	await at(7, 960.0, "L7_end")
+	await at(4, 160.0, "L4_start")
+	await at(4, float(Config.levels[3].world.width) - 160.0, "L4_end")
+	await at(8, 160.0, "L8_start")
+	main.game.squall.intensity = 1.0 # full squall tint, as in the storm
+	main.game.beach.modulate = Color.WHITE.lerp(Color(main.game.squall.cfg.tint[0], main.game.squall.cfg.tint[1], main.game.squall.cfg.tint[2]), 1.0)
+	await shot("L8_squall")
 	get_tree().quit()

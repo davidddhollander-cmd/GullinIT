@@ -1,5 +1,7 @@
 {
   "id": 8,
+  "sky": "overcast",
+  "horizon": "windfarm",
   "board": 7,
   "crabs": {"enabled": true},
   "thumb": "thumb_lightning",

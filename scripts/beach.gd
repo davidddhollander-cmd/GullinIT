@@ -39,13 +39,14 @@ var use_background_art: bool = true
 var background_art: BeachBackgroundArt
 var horizon: String = "" ## the level's optional "horizon" strip id; set before setup()
 var horizon_x: float = BeachBackgroundArt.HORIZON_START_X ## screen x of the strip's left edge at the level start
+var overcast: bool = false ## the level's "sky": "overcast"; set before setup()
 var cloud_layout: Array = [] ## the level's "clouds" placements; set before setup(), empty uses the default arrangement
 
 func setup(entries: Array, zone_entries: Array = [], world_settings: Dictionary = {}) -> void:
 	zones = zone_entries.duplicate(true)
 	world = world_settings.duplicate(true)
 	if use_background_art:
-		background_art = BeachBackgroundArt.new(sunset,cloud_layout,horizon,horizon_x)
+		background_art = BeachBackgroundArt.new(sunset,cloud_layout,horizon,horizon_x,overcast)
 		add_child(background_art)
 		background_art.update(camera_x,time,wind_dir,strength)
 	for entry: Dictionary in entries:
