@@ -316,48 +316,44 @@ func _feather_icon_rect(row: HBoxContainer) -> void:
 	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(icon)
 
-## VS intro card: "<YOUR GULL> VS GARY" (or "VS 3 RIVALS") with your gull facing a grid of the rivals, each named
-## under its sprite, and the arena name underneath. Rivals sit two per row, so four still fit without overlapping.
+## VS intro card: one vertical list, your gull then each rival (sprite + name), with a VS between every pair.
+## Row height shrinks as rivals are added so five gulls and four VS lines still fit the 320 x 180 canvas.
 func _vs_card(card: VBoxContainer) -> void:
 	var ids: Array = game.level.vs.opponents
-	var mine: String = str(Config.species.species[game.player.species].name)
-	var versus: String = str(Config.vs.opponents[ids[0]].name).to_upper() if ids.size() == 1 else "%d RIVALS" % ids.size()
-	BeachUI.label(card,"%s VS %s" % [mine,versus],8,BeachUI.GOLD).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var row: HBoxContainer = HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation",4)
-	card.add_child(row)
-	_vs_stage(row,game.player.species,false,"YOU")
-	BeachUI.label(row,"VS",16,BeachUI.CREAM).size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var grid: GridContainer = GridContainer.new()
-	grid.columns = mini(ids.size(),2)
-	grid.add_theme_constant_override("h_separation",2)
-	grid.add_theme_constant_override("v_separation",2)
-	row.add_child(grid)
+	var count: int = ids.size() + 1
+	var row_h: int = mini(32,(116 - 8 * (count - 1)) / count)
+	card.add_theme_constant_override("separation",0)
+	_vs_row(card,game.player.species,false,"YOU",row_h)
 	for id: String in ids:
-		_vs_stage(grid,str(Config.vs.opponents[id].species),true,str(Config.vs.opponents[id].name).to_upper())
+		var vs: Label = BeachUI.label(card,"VS",8,BeachUI.CREAM)
+		vs.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_vs_row(card,str(Config.vs.opponents[id].species),true,str(Config.vs.opponents[id].name).to_upper(),row_h)
 	var arena: Label = BeachUI.label(card,str(game.level.name).to_upper(),8,Color("80bcb8"))
 	arena.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
-## One 64 x 24 gull stage with a name under it.
-func _vs_stage(parent: Control, species: String, flip: bool, caption: String) -> void:
-	var cell: VBoxContainer = VBoxContainer.new()
-	cell.add_theme_constant_override("separation",0)
-	parent.add_child(cell)
+## One gull row: a stage (64 x 24 scaled to row_h) with the name beside it.
+func _vs_row(parent: Control, species: String, flip: bool, caption: String, row_h: int) -> void:
+	var row: HBoxContainer = HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation",4)
+	parent.add_child(row)
+	var zoom: float = row_h / 24.0
 	var stage: Control = Control.new()
-	stage.custom_minimum_size = Vector2(64,24)
+	stage.custom_minimum_size = Vector2(64.0 * zoom,row_h)
 	stage.clip_contents = true
-	cell.add_child(stage)
+	row.add_child(stage)
 	var art_id: String = "gull_" + species.replace("-","_")
 	var bird: AnimatedSprite2D = AnimatedSprite2D.new()
 	bird.sprite_frames = Config.frames(art_id)
-	bird.scale = Vector2.ONE * float(Config.sprites[art_id].visual_scale)
+	bird.scale = Vector2.ONE * float(Config.sprites[art_id].visual_scale) * zoom
 	bird.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	bird.flip_h = flip
-	bird.position = Vector2(20 if flip else 44,12) # the frames carry the bird left of centre
+	bird.position = Vector2(20 if flip else 44,12) * zoom # the frames carry the bird left of centre
 	bird.play(&"glide")
 	stage.add_child(bird)
-	BeachUI.label(cell,caption,8,BeachUI.CREAM).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var name_label: Label = BeachUI.label(row,caption,8,BeachUI.CREAM)
+	name_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	name_label.custom_minimum_size.x = 48 # same-width names keep the sprites in one column
 
 func _small(label: Label) -> Label:
 	label.add_theme_font_override("font",HUD_FONT)
@@ -433,9 +429,10 @@ func _build_rival_popup() -> void:
 	row.add_theme_constant_override("separation",4)
 	rival_popup.add_child(row)
 	rival_popup_head = TextureRect.new()
-	rival_popup_head.custom_minimum_size = Vector2(24,24)
+	rival_popup_head.custom_minimum_size = Vector2(16,16) ## the 48 px head crop at exactly 1/3
 	rival_popup_head.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	rival_popup_head.stretch_mode = TextureRect.STRETCH_SCALE
+	rival_popup_head.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	rival_popup_head.size_flags_vertical = Control.SIZE_SHRINK_CENTER ## don't stretch to the wrapped text's height
 	rival_popup_head.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	rival_popup_head.mouse_filter = MOUSE_FILTER_IGNORE
 	row.add_child(rival_popup_head)
