@@ -96,8 +96,7 @@
   "dive": {
     "pull_up_turn_boost": 1.5,
     "windup": 0.15,
-    "cooldown": 0.4,
-    "buffer": 0.3,
+    "cooldown": 0.0,
     "stun": 1.5,
     "invulnerability": 1.0,
     "beak_w": 8,

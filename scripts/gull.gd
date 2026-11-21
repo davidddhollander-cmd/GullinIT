@@ -34,7 +34,6 @@ var direction: Vector2 = Vector2.DOWN
 var facing: float = 1.0
 var timer: float = 0.0
 var cooldown: float = 0.0
-var dive_buffer: float = 0.0 ## a dive pressed during the post-pullup/tumble cooldown, fired when it ends
 var invulnerable: float = 0.0
 var climb: bool = false
 var dive_turn_scale: float = 1.0 ## player touch steering damping; rivals stay 1.0
@@ -403,11 +402,8 @@ func dive(wind_dir: int) -> void:
 		departing_perch = support
 		support = {}
 		state = State.GLIDE
-	if state in [State.GLIDE,State.GROUNDED] and cooldown > 0.0:
-		dive_buffer = float(Config.tuning.dive.buffer) # not dropped: fires as soon as the cooldown ends
 	if state != State.GLIDE or cooldown > 0.0:
 		return
-	dive_buffer = 0.0
 	direction = (aim - position).normalized()
 	if direction.length_squared() < 0.5:
 		direction = Vector2(facing, 1).normalized()
@@ -464,10 +460,6 @@ func tick(delta: float, wind_dir: int, strength: float) -> void:
 	previous_beak = beak()
 	timer -= delta
 	cooldown = maxf(0.0, cooldown - delta)
-	if dive_buffer > 0.0:
-		dive_buffer = maxf(0.0,dive_buffer-delta)
-		if cooldown <= 0.0 and state == State.GLIDE and not rival:
-			dive(wind_dir)
 	stroke_cooldown = maxf(-delta, stroke_cooldown - delta)
 	stroke_started = false
 	if state != State.GLIDE:

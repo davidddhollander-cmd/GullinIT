@@ -246,15 +246,12 @@ static func _rivals(host: Node, check: Callable) -> void:
 	check.call(strokes >= 5, "rivals keep held-flap wingbeats whatever the mode string says")
 	rival.queue_free()
 
-static func _dive_buffer(suite: Node, check: Callable) -> void:
+static func _no_dive_cooldown(suite: Node, check: Callable) -> void:
 	var gull: BeachGull = _airborne(suite, "normal")
-	gull.cooldown = 0.3
+	gull.pullup()
+	gull.aim = gull.position + Vector2(40,60)
 	gull.dive(0)
-	check.call(gull.state == BeachGull.State.GLIDE and gull.dive_buffer > 0.0, "a dive pressed during the cooldown is buffered, not dropped")
-	for i: int in 30:
-		gull.aim = gull.position + Vector2(40,60)
-		gull.tick(DT, 0, 0.0)
-	check.call(gull.state in [BeachGull.State.WINDUP,BeachGull.State.STRIKE], "the buffered dive fires when the cooldown ends")
+	check.call(gull.state == BeachGull.State.WINDUP, "a dive pressed right after a pull-up starts at once: no cooldown")
 	check.call(float(Config.tuning.tumble.impact.min_speed) >= float(Config.tuning.dive.start_speed), "no bump below a fresh dive's start speed")
 
 static func run(suite: Node, check: Callable) -> void:
@@ -264,4 +261,4 @@ static func run(suite: Node, check: Callable) -> void:
 	_realistic(suite, check)
 	await _casual(suite, check)
 	_rivals(suite, check)
-	_dive_buffer(suite, check)
+	_no_dive_cooldown(suite, check)
