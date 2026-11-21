@@ -4,13 +4,17 @@ extends RefCounted
 static func litter_at(position: Vector2) -> Dictionary:
 	return {"owner":null,"source":"bin","bin_x":0.0,"food_id":"","garbage":true,"garbage_kind":"can_red","extra":true,"position":position,"velocity":Vector2.ZERO,"grounded":true,"age":5.0,"rotation":0.0,"angular_velocity":0.0,"rest_angle":0.0}
 
+## Resting litter's centre height: the ground minus half its drawn height.
+static func floor_y(raids: BeachStashRaids) -> float:
+	return float(Config.tuning.world.ground)-float(raids.litter_texture("can_red").get_height())*BeachStashRaids.LITTER_SCALE*0.5
+
 static func run(host: Node, check: Callable) -> void:
 	var game: BeachGame = preload("res://tests/peck_spam_checks.gd").fixture(host)
 	game.stash_raids.bins.clear() # no bin competes for the peck
 	var raids: BeachStashRaids = game.stash_raids
 	var beak: Vector2 = game.player.beak()
-	var ahead: Dictionary = litter_at(Vector2(beak.x+8.0,beak.y))
-	var behind: Dictionary = litter_at(Vector2(beak.x-8.0,beak.y))
+	var ahead: Dictionary = litter_at(Vector2(beak.x+8.0,floor_y(raids)))
+	var behind: Dictionary = litter_at(Vector2(beak.x-8.0,floor_y(raids)))
 	raids.items.append(ahead)
 	raids.items.append(behind)
 	raids.peck_cooldown = 0.0
@@ -30,4 +34,13 @@ static func run(host: Node, check: Callable) -> void:
 	raids.items.erase(behind)
 	raids.items.erase(ahead)
 	check.call(not raids.peck(), "peck with no litter in reach still falls through")
+	# Every playable species can fling floor litter, whatever its beak height (litter rests at ground level, not at the beak).
+	for id: String in Config.species.species.keys():
+		game.player.species = id
+		game.player.refresh_art()
+		var floor_item: Dictionary = litter_at(Vector2(game.player.beak().x+8.0,floor_y(raids)))
+		raids.items.append(floor_item)
+		raids.peck_cooldown = 0.0
+		check.call(raids.peck() and not bool(floor_item.grounded), "%s can peck-fling litter lying on the floor" % id)
+		raids.items.erase(floor_item)
 	game.queue_free()

@@ -112,13 +112,15 @@ func nearby_litter() -> Dictionary:
 	var beak: Vector2 = _gull().beak()
 	var reach: float = float(Config.tuning.world.peck_reach)
 	var tolerance: float = float(Config.tuning.world.litter_peck_vertical_tolerance)
+	# Litter rests on the floor, so measure against the gull's feet; the beak's height above them differs per species art.
+	var floor_y: float = _gull().position.y+float(Config.tuning.flight.feet_offset)
 	var nearest: Dictionary = {}
 	var distance: float = INF
 	for item: Dictionary in items:
 		if not bool(item.get("garbage",false)) or not bool(item.grounded) or bool(item.get("recovered",false)):
 			continue
 		var forward_gap: float = (float(item.position.x)-beak.x)*_gull().facing
-		if forward_gap < 0.0 or forward_gap > reach or absf(float(item.position.y)-beak.y) > tolerance or forward_gap >= distance:
+		if forward_gap < 0.0 or forward_gap > reach or absf(float(item.position.y)-floor_y) > tolerance or forward_gap >= distance:
 			continue
 		distance = forward_gap
 		nearest = item
