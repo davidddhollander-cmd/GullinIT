@@ -97,6 +97,7 @@
     "pull_up_turn_boost": 1.5,
     "windup": 0.15,
     "cooldown": 0.4,
+    "buffer": 0.3,
     "stun": 1.5,
     "invulnerability": 1.0,
     "beak_w": 8,
@@ -133,7 +134,7 @@
     "recovery_time": 0.18,
     "shed_time": 0.5,
     "shed_interval": 0.12,
-    "impact": {"min_speed": 25, "full_speed": 340, "low_force": 0.35, "max_force": 2.5}
+    "impact": {"min_speed": 70, "full_speed": 340, "low_force": 0.35, "max_force": 2.5}
   },
   "wind": {
     "drift": 40,
