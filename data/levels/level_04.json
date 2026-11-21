@@ -1,5 +1,8 @@
 {
   "id": 4,
+  "sky": "overcast",
+  "horizon": "cliffs-cottage",
+  "horizon_x": -20,
   "crabs": {"enabled": true},
   "thumb": "pigeon_b",
   "name": "Feeding Time",

@@ -9,6 +9,13 @@ const HORIZON_Y: float = 94.0
 const HORIZON_START_X: float = 90.0 ## default when a level has no "horizon_x"
 const SKY_Y: float = HORIZON_Y - 80.0
 const SKY_COLOR: Color = Color8(91, 199, 216)
+## Overcast preset (level "sky": "overcast"): muted grey day. Dusk and the squall tint stack on top.
+const SKY_OVERCAST: Color = Color8(163, 177, 184)
+const SUN_OVERCAST: Color = Color(1.0, 1.0, 1.0, 0.07) ## a barely-there pale disc behind the clouds
+const CLOUD_OVERCAST: Color = Color8(201, 207, 210)
+const SEA_OVERCAST: Color = Color(0.8, 0.86, 0.86)
+## Grey haze laid over the sea (modulate alone cannot desaturate it).
+const SEA_HAZE: Color = Color(0.64, 0.7, 0.72, 0.38)
 const SEA_FRAME_TIME: float = 0.15
 const SEA_FRAMES: int = 16
 ## Darkens the sea toward blue under the sunset sky.
@@ -31,18 +38,17 @@ var clouds: CloudLayer
 var horizon: Sprite2D ## optional distant strip (assets/sprites/horizon-v1), null when the level has none
 var horizon_x: float = HORIZON_START_X
 var top_color: Color = SKY_COLOR
+static var flat_sky_overcast: Texture2D
 static var flat_sky: Texture2D ## the plate's 320x80 strip in plain sky colour; the clouds are separate sprites
 
 ## layout: cloud placements from the level ({id, x, y, scale}); empty uses the default arrangement.
-func _init(sunset: bool, layout: Array = [], horizon_id: String = "", start_x: float = HORIZON_START_X) -> void:
+func _init(sunset: bool, layout: Array = [], horizon_id: String = "", start_x: float = HORIZON_START_X, overcast: bool = false) -> void:
 	horizon_x = start_x
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	show_behind_parent = true
 	sky = _sprite("sky-clouds-320x80.png", Vector2(0, SKY_Y))
 	if flat_sky == null:
-		var flat: Image = Image.create(320, 80, false, Image.FORMAT_RGBA8)
-		flat.fill(SKY_COLOR)
-		flat_sky = ImageTexture.create_from_image(flat)
+		flat_sky = _flat(SKY_COLOR)
 	sky.texture = flat_sky
 	sun = _sprite("sun-34x34.png", SUN_DAY_POS)
 	clouds = CloudLayer.new() # after the sun, so clouds pass in front of it
@@ -57,6 +63,12 @@ func _init(sunset: bool, layout: Array = [], horizon_id: String = "", start_x: f
 		horizon.region_rect = Rect2(0, 0, 320, 24)
 		horizon.position = Vector2(0, HORIZON_Y - 24.0)
 		add_child(horizon)
+	if overcast:
+		top_color = SKY_OVERCAST
+		flat_sky_overcast = _flat(SKY_OVERCAST)
+		sky.texture = flat_sky_overcast
+		sun.modulate = SUN_OVERCAST
+		clouds.modulate = CLOUD_OVERCAST
 	var frames := SpriteFrames.new()
 	for index: int in SEA_FRAMES:
 		frames.add_frame(&"default", load(ART + "sea-frame-%02d.png" % (index + 1)))
@@ -65,6 +77,13 @@ func _init(sunset: bool, layout: Array = [], horizon_id: String = "", start_x: f
 	sea.centered = false
 	sea.position = Vector2(0, HORIZON_Y)
 	add_child(sea)
+	if overcast:
+		sea.modulate = SEA_OVERCAST
+		var haze := ColorRect.new()
+		haze.color = SEA_HAZE
+		haze.position = Vector2(0, HORIZON_Y)
+		haze.size = Vector2(320, 60) # sand draws in front of the lower part
+		add_child(haze)
 	birds = BackgroundBirds.new(sunset)
 	add_child(birds)
 	if sunset:
@@ -77,9 +96,14 @@ func _init(sunset: bool, layout: Array = [], horizon_id: String = "", start_x: f
 		var glint := Node2D.new() # after the sea, so it draws over the water
 		glint.draw.connect(_draw_glint.bind(glint))
 		add_child(glint)
-		sea.modulate = SEA_DUSK
+		sea.modulate = SEA_DUSK * (SEA_OVERCAST if overcast else Color.WHITE)
 		if horizon:
 			horizon.modulate = SEA_DUSK
+
+static func _flat(color: Color) -> Texture2D:
+	var flat: Image = Image.create(320, 80, false, Image.FORMAT_RGBA8)
+	flat.fill(color)
+	return ImageTexture.create_from_image(flat)
 
 func _sprite(file: String, at: Vector2) -> Sprite2D:
 	var sprite := Sprite2D.new()
