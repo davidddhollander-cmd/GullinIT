@@ -1,7 +1,7 @@
 # 104 Level rework: Gary in level 3, new level 5 "Dog Day Afternoon"
 
 Assignee: sonnet
-Status: done
+Status: merged
 Depends on: none
 
 ## Goal
