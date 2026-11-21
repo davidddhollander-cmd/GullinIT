@@ -8,6 +8,7 @@
   "authored": true,
   "time_limit": 130,
   "wind": {"dir": -1, "strength": 0.2, "gusts": false, "flip": false},
+  "horizon": "headland-lighthouse",
   "clouds": [{"id": "fair-wisp-01", "x": 40, "y": 24, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-03", "x": 118, "y": 20, "scale": 1.0, "depth": 1.0}, {"id": "fair-wisp-02", "x": 196, "y": 30, "scale": 1.0, "depth": 1.0}, {"id": "fair-medium-03", "x": 90, "y": 54, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-02", "x": 250, "y": 50, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-01", "x": 160, "y": 66, "scale": 1.0, "depth": 0.9}, {"id": "fair-wisp-03", "x": 10, "y": 58, "scale": 1.0, "depth": 0.8}],
   "awareness_mult": 1.1,
   "twist": {"id": "dog_day", "tip": {"id": "shepherd", "text": "OFF THE LEAD: MIND THE SHEPHERD!"}},

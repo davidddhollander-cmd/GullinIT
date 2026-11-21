@@ -26,11 +26,12 @@ var sun: Sprite2D
 var sea: AnimatedSprite2D
 var birds: BackgroundBirds
 var clouds: CloudLayer
+var horizon: Sprite2D ## optional distant strip (assets/sprites/horizon-v1), null when the level has none
 var top_color: Color = SKY_COLOR
 static var flat_sky: Texture2D ## the plate's 320x80 strip in plain sky colour; the clouds are separate sprites
 
 ## layout: cloud placements from the level ({id, x, y, scale}); empty uses the default arrangement.
-func _init(sunset: bool, layout: Array = []) -> void:
+func _init(sunset: bool, layout: Array = [], horizon_id: String = "") -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	show_behind_parent = true
 	sky = _sprite("sky-clouds-320x80.png", Vector2(0, SKY_Y))
@@ -43,6 +44,15 @@ func _init(sunset: bool, layout: Array = []) -> void:
 	clouds = CloudLayer.new() # after the sun, so clouds pass in front of it
 	add_child(clouds)
 	clouds.setup(layout if not layout.is_empty() else Config.tuning.clouds.default_layout, sunset)
+	if horizon_id != "":
+		horizon = Sprite2D.new() # bottom row on y 93, resting on the sea's top row; after the clouds, before the sea
+		horizon.texture = load("res://assets/sprites/horizon-v1/%s-640x24.png" % horizon_id)
+		horizon.centered = false
+		horizon.region_enabled = true
+		horizon.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+		horizon.region_rect = Rect2(0, 0, 320, 24)
+		horizon.position = Vector2(0, HORIZON_Y - 24.0)
+		add_child(horizon)
 	var frames := SpriteFrames.new()
 	for index: int in SEA_FRAMES:
 		frames.add_frame(&"default", load(ART + "sea-frame-%02d.png" % (index + 1)))
@@ -64,6 +74,8 @@ func _init(sunset: bool, layout: Array = []) -> void:
 		glint.draw.connect(_draw_glint.bind(glint))
 		add_child(glint)
 		sea.modulate = SEA_DUSK
+		if horizon:
+			horizon.modulate = SEA_DUSK
 
 func _sprite(file: String, at: Vector2) -> Sprite2D:
 	var sprite := Sprite2D.new()
@@ -76,6 +88,8 @@ func _sprite(file: String, at: Vector2) -> Sprite2D:
 ## Follows the beach clock so the sea and clouds freeze with pause and results. Calm wind (the default) leaves clouds still.
 func update(camera_x: float, time: float, wind_dir: int = 0, wind_strength: float = 0.0) -> void:
 	position.x = roundf(camera_x) - 160.0
+	if horizon: # 0.1x parallax in whole pixels, wrapping at the strip's 640 px
+		horizon.region_rect.position.x = fposmod(roundf(camera_x * 0.1), 640.0)
 	sea.frame = int(time / SEA_FRAME_TIME) % SEA_FRAMES
 	birds.update(time)
 	clouds.update(time, wind_dir, wind_strength)

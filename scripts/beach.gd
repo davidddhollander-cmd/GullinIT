@@ -37,13 +37,14 @@ var font: Font = preload("res://assets/fonts/gull_pixel.fnt")
 ## Generated sky/sun/sea (BeachBackgroundArt) and ground. Off draws the old flat sky and sand; set before setup().
 var use_background_art: bool = true
 var background_art: BeachBackgroundArt
+var horizon: String = "" ## the level's optional "horizon" strip id; set before setup()
 var cloud_layout: Array = [] ## the level's "clouds" placements; set before setup(), empty uses the default arrangement
 
 func setup(entries: Array, zone_entries: Array = [], world_settings: Dictionary = {}) -> void:
 	zones = zone_entries.duplicate(true)
 	world = world_settings.duplicate(true)
 	if use_background_art:
-		background_art = BeachBackgroundArt.new(sunset,cloud_layout)
+		background_art = BeachBackgroundArt.new(sunset,cloud_layout,horizon)
 		add_child(background_art)
 		background_art.update(camera_x,time,wind_dir,strength)
 	for entry: Dictionary in entries:

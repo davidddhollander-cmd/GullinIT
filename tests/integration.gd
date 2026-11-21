@@ -229,6 +229,7 @@ func run() -> void:
 	preload("res://tests/bump_physics_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/art_lab_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/cloud_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/horizon_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/bin_leftover_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/sweeper_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/food_variety_checks.gd").run(self,Callable(self,"check"))
