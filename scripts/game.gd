@@ -171,6 +171,8 @@ func setup(definition: Dictionary, is_casual: bool, force_training: bool = false
 	beach = BeachBackdrop.new()
 	beach.sunset = level.has("sunset")
 	beach.cloud_layout = level.get("clouds",[])
+	beach.horizon = level.get("horizon","")
+	beach.horizon_x = float(level.get("horizon_x",BeachBackgroundArt.HORIZON_START_X))
 	beach.wind_dir = wind.direction
 	beach.strength = wind.strength
 	add_child(beach)
