@@ -965,9 +965,12 @@ func options(from_pause: bool) -> void:
 	if not OS.has_feature("mobile"):
 		var extras: HBoxContainer = HBoxContainer.new()
 		content.add_child(extras)
-		_small_button(extras,"MOUSE: AIMS DIVES" if GameState.mouse_role() == "dive_aim" else "MOUSE: STEERS FLIGHT",func() -> void:
-			GameState.set_mouse_role("steer" if GameState.mouse_role() == "dive_aim" else "dive_aim")
-			options(from_pause)).name = "MouseRoleButton"
+		var keys_fly: bool = GameState.mouse_role() == "dive_aim"
+		var role_button: Button = _small_button(extras,"KEYS FLY / MOUSE AIMS DIVES" if keys_fly else "MOUSE ONLY",func() -> void:
+			GameState.set_mouse_role("steer" if keys_fly else "dive_aim")
+			options(from_pause))
+		role_button.name = "MouseRoleButton"
+		role_button.tooltip_text = "KEYBOARD STEERS FLIGHT, MOUSE AIMS DIVES. CLICK FOR MOUSE ONLY" if keys_fly else "MOUSE STEERS FLIGHT AND DIVES. CLICK FOR KEYS FLY / MOUSE AIMS DIVES"
 		_small_button(extras,"FULLSCREEN / F11",func() -> void: choose("fullscreen"))
 	BeachUI.back_button(content,"SAVE / BACK",func() -> void:
 		GameState.save_progress()

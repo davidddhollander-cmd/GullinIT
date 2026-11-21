@@ -120,13 +120,13 @@ static func run(host: Node, check: Callable) -> void:
 	host.main._navigate("options")
 	await host.settle()
 	var row: Button = host.main.menus.find_child("MouseRoleButton",true,false) as Button
-	check.call(row != null and row.text == "MOUSE: AIMS DIVES", "options row shows MOUSE: AIMS DIVES")
+	check.call(row != null and row.text == "KEYS FLY / MOUSE AIMS DIVES", "options row shows KEYS FLY / MOUSE AIMS DIVES")
 	if row != null:
 		row.pressed.emit()
 		await host.settle()
 		check.call(GameState.mouse_role() == "steer", "options row flips back to steer")
 		row = host.main.menus.find_child("MouseRoleButton",true,false) as Button
-		check.call(row != null and row.text == "MOUSE: STEERS FLIGHT", "options row then reads MOUSE: STEERS FLIGHT")
+		check.call(row != null and row.text == "MOUSE ONLY", "options row then reads MOUSE ONLY")
 		row.pressed.emit()
 		await host.settle()
 		check.call(GameState.mouse_role() == "dive_aim", "options row flips to dive_aim")
