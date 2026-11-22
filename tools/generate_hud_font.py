@@ -30,6 +30,7 @@ GLYPHS = {
     "-":"000/000/111/000/000", "+":"000/010/111/010/000",
     ".":"0/0/0/0/1", ":":"0/1/0/1/0", "!":"1/1/1/0/1",
     "?":"111/001/010/000/010", " ":"0/0/0/0/0",
+    "=":"000/111/000/111/000", ",":"00/00/00/00/01/10",
 }
 GLYPHS.update({letter.lower():glyph for letter,glyph in list(GLYPHS.items()) if letter.isalpha()})
 image = Image.new("RGBA",(128,((len(GLYPHS)+15)//16)*8),(0,0,0,0))
@@ -47,7 +48,7 @@ for index,(character,glyph) in enumerate(GLYPHS.items()):
             if bit=="1":
                 image.putpixel((x+dx,y+dy),(255,255,255,255))
     advance = 3 if character==" " else width+1
-    lines.append(f'char id={ord(character)} x={x} y={y} width={width} height=5 xoffset=0 yoffset=0 xadvance={advance} page=0 chnl=15')
+    lines.append(f'char id={ord(character)} x={x} y={y} width={width} height={len(rows)} xoffset=0 yoffset=0 xadvance={advance} page=0 chnl=15')
 image.save(OUT / "gull_hud.png")
 (OUT / "gull_hud.fnt").write_text("\n".join(lines)+"\n",encoding="utf-8")
 print("Saved native 6 px HUD font and atlas.")
