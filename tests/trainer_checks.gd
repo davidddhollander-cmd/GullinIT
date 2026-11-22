@@ -187,8 +187,8 @@ static func _aim_pause(host: Node, check: Callable, game: BeachGame) -> void:
 	game.player.direction = -game.player.direction
 	check.call(not game.aim_lines_up(),"a line pointing away does not")
 	game.player.direction = chosen
-	var press: InputEventKey = InputEventKey.new()
-	press.physical_keycode = KEY_SHIFT
+	var press: InputEventAction = InputEventAction.new()
+	press.action = "dive"
 	press.pressed = true
 	game._unhandled_input(press)
 	check.call(not game.aim_pause,"pressing dive again launches")
@@ -556,7 +556,7 @@ static func _counter_flow(host: Node, check: Callable) -> void:
 	await host.snapshot("trainer-counter-tip")
 	var input: GullInput = game.input
 	_set_device(input,"keyboard")
-	check.call(game.overlay.prompt_text() == "DIVE! SHIFT/RIGHT CLICK","the keyboard prompt names Shift")
+	check.call(game.overlay.prompt_text() == "DIVE! RIGHT CLICK","the keyboard prompt names right click")
 	_set_device(input,"gamepad")
 	check.call(game.overlay.prompt_text() == "DIVE! B","the gamepad prompt names B")
 	_set_device(input,"touch")
@@ -567,8 +567,8 @@ static func _counter_flow(host: Node, check: Callable) -> void:
 	stray.pressed = true
 	game._unhandled_input(stray)
 	check.call(game.peck_pause,"a peck press does not dismiss the dive prompt")
-	var press: InputEventKey = InputEventKey.new()
-	press.physical_keycode = KEY_SHIFT
+	var press: InputEventAction = InputEventAction.new()
+	press.action = "dive"
 	press.pressed = true
 	game._unhandled_input(press)
 	check.call(not game.peck_pause and not game.counter_tip and gull.state in [BeachGull.State.WINDUP,BeachGull.State.STRIKE],"pressing dive resumes the beach and starts the dive")

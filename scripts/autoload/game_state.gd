@@ -265,6 +265,15 @@ func set_mouse_role(id: String) -> void:
 	key_flight = false
 	save_progress()
 
+## The first-run controls chooser has been answered (saves that already picked a mouse role count).
+func controls_chosen() -> bool:
+	return bool(options.get("controls_chosen",false)) or bool(options.get("mouse_role_set",false))
+
+## The chooser's answer: "steer" (mouse only) or "dive_aim" (keyboard + mouse). Saves.
+func choose_controls(id: String) -> void:
+	options.controls_chosen = true
+	set_mouse_role(id)
+
 const CONTROL_MODES: Array[String] = ["realistic","normal","casual"]
 
 ## How hard flying and snatching are: realistic taps every wingbeat, casual pecks dives for you.

@@ -141,7 +141,7 @@ func run() -> void:
 			DirAccess.remove_absolute("res://test-output/" + stale)
 	GameState.save_path = "res://test-output/integration-save.json"
 	# The autoload loaded the player's real save; pin the options the checks depend on.
-	GameState.options.merge({"shake": true, "touch": false, "gull": "herring", "stats": true, "dev_player": false},true)
+	GameState.options.merge({"shake": true, "touch": false, "gull": "herring", "stats": true, "dev_player": false, "controls_chosen": true},true)
 	for key: String in ["player_name","mouse_role","mouse_role_set","assist","control_mode","dive_steer","perk"]:
 		GameState.options.erase(key)
 	GameState.wallet = {}
@@ -324,6 +324,7 @@ func run() -> void:
 	await preload("res://tests/demo_polish_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/touch_stick_checks.gd").run(self,Callable(self,"check"))
 	await preload("res://tests/mouse_role_checks.gd").run(self,Callable(self,"check"))
+	await preload("res://tests/controls_chooser_checks.gd").run(self,Callable(self,"check"))
 	var model: BeachScore = BeachScore.new()
 	check(model.snatch(10,false,false,false)==10,"first snatch")
 	check(model.snatch(20,true,true,true)==66,"additive bonuses before combo")

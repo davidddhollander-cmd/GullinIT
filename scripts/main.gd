@@ -8,6 +8,7 @@ var vs: bool = false ## picking a gull leads to the VS menu instead of the level
 var current_level: int = 1
 var vs_round: Dictionary = {} ## {arena, opponent} of the VS round being played, for REMATCH and R
 var screen: String = "title"
+var chooser: CanvasLayer ## the first-run controls chooser while it is open
 var quitting: bool = false
 var _pagehide: JavaScriptObject
 var _visibility: JavaScriptObject
@@ -103,6 +104,8 @@ func _process(delta: float) -> void:
 		background.tick(delta)
 
 func _navigate(action: String, payload: Variant = null) -> void:
+	if action != "fullscreen":
+		close_controls_chooser()
 	for node: CanvasItem in _scenery:
 		if is_instance_valid(node):
 			node.visible = action not in ["practice", "gull_practice", "select"] # the gull cycler stays on the Practice menu
@@ -255,7 +258,36 @@ func _quit() -> void:
 	await get_tree().create_timer(0.1).timeout
 	get_tree().quit()
 
+## First-run controls chooser: desktop keyboard + mouse only (not touch, not with a pad connected), once per save.
+func needs_controls_choice() -> bool:
+	return not GameState.controls_chosen() and not DisplayServer.is_touchscreen_available() and not bool(GameState.options.touch) and Input.get_connected_joypads().is_empty()
+
+## Shows the chooser over the beach backdrop BEFORE the game scene exists, so no clock or intro runs under it.
+## Returns true if it was opened (the run starts from `then` once a panel is clicked), false if not needed.
+func _ask_controls(then: Callable) -> bool:
+	if not needs_controls_choice():
+		return false
+	close_controls_chooser()
+	screen = "controls"
+	menus.hide()
+	background.show()
+	chooser = preload("res://scripts/controls_chooser.gd").new()
+	chooser.chosen.connect(func(role: String) -> void:
+		GameState.choose_controls(role)
+		close_controls_chooser()
+		then.call())
+	add_child(chooser)
+	return true
+
+func close_controls_chooser() -> void:
+	if is_instance_valid(chooser):
+		remove_child(chooser)
+		chooser.queue_free()
+	chooser = null
+
 func start_level(id: int, force_training: bool = false, force_lesson: bool = false) -> void:
+	if _ask_controls(start_level.bind(id,force_training,force_lesson)):
+		return
 	current_level = id
 	vs_round = {}
 	_start_game(Config.levels[id-1],force_training,force_lesson)
@@ -268,6 +300,8 @@ func start_vs(arena_id: String, opponent_ids: Array) -> void:
 		if Config.vs.opponents.has(str(id)) and str(id) not in ids and ids.size() < int(Config.vs.max_opponents):
 			ids.append(str(id))
 	if not Config.arenas.has(arena_id) or ids.is_empty():
+		return
+	if _ask_controls(start_vs.bind(arena_id,opponent_ids)):
 		return
 	var round_level: Dictionary = Config.arenas[arena_id].duplicate(true)
 	round_level.rivals = ids.map(func(id: String) -> Dictionary: return Config.vs.opponents[id].duplicate(true))

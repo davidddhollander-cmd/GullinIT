@@ -4,7 +4,7 @@
   "keys": {
     "keyboard": {
       "flap": "W/Up/left click",
-      "dive": "Shift/right click",
+      "dive": "right click",
       "peck": "E/middle click",
       "peck_alt": "E/middle click",
       "steer": "the mouse/A S D",
@@ -43,6 +43,27 @@
     "rows": [["FLY UP", "{flap}"], ["DIVE", "{dive}"], ["PECK", "{peck}"], ["STEER", "{steer}"]],
     "mouse_steer": "MOUSE STEERS THE GULL",
     "mouse_aim": "KEYS FLY / MOUSE AIMS DIVES"
+  },
+  "controls_chooser": {
+    "title": "HOW DO YOU WANT TO PLAY?",
+    "mouse": {
+      "name": "MOUSE ONLY",
+      "flap": "FLAP",
+      "dive": "DIVE",
+      "peck": "PECK",
+      "body": "MOVE: FLY + DIVE",
+      "note": "MOUSE STEERS FLYING AND DIVING"
+    },
+    "keys": {
+      "name": "KEYBOARD + MOUSE",
+      "flap": "FLAP",
+      "steer": "STEER",
+      "drop": "DROP",
+      "dive": "DIVE",
+      "peck": "PECK OR E",
+      "body": "AIM DIVES",
+      "note": "ARROWS FLY / MOUSE AIMS DIVES"
+    }
   },
   "toasts": [
     "Nice one!",

@@ -18,7 +18,7 @@ Import `project.godot` into Godot and press F6 on `scenes/main.tscn`, or F5 to r
 | --- | --- | --- |
 | Aim | Mouse, WASD, or Left/Right/Down arrows (W and Up arrow aim up) | Left stick |
 | Climb | Hold Space or left mouse | Hold A |
-| Dive | Right mouse or Shift | B |
+| Dive | Right mouse | B |
 | Peck during a dive / nearby stash or toddler food on foot | Tap E | Tap X |
 | Pause / resume | Escape or HUD pause button | Start |
 | Restart | R | Back |

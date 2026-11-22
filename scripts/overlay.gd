@@ -360,7 +360,7 @@ func _small(label: Label) -> Label:
 	label.add_theme_font_size_override("font_size",TOP_BAR_FONT_SIZE)
 	return label
 
-## The frozen prompt's words: PRESS E before the first swoop's peck, DIVE! SHIFT on the counter snatch lesson.
+## The frozen prompt's words: PRESS E before the first swoop's peck, DIVE! on the counter snatch lesson.
 func prompt_text() -> String:
 	var key: String = str(Config.trainer.keys[TrainerScript.device(game.input)][game.prompt_action]).split(" or ")[0].to_upper()
 	if game.prompt_action == "peck":
