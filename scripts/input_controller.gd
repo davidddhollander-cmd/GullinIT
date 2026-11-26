@@ -50,7 +50,7 @@ static func on_peck_button(point: Vector2) -> bool:
 	return point.distance_to(PECK_CENTER) <= PECK_RADIUS + TOUCH_SLOP
 
 static func register_actions() -> void:
-	var keys: Dictionary = {"climb":[KEY_W,KEY_UP],"dive":[],"pause":[KEY_ESCAPE],"restart":[KEY_R],"slowmo":[KEY_Q],"fullscreen":[KEY_F11],"debug":[KEY_F1],"reload":[KEY_F2],"aim_left":[KEY_A,KEY_LEFT],"aim_right":[KEY_D,KEY_RIGHT],"aim_up":[],"aim_down":[KEY_S,KEY_DOWN]}
+	var keys: Dictionary = {"climb":[KEY_W,KEY_UP],"dive":[],"pause":[KEY_ESCAPE],"restart":[],"slowmo":[KEY_Q],"fullscreen":[KEY_F11],"debug":[KEY_F1],"reload":[KEY_F2],"aim_left":[KEY_A,KEY_LEFT],"aim_right":[KEY_D,KEY_RIGHT],"aim_up":[],"aim_down":[KEY_S,KEY_DOWN]}
 	for action: String in keys:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action,0.2)

@@ -178,7 +178,7 @@ func _build() -> void:
 			_add_button(actions, "NEXT >", "start", int(level.id) + 1)
 		elif demo_finished() and not GameState.feedback_url().is_empty():
 			_add_button(actions, "FEEDBACK", "feedback")
-		_add_button(actions, "RETRY / R", "restart")
+		_add_button(actions, "RETRY", "restart")
 		_add_button(actions, "LEVELS", "select")
 	for button: Button in buttons:
 		button.disabled = true
