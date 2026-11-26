@@ -153,6 +153,16 @@ func complete_screech_lesson() -> void:
 	progress["2"] = previous
 	save_progress()
 
+## The one-time awareness tip (a shopper's bar fills for the first time), stored on level 2's entry.
+func awareness_tip_seen() -> bool:
+	return bool(entry(2).get("awareness_tip_seen", false))
+
+func mark_awareness_tip() -> void:
+	var previous: Dictionary = entry(2)
+	previous.awareness_tip_seen = true
+	progress["2"] = previous
+	save_progress()
+
 ## The one-time counter tip (the first serving seen on a counter), stored on level 3's entry. Saves from the old counter lesson count as seen.
 func counter_tip_seen() -> bool:
 	var previous: Dictionary = entry(3)

@@ -806,6 +806,7 @@ func _physics_process(delta: float) -> void:
 	beach.tick(step)
 	overlay.queue_redraw()
 	_counter_tip_check()
+	_awareness_tip_check()
 	if practice:
 		_practice_tick(step)
 	if training:
@@ -2060,6 +2061,24 @@ func screech_lesson_target() -> Vector2:
 	if _mug_step():
 		return training_dummy().gull.position
 	return Vector2(-1000,-1000)
+
+# --- Awareness tip (level 2: first time a shopper's bar fills) -----------------------------
+
+## One card, once: the first time a shopper on screen has half-spotted the gull, explain the bar over their head.
+func _awareness_tip_check() -> void:
+	if int(level.id) != 2 or not trainer_cards or not running or intro > 0 or peck_pause or trainer_open or training or screech_lesson or GameState.awareness_tip_seen():
+		return
+	var offset: Vector2 = Vector2(camera_x-160,camera_y-90)
+	for target: BeachTarget in spawner.targets:
+		if not is_instance_valid(target) or target.alert < 0.5:
+			continue
+		var at: Vector2 = target.position-offset
+		if at.x < 8.0 or at.x > 312.0:
+			continue
+		GameState.mark_awareness_tip()
+		var tip: Dictionary = Config.trainer.awareness_tip
+		open_trainer({"mood": tip.mood, "lay": tip.lay, "how": tip.how, "lay_source": "awareness_tip.lay", "how_source": "awareness_tip.how", "lay_template": tip.lay, "how_template": tip.how, "button": Config.trainer.lesson_button, "counter": tip.counter})
+		return
 
 # --- Counter tip (first serving seen on a counter) -------------------------------------------
 

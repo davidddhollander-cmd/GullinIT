@@ -36,7 +36,7 @@ static func _spawn(game: BeachGame, x: float) -> BeachSweeper:
 ## Task 071: he always starts just off a screen edge, never on it, and runs in along the ground to his range.
 static func _entry_checks(suite: Node, check: Callable) -> void:
 	var t: Dictionary = Config.tuning.sweeper
-	var game: BeachGame = _start(suite,2)
+	var game: BeachGame = _start(suite,3)
 	var visits: SweeperVisits = game.sweeper_visits
 	var gull: BeachGull = game.player
 	var half: float = visits._half_width()
@@ -92,9 +92,9 @@ static func run(suite: Node, check: Callable) -> void:
 	# Level gating and visit schedule.
 	var game: BeachGame = _start(suite,1)
 	check.call(not game.sweeper_visits.enabled,"levels without a sweeper block never schedule him")
-	game = _start(suite,2)
+	game = _start(suite,3)
 	var visits: SweeperVisits = game.sweeper_visits
-	check.call(visits.enabled and not is_instance_valid(visits.sweeper),"level 2 schedules a sweeper but he starts absent")
+	check.call(visits.enabled and not is_instance_valid(visits.sweeper),"level 3 schedules a sweeper but he starts absent")
 	game.player.position.x = 300.0
 	visits.tick(float(t.first_arrival)-1.0,true)
 	check.call(not is_instance_valid(visits.sweeper),"no sweeper before the first arrival time")
@@ -104,7 +104,7 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(sweeper.position.x >= float(t.range[0])-20.0 and sweeper.position.x <= float(t.range[1])+20.0,"sweeper enters at the sand edge of his range")
 	sweeper.queue_free()
 	# Early call by litter: more than call_litter items, not exactly call_litter.
-	game = _start(suite,2)
+	game = _start(suite,3)
 	visits = game.sweeper_visits
 	visits.wait = 9999.0
 	visits.absent = float(t.call_min_absence)
@@ -128,7 +128,7 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(BeachSweeper.is_sweepable(_item(100.0)),"settled unowned grounded food is sweepable")
 	check.call(not BeachSweeper.is_sweepable(owned) and not BeachSweeper.is_sweepable(airborne) and not BeachSweeper.is_sweepable(young) and not BeachSweeper.is_sweepable(far) and not BeachSweeper.is_sweepable(swept),"owned, falling, fresh, out-of-range and already-swept items are skipped")
 	# Warn, windup, swat; a hit is the ordinary stun.
-	game = _start(suite,2)
+	game = _start(suite,3)
 	var gull: BeachGull = game.player
 	gull.position = Vector2(300.0,gull.ground_y())
 	gull.land()
@@ -148,7 +148,7 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(absf(gull.velocity.x) >= float(t.knock_speed)*0.9 and gull.velocity.y < 0.0,"a hit knocks the gull back much harder than a normal tumble")
 	check.call(sweeper.cooldown > 0.0,"after a hit his cooldown starts")
 	# Rivals are marks too: a low rival is warned and swatted while the player stays high.
-	game = _start(suite,2)
+	game = _start(suite,3)
 	game.pending_rivals = Config.levels[2].rivals.duplicate(true) # Gary now debuts in level 3; the sweeper treats any rival as a mark
 	game._release_rivals()
 	var rival: BeachGull = game.pilots[0].gull
@@ -165,7 +165,7 @@ static func run(suite: Node, check: Callable) -> void:
 	_run_for(sweeper,game.player,0.7)
 	check.call(rival.state == BeachGull.State.STUNNED and game.player.state != BeachGull.State.STUNNED,"his swing lands on the rival he chased, not on the far-off player")
 	# Rising out of reach during the windup avoids the swing.
-	game = _start(suite,2)
+	game = _start(suite,3)
 	gull = game.player
 	gull.position = Vector2(300.0,gull.ground_y())
 	gull.land()
@@ -186,7 +186,7 @@ static func run(suite: Node, check: Callable) -> void:
 	check.call(sweeper.state == BeachSweeper.State.PATROL,"the cooldown stops him warning again straight away")
 	sweeper.queue_free()
 	# Sweeping into the closest bin.
-	game = _start(suite,2)
+	game = _start(suite,3)
 	gull = game.player
 	gull.position = Vector2(600.0,float(Config.tuning.world.ground)-120.0)
 	var bin: Dictionary = {}
