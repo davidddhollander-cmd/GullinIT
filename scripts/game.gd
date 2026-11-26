@@ -150,6 +150,7 @@ var screech_fly_age: float = 0.0
 var mug_wait: float = 0.0 ## seconds, counted from when the special has finished, until the sparring gull shows up (data/trainer.json screech.mug_delay)
 # The counter tip: the first serving a player sees on a counter freezes the beach once, rings the food and names the dive key.
 var counter_tip: bool = false
+var awareness_tip_due: bool = false ## the player was swatted: show the awareness tip as soon as cards are free
 var counter_tip_pos: Vector2 = Vector2.ZERO
 
 ## A VS round: Scrap Sands against one opponent, won on points. No quests, stars, Feathers, lessons or progress.
@@ -519,6 +520,7 @@ func _wire_target(target: BeachTarget) -> void:
 		stalls.bind(target)
 	target.snatched.connect(_snatched)
 	target.cried.connect(_cry)
+	target.swatted_gull.connect(func(gull: BeachGull) -> void: awareness_tip_due = awareness_tip_due or gull == player)
 	target.whistled.connect(_whistle)
 	target.food_knocked.connect(_food_knocked)
 
@@ -2073,16 +2075,20 @@ func _awareness_tip_check() -> void:
 	if int(level.id) != 2 or not trainer_cards or not running or intro > 0 or peck_pause or trainer_open or training or screech_lesson or GameState.awareness_tip_seen():
 		return
 	var offset: Vector2 = Vector2(camera_x-160,camera_y-90)
+	var due: bool = awareness_tip_due
 	for target: BeachTarget in spawner.targets:
-		if not is_instance_valid(target) or target.alert < 0.5:
+		if due:
+			break
+		if not is_instance_valid(target):
 			continue
 		var at: Vector2 = target.position-offset
-		if at.x < 8.0 or at.x > 312.0:
-			continue
-		GameState.mark_awareness_tip()
-		var tip: Dictionary = Config.trainer.awareness_tip
-		open_trainer({"mood": tip.mood, "lay": tip.lay, "how": tip.how, "lay_source": "awareness_tip.lay", "how_source": "awareness_tip.how", "lay_template": tip.lay, "how_template": tip.how, "button": Config.trainer.lesson_button, "counter": tip.counter})
+		due = target.alert >= 0.5 and at.x >= 8.0 and at.x <= 312.0
+	if not due:
 		return
+	awareness_tip_due = false
+	GameState.mark_awareness_tip()
+	var tip: Dictionary = Config.trainer.awareness_tip
+	open_trainer({"mood": tip.mood, "lay": tip.lay, "how": tip.how, "lay_source": "awareness_tip.lay", "how_source": "awareness_tip.how", "lay_template": tip.lay, "how_template": tip.how, "button": Config.trainer.lesson_button, "counter": tip.counter})
 
 # --- Counter tip (first serving seen on a counter) -------------------------------------------
 

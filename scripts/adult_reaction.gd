@@ -188,5 +188,6 @@ func _hit(owner: BeachTarget) -> void:
 		if owner.kind in ["pier_diner","lifeguard","kiosk_customer"]:
 			owner.action_pose_time = 0.28
 		focus.swatted(-1.0,owner.position)
+		owner.swatted_gull.emit(focus)
 		Audio.react("swat",owner.voice_kind(),owner)
 		owner.mum_swat_time = 0.25

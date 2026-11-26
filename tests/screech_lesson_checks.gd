@@ -117,6 +117,9 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	game._screech_lesson_tick(0.016)
 	check.call(game.screech_lesson and game.screech_step == BeachGame.SCREECH_MUG_STEP and not bool(GameState.entry(2).get("screech_lesson_complete", false)), "firing Gang Call moves on to the mug step instead of ending the lesson")
 	check.call(game.training_dummy() == null and game.screech_lesson_text().contains("Get ready") and game.screech_lesson_target().x < -500.0, "no sparring gull right after the special, and the strip does not ring a missing target")
+	game._screech_lesson_tick(float(Config.trainer.screech.mug_delay) + 1.0)
+	check.call(game.training_dummy() == null, "the mug delay does not count down while the gang is still flying")
+	game.brash.allies.clear() # the gang has finished
 	game._screech_lesson_tick(float(Config.trainer.screech.mug_delay) - 0.5)
 	check.call(game.training_dummy() == null, "the sparring gull is still away just before the mug delay is up")
 	game._screech_lesson_tick(0.6)
@@ -228,6 +231,7 @@ static func _lesson_checks(host: Node, check: Callable) -> void:
 	game.start_slowmo()
 	game._screech_lesson_tick(0.016)
 	check.call(game.screech_step == BeachGame.SCREECH_MUG_STEP, "the lesson reaches the mug step")
+	game.brash.allies.clear()
 	game._screech_lesson_tick(float(Config.trainer.screech.mug_delay) + 0.1)
 	dummy = game.training_dummy()
 	dummy.dummy_food = ""

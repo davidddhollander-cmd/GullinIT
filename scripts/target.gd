@@ -2,6 +2,7 @@ class_name BeachTarget
 extends Node2D
 signal snatched(target: BeachTarget, gull: BeachGull, risky: bool)
 signal cried(target: BeachTarget)
+signal swatted_gull(gull: BeachGull) ## a shopper or bystander swatted this gull
 signal whistled(target: BeachTarget)
 signal departed(target: BeachTarget)
 signal food_knocked(target: BeachTarget, food_id: String, at: Vector2, impulse: Vector2)
@@ -666,6 +667,7 @@ func _tick_defense(delta: float, gulls: Array[BeachGull]) -> void:
 			if kind == "picnic_family" and gull.state != BeachGull.State.STUNNED and not gull.untargetable():
 				mum_swat_time = 0.25
 			gull.swatted(-1.0,position)
+			swatted_gull.emit(gull)
 	if windup >= 0:
 		windup -= delta
 	if not seen:
