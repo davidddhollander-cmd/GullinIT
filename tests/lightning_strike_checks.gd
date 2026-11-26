@@ -295,7 +295,9 @@ static func _charge_checks(host: Node, check: Callable) -> void:
 	Engine.time_scale = 1.0
 	var herring: BeachGame = Shake.fixture(host,"herring")
 	herring.brash.add(5.0)
-	check.call(herring.brash.max_charges() == 1 and is_equal_approx(herring.brash.meter,1.0),"a one-charge power still clamps at 1")
+	check.call(herring.brash.max_charges() == 2 and is_equal_approx(herring.brash.meter,2.0),"a two-charge power clamps at 2")
+	herring.brash.fire()
+	check.call(herring.brash.allies.size() == int(herring.player.species_stats().power.allies) * 2,"two banked charges double the Gang Call")
 	herring.queue_free()
 
 static func _other_species_checks(host: Node, check: Callable) -> void:

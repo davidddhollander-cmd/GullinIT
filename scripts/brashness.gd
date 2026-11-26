@@ -14,6 +14,7 @@ var dust_clock: float = 0.0
 var hits: int = 0
 var active_id: String = "" ## the running timed power ("" when none)
 var active_left: float = 0.0
+var active_total: float = 1.0 ## the running timed power's full length (duration x banked charges spent)
 var powers_fired: int = 0
 var shakedown: BeachShakedown = BeachShakedown.new()
 var lightning: BeachLightning = BeachLightning.new()
@@ -33,7 +34,7 @@ func is_full() -> bool:
 
 ## Overlay: how full the running power's bar is, and its text.
 func active_fraction() -> float:
-	return lightning.fraction() if active_id == "lightning_strike" else active_left/float(power().get("duration",1.0))
+	return lightning.fraction() if active_id == "lightning_strike" else active_left/maxf(active_total,0.001)
 
 func active_label() -> String:
 	return lightning.label() if active_id == "lightning_strike" else "%.1f" % active_left
@@ -85,7 +86,8 @@ func fire() -> bool:
 	game.track("power_fired",{"power":str(p.id),"level":int(game.level.get("id",0))})
 	if str(p.id) == "shakedown":
 		active_id = "shakedown"
-		active_left = float(p.duration)
+		active_left = float(p.duration)*spent # each banked charge adds a full duration
+		active_total = active_left
 		shakedown.start(self)
 	elif str(p.id) == "lightning_strike":
 		active_id = "lightning_strike"
@@ -93,10 +95,10 @@ func fire() -> bool:
 		lightning.charges_spent = spent
 		lightning.start(self)
 	else:
-		_gang_call(p)
+		_gang_call(p,spent)
 	return true
 
-func _gang_call(p: Dictionary) -> void:
+func _gang_call(p: Dictionary, spent: int = 1) -> void:
 	CrowdPanic.warn(game.spawner.targets,game.player.position.x)
 	for target: BeachTarget in game.spawner.targets:
 		if is_instance_valid(target) and target.panic.state == CrowdPanic.State.LOOK_UP:
@@ -109,17 +111,26 @@ func _gang_call(p: Dictionary) -> void:
 		if game.snatchable(target) and absf(target.position.x-game.camera_x) < 170.0:
 			targets.append(target)
 	targets.sort_custom(func(a: BeachTarget, b: BeachTarget) -> bool: return absf(a.position.x-game.player.position.x) < absf(b.position.x-game.player.position.x))
-	for i: int in int(p.allies):
-		var side: float = -1.0 if i%2 == 0 else 1.0
+	var count: int = int(p.allies)*spent # each banked charge brings a full gang
+	# The whole gang enters from one upper corner in a tight bunch (travelling the way the player faces), then fans out onto separate snacks.
+	var side: float = 1.0 if game.player.facing >= 0 else -1.0
+	var hits: Array[Vector2] = []
+	for i: int in count:
 		var target: BeachTarget = targets[i] if i < targets.size() else null
-		var hit: Vector2 = target.food_position() if target != null else Vector2(game.camera_x+(i-1)*70.0,_sand_y())
+		hits.append(target.food_position() if target != null else Vector2(game.camera_x+(i-1)*70.0,_sand_y()))
+	var centre: float = 0.0
+	for hit: Vector2 in hits:
+		centre += hit.x/count
+	for i: int in count:
+		var target: BeachTarget = targets[i] if i < targets.size() else null
+		var hit: Vector2 = hits[i]
 		var gull: BeachGull = BeachGull.new()
 		gull.species = "herring"
 		gull.state = BeachGull.State.GLIDE
 		gull.z_index = 4
 		gull.visible = false
 		game.add_child(gull)
-		var start: Vector2 = Vector2(hit.x-side*120.0,-20.0)
+		var start: Vector2 = Vector2(centre-side*float(tuning().gang_entry_px)+float(i%3)*-side*9.0,-70.0-float(i%2)*8.0)
 		gull.position = start
 		allies.append({"gull":gull,"target":target,"start":start,"hit":hit,"end":Vector2(hit.x+side*140.0,-30.0),"t":-lead-float(p.stagger)*i,"knocked":false})
 
@@ -175,13 +186,17 @@ func tick(delta: float) -> void:
 			_steer(ally,delta)
 		var from: Vector2 = ally.start if plunge else ally.hit
 		var to: Vector2 = ally.hit if plunge else ally.end
-		var control: Vector2 = Vector2(to.x,from.y) if plunge else Vector2(from.x,to.y)
+		# The dive bends flat at the food (pull-up just before the sand) and the climb leaves flat: one smooth swoop.
+		var heading: float = signf(ally.end.x-ally.start.x)
+		var bend: float = float(tuning().pullup_px)
+		var control: Vector2 = Vector2(to.x-heading*bend,to.y) if plunge else Vector2(from.x+heading*bend,from.y)
 		gull.position = from.lerp(control,u).lerp(control.lerp(to,u),u)
 		gull.velocity = (gull.position-before)/maxf(delta,0.001)
 		gull.facing = 1 if gull.velocity.x >= 0.0 else -1
 		gull.sprite.flip_h = gull.facing < 0
-		gull.sprite.play(&"dive" if plunge and u > 0.45 else &"fly")
-		gull.sprite.rotation = clampf(gull.velocity.angle() if gull.facing > 0 else gull.velocity.angle()-PI,-1.2,1.2) if plunge and u > 0.45 else 0.0
+		var diving: bool = plunge and u > 0.3 and u < 0.85
+		gull.sprite.play(&"dive" if diving else &"fly")
+		gull.sprite.rotation = clampf(gull.velocity.angle() if gull.facing > 0 else gull.velocity.angle()-PI,-1.2,1.2) if diving else 0.0
 		if not plunge and not ally.knocked:
 			ally.knocked = true
 			if not panic_started:

@@ -147,7 +147,7 @@ const DUMMY_EXIT_DELAY: float = 1.2 ## seconds the sparring gull lingers after t
 const SCREECH_FLY_TIME: float = 3.0 ## the scripted fly-in always lands on the sign after this long
 var screech_landing: bool = false ## level 2's opening fly-in: the gull glides onto the sign by itself, input ignored
 var screech_fly_age: float = 0.0
-var mug_wait: float = 0.0 ## seconds until the sparring gull shows up after the special fires (data/trainer.json screech.mug_delay)
+var mug_wait: float = 0.0 ## seconds, counted from when the special has finished, until the sparring gull shows up (data/trainer.json screech.mug_delay)
 # The counter tip: the first serving a player sees on a counter freezes the beach once, rings the food and names the dive key.
 var counter_tip: bool = false
 var counter_tip_pos: Vector2 = Vector2.ZERO
@@ -984,6 +984,9 @@ func _peck_pressed() -> bool:
 		peck_hold_elapsed = 0.0
 		player.aim = player.position
 		return true
+	if player.state == BeachGull.State.GLIDE and not brash.active() and brash.is_full() and str(brash.power().id) != "gang_call":
+		brash.fire() # in flight a peck press has no other use, so it fires Shakedown / Lightning Strike (Q works anywhere too)
+		return false
 	_peck()
 	return false
 
@@ -2020,7 +2023,8 @@ func _screech_lesson_tick(delta: float) -> void:
 	if screech_landing:
 		return
 	if mug_wait > 0.0:
-		mug_wait -= delta
+		if brash.allies.is_empty() and brash.active_id.is_empty(): # the countdown starts once the special has finished
+			mug_wait -= delta
 		if mug_wait <= 0.0:
 			_training_dummy_setup()
 			if trainer_cards:
