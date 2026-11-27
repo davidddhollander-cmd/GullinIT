@@ -1,6 +1,6 @@
 # 041 — Unwire the beach bucket prop from the main build
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: none
