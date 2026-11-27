@@ -36,7 +36,6 @@
     {"type": "kiosk_customer", "x": 865, "food_id": "ice_cream", "appearance": "shopper_mullet", "station": "ice_cream", "patrol_radius": 10}
   ],
   "props": [
-    {"type": "beach_bucket", "x": 110, "y": 146},
     {"type": "beach_palm", "x": 436, "y": 148, "flip": true, "scale": 0.903226},
     {"type": "beach_ball", "x": 610, "y": 146},
     {"type": "bin", "x": 22},
