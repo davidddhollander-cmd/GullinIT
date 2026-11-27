@@ -3,6 +3,7 @@ var game: BeachGame
 var menus: BeachMenus
 var background: BeachBackdrop
 var _scenery: Array[CanvasItem] = []
+var _next_title_daytime: bool = false
 var casual: bool = false
 var vs: bool = false ## picking a gull leads to the VS menu instead of the level select
 var current_level: int = 1
@@ -19,50 +20,7 @@ func _ready() -> void:
 		get_tree().root.content_scale_stretch = Window.CONTENT_SCALE_STRETCH_FRACTIONAL ## fill the itch frame with no black border; native runs keep crisp integer scaling
 	if OS.is_debug_build():
 		add_child(TextEditTool.new()) # F3: edit any on-screen text and copy the changes
-	background = BeachBackdrop.new()
-	add_child(background)
-	background.sunset = true
-	background.strength = 0.12 # a lighter breeze than the beach default (0.3): the menu clouds drift slowly
-	# Only x >= ~207 shows beside the menu panel. Hut, castle and palm sit further back (y 142-148);
-	# sunbathers and towels draw above every prop (z 3).
-	background.setup([
-		{"type":"beach_hut","x":240,"y":148},{"type":"beach_castle","x":310,"y":175},{"type":"beach_palm","x":172,"y":142}
-	])
-	# Sandcastle in the foreground, in front of and below the sunbathers: a little smaller, drawn with sharp pixels like everything else.
-	var castle: AnimatedSprite2D = background.prop_sprites[1]
-	var castle_half: float = 175.0 - castle.position.y
-	castle.scale *= 0.7
-	castle.position.y = 175.0 - castle_half * 0.7
-	castle.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	castle.z_index = 4
-	# [blue, female, x, y offset, mirrored]
-	for spec: Array in [[false,true,244.0,0.0,false],[true,false,282.0,10.0,true]]:
-		var towel := SunbatherTowel.new()
-		towel.blue = spec[0]
-		towel.female = spec[1]
-		towel.position = Vector2(spec[2],152.0 + spec[3])
-		towel.z_index = 3
-		background.add_child(towel)
-		var sunbather: AnimatedSprite2D = AnimatedSprite2D.new()
-		sunbather.sprite_frames = SunbatherArt.frames(spec[0],spec[1])
-		sunbather.play(&"rest")
-		sunbather.flip_h = spec[4]
-		sunbather.scale = Vector2.ONE * AdultPixelArt.DISPLAY_SCALE
-		sunbather.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		sunbather.position = Vector2(spec[2],126.0 + spec[3])
-		sunbather.z_index = 3
-		background.add_child(sunbather)
-	var flyby := TitleFlyby.new()
-	flyby.z_index = 4
-	background.add_child(flyby)
-	# Everything the Practice menu hides to show the bare beach.
-	for node: CanvasItem in background.prop_sprites:
-		_scenery.append(node)
-	for node: CanvasItem in background.get_children():
-		if node is SunbatherTowel or node is TitleFlyby or (node is AnimatedSprite2D and node.z_index == 3):
-			_scenery.append(node)
-	if background.background_art != null:
-		_scenery.append(background.background_art.birds)
+	_show_title_background()
 	var layer: CanvasLayer = CanvasLayer.new()
 	layer.layer = 5
 	add_child(layer)
@@ -96,6 +54,67 @@ func _ready() -> void:
 	elif OS.get_cmdline_user_args().has("--vs-menu"):
 		_navigate("vs_menu") # dev entry: straight to the VS menu
 
+## Rebuild only the title backdrop; the in-memory toggle advances whenever title is shown.
+func _show_title_background() -> void:
+	_scenery.clear()
+	if is_instance_valid(background):
+		remove_child(background)
+		background.queue_free()
+	background = BeachBackdrop.new()
+	add_child(background)
+	background.sunset = not _next_title_daytime
+	background.strength = 0.12 # a lighter breeze than the beach default (0.3)
+	if _next_title_daytime:
+		# Keep the existing lighthouse and all props in the strip beside the menu.
+		background.horizon = "headland-lighthouse"
+		background.horizon_x = 248.0
+		background.setup([
+			{"type":"beach_jet_ski","x":244,"y":154},{"type":"beach_palm","x":292,"y":144},
+			{"type":"beach_ball","x":222,"y":173},{"type":"beach_shells","x":286,"y":171}
+		])
+	else:
+		# Only x >= ~207 shows beside the menu panel. Hut, castle and palm sit further back (y 142-148);
+		# sunbathers and towels draw above every prop (z 3).
+		background.setup([
+			{"type":"beach_hut","x":240,"y":148},{"type":"beach_castle","x":310,"y":175},{"type":"beach_palm","x":172,"y":142}
+		])
+		# Sandcastle in the foreground, in front of and below the sunbathers: a little smaller, drawn with sharp pixels like everything else.
+		var castle: AnimatedSprite2D = background.prop_sprites[1]
+		var castle_half: float = 175.0 - castle.position.y
+		castle.scale *= 0.7
+		castle.position.y = 175.0 - castle_half * 0.7
+		castle.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		castle.z_index = 4
+		# [blue, female, x, y offset, mirrored]
+		for spec: Array in [[false,true,244.0,0.0,false],[true,false,282.0,10.0,true]]:
+			var towel := SunbatherTowel.new()
+			towel.blue = spec[0]
+			towel.female = spec[1]
+			towel.position = Vector2(spec[2],152.0 + spec[3])
+			towel.z_index = 3
+			background.add_child(towel)
+			var sunbather: AnimatedSprite2D = AnimatedSprite2D.new()
+			sunbather.sprite_frames = SunbatherArt.frames(spec[0],spec[1])
+			sunbather.play(&"rest")
+			sunbather.flip_h = spec[4]
+			sunbather.scale = Vector2.ONE * AdultPixelArt.DISPLAY_SCALE
+			sunbather.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			sunbather.position = Vector2(spec[2],126.0 + spec[3])
+			sunbather.z_index = 3
+			background.add_child(sunbather)
+	var flyby := TitleFlyby.new()
+	flyby.z_index = 4
+	background.add_child(flyby)
+	# Everything the Practice menu hides to show the bare beach.
+	for node: CanvasItem in background.prop_sprites:
+		_scenery.append(node)
+	for node: CanvasItem in background.get_children():
+		if node is SunbatherTowel or node is TitleFlyby or (node is AnimatedSprite2D and node.z_index == 3):
+			_scenery.append(node)
+	if background.background_art != null:
+		_scenery.append(background.background_art.birds)
+	_next_title_daytime = not _next_title_daytime
+
 func _vs_args() -> Array:
 	return Array(OS.get_cmdline_user_args()).filter(func(a: String) -> bool: return a == "--vs" or a.begins_with("--vs="))
 
@@ -112,6 +131,7 @@ func _navigate(action: String, payload: Variant = null) -> void:
 	match action:
 		"title":
 			clear_game()
+			_show_title_background()
 			screen = "title"
 			menus.show()
 			menus.title()

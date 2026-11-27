@@ -144,6 +144,58 @@ func removed_bucket_checks() -> void:
 	for level: Dictionary in Config.levels:
 		check_bucket_free_level(level,"loaded level %d" % int(level.id))
 
+## First title is the original sunset; every return advances once, including after Practice.
+func title_background_checks() -> void:
+	var original_props: Array = [{"type":"beach_hut","x":240,"y":148},{"type":"beach_castle","x":310,"y":175},{"type":"beach_palm","x":172,"y":142}]
+	for visit: int in 5:
+		var sunset: bool = visit % 2 == 0
+		var beach: BeachBackdrop = main.background
+		var art: BeachBackgroundArt = beach.background_art
+		check(beach.sunset == sunset,"title visit %d alternates A/B, starting with A" % visit)
+		check(main.screen == "title" and beach.is_visible_in_tree(),"title visit %d shows its backdrop" % visit)
+		check(art != null and art.sea.sprite_frames.get_frame_count(&"default") == 16,"both title variants build the live sea")
+		check(is_equal_approx(beach.strength,0.12),"both title variants retain the gentle cloud breeze")
+		check(main._scenery.all(func(node: CanvasItem) -> bool: return is_instance_valid(node) and beach.is_ancestor_of(node) and node.is_visible_in_tree()),"title scenery belongs to the active backdrop and is restored")
+		check(main._scenery.has(art.birds),"Practice can hide background birds in both variants")
+		check(beach.get_children().filter(func(node: Node) -> bool: return node is TitleFlyby).size() == 1,"both variants reuse one existing flyby")
+		if sunset:
+			check(beach.props == original_props and art.horizon == null,"variant A keeps the original props and open sunset horizon")
+			check(art.sky.material != null and art.sun.position == BeachBackgroundArt.SUN_DUSK_POS,"variant A retains the dusk sky and low sun")
+			check(beach.get_children().filter(func(node: Node) -> bool: return node is SunbatherTowel).size() == 2,"variant A keeps both sunbathers' towels")
+		else:
+			check(art.sky.material == null and art.sun.position == BeachBackgroundArt.SUN_DAY_POS,"variant B uses the existing daytime sky and sun")
+			check(art.horizon != null and art.horizon.texture != null,"variant B builds its existing horizon strip")
+			check(beach.props != original_props and not beach.props.is_empty(),"variant B uses a different small prop set")
+			for prop: Dictionary in beach.props:
+				check(BeachBackdrop.BACKDROP_PROPS.has(str(prop.type)) and str(prop.type) != "beach_bucket","variant B reuses an approved beach prop")
+			for sprite: AnimatedSprite2D in beach.prop_sprites:
+				var half_width: float = sprite.sprite_frames.get_frame_texture(&"idle",0).get_width() * sprite.scale.x * 0.5
+				check(sprite.position.x - half_width >= 207 and sprite.position.x + half_width <= 320,"variant B props fit beside the menu panel")
+		for sprite: AnimatedSprite2D in beach.prop_sprites:
+			check(main._scenery.has(sprite),"Practice can hide every active prop")
+		var time_before: float = beach.time
+		var cloud_before: float = art.clouds.last_time
+		beach.tick(0.3)
+		check(beach.time > time_before and art.sea.frame == int(beach.time / BeachBackgroundArt.SEA_FRAME_TIME) % 16,"both variants advance their live sea")
+		check(art.clouds.last_time > cloud_before,"both variants advance their clouds")
+		if visit < 2:
+			await snapshot("title-background-a" if sunset else "title-background-b")
+		layout(main.menus)
+		menu_font_grid(main.menus)
+		main._navigate("practice")
+		check(main.background == beach and main.screen == "practice","opening Practice keeps the active variant")
+		check(main._scenery.all(func(node: CanvasItem) -> bool: return not node.visible),"Practice hides all scenery on either variant")
+		check(art.is_visible_in_tree(),"Practice leaves the bare live beach visible")
+		main._navigate("options")
+		check(main.background == beach and main._scenery.all(func(node: CanvasItem) -> bool: return node.visible),"leaving Practice restores the same scenery without advancing the variant")
+		main._navigate("title")
+		await settle()
+		check(not is_instance_valid(beach),"returning to title releases the previous backdrop")
+		check(main.get_children().filter(func(node: Node) -> bool: return node is BeachBackdrop).size() == 1,"title returns do not accumulate backdrops")
+	# Finish on A so the rest of the integration flow starts with the normal opening.
+	main._navigate("title")
+	await settle()
+
 func run() -> void:
 	removed_bucket_checks()
 	BeachGame.trainer_cards = false # lesson-logic tests drive lessons without dismissing pop-ups; trainer_checks.gd covers the cards
@@ -163,6 +215,7 @@ func run() -> void:
 	GameState.progress = {}
 	main = preload("res://scenes/main.tscn").instantiate()
 	add_child(main)
+	await title_background_checks()
 	await snapshot("title")
 	layout(main.menus)
 	menu_font_grid(main.menus)
