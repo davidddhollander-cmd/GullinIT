@@ -144,6 +144,142 @@ func removed_bucket_checks() -> void:
 	for level: Dictionary in Config.levels:
 		check_bucket_free_level(level,"loaded level %d" % int(level.id))
 
+## WCAG relative luminance uses linear sRGB, not the average RGB brightness.
+func title_luminance(color: Color) -> float:
+	var linear: Color = color.srgb_to_linear()
+	return 0.2126 * linear.r + 0.7152 * linear.g + 0.0722 * linear.b
+
+func title_contrast(a: Color, b: Color) -> float:
+	var light: float = title_luminance(a)
+	var dark: float = title_luminance(b)
+	return (maxf(light,dark) + 0.05) / (minf(light,dark) + 0.05)
+
+func title_tagline_checks(label: String) -> void:
+	await settle() # also flush the cream-board recolour deferred before returning to title
+	var tagline: Label = main.menus.find_child("TitleTagline",true,false) as Label
+	check(tagline != null,"title has its floating tagline")
+	if tagline == null:
+		return
+	var fill: Color = tagline.get_theme_color("font_color")
+	var backing: StyleBoxFlat = tagline.get_theme_stylebox("normal") as StyleBoxFlat
+	check(fill == BeachUI.CREAM,"deferred cream-board recolouring does not turn the title tagline brown")
+	check(tagline.get_theme_font("font") == BeachUI.PIXEL_FONT and tagline.get_theme_font_size("font_size") == 8,"tagline retains GullPixel on its 8 px grid")
+	check(backing != null and is_equal_approx(backing.bg_color.a,1.0),"tagline has an opaque backing over either moving sky")
+	if backing == null:
+		return
+	check(title_contrast(fill,backing.bg_color) >= 7.0,"tagline fill/backing WCAG contrast meets 7:1 on " + label)
+	if not capture:
+		return
+	# Read real rendered pixels beneath every cream glyph, with only the glyphs
+	# temporarily transparent. Keep the backing, layout and beach clock unchanged.
+	main.set_process(false)
+	await snapshot("title-background-" + label)
+	var rendered: Image = get_viewport().get_texture().get_image()
+	tagline.add_theme_color_override("font_color",Color(fill,0.0))
+	await RenderingServer.frame_post_draw
+	var beneath: Image = get_viewport().get_texture().get_image()
+	tagline.add_theme_color_override("font_color",fill)
+	var scale_x: float = rendered.get_width() / 320.0
+	var scale_y: float = rendered.get_height() / 180.0
+	var rect: Rect2 = tagline.get_global_rect()
+	var worst: float = 100.0
+	var samples: int = 0
+	var backgrounds: Dictionary = {}
+	for y: int in range(ceili(rect.position.y * scale_y),floori(rect.end.y * scale_y)):
+		for x: int in range(ceili(rect.position.x * scale_x),floori(rect.end.x * scale_x)):
+			var actual: Color = rendered.get_pixel(x,y)
+			if absf(actual.r-fill.r) + absf(actual.g-fill.g) + absf(actual.b-fill.b) > 0.02:
+				continue
+			var behind: Color = beneath.get_pixel(x,y)
+			samples += 1
+			backgrounds[behind.to_html(false)] = true
+			worst = minf(worst,title_contrast(actual,behind))
+	check(samples > 100,"rendered tagline provides real glyph/background samples on " + label)
+	check(worst >= 7.0,"rendered tagline worst sampled WCAG contrast >= 7:1 on %s: %.4f (%d pixels)" % [label,worst,samples])
+	var report: Dictionary = {"variant":label,"fill":fill.to_html(false),"backgrounds":backgrounds.keys(),"glyph_pixel_samples":samples,"worst_contrast":worst,"threshold":7.0,"image_size":rendered.get_size(),"tagline_rect":rect}
+	var file: FileAccess = FileAccess.open("res://test-output/title-contrast-" + label + ".json",FileAccess.WRITE)
+	file.store_string(JSON.stringify(report,"\t"))
+	print("TITLE CONTRAST: " + JSON.stringify(report))
+	main.set_process(true)
+	await settle()
+
+## First title is the original sunset; every return alternates A/D, including after Practice.
+func title_background_checks() -> void:
+	var original_props: Array = [{"type":"beach_hut","x":240,"y":148},{"type":"beach_castle","x":310,"y":175},{"type":"beach_palm","x":172,"y":142}]
+	for visit: int in 4: # two complete A/D rotations
+		var original: bool = visit % 2 == 0
+		var label: String = "a" if original else "d"
+		var beach: BeachBackdrop = main.background
+		var art: BeachBackgroundArt = beach.background_art
+		check(beach.sunset == original and beach.horizon == ("" if original else "island-lighthouse"),"title visit %d alternates A/D, starting with A" % visit)
+		check(main.screen == "title" and beach.is_visible_in_tree(),"title shows its active backdrop")
+		check(art.sea.sprite_frames.get_frame_count(&"default") == 16,"both variants build the live sea")
+		check(is_equal_approx(beach.strength,0.12),"both variants retain the gentle cloud breeze")
+		check(main._scenery.all(func(node: CanvasItem) -> bool: return is_instance_valid(node) and beach.is_ancestor_of(node) and node.is_visible_in_tree()),"title scenery belongs to the active backdrop and is restored")
+		check(main._scenery.has(art.birds) and art.birds.is_visible_in_tree(),"both variants include visible distant bird flocks in Practice scenery")
+		check(beach.get_children().filter(func(node: Node) -> bool: return node is TitleFlyby).size() == 1,"both variants reuse exactly one flyby")
+		if original:
+			check(beach.props == original_props and art.horizon == null,"A keeps all original props and open sunset horizon")
+			check(art.sky.material != null and art.sun.position == BeachBackgroundArt.SUN_DUSK_POS,"A retains its dusk sky and low sun")
+			check(beach.get_children().filter(func(node: Node) -> bool: return node is SunbatherTowel).size() == 2,"A keeps both sunbathers' towels")
+			var sunbathers: Array = beach.get_children().filter(func(node: Node) -> bool: return node is AnimatedSprite2D and node.z_index == 3)
+			check(sunbathers.size() == 2 and sunbathers[0].position == Vector2(244,126) and sunbathers[1].position == Vector2(282,136),"A keeps both original sunbathers and positions")
+			var castle: AnimatedSprite2D = beach.prop_sprites[1]
+			check(is_equal_approx(castle.scale.x,BeachBackdrop.prop_scale(original_props[1]) * 0.7) and castle.z_index == 4,"A retains its smaller foreground castle")
+		else:
+			check(beach.props.size() == 2 and beach.prop_sprites.size() == 2,"D has exactly two props")
+			check(beach.props.filter(func(prop: Dictionary) -> bool: return prop.type == "beach_palm").size() == 1 and beach.props.filter(func(prop: Dictionary) -> bool: return prop.type == "beach_ball").size() == 1,"D has exactly one palm and one ball")
+			check(beach.get_children().all(func(node: Node) -> bool: return node is BeachBackgroundArt or node is TitleFlyby or node in beach.prop_sprites),"D has no additional props or sunbathers")
+			check(art.horizon != null and art.horizon.texture.resource_path.ends_with("island-lighthouse-640x24.png") and beach.horizon_x == -12.0,"D retains its island lighthouse and alignment")
+			check(not beach.overcast and art.top_color == BeachBackgroundArt.SKY_COLOR and art.sky.material == null and art.sun.position == Vector2(276,18),"D retains clear day and moved sun")
+			check(beach.cloud_layout == [{"id":"plate-01","x":16,"y":42,"scale":1.0},{"id":"plate-02","x":214,"y":20,"scale":0.5},{"id":"plate-03","x":238,"y":60,"scale":0.5}],"D retains its alternative cloud arrangement")
+			var palm: AnimatedSprite2D = beach.prop_sprites[0]
+			var ball: AnimatedSprite2D = beach.prop_sprites[1]
+			check(absf(palm.position.x-ball.position.x) <= 30 and beach.props[0].y == beach.props[1].y,"D palm and ball sit next to each other")
+			for i: int in beach.prop_sprites.size():
+				var sprite: AnimatedSprite2D = beach.prop_sprites[i]
+				var frame_size: Vector2 = sprite.sprite_frames.get_frame_texture(&"idle",0).get_size() * sprite.scale
+				check(sprite.scale == Vector2.ONE * BeachBackdrop.prop_scale({"type":beach.props[i].type}),"D props use their normal in-game scale")
+				check(sprite.position.x-frame_size.x/2 >= 207 and sprite.position.x+frame_size.x/2 <= 320,"D props fit beside the menu")
+				check(sprite.position.y-frame_size.y/2 >= BeachBackgroundArt.HORIZON_Y,"D props stay below the lighthouse horizon")
+		for sprite: AnimatedSprite2D in beach.prop_sprites:
+			check(main._scenery.has(sprite),"Practice can hide every active prop")
+		var time_before: float = beach.time
+		var cloud_before: float = art.clouds.last_time
+		beach.tick(0.3)
+		check(beach.time > time_before and art.sea.frame == int(beach.time / BeachBackgroundArt.SEA_FRAME_TIME) % 16,"both variants advance their live sea")
+		check(art.clouds.last_time > cloud_before,"both variants advance their clouds")
+		# Sample a live flock in the open strip; verify movement/flapping through
+		# the real beach tick, rather than merely asserting that the node is shown.
+		for second: int in range(1,45):
+			beach.time = float(second)
+			beach.tick(0.0)
+			if Array(art.birds.pixels).any(func(at: Vector2) -> bool: return at.x >= 210):
+				break
+		var bird_pixels: PackedVector2Array = art.birds.pixels.duplicate()
+		check(not bird_pixels.is_empty(),"both variants produce visible live flock pixels")
+		beach.tick(0.6)
+		check(not art.birds.pixels.is_empty() and art.birds.pixels != bird_pixels,"both variants animate the distant flock via the beach clock")
+		if visit < 2:
+			await title_tagline_checks(label)
+		layout(main.menus)
+		menu_font_grid(main.menus)
+		main._navigate("practice")
+		check(main.background == beach and main.screen == "practice","Practice keeps the active variant")
+		check(main._scenery.all(func(node: CanvasItem) -> bool: return not node.visible) and not art.birds.is_visible_in_tree(),"Practice hides all scenery including birds, palm and ball")
+		check(art.is_visible_in_tree(),"Practice leaves the bare live beach visible")
+		main._navigate("options")
+		check(main.background == beach and main._scenery.all(func(node: CanvasItem) -> bool: return node.visible) and art.birds.is_visible_in_tree(),"leaving Practice restores the same scenery without advancing")
+		# Return before options' deferred board recolour runs: the historical
+		# brown-tagline regression occurred on this path.
+		main._navigate("title")
+		await settle()
+		var restored_tagline: Label = main.menus.find_child("TitleTagline",true,false) as Label
+		check(restored_tagline != null and restored_tagline.get_theme_color("font_color") == BeachUI.CREAM,"returning to title before a deferred board pass preserves tagline colour")
+		check(not is_instance_valid(beach),"title return releases the previous backdrop")
+		check(main.get_children().filter(func(node: Node) -> bool: return node is BeachBackdrop).size() == 1,"title returns do not accumulate backdrops")
+	# Four returns finish on A for the remaining integration flow.
+
 func run() -> void:
 	removed_bucket_checks()
 	BeachGame.trainer_cards = false # lesson-logic tests drive lessons without dismissing pop-ups; trainer_checks.gd covers the cards
@@ -163,6 +299,7 @@ func run() -> void:
 	GameState.progress = {}
 	main = preload("res://scenes/main.tscn").instantiate()
 	add_child(main)
+	await title_background_checks()
 	await snapshot("title")
 	layout(main.menus)
 	menu_font_grid(main.menus)
