@@ -1,7 +1,7 @@
 {
   "id": 1,
   "crabs": {"enabled": true},
-  "thumb": "beach_ball",
+  "thumb": "beach_bucket",
   "name": "Training Day",
   "scrap_max_x": 140,
   "seed": 7101,

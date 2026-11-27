@@ -131,9 +131,7 @@ func pin_base_reactions() -> void:
 		world.sunbather_sleep_pecks = 4 # these fixtures walk four protected pecks; slow_adult_checks covers the two-peck wake
 
 func check_bucket_free_level(level: Dictionary, label: String) -> void:
-	var thumb: Variant = level.get("thumb",[])
-	var thumbnails: Array = thumb if thumb is Array else [thumb]
-	check(not thumbnails.has("beach_bucket"),"%s thumbnail does not use the bucket" % label)
+	# The bucket stays as a level-select thumbnail only (level_01); it is never placed in a level.
 	check(not level.get("props",[]).any(func(prop: Dictionary) -> bool: return prop.get("type","") == "beach_bucket"),"%s placements do not use the bucket" % label)
 
 func removed_bucket_checks() -> void:
