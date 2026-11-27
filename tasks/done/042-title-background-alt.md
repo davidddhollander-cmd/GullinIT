@@ -1,6 +1,6 @@
 # 042 — Second live background for the title menu (alternates with the current one)
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: none

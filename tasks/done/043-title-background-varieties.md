@@ -1,6 +1,6 @@
 # 043 — Three more title backgrounds: sky, sea and land/island horizons only
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: 042 (NOT merged to main: base this task on branch `codex/042-title-background-alt`, see below)

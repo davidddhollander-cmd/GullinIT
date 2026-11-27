@@ -1,6 +1,6 @@
 # 044 — Trim the title rotation to two backgrounds (A original + D) with strong tagline contrast
 
-Status: done
+Status: merged
 Author: Claude
 Assignee: Codex
 Depends on: 042, 043 (neither merged to main: base on branch `codex/043-title-background-varieties`)
