@@ -47,7 +47,7 @@ func clear(title: String, subtitle: String = "", card: bool = false, title_size:
 		child.queue_free()
 	var margin: MarginContainer = BeachUI.margin(self,6)
 	var panel: PanelContainer = BeachUI.wood_panel(margin)
-	_ink_labels.call_deferred()
+	_ink_labels.call_deferred(panel)
 	if card:
 		panel.size_flags_horizontal = SIZE_SHRINK_BEGIN
 		panel.size_flags_vertical = SIZE_SHRINK_CENTER
@@ -67,7 +67,10 @@ const ON_CREAM: Dictionary = {
 	Color("80bcb8"): Color("397a85"),
 }
 
-func _ink_labels(node: Node = self) -> void:
+func _ink_labels(node: Node) -> void:
+	# A queued board pass must never recolour a later title rebuild.
+	if not is_instance_valid(node):
+		return
 	for child: Node in node.get_children():
 		if child is Button or child.name == "ScoresToBeat":
 			continue
@@ -127,16 +130,22 @@ func title() -> void:
 	var tween: Tween = logo.create_tween().set_loops()
 	tween.tween_property(logo,"position:y",3.0,1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(logo,"position:y",0.0,1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	var tagline: Label = BeachUI.label(column,"The No. 1 Seagull Simulator",BeachUI.FONT_NATIVE,BeachUI.GOLD)
+	var tagline: Label = BeachUI.label(column,"The No. 1 Seagull Simulator",BeachUI.FONT_NATIVE,BeachUI.CREAM)
+	tagline.name = "TitleTagline"
 	tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tagline.size_flags_horizontal = SIZE_SHRINK_CENTER
+	# Bitmap glyphs ignore outlines. A snug ink backing gives the same strong
+	# contrast over moving clouds and either sky, without changing row height.
+	var backing := StyleBoxFlat.new()
+	backing.bg_color = BeachUI.INK
+	backing.set_content_margin_all(0)
+	backing.set_expand_margin_all(2)
+	backing.anti_aliasing = false
+	tagline.add_theme_stylebox_override("normal",backing)
 	logo.gui_input.connect(func(event: InputEvent) -> void:
 		if event.is_pressed() and (event is InputEventMouseButton or event is InputEventScreenTouch):
 			_logo_tapped(tagline)
 	)
-	# The bitmap font ignores outlines; a 1 px ink shadow lifts the gold off the sunset sky.
-	tagline.add_theme_color_override("font_shadow_color",BeachUI.INK)
-	tagline.add_theme_constant_override("shadow_offset_x",1)
-	tagline.add_theme_constant_override("shadow_offset_y",1)
 	var gap: Control = Control.new()
 	gap.custom_minimum_size.y = 6
 	column.add_child(gap)

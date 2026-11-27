@@ -3,7 +3,7 @@ var game: BeachGame
 var menus: BeachMenus
 var background: BeachBackdrop
 var _scenery: Array[CanvasItem] = []
-var _next_title_variant: int = 0 ## A sunset, B day/props, C overcast/ferry, D island, E dusk/windfarm
+var _next_title_variant: int = 0 ## A original sunset, D clear day/island
 var casual: bool = false
 var vs: bool = false ## picking a gull leads to the VS menu instead of the level select
 var current_level: int = 1
@@ -63,17 +63,9 @@ func _show_title_background() -> void:
 		background.queue_free()
 	background = BeachBackdrop.new()
 	add_child(background)
-	background.sunset = variant in [0, 4]
+	background.sunset = variant == 0
 	background.strength = 0.12 # a lighter breeze than the beach default (0.3)
-	if variant == 1:
-		# Keep the existing lighthouse and all props in the strip beside the menu.
-		background.horizon = "headland-lighthouse"
-		background.horizon_x = 248.0
-		background.setup([
-			{"type":"beach_jet_ski","x":244,"y":154},{"type":"beach_palm","x":292,"y":144},
-			{"type":"beach_ball","x":222,"y":173},{"type":"beach_shells","x":286,"y":171}
-		])
-	elif variant == 0:
+	if variant == 0:
 		# Only x >= ~207 shows beside the menu panel. Hut, castle and palm sit further back (y 142-148);
 		# sunbathers and towels draw above every prop (z 3).
 		background.setup([
@@ -104,28 +96,19 @@ func _show_title_background() -> void:
 			sunbather.z_index = 3
 			background.add_child(sunbather)
 	else:
-		# Quiet views: only existing sky/sea/cloud/horizon art, without beach props.
-		match variant:
-			2:
-				background.overcast = true
-				background.horizon = "islands-ferry"
-				background.horizon_x = 40.0 # islands at x 185-265, ferry at x 294-316
-			3:
-				background.horizon = "island-lighthouse"
-				background.horizon_x = -12.0 # lighthouse at x 276, beside the menu
-				background.cloud_layout = [
-					{"id":"plate-01","x":16,"y":42,"scale":1.0},
-					{"id":"plate-02","x":214,"y":20,"scale":0.5},
-					{"id":"plate-03","x":238,"y":60,"scale":0.5}
-				]
-			4:
-				background.horizon = "windfarm"
-				background.horizon_x = 0.0 # several turbines visible across the open right strip
-		background.setup([])
-		if variant == 3:
-			background.background_art.sun.position = Vector2(276,18)
-		# Keep the code-drawn distant flocks out of these art-only views, including after Practice.
-		background.background_art.birds.hide()
+		background.horizon = "island-lighthouse"
+		background.horizon_x = -12.0 # lighthouse at x 276, beside the menu
+		background.cloud_layout = [
+			{"id":"plate-01","x":16,"y":42,"scale":1.0},
+			{"id":"plate-02","x":214,"y":20,"scale":0.5},
+			{"id":"plate-03","x":238,"y":60,"scale":0.5}
+		]
+		# Normal in-game sizes, next to each other below/left of the lighthouse.
+		background.setup([
+			{"type":"beach_palm","x":238,"y":156},
+			{"type":"beach_ball","x":265,"y":156}
+		])
+		background.background_art.sun.position = Vector2(276,18)
 	var flyby := TitleFlyby.new()
 	flyby.z_index = 4
 	background.add_child(flyby)
@@ -135,9 +118,9 @@ func _show_title_background() -> void:
 	for node: CanvasItem in background.get_children():
 		if node is SunbatherTowel or node is TitleFlyby or (node is AnimatedSprite2D and node.z_index == 3):
 			_scenery.append(node)
-	if background.background_art != null and variant < 2:
+	if background.background_art != null:
 		_scenery.append(background.background_art.birds)
-	_next_title_variant = (variant + 1) % 5
+	_next_title_variant = (variant + 1) % 2
 
 func _vs_args() -> Array:
 	return Array(OS.get_cmdline_user_args()).filter(func(a: String) -> bool: return a == "--vs" or a.begins_with("--vs="))
