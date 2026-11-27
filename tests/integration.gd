@@ -130,7 +130,24 @@ func pin_base_reactions() -> void:
 		world.sunbather_shoo_time = 0.0
 		world.sunbather_sleep_pecks = 4 # these fixtures walk four protected pecks; slow_adult_checks covers the two-peck wake
 
+func check_bucket_free_level(level: Dictionary, label: String) -> void:
+	var thumb: Variant = level.get("thumb",[])
+	var thumbnails: Array = thumb if thumb is Array else [thumb]
+	check(not thumbnails.has("beach_bucket"),"%s thumbnail does not use the bucket" % label)
+	check(not level.get("props",[]).any(func(prop: Dictionary) -> bool: return prop.get("type","") == "beach_bucket"),"%s placements do not use the bucket" % label)
+
+func removed_bucket_checks() -> void:
+	check(not BeachBackdrop.BACKDROP_PROPS.has("beach_bucket"),"bucket is absent from backdrop prop types")
+	for file: String in DirAccess.get_files_at("res://data/levels"):
+		if not file.ends_with(".json"):
+			continue
+		var level: Dictionary = Config.read_json("res://data/levels/" + file)
+		check_bucket_free_level(level,file)
+	for level: Dictionary in Config.levels:
+		check_bucket_free_level(level,"loaded level %d" % int(level.id))
+
 func run() -> void:
+	removed_bucket_checks()
 	BeachGame.trainer_cards = false # lesson-logic tests drive lessons without dismissing pop-ups; trainer_checks.gd covers the cards
 	GameState.unlock_all = false
 	pin_base_reactions() # timing checks assume base reactions; slow_adult_checks covers the global multiplier

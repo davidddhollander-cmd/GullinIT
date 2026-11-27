@@ -1,7 +1,7 @@
 {
   "id": 1,
   "crabs": {"enabled": true},
-  "thumb": "beach_bucket",
+  "thumb": "beach_ball",
   "name": "Training Day",
   "scrap_max_x": 140,
   "seed": 7101,
@@ -26,7 +26,6 @@
   "props": [
     {"type": "beach_ball", "x": 60, "y": 146},
     {"type": "beach_palm", "x": 152, "y": 148, "flip": true},
-    {"type": "beach_bucket", "x": 194, "y": 138},
     {"type": "bin", "x": 326},
     {"type": "beach_palm", "x": 366, "y": 148, "scale": 0.935484},
     {"type": "beach_parasol_blue", "x": 455, "y": 143},
